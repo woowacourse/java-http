@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.junit.jupiter.api.DisplayName;
@@ -371,5 +372,89 @@ class HttpResponseTest {
             softly.assertThat(responseString).contains("Set-Cookie: session=new_session_id");
             softly.assertThat(responseString).contains("Content-Length: 0");
         });
+    }
+
+    @Test
+    @DisplayName("쿠키 이름에 CRLF 주입 시 예외 발생")
+    void rejectCookieNameWithCRLF() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie("session\r\nSet-Cookie: admin=true", "value"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다");
+    }
+
+    @Test
+    @DisplayName("쿠키 값에 CRLF 주입 시 예외 발생")
+    void rejectCookieValueWithCRLF() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie("session", "abc123\r\nSet-Cookie: admin=true"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 값에 유효하지 않은 문자가 포함되어 있습니다");
+    }
+
+    @Test
+    @DisplayName("쿠키 이름에 제어문자 주입 시 예외 발생")
+    void rejectCookieNameWithControlCharacters() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie("session\u0000", "value"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다");
+    }
+
+    @Test
+    @DisplayName("쿠키 값에 구분자 주입 시 예외 발생")
+    void rejectCookieValueWithSeparators() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie("session", "value;path=/"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 값에 유효하지 않은 문자가 포함되어 있습니다");
+    }
+
+    @Test
+    @DisplayName("null 쿠키 이름으로 예외 발생")
+    void rejectNullCookieName() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie(null, "value"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 이름은 null이거나 비어있을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("빈 쿠키 이름으로 예외 발생")
+    void rejectEmptyCookieName() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie("", "value"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 이름은 null이거나 비어있을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("null 쿠키 값으로 예외 발생")
+    void rejectNullCookieValue() {
+        // given
+        final HttpResponse response = new HttpResponse("1.1", HttpStatus.OK, ContentType.HTML, "test");
+
+        // when & then
+        assertThatThrownBy(() -> response.setCookie("session", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("쿠키 값은 null일 수 없습니다");
     }
 }

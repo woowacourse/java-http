@@ -36,7 +36,39 @@ public class HttpResponse {
     }
 
     public void setCookie(final String name, final String value) {
+        validateCookieName(name);
+        validateCookieValue(value);
         cookies.put(name, value);
+    }
+
+    private void validateCookieName(final String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("쿠키 이름은 null이거나 비어있을 수 없습니다");
+        }
+        if (containsInvalidCookieCharacters(name)) {
+            throw new IllegalArgumentException("쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다: " + name);
+        }
+    }
+
+    private void validateCookieValue(final String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("쿠키 값은 null일 수 없습니다");
+        }
+        if (containsInvalidCookieCharacters(value)) {
+            throw new IllegalArgumentException("쿠키 값에 유효하지 않은 문자가 포함되어 있습니다: " + value);
+        }
+    }
+
+    private boolean containsInvalidCookieCharacters(final String input) {
+        // CR, LF, NULL 등 제어문자와 구분자 검사
+        for (int i = 0; i < input.length(); i++) {
+            final char c = input.charAt(i);
+            if (c < 0x20 || c == 0x7F ||  // 제어문자
+                c == '"' || c == ',' || c == ';' || c == '\\') {  // 쿠키 구분자
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -57,6 +89,7 @@ public class HttpResponse {
                 .append(status.getCode()).append(" ").append(status.getReasonPhrase()).append(HttpConstants.CRLF);
     }
 
+    // TODO 1xx/204/304, 그리고 HEAD 응답은 메시지 바디가 없어야 함. 현재는 Content-Type/Length를 항상 출력 (코드 래빗)
     private void appendContentHeaders(final StringBuilder response) {
         final int contentLength = body == null ? 0 : body.getBytes(StandardCharsets.UTF_8).length;
 

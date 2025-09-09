@@ -3,10 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequest;
@@ -39,6 +35,11 @@ public class LoginController extends AbstractController {
             return;
         }
 
+        handleLogin(request, response, account, password);
+    }
+
+    private static void handleLogin(HttpRequest request, HttpResponse response, String account, String password)
+            throws IOException {
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
             log.info("user: {}", userOptional.get());
@@ -49,16 +50,5 @@ public class LoginController extends AbstractController {
             return;
         }
         response.sendRedirect(HttpResponseStatus.FOUND, "/401.html");
-    }
-
-    private void serveStaticFile(String path, HttpResponse response, String contentType) throws IOException, URISyntaxException {
-        final var resource = getClass().getClassLoader().getResource("static" + path);
-        if (resource != null) {
-            final Path resourcePath = Paths.get(resource.toURI());
-            byte[] body = Files.readAllBytes(resourcePath);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(body);
-        }
-        response.send();
     }
 }

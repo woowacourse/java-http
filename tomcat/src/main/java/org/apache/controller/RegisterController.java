@@ -22,6 +22,8 @@ public class RegisterController implements Controller {
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
+        validateRequestBody(request);
+
         String account = request.getBody("account");
         String email = request.getBody("email");
         String password = request.getBody("password");
@@ -46,5 +48,16 @@ public class RegisterController implements Controller {
         String sessionId = UUID.randomUUID().toString();
         SessionManager.add(new Session(sessionId, user));
         return sessionId;
+    }
+
+    private void validateRequestBody(HttpRequest request) {
+        String account = request.getBody("account");
+        String email = request.getBody("email");
+        String password = request.getBody("password");
+        if (account == null || account.isEmpty() &&
+                email == null || email.isEmpty() &&
+                password == null || password.isEmpty()) {
+            throw new InvalidRequestException("잘못된 회원가입 형식입니다.");
+        }
     }
 }

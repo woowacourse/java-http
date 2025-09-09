@@ -44,16 +44,18 @@ public class ResponseBuilder {
 
         builder.append("HTTP/1.1 ").append(status).append(" \r\n");
 
-        String contentType = getContentType(requestUri);
-        builder.append("Content-Type: ").append(contentType).append(" \r\n");
-
-        if (body != null) {
-            builder.append("Content-Length: ").append(body.length).append(" \r\n");
+        if (requestUri != null) {
+            String contentType = getContentType(requestUri);
+            builder.append("Content-Type: ").append(contentType).append(" \r\n");
         }
         if (headers != null) {
-            headers.forEach((key, value) -> builder.append(key).append(": ").append(value));
+            headers.forEach((key, value) -> builder.append(key).append(": ").append(value).append(" \r\n"));
+        }
+        if (body == null) {
+            return builder.toString();
         }
 
+        builder.append("Content-Length: ").append(body.length).append(" \r\n");
         builder.append("\r\n");
         builder.append(new String(body));
 

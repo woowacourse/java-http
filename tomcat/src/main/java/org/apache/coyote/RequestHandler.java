@@ -66,7 +66,7 @@ public class RequestHandler {
             } catch (IllegalArgumentException e) {
                 final Map<String, String> headers = new HashMap<>();
                 headers.put("Location", "/401.html");
-                return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
+                return responseBuilder.build(null, "302 Found", new byte[0], headers);
             }
 
             final Map<String, String> headers = new HashMap<>();
@@ -79,7 +79,7 @@ public class RequestHandler {
             loginSession.setAttribute("user", user);
             sessionManager.add(new Session(uuid.toString()));
 
-            return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
+            return responseBuilder.build(null, "302 Found", null, headers);
         }
 
         if (path.startsWith("register")) {
@@ -101,9 +101,9 @@ public class RequestHandler {
             loginSession.setAttribute("user", user);
             sessionManager.add(new Session(uuid.toString()));
 
-            return responseBuilder.build(path + ".html", "302 Found", new byte[0], headers);
+            return responseBuilder.build(null, "302 Found", null, headers);
         }
 
-        return responseBuilder.build(path, "", new byte[0], null);
+        return responseBuilder.build(path, "", null, null);
     }
 }

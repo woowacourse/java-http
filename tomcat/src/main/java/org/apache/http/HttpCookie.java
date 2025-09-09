@@ -23,7 +23,7 @@ public class HttpCookie {
     }
 
     public String getjSessionId() {
-        return jSessionId;
+        return "JSESSIONID=" + jSessionId;
     }
 
     public void setjSessionId(String sessionId) {

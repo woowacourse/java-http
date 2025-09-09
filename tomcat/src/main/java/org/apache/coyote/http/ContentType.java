@@ -17,6 +17,9 @@ public enum ContentType {
     ;
 
     public static final String HEADER_NAME = "content-type";
+    public static final String HTML_EXTENSION = ".html";
+    public static final String CSS_EXTENSION = ".css";
+    public static final String JS_EXTENSION = ".js";
 
     private final String mimeType;
     private final Charset defaultCharset;
@@ -24,11 +27,11 @@ public enum ContentType {
     public static ContentType from(final String path) {
         final String lowerPath = path.toLowerCase();
 
-        if (lowerPath.endsWith(".css")) {
+        if (lowerPath.endsWith(CSS_EXTENSION)) {
             return CSS;
         }
 
-        if (lowerPath.endsWith(".js")) {
+        if (lowerPath.endsWith(JS_EXTENSION)) {
             return JAVASCRIPT;
         }
 

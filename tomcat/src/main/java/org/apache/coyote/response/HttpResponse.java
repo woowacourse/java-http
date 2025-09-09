@@ -21,7 +21,7 @@ public class HttpResponse {
 
     public byte[] combine() {
         String response = String.join(CRLF,
-                responseLine.combine() + " ",
+                responseLine.combine(),
                 responseHeader.combine(),
                 "",
                 responseBody.getBody());

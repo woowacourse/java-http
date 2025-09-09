@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (MethodType.isPostMethod(method)){
-                int contentLength = Integer.parseInt(headers.get("Content-Length"));
+                int contentLength = toInt(headers.get("Content-Length"));
 
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
@@ -271,6 +271,8 @@ public class Http11Processor implements Runnable, Processor {
         String[] keyValuePairs = requestBody.split("&");
 
         for (String pair : keyValuePairs) {
+            validateContainsEqual(pair);
+
             String[] keyValue = pair.split("=");
             String key = keyValue[0];
             String encodedValue = keyValue[1];
@@ -286,6 +288,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<LoginParam, String> queryParser(String queryString) {
         String[] accountAndPassword = queryString.split("&");
+        validateContainsEqual(accountAndPassword[0]);
+        validateContainsEqual(accountAndPassword[1]);
+
         String[] accountInfo = accountAndPassword[0].split("=");
         String[] passwordInfo = accountAndPassword[1].split("=");
 
@@ -319,6 +324,12 @@ public class Http11Processor implements Runnable, Processor {
             return Integer.parseInt(contentLength);
         } catch (NumberFormatException | NullPointerException e) {
             throw new IllegalArgumentException("[ERROR] invalid content length");
+        }
+    }
+
+    private void validateContainsEqual(String query) {
+        if (!query.contains("=")) {
+            throw new IllegalArgumentException("[ERROR] invalid query format");
         }
     }
 }

@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum MediaType {
 
     CSS(".css", "text/css;charset=utf-8"),
-    HTML(".html", "text/html;charset=utf-8");
+    HTML(".html", "text/html;charset=utf-8"),
+    SVG(".svg", "image/svg+xml;charset=utf-8");
 
     private final String extension;
     private final String mimeType;
@@ -24,5 +25,9 @@ public enum MediaType {
                 .findFirst()
                 .map(type -> type.mimeType)
                 .orElse(HTML.mimeType); // TODO: 기본값 변경
+    }
+
+    public String getMimeType() {
+        return mimeType;
     }
 }

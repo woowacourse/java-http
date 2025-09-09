@@ -1,17 +1,22 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,111 +43,176 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String request = buildRequest(inputStream);
-            final String[] requestLines = request.split(CRLF, -1);
-            if (requestLines.length == 0 || requestLines[0].isEmpty()) {
-                log.error("request is empty");
+            final Http11Request request;
+            try {
+                request = new Http11Request(inputStream);
+            } catch (Http11ParseException e) {
+                sendErrorResponse(outputStream);
                 return;
             }
 
-            final String[] requestLineContents = requestLines[0].split(" ");
-            if (requestLineContents.length < 3) {
-                log.error("request line is not enough");
-                return;
-            }
+            final String path = extractPath(request.getUri());
+            final String method = request.getMethod();
 
-            final String method = requestLineContents[0];
-            final String uri = requestLineContents[1];
-            final String version = requestLineContents[2];
-
-            String path = uri;
-            Map<String, String> queryParams = new LinkedHashMap<>();
-            if (uri.contains("?")) {
-                int index = uri.indexOf("?");
-                path = uri.substring(0, index);
-                String queryString = uri.substring(index + 1);
-                queryParams = parseQueryString(queryString);
-            }
-
-            final Map<String, String> responseHeaders = new LinkedHashMap<>();
-            final String statusLine = "HTTP/1.1 200 OK";
+            String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
+            final Map<String, String> responseHeaders = new LinkedHashMap<>();
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
-            if ("GET".equals(method)) {
-                if ("/login".equals(path)) {
-                    responseBody = handleLogin(queryParams);
-                } else if (!"/".equals(path)) {
-                    final String resourcePath = "static" + path;
-                    responseBody = readFileFromClasspath(resourcePath);
-                }
+            if ("/logout".equals(path)) {
+                statusLine = handleLogout(request, responseHeaders);
+                responseBody = "";
+            } else if ("GET".equals(method)) {
+                Entry<String, String> getResult = handleGetRequest(path, request, responseHeaders);
+                statusLine = getResult.getKey();
+                responseBody = getResult.getValue();
+            } else if ("POST".equals(method)) {
+                statusLine = handlePostRequest(path, request, responseHeaders);
+                responseBody = "";
             }
 
             responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-
             final String response = buildResponse(statusLine, responseHeaders, responseBody);
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String buildRequest(InputStream inputStream) {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        final StringBuilder requestBuilder = new StringBuilder();
-        try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                requestBuilder.append(line).append(CRLF);
-                if (line.isEmpty()) {
-                    break;
+    private void sendErrorResponse(OutputStream outputStream)
+            throws IOException {
+        String statusLine = "HTTP/1.1 400 Bad Request"; // TODO: 별도의 핸들러로 관리
+        String responseBody = readFileFromClasspath("static/400.html");
+        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Content-Type", MediaType.HTML.getMimeType());
+        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        final String response = buildResponse(statusLine, responseHeaders, responseBody);
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private String handleLogout(final Http11Request request, final Map<String, String> responseHeaders) {
+        final Http11Cookie cookie = request.getCookie();
+        if (cookie.isContainsSessionId()) {
+            SessionManager.getInstance().remove(cookie.getSessionId());
+        }
+        responseHeaders.put("Location", "/index.html");
+        responseHeaders.put("Set-Cookie", "JSESSIONID=; Path=/; Max-Age=0");
+        return "HTTP/1.1 302 Found";
+    }
+
+    private Entry<String, String> handleGetRequest(final String path, final Http11Request request, 
+                                                   final Map<String, String> responseHeaders) {
+        String statusLine = "HTTP/1.1 200 OK";
+        String responseBody;
+
+        if ("/register".equals(path)) {
+            responseBody = readFileFromClasspath("static/register.html");
+        } else if ("/login".equals(path) || "/login.html".equals(path)) {
+            final Http11Cookie cookie = request.getCookie();
+            if (cookie.isContainsSessionId() && SessionManager.getInstance().containsSession(cookie.getSessionId())) {
+                statusLine = "HTTP/1.1 302 Found";
+                responseHeaders.put("Location", "/index.html");
+                responseBody = "";
+            } else {
+                responseBody = readFileFromClasspath("static/login.html");
+            }
+        } else if (!"/".equals(path)) {
+            responseBody = readFileFromClasspath("static" + path);
+            if (responseBody.isEmpty()) {
+                statusLine = "HTTP/1.1 404 Not Found";
+                responseBody = readFileFromClasspath("static/404.html");
+            }
+        } else {
+            responseBody = "Hello world!";
+        }
+
+        return new AbstractMap.SimpleEntry<>(statusLine, responseBody);
+    }
+
+    private String handlePostRequest(final String path, final Http11Request request, 
+                                     final Map<String, String> responseHeaders) {
+        final Map<String, String> params = parseRequestBody(request.getBody());
+
+        if ("/register".equals(path)) {
+            final User user = new User(params.get("account"), params.get("password"), params.get("email"));
+            InMemoryUserRepository.save(user);
+            log.info("User saved: {}", user);
+            createSessionAndSetCookie(user, request, responseHeaders);
+            responseHeaders.put("Location", "/index.html");
+            return "HTTP/1.1 302 Found";
+        }
+
+        if ("/login".equals(path)) {
+            try {
+                final User user = InMemoryUserRepository.findByAccount(params.get("account"))
+                        .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
+
+                if (user.checkPassword(params.get("password"))) {
+                    createSessionAndSetCookie(user, request, responseHeaders);
+                    responseHeaders.put("Location", "/index.html");
+                    return "HTTP/1.1 302 Found";
+                } else {
+                    responseHeaders.put("Location", "/401.html");
+                    return "HTTP/1.1 302 Found";
                 }
+            } catch (IllegalArgumentException e) {
+                responseHeaders.put("Location", "/401.html");
+                return "HTTP/1.1 302 Found";
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
         }
-        return requestBuilder.toString();
+        return "HTTP/1.1 404 Not Found";
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        final Map<String, String> queryParams = new LinkedHashMap<>();
-        if (queryString == null || queryString.isEmpty()) {
-            log.error("query string is empty");
-            return queryParams;
+    private void createSessionAndSetCookie(final User user, final Http11Request request, 
+                                           final Map<String, String> responseHeaders) {
+        final Http11Cookie cookie = request.getCookie();
+        if (cookie.isNotContainsSessionId() || !SessionManager.getInstance().containsSession(cookie.getSessionId())) {
+            final String sessionId = UUID.randomUUID().toString();
+            final Http11Session session = new Http11Session(sessionId);
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
+            // TODO: CookieSecurityConfig를 통한 HttpOnly 기본, Secure/SameSite 설정 전략 등 고려하기
+            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
         }
+    }
 
-        final String[] pairs = queryString.split("&");
+    private String extractPath(final String uri) {
+        if (uri == null || uri.isEmpty()) {
+            return "/";
+        }
+        if (uri.contains("?")) {
+            return uri.substring(0, uri.indexOf("?"));
+        }
+        return uri;
+    }
+
+    private Map<String, String> parseRequestBody(final String requestBody) {
+        if (requestBody == null || requestBody.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> params = new HashMap<>();
+        final String[] pairs = requestBody.split("&");
         for (String pair : pairs) {
-            final String[] keyValue = pair.split("=");
-            queryParams.put(keyValue[0], keyValue[1]);
-        }
-        return queryParams;
-    }
-
-    private String handleLogin(Map<String, String> queryParams) {
-        try {
-            final String account = queryParams.get("account");
-            final String password = queryParams.get("password");
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
-
-            if (user.checkPassword(password)) {
-                log.info("user: {}", user);
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                params.put(key, value);
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
         }
-        return readFileFromClasspath("static/login.html");
+        return params;
     }
 
     private String readFileFromClasspath(String resourcePath) {
-        InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
-        StringBuilder fileContents = new StringBuilder();
+        final InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
         if (input == null) {
             log.error("resource not found: {}", resourcePath);
-            return fileContents.toString();
+            return "";
         }
+        final StringBuilder fileContents = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -150,6 +220,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         } catch (IOException e) {
             log.error("Failed to read file: {}", resourcePath, e);
+            return "";
         }
         return fileContents.toString();
     }

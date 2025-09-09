@@ -30,9 +30,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Charset DEFAULT_HEADER_CHARSET = StandardCharsets.ISO_8859_1;
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();) {
 
-            Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStream, new SessionManager(),
+            Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStream, sessionManager,
                     DEFAULT_HEADER_CHARSET, DEFAULT_BODY_CHARSET);
             Http11OutputBuffer http11OutputBuffer = new Http11OutputBuffer(outputStream);
 

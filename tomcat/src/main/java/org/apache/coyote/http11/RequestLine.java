@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.BadRequestException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,7 +48,7 @@ public class RequestLine {
     }
 
     public Map<String, String> getQueryParams() {
-        return Collections.unmodifiableMap(queryParams);
+        return queryParams;
     }
 
     public String getQueryParam(String key) {

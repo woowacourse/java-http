@@ -1,17 +1,17 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpResponse {
 
     private final HttpStatus httpStatus;
-    private final Map<String, String> headers;
+    private final List<HttpHeader> headers;
     private final String responseBody;
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String responseBody) {
+    public HttpResponse(HttpStatus httpStatus, List<HttpHeader> headers, String responseBody) {
         this.httpStatus = httpStatus;
-        this.headers = new HashMap<>(headers);
+        this.headers = new ArrayList<>(headers);
         this.responseBody = responseBody;
     }
 
@@ -23,8 +23,8 @@ public class HttpResponse {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("HTTP/1.1 %s %s ".formatted(httpStatus.getCode(), httpStatus.getMessage())).append("\r\n");
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append("%s: %s ".formatted(entry.getKey(), entry.getValue())).append("\r\n");
+        for (HttpHeader httpHeader : headers) {
+            sb.append("%s: %s ".formatted(httpHeader.getName(), httpHeader.getValue())).append("\r\n");
         }
         sb.append("").append("\r\n");
         sb.append(responseBody);

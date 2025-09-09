@@ -1,24 +1,24 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpResponseBuilder {
     private HttpStatus httpStatus;
     private String responseBody;
-    private Map<String, String> headers = new HashMap<>();
+    private List<HttpHeader> headers = new ArrayList<>();
 
     public HttpResponseBuilder() {
     }
 
-    public HttpResponseBuilder header(String key, String value) {
-        headers.put(key, value);
+    public HttpResponseBuilder header(String name, String value) {
+        headers.add(new HttpHeader(name, value));
         return this;
     }
 
-    public HttpResponseBuilder header(String key, int value) {
-        headers.put(key, String.valueOf(value));
+    public HttpResponseBuilder header(String name, int value) {
+        headers.add(new HttpHeader(name, String.valueOf(value)));
         return this;
     }
 
@@ -28,12 +28,12 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder contentType(String value) {
-        headers.put("Content-Type", value);
+        headers.add(new HttpHeader("Content-Type", value));
         return this;
     }
 
-    public HttpResponseBuilder cookie(String key, String value) {
-        headers.put("Set-Cookie", "%s=%s;".formatted(key, value));
+    public HttpResponseBuilder cookie(String name, String value) {
+        headers.add(new HttpHeader("Set-Cookie", "%s=%s;".formatted(name, value)));
         return this;
     }
 

@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import com.techcourse.web.session.Session;
 import com.techcourse.web.session.SessionManager;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +21,6 @@ import org.apache.coyote.Processor;
 
 @Slf4j
 public class Http11Processor implements Runnable, Processor {
-
-    private static final String CRLF = "\r\n";
-    private static final int EOF = -1;
-    private static final String CONTENT_LENGTH_HEADER_PREFIX = "content-length:";
 
     private final Socket connection;
     private final SessionManager sessionManager;
@@ -55,56 +52,51 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest buildRequest(final InputStream inputStream) throws IOException {
-        final StringBuilder requestBuilder = new StringBuilder();
+        final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+
         final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                new InputStreamReader(bufferedInputStream, StandardCharsets.ISO_8859_1));
 
-        readHeader(reader, requestBuilder);
-        readBody(requestBuilder, reader);
+        final HttpRequestHeader requestHeader = readRequestHeader(reader);
+        final HttpRequestBody requestBody = readRequestBody(bufferedInputStream, requestHeader);
 
-        return HttpRequest.from(requestBuilder.toString());
+        return HttpRequest.from(requestHeader, requestBody);
     }
 
-    private void readHeader(final BufferedReader reader, final StringBuilder requestBuilder) throws IOException {
+    private HttpRequestHeader readRequestHeader(final BufferedReader reader) throws IOException {
+        final StringBuilder headerBuilder = new StringBuilder();
+
         String line;
         while ((line = reader.readLine()) != null) {
-            requestBuilder.append(line).append(CRLF);
+            headerBuilder.append(line).append("\r\n");
             if (line.isEmpty()) {
                 break;
             }
         }
+
+        return HttpRequestHeader.from(headerBuilder.toString());
     }
 
-    private void readBody(final StringBuilder requestBuilder, final BufferedReader reader) throws IOException {
-        final String header = requestBuilder.toString();
-        final int contentLength = extractContentLength(header);
+    private HttpRequestBody readRequestBody(final InputStream inputStream, final HttpRequestHeader header)
+            throws IOException {
+        final int contentLength = header.getContentLength();
+        final ContentType contentType = header.getContentType();
 
         if (contentLength <= 0) {
-            return;
+            return HttpRequestBody.from("", contentType);
         }
 
-        final char[] buffer = new char[contentLength];
-        int totalRead = 0;
-
-        while (totalRead < contentLength) {
-            final int bytesRead = reader.read(buffer, totalRead, contentLength - totalRead);
-            if (bytesRead == EOF) {
-                throw new IOException(
-                        "Content-Length와 실제 데이터 길이 불일치: 예상 " + contentLength + "바이트, 실제 " + totalRead + "바이트");
-            }
-            totalRead += bytesRead;
+        final byte[] bodyBytes = inputStream.readNBytes(contentLength);
+        if (bodyBytes.length != contentLength) {
+            throw new IOException(
+                    "Content-Length와 실제 데이터 길이 불일치: 예상=" + contentLength + ", 실제=" + bodyBytes.length);
         }
-        requestBuilder.append(buffer);
+
+        final String bodyString = new String(bodyBytes, contentType.getDefaultCharset()); // TODO client request charset
+
+        return HttpRequestBody.from(bodyString, contentType);
     }
 
-    private int extractContentLength(final String request) {
-        for (final String line : request.split(CRLF)) {
-            if (line.toLowerCase().startsWith(CONTENT_LENGTH_HEADER_PREFIX)) {
-                return Integer.parseInt(line.substring(CONTENT_LENGTH_HEADER_PREFIX.length()).trim());
-            }
-        }
-        return 0;
-    }
 
     private HttpResponse buildResponse(final HttpRequest request) {
         final String path = request.getPath();
@@ -150,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
         if (path.contains(".")) {
             return resourcePath;
         }
-        return resourcePath + ".html";
+        return resourcePath + ContentType.HTML_EXTENSION;
     }
 
     private HttpResponse loadAndServeFile(final HttpRequest request, final String resourcePath) {

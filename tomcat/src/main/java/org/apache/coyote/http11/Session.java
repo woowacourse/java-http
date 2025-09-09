@@ -6,11 +6,15 @@ import java.util.UUID;
 
 public class Session {
 
-    private final String id;
+    private String id;
     private final Map<String, Object> attributes = new HashMap<>();
 
     public Session() {
         this.id = UUID.randomUUID().toString();
+    }
+
+    public void changeId() {
+        id = UUID.randomUUID().toString();
     }
 
     public void addAttribute(String name, Object value) {

@@ -200,6 +200,8 @@ public class Http11Processor implements Runnable, Processor {
                 if (session == null) {
                     session = new Session();
                     SessionManager.getInstance().add(session);
+                } else {
+                    session.changeId();
                 }
                 session.addAttribute("user", loginUser);
             } catch (UnAuthorizedException e) {

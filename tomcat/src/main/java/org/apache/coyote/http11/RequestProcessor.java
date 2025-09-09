@@ -5,6 +5,7 @@ import com.techcourse.presentation.Controller;
 import com.techcourse.presentation.HttpRequest;
 import com.techcourse.presentation.HttpResponse;
 import com.techcourse.presentation.LoginController;
+import com.techcourse.presentation.RegisterController;
 import com.techcourse.presentation.StaticResourceController;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +33,13 @@ public class RequestProcessor {
                 key -> {
                     priority.add(key);
                     return new LoginController(new LoginService(), staticResourceController);
+                }
+        );
+        controllers.computeIfAbsent(
+                "RegisterController",
+                key -> {
+                    priority.add(key);
+                    return new RegisterController(new LoginService(), staticResourceController);
                 }
         );
     }

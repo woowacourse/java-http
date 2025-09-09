@@ -17,6 +17,7 @@ dependencies {
     implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     implementation 'ch.qos.logback:logback-classic:1.5.18'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
+    compileOnly("org.jspecify:jspecify:1.0.0")
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.13.4'
     testImplementation 'org.assertj:assertj-core:3.27.4'

@@ -11,11 +11,12 @@ public class InMemoryUserRepository {
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        final User user = User.of("gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 
     public static void save(User user) {
+        // TODO. 추후 ID 생성 로직 구현
         database.put(user.getAccount(), user);
     }
 

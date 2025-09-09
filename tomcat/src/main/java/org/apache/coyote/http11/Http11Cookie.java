@@ -21,8 +21,8 @@ public class Http11Cookie {
     }
 
     private void parseCookies(String cookies) {
-        this.cookies = Arrays.stream(cookies.split(";"))
-                .map(cookie -> cookie.split("="))
+        this.cookies = Arrays.stream(cookies.split(";", 2))
+                .map(cookie -> cookie.split("=", 2))
                 .collect(Collectors.toMap(
                         arr -> arr[0].trim(), arr -> arr[1].trim()
                 ));

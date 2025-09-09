@@ -264,6 +264,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
         User user = findUser.orElseThrow(() -> new UnAuthorizedException("Invalid account " + account));
+        if (!user.checkPassword(password)) {
+            throw new UnAuthorizedException("Invalid password");
+        }
         log.atInfo().log("user: {}", user);
         return user;
     }

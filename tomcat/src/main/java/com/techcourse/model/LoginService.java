@@ -13,7 +13,7 @@ public class LoginService {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
-                    log.info("user: {}", user);
+                    log.info("로그인 성공! 아이디:: {}", user.getAccount());
                     session.setAttribute("user", user);
 
                     return true;

@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
                 requestBody = new String(buffer);
             }
 
-            final String response = handleRequest(requestInfo, requestBody);
+            final String response = handleRequest(requestInfo, requestHeaders, requestBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -89,9 +90,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String[]{method, uri};
     }
 
-    private String handleRequest(final String[] requestInfo, final String requestBody) throws IOException, URISyntaxException {
+    private String handleRequest(final String[] requestInfo, final Map<String, String> requestHeaders, final String requestBody) throws IOException, URISyntaxException {
         String method = requestInfo[0];
         String path = requestInfo[1];
+
+        String existingSessionId = getSessionIdFromCookie(requestHeaders.get("Cookie"));
 
         if ("/login".equals(path)) {
             return handleLogin(method, requestBody);
@@ -100,30 +103,33 @@ public class Http11Processor implements Runnable, Processor {
             return handleRegister(method, requestBody);
         }
 
-        return serveStaticFile(path);
+        return serveStaticFile(path, existingSessionId);
     }
 
     private String handleLogin(final String method, final String requestBody) throws IOException, URISyntaxException {
         if("POST".equals(method)) {
             return processLogin(requestBody);
         }
-        return serveStaticFile( "/login.html");
+        return serveStaticFile("/login.html", null);
     }
 
     private String handleRegister(final String method, final String requestBody) throws IOException, URISyntaxException {
         if("POST".equals(method)) {
             return processRegister(requestBody);
         }
-        return serveStaticFile("/register.html");
+        return serveStaticFile("/register.html", null);
     }
 
     private String processLogin(final String requestBody) {
         final Map<String, String> parameters = parseFormData(requestBody);
         final boolean loginSuccess = authenticateUser(parameters);
 
-        final String redirectLocation = loginSuccess ? "/index.html" : "/401.html";
+        if(loginSuccess) {
+            final String jsessionid = UUID.randomUUID().toString();
+            return generateRedirectResponse("/index.html", jsessionid);
+        }
 
-        return generateRedirectResponse(redirectLocation);
+        return generateRedirectResponse("/401.html", null);
     }
 
     private String processRegister(final String requestBody) {
@@ -132,7 +138,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final String redirectLocation = registerSuccess ? "/index.html" : "/register.html";
 
-        return generateRedirectResponse(redirectLocation);
+        return generateRedirectResponse(redirectLocation, null);
     }
 
     private boolean authenticateUser(final Map<String, String> parameters) {
@@ -177,9 +183,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String serveStaticFile(final String path) throws IOException, URISyntaxException {
+    private String serveStaticFile(final String path, final String existingSessionId) throws IOException, URISyntaxException {
         final byte[] fileBytes = readFile(path);
-        return generateOkResponse(path, fileBytes);
+
+        String sessionId = existingSessionId;
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+        }
+
+        return generateOkResponse(path, fileBytes, sessionId);
+    }
+
+    private String getSessionIdFromCookie(final String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
+            return null;
+        }
+
+        final String[] cookies = cookieHeader.split(";");
+        for (final String cookie : cookies) {
+            final String trimmedCookie = cookie.trim();
+            if (trimmedCookie.startsWith("JSESSIONID=")) {
+                return trimmedCookie.substring("JSESSIONID=".length());
+            }
+        }
+        return null;
     }
 
     private Map<String, String> parseFormData(final String formData) {
@@ -188,19 +215,27 @@ public class Http11Processor implements Runnable, Processor {
             final String[] pairs = formData.split("&");
             for (final String pair : pairs) {
                 final String[] keyValue = pair.split("=");
-                parameters.put(keyValue[0], keyValue[1]);
+                if (keyValue.length >= 2) {
+                    parameters.put(keyValue[0], keyValue[1]);
+                }
             }
         }
         return parameters;
     }
 
-    private String generateRedirectResponse(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Type: text/html; charset=UTF-8 ",
-                "Content-Length: 0 ",
-                "\r\n");
+    private String generateRedirectResponse(final String location, final String jsessionid) {
+        StringBuilder response = new StringBuilder();
+        response.append("HTTP/1.1 302 Found \r\n");
+        response.append("Location: ").append(location).append(" \r\n");
+        response.append("Content-Type: text/html; charset=UTF-8 \r\n");
+        response.append("Content-Length: 0 \r\n");
+
+        if (jsessionid != null) {
+            response.append("Set-Cookie: JSESSIONID=").append(jsessionid).append(" \r\n");
+        }
+
+        response.append("\r\n");
+        return response.toString();
     }
 
     private byte[] readFile(final String path) throws IOException, URISyntaxException {
@@ -209,16 +244,23 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(filePath);
     }
 
-    private String generateOkResponse(final String path, final byte[] bytes) {
+    private String generateOkResponse(final String path, final byte[] bytes, final String jsessionid) {
         final String responseBody = new String(bytes);
         final String contentType = getContentType(path);
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
-                "",
-                responseBody);
+        StringBuilder response = new StringBuilder();
+        response.append("HTTP/1.1 200 OK \r\n");
+        response.append("Content-Type: ").append(contentType).append(";charset=utf-8 \r\n");
+        response.append("Content-Length: ").append(bytes.length).append(" \r\n");
+
+        if (jsessionid != null) {
+            response.append("Set-Cookie: JSESSIONID=").append(jsessionid).append(" \r\n");
+        }
+
+        response.append("\r\n");
+        response.append(responseBody);
+
+        return response.toString();
     }
 
     private String getContentType(final String path) {

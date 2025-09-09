@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class StartLine {
     private static final String RESOURCE_PATH = "static";
     private static final String ROUTE_PATH = "/";

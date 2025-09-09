@@ -1,7 +1,6 @@
 package com.techcourse.db;
 
 import com.techcourse.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +20,14 @@ public class InMemoryUserRepository {
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
+    }
+
+    public static User getByAccountAndPassword(String account, String password) {
+        User user = database.get(account);
+        if (user == null || !user.checkPassword(password)) {
+            throw new IllegalArgumentException("로그인 혹은 비밀번호가 틀렸습니다.");
+        }
+        return user;
     }
 
     private InMemoryUserRepository() {}

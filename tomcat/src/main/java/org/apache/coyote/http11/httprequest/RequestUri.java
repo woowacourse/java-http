@@ -16,13 +16,14 @@ public class RequestUri {
     private final Map<String, String> queryParameters;
 
     public static RequestUri from(final String rawRequestUri) {
-        final String requestPath = rawRequestUri.split(QUERY_STRING_REGEX)[0];
+        final String[] requestUri = rawRequestUri.split(QUERY_STRING_REGEX);
+        final String requestPath = requestUri[0];
 
         if (!rawRequestUri.contains(QUERY_STRING_SEPARATOR)) {
             return new RequestUri(requestPath, new HashMap<>());
         }
 
-        final String queryString = rawRequestUri.split(QUERY_STRING_REGEX)[1];
+        final String queryString = requestUri[1];
         final String[] queryParameters = queryString.split(QUERY_PARAMETER_SEPARATOR);
         final Map<String, String> parameters = Arrays.stream(queryParameters)
                 .map(param -> param.split(QUERY_PARAMETER_KEY_VALUE_SEPARATOR))

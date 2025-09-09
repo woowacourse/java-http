@@ -27,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final Map<Integer, String> HTTP_STATUS_CODES = Map.ofEntries(
             Map.entry(200, "200 OK"),
+            Map.entry(302, "302 Found"),
             Map.entry(400, "400 Bad Request"),
             Map.entry(401, "401 Unauthorized"),
             Map.entry(404, "404 Not Found")
@@ -70,7 +71,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            handleLogin(path, queryMap);
+            if ("/login.html".equals(path) && !queryMap.isEmpty()) {
+                handleLogin(queryMap, outputStream);
+                return;
+            }
+
             sendResponse(generateResponse(200, resource), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -149,9 +154,9 @@ public class Http11Processor implements Runnable, Processor {
             final String responseBody = String.format("""
                 <html>
                     <head><title>Error</title></head>
-                    <body><h1>%d %s</h1></body>
+                    <body><h1>%s</h1></body>
                 </html>
-            """, httpStatusCode, HTTP_STATUS_CODES.get(httpStatusCode));
+            """, HTTP_STATUS_CODES.get(httpStatusCode));
 
             return parseResponse(httpStatusCode, "text/html", responseBody);
         }
@@ -174,10 +179,7 @@ public class Http11Processor implements Runnable, Processor {
         return resourceName.substring(dotIndex + 1);
     }
 
-    private void handleLogin(final String path, final Map<String, String> queryMap) {
-        if (!"/login.html".equals(path) || queryMap.isEmpty()) {
-            return;
-        }
+    private void handleLogin(final Map<String, String> queryMap, final OutputStream outputStream) throws IOException {
         final String account = queryMap.get("account");
         final String password = queryMap.get("password");
 
@@ -185,7 +187,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
+            final URL resource = getResourceUrl("/index.html");
+            sendResponse(generateResponse(302, resource), outputStream);
+            return;
         }
+
+        sendResponse(generateErrorResponse(401), outputStream);
     }
 
     private void sendResponse(final String response, final OutputStream outputStream) throws IOException {

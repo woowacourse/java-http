@@ -4,18 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.catalina.cookie.RequestCookie;
-import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.Http11RequestParser;
 import org.apache.coyote.http11.message.HttpRequest;
-import org.apache.coyote.http11.message.HttpRequestHeader;
-import org.apache.coyote.http11.message.RequestLine;
 
 public class Http11InputBuffer {
 
     private static final int END_SIGN_FOR_STREAM = -1;
-    private static final String INVALID_HTTP_VERSION = "HTTP/1.1";
 
     private final InputStream inputStream;
     private final Charset defaultHeaderCharset;
@@ -28,89 +22,11 @@ public class Http11InputBuffer {
     }
 
     public HttpRequest read() throws IOException {
-        String rawRequestLine = readLine(inputStream);
-        if (rawRequestLine == null || rawRequestLine.isEmpty()) {
-            throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
-        }
-        RequestLine requestLine = RequestLine.createFromRawRequestLine(rawRequestLine);
-        checkHttpVersion(requestLine);
-
-        Map<String, String> rawHeaders = parseHeaders(inputStream);
-        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(rawHeaders);
-
-        if (httpRequestHeader.contains("Cookie")) {
-            RequestCookie requestCookie = parseToCookie(httpRequestHeader.get("Cookie"));
-            httpRequestHeader.addCookie(requestCookie);
-        }
-
-        String requestBody = parseRequestBody(requestLine, httpRequestHeader);
-
-        return new HttpRequest(requestLine, httpRequestHeader, requestBody);
+        Http11RequestParser parser = new Http11RequestParser(this, defaultHeaderCharset, defaultBodyCharset);
+        return parser.parseRequest();
     }
 
-    private RequestCookie parseToCookie(String rawCookies) {
-        Map<String, String> cookieValues = new HashMap<>();
-        String[] pairs = rawCookies.split("; ");
-        for (String pair : pairs) {
-            String[] splitPair = pair.split("=", 2);
-            String key = splitPair[0];
-            String value = (splitPair.length == 2) ? splitPair[1] : "";
-            cookieValues.put(key, value);
-        }
-        return new RequestCookie(cookieValues);
-
-    }
-
-    private String parseRequestBody(RequestLine requestLine, HttpRequestHeader httpRequestHeader) throws IOException {
-        String requestBody = null;
-
-        if (requestLine.httpMethod().equals(HttpMethod.POST) && httpRequestHeader.contains("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
-            if (contentLength > 0) {
-                byte[] body = inputStream.readNBytes(contentLength);
-                String contentType = httpRequestHeader.get("Content-Type");
-                requestBody = new String(body, extractBodyCharset(contentType));
-            }
-        }
-        return requestBody;
-    }
-
-    private Charset extractBodyCharset(String contentType) {
-        if (contentType == null) {
-            return defaultBodyCharset;
-        }
-        for (String t : contentType.split(";")) {
-            int i = t.indexOf('=');
-            if (i > 0 && t.substring(0, i).trim().equalsIgnoreCase("charset")) {
-                try {
-                    return Charset.forName(t.substring(i + 1).trim());
-                } catch (Exception ignore) {
-                    return defaultBodyCharset;
-                }
-            }
-        }
-        return defaultBodyCharset;
-    }
-
-    private static void checkHttpVersion(RequestLine requestLine) {
-        if (!requestLine.httpVersion().equals(INVALID_HTTP_VERSION)) {
-            throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
-        }
-    }
-
-    private String readRequestBody(int contentLength, HttpRequestHeader httpRequestHeader, String requestBody)
-            throws IOException {
-        byte[] body = inputStream.readNBytes(contentLength);
-
-        if (httpRequestHeader.contains("Content-Type")) {
-            String contentType = httpRequestHeader.get("Content-Type");
-            requestBody = new String(body, extractBodyCharset(contentType));
-        }
-        return requestBody;
-    }
-
-
-    private String readLine(InputStream inputStream) throws IOException {
+    public String readLine() throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int readByte;
         boolean seenCR = false;
@@ -136,17 +52,7 @@ public class Http11InputBuffer {
         return buffer.toString(defaultHeaderCharset);
     }
 
-    private Map<String, String> parseHeaders(InputStream inputStream) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line;
-        while ((line = readLine(inputStream)) != null && !line.isEmpty()) {
-            int colonIndex = line.indexOf(":");
-            if (colonIndex > 0) {
-                String key = line.substring(0, colonIndex).trim();
-                String value = line.substring(colonIndex + 1).trim();
-                headers.put(key, value);
-            }
-        }
-        return headers;
+    public byte[] readNBytes(int length) throws IOException {
+        return inputStream.readNBytes(length);
     }
 }

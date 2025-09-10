@@ -35,4 +35,11 @@ public class HttpCookie {
     public boolean hasAttribute(final String name) {
         return cookies.containsKey(name);
     }
+
+    public String getAttribute(final String name) {
+        if (hasAttribute(name)) {
+            return cookies.get(name);
+        }
+        return "";
+    }
 }

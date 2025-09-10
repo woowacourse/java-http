@@ -5,7 +5,8 @@ import org.apache.coyote.Cookie;
 public class HttpResponse {
 
     private final HttpResponseHeader responseHeader;
-    private final String body;
+    private String body;
+
 
     public HttpResponse(
             final String protocol,
@@ -14,6 +15,19 @@ public class HttpResponse {
     ) {
         final StatusLine statusLine = new StatusLine(protocol, statusCode);
         this.responseHeader = new HttpResponseHeader(statusLine);
+        this.body = body;
+    }
+
+    public HttpResponse() {
+        this.responseHeader = new HttpResponseHeader();
+        this.body = null;
+    }
+
+    public void updateStatusLine(final String protocol, final StatusCode statusCode) {
+        responseHeader.updateStatusLine(protocol, statusCode);
+    }
+
+    public void updateBody(final String body) {
         this.body = body;
     }
 
@@ -34,8 +48,8 @@ public class HttpResponse {
         responseHeader.addHeader(key, value);
     }
 
-    public void addCookie(final Cookie cookie){
-        String cookieValue = cookie.getKey()+"="+cookie.getValue();
-        responseHeader.addHeader("Set-Cookie",cookieValue);
+    public void addCookie(final Cookie cookie) {
+        String cookieValue = cookie.getKey() + "=" + cookie.getValue();
+        responseHeader.addHeader("Set-Cookie", cookieValue);
     }
 }

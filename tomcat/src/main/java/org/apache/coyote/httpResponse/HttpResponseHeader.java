@@ -11,7 +11,7 @@ public class HttpResponseHeader {
     private final Map<String, String> headers;
 
     public HttpResponseHeader() {
-        this.statusLine = null;
+        this.statusLine = new StatusLine("HTTP/1.1",StatusCode.OK);
         this.headers = new LinkedHashMap<>();
     }
 

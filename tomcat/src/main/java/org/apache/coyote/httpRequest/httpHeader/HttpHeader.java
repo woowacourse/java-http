@@ -1,6 +1,7 @@
 package org.apache.coyote.httpRequest.httpHeader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Cookie;
@@ -24,7 +25,7 @@ public class HttpHeader {
 
     private HttpHeader(final RequestLine requestLine) {
         this.requestLine = requestLine;
-        headers = null;
+        headers = new HashMap<>();
     }
 
     public HttpMethod getHttpMethod() {

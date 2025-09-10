@@ -38,27 +38,32 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+             var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var request = HttpRequest.from(reader);
-            final var session = request.getSession(true);
+            final var outputStream = connection.getOutputStream();
+            HttpResponse response;
 
-            final var controller = requestMapping.getController(request.getPath());
-            var response = (controller != null)
-                    ? controller.service(request)
-                    : handleStaticResource(request);
+            try {
+                final var request = HttpRequest.from(reader);
+                final var session = request.getSession(true);
 
-            if (session instanceof SimpleHttpSession s && s.isNew()) {
-                response = response.toBuilder()
-                        .setCookie("JSESSIONID", s.getId())
-                        .build();
+                final var controller = requestMapping.getController(request.getPath());
+                response = (controller != null)
+                        ? controller.service(request)
+                        : handleStaticResource(request);
+
+                if (session instanceof SimpleHttpSession s && s.isNew()) {
+                    response = response.toBuilder()
+                            .setCookie("JSESSIONID", s.getId())
+                            .build();
+                }
+            } catch (Exception e) {
+                log.error("Internal Server Error: {}", e.getMessage(), e);
+                response = buildInternalServerErrorResponse();
             }
-
             response.writeTo(outputStream);
         } catch (Exception e) {
-            log.error("Internal Server Error: {}", e.getMessage(), e);
-            sendInternalServerErrorResponse(connection);
+            log.error("Fatal error while processing connection", e);
         }
     }
 
@@ -70,22 +75,25 @@ public class Http11Processor implements Runnable, Processor {
                     .body("Method Not Allowed".getBytes())
                     .build();
         }
-        
+
         return StaticResourceHandler.serveStaticResource(request.getPath());
     }
 
-    private void sendInternalServerErrorResponse(final Socket connection) {
+    private HttpResponse buildInternalServerErrorResponse() {
         try {
             final var body = readStaticFile("static/500.html");
 
-            HttpResponse.builder()
+            return HttpResponse.builder()
                     .status(500, "Internal Server Error")
                     .contentType("text/html;charset=utf-8")
                     .body(body)
-                    .build()
-                    .writeTo(connection.getOutputStream());
+                    .build();
         } catch (Exception ex) {
-            log.error("Failed to send 500 response: {}", ex.getMessage(), ex);
+            return HttpResponse.builder()
+                    .status(500, "Internal Server Error")
+                    .contentType("text/plain;charset=utf-8")
+                    .body("Internal Server Error".getBytes())
+                    .build();
         }
     }
 

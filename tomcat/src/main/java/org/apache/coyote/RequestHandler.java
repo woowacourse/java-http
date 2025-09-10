@@ -1,6 +1,7 @@
 package org.apache.coyote;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Map<RequestMapping, Function<HttpRequest, HttpResponse>> requestMappings;
 
@@ -39,16 +42,22 @@ public class RequestHandler {
         requestMappings.put(new RequestMapping("/assets/chart-pie.js", Method.GET), this::handleStaticResource);
         requestMappings.put(new RequestMapping("/assets/img/error-404-monochrome.svg", Method.GET),
                 this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleStaticResource);
+        requestMappings.put(new RequestMapping("/login", Method.GET), this::handleStaticResource);
 
-        requestMappings.put(new RequestMapping("/login.html", Method.GET), this::handleLogin);
-        requestMappings.put(new RequestMapping("/login", Method.GET), this::handleLogin);
+        requestMappings.put(new RequestMapping("/register", Method.POST), this::handleRegister);
+        requestMappings.put(new RequestMapping("/login", Method.POST), this::handleLogin);
     }
 
     public HttpResponse handleRequest(HttpRequest httpRequest) {
-        for (var entry : requestMappings.entrySet()) {
-            if (entry.getKey().isSupported(httpRequest)) {
-                return entry.getValue().apply(httpRequest);
+        try {
+            for (var entry : requestMappings.entrySet()) {
+                if (entry.getKey().isSupported(httpRequest)) {
+                    return entry.getValue().apply(httpRequest);
+                }
             }
+        } catch (UnauthorizedException e) {
+            return responseUnauthorizedView();
         }
         return responseNotFoundView();
     }
@@ -59,30 +68,67 @@ public class RequestHandler {
     }
 
     private HttpResponse handleStaticResource(HttpRequest httpRequest) {
+        if (httpRequest.getPath().equals("/index") || httpRequest.getPath().equals("/index.html")) {
+            if (sessionManager.getSession(httpRequest.getSessionId()) == null) {
+                return HttpResponse.forRedirect(ResponseStatus.FOUND, "/login.html");
+            }
+        }
+        if (httpRequest.getPath().equals("/login") || httpRequest.getPath().equals("/login.html") ||
+                httpRequest.getPath().equals("/register") || httpRequest.getPath().equals("/register.html")) {
+            if (sessionManager.getSession(httpRequest.getSessionId()) != null) {
+                final var session = sessionManager.getSession(httpRequest.getSessionId());
+                User user = (User) session.getAttribute("user");
+                return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+            }
+        }
         final String staticFilePath = getStaticFilePath(httpRequest);
         final byte[] body = readFile(staticFilePath);
         final var contentType = ContentType.fromFileName(staticFilePath);
         return HttpResponse.of(ResponseStatus.OK, contentType, body);
     }
 
+    private HttpResponse handleRegister(HttpRequest httpRequest) {
+        Map<String, String> requestBody = httpRequest.getBody();
+        final String account = requestBody.getOrDefault("account", "");
+        final String password = requestBody.getOrDefault("password", "");
+        final String email = requestBody.getOrDefault("email", "");
+        if (account.isBlank() || password.isBlank() || email.isBlank()) {
+            return handleStaticResource(httpRequest);
+        }
+        final var user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        final var session = sessionManager.createSession();
+        final var httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        httpResponse.setSession(session);
+        return httpResponse;
+    }
+
     private HttpResponse handleLogin(HttpRequest httpRequest) {
-        final String account = httpRequest.getQueryParameterValue("account");
-        final String password = httpRequest.getQueryParameterValue("password");
+        final Map<String, String> requestBody = httpRequest.getBody();
+        final String account = requestBody.getOrDefault("account", "");
+        final String password = requestBody.getOrDefault("password", "");
         if (account.isBlank() || password.isBlank()) {
             return handleStaticResource(httpRequest);
         }
-        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() ->
-                new IllegalArgumentException("회원이 존재하지 않습니다. : " + account));
+        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UnauthorizedException::new);
         if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("회원이 존재하지 않습니다. : " + account);
+            throw new UnauthorizedException();
         }
         log.info("회원 조회 성공 : {}", user);
-        return handleStaticResource(httpRequest);
+        final var session = sessionManager.createSession();
+        final var httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        httpResponse.setSession(session);
+        return httpResponse;
     }
 
     private HttpResponse responseNotFoundView() {
         final byte[] body = readFile(Path.of("static", "404.html").toString());
         return HttpResponse.of(ResponseStatus.NOT_FOUND, ContentType.HTML, body);
+    }
+
+    private HttpResponse responseUnauthorizedView() {
+        final byte[] body = readFile(Path.of("static", "401.html").toString());
+        return HttpResponse.of(ResponseStatus.UNAUTHORIZED, ContentType.HTML, body);
     }
 
     private String getStaticFilePath(HttpRequest httpRequest) {

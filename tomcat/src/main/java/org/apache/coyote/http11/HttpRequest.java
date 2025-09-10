@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
@@ -8,18 +9,30 @@ public class HttpRequest {
     private final String path;
     private final HttpVersion httpVersion;
     private final ContentType contentType;
+    private final int contentLength;
+    private final List<HttpCookie> cookies;
     private final Map<String, String> queryParameter;
+    private final Map<String, String> body;
 
     public HttpRequest(Method method,
                        String path,
                        HttpVersion httpVersion,
                        ContentType contentType,
-                       Map<String, String> queryParameter) {
+                       int contentLength, List<HttpCookie> httpCookie,
+                       Map<String, String> queryParameter,
+                       Map<String, String> body) {
         this.method = method;
         this.path = path;
         this.httpVersion = httpVersion;
         this.contentType = contentType;
+        this.contentLength = contentLength;
+        this.cookies = httpCookie;
         this.queryParameter = queryParameter;
+        this.body = body;
+    }
+
+    public String getSessionId() {
+        return getCookieValue("JSESSIONID");
     }
 
     public Method getMethod() {
@@ -35,11 +48,24 @@ public class HttpRequest {
     }
 
     public String getQueryParameterValue(String key) {
-        String value = queryParameter.get(key);
-        if (value == null || value.isBlank()) {
-            return "";
-        }
-        return value;
+        return queryParameter.getOrDefault(key, "");
+    }
+
+    public boolean hasCookie(String key) {
+        return cookies.stream()
+                .anyMatch(cookie -> cookie.isKey(key));
+    }
+
+    public String getCookieValue(String key) {
+        return cookies.stream()
+                .filter(cookie -> cookie.isKey(key))
+                .map(HttpCookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Map<String, String> getBody() {
+        return body;
     }
 
     @Override
@@ -49,7 +75,9 @@ public class HttpRequest {
                 ", path='" + path + '\'' +
                 ", httpVersion=" + httpVersion +
                 ", contentType=" + contentType +
+                ", contentLength=" + contentLength +
                 ", queryParameter=" + queryParameter +
+                ", body=" + body +
                 '}';
     }
 }

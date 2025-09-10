@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.coyote.http11.application.Controller;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
@@ -14,7 +15,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
-public class UserController {
+public class UserController implements Controller {
 
     private static final String SESSION_NAME = "JSESSIONID";
 
@@ -32,6 +33,7 @@ public class UserController {
         this.sessionManager = sessionManager;
     }
 
+    @Override
     public Function<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi) {
         return supports.get(requestApi);
     }
@@ -63,6 +65,7 @@ public class UserController {
         String sessionId = request.getCookies().get(SESSION_NAME);
         if (sessionId == null) {
             request.setPath("/index.html");
+            return new HttpResponse();
         }
         Session session = sessionManager.findSession(sessionId);
         if (userService.getLoggedUser(session) == null) {

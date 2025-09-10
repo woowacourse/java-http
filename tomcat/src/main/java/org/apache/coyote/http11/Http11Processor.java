@@ -6,8 +6,10 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.application.Controller;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
@@ -26,7 +28,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
-    private final UserController userController = new UserController(SESSION_MANAGER);
+    private final List<Controller> controllers = List.of(
+        new UserController(SESSION_MANAGER)
+    );
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -48,9 +52,12 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 Api api = request.getApi();
-                var handlerMethod = userController.getHandlerMethod(api);
-                if (handlerMethod != null) {
-                    response = handlerMethod.apply(request);
+                for (var controller : controllers) {
+                    var handlerMethod = controller.getHandlerMethod(api);
+                    if (handlerMethod != null) {
+                        response = handlerMethod.apply(request);
+                        break;
+                    }
                 }
             } catch (UnauthorizedException e) {
                 request.setPath("/401.html");

@@ -8,7 +8,7 @@ import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.apache.catalina.domain.request.HttpRequest;
+import com.spring.http.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestParserTest {

@@ -1,4 +1,4 @@
-package org.apache.catalina.domain.cookie;
+package com.spring.http.cookie;
 
 public record HttpCookie(
         String name,

@@ -1,8 +1,8 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.domain.HttpHeader;
-import org.apache.catalina.domain.request.HttpRequest;
-import org.apache.catalina.domain.response.HttpResponse;
+import com.spring.http.HttpHeader;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 
 public final class ResponseHeaderUtil {
 

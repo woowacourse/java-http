@@ -3,8 +3,8 @@ package com.spring.controller;
 import com.spring.http.enums.HttpMethod;
 import com.spring.http.enums.HttpStatus;
 import java.io.IOException;
-import org.apache.catalina.domain.request.HttpRequest;
-import org.apache.catalina.domain.response.HttpResponse;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 
 public interface Controller {
 

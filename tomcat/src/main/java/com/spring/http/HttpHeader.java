@@ -1,9 +1,9 @@
-package org.apache.catalina.domain;
+package com.spring.http;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.domain.cookie.HttpCookies;
+import com.spring.http.cookie.HttpCookies;
 
 public final class HttpHeader {
 

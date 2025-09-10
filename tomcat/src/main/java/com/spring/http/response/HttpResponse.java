@@ -1,12 +1,12 @@
-package org.apache.catalina.domain.response;
+package com.spring.http.response;
 
 import com.spring.http.enums.HttpStatus;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.catalina.domain.HttpHeader;
-import org.apache.catalina.domain.cookie.HttpCookie;
-import org.apache.catalina.domain.request.HttpRequest;
+import com.spring.http.HttpHeader;
+import com.spring.http.cookie.HttpCookie;
+import com.spring.http.request.HttpRequest;
 
 public final class HttpResponse {
 

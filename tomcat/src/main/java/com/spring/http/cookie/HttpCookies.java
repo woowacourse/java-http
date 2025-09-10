@@ -1,4 +1,4 @@
-package org.apache.catalina.domain.cookie;
+package com.spring.http.cookie;
 
 import java.util.ArrayList;
 import java.util.List;

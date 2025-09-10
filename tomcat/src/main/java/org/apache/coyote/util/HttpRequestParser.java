@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.catalina.domain.HttpHeader;
-import org.apache.catalina.domain.request.HttpRequest;
-import org.apache.catalina.domain.request.HttpRequestBody;
-import org.apache.catalina.domain.request.RequestStartLine;
+import com.spring.http.HttpHeader;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.request.HttpRequestBody;
+import com.spring.http.request.RequestStartLine;
 
 public final class HttpRequestParser {
 

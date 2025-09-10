@@ -1,9 +1,9 @@
-package org.apache.catalina.domain.request;
+package com.spring.http.request;
 
 import com.spring.http.enums.HttpStatus;
 import com.techcourse.exception.HttpStatusException;
 import java.util.Map;
-import org.apache.catalina.domain.HttpHeader;
+import com.spring.http.HttpHeader;
 import org.apache.catalina.domain.Session;
 import org.apache.catalina.manager.SessionManager;
 

@@ -1,4 +1,4 @@
-package org.apache.catalina.domain.request;
+package com.spring.http.request;
 
 import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;

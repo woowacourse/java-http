@@ -1,7 +1,7 @@
-package org.apache.catalina.domain.response;
+package com.spring.http.response;
 
 import com.spring.http.enums.HttpStatus;
-import org.apache.catalina.domain.request.HttpRequest;
+import com.spring.http.request.HttpRequest;
 
 public final class ResponseStartLine {
     private String version;

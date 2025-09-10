@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.util.List;
-import org.apache.catalina.domain.request.RequestStartLine;
+import com.spring.http.request.RequestStartLine;
 import org.junit.jupiter.api.Test;
 
 class RequestStartLineTest {

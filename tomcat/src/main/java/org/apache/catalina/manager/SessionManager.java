@@ -5,10 +5,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 import org.apache.catalina.domain.Session;
-import org.apache.catalina.domain.cookie.HttpCookie;
-import org.apache.catalina.domain.cookie.HttpCookies;
-import org.apache.catalina.domain.request.HttpRequest;
-import org.apache.catalina.domain.response.HttpResponse;
+import com.spring.http.cookie.HttpCookie;
+import com.spring.http.cookie.HttpCookies;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 
 public class SessionManager implements Manager {
 

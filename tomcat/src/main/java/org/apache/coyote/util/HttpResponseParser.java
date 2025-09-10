@@ -2,7 +2,7 @@ package org.apache.coyote.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
-import org.apache.catalina.domain.response.HttpResponse;
+import com.spring.http.response.HttpResponse;
 
 public final class HttpResponseParser {
 

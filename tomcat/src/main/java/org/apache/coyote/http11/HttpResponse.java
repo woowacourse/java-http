@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.session.HttpCookie;
 
 public class HttpResponse {
 

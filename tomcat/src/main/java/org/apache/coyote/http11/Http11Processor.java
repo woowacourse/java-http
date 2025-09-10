@@ -4,7 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestHandler;
+import org.apache.catalina.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

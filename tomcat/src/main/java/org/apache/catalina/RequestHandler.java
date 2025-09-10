@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

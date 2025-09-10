@@ -8,10 +8,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
@@ -49,30 +47,44 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     public String parseRequest(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        StringBuilder fullRequest = new StringBuilder();
-
-        String line;
+        StringBuilder headerBuilder = new StringBuilder();
         int contentLength = 0;
+        int lastByte = -1;
+        int secondLastByte = -1;
+        int currentByte;
 
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            fullRequest.append(line).append("\r\n");
-            if (line.startsWith("Content-Length")) {
-                contentLength = Integer.parseInt(line.substring(line.indexOf(":") + 1).trim());
+        while ((currentByte = inputStream.read()) != -1) {
+            headerBuilder.append((char) currentByte);
+            if (currentByte == 10 && lastByte == 13 && secondLastByte == 10) {
+                String header = headerBuilder.toString();
+                String[] lines = header.split("\r\n");
+                for (String line : lines) {
+                    if (line.startsWith("Content-Length")) {
+                        contentLength = Integer.parseInt(line.substring(line.indexOf(":") + 1).trim());
+                        break;
+                    }
+                }
+                break;
             }
+            secondLastByte = lastByte;
+            lastByte = currentByte;
         }
-
-        fullRequest.append("\r\n");
 
         if (contentLength > 0) {
-            char[] body = new char[contentLength];
-            int bytesRead = bufferedReader.read(body, 0, contentLength);
-            if (bytesRead != -1) {
-                fullRequest.append(body, 0, bytesRead);
+            byte[] bodyBytes = new byte[contentLength];
+            int totalBytesRead = 0;
+            int bytesRead;
+
+            while (totalBytesRead < contentLength
+                    && (bytesRead = inputStream.read(bodyBytes, totalBytesRead, contentLength - totalBytesRead))
+                    != -1) {
+                totalBytesRead += bytesRead;
             }
+            String bodyString = new String(bodyBytes, StandardCharsets.UTF_8);
+            headerBuilder.append(bodyString);
         }
 
-        return fullRequest.toString();
+        return headerBuilder.toString();
     }
 
     private HttpResponse processResponse(String request) {

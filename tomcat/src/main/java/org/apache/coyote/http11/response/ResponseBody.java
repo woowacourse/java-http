@@ -1,9 +1,23 @@
 package org.apache.coyote.http11.response;
 
 
-public record ResponseBody(byte[] bytes) {
+public class ResponseBody {
 
-    public ResponseBody(int size) {
-        this(new byte[size]);
+    private byte[] bytes;
+
+    public ResponseBody(final byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public ResponseBody(final int size) {
+        this.bytes = new byte[size];
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public void setBytes(final byte[] bytes) {
+        this.bytes = bytes;
     }
 }

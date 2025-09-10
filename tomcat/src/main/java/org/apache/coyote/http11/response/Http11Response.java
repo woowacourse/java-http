@@ -7,9 +7,9 @@ public class Http11Response {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
 
-    private StatusLine statusLine;
+    private final StatusLine statusLine;
     private final ResponseHeaders headers;
-    private ResponseBody body;
+    private final ResponseBody body;
 
     public Http11Response() {
         this.statusLine = new StatusLine();
@@ -31,7 +31,7 @@ public class Http11Response {
     }
 
     public void setContentLength() {
-        final int length = body.bytes().length;
+        final int length = body.getBytes().length;
         this.addHeader(CONTENT_LENGTH, String.valueOf(length));
     }
 
@@ -44,19 +44,19 @@ public class Http11Response {
         return headers.getHeader();
     }
 
-    public void setState(final HttpStatus state) {
-        this.statusLine = new StatusLine(this.statusLine.protocol(), state);
+    public void setState(final HttpStatus setStatus) {
+        this.statusLine.setStatus(setStatus);
     }
 
     public HttpStatus getState() {
-        return this.statusLine.status();
+        return this.statusLine.getStatus();
     }
 
     public byte[] getBody() {
-        return body.bytes();
+        return body.getBytes();
     }
 
-    public void setBody(final byte[] body) {
-        this.body = new ResponseBody(body);
+    public void setBody(final byte[] bytes) {
+        this.body.setBytes(bytes);
     }
 }

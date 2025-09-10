@@ -17,6 +17,6 @@ public class RequestMapping {
     
     private boolean isAuthRequest(HttpRequest request) {
         String uri = request.getRequestUri();
-        return "/login".equals(uri) || "/register".equals(uri);
+        return uri.contains("login") || uri.contains("register");
     }
 }

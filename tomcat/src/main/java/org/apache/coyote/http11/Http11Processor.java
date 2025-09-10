@@ -41,33 +41,35 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = requestHandler.handleRequest(inputStream);
             HttpUri requestUri = request.getUri();
+
             String path = requestUri.getPath();
+
+            HttpCookie cookie = request.getCookies();
+            String sessionId = cookie.getCookie("JSESSIONID");
 
             HttpResponse response;
 
-            if (path.startsWith("/login")) {
+            if (path.startsWith("/login") && request.getHttpMethod() == HttpMethod.GET) {
+                Session session = SessionManager.findSession(sessionId);
+                if (session != null) {
+                    response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
+                    response.setLocation("/index.html");
+                    sendResponse(outputStream, response);
+                    return;
+                }
+                response = responseHandler.handleResponse(request, HttpStatusCode.OK);
+                sendResponse(outputStream, response);
+                return;
+            }
+
+            if (path.startsWith("/login") && request.getHttpMethod() == HttpMethod.POST) {
                 try {
-                    HttpCookie cookie = request.getCookies();
-                    String sessionId = cookie.getCookie("JSESSIONID");
+                    Map<String, String> formData = request.getBody().getFormData();
+                        String account = formData.get("account");
+                        String password = formData.get("password");
 
-                    if (!request.hasQueryParameter()) {
-                            Session session = SessionManager.findSession(sessionId);
-                            if (session != null) {
-                                response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
-                                response.setLocation("/index.html");
-                                sendResponse(outputStream, response);
-                                return;
-                            }
-                        response = responseHandler.handleResponse(request, HttpStatusCode.OK);
-                        sendResponse(outputStream, response);
-                        return;
-                    }
-
-                    if (sessionId.isBlank()) {
-                        String account = request.getQueryParameter("account");
-                        String password = request.getQueryParameter("password");
-
-                        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+                        User user = InMemoryUserRepository.findByAccount(account)
+                                .orElseThrow(IllegalArgumentException::new);
 
                         boolean checkPassword = user.checkPassword(password);
                         if (!checkPassword) {
@@ -84,20 +86,9 @@ public class Http11Processor implements Runnable, Processor {
 
                         response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
                         response.setLocation("/index.html");
-                        response.addCookie("JSESSIONID",uuid.toString());
-                        System.out.println(response.asString());
+                        response.addCookie("JSESSIONID", uuid.toString());
                         sendResponse(outputStream, response);
                         return;
-                    }
-
-                    Session session = SessionManager.findSession(sessionId);
-                    User user = SessionManager.getUser(session);
-                    InMemoryUserRepository.save(user);
-
-                    response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
-                    response.setLocation("/index.html");
-                    sendResponse(outputStream, response);
-                    return;
                 } catch (IllegalArgumentException e) {
                     response = responseHandler.handleResponse(request, HttpStatusCode.FOUND);
                     response.setLocation("/401.html");
@@ -135,7 +126,6 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
             }
-
             response = responseHandler.handleResponse(request, HttpStatusCode.OK);
             sendResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
@@ -144,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void sendResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-            outputStream.write(response.asString().getBytes());
-            outputStream.flush();
+        outputStream.write(response.asString().getBytes());
+        outputStream.flush();
     }
 }

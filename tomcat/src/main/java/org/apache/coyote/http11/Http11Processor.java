@@ -5,9 +5,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import org.apache.catalina.controller.Controller;
 import org.apache.catalina.RequestMapping;
-import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.io.Http11InputBuffer;
 import org.apache.coyote.http11.io.Http11OutputBuffer;
@@ -25,12 +24,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Charset DEFAULT_HEADER_CHARSET = StandardCharsets.ISO_8859_1;
 
     private final Socket connection;
-    private final SessionManager sessionManager;
     private final RequestMapping requestMapping;
 
-    public Http11Processor(Socket connection, SessionManager sessionManager, RequestMapping requestMapping) {
+    public Http11Processor(Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
-        this.sessionManager = sessionManager;
         this.requestMapping = requestMapping;
     }
 
@@ -50,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             Http11OutputBuffer http11OutputBuffer = new Http11OutputBuffer(outputStream);
 
             HttpRequest httpRequest = http11InputBuffer.read();
-            HttpResponse httpResponse = new HttpResponse(null, null, null);
+            HttpResponse httpResponse = new HttpResponse();
 
             Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);

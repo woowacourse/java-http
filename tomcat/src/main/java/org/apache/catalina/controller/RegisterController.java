@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.cookie.ResponseCookie;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpResponse;
 import org.apache.coyote.http11.message.HttpResponseHeader;
@@ -15,6 +16,12 @@ import org.apache.coyote.http11.message.StatusLine;
 public class RegisterController implements Controller {
 
     private static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
+
+    private final SessionManager sessionManager;
+
+    public RegisterController(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -32,7 +39,8 @@ public class RegisterController implements Controller {
         httpResponseHeader.add("Location", "index.html");
         httpResponseHeader.addCookie(responseCookie);
 
-        response = new HttpResponse(statusLine, httpResponseHeader, null);
+        response.setStatusLine(statusLine);
+        response.setHttpResponseHeader(httpResponseHeader);
     }
 
     private Map<String, String> parseRequestBody(String requestBody) {

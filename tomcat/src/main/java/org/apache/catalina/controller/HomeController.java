@@ -22,7 +22,8 @@ public class HomeController implements Controller {
         httpResponseHeader.add("Content-Length",
                 String.valueOf(DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8).length));
 
-        response = new HttpResponse(statusLine, httpResponseHeader,
-                DEFAULT_RESPONSE_BODY);
+        response.setStatusLine(statusLine);
+        response.setHttpResponseHeader(httpResponseHeader);
+        response.setResponseBody(DEFAULT_RESPONSE_BODY);
     }
 }

@@ -30,7 +30,9 @@ public class StaticResourceController implements Controller {
                 StaticResourceExtension.findMimeTypeByUrl(path) + ";charset=utf-8");
         httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
 
-        response = new HttpResponse(statusLine, httpResponseHeader, responseBody);
+        response.setStatusLine(statusLine);
+        response.setHttpResponseHeader(httpResponseHeader);
+        response.setResponseBody(responseBody);
     }
 
     private static String readFile(URL resource) throws IOException {

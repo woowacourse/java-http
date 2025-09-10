@@ -41,7 +41,7 @@ public class Http11OutputBuffer {
     }
 
     private void checkHttpVersion(StatusLine statusLine) {
-        if (!statusLine.httpVersion().equals(VALID_HTTP_VERSION)) {
+        if (statusLine != null && !statusLine.httpVersion().equals(VALID_HTTP_VERSION)) {
             throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
         }
     }

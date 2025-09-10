@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.message;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.catalina.cookie.RequestCookie;
 import org.apache.catalina.session.SessionManager;
 
@@ -59,5 +61,19 @@ public class HttpRequest {
 
     public String getHttpVersion() {
         return this.requestLine.httpVersion();
+    }
+
+    public Map<String, String> parseToMap() {
+        Map<String, String> parsedRequestBody = new HashMap<>();
+
+        String[] pairs = requestBody.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            String key = keyValue[0];
+            String value = keyValue[1];
+            parsedRequestBody.put(key, value);
+        }
+
+        return parsedRequestBody;
     }
 }

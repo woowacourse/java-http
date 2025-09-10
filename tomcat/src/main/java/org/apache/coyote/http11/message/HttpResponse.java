@@ -2,14 +2,23 @@ package org.apache.coyote.http11.message;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final HttpResponseHeader httpResponseHeader;
-    private final String responseBody;
+    private StatusLine statusLine;
+    private HttpResponseHeader httpResponseHeader;
+    private String responseBody;
 
-    public HttpResponse(StatusLine statusLine, HttpResponseHeader httpResponseHeader, String responseBody) {
-        this.statusLine = statusLine;
-        this.httpResponseHeader = httpResponseHeader;
+    public HttpResponse() {
+    }
+
+    public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
+    }
+
+    public void setStatusLine(StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void setHttpResponseHeader(HttpResponseHeader httpResponseHeader) {
+        this.httpResponseHeader = httpResponseHeader;
     }
 
     public boolean hasResponseBody() {

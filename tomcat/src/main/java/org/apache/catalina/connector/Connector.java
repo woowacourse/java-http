@@ -5,7 +5,6 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.catalina.RequestMapping;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,20 +17,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final SessionManager sessionManager;
     private final RequestMapping requestMapping;
 
     private boolean stopped;
 
-    public Connector(SessionManager sessionManager, RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, sessionManager, requestMapping);
+    public Connector(RequestMapping requestMapping) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping);
     }
 
-    public Connector(final int port, final int acceptCount, SessionManager sessionManager,
-                     RequestMapping requestMapping) {
+    public Connector(final int port, final int acceptCount, RequestMapping requestMapping) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.sessionManager = sessionManager;
         this.requestMapping = requestMapping;
     }
 
@@ -73,7 +69,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, sessionManager, requestMapping);
+        var processor = new Http11Processor(connection, requestMapping);
         new Thread(processor).start();
     }
 

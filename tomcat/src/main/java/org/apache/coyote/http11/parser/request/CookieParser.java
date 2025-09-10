@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.parser.request;
 
 import static org.apache.coyote.http11.HttpConstants.EMPTY;
 import static org.apache.coyote.http11.HttpConstants.EQUAL;
@@ -6,14 +6,14 @@ import static org.apache.coyote.http11.HttpConstants.SEMICOLON;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.dto.HttpCookie;
+import org.apache.coyote.http11.dto.request.Cookie;
 
-public final class HttpCookieParser {
+public final class CookieParser {
 
-    private HttpCookieParser() {
+    private CookieParser() {
     }
 
-    public static HttpCookie parse(final String cookieString) {
+    public static Cookie parse(final String cookieString) {
         final Map<String, String> cookies = new LinkedHashMap<>();
         final String[] pairs = cookieString.split(SEMICOLON);
 
@@ -26,6 +26,6 @@ public final class HttpCookieParser {
             }
         }
 
-        return new HttpCookie(cookies);
+        return new Cookie(cookies);
     }
 }

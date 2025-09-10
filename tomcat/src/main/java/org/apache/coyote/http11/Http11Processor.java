@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Manager;
@@ -44,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final var requestLine = RequestLine.from(headerReader.readLine());
             final var requestHeaders = RequestHeaders.from(headerReader);
             final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
-            final Map<String, String> responseHeaders = new HashMap<>();
+            final var responseHeaders = new ResponseHeaders();
 
             var session = SessionSupport.findSessionOrCreate(manager, requestCookies, responseHeaders);
 

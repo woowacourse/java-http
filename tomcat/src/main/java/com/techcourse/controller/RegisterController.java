@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.exception.Http4xxException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -26,17 +27,22 @@ public class RegisterController extends AbstractController {
     }
 
     public String postToRegister(final Http11Request request, final Http11Response response) {
-        final String account = request.body().getValueByKey("account");
-        final String password = request.body().getValueByKey("password");
-        final String email = request.body().getValueByKey("email");
+        final String account = request.getBodyValueByKey("account");
+        final String password = request.getBodyValueByKey("password");
+        final String email = request.getBodyValueByKey("email");
 
-        if (account != null && !account.isBlank()) {
-            checkDuplication(response, account);
-            saveUser(account, password, email);
-            return "/index";
+        if (!isRequestBodyValid(account, password, email)) {
+            throw new Http4xxException("잘못된 요청입니다.", response, HttpStatus.BAD_REQUEST);
         }
+        checkDuplication(response, account);
+        saveUser(account, password, email);
+        return "/index";
+    }
 
-        throw new Http4xxException("잘못된 요청입니다.", response, HttpStatus.BAD_REQUEST);
+    private boolean isRequestBodyValid(final String account, final String password, final String email) {
+        return StringUtils.isNotBlank(account)
+                && StringUtils.isNotBlank(password)
+                && StringUtils.isNotBlank(email);
     }
 
     private void checkDuplication(Http11Response response, String account) {

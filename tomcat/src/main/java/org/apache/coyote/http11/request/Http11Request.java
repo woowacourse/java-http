@@ -66,4 +66,8 @@ public record Http11Request(
     public HttpMethod getMethod() {
         return requestLine.method();
     }
+
+    public String getBodyValueByKey(String key) {
+        return body.getValueByKey(key);
+    }
 }

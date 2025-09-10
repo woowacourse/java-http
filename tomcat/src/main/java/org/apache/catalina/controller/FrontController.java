@@ -1,5 +1,9 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
+import com.techcourse.controller.HelloController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 

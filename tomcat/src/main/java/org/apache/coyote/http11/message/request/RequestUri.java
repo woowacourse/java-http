@@ -34,9 +34,6 @@ public class RequestUri {
 
         return raw.substring(0, index);
     }
-    //TODO: 쿼리 규약 준수 검증 필요  (2025-09-7, 일, 17:20)
-
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2321263497
 
     private static Map<String, String> extractQueryParams(String raw) {
         int index = raw.indexOf("?");

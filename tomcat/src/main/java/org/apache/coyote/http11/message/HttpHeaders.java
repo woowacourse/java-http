@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class HttpHeaders {
+    public static final String VALID_HEADER_KEY_PATTERN = "^[A-Za-z0-9-]+$";
+    public static final String VALID_HEADER_VALUE_PATTERN = ".*[\\r\\n\\x00-\\x1F\\x7F].*";
+
     private final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     private HttpHeaders() {
@@ -25,8 +28,8 @@ public class HttpHeaders {
 
             String[] parts = line.split(":", 2);
             validateHeader(line, parts);
-            String name = sanitize(parts[0].trim());
-            String value = sanitize(parts[1].trim());
+            String name = parts[0].trim();
+            String value = parts[1].trim();
             httpHeaders.add(name, value);
         }
         return httpHeaders;
@@ -63,11 +66,24 @@ public class HttpHeaders {
         return lines;
     }
 
-    //TODO: 헤더 유효성 검증 강화 필요  (2025-09-7, 일, 17:23)
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895289
     private static void validateHeader(String line, String[] parts) {
-        if (parts.length != 2) {
+        if (parts.length != 2 || parts[0] == null || parts[1] == null) {
             throw new IllegalArgumentException("유효하지 않은 헤더: " + line);
+        }
+
+        validateHeaderKey(parts);
+        validateHeaderValue(parts);
+    }
+
+    private static void validateHeaderKey(String[] parts) {
+        if (!parts[0].matches(VALID_HEADER_KEY_PATTERN)) {
+            throw new IllegalArgumentException("잘못된 헤더 이름: " + parts[0]);
+        }
+    }
+
+    private static void validateHeaderValue(String[] parts) {
+        if (parts[1].matches(VALID_HEADER_VALUE_PATTERN)) {
+            throw new IllegalArgumentException("잘못된 헤더 값: " + parts[1]);
         }
     }
 

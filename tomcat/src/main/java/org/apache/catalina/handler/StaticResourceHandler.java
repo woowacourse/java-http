@@ -14,7 +14,7 @@ public class StaticResourceHandler {
     private StaticResourceHandler() {
     }
 
-    public static HttpResponse serveStaticResource(final String path) throws Exception {
+    public static HttpResponse serveStaticResource(final String path) {
         try {
             final var rootPath = getStaticRootPath();
             final var requestedPath = resolveRequestedPath(rootPath, path);
@@ -71,7 +71,7 @@ public class StaticResourceHandler {
                 .build();
     }
 
-    private static HttpResponse okResponse(final Path requestedPath) throws Exception {
+    private static HttpResponse okResponse(final Path requestedPath) throws IOException {
         final var contentType = Files.probeContentType(requestedPath);
         final var body = Files.readAllBytes(requestedPath);
 

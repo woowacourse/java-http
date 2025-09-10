@@ -45,6 +45,12 @@ public class HttpRequest {
         return map;
     }
 
+    public boolean isStaticResource() {
+        List<String> staticResourceSuffix = List.of(".css", ".js", ".html");
+        return staticResourceSuffix.stream()
+                .anyMatch(suffix -> path.endsWith(suffix));
+    }
+
     private List<String> getInput(BufferedReader reader) throws IOException {
         List<String> lines = new ArrayList<>();
         String line;

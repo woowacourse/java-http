@@ -1,4 +1,4 @@
-package org.apache.catalina.handler;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -13,27 +13,17 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-    private static final LoginHandler INSTANCE = new LoginHandler();
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final LoginController INSTANCE = new LoginController();
 
-    public static LoginHandler getInstance() {
+    public static LoginController getInstance() {
         return INSTANCE;
     }
 
-    public HttpResponse handle(HttpRequest request) {
-        if (request.getMethod().equals("GET")) {
-            return getLoginPage(request);
-        }
-        if (request.getMethod().equals("POST")) {
-            return login(request);
-        }
-
-        return new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/401.html"); // TODO: 405 처리 필요
-    }
-
-    private HttpResponse getLoginPage(HttpRequest request) {
+    @Override
+    protected HttpResponse doGet(HttpRequest request) {
         String sessionId = request.getCookie("JSESSIONID");
         Session session = (sessionId != null)
                 ? SessionManager.getInstance().findSession(sessionId)
@@ -48,7 +38,8 @@ public class LoginHandler {
         return response;
     }
 
-    private HttpResponse login(HttpRequest request) {
+    @Override
+    protected HttpResponse doPost(HttpRequest request) {
         Map<String, String> requestBody = request.parseQueryStringForm(request.getBody());
         String account = requestBody.get("account");
         String password = requestBody.get("password");

@@ -30,6 +30,9 @@ public class RequestMapping {
         if("GET".equals(method)) {
             return GET;
         }
-        return POST;
+        if("POST".equals(method)) {
+            return POST;
+        }
+        return new HashMap<>();
     }
 }

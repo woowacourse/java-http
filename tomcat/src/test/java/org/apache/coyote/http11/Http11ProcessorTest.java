@@ -26,11 +26,11 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 12",
-                "",
-                "Hello world!");
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/html;charset=utf-8",
+            "Content-Length: 13",
+            "",
+            "Hello world!\n");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -38,12 +38,12 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException, URISyntaxException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = String.join("\r\n",
+            "GET /index.html HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -61,10 +61,10 @@ class Http11ProcessorTest {
         Path path = Paths.get(resource.toURI());
         int length = Files.readAllBytes(path).length;
         var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: " + length + "\r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(path));
+            "Content-Type: text/html;charset=utf-8\r\n" +
+            "Content-Length: " + length + "\r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(path));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

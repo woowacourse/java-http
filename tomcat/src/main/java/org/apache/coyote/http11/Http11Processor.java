@@ -16,6 +16,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.controller.HelloController;
 import com.techcourse.controller.UserController;
 import com.techcourse.exception.UncheckedServletException;
 
@@ -25,7 +26,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final List<Handler> handlers = List.of(
-        new UserController(SESSION_MANAGER)
+        new UserController(SESSION_MANAGER),
+        new HelloController()
     );
     private final Socket connection;
     private final ViewResolver viewResolver = new ViewResolver();

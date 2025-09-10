@@ -55,15 +55,10 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpResponse response = new HttpResponse();
 
-            // 1. 로그인 여부 확인
-            Session session = request.getSession(false);
-            User loginUser = getUser(session);
-            boolean loggedIn = (loginUser != null);
-
-            // 2. GET 요청 Route
+            // 1. GET 요청 Route
             if ("GET".equals(method)) {
                 if (uri.equals("/") || uri.isEmpty()) {
-                    if (loggedIn) {
+                    if (isLoggedIn(request)) {
                         response.redirect("/index.html");
                     } else {
                         response.writeText("Hello world!", "text/html;charset=utf-8");
@@ -74,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
                 if (uri.equals("/login.html")) {
-                    if (loggedIn) {
+                    if (isLoggedIn(request)) {
                         response.redirect("/index.html");
                         response.writeResponse(outputStream);
                         return;
@@ -87,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            // 3. POST login & register 요청 Route
+            // 2. POST login & register 요청 Route
             if (uri.equals("/login")) {
                 handleLogin(request, response);
                 response.writeResponse(outputStream);
@@ -98,7 +93,7 @@ public class Http11Processor implements Runnable, Processor {
                 response.writeResponse(outputStream);
                 return;
             }
-            // 4. 나머지
+            // 3. 나머지
             response.setStatus(404, "Not Found");
             response.writeText("No Route", "text/html;charset=utf-8");
             response.writeResponse(outputStream);
@@ -107,6 +102,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isLoggedIn(final HttpRequest request) {
+        Session session = request.getSession(false);
+        User loginUser = getUser(session);
+        boolean loggedIn = (loginUser != null);
+        return loggedIn;
     }
 
     private static boolean isStatic(final String uri) {

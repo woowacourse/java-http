@@ -36,6 +36,8 @@ public class Http11Processor implements Runnable, Processor {
 
         } catch (IOException e) {
             log.error("IO error during request processing", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

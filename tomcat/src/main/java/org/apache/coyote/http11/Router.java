@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.exception.CommonException;
 import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
@@ -10,56 +12,46 @@ public class Router {
 
     private static final Logger log = LoggerFactory.getLogger(Router.class);
 
-    private final LoginController loginController = new LoginController();
+    private final Map<String, Controller> controllers = new HashMap<>();
+    private final StaticResourceController staticController = new StaticResourceController();
     private final StaticResourceHandler staticHandler = new StaticResourceHandler();
+
+    public Router() {
+        // 라우트 등록
+        controllers.put("/login", new LoginController());
+        controllers.put("/register", new LoginController());
+    }
 
     public void handle(
             HttpRequest httpRequest,
             HttpResponse httpResponse
-    ) throws IOException {
+    ) throws Exception {
         try {
-            if (httpRequest.method().equals("GET")) {
-                doGet(httpRequest, httpResponse);
+
+            String uri = httpRequest.uri();
+            Controller controller = findController(uri);
+
+            if (controller != null) {
+                controller.service(httpRequest, httpResponse);
                 return;
             }
-            if (httpRequest.method().equals("POST")) {
-                doPost(httpRequest, httpResponse);
-                return;
-            }
-            staticHandler.serve(httpRequest, httpResponse);
+            staticController.service(httpRequest, httpResponse);
         } catch (CommonException e) {
             log.error("exception: ", e);
-            staticHandler.serveErrorPage(httpResponse, e.getHttpStatus());
-        } catch (Throwable t) {
-            log.error("exception: ", t);
-            staticHandler.serveErrorPage(httpResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+            httpResponse.setStatusCode(e.getHttpStatus());
+            staticController.service(httpRequest, httpResponse);
+        } catch (Exception e) {
+            log.error("exception: ", e);
+            httpResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            staticController.service(httpRequest, httpResponse);
         }
     }
 
-    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if (httpRequest.uri().equals("/login")) {
-            Session session = httpRequest.getSession();
-            if (session != null && session.getAttribute("user") != null) {
-                httpResponse.setStatusCode(HttpStatus.FOUND);
-                httpResponse.setHeader("Location", "http://localhost:8080");
-                return;
-            }
-        }
-        staticHandler.serve(httpRequest, httpResponse);
+    private Controller findController(String uri) {
+        return controllers.get(uri);
     }
 
-    private void doPost(
-            HttpRequest httpRequest,
-            HttpResponse httpResponse
-    ) throws IOException {
-        if (httpRequest.uri().equals("/login")) {
-            loginController.login(httpRequest, httpResponse);
-            return;
-        }
-        if (httpRequest.uri().equals("/register")) {
-            loginController.register(httpRequest, httpResponse);
-            return;
-        }
-        staticHandler.serveErrorPage(httpResponse, HttpStatus.NOT_FOUND);
+    public void addController(String path, Controller controller) {
+        controllers.put(path, controller);
     }
 }

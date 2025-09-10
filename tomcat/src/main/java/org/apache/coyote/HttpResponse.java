@@ -17,7 +17,8 @@ public class HttpResponse {
 
     public HttpResponse(String protocol) {
         this.protocol = protocol;
-        initialize();
+        this.headers = new HttpHeader();
+        this.body = EMPTY_BODY;
     }
 
     public void setBody(String body) {
@@ -54,11 +55,6 @@ public class HttpResponse {
             }
         }
         return builder.toString();
-    }
-
-    private void initialize() {
-        this.headers = new HttpHeader();
-        this.body = EMPTY_BODY;
     }
 
     private void setContentLength() {

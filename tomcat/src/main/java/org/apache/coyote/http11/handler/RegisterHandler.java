@@ -40,7 +40,7 @@ public class RegisterHandler implements Handler {
             final String password = formParams.get("password");
             final User user = new User(account, password, email);
 
-            if (account != null && email != null & password != null) {
+            if (account != null && email != null && password != null) {
                 InMemoryUserRepository.save(user);
                 log.info("회원가입 완료 {}", user);
                 return redirectResponse(httpVersion, "/index.html");

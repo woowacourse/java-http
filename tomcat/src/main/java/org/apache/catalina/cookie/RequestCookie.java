@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class RequestCookie {
         return this.cookieValues.get(key);
     }
 
-    public Map<String, String> getCookieValues() {
-        return cookieValues;
+    public boolean contains(String key) {
+        return this.cookieValues.containsKey(key);
     }
 }

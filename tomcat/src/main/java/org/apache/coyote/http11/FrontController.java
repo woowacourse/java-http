@@ -11,7 +11,6 @@ import org.apache.catalina.container.exception.InvalidRequestException;
 import org.apache.catalina.container.exception.UnauthorizedException;
 import org.apache.catalina.container.http.request.HttpRequest;
 import org.apache.catalina.container.http.response.HttpResponse;
-import org.apache.catalina.container.http.value.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +31,15 @@ public class FrontController {
             controller.service(request, response);
         } catch (InvalidRequestException e) {
             log.info(e.getMessage(), e);
-            response.setStatusCode(StatusCode.BAD_REQUEST);
             response.setRedirection("/400.html");
         } catch (UnauthorizedException e) {
             log.info(e.getMessage(), e);
-            response.setStatusCode(StatusCode.BAD_REQUEST);
             response.setRedirection("/401.html");
         } catch (DataNotFoundException e) {
             log.info(e.getMessage(), e);
-            response.setStatusCode(StatusCode.NOT_FOUND);
             response.setRedirection("/404.html");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            response.setStatusCode(StatusCode.INTERNAL_SERVER_ERROR);
             response.setRedirection("/500.html");
         }
     }

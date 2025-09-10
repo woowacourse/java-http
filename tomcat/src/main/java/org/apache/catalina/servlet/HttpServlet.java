@@ -23,6 +23,6 @@ public interface HttpServlet {
     }
 
     default void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        response.sendError(HttpStatus.METHOD_NOT_ALLOWED, "GET 메서드를 지원하지 않습니다.");
+        response.sendError(HttpStatus.METHOD_NOT_ALLOWED, "POST 메서드를 지원하지 않습니다.");
     }
 }

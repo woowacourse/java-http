@@ -88,6 +88,10 @@ public final class HttpHeader {
         return Integer.parseInt(get(CONTENT_LENGTH));
     }
 
+    public void setContentLength(byte[] bytes){
+        put(CONTENT_LENGTH, String.valueOf(bytes.length));
+    }
+
     public String getContentType() {
         if (!containKey(CONTENT_TYPE)) {
             throw new IllegalArgumentException("Content-Length header is missing");

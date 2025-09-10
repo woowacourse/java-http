@@ -1,12 +1,12 @@
 package com.spring.http.response;
 
+import com.spring.http.HttpHeader;
+import com.spring.http.cookie.HttpCookie;
 import com.spring.http.enums.HttpStatus;
+import com.spring.http.request.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import com.spring.http.HttpHeader;
-import com.spring.http.cookie.HttpCookie;
-import com.spring.http.request.HttpRequest;
 
 public final class HttpResponse {
 
@@ -73,11 +73,15 @@ public final class HttpResponse {
     }
 
     public void setBody(byte[] body) {
+        if (body != null) {
+            this.header.setContentLength(body);
+        }
         this.body = body;
     }
 
     public void sendError(HttpStatus httpStatus, String message) {
         setStatus(httpStatus);
         this.body = message.getBytes(StandardCharsets.UTF_8);
+        this.header.setContentLength(this.body);
     }
 }

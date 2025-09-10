@@ -54,4 +54,12 @@ public class RequestLine {
     public String getQueryParam(String key) {
         return queryParams.get(key);
     }
+
+    public boolean isGet() {
+        return "GET".equalsIgnoreCase(method);
+    }
+
+    public boolean isPost() {
+        return "POST".equalsIgnoreCase(method);
+    }
 }

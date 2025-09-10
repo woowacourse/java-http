@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,50 +11,32 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private final String body;
+    private final RequestBody requestBody;
     private final HttpCookie cookies;
     private Session session;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
         this.requestLine = new RequestLine(reader.readLine());
-        this.headers = HttpHeaders.parse(reader);
-        this.body = parseBodyIfNecessary(reader);
+        this.headers = new HttpHeaders(reader);
+        this.requestBody = new RequestBody(requestLine, headers, reader);
         this.cookies = new HttpCookie(headers.get("Cookie"));
     }
 
-    private String parseBodyIfNecessary(BufferedReader reader) throws IOException {
-        if (!"POST".equalsIgnoreCase(requestLine.getMethod())) {
-            return null;
-        }
-        String contentLengthValue = headers.get("Content-Length");
-        if (contentLengthValue == null) {
-            return null;
-        }
-        int contentLength = Integer.parseInt(contentLengthValue);
-        char[] buffer = new char[contentLength];
-        int read = reader.read(buffer);
-        if (read < 0) {
-            throw new BadRequestException("요청 본문을 읽을 수 없습니다.");
-        }
-        String body = new String(buffer, 0, read);
-        if ("application/x-www-form-urlencoded".equalsIgnoreCase(headers.get("Content-Type"))) {
-            requestLine.getQueryParams().putAll(HttpParamParser.parseKeyValuePairs(body, "&"));
-        }
-        return body;
-    }
-
-    public String getMethod() {
-        return requestLine.getMethod();
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public boolean isGetMethod() {
-        return "GET".equalsIgnoreCase(requestLine.getMethod());
+        return requestLine.isGet();
     }
 
     public boolean isPostMethod() {
-        return "POST".equalsIgnoreCase(requestLine.getMethod());
+        return requestLine.isPost();
+    }
+
+    public String getBodyParam(String key) {
+        return requestBody.getParam(key);
     }
 
     public String getPath() {
@@ -70,6 +51,10 @@ public class HttpRequest {
         return requestLine.getQueryParams();
     }
 
+    public Map<String, String> getBodyParams() {
+        return requestBody.getParams();
+    }
+
     public HttpHeaders getHeaders() {
         return headers;
     }
@@ -79,14 +64,10 @@ public class HttpRequest {
     }
 
     public String getBody() {
-        return body;
+        return requestBody.getRawBody();
     }
 
     public Session getSession() {
         return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 }

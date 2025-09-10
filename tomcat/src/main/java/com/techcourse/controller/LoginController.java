@@ -31,8 +31,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        String account = request.getQueryParam("account");
-        String password = request.getQueryParam("password");
+        String account = request.getBodyParam("account");
+        String password = request.getBodyParam("password");
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
             log.info("로그인 실패: 아이디 또는 비밀번호 불일치");

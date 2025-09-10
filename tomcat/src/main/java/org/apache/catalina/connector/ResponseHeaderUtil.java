@@ -3,7 +3,6 @@ package org.apache.catalina.connector;
 import org.apache.catalina.domain.HttpHeader;
 import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.response.HttpResponse;
-import org.apache.catalina.manager.SessionManager;
 
 public final class ResponseHeaderUtil {
 
@@ -15,13 +14,8 @@ public final class ResponseHeaderUtil {
     }
 
     public static void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        handleSessionCookie(httpRequest, httpResponse);
         processContentType(httpRequest, httpResponse);
         processContentLength(httpResponse);
-    }
-
-    private static void handleSessionCookie(HttpRequest request, HttpResponse response) {
-        SessionManager.processSessionId(request, response);
     }
 
     private static void processContentType(HttpRequest httpRequest, HttpResponse httpResponse) {

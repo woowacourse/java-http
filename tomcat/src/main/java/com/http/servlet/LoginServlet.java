@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.catalina.domain.Session;
 import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.response.HttpResponse;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
@@ -23,6 +24,9 @@ public class LoginServlet implements HttpServlet {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        // 세션 쿠키 처리
+        handleSessionCookie(request, response);
+        
         // 이미 로그인된 상태인지 확인
         final Session session = request.getSession(false); // 세션이 없으면 null 반환
         final User user = getUser(session);
@@ -41,6 +45,9 @@ public class LoginServlet implements HttpServlet {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
+        // 세션 쿠키 처리
+        handleSessionCookie(request, response);
+        
         log.debug("request = {}", request);
         final Map<String, String> form = request.parseBody();
 
@@ -69,6 +76,10 @@ public class LoginServlet implements HttpServlet {
         httpResponse.addHeader("Location", "/index.html");
 
         log.info("로그인 성공 아이디={}, 세션ID={}", account, session.getId());
+    }
+
+    private void handleSessionCookie(HttpRequest request, HttpResponse response) {
+        SessionManager.processSessionId(request, response);
     }
 
     private User getUser(Session session) {

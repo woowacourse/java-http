@@ -1,10 +1,9 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.service.LoginService;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.http.request.HttpRequest;
@@ -16,6 +15,12 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
+    private final LoginService loginService;
+
+    public LoginController(final LoginService loginService) {
+        this.loginService = loginService;
+    }
+
     @Override
     public boolean isProvide(final String path) {
         return "/login".equals(path);
@@ -25,6 +30,7 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final HttpSession session = request.getSession();
         if (session == null) {
+            log.info("no session detected in login");
             response.setOk("login.html");
             return;
         }
@@ -48,23 +54,7 @@ public class LoginController extends AbstractController {
         final String account = bodyElement.get("account");
         final String password = bodyElement.get("password");
 
-        final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-
-        if (userOptional.isEmpty()) {
-            log.warn("존재하지 않는 유저입니다: {}", account);
-            response.setUnauthorized();
-            return;
-        }
-
-        final User user = userOptional.get();
-
-        if (!user.checkPassword(password)) {
-            log.warn("유효하지 않는 password입니다.: {}", user.getAccount());
-            response.setUnauthorized();
-            return;
-        }
-
-        log.info("user : {}", user);
+        final User user = loginService.login(account, password);
 
         response.setFound("index.html");
         String sessionId = UUID.randomUUID().toString();

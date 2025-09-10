@@ -30,15 +30,15 @@ public class Http11Processor implements Runnable, Processor {
     private final Resolver resolver;
     private final ErrorMapper errorMapper;
 
-    public Http11Processor(final Socket connection, final HttpCookie httpCookie, final SessionManager sessionManager) {
+    public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.queryParser = new QueryParser();
         this.httpRequestReader = new HttpRequestReader(queryParser);
         this.httpResourceLoader = new HttpResourceLoader();
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
-        this.httpCookie = httpCookie;
-        this.sessionManager = sessionManager;
+        this.httpCookie = new HttpCookie();
+        this.sessionManager = new SessionManager();
         this.resolver = new Resolver(httpResourceHandler)
                 .register("/", new GreetingHandler())
                 .register("/login", new LoginHandler(httpResourceLoader, queryParser, httpCookie, sessionManager))

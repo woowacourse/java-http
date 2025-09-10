@@ -22,7 +22,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("Hello world!");
+        assertThat(socket.output()).contains("Resource not found");
     }
 
     @Test

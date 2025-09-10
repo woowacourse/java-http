@@ -52,6 +52,14 @@ public class Http11Request {
         this.cookie = new Http11Cookie(map.getOrDefault("Cookie", null));
     }
 
+    public boolean isGet() {
+        return method == Http11Method.GET;
+    }
+
+    public boolean isPost() {
+        return method == Http11Method.POST;
+    }
+
     public Http11Method getMethod() {
         return method;
     }

@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.coyote.http11.httprequest.RequestBody;
-import org.apache.coyote.http11.httprequest.RequestHeaders;
+import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.header.RequestHeaders;
 
 public class FormUrlEncodedHttpRequestParser extends HttpRequestParser {
 

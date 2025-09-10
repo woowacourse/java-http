@@ -1,9 +1,7 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.session;
 
 import java.util.Optional;
-import org.apache.coyote.http11.httprequest.HttpRequest;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionParser {
 

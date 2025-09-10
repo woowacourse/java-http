@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.httpresponse.HttpStatusCode;
+import org.apache.coyote.http11.response.startline.HttpStatusCode;
 
 public class StaticResource {
 

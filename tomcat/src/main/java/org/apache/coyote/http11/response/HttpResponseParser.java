@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -8,11 +8,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.StaticResource;
 import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.httpresponse.HttpStatusCode;
-import org.apache.coyote.http11.httpresponse.ResponseBody;
-import org.apache.coyote.http11.httpresponse.ResponseHeaders;
-import org.apache.coyote.http11.httpresponse.ResponseLine;
+import org.apache.coyote.http11.response.body.ResponseBody;
+import org.apache.coyote.http11.response.header.ResponseHeaders;
+import org.apache.coyote.http11.response.startline.HttpStatusCode;
+import org.apache.coyote.http11.response.startline.ResponseLine;
 
 public class HttpResponseParser {
 

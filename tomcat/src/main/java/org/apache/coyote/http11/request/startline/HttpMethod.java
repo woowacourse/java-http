@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request.startline;
 
 import java.util.Arrays;
 import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.httpresponse.HttpStatusCode;
+import org.apache.coyote.http11.response.startline.HttpStatusCode;
 
 public enum HttpMethod {
 

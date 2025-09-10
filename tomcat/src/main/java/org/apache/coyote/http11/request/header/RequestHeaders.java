@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request.header;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.httpresponse.HttpStatusCode;
+import org.apache.coyote.http11.response.startline.HttpStatusCode;
 
 public class RequestHeaders {
 

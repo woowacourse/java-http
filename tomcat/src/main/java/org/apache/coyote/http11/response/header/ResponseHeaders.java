@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpresponse;
+package org.apache.coyote.http11.response.header;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

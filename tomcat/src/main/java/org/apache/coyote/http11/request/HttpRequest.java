@@ -1,8 +1,11 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request;
 
 import java.io.IOException;
 import org.apache.coyote.http11.cookie.HttpCookie;
-import org.apache.coyote.http11.parser.HttpRequestParser;
+import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.header.RequestHeaders;
+import org.apache.coyote.http11.request.startline.HttpMethod;
+import org.apache.coyote.http11.request.startline.RequestLine;
 
 public class HttpRequest {
 

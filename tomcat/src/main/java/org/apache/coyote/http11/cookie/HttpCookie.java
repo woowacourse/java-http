@@ -3,8 +3,8 @@ package org.apache.coyote.http11.cookie;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.httprequest.RequestHeaders;
-import org.apache.coyote.http11.httpresponse.ResponseHeaders;
+import org.apache.coyote.http11.request.header.RequestHeaders;
+import org.apache.coyote.http11.response.header.ResponseHeaders;
 
 public class HttpCookie {
 

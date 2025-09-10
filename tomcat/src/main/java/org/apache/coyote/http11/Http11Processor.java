@@ -203,7 +203,6 @@ public class Http11Processor implements Runnable, Processor {
         String jsessionId = cookie.get("JSESSIONID");
         if (jsessionId == null) {
             jsessionId = UUID.randomUUID().toString();
-            cookie.add("JSESSIONID", jsessionId);
             httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jsessionId);
         }
         return jsessionId;

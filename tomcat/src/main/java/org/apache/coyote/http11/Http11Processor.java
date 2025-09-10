@@ -7,11 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Objects;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethodType;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.MimeType;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.MimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,6 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -62,8 +62,12 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse createResponse(final HttpRequest request) throws IOException {
         String requestPath = request.getPath();
         
-        if (Objects.equals("/login", requestPath) && request.getMethodType() == HttpMethodType.POST) {
-            return handleLoginRequest(request);
+        if (Objects.equals("/login", requestPath)) {
+            if (request.getMethodType() == HttpMethodType.GET) {
+                return handleLoginGetRequest(request);
+            } else if (request.getMethodType() == HttpMethodType.POST) {
+                return handleLoginRequest(request);
+            }
         }
         
         if (Objects.equals("/register", requestPath) && request.getMethodType() == HttpMethodType.POST) {
@@ -79,24 +83,27 @@ public class Http11Processor implements Runnable, Processor {
         String password = request.getParameter("password");
         
         if (account == null || password == null) {
-            log.info("로그인 파라미터 누락 - account: {}, password: {}", account, password);
             return HttpResponse.redirect("/401.html");
         }
         
-        return processLoginCredentials(account, password);
+        return processLoginCredentials(account, password, request);
     }
 
-    private HttpResponse processLoginCredentials(final String account, final String password) {
+    private HttpResponse processLoginCredentials(final String account, final String password, final HttpRequest request) {
         return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
             .map(user -> {
+                Session session = request.getSession(true);
+                session.setAttribute("user", user);
+                String setCookieHeader = HttpCookie.createJSessionIdSetCookieHeader(session.getId());
+                HttpResponse response = HttpResponse.redirect("/index.html");
+                response.addHeader("Set-Cookie", setCookieHeader);
                 log.info("로그인 성공: {}", user);
-                return HttpResponse.redirect("/index.html");
+                return response;
             })
             .orElseGet(() -> {
                 log.info("로그인 실패 - account: {}, password: {}", account, password);
-                return HttpResponse.redirect("/401.html");
-            });
+                return HttpResponse.redirect("/401.html");});
     }
 
     private HttpResponse handleRegisterRequest(final HttpRequest request) {
@@ -104,22 +111,44 @@ public class Http11Processor implements Runnable, Processor {
         String password = request.getParameter("password");
         String email = request.getParameter("email");
         
-        if (account == null || password == null || email == null) {
-            log.info("회원가입 파라미터 누락 - account: {}, password: {}, email: {}", account, password, email);
-            return HttpResponse.redirect("/register.html");
-        }
-        
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            log.info("중복된 계정으로 회원가입 시도: {}", account);
             return HttpResponse.redirect("/register.html");
         }
         
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
-        log.info("회원가입 성공: {}", newUser);
         
-        return HttpResponse.redirect("/index.html");
+        Session session = request.getSession(true);
+        session.setAttribute("user", newUser);
+        String setCookieHeader = HttpCookie.createJSessionIdSetCookieHeader(session.getId());
+        HttpResponse response = HttpResponse.redirect("/index.html");
+        response.addHeader("Set-Cookie", setCookieHeader);
+        return response;
     }
+
+    private HttpResponse handleLoginGetRequest(final HttpRequest request) {
+        Session session = request.getSession(false);
+        
+        if (session != null) {
+            User user = getUser(session);
+            if (user != null) {
+                return HttpResponse.redirect("/index.html");
+            }
+        }
+        
+        String resolvedPath = resolveFilePath("/login");
+        try {
+            return generateHttpResponse(resolvedPath);
+        } catch (IOException e) {
+            log.error("로그인 페이지 로드 실패", e);
+            return HttpResponse.notFound();
+        }
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
+    }
+
 
     private String resolveFilePath(final String requestPath) {
         String htmlPath = requestPath + ".html";

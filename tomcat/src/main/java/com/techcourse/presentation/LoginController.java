@@ -31,7 +31,7 @@ public class LoginController implements Controller {
             return HttpResponse.builder()
                     .protocol(request.protocol())
                     .found()
-                    .header("Location", "/index.html")
+                    .header("Location", "http://localhost:8080/index.html")
                     .build();
         }
 
@@ -50,17 +50,17 @@ public class LoginController implements Controller {
             }
 
             final User user = loginService.login(account, password);
-            
+
             if (user != null) {
                 final Session session = request.getSession(true);
                 session.setAttribute(user.getAccount(), user);
                 SessionManager.getInstance().add(session);
-                
+
                 return HttpResponse.builder()
                         .protocol(request.protocol())
                         .found()
-                        .addCookie("JSESSIONID" + session.getId())
-                        .header("Location", "/index.html")
+                        .addCookie("JSESSIONID" + "=" + session.getId())
+                        .header("Location", "http://localhost:8080/index.html")
                         .build();
             }
         } catch (IllegalArgumentException e) {

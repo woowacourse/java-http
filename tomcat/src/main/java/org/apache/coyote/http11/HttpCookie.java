@@ -18,15 +18,17 @@ public class HttpCookie {
         final Map<String, String> cookies = new LinkedHashMap<>();
 
         final String value = request.headers().get("Cookie");
-        if (value == null) {
+        if (value == null || value.isBlank()) {
             return Map.of();
         }
 
         for (String pair : value.split(";")) {
             final int index = pair.indexOf('=');
-            final String k = URLDecoder.decode(pair.substring(0, index).trim(), StandardCharsets.UTF_8);
-            final String v = URLDecoder.decode(pair.substring(index + 1).trim(), StandardCharsets.UTF_8);
-            cookies.put(k, v);
+            if (index > 0) {
+                final String k = URLDecoder.decode(pair.substring(0, index).trim(), StandardCharsets.UTF_8);
+                final String v = URLDecoder.decode(pair.substring(index + 1).trim(), StandardCharsets.UTF_8);
+                cookies.put(k, v);
+            }
         }
 
         return Map.copyOf(cookies);

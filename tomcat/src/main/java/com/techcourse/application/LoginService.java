@@ -25,7 +25,7 @@ public class LoginService {
         return user;
     }
 
-    public void register(final String account, final String password, final String email) {
+    public User register(final String account, final String password, final String email) {
         final Optional<User> existUser = InMemoryUserRepository.findByAccount(account);
         if (existUser.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
@@ -33,5 +33,6 @@ public class LoginService {
 
         final User user = new User(index.incrementAndGet(), account, password, email);
         InMemoryUserRepository.save(user);
+        return user;
     }
 }

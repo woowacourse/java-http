@@ -1,9 +1,12 @@
 package com.techcourse.presentation;
 
 import com.techcourse.application.LoginService;
+import com.techcourse.model.User;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +34,36 @@ public class RegisterController implements Controller {
 
     public HttpResponse register(final HttpRequest request) {
         final Map<String, String> params = request.params();
+        final String account = params.get("account");
+        final String password = params.get("password");
+        final String email = params.get("email");
 
         try {
-            if (params.size() != 3 || !params.containsKey("account") || !params.containsKey("password")
-                || !params.containsKey("email")) {
+            if (account == null || password == null || email == null ||
+                account.isBlank() || password.isBlank() || email.isBlank()) {
+
                 log.debug("요청 파라미터: {}", params);
                 throw new IllegalArgumentException("적절하지 않은 회원가입 요청입니다.");
             }
 
-            loginService.register(params.get("account"), params.get("password"), params.get("email"));
+            final User user = loginService.register(params.get("account"), params.get("password"), params.get("email"));
+
+            if (user != null) {
+                final Session session = request.getSession(true);
+                session.setAttribute(user.getAccount(), user);
+                SessionManager.getInstance().add(session);
+
+                final String body = "회원가입이 완료되었습니다.";
+                return HttpResponse.builder()
+                        .protocol(request.protocol())
+                        .seeOther()
+                        .header("Location", "http://localhost:8080/index.html")
+                        .addCookie("JSESSIONID" + "=" + session.getId())
+                        .contentType("text/html;charset=utf-8")
+                        .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                        .body(body)
+                        .build();
+            }
         } catch (IllegalArgumentException e) {
             final String errorMessage = e.getMessage();
 
@@ -52,15 +76,7 @@ public class RegisterController implements Controller {
                     .build();
         }
 
-        final String body = "회원가입이 완료되었습니다.";
-        return HttpResponse.builder()
-                .protocol(request.protocol())
-                .seeOther()
-                .header("Location", "http://localhost:8080/index.html")
-                .contentType("text/html;charset=utf-8")
-                .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                .body(body)
-                .build();
+        return register(request.protocol());
     }
 
     @Override

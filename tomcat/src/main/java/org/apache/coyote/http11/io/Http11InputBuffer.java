@@ -32,29 +32,64 @@ public class Http11InputBuffer {
         if (rawRequestLine == null || rawRequestLine.isEmpty()) {
             throw new IllegalArgumentException("요청 형식이 잘못되었습니다.");
         }
-
         RequestLine requestLine = RequestLine.createFromRawRequestLine(rawRequestLine);
         checkHttpVersion(requestLine);
 
         Map<String, String> rawHeaders = parseHeaders(inputStream);
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(rawHeaders);
 
-        RequestCookie requestCookie = parseCookie(httpRequestHeader);
-        httpRequestHeader.addCookie(requestCookie);
+        if (httpRequestHeader.contains("Cookie")) {
+            RequestCookie requestCookie = parseToCookie(httpRequestHeader.get("Cookie"));
+            httpRequestHeader.addCookie(requestCookie);
+        }
 
         String requestBody = parseRequestBody(requestLine, httpRequestHeader);
 
         return new HttpRequest(requestLine, httpRequestHeader, requestBody);
     }
 
-    private RequestCookie parseCookie(HttpRequestHeader httpRequestHeader) {
-        RequestCookie requestCookie = null;
-        if (httpRequestHeader.contains("Cookie")) {
-            String rawCookie = httpRequestHeader.get("Cookie");
-            requestCookie = parseToCookie(rawCookie);
-            httpRequestHeader.addCookie(requestCookie);
+    private RequestCookie parseToCookie(String rawCookies) {
+        Map<String, String> cookieValues = new HashMap<>();
+        String[] pairs = rawCookies.split("; ");
+        for (String pair : pairs) {
+            String[] splitPair = pair.split("=", 2);
+            String key = splitPair[0];
+            String value = (splitPair.length == 2) ? splitPair[1] : "";
+            cookieValues.put(key, value);
         }
-        return requestCookie;
+        return new RequestCookie(cookieValues);
+
+    }
+
+    private String parseRequestBody(RequestLine requestLine, HttpRequestHeader httpRequestHeader) throws IOException {
+        String requestBody = null;
+
+        if (requestLine.httpMethod().equals(HttpMethod.POST) && httpRequestHeader.contains("Content-Length")) {
+            int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
+            if (contentLength > 0) {
+                byte[] body = inputStream.readNBytes(contentLength);
+                String contentType = httpRequestHeader.get("Content-Type");
+                requestBody = new String(body, extractBodyCharset(contentType));
+            }
+        }
+        return requestBody;
+    }
+
+    private Charset extractBodyCharset(String contentType) {
+        if (contentType == null) {
+            return defaultBodyCharset;
+        }
+        for (String t : contentType.split(";")) {
+            int i = t.indexOf('=');
+            if (i > 0 && t.substring(0, i).trim().equalsIgnoreCase("charset")) {
+                try {
+                    return Charset.forName(t.substring(i + 1).trim());
+                } catch (Exception ignore) {
+                    return defaultBodyCharset;
+                }
+            }
+        }
+        return defaultBodyCharset;
     }
 
     private static void checkHttpVersion(RequestLine requestLine) {
@@ -74,17 +109,6 @@ public class Http11InputBuffer {
         return requestBody;
     }
 
-    private String parseRequestBody(RequestLine requestLine, HttpRequestHeader httpRequestHeader) throws IOException {
-        String requestBody = null;
-
-        if (requestLine.httpMethod().equals(HttpMethod.POST) && httpRequestHeader.contains("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
-            if (contentLength > 0) {
-                requestBody = readRequestBody(contentLength, httpRequestHeader, requestBody);
-            }
-        }
-        return requestBody;
-    }
 
     private String readLine(InputStream inputStream) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -124,35 +148,5 @@ public class Http11InputBuffer {
             }
         }
         return headers;
-    }
-
-    private RequestCookie parseToCookie(String rawCookies) {
-        Map<String, String> cookieValues = new HashMap<>();
-        String[] pairs = rawCookies.split("; ");
-        for (String pair : pairs) {
-            String[] splitPair = pair.split("=", 2);
-            String key = splitPair[0];
-            String value = (splitPair.length == 2) ? splitPair[1] : "";
-            cookieValues.put(key, value);
-        }
-        return new RequestCookie(cookieValues);
-
-    }
-
-    private Charset extractBodyCharset(String contentType) {
-        if (contentType == null) {
-            return defaultBodyCharset;
-        }
-        for (String t : contentType.split(";")) {
-            int i = t.indexOf('=');
-            if (i > 0 && t.substring(0, i).trim().equalsIgnoreCase("charset")) {
-                try {
-                    return Charset.forName(t.substring(i + 1).trim());
-                } catch (Exception ignore) {
-                    return defaultBodyCharset;
-                }
-            }
-        }
-        return defaultBodyCharset;
     }
 }

@@ -4,16 +4,12 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestBodyUtils;
-import org.apache.coyote.http11.response.ResponseHeaders;
-import org.apache.coyote.http11.util.ErrorResponder;
-import org.apache.coyote.http11.util.HttpResponseWriter;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.SessionSupport;
 import org.apache.coyote.http11.util.StaticResourceResolver;
 import org.slf4j.Logger;
@@ -26,7 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final Manager manager;
 
-    public Http11Processor(final Socket connection, Manager manager) {
+    public Http11Processor(final Socket connection, final Manager manager) {
         this.connection = connection;
         this.manager = manager;
     }
@@ -43,21 +39,23 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
         ) {
             final var httpRequest = HttpRequest.from(inputStream);
-            final var responseHeaders = new ResponseHeaders();
-            var session = SessionSupport.findSessionOrCreate(manager, httpRequest.getRequestCookies(), responseHeaders);
+            final var httpResponse = new HttpResponse(outputStream);
+
+            final var session = SessionSupport.findSessionOrCreate(
+                    manager, httpRequest.getRequestCookies(), httpResponse);
 
             //=========== POST 요청 처리 ============
             if (httpRequest.getMethod() == HttpMethod.POST) {
-                final var requestBody = httpRequest.getRequestBody();
-                final Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
+                final var parameters = httpRequest.getParameters();
                 String redirectUrl = "/index.html";
 
                 if ("/login".equals(httpRequest.getPath())) {
                     final var account = parameters.get("account");
                     final var password = parameters.get("password");
                     final Optional<User> optionalUser = findUserByAccount(account);
+
                     if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-                        SessionSupport.rotateSessionAfterLogin(manager, session, optionalUser.get(), responseHeaders);
+                        SessionSupport.rotateSessionAfterLogin(manager, session, optionalUser.get(), httpResponse);
                         log.info("로그인 성공 account: {}", account);
                     } else {
                         redirectUrl = "/401.html";
@@ -75,8 +73,7 @@ public class Http11Processor implements Runnable, Processor {
                     log.info("Registered new user: {}", newUser.getAccount());
                 }
 
-                final var response = HttpResponseWriter.redirect(redirectUrl, responseHeaders);
-                HttpResponseWriter.write(outputStream, response);
+                httpResponse.sendRedirect(redirectUrl);
                 return;
             }
 
@@ -84,8 +81,7 @@ public class Http11Processor implements Runnable, Processor {
             var requestPath = httpRequest.getPath();
 
             if ("/login".equals(requestPath) && session.getAttribute("user") != null) {
-                final var response = HttpResponseWriter.redirect("/index.html", responseHeaders);
-                HttpResponseWriter.write(outputStream, response);
+                httpResponse.sendRedirect("/index.html");
                 return;
             }
 
@@ -95,23 +91,24 @@ public class Http11Processor implements Runnable, Processor {
 
             final var responseBody = StaticResourceResolver.read(requestPath);
             if (responseBody == null) {
-                ErrorResponder.send404(outputStream);
+                httpResponse.sendNotFound();
                 return;
             }
             final var mimeType = ContentType.from(requestPath).getMimeType();
-            final var response = HttpResponseWriter.ok(mimeType, responseBody, responseHeaders);
-            HttpResponseWriter.write(outputStream, response);
+            httpResponse.sendOk(mimeType, responseBody);
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             try (final var outputStream = connection.getOutputStream()) {
-                ErrorResponder.send500(outputStream);
+                final var response = new HttpResponse(outputStream);
+                response.sendServerError();
             } catch (IOException ioEx) {
                 log.error("500 에러 전송 실패: {}", ioEx.getMessage(), ioEx);
             }
         }
     }
 
-    public Optional<User> findUserByAccount(String account) {
+    public Optional<User> findUserByAccount(final String account) {
         if (account == null || account.isBlank()) {
             return Optional.empty();
         }

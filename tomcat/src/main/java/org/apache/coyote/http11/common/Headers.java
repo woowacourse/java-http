@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +9,10 @@ public class Headers {
 
     public void put(String key, String value) {
         data.put(key, value);
+    }
+
+    public String get(String key) {
+        return data.get(key);
     }
 
     public void clear() {
@@ -25,5 +29,13 @@ public class Headers {
             sb.append(set.getKey()).append(": ").append(set.getValue());
         }
         return sb.toString();
+    }
+
+    public int getContentLength() {
+        String header = get("Content-Length");
+        if (header == null) {
+            return 0;
+        }
+        return Integer.parseInt(header);
     }
 }

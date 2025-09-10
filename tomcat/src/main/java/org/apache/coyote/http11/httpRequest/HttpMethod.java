@@ -12,6 +12,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
             .filter(value -> value.name().equalsIgnoreCase(method))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
+            .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 요청 방식입니다."));
     }
 }

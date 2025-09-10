@@ -15,11 +15,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,14 +82,16 @@ public class Http11Processor implements Runnable, Processor {
                     parseQueryString(body)
             );
 
+            final HttpCookie httpCookie = parseCookieFromHeader(headers);
+
             if ("POST".equals(method) && !queryParams.isEmpty()) {
                 if ("/login.html".equals(path)) {
-                    handleLogin(queryParams, outputStream);
+                    handleLogin(queryParams, httpCookie, outputStream);
                     return;
                 }
 
                 if ("/register.html".equals(path)) {
-                    handleRegister(queryParams, outputStream);
+                    handleRegister(queryParams, httpCookie, outputStream);
                     return;
                 }
             }
@@ -149,6 +151,15 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private HttpCookie parseCookieFromHeader(final List<String> headers) {
+        return headers.stream()
+                .filter(h -> h.startsWith("Cookie"))
+                .map(h -> h.substring("Cookie:".length()).trim())
+                .map(HttpCookie::fromHeader)
+                .findFirst()
+                .orElse(HttpCookie.fromHeader(null));
+    }
+
     private Map<String, String> mergeParameters(
             Map<String, String> queryParams,
             Map<String, String> bodyParams
@@ -175,7 +186,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final String[] pairs = queryString.split("&");
         for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=");
+            final String[] keyValue = pair.split("=", 2);
             final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
             String value = "";
             if (keyValue.length > 1) {
@@ -197,6 +208,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String generateRedirectResponse(final int httpStatusCode, final String location) {
         return parseResponse(httpStatusCode, location);
+    }
+
+    private String generateRedirectResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
+        return parseResponse(httpStatusCode, location, httpCookie);
     }
 
     private String generateErrorResponse(final int httpStatusCode) {
@@ -239,6 +254,19 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
+    private String parseResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
+        final List<String> cookies = httpCookie.getAll().entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .toList();
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
+                "Location: " + location + " ",
+                "Set-Cookie: " + String.join("; ", cookies) + " ",
+                "Content-Length: 0 ",
+                "");
+    }
+
     private String extractExtension(final String resourceName) {
         int dotIndex = resourceName.lastIndexOf(".");
         if (dotIndex == -1) {
@@ -247,7 +275,11 @@ public class Http11Processor implements Runnable, Processor {
         return resourceName.substring(dotIndex + 1);
     }
 
-    private void handleLogin(final Map<String, String> queryMap, final OutputStream outputStream) throws IOException {
+    private void handleLogin(
+            final Map<String, String> queryMap,
+            final HttpCookie httpCookie,
+            final OutputStream outputStream
+    ) throws IOException {
         final String account = queryMap.get("account");
         final String password = queryMap.get("password");
 
@@ -260,14 +292,20 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
-            sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
+            final String id = UUID.randomUUID().toString();
+            httpCookie.add("JSESSIONID", id);
+            sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
             return;
         }
 
         sendResponse(generateRedirectResponse(302, "/401.html"), outputStream);
     }
 
-    private void handleRegister(final Map<String, String> queryMap, final OutputStream outputStream) throws IOException {
+    private void handleRegister(
+            final Map<String, String> queryMap,
+            final HttpCookie httpCookie,
+            final OutputStream outputStream
+    ) throws IOException {
         final String account = queryMap.get("account");
         final String email = queryMap.get("email");
         final String password = queryMap.get("password");
@@ -287,6 +325,8 @@ public class Http11Processor implements Runnable, Processor {
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         log.info("new user : {}", newUser);
-        sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
+        final String id = UUID.randomUUID().toString();
+        httpCookie.add("JSESSIONID", id);
+        sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
     }
 }

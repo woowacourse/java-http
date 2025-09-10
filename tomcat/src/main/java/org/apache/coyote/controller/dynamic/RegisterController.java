@@ -27,7 +27,7 @@ public class RegisterController implements Controller {
         final HttpHeader httpHeader = request.getHttpHeader();
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {
-            doGet(request, response);
+            doGet(response);
             return;
         }
         if (httpMethod.equals(HttpMethod.POST)) {
@@ -37,11 +37,8 @@ public class RegisterController implements Controller {
         throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }
 
-    private void doGet(
-            final HttpRequest request,
-            final HttpResponse response
-    ) throws IOException {
-        responseRegisterHtml(request.getHttpHeader(), response);
+    private void doGet(final HttpResponse response) throws IOException {
+        responseRegisterHtml(response);
     }
 
     private void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
@@ -54,11 +51,8 @@ public class RegisterController implements Controller {
         responseRegisterErrorPage("/register.html", StatusCode.BAD_REQUEST, response);
     }
 
-    private void responseRegisterHtml(
-            final HttpHeader httpHeader,
-            final HttpResponse httpResponse
-    ) throws IOException {
-        final String body = staticResourceReader.getStaticResponseBody("static" + httpHeader.getPurePath());
+    private void responseRegisterHtml(final HttpResponse httpResponse) throws IOException {
+        final String body = staticResourceReader.getStaticResponseBody("static/register.html");
         httpResponse.updateStatusLine("HTTP/1.1", StatusCode.OK);
         httpResponse.updateBody(body);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");

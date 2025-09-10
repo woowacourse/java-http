@@ -3,14 +3,12 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.List;
+import org.apache.catalina.dispatcher.HandlerDispatcher;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.ControllerHandler;
-import org.apache.coyote.http11.handler.HandlerDispatcher;
-import org.apache.coyote.http11.handler.HandlerMapping;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.config.HandlerDispatcherConfig;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +43,12 @@ public class Http11Processor implements Runnable, Processor {
             log.debug("request headers: {}", request.getHeaders());
             log.debug("request body: {}", request.getBody());
 
-            final HandlerDispatcher handlerDispatcher = new HandlerDispatcher(List.of(
-                    new StaticResourceHandler(),
-                    new ControllerHandler(new HandlerMapping())
-            ));
-            HttpResponse response = handlerDispatcher.handle(request);
+            HandlerDispatcher handlerDispatcher = new HandlerDispatcher(
+                    HandlerDispatcherConfig.getRequestHandlers()
+            );
+
+            HttpResponse response = ResponseEntity.notFound("");
+            handlerDispatcher.handle(request, response);
             log.debug("response status line: {}", response.getStatusLine());
             log.debug("response headers: {}", response.getHeaders());
 //            log.debug("response body: {}", response.getBody());

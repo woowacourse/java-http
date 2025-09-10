@@ -17,12 +17,12 @@ public class ResponseEntity {
         return buildHttpResponse(body, contentType, HttpStatus.OK);
     }
 
-    public static HttpResponse notFound(String body) {
-        return notFound(body, "text/plain;charset=utf-8");
+    public static HttpResponse found(String body) {
+        return found(body, "text/plain;charset=utf-8");
     }
 
-    public static HttpResponse notFound(String body, String contentType) {
-        return buildHttpResponse(body, contentType, HttpStatus.NOT_FOUND);
+    public static HttpResponse found(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.FOUND);
     }
 
     public static HttpResponse badRequest(String body) {
@@ -39,6 +39,30 @@ public class ResponseEntity {
 
     public static HttpResponse unauthorized(String body, String contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.UNAUTHORIZED);
+    }
+
+    public static HttpResponse notFound(String body) {
+        return notFound(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse notFound(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.NOT_FOUND);
+    }
+
+    public static HttpResponse conflict(String body) {
+        return conflict(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse conflict(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.CONFLICT);
+    }
+
+    public static HttpResponse internalServerError(String body) {
+        return internalServerError(body, "text/plain;charset=utf-8");
+    }
+
+    public static HttpResponse internalServerError(String body, String contentType) {
+        return buildHttpResponse(body, contentType, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private static HttpResponse buildHttpResponse(String body, String contentType, HttpStatus status) {

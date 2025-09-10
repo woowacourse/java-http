@@ -1,16 +1,16 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.dispatcher;
 
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.util.ResourceUtil;
 
 public class ControllerHandler implements RequestHandler {
 
-    private final HandlerMapping handlerMapping;
+    private final RequestMapping requestMapping;
 
-    public ControllerHandler(HandlerMapping handlerMapping) {
-        this.handlerMapping = handlerMapping;
+    public ControllerHandler(RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -24,10 +24,8 @@ public class ControllerHandler implements RequestHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-
-        return handlerMapping.getController(httpRequest)
-                .map(controller -> controller.handle(httpRequest))
-                .orElse(ResponseEntity.notFound(""));
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
+        requestMapping.getController(httpRequest)
+                .ifPresent(controller -> controller.service(httpRequest, httpResponse));
     }
 }

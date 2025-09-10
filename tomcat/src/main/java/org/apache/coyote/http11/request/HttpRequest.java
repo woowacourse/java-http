@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.session.Cookie;
 
 /**
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages#http_requests"></a>
@@ -14,11 +16,12 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
-    private final String body;
-    private final Map<String, String> queryParams;
+    private final RequestBody body;
 
     public HttpRequest(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+        );
 
         // 1. request line 추출
         RequestLine requestLine = new RequestLine(bufferedReader.readLine());
@@ -27,11 +30,13 @@ public class HttpRequest {
         Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] header = line.split(": ");
+            String[] header = line.split(":", 2);
             if (header.length != 2) {
-                throw new IllegalArgumentException("invalid header: " + header);
+                throw new IllegalArgumentException("Invalid header line: " + line);
             }
-            headers.put(header[0], header[1]);
+            String key = header[0].trim();
+            String value = header[1].trim();
+            headers.put(key, value);
         }
 
         // 3. body 추출
@@ -47,8 +52,7 @@ public class HttpRequest {
 
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
-        this.queryParams = requestLine.getQueryParams();
+        this.body = new RequestBody(body);
     }
 
     public RequestLine getRequestLine() {
@@ -71,11 +75,19 @@ public class HttpRequest {
         return headers;
     }
 
+    public Cookie getCookie() {
+        return new Cookie(headers.get("Cookie"));
+    }
+
     public Map<String, String> getQueryParams() {
-        return queryParams;
+        return requestLine.getQueryParams();
+    }
+
+    public Map<String, String> getBodyParams() {
+        return body.getBodyParams();
     }
 
     public String getBody() {
-        return body;
+        return body.getValue();
     }
 }

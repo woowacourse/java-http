@@ -1,79 +1,81 @@
 package org.apache.coyote.http11.http.common.header;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import http.HttpHeaderKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.http.common.HttpSplitFormat;
+import org.apache.coyote.http11.http.response.HttpResponseBody;
 
 public class HttpHeader {
 
-    private final Map<String, String> httpHeaderInfo;
+    private final Map<String, List<String>> httpHeaderInfo;
 
-    private HttpHeader(final Map<String, String> httpHeaderInfo) {
-        this.httpHeaderInfo = Map.copyOf(httpHeaderInfo);
+    private HttpHeader(final Map<String, List<String>> httpHeaderInfo) {
+        this.httpHeaderInfo = new HashMap<>(httpHeaderInfo);
     }
 
-    public static HttpHeader from(final BufferedReader bufferedReader) throws IOException {
-        validateNull(bufferedReader);
-        return new HttpHeader(createHeaderInfo(bufferedReader));
+    public static HttpHeader from(final List<String> headerLines) {
+        validateNotNull(headerLines);
+        return new HttpHeader(parseHeaderLines(headerLines));
     }
 
-    public static HttpHeader from(final Map<String, String> httpHeaderInfo) {
-        validateNull(httpHeaderInfo);
+    public static HttpHeader from(final Map<String, List<String>> httpHeaderInfo) {
+        validateNotNull(httpHeaderInfo);
         return new HttpHeader(httpHeaderInfo);
     }
 
-    private static void validateNull(final BufferedReader bufferedReader) {
-        if (bufferedReader == null) {
-            throw new IllegalArgumentException("bufferedReader는 null일 수 없습니다.");
+    public static HttpHeader createByResponseBody(
+            final HttpResponseBody responseBody,
+            final String responseReturnValue
+    ) {
+        final Map<String, List<String>> responseHeaderInfo = new HashMap<>();
+        if (responseReturnValue == null) {
+            return HttpHeader.from(responseHeaderInfo);
+        }
+
+        responseHeaderInfo.computeIfAbsent(HttpHeaderKey.CONTENT_TYPE.getValue(), k -> new ArrayList<>())
+                .add(responseBody.getContentType().getFormat() + ";charset=utf-8");
+
+        final Optional<byte[]> valueOptional = responseBody.getValue();
+
+        if (valueOptional.isPresent()) {
+            responseHeaderInfo.computeIfAbsent(HttpHeaderKey.CONTENT_LENGTH.getValue(), k -> new ArrayList<>())
+                    .add(Integer.toString(responseBody.getByteLength()));
+        }
+
+        return HttpHeader.from(responseHeaderInfo);
+    }
+
+    private static void validateNotNull(final List<String> headerLines) {
+        if (headerLines == null) {
+            throw new IllegalArgumentException("headerLines는 null일 수 없습니다.");
         }
     }
 
-    private static void validateNull(final Map<String, String> httpHeaderInfo) {
+    private static void validateNotNull(final Map<String, List<String>> httpHeaderInfo) {
         if (httpHeaderInfo == null) {
             throw new IllegalArgumentException("httpHeaderInfo는 null일 수 없습니다.");
         }
     }
 
-    private static void validateSplitFormat(final String requestPayload, final int headerSplitIndex) {
-        if (headerSplitIndex == -1 || headerSplitIndex == requestPayload.length() - 1) {
-            throw new IllegalArgumentException(
-                    "유효하지 읺은 header 형식입니다: requestPayload=%s, headerSplitIndex=%d".formatted(requestPayload,
-                            headerSplitIndex));
-        }
-    }
+    private static Map<String, List<String>> parseHeaderLines(final List<String> httpHeaderLines) {
+        final Map<String, List<String>> httpHeaderInfo = new HashMap<>();
 
-    private static Map<String, String> createHeaderInfo(final BufferedReader bufferedReader) throws IOException {
-        final List<String> headerLines = readHeaderLines(bufferedReader);
-        return parseHeaderLines(headerLines);
-    }
-
-    private static List<String> readHeaderLines(final BufferedReader bufferedReader) throws IOException {
-        final List<String> headerLines = new ArrayList<>();
-        String headerLine = null;
-        while ((headerLine = bufferedReader.readLine()) != null) {
-            if ("".equals(headerLine)) {
-                break;
-            }
-            headerLines.add(headerLine);
-        }
-        return headerLines;
-    }
-
-    private static Map<String, String> parseHeaderLines(final List<String> httpHeaderLines) {
-        final Map<String, String> httpHeaderInfo = new HashMap<>();
         for (final String requestPayload : httpHeaderLines) {
-            final int headerSplitIndex = requestPayload.indexOf(HttpSplitFormat.HEADER.getValue());
-            validateSplitFormat(requestPayload, headerSplitIndex);
+            final String[] parts = requestPayload.split(HttpSplitFormat.HEADER.getValue(), 2);
 
-            final String headerKey = requestPayload.substring(0, headerSplitIndex).trim().toLowerCase();
-            final String headerValue = requestPayload.substring(headerSplitIndex + 1).trim();
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("유효하지 않은 header 형식입니다: requestPayload=" + requestPayload);
+            }
+
+            final String headerKey = parts[0].trim().toLowerCase();
+            final String headerValue = parts[1].trim();
 
             validateHeaderFormat(headerKey, headerValue);
-            httpHeaderInfo.put(headerKey, headerValue);
+            httpHeaderInfo.computeIfAbsent(headerKey, k -> new ArrayList<>()).add(headerValue);
         }
         return httpHeaderInfo;
     }
@@ -88,22 +90,38 @@ public class HttpHeader {
         }
     }
 
-    public boolean containsKey(String target) {
-        return httpHeaderInfo.containsKey(target);
+    public void addHeader(final String headerKey, final String headerValue) {
+        if (headerKey == null) {
+            throw new IllegalArgumentException("header key는 null일 수 없습니다");
+        }
+        if (headerValue == null) {
+            throw new IllegalArgumentException("header value는 null일 수 없습니다");
+        }
+        httpHeaderInfo.computeIfAbsent(headerKey.trim().toLowerCase(), k -> new ArrayList<>()).add(headerValue);
     }
 
-    public String getValue(final String target) {
+    public Optional<String> getFirstValue(final String target) {
         final String cleanTarget = target.trim().toLowerCase();
         if (!httpHeaderInfo.containsKey(cleanTarget)) {
-            throw new IllegalArgumentException("존재하지 않는 header입니다: %s".formatted(target));
+            return Optional.empty();
         }
-        return httpHeaderInfo.get(target);
+        List<String> values = httpHeaderInfo.get(cleanTarget);
+        if (values.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(values.getFirst());
+    }
+
+    public List<String> getValues(final String target) {
+        final String cleanTarget = target.trim().toLowerCase();
+        return httpHeaderInfo.getOrDefault(cleanTarget, new ArrayList<>());
     }
 
     public List<String> getFormat() {
         return httpHeaderInfo.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .flatMap(entry -> entry.getValue().stream()
+                        .map(value -> entry.getKey() + ": " + value))
                 .toList();
     }
 }

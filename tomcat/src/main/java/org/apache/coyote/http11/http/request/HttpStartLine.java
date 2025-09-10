@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.http.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import org.apache.coyote.http11.http.common.HttpSplitFormat;
 import org.apache.coyote.http11.http.common.startline.HttpMethod;
 import org.apache.coyote.http11.http.common.startline.HttpVersion;
@@ -23,10 +21,8 @@ public class HttpStartLine {
 
     }
 
-    public static HttpStartLine from(final BufferedReader bufferedReader) throws IOException {
-        validateNull(bufferedReader);
-        final String httpRequestLine = bufferedReader.readLine();
-        validateNull(httpRequestLine);
+    public static HttpStartLine from(final String httpRequestLine) {
+        validateNotNull(httpRequestLine);
         final String[] httpRequestElements = httpRequestLine.split(HttpSplitFormat.START_LINE.getValue());
         validateFormat(httpRequestElements);
         final HttpMethod method = HttpMethod.findMethod(httpRequestElements[0].trim());
@@ -35,13 +31,7 @@ public class HttpStartLine {
         return new HttpStartLine(method, path, version);
     }
 
-    private static void validateNull(final BufferedReader bufferedReader) {
-        if (bufferedReader == null) {
-            throw new IllegalArgumentException("bufferedReader는 null일 수 없습니다.");
-        }
-    }
-
-    private static void validateNull(final String httpRequestLine) {
+    private static void validateNotNull(final String httpRequestLine) {
         if (httpRequestLine == null) {
             throw new IllegalArgumentException("유효하지 않은 Http request line 형식입니다");
         }
@@ -64,6 +54,10 @@ public class HttpStartLine {
 
     public String getPath() {
         return path.getRootPath();
+    }
+
+    public boolean containsTargetQueryParameter(final String target) {
+        return path.containsQueryParameter(target);
     }
 
     public String getTargetQueryParameter(final String target) {

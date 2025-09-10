@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.http.request;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.http.common.HttpSplitFormat;
@@ -41,12 +43,12 @@ public class HttpQueryParameter {
                 .indexOf(HttpSplitFormat.QUERY_PARAMETER_ELEMENT.getValue());
         validateQueryParameterElementFormat(queryParameterSplitIndex);
 
-        final String queryParameterElementKey = queryParameterElementLine
+        final String queryParameterElementKey = URLDecoder.decode(queryParameterElementLine
                 .substring(0, queryParameterSplitIndex)
-                .trim();
-        final String queryParameterElementValue = queryParameterElementLine
+                .trim(), StandardCharsets.UTF_8);
+        final String queryParameterElementValue = URLDecoder.decode(queryParameterElementLine
                 .substring(queryParameterSplitIndex + 1)
-                .trim();
+                .trim(), StandardCharsets.UTF_8);
         validateQueryParameterKeyFormat(queryParameterElementKey);
         validateQueryParameterValueFormat(queryParameterElementValue);
         queryParameterInfo.put(queryParameterElementKey, queryParameterElementValue);
@@ -73,16 +75,25 @@ public class HttpQueryParameter {
         }
     }
 
+    public boolean contains(final String target) {
+        validateTargetKey(target);
+        final String targetKey = URLDecoder.decode(target.trim(), StandardCharsets.UTF_8);
+        return queryParameterInfo.containsKey(targetKey);
+    }
+
     public String getValue(final String target) {
-        if (target == null) {
-            throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
-        }
+        validateTargetKey(target);
 
-        final String targetKey = target.trim();
-
-        if (!queryParameterInfo.containsKey(targetKey)) {
+        final String targetKey = URLDecoder.decode(target.trim(), StandardCharsets.UTF_8);
+        if (!contains(targetKey)) {
             throw new IllegalArgumentException("존재하지 않는 query parameter key 입니다: %s".formatted(target));
         }
         return queryParameterInfo.get(targetKey);
+    }
+
+    private void validateTargetKey(final String target) {
+        if (target == null) {
+            throw new IllegalArgumentException("query parameter key는 null일 수 없습니다");
+        }
     }
 }

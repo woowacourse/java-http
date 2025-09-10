@@ -122,9 +122,7 @@ public class Http11Processor implements Runnable, Processor {
         String statusLine = "HTTP/1.1 200 OK";
         String responseBody;
 
-        if ("/register".equals(path)) {
-            responseBody = readFileFromClasspath("static/register.html");
-        } else if ("/login".equals(path) || "/login.html".equals(path)) {
+        if ("/login".equals(path) || "/login.html".equals(path)) {
             final Http11Cookie cookie = request.getCookie();
             if (cookie.isContainsSessionId() && SessionManager.getInstance().containsSession(cookie.getSessionId())) {
                 statusLine = "HTTP/1.1 302 Found";
@@ -148,16 +146,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String handlePostRequest(final String path, final Http11Request request, 
                                      final Map<String, String> responseHeaders) {
-        final Map<String, String> params = parseRequestBody(request.getBody());
-
-        if ("/register".equals(path)) {
-            final User user = new User(params.get("account"), params.get("password"), params.get("email"));
-            InMemoryUserRepository.save(user);
-            log.info("User saved: {}", user);
-            createSessionAndSetCookie(user, request, responseHeaders);
-            responseHeaders.put("Location", "/index.html");
-            return "HTTP/1.1 302 Found";
-        }
+        Map<String, String> params = request.getParams();
 
         if ("/login".equals(path)) {
             try {

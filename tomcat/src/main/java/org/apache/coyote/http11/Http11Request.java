@@ -106,6 +106,10 @@ public class Http11Request {
         return params;
     }
 
+    public String getParam(String name) {
+        return params.get(name);
+    }
+
     public String getVersion() {
         return version;
     }

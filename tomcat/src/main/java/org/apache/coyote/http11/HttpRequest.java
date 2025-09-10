@@ -9,11 +9,11 @@ public class HttpRequest {
     private final HttpMethod method;
     private final String requestUri;
     private final String protocol;
-    private final Map<String, String> headers;
+    private final HttpHeaders headers;
     private final String body;
     private final HttpCookie httpCookie;
 
-    private HttpRequest(HttpMethod method, String requestUri, String protocol, Map<String, String> headers, String body, HttpCookie httpCookie) {
+    private HttpRequest(HttpMethod method, String requestUri, String protocol, HttpHeaders headers, String body, HttpCookie httpCookie) {
         this.method = method;
         this.requestUri = requestUri;
         this.protocol = protocol;
@@ -28,14 +28,6 @@ public class HttpRequest {
 
     public String getRequestUri() {
         return requestUri;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
     }
 
     public String getBody() {
@@ -55,16 +47,16 @@ public class HttpRequest {
         String protocol = requestParts[2];
 
         HttpMethod method = HttpMethod.from(methodToken);
+        HttpHeaders httpHeaders = HttpHeaders.of(headers);
         HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-        return new HttpRequest(method, requestUri, protocol, headers, body, httpCookie);
+        return new HttpRequest(method, requestUri, protocol, httpHeaders, body, httpCookie);
     }
-
-    public boolean isStaticResourceRequest() {
-        return requestUri.contains(".") && !requestUri.contains("/login") && !requestUri.contains("/register");
-    }
-
-    public boolean isPost() {
-        return getMethod() == HttpMethod.POST;
+    
+    public Map<String, String> getFormData() {
+        if (body == null || body.isBlank()) {
+            return Map.of();
+        }
+        return FormDataParser.parse(body);
     }
 
     private static void validateSplitRequestLine(String[] requestParts) {

@@ -4,20 +4,25 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
+import org.apache.catalina.Manager;
 import org.apache.catalina.controller.AbstractController;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private final Manager sessionManager = SessionManager.getInstance();
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        Session session = request.getSession();
-        if (session.getAttribute("user") != null) {
+        HttpCookie httpCookie = request.getCookies();
+        String sessionId = httpCookie.getSessionId();
+        if (httpCookie.hasSession() && sessionManager.findSession(sessionId) != null) {
             response.sendRedirect("/index.html");
             return;
         }
@@ -36,7 +41,7 @@ public class LoginController extends AbstractController {
         }
         User user = userOptional.get();
         log.info("로그인 성공: {}", user);
-        Session session = request.getSession();
+        Session session = response.addSession(sessionManager);
         session.setAttribute("user", user);
         response.sendRedirect("/index.html");
     }

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.Manager;
 
 public class HttpResponse {
 
@@ -66,5 +68,13 @@ public class HttpResponse {
     public void sendInternalServerError() throws IOException {
         final var bodyBytes = "500 Internal Server Error".getBytes(StandardCharsets.UTF_8);
         sendResponse("500 Internal Server Error", "text/html;charset=utf-8", bodyBytes);
+    }
+
+    public Session addSession(Manager sessionManager) {
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        sessionManager.add(session);
+        setCookie("JSESSIONID", session.getId());
+        return session;
     }
 }

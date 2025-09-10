@@ -12,12 +12,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
-    private final SessionHandler sessionHandler;
     private final FrontController frontController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.sessionHandler = new SessionHandler();
         this.frontController = new FrontController();
     }
 
@@ -34,12 +32,11 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse(outputStream);
             try {
                 HttpRequest request = new HttpRequest(inputStream);
-                Session session = sessionHandler.getSession(request, response);
-                request.setSession(session);
                 frontController.service(request, response);
             } catch (BadRequestException e) {
                 response.sendBadRequest();
             } catch (Exception e) {
+                log.error("Internal server error", e);
                 response.sendInternalServerError();
             }
         } catch (IOException e) {

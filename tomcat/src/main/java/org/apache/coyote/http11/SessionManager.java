@@ -1,37 +1,39 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final SessionManager INSTANCE = new SessionManager();
 
     private SessionManager() {
     }
 
-    public static Session getSession(String id) {
-        return SESSIONS.get(id);
+    public static Manager getInstance() {
+        return INSTANCE;
     }
 
-    public static void add(Session session) {
+    @Override
+    public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public void add(HttpSession session) {
-        
+    public Session findSession(final String id) throws IOException {
+        if (id == null) {
+            return null;
+        }
+        return SESSIONS.get(id);
     }
 
     @Override
-    public HttpSession findSession(String id) throws IOException {
-        return null;
-    }
-
-    @Override
-    public void remove(HttpSession session) {
-
+    public void remove(final Session session) {
+        if (session != null) {
+            SESSIONS.remove(session.getId());
+        }
     }
 }

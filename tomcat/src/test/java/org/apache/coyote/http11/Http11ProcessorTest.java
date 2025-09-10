@@ -92,7 +92,7 @@ class Http11ProcessorTest {
     @Test
     void loginFailed() {
         // given
-        final String requestBody = "account=gugu&password=password";
+        final String requestBody = "account=gugu&password=1";
         final String httpRequest = String.join("\r\n",
                 "POST /login.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -111,8 +111,7 @@ class Http11ProcessorTest {
         // then
         final String response = socket.output();
         assertThat(response).startsWith("HTTP/1.1 302 Found");
-        assertThat(response).contains("Location: /index.html");
-        assertThat(response).contains("Set-Cookie: JSESSIONID=");
+        assertThat(response).contains("Location: /401.html");
     }
 
     @Test

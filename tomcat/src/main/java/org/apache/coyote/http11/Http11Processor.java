@@ -302,7 +302,7 @@ public class Http11Processor implements Runnable, Processor {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
             final Session session = Session.create();
-            session.setAttribute("user", user);
+            session.setAttribute("user", user.get());
             SessionManager.getInstance().add(session);
             httpCookie.add("JSESSIONID", session.getId());
             sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);

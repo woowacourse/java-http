@@ -18,6 +18,11 @@ public class InMemoryUserRepository {
     private InMemoryUserRepository() {
     }
 
+    public static boolean existsById(Long id) {
+        return database.values().stream()
+                .anyMatch(user -> user.hasSameId(id));
+    }
+
     public static void save(User user) {
         database.put(user.getAccount(), user);
     }

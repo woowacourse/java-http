@@ -3,23 +3,28 @@ package org.apache.coyote.http11.handler;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.http11.response.HttpResponse;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public abstract class HttpRequestHandler {
 
     abstract String getSupportedUrl();
 
-    public final String handle(String request) {
+    public final HttpResponse handle(String request) {
         validateSupports(request);
         HttpMethod requestMethod = HttpMethod.fromHttp11Request(request);
         if (requestMethod.equals(HttpMethod.GET)) {
             return handleGet(request);
+        } else if (requestMethod.equals(HttpMethod.POST)) {
+            return handlePost(request);
         }
         return handleMethodNotAllow(request);
     }
 
-    protected abstract String handleGet(String request);
+    protected abstract HttpResponse handleGet(String request);
+
+    protected abstract HttpResponse handlePost(String request);
 
     private void validateSupports(String request) {
         String url = getUrl(request);
@@ -32,20 +37,17 @@ public abstract class HttpRequestHandler {
         return getSupportedUrl().equals(url);
     }
 
-    private String handleMethodNotAllow(String request) {
+    private HttpResponse handleMethodNotAllow(String request) {
         HttpMethod requestMethod = HttpMethod.fromHttp11Request(request);
-        String responseBody = String.format("Http Method %s not allowed", requestMethod);
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 " + HttpStatus.METHOD_NOT_ALLOWED.getPrase(),
-                "Content-Type: " + MimeType.TEXT_PLAIN.getMimeType(),
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
-                "",
-                responseBody
+        return new HttpResponse(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                String.format("Http Method %s not allowed", requestMethod),
+                MimeType.TEXT_HTML,
+                Map.of()
         );
     }
 
     protected String getUrl(String request) {
-        return request.split(System.lineSeparator())[0].split(" ")[1].split("\\?")[0];
+        return request.split("\r\n")[0].split(" ")[1].split("\\?")[0];
     }
 }

@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.http11.response.HttpResponse;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class RootPathHandler extends HttpRequestHandler {
 
@@ -12,15 +14,18 @@ public class RootPathHandler extends HttpRequestHandler {
     }
 
     @Override
-    protected String handleGet(String request) {
+    protected HttpResponse handleGet(String request) {
         String response = "Hello world!";
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: " + MimeType.TEXT_HTML.getMimeType(),
-                "Content-Length: " + response.getBytes(StandardCharsets.UTF_8).length,
-                "",
-                response
+        return new HttpResponse(
+                HttpStatus.OK,
+                response,
+                MimeType.TEXT_HTML,
+                Map.of()
         );
+    }
+
+    @Override
+    protected HttpResponse handlePost(String request) {
+        return null;
     }
 }

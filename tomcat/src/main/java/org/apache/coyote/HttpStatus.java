@@ -5,22 +5,25 @@ public enum HttpStatus {
     // 2xx
     OK(200, "200 OK"),
 
+    // 3xx
+    FOUND(302, "302 FOUND"),
+
     // 4xx
     METHOD_NOT_ALLOWED(405, "405 METHOD_NOT_ALLOWED");
 
     private final int code;
-    private final String prase;
+    private final String phrase;
 
-    HttpStatus(int code, String prase) {
+    HttpStatus(int code, String phrase) {
         this.code = code;
-        this.prase = prase;
+        this.phrase = phrase;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getPrase() {
-        return prase;
+    public String getPhrase() {
+        return phrase;
     }
 }

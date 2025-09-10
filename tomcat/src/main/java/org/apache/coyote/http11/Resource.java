@@ -18,14 +18,9 @@ public record Resource(String path, String type, String content) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-
-            if (bufferedReader.lines() == null) {
-                throw new IllegalArgumentException("Resource not found: " + path);
-            }
-
             String extension = Arrays.asList(path.split("\\.")).getLast();
             String content = bufferedReader.lines()
-                    .collect(Collectors.joining(System.lineSeparator(), "", System.lineSeparator()));
+                    .collect(Collectors.joining("\r\n", "", "\r\n"));
 
             return new Resource(path, extension, content);
         }

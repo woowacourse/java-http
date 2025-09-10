@@ -1,18 +1,26 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.Resource;
+import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.UUID;
 
 public class LoginHandler extends HttpRequestHandler {
+
+    private final SessionManager sessionManager = new SessionManager();
 
     @Override
     String getSupportedUrl() {
@@ -20,52 +28,106 @@ public class LoginHandler extends HttpRequestHandler {
     }
 
     @Override
-    protected String handleGet(String request) {
-        service(request);
+    protected HttpResponse handleGet(String request) {
+        String jSessionId = getCookie(request, "JSESSIONID");
+        if (jSessionId != null) {
+            Session session = sessionManager.find(jSessionId);
+            long userId = Long.parseLong((String) session.getAttribute("userId"));
+            if (InMemoryUserRepository.existsById(userId)) {
+                return new HttpResponse(
+                        HttpStatus.FOUND,
+                        "",
+                        MimeType.ANY,
+                        Map.of("Location", "/index.html")
+                );
+            }
+        }
         Resource responseBody = getResource("/login.html");
         MimeType mimeType = MimeType.fromResource(responseBody);
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + mimeType.getMimeType(),
-                "Content-Length: " + responseBody.content().getBytes(StandardCharsets.UTF_8).length,
-                "",
-                responseBody.content()
-        );
+        return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
     }
 
-    private void service(String request) {
-        Map<String, String> parameterMap = getParameters(request);
-        String account = parameterMap.get("account");
-        String password = parameterMap.get("password");
-        if (account == null | password == null) {
-            return;
-        }
-        InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .ifPresentOrElse(
-                        user -> System.out.println("user = " + user),
-                        () -> System.out.println("User account " + account + " not found.")
+    @Override
+    protected HttpResponse handlePost(String request) {
+        String jSessionId = getCookie(request, "JSESSIONID");
+        if (jSessionId != null) {
+            Session session = sessionManager.find(jSessionId);
+            long userId = Long.parseLong((String) session.getAttribute("userId"));
+            if (InMemoryUserRepository.existsById(userId)) {
+                return new HttpResponse(
+                        HttpStatus.FOUND,
+                        "",
+                        MimeType.ANY,
+                        Map.of("Location", "/index.html")
                 );
-    }
-
-    private Map<String, String> getParameters(String request) {
-        String url = request.split(System.lineSeparator())[0].split(" ")[1];
-
-        int questionMarkIndex = url.indexOf('?');
-        if (questionMarkIndex == -1) {
-            return Map.of();
+            }
+        }
+        Map<String, String> body = parserBody(request);
+        String account = body.get("account");
+        String password = body.get("password");
+        if (account == null || password == null) {
+            Resource responseBody = getResource("/login.html");
+            MimeType mimeType = MimeType.fromResource(responseBody);
+            return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
         }
 
-        String queryString = url.substring(questionMarkIndex + 1);
-        return Stream.of(queryString.split("&"))
-                .map(pair -> pair.split("=", 2))
-                .filter(keyValue -> keyValue.length == 2)
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
-                        keyValue -> keyValue[1],
-                        (oldValue, newValue) -> oldValue,
-                        HashMap::new
-                ));
+        Optional<User> user = InMemoryUserRepository.findByAccountAndPassword(account, password);
+        if (user.isPresent()) {
+            Session session = new Session(UUID.randomUUID().toString());
+            session.setAttribute("userId", String.valueOf(user.get().getId()));
+            sessionManager.add(session);
+            return new HttpResponse(
+                    HttpStatus.FOUND,
+                    "",
+                    MimeType.ANY,
+                    Map.of(
+                            "Location", "/index.html",
+                            "Set-Cookie", "JSESSIONID=" + session.getId()
+                    )
+            );
+        }
+
+        Resource responseBody = getResource("/401.html");
+        MimeType mimeType = MimeType.fromResource(responseBody);
+        return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
+    }
+
+    public Map<String, String> parserBody(String request) {
+        System.out.println("request = " + request);
+        String urlEncodedBody = request.split("\r\n\r\n")[1];
+        System.out.println("urlEncodedBody = " + urlEncodedBody);
+        Map<String, String> result = new HashMap<>();
+        String[] pairs = urlEncodedBody.split("&");
+
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            if (idx == -1) {
+                continue;
+            }
+            String key = pair.substring(0, idx);
+            String value = pair.substring(idx + 1);
+            String decodedKey = URLDecoder.decode(key, StandardCharsets.UTF_8);
+            String decodedValue = URLDecoder.decode(value, StandardCharsets.UTF_8);
+            result.put(decodedKey, decodedValue);
+        }
+
+        return result;
+    }
+
+    private String getCookie(String request, String key) {
+        String[] headers = request.split("\r\n");
+        for (String header : headers) {
+            if (header.startsWith("Cookie:")) {
+                String[] cookies = header.substring(7).split(";");
+                for (String cookie : cookies) {
+                    String[] cookiePair = cookie.trim().split("=");
+                    if (cookiePair.length == 2 && cookiePair[0].equals(key)) {
+                        return cookiePair[1];
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private Resource getResource(String path) {

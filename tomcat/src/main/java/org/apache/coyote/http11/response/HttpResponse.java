@@ -32,8 +32,10 @@ public class HttpResponse {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
         this.contentType = contentType;
-        this.body = body;
-        this.headers = headers;
+        this.body = body == null ? null : body.clone();
+        Map<String, List<String>> copy = new LinkedHashMap<>();
+        headers.forEach((k, v) -> copy.put(k, new ArrayList<>(v)));
+        this.headers = copy;
     }
 
     public void writeTo(final OutputStream outputStream) throws IOException {

@@ -94,7 +94,7 @@ public final class HttpHeader {
 
     public String getContentType() {
         if (!containKey(CONTENT_TYPE)) {
-            throw new IllegalArgumentException("Content-Length header is missing");
+            throw new IllegalArgumentException("Content-Type header is missing");
         }
         return get(CONTENT_TYPE);
     }

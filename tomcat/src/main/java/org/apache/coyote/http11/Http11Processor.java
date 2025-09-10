@@ -34,10 +34,10 @@ public class Http11Processor implements Runnable, Processor {
                 HttpRequest request = new HttpRequest(inputStream);
                 frontController.service(request, response);
             } catch (BadRequestException e) {
-                response.sendBadRequest();
+                response.send(HttpStatus.BAD_REQUEST);
             } catch (Exception e) {
                 log.error("Internal server error", e);
-                response.sendInternalServerError();
+                response.send(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);

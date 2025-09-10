@@ -6,6 +6,7 @@ import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +23,12 @@ public class StaticResourceController extends AbstractController {
         String resourcePath = "static" + path;
         try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (fileInputStream == null) {
-                response.sendNotFound();
+                response.send(HttpStatus.NOT_FOUND);
                 return;
             }
             String contentType = determineContentType(path);
             byte[] bodyBytes = fileInputStream.readAllBytes();
-            response.sendOk(contentType, bodyBytes);
+            response.send(HttpStatus.OK, contentType, bodyBytes);
         }
     }
 

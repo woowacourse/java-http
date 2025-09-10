@@ -27,47 +27,43 @@ public class HttpResponse {
         addHeader("Set-Cookie", name + "=" + value);
     }
 
-    private void sendResponse(String statusLine, String contentType, byte[] body) throws IOException {
+    public void send(HttpStatus status, String contentType, byte[] body) throws IOException {
         addHeader("Content-Type", contentType);
         addHeader("Content-Length", String.valueOf(body.length));
+        writeResponse(status.getStatusLine(), body);
+    }
+
+    public void send(HttpStatus status) throws IOException {
+        String defaultBody = status.getStatusCode() + " " + status.getReasonPhrase();
+        byte[] bodyBytes = defaultBody.getBytes(StandardCharsets.UTF_8);
+
+        String contentType = "text/plain;charset=utf-8";
+        if (status == HttpStatus.BAD_REQUEST || status == HttpStatus.INTERNAL_SERVER_ERROR) {
+            contentType = "text/html;charset=utf-8";
+        }
+
+        send(status, contentType, bodyBytes);
+    }
+
+    public void sendRedirect(String location) throws IOException {
+        addHeader("Location", location);
+        writeResponse(HttpStatus.FOUND.getStatusLine(), new byte[0]);
+    }
+
+    private void writeResponse(String statusLine, byte[] body) throws IOException {
         StringBuilder formattedHeader = new StringBuilder();
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             for (String value : entry.getValue()) {
                 formattedHeader.append(entry.getKey()).append(": ").append(value).append("\r\n");
             }
         }
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + statusLine,
-                formattedHeader.toString(),
-                "",
-                "");
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
+        final var responseStart = "HTTP/1.1 " + statusLine + "\r\n"
+                + formattedHeader + "\r\n";
+        outputStream.write(responseStart.getBytes(StandardCharsets.UTF_8));
+        if (body != null && body.length > 0) {
+            outputStream.write(body);
+        }
         outputStream.flush();
-    }
-
-    public void sendRedirect(String location) throws IOException {
-        addHeader("Location", location);
-        sendResponse("302 Found", null, new byte[0]);
-    }
-
-    public void sendOk(String contentType, byte[] body) throws IOException {
-        sendResponse("200 OK", contentType, body);
-    }
-
-    public void sendNotFound() throws IOException {
-        final var bodyBytes = "404 Not Found".getBytes(StandardCharsets.UTF_8);
-        sendResponse("404 Not Found", "text/plain;charset=utf-8", bodyBytes);
-    }
-
-    public void sendBadRequest() throws IOException {
-        final var bodyBytes = "400 Bad Request".getBytes(StandardCharsets.UTF_8);
-        sendResponse("400 Bad Request", "text/html;charset=utf-8", bodyBytes);
-    }
-
-    public void sendInternalServerError() throws IOException {
-        final var bodyBytes = "500 Internal Server Error".getBytes(StandardCharsets.UTF_8);
-        sendResponse("500 Internal Server Error", "text/html;charset=utf-8", bodyBytes);
     }
 
     public Session addSession(Manager sessionManager) {

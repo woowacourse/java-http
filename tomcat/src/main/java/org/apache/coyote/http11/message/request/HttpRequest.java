@@ -17,18 +17,12 @@ import org.apache.coyote.http11.message.response.ContentType;
 public class HttpRequest {
     public static final int REQUEST_LINE_ELEMENT_COUNT = 3;
 
-    //TODO: 요청라인을 전담하는 값 객체로 묶기  (2025-09-7, 일, 17:19)
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2321263491
-    private final HttpMethod method;
-    private final RequestUri requestUri;
-    private final String version;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpBody body;
 
-    private HttpRequest(HttpMethod method, RequestUri requestUri, String version, HttpHeaders headers, HttpBody body) {
-        this.method = method;
-        this.requestUri = requestUri;
-        this.version = version;
+    private HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
@@ -36,17 +30,19 @@ public class HttpRequest {
     //TODO: 뎁스 줄이기. Parser 분리?  (2025-09-9, 화, 21:9)
     public static HttpRequest from(BufferedReader reader) throws IOException {
         // 요청 라인
-        String requestLine = reader.readLine();
-        if (requestLine == null || requestLine.isBlank()) {
+        String rawRequestLine = reader.readLine();
+        if (rawRequestLine == null || rawRequestLine.isBlank()) {
             throw new IllegalArgumentException("Empty request");
         }
-        String[] requestLineTokens = requestLine.split(" ");
+        String[] requestLineTokens = rawRequestLine.split(" ");
         if (requestLineTokens.length != REQUEST_LINE_ELEMENT_COUNT) {
-            throw new IllegalArgumentException("Invalid Request Line: " + requestLine);
+            throw new IllegalArgumentException("Invalid Request Line: " + rawRequestLine);
         }
         HttpMethod method = HttpMethod.from(requestLineTokens[0]);
         RequestUri requestUri = RequestUri.from(requestLineTokens[1]);
         String version = requestLineTokens[2];
+
+        RequestLine requestLine = new RequestLine(method, requestUri, version);
 
         // 헤더 읽기
         List<String> headerLines = new ArrayList<>();
@@ -68,24 +64,23 @@ public class HttpRequest {
             body = HttpBody.from(new String(bodyChars));
         }
 
-        return new HttpRequest(method, requestUri, version, headers, body);
+        return new HttpRequest(requestLine, headers, body);
     }
 
-
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getRequestPath() {
-        return requestUri.getPath();
+        return requestLine.getPath();
     }
 
     public Map<String, String> getQueryParams() {
-        return requestUri.getQueryParams();
+        return requestLine.getQueryParams();
     }
 
     public String getVersion() {
-        return version;
+        return requestLine.getVersion();
     }
 
     public HttpHeaders getHeaders() {

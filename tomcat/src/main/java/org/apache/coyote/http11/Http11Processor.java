@@ -30,8 +30,6 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
-    //TODO: 헤더와 바디도 읽도록 RequestParser/Reader 구현 필요
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2321263463  (2025-09-7, 일, 17:18)
     @Override
     public void process(final Socket connection) {
         try (

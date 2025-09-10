@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-//TODO: 요청 파싱용 쿠키와 응답 생성용 쿠키 분리  (2025-09-9, 화, 21:8)
-// https://github.com/woowacourse/java-http/pull/899#discussion_r2331128275
 public class HttpCookie {
     public static final String JSESSIONID = "JSESSIONID";
     private final Map<String, String> cookies = new HashMap<>();

@@ -50,7 +50,7 @@ public class LoginHandler implements Handler {
         if (loggedIn) {
             response.sendRedirect("/index.html");
         } else {
-            StaticResourceUtils.serve(response, "/login", HttpStatus.OK);
+            StaticResourceUtils.serve(response, "login", HttpStatus.OK);
         }
     }
 

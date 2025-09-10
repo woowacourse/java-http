@@ -101,12 +101,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (httpMethod.equals("GET") && endPoint.startsWith("/login")) {
-                final int index = endPoint.indexOf("?");
-                final String path = endPoint.substring(0, index);
-
-                final String queryString = endPoint.substring(index + 1);
-                final String[] queryStringParts = queryString.split("&");
+            if (httpMethod.equals("POST") && endPoint.equals("/login")) {
+                final String[] queryStringParts = requestBody.split("&");
                 final String account = queryStringParts[0].split("=")[1];
                 final String password = queryStringParts[1].split("=")[1];
 
@@ -117,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 log.info("user: {}", user);
-                final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
+                final URL resource = getClass().getClassLoader().getResource("static" + endPoint + ".html");
                 validateNullResource(resource);
                 final Cookie cookie = HttpCookie.createCookie();
                 Session session = new Session(cookie.getValue());

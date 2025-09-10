@@ -48,7 +48,7 @@ public class RegisterController implements Controller {
             response.addHeader("Location", "/index.html");
             return;
         }
-        responseRegisterErrorPage("/register.html", StatusCode.BAD_REQUEST, response);
+        responseRegisterErrorPage(response);
     }
 
     private void responseRegisterHtml(final HttpResponse httpResponse) throws IOException {
@@ -78,13 +78,9 @@ public class RegisterController implements Controller {
         return true;
     }
 
-    private void responseRegisterErrorPage(
-            final String errorPagePath,
-            final StatusCode statusCode,
-            final HttpResponse httpResponse
-    ) throws IOException {
-        final String body = staticResourceReader.getStaticResponseBody("static" + errorPagePath);
-        httpResponse.updateStatusLine("HTTP/1.1", statusCode);
+    private void responseRegisterErrorPage(final HttpResponse httpResponse) throws IOException {
+        final String body = staticResourceReader.getStaticResponseBody("static/register.html");
+        httpResponse.updateStatusLine("HTTP/1.1", StatusCode.BAD_REQUEST);
         httpResponse.updateBody(body);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));

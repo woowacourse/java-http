@@ -21,7 +21,7 @@ public class RequestUriParser {
     }
 
     public Map<String, String> parseQueryParameters(final String rawRequestUri) {
-        if (rawRequestUri.contains(QUERY_STRING_SEPARATOR)) {
+        if (!rawRequestUri.contains(QUERY_STRING_SEPARATOR)) {
             return new HashMap<>();
         }
 

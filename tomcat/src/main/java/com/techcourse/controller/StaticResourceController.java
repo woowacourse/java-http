@@ -8,18 +8,13 @@ import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(StaticResourceController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = request.getPath();
-        try {
-            loadStaticResource(response, path);
-        } catch (IOException e) {
-            log.error("Error while loading static resource", e);
-            response.sendInternalServerError();
-        }
+        loadStaticResource(response, path);
     }
 
     private void loadStaticResource(HttpResponse response, String path) throws IOException {

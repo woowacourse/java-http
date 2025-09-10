@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -9,26 +10,21 @@ import org.apache.coyote.http11.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         Session session = request.getSession();
-        if ("GET".equals(request.getMethod()) && session.getAttribute("user") != null) {
+        if (session.getAttribute("user") != null) {
             response.sendRedirect("/index.html");
             return;
         }
-
-        if ("POST".equals(request.getMethod())) {
-            handleLogin(request, response);
-            return;
-        }
-
         response.sendRedirect("/login.html");
     }
 
-    private void handleLogin(HttpRequest request, HttpResponse response) {
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         String account = request.getQueryParam("account");
         String password = request.getQueryParam("password");
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);

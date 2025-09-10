@@ -17,15 +17,7 @@ public class HttpHeaders {
     public HttpHeaders() {
         this.headers = new HashMap<>();
     }
-    
-    public HttpHeaders(Map<String, String> initialHeaders) {
-        this.headers = new HashMap<>(initialHeaders);
-    }
-    
-    public static HttpHeaders of(Map<String, String> headers) {
-        return new HttpHeaders(headers);
-    }
-    
+
     public HttpHeaders add(String name, String value) {
         headers.put(name, value);
         return this;
@@ -33,14 +25,6 @@ public class HttpHeaders {
     
     public String get(String name) {
         return headers.get(name);
-    }
-    
-    public Map<String, String> toMap() {
-        return new HashMap<>(headers);
-    }
-    
-    public java.util.Set<Map.Entry<String, String>> entrySet() {
-        return headers.entrySet();
     }
     
     @Override
@@ -79,9 +63,8 @@ public class HttpHeaders {
         }
         return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html;charset=utf-8");
     }
-    
-    // 파일 확장자로부터 Content-Type을 설정한 HttpHeaders 생성
-    public static HttpHeaders forFile(String fileName) {
+
+    public static HttpHeaders fromFile(String fileName) {
         return new HttpHeaders().add("Content-Type", getContentType(fileName));
     }
 }

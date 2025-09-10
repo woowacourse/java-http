@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -32,21 +30,16 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-            final var outputStream = connection.getOutputStream();
-            HttpRequest request = getHttpRequest(br);
+        try (final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+            final var outputStream = connection.getOutputStream()) {
 
+            HttpRequest request = getHttpRequest(br);
             RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(request);
             HttpResponse response = controller.service(request);
-            
-            // 디버깅을 위한 로그
-            log.info("Request: {} {}", request.getMethod(), request.getRequestUri());
-            log.info("Response: {}", response != null ? response.getStatus() : "NULL");
-            
-            // HttpResponse를 OutputStream에 쓰기
+
             if (response == null) {
-                log.error("Response is null for request: {} {}", request.getMethod(), request.getRequestUri());
+                log.error("요청에 대한 응답이 NULL 입니다: {} {}", request.getMethod(), request.getRequestUri());
                 return;
             }
             outputStream.write(response.toHttpString().getBytes(StandardCharsets.UTF_8));
@@ -58,27 +51,25 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest getHttpRequest(BufferedReader br) throws IOException {
         String requestLine = br.readLine();
-        Map<String, String> headers = parseHttpHeaders(br);
+        HttpHeaders headers = parseHttpHeaders(br);
         String body = "POST".equals(requestLine.split("\\s+")[0]) ? getBody(headers, br) : "";
-        HttpRequest request = HttpRequest.from(requestLine, headers, body);
-        return request;
+        return HttpRequest.from(requestLine, headers, body);
     }
 
-    private Map<String, String> parseHttpHeaders(BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private HttpHeaders parseHttpHeaders(BufferedReader br) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
         String line;
         while ((line = br.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(":", 2);
-            headers.put(headerParts[0].strip(), headerParts[1].strip());
+            headers.add(headerParts[0].strip(), headerParts[1].strip());
         }
         return headers;
     }
 
-    private String getBody(Map<String, String> headers, BufferedReader br) throws IOException {
+    private String getBody(HttpHeaders headers, BufferedReader br) throws IOException {
         int contentLength = Integer.parseInt(headers.get("Content-Length"));
         char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
         return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
-
 }

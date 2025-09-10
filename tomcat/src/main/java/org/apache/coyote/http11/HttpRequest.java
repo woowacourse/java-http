@@ -38,7 +38,7 @@ public class HttpRequest {
         return httpCookie;
     }
 
-    public static HttpRequest from(String requestLine, Map<String, String> headers, String body) {
+    public static HttpRequest from(String requestLine, HttpHeaders headers, String body) {
         validateRequestLine(requestLine);
         String[] requestParts = requestLine.split(HEADER_DELIMITER);
         validateSplitRequestLine(requestParts);
@@ -47,9 +47,8 @@ public class HttpRequest {
         String protocol = requestParts[2];
 
         HttpMethod method = HttpMethod.from(methodToken);
-        HttpHeaders httpHeaders = HttpHeaders.of(headers);
         HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-        return new HttpRequest(method, requestUri, protocol, httpHeaders, body, httpCookie);
+        return new HttpRequest(method, requestUri, protocol, headers, body, httpCookie);
     }
     
     public Map<String, String> getFormData() {

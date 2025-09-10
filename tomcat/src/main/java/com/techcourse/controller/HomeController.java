@@ -7,9 +7,9 @@ import org.apache.coyote.http11.HttpStatusCode;
 
 public class HomeController extends AbstractController {
 
-    private static final LoginController INSTANCE = new LoginController();
+    private static final HomeController INSTANCE = new HomeController();
 
-    public static LoginController getInstance() {
+    public static HomeController getInstance() {
         return INSTANCE;
     }
 

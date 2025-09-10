@@ -19,7 +19,7 @@ public class RegisterHandler implements Handler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.path().startsWith("/register");
+        return request.path().equals("/register");
     }
 
     @Override

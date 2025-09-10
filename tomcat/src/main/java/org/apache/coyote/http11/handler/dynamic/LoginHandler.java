@@ -23,7 +23,7 @@ public class LoginHandler implements Handler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.path().startsWith("/login");
+        return request.path().equals("/login");
     }
 
     @Override
@@ -46,11 +46,10 @@ public class LoginHandler implements Handler {
                 })
                 .map(session -> (User) session.getAttribute("user"))
                 .isPresent();
-
         if (loggedIn) {
             response.sendRedirect("/index.html");
         } else {
-            StaticResourceUtils.serve(response, "login", HttpStatus.OK);
+            StaticResourceUtils.serve(response, "login.html", HttpStatus.OK);
         }
     }
 
@@ -82,7 +81,7 @@ public class LoginHandler implements Handler {
             log.info("로그인 성공: {}", account);
         } catch (IllegalArgumentException e) {
             log.warn("로그인 실패: {}", e.getMessage());
-            StaticResourceUtils.serve(response, "401.html", HttpStatus.UNAUTHORIZED);
+            response.sendRedirect("/401.html");
         }
     }
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Map<RequestMapping, Function<HttpRequest, HttpResponse>> requestMappings;
 
@@ -96,6 +98,7 @@ public class RequestHandler {
         }
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+        sessionManager.setSession();
         final var session = httpRequest.getSession(true);
         session.setAttribute("user", user);
         HttpResponse httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");

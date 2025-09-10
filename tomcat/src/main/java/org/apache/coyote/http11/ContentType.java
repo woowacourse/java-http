@@ -41,14 +41,11 @@ public enum ContentType {
         throw new IllegalArgumentException("알 수 없는 파일 확장자입니다: " + fileExtension);
     }
 
-    public String getResponseHeader() {
-        if(this == HTML || this == JS || this == CSS) {
-            return "Content-Type: " + mimeTypes.getFirst() + ";charset=utf-8";
-        }
-        return "Content-Type: " + mimeTypes.getFirst();
-    }
-
     public String getExtension() {
         return extension;
+    }
+
+    public String getFirstMimeType() {
+        return this.mimeTypes.getFirst();
     }
 }

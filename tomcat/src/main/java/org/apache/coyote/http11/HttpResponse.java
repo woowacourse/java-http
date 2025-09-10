@@ -55,21 +55,21 @@ public class HttpResponse {
         httpCookies.add(new HttpCookie(key, value));
     }
 
-    public byte[] getBytes() {
-        final var headers = getHeaders();
+    public byte[] convertToBytes() {
+        final var headers = buildHeaders();
         final var bodyString = new String(body, StandardCharsets.UTF_8);
         final String fullResponse = headers + bodyString;
         return fullResponse.getBytes();
     }
 
-    private String getHeaders() {
+    private String buildHeaders() {
         StringBuilder sb = new StringBuilder();
         sb.append(getStatusLine()).append(CRLF);
         if (location != null && !location.isBlank()) {
             sb.append("Location: ").append(location).append(CRLF);
         }
         if (contentType != null) {
-            sb.append(contentType.getResponseHeader()).append(CRLF);
+            sb.append(buildContentTypeHeader()).append(CRLF);
         }
         if (!httpCookies.isEmpty()) {
             for (HttpCookie httpCookie : httpCookies) {
@@ -85,5 +85,12 @@ public class HttpResponse {
 
     private String getStatusLine() {
         return httpVersion.getResponseHeader() + " " + responseStatus.getResponseHeader();
+    }
+
+    private String buildContentTypeHeader() {
+        if(contentType == ContentType.HTML || contentType == ContentType.JS || contentType == ContentType.CSS) {
+            return "Content-Type: " + contentType.getFirstMimeType() + ";charset=utf-8";
+        }
+        return "Content-Type: " +contentType.getFirstMimeType();
     }
 }

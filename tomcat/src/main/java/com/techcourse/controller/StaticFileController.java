@@ -1,13 +1,13 @@
 package com.techcourse.controller;
 
 import java.util.List;
-import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.response.HttpResponse;
-import org.apache.coyote.http.value.ContentType;
-import org.apache.coyote.http.value.HttpHeader;
-import org.apache.coyote.http.value.StatusCode;
-import org.apache.coyote.reader.StaticFileUtility;
+import org.apache.catalina.container.controller.AbstractController;
+import org.apache.catalina.container.http.request.HttpRequest;
+import org.apache.catalina.container.http.response.HttpResponse;
+import org.apache.catalina.container.http.value.ContentType;
+import org.apache.catalina.container.http.value.HttpHeader;
+import org.apache.catalina.container.http.value.StatusCode;
+import org.apache.catalina.container.reader.StaticFileUtility;
 
 public class StaticFileController extends AbstractController {
 

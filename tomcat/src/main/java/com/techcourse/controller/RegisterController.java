@@ -42,11 +42,18 @@ public class RegisterController extends AbstractController {
             response.setRedirection("/register.html");
             return;
         }
+
         Session session = SessionManager.findSession(cookie.getValue());
-        if (session != null && isValidUser(session.getUser())) {
+        if (session == null) {
             response.setRedirection("/register.html");
             return;
         }
+
+        if (!isValidUser(session.getUser())) {
+            response.setRedirection("/register.html");
+            return;
+        }
+
         response.setRedirection("/index.html");
     }
 

@@ -30,11 +30,18 @@ public class LoginController extends AbstractController {
             response.setRedirection("/login.html");
             return;
         }
+
         Session session = SessionManager.findSession(cookie.getValue());
-        if (session != null && isExistUser(session.getUser().getAccount())) {
+        if (session == null) {
             response.setRedirection("/login.html");
             return;
         }
+
+        if (!isExistUser(session.getUser().getAccount())) {
+            response.setRedirection("/login.html");
+            return;
+        }
+
         response.setRedirection("/index.html");
     }
 

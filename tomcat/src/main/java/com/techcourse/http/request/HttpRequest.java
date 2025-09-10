@@ -97,7 +97,7 @@ public class HttpRequest {
     private static String extractPath(final String requestUri) {
         int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
 
-        if (queryStringDelimiterIndex != NOT_FOUND_INDEX) {
+        if (hasExtension(queryStringDelimiterIndex)) {
             return requestUri.substring(0, queryStringDelimiterIndex);
         }
 
@@ -107,7 +107,7 @@ public class HttpRequest {
     private static String extractQueryString(final String requestUri) {
         int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
 
-        if (queryStringDelimiterIndex != NOT_FOUND_INDEX) {
+        if (hasExtension(queryStringDelimiterIndex)) {
             return requestUri.substring(queryStringDelimiterIndex + 1);
         }
 
@@ -118,7 +118,7 @@ public class HttpRequest {
         int firstIndex = uri.indexOf(QUERY_STRING_DELIMITER);
         int lastIndex = uri.lastIndexOf(QUERY_STRING_DELIMITER);
 
-        if (firstIndex != NOT_FOUND_INDEX && firstIndex != lastIndex) {
+        if (hasExtension(firstIndex) && firstIndex != lastIndex) {
             throw new UncheckedServletException("잘못된 URI 형식: ?가 여러 번 포함되었습니다 → " + uri);
         }
 
@@ -129,11 +129,15 @@ public class HttpRequest {
         Objects.requireNonNull(path);
         int extensionDelimiterIndex = path.lastIndexOf(EXTENSION_DELIMITER);
 
-        if (extensionDelimiterIndex != NOT_FOUND_INDEX) {
+        if (hasExtension(extensionDelimiterIndex)) {
             String extension = path.substring(extensionDelimiterIndex + 1);
             return ContentType.from(extension);
         }
         return ContentType.TEXT_HTML;
+    }
+
+    private static boolean hasExtension(int delimiterIndex) {
+        return delimiterIndex != NOT_FOUND_INDEX;
     }
 
     public String getFilePath() {

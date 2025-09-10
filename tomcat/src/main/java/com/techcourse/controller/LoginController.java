@@ -26,28 +26,33 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (isLoginUser(httpRequest)) {
             String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
-
             httpResponse.setHttpResponse(ResponseEntity.found(body, "text/html;charset=utf-8"));
             return;
         }
 
-        Map<String, String> queryParams = httpRequest.getQueryParams();
+        String body = ResourceUtil.readStaticResource("/login.html", this.getClass());
+        httpResponse.setHttpResponse(ResponseEntity.ok(body, "text/html;charset=utf-8"));
+    }
+
+    @Override
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        Map<String, String> bodyParams = httpRequest.getBodyParams();
 
         // account, password 쿼리 파라미터가 둘 다 없는 경우 login.html 반환
-        if (queryParams.isEmpty()) {
+        if (bodyParams.isEmpty()) {
             String body = ResourceUtil.readStaticResource("/login.html", this.getClass());
 
             httpResponse.setHttpResponse(ResponseEntity.ok(body, "text/html;charset=utf-8"));
             return;
         }
 
-        if (!isValidQueryParams(queryParams)) {
+        if (!isValidParams(bodyParams)) {
             httpResponse.setHttpResponse(ResponseEntity.badRequest("account or password is missing."));
             return;
         }
 
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+        String account = bodyParams.get("account");
+        String password = bodyParams.get("password");
 
         boolean isLoginSuccess = loginService.login(account, password);
         if (!isLoginSuccess) {
@@ -80,10 +85,10 @@ public class LoginController extends AbstractController {
         return sessionIdInCookie.equals(sessionId);
     }
 
-    private boolean isValidQueryParams(Map<String, String> queryParams) {
+    private boolean isValidParams(Map<String, String> params) {
         // account나 password 중 하나만 없는 경우, 파라미터 누락 처리
-        if (!queryParams.containsKey("account")
-                || !queryParams.containsKey("password")) {
+        if (!params.containsKey("account")
+                || !params.containsKey("password")) {
             return false;
         }
 

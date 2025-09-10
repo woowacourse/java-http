@@ -11,7 +11,7 @@ import org.apache.coyote.HttpRequest;
 
 public class ServletRequest {
 
-    private final String method;
+    private final HttpMethod method;
     private final Path path;
     private final Parameters parameters;
     private final HttpHeader headers;
@@ -20,7 +20,7 @@ public class ServletRequest {
     private Session session;
 
     public ServletRequest(HttpRequest request) {
-        this.method = request.getMethod();
+        this.method = HttpMethod.of(request.getMethod());
         this.headers = new HttpHeader(request.getHeaders());
         this.path = new Path(request.getUri());
         this.body = request.getBody();
@@ -32,7 +32,7 @@ public class ServletRequest {
         return path;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

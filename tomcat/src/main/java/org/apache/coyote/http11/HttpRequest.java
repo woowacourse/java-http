@@ -17,7 +17,7 @@ public class HttpRequest {
 
     private Map<String, List<String>> queryParameters;
     private Map<String, List<String>> formParameters;
-    private Map<String, List<String>> mergedParameters;
+    private Map<String, List<String>> allParameters;
     private HttpCookie cookies;
 
     public HttpRequest(final HttpRequestStartLine startLine, final HttpHeaders headers, final String body) {
@@ -60,8 +60,8 @@ public class HttpRequest {
         return startLine.getHttpMethod();
     }
 
-    public String getUri() {
-        return startLine.getUri();
+    public String getPath() {
+        return startLine.getPath();
     }
 
     public Map<String, List<String>> getQueryParameters() {
@@ -101,15 +101,15 @@ public class HttpRequest {
     }
 
     public Map<String, List<String>> getParameters() {
-        if (mergedParameters == null) {
-            mergedParameters = new LinkedHashMap<>();
-            mergeInto(mergedParameters, getQueryParameters());
-            mergeInto(mergedParameters, getFormParameters());
+        if (allParameters == null) {
+            allParameters = new LinkedHashMap<>();
+            addInto(allParameters, getQueryParameters());
+            addInto(allParameters, getFormParameters());
         }
-        return mergedParameters;
+        return allParameters;
     }
 
-    private static void mergeInto(
+    private static void addInto(
             final Map<String, List<String>> base,
             final Map<String, List<String>> add
     ) {

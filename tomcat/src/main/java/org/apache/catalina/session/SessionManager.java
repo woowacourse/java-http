@@ -13,6 +13,9 @@ public class SessionManager implements Manager {
     public static SessionManager getInstance() {
         return INSTANCE;
     }
+    
+    private SessionManager() {
+    }
 
     @Override
     public void add(final Session session) {
@@ -37,8 +40,5 @@ public class SessionManager implements Manager {
         Session session = new Session(jsessionId);
         add(session);
         return session;
-    }
-
-    private SessionManager() {
     }
 }

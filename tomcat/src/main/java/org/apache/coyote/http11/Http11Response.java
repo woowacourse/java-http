@@ -89,7 +89,7 @@ public class Http11Response {
         this(
                 httpVersion,
                 httpStatus.getCode(),
-                httpStatus.getMessage(),
+                httpStatus.name(),
                 headers,
                 new String(body, StandardCharsets.UTF_8)
         );

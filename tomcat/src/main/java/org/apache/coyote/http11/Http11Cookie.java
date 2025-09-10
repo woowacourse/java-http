@@ -31,9 +31,6 @@ public class Http11Cookie {
     }
 
     public Optional<String> findCookie(final String cookieName) {
-        if (cookies.containsKey(cookieName)) {
-            return Optional.of(cookies.get(cookieName));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(cookies.get(cookieName));
     }
 }

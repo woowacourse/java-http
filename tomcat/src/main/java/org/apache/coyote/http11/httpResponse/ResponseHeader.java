@@ -30,9 +30,13 @@ public class ResponseHeader {
 
     public ResponseHeader build(
             final String body,
-            final String contentType
+            final String type
     ) {
-        this.headers.put("Content-Type", contentType + ";charset=utf-8");
+        String contentType = type;
+        if (contentType.startsWith("text/")) {
+            contentType += ";charset=utf-8";
+        }
+        this.headers.put("Content-Type", contentType);
         this.headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 
         return this;

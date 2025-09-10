@@ -19,9 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Session session;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Session session) {
         this.connection = connection;
+        this.session = session;
     }
 
     @Override
@@ -46,10 +48,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private void processRequest(HttpRequest request, HttpResponse response) throws IOException {
         if ("/login".equals(request.getPath())) {
-            if ("GET".equalsIgnoreCase(request.getMethod())) {
-                handleStaticFileRequest("/login.html", response);
-                return;
-            }
             handleLoginRequest(request, response);
             return;
         }
@@ -67,6 +65,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLoginRequest(HttpRequest request, HttpResponse response) throws IOException {
+        if (request.isCookies()) {
+            User user = (User) session.getStore(request.getCookie().getValue());
+
+            log.info(user.toString());
+            response.sendRedirect("/index");
+            return;
+        }
+
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            handleStaticFileRequest("/login.html", response);
+            return;
+        }
+
         if (!request.isParams()) {
             response.sendError(HttpStatus.BAD_REQUEST);
             return;
@@ -93,7 +104,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info(user.toString());
-        response.addCookie(HttpCookie.createSessionId());
+
+        HttpCookie cookie = HttpCookie.createSessionId();
+        session.addStore(cookie.getValue(), user);
+
+        response.addCookie(cookie);
         response.sendRedirect("/index");
     }
 

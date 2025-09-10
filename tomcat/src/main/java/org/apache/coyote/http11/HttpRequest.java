@@ -13,6 +13,7 @@ public class HttpRequest {
     private final String queryString;
     private final Map<String, String> params;
     private final Map<String, String> headers;
+    private HttpCookie cookie;
 
     public HttpRequest(BufferedReader reader) throws IOException {
         String requestLine = readRequestLine(reader);
@@ -23,7 +24,7 @@ public class HttpRequest {
         this.path = extractPath(uri);
         this.queryString = extractQueryString(uri);
         this.headers = Collections.unmodifiableMap(readHeaders(reader));
-        
+
         if ("POST".equalsIgnoreCase(this.method) && headers.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
             char[] body = new char[contentLength];
@@ -31,7 +32,7 @@ public class HttpRequest {
             this.params = Collections.unmodifiableMap(parseParams(new String(body)));
             return;
         }
-        
+
         this.params = Collections.unmodifiableMap(parseParams(this.queryString));
     }
 
@@ -68,8 +69,23 @@ public class HttpRequest {
             String key = line.substring(0, sep).trim();
             String value = line.substring(sep + 1).trim();
             headers.put(key, value);
+
+            if ("Cookie".equals(key)) {
+                parseCookie(value);
+            }
         }
         return headers;
+    }
+
+    private void parseCookie(String cookieHeader) {
+        String[] cookies = cookieHeader.split(";");
+        for (String cookie : cookies) {
+            String[] parts = cookie.trim().split("=");
+            if (parts.length == 2 && "JSESSIONID".equals(parts[0])) {
+                this.cookie = HttpCookie.of(parts[1]);
+                break;
+            }
+        }
     }
 
     private Map<String, String> parseParams(String query) {
@@ -89,6 +105,10 @@ public class HttpRequest {
         return params;
     }
 
+    public boolean isCookies() {
+        return cookie != null;
+    }
+
     public String getPath() {
         return path;
     }
@@ -103,5 +123,9 @@ public class HttpRequest {
 
     public Map<String, String> getParams() {
         return params;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }

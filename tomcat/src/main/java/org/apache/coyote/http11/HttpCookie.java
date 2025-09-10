@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class HttpCookie {
 
+    private static final String NAME = "JSESSIONID";
     private final String name;
     private final String value;
 
@@ -12,16 +13,20 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public static HttpCookie of(String name, String value) {
-        return new HttpCookie(name, value);
+    public static HttpCookie of(String value) {
+        return new HttpCookie(NAME, value);
     }
 
     public static HttpCookie createSessionId() {
-        return new HttpCookie("JSESSIONID", UUID.randomUUID().toString());
+        return new HttpCookie(NAME, UUID.randomUUID().toString());
     }
 
     @Override
     public String toString() {
         return String.format("Set-Cookie: %s=%s", name, value);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

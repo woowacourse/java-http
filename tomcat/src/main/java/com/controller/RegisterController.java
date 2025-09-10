@@ -1,5 +1,7 @@
-package org.apache.web;
+package com.controller;
 
+import com.resolver.StaticResourceResolver;
+import com.resolver.StaticResourceResolver.ResolvedResource;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.Account;
 import com.techcourse.model.Email;
@@ -12,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.web.StaticResourceResolver.ResolvedResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

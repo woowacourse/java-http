@@ -1,4 +1,4 @@
-package org.apache.web;
+package com.mapping;
 
 import java.util.Objects;
 import org.apache.coyote.http11.HttpMethod;

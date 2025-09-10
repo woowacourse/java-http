@@ -1,4 +1,4 @@
-package org.apache.web;
+package com.resolver;
 
 import java.net.URL;
 

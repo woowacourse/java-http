@@ -1,5 +1,7 @@
-package org.apache.web;
+package com.mapping;
 
+import com.controller.Controller;
+import com.controller.StaticResourcesController;
 import java.util.ArrayList;
 import java.util.List;
 

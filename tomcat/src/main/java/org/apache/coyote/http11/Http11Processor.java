@@ -1,13 +1,12 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.apache.web.FrontController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.FrontController;
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -16,7 +15,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final FrontController frontController;
 
-    public Http11Processor(final Socket connection, final  FrontController frontController) {
+    public Http11Processor(final Socket connection, final FrontController frontController) {
         this.connection = connection;
         this.frontController = frontController;
     }
@@ -30,8 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream())
-        {
+             final var outputStream = connection.getOutputStream()) {
             final Http11Request http11Request = Http11Request.from(inputStream);
             final Http11Response http11Response = frontController.service(http11Request);
             outputStream.write(http11Response.toBytes());

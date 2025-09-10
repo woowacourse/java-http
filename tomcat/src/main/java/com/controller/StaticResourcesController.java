@@ -1,12 +1,13 @@
-package org.apache.web;
+package com.controller;
 
+import com.resolver.StaticResourceResolver;
+import com.resolver.StaticResourceResolver.ResolvedResource;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.web.StaticResourceResolver.ResolvedResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

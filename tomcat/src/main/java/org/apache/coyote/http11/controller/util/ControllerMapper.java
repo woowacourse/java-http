@@ -7,9 +7,11 @@ import org.apache.coyote.http11.controller.IndexController;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.LogoutController;
 import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.ResourceController;
 
 public class ControllerMapper {
 
+    private static final Controller RESOURCE_CONTROLLER = new ResourceController();
     private static final Map<String, Controller> CONTROLLERS = new HashMap<>();
 
     static {
@@ -21,6 +23,6 @@ public class ControllerMapper {
     }
 
     public static Controller getController(final String path) {
-        return CONTROLLERS.getOrDefault(path, null);
+        return CONTROLLERS.getOrDefault(path, RESOURCE_CONTROLLER);
     }
 }

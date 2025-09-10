@@ -17,7 +17,7 @@ public class Session implements HttpSession {
     private final String id;
     private final Map<String, Object> attributes = new HashMap<>();
     private final long creationTime;
-    private boolean invalidated = false;
+    private boolean invalidated;
 
     private Session(Manager manager, String id, long creationTime, boolean invalidated) {
         this.manager = manager;

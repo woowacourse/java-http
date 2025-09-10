@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -18,11 +19,17 @@ public class Http11Response {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CRLF = "\r\n";
 
+    private OutputStream outputStream;
+    private String statusLine;
     private String version;
     private int code;
     private String message;
     private Map<String, String> headers = new LinkedHashMap<>();
     private String body;
+
+    public Http11Response(OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
 
     public byte[] buildResponse(Charset charset) throws IOException {
         headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
@@ -62,6 +69,15 @@ public class Http11Response {
     public void sendRedirect(String path) throws Http11ParseException {
         putStatusLine("HTTP/1.1 302 Found");
         putHeader("Location", "/index.html");
+    }
+
+    public void sendError() {
+        this.statusLine = "HTTP/1.1 400 Bad Request";
+        String responseBody = readFileFromClasspath("static/400.html");
+        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Content-Type", MediaType.HTML.getMimeType());
+        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        this.headers = responseHeaders;
     }
 
     public void putStatusLine(String line) throws Http11ParseException {

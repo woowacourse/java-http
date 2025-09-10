@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public class HttpCookie {
 
+    public static final String JSESSIONID = "JSESSIONID";
+    
     private final Map<String, String> cookies;
 
     private HttpCookie(Map<String, String> cookies) {
@@ -46,11 +48,11 @@ public class HttpCookie {
     }
 
     public boolean hasJSessionId() {
-        return cookies.containsKey("JSESSIONID");
+        return cookies.containsKey(JSESSIONID);
     }
 
     public String getJSessionId() {
-        return cookies.get("JSESSIONID");
+        return cookies.get(JSESSIONID);
     }
 
     public Map<String, String> getAllCookies() {

@@ -10,7 +10,7 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
 public class RequestHandler {
-
+    
     public HttpResponse handleRequest(HttpRequest request) {
         return switch (request.getMethod() + " " + request.getEndpoint()) {
             case String s when s.equals("GET /") -> handleHome(request);
@@ -26,7 +26,7 @@ public class RequestHandler {
     private HttpResponse handleHome(HttpRequest request) {
         final var session = request.getSession(true);
         if (!request.getCookies().hasJSessionId()) {
-            return HttpResponse.okWithCookie("Hello world!", "text/html", "JSESSIONID", session.getId());
+            return HttpResponse.okWithCookie("Hello world!", "text/html", HttpCookie.JSESSIONID, session.getId());
         }
         return HttpResponse.ok("Hello world!", "text/html");
     }
@@ -58,7 +58,7 @@ public class RequestHandler {
         final var user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             final var sessionId = HttpCookie.generateJSessionId();
-            return HttpResponse.redirectWithCookie("/index.html", "JSESSIONID", sessionId);
+            return HttpResponse.redirectWithCookie("/index.html", HttpCookie.JSESSIONID, sessionId);
         } else {
             return handleStaticFile("/login.html", "text/html");
         }
@@ -84,7 +84,7 @@ public class RequestHandler {
         final var session = request.getSession(true);
         session.setAttribute("user", user);
 
-        return HttpResponse.redirectWithCookie("/index.html", "JSESSIONID", session.getId());
+        return HttpResponse.redirectWithCookie("/index.html", HttpCookie.JSESSIONID, session.getId());
     }
 
     private User getUser(Session session) {

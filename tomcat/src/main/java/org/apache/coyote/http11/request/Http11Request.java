@@ -27,12 +27,12 @@ public record Http11Request(
         return new Http11Request(requestLine, requestHeaders, requestBody);
     }
 
-    private static String readBody(final BufferedReader bufferedReader, final int length) throws IOException {
-        if (length <= 0) {
+    private static String readBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        if (contentLength <= 0) {
             return "";
         }
-        char[] bodyChars = new char[length];
-        bufferedReader.read(bodyChars, 0, length);
+        char[] bodyChars = new char[contentLength];
+        bufferedReader.read(bodyChars, 0, contentLength);
         return new String(bodyChars);
     }
 

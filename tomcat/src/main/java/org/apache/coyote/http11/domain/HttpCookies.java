@@ -11,10 +11,6 @@ public record HttpCookies(Map<String, String> values) {
         this(new HashMap<>());
     }
 
-    public HttpCookies(String id) {
-        this(Map.of(JSESSIONID, id));
-    }
-
     public String getJsessionid() {
         return values.getOrDefault(JSESSIONID, null);
     }

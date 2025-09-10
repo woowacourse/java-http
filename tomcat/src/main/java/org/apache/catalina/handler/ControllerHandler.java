@@ -1,6 +1,6 @@
 package org.apache.catalina.handler;
 
-import org.apache.catalina.contoller.Controller;
+import org.apache.catalina.controller.Controller;
 import org.apache.catalina.exception.PathNotFoundException;
 import org.apache.catalina.resolver.ViewResolver;
 import org.apache.coyote.http11.request.Http11Request;

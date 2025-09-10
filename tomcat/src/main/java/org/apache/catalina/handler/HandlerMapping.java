@@ -1,7 +1,7 @@
 package org.apache.catalina.handler;
 
 import java.util.Map;
-import org.apache.catalina.contoller.Controller;
+import org.apache.catalina.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

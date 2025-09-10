@@ -19,8 +19,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static boolean has(User user) {
-        return database.get(user.getAccount()) != null;
+    public static boolean has(String account) {
+        return database.get(account) != null;
     }
 
     public static Optional<User> findByAccount(String account) {

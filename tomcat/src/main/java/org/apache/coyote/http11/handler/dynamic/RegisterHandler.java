@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler.dynamic;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.statics.util.StaticResourceUtils;
 import org.apache.coyote.http11.request.dto.HttpRequest;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class RegisterHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
-    private Long userId = 2L;
+    private final AtomicLong sequence = new AtomicLong(2);
 
     @Override
     public boolean canHandle(HttpRequest request) {
@@ -25,7 +26,7 @@ public class RegisterHandler implements Handler {
     public void handle(HttpRequest request, HttpResponse response) throws IOException {
         switch (request.method().toUpperCase()) {
             case "POST" -> handlePost(request, response);
-            default     -> StaticResourceUtils.serve(response, "404.html", HttpStatus.METHOD_NOT_ALLOWED);
+            default     -> StaticResourceUtils.serve(response, "405.html", HttpStatus.METHOD_NOT_ALLOWED);
         }
     }
 
@@ -40,11 +41,12 @@ public class RegisterHandler implements Handler {
         }
 
         try {
-            User user = new User(userId++, account, password, email);
-            if (InMemoryUserRepository.has(user)) {
-                log.error("이미 존재하는 아이디입니다: {}", user.getAccount());
+            if (InMemoryUserRepository.has(account)) {
+                log.error("이미 존재하는 아이디입니다: {}", account);
                 throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
             }
+            long id = sequence.getAndIncrement();
+            User user = new User(id, account, password, email);
             InMemoryUserRepository.save(user);
             log.info("회원가입 완료 = {}, {}, {}", account, email, password);
 

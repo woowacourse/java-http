@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import org.apache.coyote.http11.exception.CommonException;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +36,14 @@ public class Router {
         }
     }
 
-    private void doGet(
-            HttpRequest httpRequest,
-            HttpResponse httpResponse
-    ) throws IOException {
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.uri().equals("/login")) {
-            if(httpRequest.getSession() != null) {
+            Session session = httpRequest.getSession();
+            if (session != null && session.getAttribute("user") != null) {
                 httpResponse.setStatusCode(HttpStatus.FOUND);
                 httpResponse.setHeader("Location", "http://localhost:8080");
+                return;
             }
-            return;
         }
         staticHandler.serve(httpRequest, httpResponse);
     }

@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleWelcomePage() {
-        return HttpResponseParser.createWelcomeHttpResponse();
+        return HttpResponseParser.createPlainTextHttpResponse("Hello world!");
     }
 
     private HttpResponse handleRegisterGetRequest() throws IOException {

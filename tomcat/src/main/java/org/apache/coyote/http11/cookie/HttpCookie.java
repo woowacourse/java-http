@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.header.RequestHeaders;
+import org.apache.coyote.http11.response.header.ResponseHeader;
 import org.apache.coyote.http11.response.header.ResponseHeaders;
 
 public class HttpCookie {
@@ -11,7 +12,6 @@ public class HttpCookie {
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String REQUEST_HEADER_COOKIE_NAME = "Cookie";
-    private static final String RESPONSE_HEADER_COOKIE_NAME = "Set-Cookie";
 
     private final Map<String, String> cookies;
 
@@ -38,7 +38,10 @@ public class HttpCookie {
     }
 
     public void addToResponseHeaders(final ResponseHeaders responseHeaders) {
-        cookies.forEach((key, value) -> responseHeaders.add(RESPONSE_HEADER_COOKIE_NAME, key + "=" + value));
+        cookies.forEach((key, value) -> {
+            final ResponseHeader header = ResponseHeader.createSetCookieHeader(key + "=" + value);
+            responseHeaders.add(header);
+        });
     }
 
     public Optional<String> get(final String key) {

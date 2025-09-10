@@ -1,36 +1,23 @@
 package org.apache.coyote.http11.response;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.http11.StaticResource;
-import org.apache.coyote.http11.exception.HttpStatusException;
 import org.apache.coyote.http11.response.body.ResponseBody;
+import org.apache.coyote.http11.response.header.ResponseHeader;
 import org.apache.coyote.http11.response.header.ResponseHeaders;
 import org.apache.coyote.http11.response.startline.HttpStatusCode;
 import org.apache.coyote.http11.response.startline.ResponseLine;
 
 public class HttpResponseParser {
 
-    private static final Map<String, String> MIME_TYPES = Map.of(
-            "html", "text/html;charset=utf-8",
-            "css", "text/css;charset=utf-8",
-            "js", "text/javascript;charset=utf-8"
-    );
-
-    public static HttpResponse createWelcomeHttpResponse() {
+    public static HttpResponse createPlainTextHttpResponse(final String content) {
         final ResponseLine responseLine = new ResponseLine("HTTP/1.1", HttpStatusCode.OK);
+        final ResponseBody responseBody = ResponseBody.createPlainTextResponseBody(content);
 
-        final byte[] bodyBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
-        final ResponseBody responseBody = new ResponseBody(MIME_TYPES.get("html"), bodyBytes);
-
-        final LinkedHashMap<String, List<String>> rawResponseHeaders = new LinkedHashMap<>();
-        addHeader(rawResponseHeaders, "Content-Type", responseBody.getContentType());
-        addHeader(rawResponseHeaders, "Content-Length", String.valueOf(responseBody.getLength()));
-        final ResponseHeaders responseHeaders = new ResponseHeaders(rawResponseHeaders);
+        final ResponseHeader contentTypeHeader = ResponseHeader.createContentTypeHeader(responseBody);
+        final ResponseHeader contentLengthHeader = ResponseHeader.createContentLength(responseBody);
+        final ResponseHeaders responseHeaders = new ResponseHeaders(List.of(contentTypeHeader, contentLengthHeader));
 
         return new HttpResponse(responseLine, responseHeaders, responseBody);
     }
@@ -40,12 +27,13 @@ public class HttpResponseParser {
         final ResponseLine responseLine = new ResponseLine("HTTP/1.1", statusCode);
 
         final StaticResource staticResource = new StaticResource(filePath);
-        final ResponseBody responseBody = parseResponseBody(staticResource);
+        final byte[] content = staticResource.readFile();
+        final String extension = staticResource.getExtension();
+        final ResponseBody responseBody = ResponseBody.createStaticResourceResponseBody(content, extension);
 
-        final LinkedHashMap<String, List<String>> rawResponseHeaders = new LinkedHashMap<>();
-        addHeader(rawResponseHeaders, "Content-Type", responseBody.getContentType());
-        addHeader(rawResponseHeaders, "Content-Length", String.valueOf(responseBody.getLength()));
-        final ResponseHeaders responseHeaders = new ResponseHeaders(rawResponseHeaders);
+        final ResponseHeader contentTypeHeader = ResponseHeader.createContentTypeHeader(responseBody);
+        final ResponseHeader contentLengthHeader = ResponseHeader.createContentLength(responseBody);
+        final ResponseHeaders responseHeaders = new ResponseHeaders(List.of(contentTypeHeader, contentLengthHeader));
 
         return new HttpResponse(responseLine, responseHeaders, responseBody);
     }
@@ -55,11 +43,11 @@ public class HttpResponseParser {
 
         final ResponseBody responseBody = ResponseBody.createEmptyResponseBody();
 
-        final LinkedHashMap<String, List<String>> rawResponseHeaders = new LinkedHashMap<>();
-        addHeader(rawResponseHeaders, "Content-Type", "text/html; charset=UTF-8");
-        addHeader(rawResponseHeaders, "Content-Length", "0");
-        addHeader(rawResponseHeaders, "Location", location);
-        final ResponseHeaders responseHeaders = new ResponseHeaders(rawResponseHeaders);
+        final ResponseHeader contentTypeHeader = ResponseHeader.createContentTypeHeader(responseBody);
+        final ResponseHeader contentLengthHeader = ResponseHeader.createContentLength(responseBody);
+        final ResponseHeader locationHeader = ResponseHeader.createLocationHeader(location);
+        final ResponseHeaders responseHeaders = new ResponseHeaders(
+                List.of(contentTypeHeader, contentLengthHeader, locationHeader));
 
         return new HttpResponse(responseLine, responseHeaders, responseBody);
     }
@@ -68,33 +56,14 @@ public class HttpResponseParser {
         final ResponseLine responseLine = new ResponseLine("HTTP/1.1", statusCode);
 
         final StaticResource staticResource = new StaticResource("/" + statusCode.getStatusCode() + ".html");
-        final ResponseBody responseBody = parseResponseBody(staticResource);
+        final byte[] content = staticResource.readFile();
+        final String extension = staticResource.getExtension();
+        final ResponseBody responseBody = ResponseBody.createStaticResourceResponseBody(content, extension);
 
-        final LinkedHashMap<String, List<String>> rawResponseHeaders = new LinkedHashMap<>();
-        addHeader(rawResponseHeaders, "Content-Type", responseBody.getContentType());
-        addHeader(rawResponseHeaders, "Content-Length", String.valueOf(responseBody.getLength()));
-        final ResponseHeaders responseHeaders = new ResponseHeaders(rawResponseHeaders);
+        final ResponseHeader contentTypeHeader = ResponseHeader.createContentTypeHeader(responseBody);
+        final ResponseHeader contentLengthHeader = ResponseHeader.createContentLength(responseBody);
+        final ResponseHeaders responseHeaders = new ResponseHeaders(List.of(contentTypeHeader, contentLengthHeader));
 
         return new HttpResponse(responseLine, responseHeaders, responseBody);
-    }
-
-    private static ResponseBody parseResponseBody(final StaticResource staticResource) throws IOException {
-        final byte[] rawResponseBody = staticResource.readFile();
-        final String contentType = getContentType(staticResource.getExtension());
-        return new ResponseBody(contentType, rawResponseBody);
-    }
-
-    private static void addHeader(final Map<String, List<String>> responseHeaders, final String key,
-                                  final String value) {
-        responseHeaders.computeIfAbsent(key, k -> new ArrayList<>())
-                .add(value);
-    }
-
-    private static String getContentType(final String extension) {
-        final String mimeType = MIME_TYPES.get(extension);
-        if (mimeType == null) {
-            throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
-        }
-        return mimeType;
     }
 }

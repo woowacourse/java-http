@@ -1,7 +1,8 @@
-package org.apache.coyote.controller;
+package org.apache.coyote.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.dynamic.HomeController;
 import org.apache.coyote.controller.dynamic.LoginController;
 import org.apache.coyote.controller.dynamic.RegisterController;

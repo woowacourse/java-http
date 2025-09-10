@@ -1,7 +1,9 @@
-package org.apache.coyote.error;
+package org.apache.coyote.handler;
 
 import java.io.IOException;
 import org.apache.coyote.controller.error.ErrorPageController;
+import org.apache.coyote.error.ErrorPage;
+import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.HttpRequest;
 import org.apache.coyote.httpResponse.HttpResponse;
 import org.apache.coyote.httpResponse.StatusCode;

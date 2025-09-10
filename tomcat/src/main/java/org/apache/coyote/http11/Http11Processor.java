@@ -264,14 +264,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
-        final List<String> cookies = httpCookie.getAll().entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
+        final List<String> cookieHeaders = httpCookie.getAll().entrySet().stream()
+                .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + " ")
                 .toList();
 
         return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
                 "Location: " + location + " ",
-                "Set-Cookie: " + String.join("; ", cookies) + " ",
+                String.join("\r\n", cookieHeaders),
                 "Content-Length: 0 ",
                 "");
     }

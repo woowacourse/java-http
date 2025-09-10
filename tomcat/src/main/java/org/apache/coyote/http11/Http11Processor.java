@@ -1,22 +1,16 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.util.ControllerMapper;
@@ -66,10 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
 
-            if ("/logout".equals(path)) {
-                statusLine = handleLogout(request, responseHeaders);
-                responseBody = "";
-            } else if (Http11Method.GET.equals(method)) {
+            if (Http11Method.GET.equals(method)) {
                 Entry<String, String> getResult = handleGetRequest(path, request, responseHeaders);
                 statusLine = getResult.getKey();
                 responseBody = getResult.getValue();
@@ -105,16 +96,6 @@ public class Http11Processor implements Runnable, Processor {
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
-    }
-
-    private String handleLogout(final Http11Request request, final Map<String, String> responseHeaders) {
-        final Http11Cookie cookie = request.getCookie();
-        if (cookie.isContainsSessionId()) {
-            SessionManager.getInstance().remove(cookie.getSessionId());
-        }
-        responseHeaders.put("Location", "/index.html");
-        responseHeaders.put("Set-Cookie", "JSESSIONID=; Path=/; Max-Age=0");
-        return "HTTP/1.1 302 Found";
     }
 
     private Entry<String, String> handleGetRequest(final String path, final Http11Request request, 

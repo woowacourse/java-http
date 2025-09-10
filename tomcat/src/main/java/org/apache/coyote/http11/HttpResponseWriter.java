@@ -12,7 +12,8 @@ public class HttpResponseWriter {
         headers.putIfAbsent("Content-Type", "text/html;charset=utf-8");
         headers.putIfAbsent("Content-Length", String.valueOf(body.length));
 
-        outputStream.write(response.asString().getBytes());
+        outputStream.write(response.asHeaderString().getBytes());
+        outputStream.write(response.body());
         outputStream.flush();
     }
 }

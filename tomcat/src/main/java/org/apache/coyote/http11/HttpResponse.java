@@ -39,7 +39,7 @@ public final class HttpResponse {
         return httpResponse;
     }
 
-    public String asString() {
+    public String asHeaderString() {
         StringBuilder response = new StringBuilder();
 
         int statusCode = status.code();
@@ -53,7 +53,6 @@ public final class HttpResponse {
                     .append(CRLF);
         }
         response.append(CRLF);
-        response.append(new String(body));
 
         return response.toString();
     }

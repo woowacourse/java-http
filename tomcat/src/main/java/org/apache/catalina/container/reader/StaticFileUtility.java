@@ -26,6 +26,7 @@ public class StaticFileUtility {
     public static String readFile(String fileUri) {
         try {
             validateInvalidUri(fileUri);
+            validateEmptyFile(fileUri);
             ClassLoader classLoader = StaticFileUtility.class.getClassLoader();
             URL resourceUrl = classLoader.getResource(BASE_URI + fileUri);
             Path path = Paths.get(resourceUrl.toURI());
@@ -48,6 +49,14 @@ public class StaticFileUtility {
         List<String> uriPart = List.of(decodedUri.split("/"));
         if (uriPart.contains(".") || uriPart.contains("..")) {
             throw new InvalidRequestException("부적절한 리소스 주소입니다.");
+        }
+    }
+
+    private static void validateEmptyFile(String fileUri) {
+        ClassLoader classLoader = StaticFileUtility.class.getClassLoader();
+        URL resourceUrl = classLoader.getResource(BASE_URI + fileUri);
+        if (resourceUrl != null) {
+            throw new FileReadException("존재하지 않는 파일입니다.");
         }
     }
 }

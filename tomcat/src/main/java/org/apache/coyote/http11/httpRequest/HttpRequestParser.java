@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.HttpBody;
 import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.general.HttpProtocolVersion;
@@ -97,7 +98,7 @@ public class HttpRequestParser {
 
     private static HttpBody parseBody(HttpHeaders headers, BufferedReader bufferedReader) throws IOException {
         int contentLength = 0;
-        String rawContentLength = headers.getHeaderValueOf("Content-Length");
+        String rawContentLength = headers.getHeaderValueOf(CommonHeaderKeys.CONTENT_LENGTH.getKey());
         if (rawContentLength != null) {
             contentLength = Integer.parseInt(rawContentLength);
         }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httpResponse;
 
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.general.HttpProtocolVersion;
@@ -20,9 +21,9 @@ public class HttpResponse {
     public static HttpResponse of(HttpProtocolVersion protocolVersion, HttpStatus status, ContentType contentType, String bodyText) {
         StatusLine statusLine = new StatusLine(protocolVersion, status);
         HttpHeaders headers = HttpHeaders.empty();
-        headers.add("Content-Type", contentType.getValueWithUtf8Charset());
+        headers.add(CommonHeaderKeys.CONTENT_TYPE.getKey(), contentType.getValueWithUtf8Charset());
         byte[] body = bodyText.getBytes(StandardCharsets.UTF_8);
-        headers.add("Content-Length", String.valueOf(body.length));
+        headers.add(CommonHeaderKeys.CONTENT_LENGTH.getKey(), String.valueOf(body.length));
         return new HttpResponse(statusLine, headers, body);
     }
 

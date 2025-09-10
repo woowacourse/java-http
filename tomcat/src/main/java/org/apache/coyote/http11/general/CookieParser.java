@@ -1,17 +1,15 @@
-package org.apache.coyote.http11.httpRequest;
+package org.apache.coyote.http11.general;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.general.Cookies;
+import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class CookieParser {
 
-    public static final String HEADER_KEY_OF_COOKIE = "Cookie";
-
     public static Cookies parseFromHttpRequest(HttpRequest httpRequest) {
-        String cookie = httpRequest.getHeaderValueOf(HEADER_KEY_OF_COOKIE);
+        String cookie = httpRequest.getHeaderValueOf(CommonHeaderKeys.COOKIE.getKey());
         if (cookie == null) {
             return new Cookies(new HashMap<>());
         }

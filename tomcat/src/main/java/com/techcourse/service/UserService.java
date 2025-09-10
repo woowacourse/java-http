@@ -6,11 +6,12 @@ import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.Cookies;
 import org.apache.coyote.http11.handler.controllerResponse.ApplicationResponse;
 import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
-import org.apache.coyote.http11.httpRequest.CookieParser;
+import org.apache.coyote.http11.general.CookieParser;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
 import org.slf4j.Logger;
@@ -29,11 +30,11 @@ public class UserService {
         String sessionId = findSessionId(httpRequest);
         if (sessionId == null || !isValidSession(sessionId)) {
             JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-            response.addHeader("Location", "/login.html");
+            response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/login.html");
             return response;
         }
         JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader("Location", "/index.html");
+        response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
         return response;
     }
 
@@ -69,8 +70,8 @@ public class UserService {
         logger.info(user.toString());
         Session session = buildSessionOfUser(user);
         JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-        response.addHeader("Location", "/index.html");
+        response.addHeader(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
+        response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
         return response;
     }
 
@@ -93,8 +94,8 @@ public class UserService {
         InMemoryUserRepository.save(newUser);
         Session session = buildSessionOfUser(newUser);
         JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-        response.addHeader("Location", "/index.html");
+        response.addHeader(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
+        response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
         return response;
     }
 }

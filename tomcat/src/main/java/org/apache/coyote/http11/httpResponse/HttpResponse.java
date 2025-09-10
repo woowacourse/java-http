@@ -38,7 +38,10 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse build(final String path, final String body) {
+    public HttpResponse build(
+            final String path,
+            final String body
+    ) {
         final String contentType = ContentType.getContentType(path);
 
         this.responseHeader = responseHeader.build(body, contentType);

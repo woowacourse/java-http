@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.httpRequest;
 
-import com.sun.net.httpserver.Request;
 import java.util.Optional;
 
 public class RequestLine {

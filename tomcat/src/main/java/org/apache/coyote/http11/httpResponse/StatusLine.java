@@ -15,9 +15,7 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public static StatusLine build(
-            final HttpStatus httpStatus
-    ) {
+    public static StatusLine build(final HttpStatus httpStatus) {
         return new StatusLine(ProtocolVersion.HTTP_1_1, httpStatus);
     }
 

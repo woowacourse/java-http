@@ -133,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            response = getResponse("static/404.html", "404 Not Found");
+            response = getResponse("static/404.html", NOT_FOUND);
             sendResponse(outputStream, response);
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -164,7 +164,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty()) {
-            return getResponse("static/404.html", NOT_FOUND);
+            return getResponse("static/401.html", UNAUTHORIZED);
         }
         if (user.get().checkPassword(password)) {
             log.info(user.toString());
@@ -182,7 +182,7 @@ public class Http11Processor implements Runnable, Processor {
             return getRedirectResponse("/index.html", FOUND, cookieHeaderValue);
         }
 
-        return getRedirectResponse("/401.html", UNAUTHORIZED, null);
+        return getRedirectResponse("static/401.html", UNAUTHORIZED, null);
     }
 
     private String registerUserResponse(StringBuilder body) throws IOException, URISyntaxException {

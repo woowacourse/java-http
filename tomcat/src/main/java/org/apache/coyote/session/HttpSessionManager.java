@@ -24,8 +24,8 @@ public class HttpSessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
-    public boolean containsKey(String id){
-        boolean a = SESSIONS.containsKey(id);
-        return a;
+    public boolean containsKey(String id) {
+        return SESSIONS.containsKey(id);
     }
 }
+

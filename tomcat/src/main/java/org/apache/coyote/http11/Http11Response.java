@@ -8,7 +8,6 @@ import java.util.Map;
 
 public class Http11Response {
 
-    private static final String REDIRECT_BASE_URL = "http://localhost:8080";
     private static final String HTTP11_VERSION = "HTTP/1.1";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
@@ -69,7 +68,7 @@ public class Http11Response {
     }
 
     public static Http11Response createRedirectResponse(final String redirectTarget, final Map<String, String> headers) {
-        headers.put(LOCATION, REDIRECT_BASE_URL + redirectTarget);
+        headers.put(LOCATION, redirectTarget);
 
         return new Http11Response(
                 HTTP11_VERSION,

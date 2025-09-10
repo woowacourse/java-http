@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
@@ -38,23 +39,27 @@ public final class Http11Request {
         return new Http11Request("", "/", Collections.emptyMap(), Collections.emptyMap(), "", manager);
     }
 
-    public Session getSession(final boolean create) {
+    public Optional<Session> getSession(final boolean create) {
         if (session != null) {
-            return session;
+            return Optional.of(session);
         }
-        return httpCookie.getCookie("JSESSIONID")
-                .flatMap(manager::findSession)
-                .orElseGet(() -> createNewSession(create));
+        final Optional<Session> foundSession = httpCookie.getCookie("JSESSIONID")
+                .flatMap(manager::findSession);
+        if (foundSession.isPresent()) {
+            this.session = foundSession.get();
+            return foundSession;
+        }
+        if (create) {
+            this.session = createNewSession();
+            return Optional.of(this.session);
+        }
+        return Optional.empty();
     }
 
-    private Session createNewSession(final boolean create) {
-        if (create) {
-            final var newSession = new Session(UUID.randomUUID().toString());
-            manager.add(newSession);
-            this.session = newSession;
-            return newSession;
-        }
-        return null;
+    private Session createNewSession() {
+        final var newSession = new Session(UUID.randomUUID().toString());
+        manager.add(newSession);
+        return newSession;
     }
 
     public HttpCookie getHttpCookie() {

@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int MAX_LINE_LENGTH = 8192;
+
     private final Socket connection;
     private final Manager manager;
 
@@ -74,8 +76,14 @@ public class Http11Processor implements Runnable, Processor {
         final var buffer = new ByteArrayOutputStream();
         int nextByte;
         while ((nextByte = inputStream.read()) != -1) {
+            if (buffer.size() >= MAX_LINE_LENGTH) {
+                throw new IOException("요청 라인/헤더가 최대 길이 " + MAX_LINE_LENGTH + "를 초과합니다.");
+            }
+            if (nextByte == '\n') {
+                break;
+            }
             if (nextByte == '\r') {
-                inputStream.read(); // '\n'을 읽고 버립니다.
+                inputStream.read();
                 break;
             }
             buffer.write(nextByte);
@@ -138,13 +146,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response dispatch(final Http11Request httpRequest) {
-        final var response = getResponse(httpRequest);
-        final var cookie = httpRequest.getHttpCookie();
-        if (!cookie.hasCookie("JSESSIONID")) {
-            final var session = httpRequest.getSession(true);
-            response.addCookie("JSESSIONID", session.getId());
-        }
-        return response;
+        return getResponse(httpRequest);
     }
 
     private Http11Response getResponse(final Http11Request httpRequest) {
@@ -167,15 +169,17 @@ public class Http11Processor implements Runnable, Processor {
             final Optional<User> userOptional = isLoginSuccessful(params);
             if (userOptional.isPresent()) {
                 final var user = userOptional.get();
-                final var session = httpRequest.getSession(true);
+                final var session = httpRequest.getSession(true)
+                        .orElseThrow(() -> new IllegalStateException("세션 생성에 실패했습니다."));
                 session.setAttribute("user", user);
-                return Http11Response.redirect("/index.html");
+                final var response = Http11Response.redirect("/index.html");
+                response.addCookie("JSESSIONID", session.getId());
+                return response;
             }
             return Http11Response.redirect("/401.html");
         }
-
-        final Session session = httpRequest.getSession(false);
-        if (session != null && session.getAttribute("user") != null) {
+        final Optional<Session> sessionOptional = httpRequest.getSession(false);
+        if (sessionOptional.isPresent() && sessionOptional.get().getAttribute("user") != null) {
             return Http11Response.redirect("/index.html");
         }
         return serveStaticFile("/login.html");

@@ -89,7 +89,7 @@ class Http11ProcessorTest {
     @Test
     void js() throws IOException {
         // given
-        final var httpRequest = """        
+        final var httpRequest = """
                 GET /js/scripts.js HTTP/1.1\r
                 Host: localhost:8080\r
                 \r
@@ -163,7 +163,7 @@ class Http11ProcessorTest {
         );
     }
 
-    @DisplayName("로그인 성공 시 /index.html로 리다이렉트한다.")
+    @DisplayName("로그인 성공 시 /index.html로 리다이렉트하고, Set-Cookie 헤더를 포함하여 응답한다.")
     @Test
     void login_success() {
         // given
@@ -186,7 +186,8 @@ class Http11ProcessorTest {
         final String output = socket.output();
         assertAll(
                 () -> assertThat(output).startsWith("HTTP/1.1 302 Found"),
-                () -> assertThat(output).contains("Location: /index.html")
+                () -> assertThat(output).contains("Location: /index.html"),
+                () -> assertThat(output).contains("Set-Cookie: JSESSIONID=")
         );
     }
 
@@ -217,7 +218,7 @@ class Http11ProcessorTest {
         );
     }
 
-    @DisplayName("JSESSIONID 쿠키가 없으면 Set-Cookie 헤더를 포함하여 응답한다.")
+    @DisplayName("JSESSIONID 쿠키가 없으면 Set-Cookie 헤더를 포함하지 않고 응답한다.")
     @Test
     void jSessionId() {
         // given
@@ -234,7 +235,7 @@ class Http11ProcessorTest {
 
         // then
         final String output = socket.output();
-        assertThat(output).contains("Set-Cookie: JSESSIONID=");
+        assertThat(output).doesNotContain("Set-Cookie: JSESSIONID=");
     }
 
     @DisplayName("JSESSIONID 쿠키가 있으면 Set-Cookie 헤더를 포함하지 않고 응답한다.")

@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             return false;
         }
         byte[] resourceBody = readPathFile(resourcePath);
-        if (resourceBody != null) {
+        if (resourceBody == null) {
             return false;
         }
         respond(HttpResponse.of(

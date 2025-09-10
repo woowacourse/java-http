@@ -36,7 +36,7 @@ public class ApplicationProcessor {
             return HttpResponse.redirect("401.html");
         }
         User user = userOpt.get();
-        final Session session = httpRequest.getSession(true);
+        final Session session = httpRequest.changeSessionId();
         session.setAttribute("user", user);
         HttpResponse response = HttpResponse.redirect("/index.html");
         response.addCookie(SessionManager.JSESSIONID, session.getId());

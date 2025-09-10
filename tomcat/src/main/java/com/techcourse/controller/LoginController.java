@@ -77,12 +77,12 @@ public class LoginController extends AbstractController {
             return false;
         }
 
-        String sessionId = sessionManager.findSession(sessionIdInCookie).getId();
-        if (sessionId == null) {
+        Session session = sessionManager.findSession(sessionIdInCookie);
+        if (session == null) {
             return false;
         }
 
-        return sessionIdInCookie.equals(sessionId);
+        return sessionIdInCookie.equals(session.getId());
     }
 
     private boolean isValidParams(Map<String, String> params) {

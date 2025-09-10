@@ -49,7 +49,7 @@ public class LoginHandler extends AbstractController {
 
     @Override
     void doPost(final Http11Request request, final Http11Response response) throws Exception {
-        final Map<String, String> body = request.getBodyByContentType("application/x-www-form-urlencoded");
+        final Map<String, String> body = request.getBodyByContentType(HttpContentType.URL);
 
         final String account = body.get("account");
         final String password = body.get("password");

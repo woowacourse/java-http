@@ -37,8 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             final Http11Request request = readRequest(inputStream);
             final Http11Response response = new Http11Response();
 
-            final Controller controller = mapHandler(request);
-            handle(controller, request, response);
+            handle(request, response);
 
             final byte[] responseMessage = response.toMessage();
 
@@ -55,8 +54,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void handle(final Controller controller, final Http11Request request, final Http11Response response) {
+    private Http11Request readRequest(final InputStream requestInputStream) throws IOException {
+        final InputStreamReader inputStreamReader = new InputStreamReader(requestInputStream);
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        final List<String> headerLines = getHeaderLines(bufferedReader);
+        final int contentLength = getContentLength(headerLines);
+        final char[] bodyChars = getBody(contentLength, bufferedReader);
+
+        final String rawHttpRequest = String.join("\r\n", headerLines)
+                + "\r\n\r\n"
+                + new String(bodyChars);
+        return Http11Request.create(rawHttpRequest);
+    }
+
+    private void handle(final Http11Request request, final Http11Response response) {
         try {
+            final Controller controller = mapHandler(request);
             controller.service(request, response);
         } catch (final ServletException e) {
             log.warn("unauthorized : {}", e.getMessage());
@@ -70,33 +84,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Request readRequest(final InputStream requestInputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(requestInputStream);
-        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        final List<String> headerLines = new ArrayList<>();
-        String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
-
-        final int contentLength = headerLines.stream()
-                .filter(l -> l.startsWith("Content-Length:"))
-                .map(l -> Integer.parseInt(l.split(":")[1].trim()))
-                .findFirst()
-                .orElse(0);
-
-        final char[] bodyChars = new char[contentLength];
-        if (contentLength > 0) {
-            bufferedReader.read(bodyChars, 0, contentLength);
-        }
-
-        final String rawHttpRequest = String.join("\r\n", headerLines)
-                + "\r\n\r\n"
-                + new String(bodyChars);
-        return Http11Request.create(rawHttpRequest);
-    }
-
     private Controller mapHandler(final Http11Request request) throws Exception {
         final String requestTarget = request.getPath();
 
@@ -106,15 +93,34 @@ public class Http11Processor implements Runnable, Processor {
         if (requestTarget.endsWith("/register")) {
             return new RegisterHandler();
         }
-        if (requestTarget.equals("/")
-                || requestTarget.endsWith(".html")
-                || requestTarget.endsWith(".css")
-                || requestTarget.endsWith(".js")
-                || requestTarget.endsWith(".svg")
-        ) {
+        if (requestTarget.equals("/") || HttpContentType.isStaticResource(requestTarget)) {
             return new StaticHandler();
         }
-        //TODO 404 반영
         throw new NoSuchFileException(requestTarget);
+    }
+
+    private List<String> getHeaderLines(final BufferedReader bufferedReader) throws IOException {
+        final List<String> headerLines = new ArrayList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
+        }
+        return headerLines;
+    }
+
+    private int getContentLength(final List<String> headerLines) {
+        return headerLines.stream()
+                .filter(l -> l.startsWith("Content-Length:"))
+                .map(l -> Integer.parseInt(l.split(":")[1].trim()))
+                .findFirst()
+                .orElse(0);
+    }
+
+    private char[] getBody(final int contentLength, final BufferedReader bufferedReader) throws IOException {
+        final char[] bodyChars = new char[contentLength];
+        if (contentLength > 0) {
+            bufferedReader.read(bodyChars, 0, contentLength);
+        }
+        return bodyChars;
     }
 }

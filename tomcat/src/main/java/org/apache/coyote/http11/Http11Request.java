@@ -27,13 +27,13 @@ public class Http11Request {
         validateFirstLineSize(firstLine);
 
         final String method = firstLine[0];
-        String target = firstLine[1];
+        String path = firstLine[1];
         final String httpVersion = firstLine[2];
 
-        final Map<String, String> queryParams = getQueryParams(target);
+        final Map<String, String> queryParams = getQueryParams(path);
         if (!queryParams.isEmpty()) {
-            final int queryParamStartIndex = target.indexOf("?");
-            target = target.substring(0, queryParamStartIndex);
+            final int queryParamStartIndex = path.indexOf("?");
+            path = path.substring(0, queryParamStartIndex);
         }
 
         final Map<String, String> headers = getHeaders(headerLines);
@@ -43,7 +43,35 @@ public class Http11Request {
             headers.remove(COOKIE_HEADER);
         }
 
-        return new Http11Request(method, target, queryParams, httpVersion, headers, cookie, body);
+        return new Http11Request(method, path, queryParams, httpVersion, headers, cookie, body);
+    }
+
+    private static Map<String, String> getQueryParams(final String path) {
+        if (path == null || path.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        final String[] pathAndParams = path.split("\\?");
+        if (pathAndParams.length != 2) {
+            return new HashMap<>();
+        }
+
+        final String queryParams = pathAndParams[1];
+
+        final Map<String, String> params = parseUrlEncoded(queryParams);
+
+        return params;
+    }
+
+    private static Map<String, String> parseUrlEncoded(final String base) {
+        final Map<String, String> parsed = new HashMap<>();
+
+        final String[] pairs = base.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            parsed.put(keyValue[0], keyValue[1]);
+        }
+        return parsed;
     }
 
     private static void validateFirstLineSize(final String[] firstLine) {
@@ -52,35 +80,7 @@ public class Http11Request {
         }
     }
 
-    private static Map<String, String> getQueryParams(final String target) {
-        final Map<String, String> params = new HashMap<>();
-        if (target == null || target.isEmpty()) {
-            return params;
-        }
-
-        final String[] targetAndQueryParams = target.split("\\?");
-        if (targetAndQueryParams.length != 2) {
-            return params;
-        }
-
-        final String queryParams = targetAndQueryParams[1];
-
-        final String[] pairs = queryParams.split("&");
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-                continue;
-            }
-            throw new IllegalArgumentException(String.format("Wrong Query Parameter : %s", pair));
-        }
-
-        return params;
-    }
-
-    private static Map<String, String> getHeaders(
-            final String[] headerLines
-    ) {
+    private static Map<String, String> getHeaders(final String[] headerLines) {
         String line;
         final Map<String, String> headers = new HashMap<>();
         for (int i = 1; i < headerLines.length; i++) {
@@ -96,7 +96,27 @@ public class Http11Request {
         return headers;
     }
 
-    public Http11Request(
+    public Map<String, String> getBodyByContentType(final HttpContentType contentType) {
+        if (contentType != HttpContentType.URL) {
+            throw new IllegalArgumentException("Request Content-Type should be application/x-www-form-urlencoded");
+        }
+
+        if (body == null || body.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        final Map<String, String> urlEncodedResponseBody = parseUrlEncoded(body);
+        return urlEncodedResponseBody;
+    }
+
+    public Optional<String> findCookie(final String cookieName) {
+        if (cookie == null) {
+            return Optional.empty();
+        }
+        return cookie.findCookie(cookieName);
+    }
+
+    private Http11Request(
             final String method,
             final String path,
             final Map<String, String> queryParams,
@@ -114,32 +134,6 @@ public class Http11Request {
         this.body = body;
     }
 
-    public Map<String, String> getBodyByContentType(final String contentType) {
-        if (!contentType.equals("application/x-www-form-urlencoded")) {
-            throw new IllegalArgumentException("Request Content-Type should be application/x-www-form-urlencoded");
-        }
-
-        final Map<String, String> urlEncodedResponseBody = new HashMap<>();
-
-        if (body == null || body.isEmpty()) {
-            return urlEncodedResponseBody;
-        }
-
-        final String[] pairs = body.split("&");
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=", 2);
-            urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
-        }
-        return urlEncodedResponseBody;
-    }
-
-    public Optional<String> findCookie(final String cookieName) {
-        if (cookie == null) {
-            return Optional.empty();
-        }
-        return cookie.findCookie(cookieName);
-    }
-
     public String getPath() {
         return path;
     }
@@ -150,6 +144,5 @@ public class Http11Request {
 
     public String getBody() {
         return body;
-
     }
 }

@@ -3,10 +3,7 @@ package org.apache.catalina.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,7 +16,6 @@ import java.util.UUID;
 public class RegisterHandler extends AbstractController {
 
     private static final String STATIC_FILE_LOCATION = "static";
-    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -32,12 +28,12 @@ public class RegisterHandler extends AbstractController {
     void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final byte[] fileContent = readFile("/register.html");
 
-        response.setStaticResponse(HttpStatus.OK, fileContent, HTML_CONTENT_TYPE);
+        response.setStaticResponse(HttpStatus.OK, fileContent, HttpContentType.HTML.getValue());
     }
 
     @Override
     void doPost(final Http11Request request, final Http11Response response) throws Exception {
-        final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType("application/x-www-form-urlencoded");
+        final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType(HttpContentType.URL);
 
         final String account = urlEncodedResponseBody.get("account");
         final String email = urlEncodedResponseBody.get("email");

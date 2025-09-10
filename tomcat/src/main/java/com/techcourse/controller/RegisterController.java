@@ -1,20 +1,19 @@
 package com.techcourse.controller;
 
+import com.spring.controller.AbstractController;
 import com.spring.http.enums.HttpStatus;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.HttpStatusException;
 import com.techcourse.model.User;
-import com.spring.controller.Controller;
 import java.io.IOException;
 import java.util.Map;
-import com.spring.http.request.HttpRequest;
-import com.spring.http.response.HttpResponse;
 import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterController implements Controller {
-
+public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 

@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.general.HttpProtocolVersion;
 import org.apache.coyote.http11.handler.applicationResponse.ApplicationResponse;
+import org.apache.coyote.http11.handler.applicationResponse.JsonResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpResponse;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
@@ -26,7 +27,12 @@ public class ApiRouter {
     }
 
     private HttpResponse handleHttpResponse(ApplicationResponse applicationResponse, HttpProtocolVersion protocolVersion) {
-        HttpResponse httpResponse = applicationResponse.toHttpResponse(protocolVersion);
+        if (applicationResponse instanceof JsonResponse) {
+            HttpResponse httpResponse = HttpResponse.of(protocolVersion, applicationResponse.status(), ContentType.APPLICATION_JSON, applicationResponse.content());
+            addHeadersFromControllerResponse(httpResponse, applicationResponse);
+            return httpResponse;
+        }
+        HttpResponse httpResponse = StaticFileHandler.handleDefault(protocolVersion, applicationResponse.content());
         addHeadersFromControllerResponse(httpResponse, applicationResponse);
         return httpResponse;
     }

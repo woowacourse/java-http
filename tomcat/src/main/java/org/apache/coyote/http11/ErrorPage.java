@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.exception.CommonException;
-
 public enum ErrorPage {
 
     UNAUTHORIZED("401.html", 401),
@@ -25,6 +23,6 @@ public enum ErrorPage {
                 return errorPage.fileName;
             }
         }
-        throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR);
+        return INTERNAL_SERVER_ERROR.fileName;
     }
 }

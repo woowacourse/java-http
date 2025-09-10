@@ -11,18 +11,21 @@ public class RequestHandler {
     private final ApiRouter apiRouter = new ApiRouter();
 
     public HttpResponse handleHttpRequest(HttpRequest httpRequest) {
-        if (httpRequest == null) {
-            return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "잘못된 요청입니다.");
+        try {
+            if (httpRequest == null) {
+                return new HttpResponse(HttpStatus.BAD_REQUEST, ContentType.TEXT_HTML, "잘못된 요청입니다.");
+            }
+            return getResponseFromHandler(httpRequest);
+        } catch (Exception exception) {
+            return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "알 수 없는 오류가 발생했습니다.");
         }
+    }
 
+    private HttpResponse getResponseFromHandler(HttpRequest httpRequest) {
         if (httpRequest.pathEquals("") || httpRequest.pathEquals("/")) {
             return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
         }
 
-        return getResponseFromHandler(httpRequest);
-    }
-
-    private HttpResponse getResponseFromHandler(HttpRequest httpRequest) {
         URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
         if (isStaticFileRequest(resourceUrl)) {
             return StaticFileHandler.handle(httpRequest, resourceUrl);

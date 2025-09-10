@@ -24,7 +24,7 @@ public class HttpRequestParser {
             HttpHeaders headers = parseHeaders(bufferedReader);
             HttpBody body = parseBody(headers, bufferedReader);
             return new HttpRequest(requestLine, headers, body);
-        } catch (IOException | ArrayIndexOutOfBoundsException | NullPointerException exception) {
+        } catch (Exception exception) {
             logger.error(exception.getMessage(), exception);
             return null;
         }
@@ -83,7 +83,7 @@ public class HttpRequestParser {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
-    public static HttpHeaders parseHeaders(BufferedReader bufferedReader) throws IOException {
+    private static HttpHeaders parseHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while(!(headerLine = bufferedReader.readLine()).isEmpty()) {
@@ -93,7 +93,7 @@ public class HttpRequestParser {
         return new HttpHeaders(headers);
     }
 
-    public static HttpBody parseBody(HttpHeaders headers, BufferedReader bufferedReader) throws IOException {
+    private static HttpBody parseBody(HttpHeaders headers, BufferedReader bufferedReader) throws IOException {
         int contentLength = 0;
         String rawContentLength = headers.getHeaderValueOf("Content-Length");
         if (rawContentLength != null) {

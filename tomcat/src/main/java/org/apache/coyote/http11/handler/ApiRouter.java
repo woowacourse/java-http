@@ -32,16 +32,12 @@ public class ApiRouter {
     }
 
     public HttpResponse route(HttpRequest httpRequest) {
-        try {
-            Function<HttpRequest, ControllerResponse> handler = routeMap.get(httpRequest.getMethod() + " " + httpRequest.getPath());
-            if (handler == null) {
-                return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, "존재하지 않는 엔드포인트입니다.");
-            }
-            ControllerResponse controllerResponse = handler.apply(httpRequest);
-            return handleHttpResponse(controllerResponse);
-        } catch (Exception exception) {
-            return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "서버 내부에서 오류가 발생했습니다.");
+        Function<HttpRequest, ControllerResponse> handler = routeMap.get(httpRequest.getMethod() + " " + httpRequest.getPath());
+        if (handler == null) {
+            return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, "존재하지 않는 엔드포인트입니다.");
         }
+        ControllerResponse controllerResponse = handler.apply(httpRequest);
+        return handleHttpResponse(controllerResponse);
     }
 
     private HttpResponse handleHttpResponse(ControllerResponse controllerResponse) {

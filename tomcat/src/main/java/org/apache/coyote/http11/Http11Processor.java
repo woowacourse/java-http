@@ -69,25 +69,23 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                if (requestPath.startsWith("/login")) {
-                    if (requestPath.contains(QUERY_PARAM)) {
-                        authenticateUserFromRequestPath(requestPath, outputStream);
-                        return;
-                    }
-
-                    serveStaticFile(requestPath, outputStream);
-                    return;
-                }
-
                 serveStaticFile(requestPath, outputStream);
             }
 
             if (MethodType.isPostMethod(method)){
+
                 int contentLength = toInt(headers.get("Content-Length"));
 
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
+
+
+                if (requestPath.startsWith("/login")) {
+                    authenticateUserFromRequestPath(requestBody, outputStream);
+                    serveStaticFile(requestPath, outputStream);
+                    return;
+                }
 
                 registerUser(requestBody, outputStream);
             }
@@ -228,14 +226,11 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void authenticateUserFromRequestPath(String requestPath, OutputStream outputStream) throws IOException {
-        int index = requestPath.indexOf(QUERY_PARAM);
-        String queryString = requestPath.substring(index + 1);
+    private void authenticateUserFromRequestPath(String requestBody, OutputStream outputStream) throws IOException {
+        Map<LoginParam, String> loginParam = parseRequestBody(requestBody);
 
-        Map<LoginParam, String> accountAndPassword = queryParser(queryString);
-
-        String account = accountAndPassword.get(LoginParam.ACCOUNT);
-        String password = accountAndPassword.get(LoginParam.PASSWORD);
+        String account = loginParam.get(LoginParam.ACCOUNT);
+        String password = loginParam.get(LoginParam.PASSWORD);
 
         if (InMemoryUserRepository.existsByAccount(account)) {
             User user = InMemoryUserRepository.findByAccount(account).get();
@@ -244,6 +239,7 @@ public class Http11Processor implements Runnable, Processor {
             if (user.isPasswordCorrect(password)) {
                 String cookieSession = getSession(user);
                 sendResponse(outputStream, buildRedirectHeaders("/index.html", cookieSession));
+                log.info("Redirect Response:\n{}", buildRedirectHeaders("/index.html", cookieSession));
                 return;
             }
         }

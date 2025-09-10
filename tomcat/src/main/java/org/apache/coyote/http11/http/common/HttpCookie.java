@@ -53,10 +53,6 @@ public class HttpCookie {
         values.put(name, value);
     }
 
-    public boolean containsName(final String name) {
-        return values.containsKey(name);
-    }
-
     public String getByName(final String name) {
         return values.get(name);
     }

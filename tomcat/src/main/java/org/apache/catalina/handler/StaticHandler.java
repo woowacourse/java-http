@@ -1,7 +1,8 @@
-package org.apache.catalina;
+package org.apache.catalina.handler;
 
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.HttpContentType;
 import org.apache.coyote.http11.HttpStatus;
 
 import java.io.FileInputStream;
@@ -10,28 +11,28 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 
-public class StaticController extends AbstractController {
+public class StaticHandler extends AbstractController {
 
     private static final String STATIC_FILE_LOCATION = "static";
     private static final String WELCOME = "Hello world!";
 
     @Override
-    public void service(Http11Request request, Http11Response response) throws Exception {
+    public void service(final Http11Request request, final Http11Response response) throws Exception {
         super.service(request, response);
     }
 
     @Override
-    void doGet(Http11Request request, Http11Response response) throws Exception {
+    void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final String path = request.getPath();
         final byte[] fileContent = readFile(path);
-        final String contentType = determineContentType(path);
+        final String contentType = HttpContentType.fromExtension(path).getValue();
 
         response.setStaticResponse(HttpStatus.OK, fileContent, contentType);
     }
 
     @Override
-    void doPost(Http11Request request, Http11Response response) throws Exception {
-        //TODO 405 응답
+    void doPost(final Http11Request request, final Http11Response response) throws Exception {
+        response.setRedirectResponse("/404.html"); // 405 Method Not Allowed를 응답하는 게 더 자연스러우나 일단 404 처리
     }
 
     private byte[] readFile(final String location) throws IOException {
@@ -43,13 +44,5 @@ public class StaticController extends AbstractController {
         } catch (final NullPointerException e) {
             throw new NoSuchFileException(location);
         }
-    }
-
-    private String determineContentType(final String path) {
-        if (path.endsWith(".html")) return "text/html;charset=utf-8";
-        if (path.endsWith(".css")) return "text/css;charset=utf-8";
-        if (path.endsWith(".js")) return "application/javascript;charset=utf-8";
-        if (path.endsWith(".svg")) return "image/svg+xml;charset=utf-8";
-        return "text/plain;charset=utf-8";
     }
 }

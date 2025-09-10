@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.ServletException;
-import org.apache.catalina.*;
+import org.apache.catalina.handler.Controller;
+import org.apache.catalina.handler.LoginHandler;
+import org.apache.catalina.handler.RegisterHandler;
+import org.apache.catalina.handler.StaticHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void handle(Controller controller, Http11Request request, Http11Response response) throws Exception {
+    private static void handle(final Controller controller, final Http11Request request, final Http11Response response) {
         try {
             controller.service(request, response);
         } catch (final ServletException e) {
@@ -98,10 +101,10 @@ public class Http11Processor implements Runnable, Processor {
         final String requestTarget = request.getPath();
 
         if (requestTarget.endsWith("/login")) {
-            return new LoginController();
+            return new LoginHandler();
         }
         if (requestTarget.endsWith("/register")) {
-            return new RegisterController();
+            return new RegisterHandler();
         }
         if (requestTarget.equals("/")
                 || requestTarget.endsWith(".html")
@@ -109,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
                 || requestTarget.endsWith(".js")
                 || requestTarget.endsWith(".svg")
         ) {
-            return new StaticController();
+            return new StaticHandler();
         }
         //TODO 404 반영
         throw new NoSuchFileException(requestTarget);

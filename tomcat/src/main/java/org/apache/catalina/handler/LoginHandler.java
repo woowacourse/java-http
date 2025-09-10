@@ -1,8 +1,9 @@
-package org.apache.catalina;
+package org.apache.catalina.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.ServletException;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LoginController extends AbstractController {
+public class LoginHandler extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_FILE_LOCATION = "static";
@@ -25,12 +26,12 @@ public class LoginController extends AbstractController {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public void service(Http11Request request, Http11Response response) throws Exception {
+    public void service(final Http11Request request, final Http11Response response) throws Exception {
         super.service(request, response);
     }
 
     @Override
-    void doGet(Http11Request request, Http11Response response) throws Exception {
+    void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final Optional<String> sessionId = request.findCookie("JSESSIONID");
 
         if (sessionId.isPresent()) {
@@ -47,19 +48,14 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    void doPost(Http11Request request, Http11Response response) throws Exception {
+    void doPost(final Http11Request request, final Http11Response response) throws Exception {
         final Map<String, String> body = request.getBodyByContentType("application/x-www-form-urlencoded");
 
         final String account = body.get("account");
         final String password = body.get("password");
 
-        final Optional<User> userOrEmpty = findUserByAccount(account, password);
-        if (userOrEmpty.isEmpty()) {
-            throw new ServletException("login failed");
-        }
-
-        final User user = userOrEmpty.get();
-        final Session session = handleAuthorizedRequest(user);
+        final User user = findUser(account, password);
+        final Session session = createSession(user);
 
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()));
@@ -75,10 +71,12 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private Optional<User> findUserByAccount(
-            final String account,
-            final String password
-    ) {
+    private User findUser(final String account, final String password) throws ServletException {
+        final Optional<User> userOrEmpty = findUserByAccount(account, password);
+        return userOrEmpty.orElseThrow(() -> new ServletException("login failed"));
+    }
+
+    private Optional<User> findUserByAccount(final String account, final String password) {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
         if (userOrEmpty.isEmpty()) {
@@ -96,7 +94,7 @@ public class LoginController extends AbstractController {
         return Optional.of(user);
     }
 
-    private Session handleAuthorizedRequest(final User user) {
+    private Session createSession(final User user) {
         final String sessionId = generateSessionID();
 
         final Session session = new Session(sessionId);

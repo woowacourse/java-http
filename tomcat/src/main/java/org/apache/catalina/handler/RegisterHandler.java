@@ -1,8 +1,8 @@
-package org.apache.catalina;
+package org.apache.catalina.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import jakarta.servlet.ServletException;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class RegisterController extends AbstractController {
+public class RegisterHandler extends AbstractController {
 
     private static final String STATIC_FILE_LOCATION = "static";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
@@ -24,33 +24,31 @@ public class RegisterController extends AbstractController {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public void service(Http11Request request, Http11Response response) throws Exception {
+    public void service(final Http11Request request, final Http11Response response) throws Exception {
         super.service(request, response);
     }
 
     @Override
-    void doGet(Http11Request request, Http11Response response) throws Exception {
+    void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final byte[] fileContent = readFile("/register.html");
 
         response.setStaticResponse(HttpStatus.OK, fileContent, HTML_CONTENT_TYPE);
     }
 
     @Override
-    void doPost(Http11Request request, Http11Response response) throws Exception {
+    void doPost(final Http11Request request, final Http11Response response) throws Exception {
         final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType("application/x-www-form-urlencoded");
 
         final String account = urlEncodedResponseBody.get("account");
         final String email = urlEncodedResponseBody.get("email");
         final String password = urlEncodedResponseBody.get("password");
 
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
-        }
+        validateExistingSession(account);
 
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        final Session session = handleAuthorizedRequest(user);
+        final Session session = createSession(user);
 
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()));
@@ -66,7 +64,13 @@ public class RegisterController extends AbstractController {
         }
     }
 
-    private Session handleAuthorizedRequest(final User user) {
+    private static void validateExistingSession(final String account) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
+        }
+    }
+
+    private Session createSession(final User user) {
         final String sessionId = generateSessionID();
 
         final Session session = new Session(sessionId);

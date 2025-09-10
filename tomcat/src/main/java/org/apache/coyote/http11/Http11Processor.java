@@ -6,31 +6,28 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Parameters;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
+
+    private final UserService userService = new UserService(SESSION_MANAGER);
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -53,14 +50,14 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 if (request.getPath().get().equals("/login")) {
                     if (request.getMethod() == HttpMethod.GET) {
-                        if (getLoggedUser(request.getCookies()) == null) {
+                        if (userService.getLoggedUser(request.getCookies()) == null) {
                             request.setPath("/login.html");
                         } else {
                             request.setPath("/index.html");
                         }
                     }
                     if (request.getMethod() == HttpMethod.POST) {
-                        login(request, response);
+                        userService.login(request, response);
                         response.setHttpStatus(HttpStatus.FOUND);
                         response.getHeaders().put("Location", "/index.html");
                     }
@@ -71,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
                         request.setPath("/register.html");
                     }
                     if (request.getMethod() == HttpMethod.POST) {
-                        register(request);
+                        userService.register(request);
                         response.setHttpStatus(HttpStatus.FOUND);
                         response.getHeaders().put("Location", "/index.html");
                     }
@@ -100,18 +97,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private User getLoggedUser(Cookies requestCookies) {
-        String sessionId = requestCookies.get("JSESSIONID");
-        if (sessionId == null) {
-            return null;
-        }
-        Session session = SESSION_MANAGER.findSession(sessionId);
-        if (session == null) {
-            return null;
-        }
-        return (User)session.getAttribute("user");
-    }
-
     private String getStaticPage(String requestPath) throws IOException, URISyntaxException {
         String normalizedPath = Paths.get(requestPath).normalize().toString();
         if (normalizedPath.contains("..")) {
@@ -126,45 +111,5 @@ public class Http11Processor implements Runnable, Processor {
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
-    }
-
-    private void login(HttpRequest request, HttpResponse response) {
-        Cookies responseCookies = response.getResponseCookies();
-        Parameters queryParams = request.getBody();
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-        User user = findUser(account, password);
-        Session session = new Session();
-        session.setAttribute("user", user);
-        SESSION_MANAGER.add(session);
-        responseCookies.put("JSESSIONID", session.getId());
-        log.info(user.toString());
-    }
-
-    private User findUser(String account, String password) {
-        if (account == null || password == null) {
-            throw new UnauthorizedException("필수 정보가 누락되었습니다.");
-        }
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            throw new UnauthorizedException("존재하지 않는 사용자입니다.");
-        }
-        if (!user.get().checkPassword(password)) {
-            throw new UnauthorizedException("비밀번호가 틀렸습니다.");
-        }
-        return user.get();
-    }
-
-    private void register(HttpRequest request) {
-        Parameters parameters = request.getBody();
-        String account = parameters.get("account");
-        String email = parameters.get("email");
-        String password = parameters.get("password");
-        InMemoryUserRepository.findByAccount(account)
-            .ifPresent(user -> {
-                throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
-            });
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
     }
 }

@@ -2,9 +2,11 @@ package org.apache.catalina.servlet;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.ContentType;
+import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpStatus;
 
-//TODO: fallBackServlet을 application 개발자가 지정하는게 맞을지 검토  (2025-09-9, 화, 21:6)
-// https://github.com/woowacourse/java-http/pull/899#discussion_r2331128262
 public class ServletContainer {
     private static final ServletContainer INSTANCE = new ServletContainer();
 
@@ -26,7 +28,15 @@ public class ServletContainer {
         this.fallBackServlet = fallBackServlet;
     }
 
-    public Servlet getServletBy(String path) {
-        return servlets.getOrDefault(path, fallBackServlet);
+    public void executeServlet(HttpRequest request, HttpResponse response) {
+        Servlet servlet = servlets.getOrDefault(request.getRequestPath(), fallBackServlet);
+        if (servlet == null) {
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setContentType(ContentType.PLAIN);
+            response.appendToBody("404 Not Found".getBytes());
+            return;
+        }
+
+        servlet.service(request, response);
     }
 }

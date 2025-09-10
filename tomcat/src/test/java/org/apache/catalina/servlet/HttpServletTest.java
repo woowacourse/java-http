@@ -67,7 +67,7 @@ class HttpServletTest {
     void 지원하지_않는_HTTP_메소드_요청_시_아무것도_호출하지_않는다() {
         // given && when
         when(httpRequest.getMethod()).thenReturn(null);
-        testHttpServlet.service(httpRequest, null);
+        testHttpServlet.service(httpRequest, new HttpResponse());
 
         // then
         assertThat(testHttpServlet.doGetCalled).isFalse();

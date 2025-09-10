@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import org.apache.catalina.servlet.Servlet;
 import org.apache.catalina.servlet.ServletContainer;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -43,8 +42,9 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest request = HttpRequest.from(reader);
             HttpResponse response = new HttpResponse();
-            Servlet servlet = servletContainer.getServletBy(request.getRequestPath());
-            servlet.service(request, response);
+
+            servletContainer.executeServlet(request, response);
+
             response.writeTo(writer);
             writer.flush();
         } catch (IOException e) {

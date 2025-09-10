@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
             return;
         }
         response.putHeader("Content-Type", MediaType.HTML.getMimeType());
-        response.putBody(response.readFileFromClasspath("static/login.html"));
+        response.readFileFromClasspath("static/login.html");
     }
 
     @Override

@@ -16,7 +16,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(Http11Request request, Http11Response response) throws Exception {
         response.putHeader("Content-Type", "text/html; charset=utf-8");
-        response.putBody(response.readFileFromClasspath("static/register.html"));
+        response.readFileFromClasspath("static/register.html");
     }
 
     @Override

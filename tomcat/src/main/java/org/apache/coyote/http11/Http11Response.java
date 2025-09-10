@@ -21,10 +21,9 @@ public class Http11Response {
     private static final String CRLF = "\r\n";
 
     private OutputStream outputStream;
-    private String statusLine;
-    private String version;
-    private int code;
-    private String message;
+    private String version = "HTTP/1.1";
+    private int code = 200;
+    private String message = "OK";
     private Map<String, String> headers = new LinkedHashMap<>();
     private String body;
 
@@ -33,7 +32,6 @@ public class Http11Response {
     }
 
     public byte[] buildResponse(Charset charset) throws IOException {
-        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         final String statusLine = String.join(" ", version, String.valueOf(code), message);
         final StringBuilder responseBuilder = new StringBuilder();
         responseBuilder.append(statusLine).append(CRLF);
@@ -48,11 +46,10 @@ public class Http11Response {
         return responseBuilder.toString().getBytes(charset);
     }
 
-    public String readFileFromClasspath(String resourcePath) {
+    public void readFileFromClasspath(String resourcePath) {
         final InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
         if (input == null) {
             log.error("resource not found: {}", resourcePath);
-            return "";
         }
         final StringBuilder fileContents = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
@@ -62,32 +59,35 @@ public class Http11Response {
             }
         } catch (IOException e) {
             log.error("Failed to read file: {}", resourcePath, e);
-            return "";
         }
-        return fileContents.toString();
+
+        this.body = fileContents.toString();
+        headers.put("Content-Type", MediaType.detectMimeType(resourcePath));
+        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 
-    public void sendRedirect(String path) throws Http11ParseException {
+    public void sendRedirect(String path) {
         putStatusLine("HTTP/1.1 302 Found");
         putHeader("Location", path);
     }
 
     public void sendError(int code) throws Http11ParseException {
         Http11Status status = Http11Status.findByCode(code);
-        this.statusLine = status.getStatusLine();
-        String responseBody = readFileFromClasspath(ErrorResourceMapper.getResource(400));
-        final Map<String, String> responseHeaders = new LinkedHashMap<>();
-        responseHeaders.put("Content-Type", MediaType.HTML.getMimeType());
-        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-        this.headers = responseHeaders;
+        String statusLine = status.getStatusLine();
+        String[] statusLineParts = statusLine.split(" ", 3);
+        this.version = statusLineParts[1];
+        this.code = Integer.parseInt(statusLineParts[2]);
+        this.message = statusLineParts[3];
+
+        readFileFromClasspath(ErrorResourceMapper.getResource(400));
     }
 
     public void sendError(Http11Status status) throws Http11ParseException {
         sendError(status.getCode());
     }
 
-    public void putStatusLine(String line) throws Http11ParseException {
-        String[] lineParts = line.split(" ");
+    public void putStatusLine(String line) {
+        String[] lineParts = line.split(" ", 3);
         this.version = lineParts[0];
         this.code = Integer.parseInt(lineParts[1]);
         this.message = lineParts[2];

@@ -39,15 +39,15 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Cookie cookie = request.getCookie(Cookie.SESSION_COOKIE_KEY);
         if (cookie == null) {
-            response.setRedirection("/index.html");
+            response.setRedirection("/register.html");
             return;
         }
         Session session = SessionManager.findSession(cookie.getValue());
         if (session != null && isValidUser(session.getUser())) {
-            response.setRedirection("/index.html");
+            response.setRedirection("/register.html");
             return;
         }
-        response.setRedirection("/register.html");
+        response.setRedirection("/index.html");
     }
 
     private boolean isValidUser(User user) {

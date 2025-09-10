@@ -27,15 +27,15 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Cookie cookie = request.getCookie(Cookie.SESSION_COOKIE_KEY);
         if (cookie == null) {
-            response.setRedirection("/index.html");
+            response.setRedirection("/login.html");
             return;
         }
         Session session = SessionManager.findSession(cookie.getValue());
         if (session != null && isExistUser(session.getUser().getAccount())) {
-            response.setRedirection("/index.html");
+            response.setRedirection("/login.html");
             return;
         }
-        response.setRedirection("/login.html");
+        response.setRedirection("/index.html");
     }
 
     @Override

@@ -25,6 +25,6 @@ public enum ErrorPage {
                 return errorPage.fileName;
             }
         }
-        throw new CommonException(HttpStatus.INTERVAL_SERVER_ERROR);
+        throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

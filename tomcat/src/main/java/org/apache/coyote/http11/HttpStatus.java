@@ -8,7 +8,7 @@ public enum HttpStatus {
     FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "NOT FOUND"),
-    INTERVAL_SERVER_ERROR(500, "Interval Server Error"),
+    INTERNAL_SERVER_ERROR(500, "Interval Server Error"),
     ;
 
     private final int statusCode;
@@ -36,6 +36,6 @@ public enum HttpStatus {
                 return httpStatus;
             }
         }
-        throw new CommonException(HttpStatus.INTERVAL_SERVER_ERROR);
+        throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

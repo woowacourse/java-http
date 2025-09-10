@@ -3,8 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.http11.parser.HttpRequestParser;
 import org.apache.coyote.session.HttpSession;
 import org.apache.coyote.session.HttpSessionManager;
 import org.slf4j.Logger;
@@ -55,36 +54,17 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String requestLine = br.readLine();
-
-            if (requestLine == null || requestLine.isBlank()) {
-                return;
-            }
-
-            String[] requestLineInfo = requestLine.split(" ");
-            if (requestLineInfo.length < 2) {
-                return;
-            }
-
-            String httpMethod = requestLineInfo[0];
-            String url = requestLineInfo[1];
-
-            Map<String, String> parsedComponents = parseRequestComponents(br);
-            String body = parsedComponents.get("body");
-            String cookieHeader = parsedComponents.get("cookie");
-
-            HttpCookie cookie = new HttpCookie(cookieHeader);
+            HttpRequest request = HttpRequestParser.parse(inputStream);
             String response;
 
-            if (url.equals("/")) {
+            if (request.getUrl().equals("/")) {
                 response = sendDefaultResource();
                 sendResponse(outputStream, response);
                 return;
             }
 
-            if (httpMethod.equals("GET") && url.equals("/login")){
-                String sessionId = cookie.getJsessionid();
+            if (request.getMethod().equals("GET") && request.getUrl().equals("/login")){
+                String sessionId = request.getCookie().getJsessionid();
                 if (sessionId != null && SESSION_MANAGER.containsKey(sessionId)) {
                     response = getRedirectResponse("/index.html", FOUND, null);
                 } else {
@@ -94,9 +74,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (httpMethod.equals("GET") && !url.contains("?")) {
-                String staticUrl = "static" + url;
-                if (!url.contains(".")) {
+            if (request.getMethod().equals("GET") && !request.getUrl().contains("?")) {
+                String staticUrl = "static" + request.getUrl();
+                if (!request.getUrl().contains(".")) {
                     staticUrl += ".html";
                 }
                 response = getResponse(staticUrl, OK);
@@ -104,14 +84,14 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (httpMethod.equals("POST")&& url.equals("/login")) {
-                response = loginUserResponse(body, cookie);
+            if (request.getMethod().equals("POST")&& request.getUrl().equals("/login")) {
+                response = loginUserResponse(request.getBody(), request.getCookie());
                 sendResponse(outputStream, response);
                 return;
             }
 
-            if (httpMethod.equals("POST") && url.equals("/register")) {
-                response = registerUserResponse(body);
+            if (request.getMethod().equals("POST") && request.getUrl().equals("/register")) {
+                response = registerUserResponse(request.getBody());
                 sendResponse(outputStream, response);
                 return;
             }
@@ -122,39 +102,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Map<String, String> parseRequestComponents(BufferedReader br) throws IOException {
-        Map<String, String> parsedComponents = new HashMap<>();
-        StringBuilder bodyBuilder = new StringBuilder();
-        int contentLength = 0;
-        String cookieHeader = "";
-        String line;
-
-        while ((line = br.readLine()) != null && !line.isBlank()) {
-            String[] headerParts = line.split(":", 2);
-            if (headerParts.length == 2) {
-                String headerName = headerParts[0].trim();
-                String headerValue = headerParts[1].trim();
-                parsedComponents.put(headerName, headerValue);
-
-                if (headerName.equalsIgnoreCase("Content-Length")) {
-                    contentLength = Integer.parseInt(headerValue);
-                }
-                if (headerName.equalsIgnoreCase("Cookie")) {
-                    cookieHeader = headerValue;
-                }
-            }
-        }
-
-        if (contentLength > 0) {
-            char[] bodyChars = new char[contentLength];
-            br.read(bodyChars, 0, contentLength);
-            bodyBuilder.append(bodyChars);
-        }
-        parsedComponents.put("body", bodyBuilder.toString());
-        parsedComponents.put("cookie", cookieHeader);
-        return parsedComponents;
     }
 
     private String sendDefaultResource() throws IOException {

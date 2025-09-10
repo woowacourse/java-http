@@ -5,17 +5,20 @@ import java.util.Map;
 public record HttpRequest(
         RequestLine requestLine,
         Map<String, String> requestHeaders,
-        String requestBody
+        Cookies cookies,
+        RequestBody requestBody
 ) {
 
     public static HttpRequest of(
             final RequestLine requestLine,
             final Map<String, String> requestHeaders,
-            final String requestBody
+            final Cookies cookies,
+            final RequestBody requestBody
     ) {
         return new HttpRequest(
                 requestLine,
                 requestHeaders,
+                cookies,
                 requestBody
         );
     }
@@ -44,5 +47,17 @@ public record HttpRequest(
             throw new IllegalArgumentException("요청한 파라미터의 값이 존재하지 않습니다.");
         }
         return requestLine.queryParameters().getValue(parameterKey);
+    }
+
+    public String extractMethodPath() {
+        return requestLine.method() + requestLine.path();
+    }
+
+    public String getRequestValue(final String requestKey) {
+        return requestBody.getValue(requestKey);
+    }
+
+    public Cookie getCookie(final String cookieName) {
+        return cookies.getCookie(cookieName);
     }
 }

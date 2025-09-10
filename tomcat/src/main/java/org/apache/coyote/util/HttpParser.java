@@ -26,25 +26,26 @@ public final class HttpParser {
             String header;
             Map<String, String> requestHeaders = new HashMap<>();
             while (!Objects.equals(header = bufferedReader.readLine(), EMPTY_TEXT)) {
-                String[] keyValue = header.split(": ");
+                String[] keyValue = header.split(": ", 2);
                 requestHeaders.put(keyValue[0], keyValue[1]);
                 log.info("요청 헤더 Key = {}, Value = {} 파싱 완료", keyValue[0], keyValue[1]);
             }
             log.info("모든 요청 헤더 파싱 완료");
 
-            String requestBody = extractRequestBody(bufferedReader, requestHeaders.get("Content-Length"));
+            Cookies cookies = Cookies.createFromRawValues(requestHeaders.remove("Cookie"));
+            RequestBody requestBody = extractRequestBody(bufferedReader, requestHeaders.get("Content-Length"));
             log.info("요청 바디 파싱 완료");
 
-            return HttpRequest.of(requestLine, requestHeaders, requestBody);
+            return HttpRequest.of(requestLine, requestHeaders, cookies, requestBody);
         } catch (IOException e) {
             throw new RuntimeException("HttpRequest 파싱에 실패했습니다.", e);
         }
     }
 
-    private static String extractRequestBody(final BufferedReader bufferedReader, final String rawContentLength)
+    private static RequestBody extractRequestBody(final BufferedReader bufferedReader, final String rawContentLength)
             throws IOException {
         if (rawContentLength == null || Objects.equals(rawContentLength.trim(), "0")) {
-            return EMPTY_TEXT;
+            return RequestBody.createEmpty();
         }
 
         int contentLength = Integer.parseInt(rawContentLength.trim());
@@ -57,6 +58,6 @@ public final class HttpParser {
             }
             totalRead += read;
         }
-        return new String(bodyBuffers, 0, totalRead);
+        return RequestBody.createByFormData(new String(bodyBuffers, 0, totalRead));
     }
 }

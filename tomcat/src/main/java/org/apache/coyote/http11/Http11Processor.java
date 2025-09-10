@@ -149,6 +149,9 @@ public class Http11Processor implements Runnable, Processor {
                                      Map<String, String> requestHeaders) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
+        if (account == null || account.isBlank() || password == null || password.isBlank()) {
+            return redirectTo("/401.html", mimeType);
+        }
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> handleLoginSuccess(user, mimeType, requestHeaders))
@@ -172,6 +175,10 @@ public class Http11Processor implements Runnable, Processor {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         String email = queryParams.get("email");
+        if (account == null || account.isBlank() || password == null || password.isBlank() || email == null
+                || email.isBlank()) {
+            return redirectTo("/401.html", mimeType);
+        }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info("register success: account= {} email= {}", account, email);

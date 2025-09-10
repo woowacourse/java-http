@@ -83,7 +83,7 @@ public class RequestHandler {
 
         if (request.uri().startsWith("/login")) {
             try {
-                User user = service.findUser(body);
+                User user = service.getLoggedInUser(body);
                 UUID uuid = createSession(user);
 
                 final Map<String, String> headers = new HashMap<>();

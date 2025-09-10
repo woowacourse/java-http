@@ -3,6 +3,8 @@ package com.techcourse.controller;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.apache.coyote.http11.common.Cookies;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -10,6 +12,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
+import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
 public class UserController {
@@ -22,9 +25,11 @@ public class UserController {
     );
 
     private final UserService userService;
+    private final SessionManager sessionManager;
 
     public UserController(SessionManager sessionManager) {
-        userService = new UserService(sessionManager);
+        userService = new UserService();
+        this.sessionManager = sessionManager;
     }
 
     public BiConsumer<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi) {
@@ -32,7 +37,13 @@ public class UserController {
     }
 
     public void login(HttpRequest request, HttpResponse response) {
-        userService.login(request, response);
+        var requestBody = request.getBody();
+        User user = userService.login(requestBody);
+        Session session = new Session();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        Cookies responseCookies = response.getResponseCookies();
+        responseCookies.put("JSESSIONID", session.getId());
         response.setHttpStatus(HttpStatus.FOUND);
         response.getHeaders().put("Location", "/index.html");
     }
@@ -44,7 +55,12 @@ public class UserController {
     }
 
     public void loginPage(HttpRequest request, HttpResponse response) {
-        if (userService.getLoggedUser(request.getCookies()) == null) {
+        String sessionId = request.getCookies().get("JSESSIONID");
+        if (sessionId == null) {
+            request.setPath("/index.html");
+        }
+        Session session = sessionManager.findSession(sessionId);
+        if (userService.getLoggedUser(session) == null) {
             request.setPath("/login.html");
         } else {
             request.setPath("/index.html");

@@ -2,12 +2,9 @@ package com.techcourse.service;
 
 import java.util.Optional;
 
-import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Parameters;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,23 +16,12 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    private final SessionManager sessionManager;
-
-    public UserService(SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
-    }
-
-    public void login(HttpRequest request, HttpResponse response) {
-        Cookies responseCookies = response.getResponseCookies();
-        Parameters queryParams = request.getBody();
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+    public User login(Parameters requestBody) {
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
         User user = findUser(account, password);
-        Session session = new Session();
-        session.setAttribute("user", user);
-        sessionManager.add(session);
-        responseCookies.put("JSESSIONID", session.getId());
         log.info(user.toString());
+        return user;
     }
 
     private User findUser(String account, String password) {
@@ -65,12 +51,7 @@ public class UserService {
         InMemoryUserRepository.save(user);
     }
 
-    public User getLoggedUser(Cookies requestCookies) {
-        String sessionId = requestCookies.get("JSESSIONID");
-        if (sessionId == null) {
-            return null;
-        }
-        Session session = sessionManager.findSession(sessionId);
+    public User getLoggedUser(Session session) {
         if (session == null) {
             return null;
         }

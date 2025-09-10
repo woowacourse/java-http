@@ -98,18 +98,6 @@ public class HttpRequest {
 
     public Session getSession(final boolean create) {
         final String sessionId = getCookieValue("JSESSIONID");
-        
-        if (sessionId != null) {
-            final Session session = SessionManager.getInstance().findSession(sessionId);
-            if (session != null) {
-                return session;
-            }
-        }
-        
-        if (create) {
-            return SessionManager.getInstance().createSession();
-        }
-        
-        return null;
+        return SessionManager.getInstance().getOrCreateSession(sessionId, create);
     }
 }

@@ -9,7 +9,8 @@ public final class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 
     public static SessionManager getInstance() {
         return INSTANCE;
@@ -35,5 +36,20 @@ public final class SessionManager implements Manager {
         final Session session = new Session(id);
         add(session);
         return session;
+    }
+
+    public Session getOrCreateSession(final String sessionId, final boolean create) {
+        if (sessionId != null) {
+            final Session session = findSession(sessionId);
+            if (session != null) {
+                return session;
+            }
+        }
+        
+        if (create) {
+            return createSession();
+        }
+        
+        return null;
     }
 }

@@ -1,36 +1,37 @@
 package org.apache.coyote.http11.httpRequest;
 
-import java.util.Map;
+import org.apache.coyote.http11.general.HttpBody;
+import org.apache.coyote.http11.general.HttpHeaders;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
-    private final Map<String, String> queryStrings;
+    private final RequestLine requestLine;
+    private final HttpHeaders headers;
+    private final HttpBody body;
 
-    public HttpRequest(String method, String path, Map<String, String> queryStrings) {
-        this.method = method;
-        this.path = path;
-        this.queryStrings = queryStrings;
-    }
-
-    public boolean pathStartsWith(String prefix) {
-        return path.startsWith(prefix);
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
     }
 
     public boolean pathEquals(String path) {
-        return this.path.equals(path);
+        return this.requestLine.pathEquals(path);
     }
 
-    public boolean isStaticFileRequest() {
-        return path.lastIndexOf(".") != -1;
-    }
-
-    public String getQueryStringOf(String key) {
-        return queryStrings.get(key);
+    public HttpMethod getMethod() {
+        return this.requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return this.requestLine.getPath();
+    }
+
+    public String getHeaderValueOf(String key) {
+        return this.headers.getHeaderValueOf(key);
+    }
+
+    public String getBodyValueOf(String key) {
+        return body.get(key);
     }
 }

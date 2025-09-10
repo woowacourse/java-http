@@ -39,12 +39,13 @@ public class Router {
     private void doPost(
             HttpRequest httpRequest,
             HttpResponse httpResponse
-    ) {
+    ) throws IOException {
         if (httpRequest.uri().equals("/login")) {
             loginController.login(httpRequest, httpResponse);
         }
         if (httpRequest.uri().equals("/register")) {
             loginController.register(httpRequest, httpResponse);
         }
+        staticHandler.serveErrorPage(httpResponse, HttpStatus.NOT_FOUND);
     }
 }

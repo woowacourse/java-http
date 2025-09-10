@@ -1,19 +1,17 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Optional;
+import org.apache.catalina.core.ApplicationProcessor;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.HttpContentTypeResolver;
-import org.apache.coyote.util.HttpRequest;
-import org.apache.coyote.util.HttpRequestParser;
-import org.apache.coyote.util.HttpResponse;
 import org.apache.coyote.util.StaticResourcePathGenerator;
+import org.apache.coyote.util.request.HttpRequest;
+import org.apache.coyote.util.request.HttpRequestParser;
+import org.apache.coyote.util.response.HttpContentTypeResolver;
+import org.apache.coyote.util.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,72 +33,74 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
+        OutputStream outputStream = null;
+        try (final var inputStream = connection.getInputStream()) {
+            outputStream = connection.getOutputStream();
             HttpRequest request = HttpRequestParser.parse(inputStream);
             if (request == null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 404 Not Found",
-                        "static/404.html"
-                ), outputStream);
+                respond(HttpResponse.notFound(), outputStream);
                 return;
             }
-            String path = StaticResourcePathGenerator.generate(request.path());
-            if (path == null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 200 OK",
-                        "text/html;charset=utf-8",
-                        "Hello world!".getBytes()
-                ), outputStream);
+            if (handleApiRequest(request, outputStream)) {
                 return;
             }
-            byte[] body = readPathFile(path);
-            if (body == null) {
-                respond(HttpResponse.of(
-                        "HTTP/1.1 404 Not Found",
-                        "static/404.html"
-                ), outputStream);
+            if (handleStaticResourceRequest(request.getPath(), outputStream)) {
                 return;
             }
-            if ("/login".equals(request.path())) {
-                processLoginMemberInfo(request);
-            }
-            respond(HttpResponse.of(
-                    "HTTP/1.1 200 OK",
-                    HttpContentTypeResolver.resolve(path),
-                    body
-            ), outputStream);
+            respond(HttpResponse.notFound(), outputStream);
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            handleError(outputStream, e);
         }
     }
 
-    private void processLoginMemberInfo(HttpRequest httpRequest) {
-        String account = httpRequest.getQueryValue("account")
-                .orElse(null);
-        String password = httpRequest.getQueryValue("password")
-                .orElse(null);
-        if (account == null || password == null) {
+    private void handleError(OutputStream outputStream, Exception e) {
+        if (outputStream == null) {
             return;
         }
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return;
-        }
-        if (user.get().checkPassword(password)) {
-            log.info("User: {}", user.get());
+        try {
+            respond(HttpResponse.internalServerError(), outputStream);
+        } catch (IOException ex) {
+            log.error("응답 실패! : {}", ex.getMessage(), ex);
         }
     }
 
-    private byte[] readPathFile(String requestPath) {
+    private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
+        if ("/login".equals(request.getPath())) {
+            HttpResponse loginResponse = ApplicationProcessor.processLogin(request);
+            respond(loginResponse, outputStream);
+            return true;
+        }
+        if ("/register".equals(request.getPath()) && "POST".equals(request.getMethod())) {
+            HttpResponse registerResponse = ApplicationProcessor.processRegister(request);
+            respond(registerResponse, outputStream);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleStaticResourceRequest(String requestPath, OutputStream outputStream) throws IOException {
+        String resourcePath = StaticResourcePathGenerator.generate(requestPath);
+        if (resourcePath == null) {
+            return false;
+        }
+        byte[] resourceBody = readPathFile(resourcePath);
+        if (resourceBody == null) {
+            return false;
+        }
+        respond(HttpResponse.of(
+                "HTTP/1.1 200 OK",
+                HttpContentTypeResolver.resolve(resourcePath),
+                resourceBody
+        ), outputStream);
+        return true;
+    }
+
+    private byte[] readPathFile(String requestPath) throws IOException {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(requestPath)) {
             if (inputStream == null) {
                 return null;
             }
             return inputStream.readAllBytes();
-        } catch (IOException e) {
-            return null;
         }
     }
 

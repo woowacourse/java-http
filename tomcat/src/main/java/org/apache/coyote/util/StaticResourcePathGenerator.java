@@ -3,8 +3,11 @@ package org.apache.coyote.util;
 public class StaticResourcePathGenerator {
 
     public static String generate(String path) {
-        if (path == null || path.isEmpty() || "/".equals(path)) {
+        if (path == null || path.isEmpty()) {
             return null;
+        }
+        if ("/".equals(path)) {
+            return "static/hello.html";
         }
         path = path.replaceAll("/{2,}", "/");
         if (path.contains("..")) {

@@ -19,10 +19,18 @@ public class RequestHandler {
             return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
         }
 
+        return getResponseFromHandler(httpRequest);
+    }
+
+    private HttpResponse getResponseFromHandler(HttpRequest httpRequest) {
         URL resourceUrl = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
-        if (resourceUrl == null) {
-            return apiRouter.route(httpRequest);
+        if (isStaticFileRequest(resourceUrl)) {
+            return StaticFileHandler.handle(httpRequest, resourceUrl);
         }
-        return StaticFileHandler.handle(httpRequest, resourceUrl);
+        return apiRouter.route(httpRequest);
+    }
+
+    private boolean isStaticFileRequest(URL resourceUrl) {
+        return resourceUrl != null;
     }
 }

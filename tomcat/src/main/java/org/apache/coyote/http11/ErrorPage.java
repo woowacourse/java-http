@@ -6,7 +6,7 @@ public enum ErrorPage {
 
     UNAUTHORIZED("401.html", 401),
     NOT_FOUND("404.html", 404),
-    ;
+    INTERNAL_SERVER_ERROR("500.html", 500);
 
     private final String fileName;
     private final int statusCode;

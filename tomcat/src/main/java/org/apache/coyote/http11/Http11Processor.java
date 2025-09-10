@@ -1,27 +1,48 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.service.UserService;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.error.ErrorMapper;
+import org.apache.coyote.http11.handler.GreetingHandler;
+import org.apache.coyote.http11.handler.HttpHandler;
+import org.apache.coyote.http11.handler.HttpResourceHandler;
+import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.RegisterHandler;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String CRLF = "\r\n";
 
     private final Socket connection;
+    private final QueryParser queryParser;
     private final HttpRequestReader httpRequestReader;
-    private final HttpResponseBuilder httpResponseBuilder;
+    private final HttpResourceLoader httpResourceLoader;
+    private final HttpResourceHandler httpResourceHandler;
+    private final HttpResponseWriter httpResponseWriter;
+    private final SessionManager sessionManager;
+    private final Resolver resolver;
+    private final ErrorMapper errorMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.httpRequestReader = new HttpRequestReader();
-        this.httpResponseBuilder = new HttpResponseBuilder();
+        this.queryParser = new QueryParser();
+        this.httpRequestReader = new HttpRequestReader(queryParser);
+        this.httpResourceLoader = new HttpResourceLoader();
+        this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
+        this.httpResponseWriter = new HttpResponseWriter();
+        this.sessionManager = new SessionManager();
+        this.resolver = new Resolver(httpResourceHandler)
+                .register("/", new GreetingHandler())
+                .register("/login", new LoginHandler(httpResourceLoader, queryParser, sessionManager))
+                .register("/register", new RegisterHandler(httpResourceLoader, queryParser))
+        ;
+        this.errorMapper = new ErrorMapper(httpResourceLoader);
     }
 
     @Override
@@ -34,22 +55,21 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             HttpRequest httpRequest = httpRequestReader.read(inputStream);
-
             String path = httpRequest.path();
-            if (path.startsWith("/login")) {
-                Map<String, String> queries = httpRequest.queries();
-                String account = queries.get("account");
-                String password = queries.get("password");
-                UserService.login(account, password);
-            }
+            HttpHandler handler = resolver.resolve(path);
+            HttpResponse response = handler.handle(httpRequest);
 
-            HttpResponse response = httpResponseBuilder.build(path);
-            outputStream.write(response.asString().getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            httpResponseWriter.write(outputStream, response);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+
+            try (OutputStream outputStream = connection.getOutputStream()) {
+                HttpResponse response = errorMapper.toHttpResponse(e);
+                httpResponseWriter.write(outputStream, response);
+            } catch (IOException ioe) {
+                log.error("Write failed: {}", ioe.getMessage());
+            }
         }
     }
 }

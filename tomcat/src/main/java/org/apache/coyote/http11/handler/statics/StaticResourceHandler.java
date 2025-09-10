@@ -46,8 +46,9 @@ public class StaticResourceHandler implements Handler {
             return false;
         }
 
+        // /login은 LoginHandler가 처리하도록 제거
         if (request.path().equals("/login")) {
-            return true;
+            return false;
         }
 
         String path = request.path().replaceFirst(STATIC_REGEX, "");

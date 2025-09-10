@@ -1,8 +1,5 @@
-package com.techcourse.controller;
+package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.AbstractController;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.constant.ContentType;
 import org.apache.coyote.http11.constant.HttpStatus;
 

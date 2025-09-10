@@ -5,8 +5,8 @@ import java.util.Map;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import com.techcourse.model.Session;
+import com.techcourse.model.SessionManager;
 import org.apache.coyote.http11.constant.ContentType;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.util.FileReader;
@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.containsCookie() && httpRequest.getCookie().containsJSessionId()) {
+        if (httpRequest.containsCookie() && httpRequest.getCookie().contains("JSESSIONID")) {
             httpResponse.setResponse(HttpStatus.FOUND, ContentType.TEXT);
             httpResponse.appendHeader("Location", "http://localhost:8080/index.html");
             return;

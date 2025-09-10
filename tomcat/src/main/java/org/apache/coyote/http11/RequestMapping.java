@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.DefaultController;
 import com.techcourse.controller.LoginController;
-import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.StaticResourceController;
 import com.techcourse.controller.UserRegisterController;
 import java.util.HashMap;

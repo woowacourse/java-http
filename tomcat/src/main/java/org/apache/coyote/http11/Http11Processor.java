@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.StreamReader;
+import org.apache.coyote.util.RequestReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final HttpRequest httpRequest = StreamReader.readRequest(inputStream);
+            final HttpRequest httpRequest = RequestReader.readRequest(inputStream);
             if (httpRequest == null) {
                 return;
             }

@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.constant.RequestLine;
 
-public class StreamReader {
+public class RequestReader {
 
     public static HttpRequest readRequest(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));

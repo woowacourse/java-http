@@ -54,23 +54,33 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = http11InputBuffer.read();
 
-            String uri = httpRequest.getUrl();
+            String path = httpRequest.getPath();
 
             HttpResponse response = null;
-            if (uri.contains("/login") && httpRequest.getHttpMethod().equals("POST")) {
+            if (path.contains("/login") && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
                 response = handleForLogin(httpRequest);
             }
 
-            if (uri.contains("/register") && httpRequest.getHttpMethod().equals("POST")) {
+            if (path.contains("/register") && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
                 response = handleForRegister(httpRequest);
             }
 
-            if (uri.equals("/")) {
-                response = HttpResponse.createOKResponse(httpRequest, DEFAULT_RESPONSE_BODY, uri);
+            if (path.equals("/")) {
+                StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest.getPath(),
+                        httpRequest.getHttpVersion());
+
+                HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+                httpResponseHeader.add("Content-Type",
+                        StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()));
+                httpResponseHeader.add("Content-Length",
+                        String.valueOf(DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8).length));
+
+                response = new HttpResponse(statusLine, httpResponseHeader,
+                        DEFAULT_RESPONSE_BODY);
             }
 
             if (response == null) {
-                response = handleForStaticResource(httpRequest, uri);
+                response = handleForStaticResource(httpRequest, path);
             }
 
             http11OutputBuffer.write(response);
@@ -86,7 +96,16 @@ public class Http11Processor implements Runnable, Processor {
         }
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
-        return HttpResponse.createOKResponse(httpRequest, responseBody, uri);
+
+        StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest.getPath(), httpRequest.getHttpVersion());
+
+        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+        httpResponseHeader.add("Content-Type", StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()));
+        httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+//        httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        // TODO: charset 관련 처리
+
+        return new HttpResponse(statusLine, httpResponseHeader, responseBody);
     }
 
     private URL getPathOfResource(String uri) {
@@ -121,13 +140,24 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> parsedRequestBody = parseRequestBody(httpRequest.getRequestBody());
 
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"));
+        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
             ResponseCookie responseCookie = getCookie(httpRequest, foundUser.get());
-            return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", responseCookie);
+            httpResponseHeader.add("Location", "index.html");
+            httpResponseHeader.addCookie(responseCookie);
+
+            StatusLine statusLine = new StatusLine(HttpStatus.FOUND, httpRequest.getPath(),
+                    httpRequest.getHttpVersion());
+
+            return new HttpResponse(statusLine, httpResponseHeader, null);
         }
 
-        return HttpResponse.createRedirectionResponse(httpRequest, "401.html");
+        httpResponseHeader.add("Location", "401.html");
+
+        StatusLine statusLine = new StatusLine(HttpStatus.UNAUTHORIZED, httpRequest.getPath(),
+                httpRequest.getHttpVersion());
+        return new HttpResponse(statusLine, httpResponseHeader, null);
     }
 
     private HttpResponse handleForRegister(HttpRequest httpRequest) throws IOException {
@@ -139,11 +169,17 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
 
         ResponseCookie responseCookie = getCookie(httpRequest, user);
-        return HttpResponse.createRedirectionResponseWithCookie(httpRequest, "index.html", responseCookie);
+        StatusLine statusLine = new StatusLine(HttpStatus.FOUND, httpRequest.getPath(), httpRequest.getHttpVersion());
+
+        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+        httpResponseHeader.add("Location", "index.html");
+        httpResponseHeader.addCookie(responseCookie);
+
+        return new HttpResponse(statusLine, httpResponseHeader, null);
     }
 
     private ResponseCookie getCookie(HttpRequest httpRequest, User user) {
-        HttpSession session = httpRequest.getSession(true);
+        HttpSession session = httpRequest.getSession(sessionManager, true);
         session.setAttribute(session.getId(), user);
 
         ResponseCookie responseCookie = new ResponseCookie();

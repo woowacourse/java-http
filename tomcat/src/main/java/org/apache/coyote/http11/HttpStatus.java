@@ -1,13 +1,17 @@
 package org.apache.coyote.http11;
 
-public enum HTTPStatus {
-    OK("OK", 200),
-    FOUND("FOUND", 302);
+public enum HttpStatus {
 
+    OK("OK", 200),
+    FOUND("FOUND", 302),
+    UNAUTHORIZED("UNAUTHORIZED", 401),
+    ;
+
+    // TODO: Status - StatusCode 네이밍 정리하기
     private final String status;
     private final int statusCode;
 
-    HTTPStatus(String status, int statusCode) {
+    HttpStatus(String status, int statusCode) {
         this.status = status;
         this.statusCode = statusCode;
     }

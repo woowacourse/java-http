@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
-import java.nio.charset.StandardCharsets;
 import org.apache.catalina.RequestCookie;
 import org.apache.catalina.SessionManager;
 
@@ -9,32 +8,21 @@ public class HttpRequest {
 
     public static final String JAVA_SESSION_ID_KEY = "JSESSIONID";
 
-    private final SessionManager sessionManager;
-    private final String httpMethod;
-    private final String url;
-    private final String httpVersion;
-    private final String host;
-    private final String contentType;
-    private final int contentLength;
+    private final RequestLine requestLine;
+    private final HttpRequestHeader header;
     private final String requestBody;
-    private final RequestCookie cookie;
 
-    public HttpRequest(SessionManager sessionManager, String httpMethod, String url, String httpVersion, String host,
-                       String contentType, String requestBody, RequestCookie cookie) {
-        this.sessionManager = sessionManager;
-        this.httpMethod = httpMethod;
-        this.url = url;
-        this.httpVersion = httpVersion;
-        this.host = host;
-        this.contentType = contentType;
-        this.contentLength = requestBody == null ? 0 : requestBody.getBytes(StandardCharsets.UTF_8).length;
+    public HttpRequest(RequestLine requestLine, HttpRequestHeader header, String requestBody) {
+        this.requestLine = requestLine;
+        this.header = header;
         this.requestBody = requestBody;
-        this.cookie = cookie;
     }
 
-    public HttpSession getSession(boolean create) {
+    public HttpSession getSession(SessionManager sessionManager, boolean create) {
         String jSessionId = null;
-        if (cookie != null) {
+
+        if (header.hasCookie()) {
+            RequestCookie cookie = header.getCookie();
             jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
         }
 
@@ -52,23 +40,19 @@ public class HttpRequest {
         return null;
     }
 
-    public RequestCookie getCookie() {
-        return cookie;
+    public HttpMethod getHttpMethod() {
+        return this.requestLine.httpMethod();
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public String getUrl() {
-        return url;
+    public String getPath() {
+        return this.requestLine.path();
     }
 
     public String getRequestBody() {
-        return requestBody;
+        return this.requestBody;
     }
 
     public String getHttpVersion() {
-        return httpVersion;
+        return this.requestLine.httpVersion();
     }
 }

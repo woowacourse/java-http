@@ -12,55 +12,17 @@ import org.apache.coyote.http11.http.common.startline.HttpVersion;
 
 public class HttpResponse {
 
+    private final Map<String, Object> sessionAttributes;
     private HttpStatusLine responseLine;
     private HttpHeader header;
     private HttpResponseBody responseBody;
-    private final Map<String, Object> sessionAttributes;
 
     private HttpResponse() {
         sessionAttributes = new HashMap<>();
     }
 
-    private HttpResponse(final HttpStatusLine responseLine,
-                         final HttpHeader header,
-                         final HttpResponseBody responseBody) {
-        this.responseLine = responseLine;
-        this.header = header;
-        this.responseBody = responseBody;
-        this.sessionAttributes = new HashMap<>();
-    }
-
     public static HttpResponse createEmptyResponse() {
         return new HttpResponse();
-    }
-
-    public static HttpResponse ok() {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, null);
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
-    }
-
-    public static HttpResponse ok(final String responseBodyValue) {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName(responseBodyValue);
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, responseBodyValue);
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
-    }
-
-    public static HttpResponse found(final String targetPath) {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.FOUND);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, null);
-        httpHeader.addHeader(HttpHeaderKey.LOCATION.getValue(), targetPath);
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
-    }
-
-    public static HttpResponse unauthorized() {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.UNAUTHORIZED);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName("401.html");
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, "401.html");
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
     }
 
     public void addAttribute(final String key, final Object value) {

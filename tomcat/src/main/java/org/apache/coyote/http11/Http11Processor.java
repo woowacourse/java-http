@@ -122,9 +122,9 @@ public class Http11Processor implements Runnable, Processor {
             response.redirect("/login.html");
             return;
         }
-        Map<String, List<String>> queryParameters = request.getParameters();
-        String account = getFirst(queryParameters, "account");
-        String password = getFirst(queryParameters, "password");
+        Map<String, List<String>> parameters = request.getParameters();
+        String account = getFirst(parameters, "account");
+        String password = getFirst(parameters, "password");
 
         if (account == null || password == null) {
             response.redirect("/login.html");
@@ -159,10 +159,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        Map<String, List<String>> queryParameters = request.getParameters();
-        String account = getFirst(queryParameters, "account");
-        String email = getFirst(queryParameters, "email");
-        String password = getFirst(queryParameters, "password");
+        Map<String, List<String>> parameters = request.getParameters();
+        String account = getFirst(parameters, "account");
+        String email = getFirst(parameters, "email");
+        String password = getFirst(parameters, "password");
 
         if (account != null && email != null && password != null) {
             InMemoryUserRepository.save(new User(account, password, email));

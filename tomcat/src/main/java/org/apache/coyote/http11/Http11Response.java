@@ -1,14 +1,20 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.coyote.http11.exception.Http11ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Response {
 
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CRLF = "\r\n";
 
     private String version;
@@ -30,6 +36,25 @@ public class Http11Response {
         responseBuilder.append(CRLF);
         responseBuilder.append(body);
         return responseBuilder.toString().getBytes(charset);
+    }
+
+    public String readFileFromClasspath(String resourcePath) {
+        final InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        if (input == null) {
+            log.error("resource not found: {}", resourcePath);
+            return "";
+        }
+        final StringBuilder fileContents = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContents.append(line).append(CRLF);
+            }
+        } catch (IOException e) {
+            log.error("Failed to read file: {}", resourcePath, e);
+            return "";
+        }
+        return fileContents.toString();
     }
 
     public void putStatusLine(String line) throws Http11ParseException {

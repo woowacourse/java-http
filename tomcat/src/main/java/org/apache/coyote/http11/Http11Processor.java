@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.util.ControllerMapper;
 import org.apache.coyote.http11.exception.Http11ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,9 @@ public class Http11Processor implements Runnable, Processor {
             final String path = request.getPath();
             final Http11Method method = request.getMethod();
 
+            final Controller controller = ControllerMapper.getController(request.getPath());
+            controller.service(request, response);
+
             String statusLine = "HTTP/1.1 200 OK";
             String responseBody = "Hello world!";
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
@@ -84,6 +89,8 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         } catch (Http11ParseException ex) {
             log.error(ex.getMessage(), ex);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

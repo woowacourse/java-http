@@ -1,6 +1,7 @@
-package org.apache.controller;
+package com.techcourse.controller;
 
 import java.util.List;
+import org.apache.controller.AbstractController;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 import org.apache.http.value.ContentType;
@@ -8,12 +9,16 @@ import org.apache.http.value.HttpHeader;
 import org.apache.http.value.StatusCode;
 import org.apache.reader.StaticFileUtility;
 
-public class StaticFileController implements Controller {
+public class StaticFileController extends AbstractController {
 
     private static final String DEFAULT_FILE_EXTENSION = ".html";
 
+    public StaticFileController() {
+        super("");
+    }
+
     @Override
-    public boolean isProcessableRequest(HttpRequest request) {
+    public boolean canProcessable(HttpRequest request) {
         if (request.getUri().isEmpty() || request.getUri().equals("/")) {
             return false;
         }
@@ -22,7 +27,10 @@ public class StaticFileController implements Controller {
     }
 
     @Override
-    public void processRequest(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        if (request.getUri().isEmpty() || request.getUri().equals("/")) {
+            return;
+        }
         String uri = addDefaultExtension(request.getUri());
         String content = StaticFileUtility.readFile(uri);
         ContentType contentType = StaticFileUtility.getFileExtension(uri);

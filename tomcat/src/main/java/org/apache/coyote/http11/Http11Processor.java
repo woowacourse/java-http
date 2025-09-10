@@ -1,15 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RequestMapping;
 import java.net.Socket;
-import java.util.List;
-import java.util.Optional;
 import org.apache.controller.Controller;
-import org.apache.controller.LoginController;
-import org.apache.controller.LoginRedirectionController;
-import org.apache.controller.RegisterController;
-import org.apache.controller.RegisterRedirectionController;
-import org.apache.controller.RootController;
-import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
@@ -21,13 +14,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final StaticFileController staticFileController = new StaticFileController();
-    private static final List<Controller> controllers = List.of(
-            new LoginController(),
-            new LoginRedirectionController(),
-            new RegisterController(),
-            new RegisterRedirectionController(),
-            new RootController());
+    private static final RequestMapping requestMapping = new RequestMapping();
 
     private final Socket connection;
 
@@ -49,9 +36,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(inputStream);
             HttpResponse response = new HttpResponse(request.getVersion());
 
-            processCommonRequest(request, response);
-            processResourceLoadRequest(request, response);
-            validateRequestProcess(response);
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
 
             response.writeMessage(outputStream);
 
@@ -67,24 +53,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processCommonRequest(HttpRequest request, HttpResponse response) {
-        Optional<Controller> controllerOptional = controllers.stream()
-                .filter(controller -> controller.isProcessableRequest(request))
-                .findFirst();
-        controllerOptional.ifPresent(controller -> controller.processRequest(request, response));
-    }
-
-    private void processResourceLoadRequest(HttpRequest request, HttpResponse response) {
-        boolean isNotProcessedRequest = !response.isProcessed();
-        boolean canProcess = staticFileController.isProcessableRequest(request);
-        if (isNotProcessedRequest && canProcess) {
-            staticFileController.processRequest(request, response);
-        }
-    }
-
-    private void validateRequestProcess(HttpResponse response) {
-        if (!response.isProcessed()) {
-            throw new DataNotFoundException("URI에 해당하는 요청 처리가 존재하지 않습니다.");
-        }
-    }
+//    private void processCommonRequest(HttpRequest request, HttpResponse response) {
+//        Optional<Controller> controllerOptional = controllers.stream()
+//                .filter(controller -> controller.isProcessableRequest(request))
+//                .findFirst();
+//        controllerOptional.ifPresent(controller -> controller.processRequest(request, response));
+//    }
+//
+//    private void processResourceLoadRequest(HttpRequest request, HttpResponse response) {
+//        boolean isNotProcessedRequest = !response.isProcessed();
+//        boolean canProcess = staticFileController.isProcessableRequest(request);
+//        if (isNotProcessedRequest && canProcess) {
+//            staticFileController.processRequest(request, response);
+//        }
+//    }
+//
+//    private void validateRequestProcess(HttpResponse response) {
+//        if (!response.isProcessed()) {
+//            throw new DataNotFoundException("URI에 해당하는 요청 처리가 존재하지 않습니다.");
+//        }
+//    }
 }

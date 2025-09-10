@@ -5,7 +5,7 @@ import org.apache.http.response.HttpResponse;
 
 public interface Controller {
 
-    boolean isProcessableRequest(HttpRequest request);
+    boolean canProcessable(HttpRequest request);
 
-    void processRequest(HttpRequest request, HttpResponse response);
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

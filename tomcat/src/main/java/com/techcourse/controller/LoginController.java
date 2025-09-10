@@ -1,36 +1,43 @@
-package org.apache.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.controller.AbstractController;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.http.Cookie;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
-import org.apache.http.value.HttpMethod;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    @Override
-    public boolean isProcessableRequest(HttpRequest request) {
-        return request.getMethod() == HttpMethod.POST
-                && request.getUri().equals("/login");
+    public LoginController() {
+        super("/login");
     }
 
     @Override
-    public void processRequest(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        Cookie cookie = request.getCookie(Cookie.SESSION_COOKIE_KEY);
+        Session session = SessionManager.findSession(cookie.getValue());
+        if (session != null && isExistUser(session.getUser().getAccount())) {
+            response.setRedirection("/index.html");
+        }
+        response.setRedirection("/login.html");
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         String account = request.getBody("account");
         String password = request.getBody("password");
 
         Optional<User> user = getUser(account);
-
         boolean isAuthenticated = isAuthenticatedUser(user, password);
         if (!isAuthenticated) {
             response.setRedirection("/401.html");
@@ -46,6 +53,10 @@ public class LoginController implements Controller {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         user.ifPresent(value -> log.info("user : {}", value.toString()));
         return user;
+    }
+
+    private boolean isExistUser(String account) {
+        return getUser(account).isPresent();
     }
 
     private boolean isAuthenticatedUser(Optional<User> user, String password) {

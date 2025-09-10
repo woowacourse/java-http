@@ -1,27 +1,25 @@
-package org.apache.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.controller.AbstractController;
 import org.apache.exception.InvalidRequestException;
 import org.apache.http.Cookie;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
-import org.apache.http.value.HttpMethod;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
-    @Override
-    public boolean isProcessableRequest(HttpRequest request) {
-        return request.getMethod() == HttpMethod.POST
-                && request.getUri().equals("/register");
+    public RegisterController() {
+        super("/register");
     }
 
     @Override
-    public void processRequest(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         validateRequestBody(request);
 
         String account = request.getBody("account");
@@ -35,6 +33,21 @@ public class RegisterController implements Controller {
         String sessionId = makeSession(user);
         response.setRedirection("/index.html");
         response.setCookie(Cookie.makeSessionCookie(sessionId));
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        Cookie cookie = request.getCookie(Cookie.SESSION_COOKIE_KEY);
+        Session session = SessionManager.findSession(cookie.getValue());
+        if (session != null && isValidUser(session.getUser())) {
+            response.setRedirection("/index.html");
+        }
+    }
+
+    private boolean isValidUser(User user) {
+        return InMemoryUserRepository
+                .findByAccount(user.getAccount())
+                .isPresent();
     }
 
     private void validateAlreadyAccountExistence(String account) {

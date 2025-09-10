@@ -14,6 +14,7 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final String body;
     private final HttpCookie cookies;
+    private Session session;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -49,6 +50,14 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
+    public boolean isGetMethod() {
+        return "GET".equalsIgnoreCase(requestLine.getMethod());
+    }
+
+    public boolean isPostMethod() {
+        return "POST".equalsIgnoreCase(requestLine.getMethod());
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }
@@ -71,5 +80,13 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

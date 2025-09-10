@@ -68,12 +68,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
             if (request.equalPath("/register")) {
-                System.out.println("hello");
                 if (request.equalMethod(HttpMethod.GET)) {
                     return createStaticResourceResponse("/register.html");
                 }
                 if (request.equalMethod(HttpMethod.POST)) {
-                    System.out.println("hello2");
                     return register(request);
                 }
             }

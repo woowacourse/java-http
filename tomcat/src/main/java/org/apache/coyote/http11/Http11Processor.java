@@ -145,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
         // login 화면 요청인 경우
         if (method.equalsIgnoreCase("GET") && uri.equals("/login")) {
             final var session = request.getSession(false);
-            if (session == null) {
+            if (session == null || session.getAttribute("user") == null) {
                 return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("login.html"));
             }
             return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("index.html"));

@@ -27,6 +27,9 @@ public class RegisterHandler implements HttpRequestHandler {
         String account = request.getParameter(ACCOUNT_KEY);
         String password = request.getParameter(PASSWORD_KEY);
         String email = request.getParameter(EMAIL_KEY);
+        final String account = request.getParameter(ACCOUNT_KEY);
+        final String password = request.getParameter(PASSWORD_KEY);
+        final String email = request.getParameter(EMAIL_KEY);
 
         InMemoryUserRepository.save(new User(account, password, email));
         log.info("회원가입 성공! account : {}", account);

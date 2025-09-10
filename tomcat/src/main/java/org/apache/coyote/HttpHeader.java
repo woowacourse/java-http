@@ -37,7 +37,7 @@ public class HttpHeader {
         if (name == null || value == null) {
             return;
         }
-        String normalizedName = name.toLowerCase();
+        final String normalizedName = name.toLowerCase();
         headers.computeIfAbsent(normalizedName, key -> new ArrayList<>()).add(value);
     }
 

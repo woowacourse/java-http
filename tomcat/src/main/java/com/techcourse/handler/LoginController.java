@@ -40,19 +40,19 @@ public class LoginHandler implements HttpRequestHandler {
 
         log.info("로그인 성공! account : {}", findUser.getAccount());
 
-        Session session = request.getSession(true);
+        final Session session = request.getSession(true);
         session.setAttribute("user", findUser);
 
         response.sendRedirect(MAIN_PAGE_PATH);
     }
 
     private boolean isLoginUser(ServletRequest request) {
-        Session session = request.getSession(false);
+        final Session session = request.getSession(false);
         if (session == null) {
             return false;
         }
 
-        Object userAttribute = session.getAttribute("user");
+        final Object userAttribute = session.getAttribute("user");
         if (userAttribute == null) {
             return false;
         }

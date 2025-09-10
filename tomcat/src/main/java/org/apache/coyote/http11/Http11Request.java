@@ -1,24 +1,29 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Request {
 
     private static final String HEADER_DELIMITER = ": ";
+    private static final String COOKIE_HEADER = "Cookie";
 
     private final String method;
     private final String target;
     private final Map<String, String> queryParams;
     private final String httpVersion;
     private final Map<String, String> headers;
+    private final Http11Cookie cookie;
     private final String body;
 
-    public static Http11Request create(final List<String> requestMessage) {
-        int pointer = 0;
+    public static Http11Request create(final String rawHttpRequest) {
+        final String[] headersAndBody = rawHttpRequest.split("\r\n\r\n", 2);
 
-        final String[] firstLine = requestMessage.get(pointer++).split(" ");
+        final String[] headerLines = headersAndBody[0].split("\r\n");
+        final String body = headersAndBody[1];
+
+        final String[] firstLine = headerLines[0].split(" ");
         validateFirstLineSize(firstLine);
 
         final String method = firstLine[0];
@@ -31,9 +36,14 @@ public class Http11Request {
             target = target.substring(0, queryParamStartIndex);
         }
 
-        final Map<String, String> headers = getHeaders(requestMessage, pointer);
+        final Map<String, String> headers = getHeaders(headerLines);
+        Http11Cookie cookie = null;
+        if (headers.containsKey(COOKIE_HEADER)) {
+            cookie = Http11Cookie.create(headers.get(COOKIE_HEADER));
+            headers.remove(COOKIE_HEADER);
+        }
 
-        return new Http11Request(method, target, queryParams, httpVersion, headers, null);
+        return new Http11Request(method, target, queryParams, httpVersion, headers, cookie, body);
     }
 
     private static void validateFirstLineSize(final String[] firstLine) {
@@ -69,16 +79,12 @@ public class Http11Request {
     }
 
     private static Map<String, String> getHeaders(
-            final List<String> requestMessage,
-            int pointer
+            final String[] headerLines
     ) {
         String line;
         final Map<String, String> headers = new HashMap<>();
-        while (pointer < requestMessage.size()) {
-            line = requestMessage.get(pointer++);
-            if (line.isBlank()) {
-                break;
-            }
+        for (int i = 1; i < headerLines.length; i++) {
+            line = headerLines[i];
 
             final String[] headerLine = line.split(HEADER_DELIMITER);
             if (headerLine.length != 2) {
@@ -90,12 +96,13 @@ public class Http11Request {
         return headers;
     }
 
-    private Http11Request(
+    public Http11Request(
             final String method,
             final String target,
             final Map<String, String> queryParams,
             final String httpVersion,
             final Map<String, String> headers,
+            final Http11Cookie cookie,
             final String body
     ) {
         this.method = method;
@@ -103,17 +110,46 @@ public class Http11Request {
         this.queryParams = queryParams;
         this.httpVersion = httpVersion;
         this.headers = headers;
+        this.cookie = cookie;
         this.body = body;
     }
 
-    public String findQueryParam(final String key) {
-        if (queryParams.containsKey(key)) {
-            return queryParams.get(key);
+    public Map<String, String> getBodyByContentType(final String contentType) {
+        if (!contentType.equals("application/x-www-form-urlencoded")) {
+            throw new IllegalArgumentException("Request Content-Type should be application/x-www-form-urlencoded");
         }
-        throw new IllegalArgumentException("No Query Parameter : " + key);
+
+        final Map<String, String> urlEncodedResponseBody = new HashMap<>();
+
+        if (body == null || body.isEmpty()) {
+            return urlEncodedResponseBody;
+        }
+
+        final String[] pairs = body.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
+        }
+        return urlEncodedResponseBody;
+    }
+
+    public Optional<String> findCookie(final String cookieName) {
+        if (cookie == null) {
+            return Optional.empty();
+        }
+        return cookie.findCookie(cookieName);
     }
 
     public String getTarget() {
         return target;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getBody() {
+        return body;
+
     }
 }

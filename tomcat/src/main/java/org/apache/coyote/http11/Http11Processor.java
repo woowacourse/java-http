@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_FILE_LOCATION = "static";
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -55,53 +57,161 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response findResponse(final Http11Request request) throws IOException {
-        final String requestTarget = request.getTarget();
-
-        if (requestTarget.equals("/")) {
-            final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
-
-            return createHtmlResponse(defaultResponseBytes);
-        }
-        if (requestTarget.contains("/login")) {
-            final byte[] fileContent = readFile("/login.html");
-
-            final String account = request.findQueryParam("account");
-            final String password = request.findQueryParam("password");
-
-            validateUserByAccount(account, password);
-
-            return createHtmlResponse(fileContent);
-        }
-        if (requestTarget.endsWith(".html")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createHtmlResponse(fileContent);
-        }
-        if (requestTarget.endsWith(".css")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createCssResponse(fileContent);
-        }
-        if (requestTarget.endsWith(".js")) {
-            final byte[] fileContent = readFile(requestTarget);
-
-            return createJsResponse(fileContent);
-        }
-        throw new NoSuchFileException(requestTarget);
-    }
-
     private Http11Request readRequest(final InputStream requestInputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(requestInputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        final List<String> requestMessage = new ArrayList<>();
+        final List<String> headerLines = new ArrayList<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            requestMessage.add(line);
+            headerLines.add(line);
         }
 
-        return Http11Request.create(requestMessage);
+        final int contentLength = headerLines.stream()
+                .filter(l -> l.startsWith("Content-Length:"))
+                .map(l -> Integer.parseInt(l.split(":")[1].trim()))
+                .findFirst()
+                .orElse(0);
+
+        final char[] bodyChars = new char[contentLength];
+        if (contentLength > 0) {
+            bufferedReader.read(bodyChars, 0, contentLength);
+        }
+
+        final String rawHttpRequest = String.join("\r\n", headerLines)
+                + "\r\n\r\n"
+                + new String(bodyChars);
+        return Http11Request.create(rawHttpRequest);
+    }
+
+    private Http11Response findResponse(final Http11Request request) throws IOException {
+        final String requestMethod = request.getMethod();
+        final String requestTarget = request.getTarget();
+
+        if (requestMethod.equals("GET")) {
+            if (requestTarget.equals("/"))  {
+                final byte[] defaultResponseBytes = "Hello world!".getBytes(StandardCharsets.UTF_8);
+
+                return Http11Response.createHtmlResponse(HttpStatus.OK, defaultResponseBytes);
+            }
+            if (requestTarget.endsWith("/login")) {
+                return handleLoginRequest(request);
+            }
+            if (requestTarget.endsWith("/register")) {
+                return handleRegisterRequest(request);
+            }
+            if (requestTarget.endsWith(".html")) {
+                return handleHtmlRequest(requestTarget);
+            }
+            if (requestTarget.endsWith(".css")) {
+                return handleCssRequest(requestTarget);
+            }
+            if (requestTarget.endsWith(".js")) {
+                return handleJsResponse(requestTarget);
+            }
+            if (requestTarget.endsWith(".svg")) {
+                return handleImgResponse(requestTarget);
+            }
+        }
+
+        if (requestMethod.equals("POST")) {
+            if (requestTarget.contains("/login")) {
+                return handleLoginRequest(request);
+            }
+            if (requestTarget.endsWith("/register")) {
+                return handleRegisterRequest(request);
+            }
+        }
+
+        return Http11Response.createRedirectResponse("/404.html");
+    }
+
+    private Http11Response handleLoginRequest(final Http11Request request) throws IOException {
+        if (request.getMethod().equals("GET")) {
+            final Optional<String> sessionId = request.findCookie("JSESSIONID");
+
+            if (sessionId.isPresent()) {
+                final Session session = sessionManager.findSession(sessionId.get());
+                if (session != null) {
+                    return Http11Response.createRedirectResponse("/index.html");
+                }
+            }
+
+            final byte[] fileContent = readFile("/login.html");
+
+            return Http11Response.createHtmlResponse(HttpStatus.OK, fileContent);
+        }
+
+        final Map<String, String> body = request.getBodyByContentType("application/x-www-form-urlencoded");
+
+        final String account = body.get("account");
+        final String password = body.get("password");
+
+        final Optional<User> userOrEmpty = findUserByAccount(account, password);
+        if (userOrEmpty.isEmpty()) {
+            return Http11Response.createRedirectResponse("/401.html");
+        }
+
+        final User user = userOrEmpty.get();
+        return handleAuthorizedRequest(user);
+    }
+
+    private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
+        if (request.getMethod().equals("GET")) {
+            return handleHtmlRequest("/register.html");
+        }
+
+        final Map<String, String> urlEncodedResponseBody = request.getBodyByContentType("application/x-www-form-urlencoded");
+
+        final String account = urlEncodedResponseBody.get("account");
+        final String email = urlEncodedResponseBody.get("email");
+        final String password = urlEncodedResponseBody.get("password");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
+        }
+
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        return handleAuthorizedRequest(user);
+    }
+
+    private Http11Response handleAuthorizedRequest(final User user) {
+        final String sessionId = generateSessionID();
+
+        final Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", sessionId));
+
+        return Http11Response.createRedirectResponse("/index.html", headers);
+    }
+
+    private Http11Response handleHtmlRequest(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return Http11Response.createHtmlResponse(HttpStatus.OK, fileContent);
+    }
+
+    private Http11Response handleCssRequest(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return Http11Response.createCssResponse(HttpStatus.OK, fileContent);
+    }
+
+    private Http11Response handleJsResponse(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return Http11Response.createJsResponse(HttpStatus.OK, fileContent);
+    }
+
+    private Http11Response handleImgResponse(final String requestTarget) throws IOException {
+        final byte[] fileContent = readFile(requestTarget);
+
+        return Http11Response.createSvgResponse(HttpStatus.OK, fileContent);
     }
 
     private byte[] readFile(final String location) throws IOException {
@@ -112,62 +222,29 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void validateUserByAccount(final String account, final String password) {
+    private String generateSessionID() {
+        final UUID uuid = UUID.randomUUID();
+        return uuid.toString();
+    }
+
+    private Optional<User> findUserByAccount(
+            final String account,
+            final String password
+    ) {
         final Optional<User> userOrEmpty = InMemoryUserRepository.findByAccount(account);
 
         if (userOrEmpty.isEmpty()) {
             log.warn("User not found : account = {}", account);
-            return;
+            return Optional.empty();
         }
 
         final User user = userOrEmpty.get();
         if (!user.checkPassword(password)) {
             log.warn("Wrong password : account = {}", account);
-            return;
+            return Optional.empty();
         }
 
         log.info("User found : {}", user);
-    }
-
-    private Http11Response createHtmlResponse(final byte[] body) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
-
-        return new Http11Response(
-                "HTTP/1.1",
-                200,
-                "OK",
-                headers,
-                body
-        );
-    }
-
-    private Http11Response createCssResponse(final byte[] body) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/css;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
-
-        return new Http11Response(
-                "HTTP/1.1",
-                200,
-                "OK",
-                headers,
-                body
-        );
-    }
-
-    private  Http11Response createJsResponse(final byte[] body) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "application/javascript;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
-
-        return new Http11Response(
-                "HTTP/1.1",
-                200,
-                "OK",
-                headers,
-                body
-        );
+        return Optional.of(user);
     }
 }

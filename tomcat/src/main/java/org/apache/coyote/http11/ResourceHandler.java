@@ -48,6 +48,14 @@ public class ResourceHandler {
             response.setBodyAndContentLength("Hello world!");
             return;
         }
+        if (Objects.equals(request.getResourcePath(), "/login")) {
+            final var session = request.getSession();
+            if (session != null && session.getAttribute("user") != null) {
+                response.setStatusCode(StatusCode.FOUND);
+                response.sendRedirect("/index.html");
+                return;
+            }
+        }
         if (request.hasQueryParameter()) {
             if (Objects.equals(request.getResourcePath(), "/login")) {
                 redirectLogin(request, response);
@@ -77,8 +85,12 @@ public class ResourceHandler {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user);
+
+            final var session = request.getSession();
+            session.setAttribute("user", user.get());
+
             response.setStatusCode(StatusCode.FOUND);
-            response.setLocation("/index.html");
+            response.sendRedirect("/index.html");
             return;
         }
         response.setStatusCode(StatusCode.UNAUTHORIZED);
@@ -95,7 +107,7 @@ public class ResourceHandler {
 
         log.info("user : {}", user);
         response.setStatusCode(StatusCode.FOUND);
-        response.setLocation("/index.html");
+        response.sendRedirect("/index.html");
     }
 
     private String getContent(final String resourcePath) {

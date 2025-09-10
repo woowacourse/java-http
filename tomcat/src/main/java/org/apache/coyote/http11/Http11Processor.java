@@ -1,7 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.SessionManager;
 import com.techcourse.exception.UncheckedServletException;
-import java.util.UUID;
+import com.techcourse.model.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,21 @@ public class Http11Processor implements Runnable, Processor {
             final var httpRequest = HttpRequestParser.parse(inputStream);
             final var httpResponse = new HttpResponse();
 
-            resourceHandler.execute(httpRequest, httpResponse);
+            final var cookies = httpRequest.getCookies();
+            final var jsessionid = cookies.getCookie("JSESSIONID");
 
-            final Cookies cookies = httpRequest.getCookies();
-            if (!cookies.hasCookie("JSESSIONID")) {
-                final UUID sessionId = UUID.randomUUID();
-                httpResponse.setCookie("JSESSIONID=" + sessionId);
+            Session session = null;
+            if (jsessionid != null) {
+                session = SessionManager.findSession(jsessionid).orElse(null);
             }
+
+            if (session == null) {
+                session = SessionManager.createSession();
+                httpResponse.setCookie("JSESSIONID=" + session.getId() + "; Path=/");
+            }
+            httpRequest.setSession(session);
+
+            resourceHandler.execute(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();

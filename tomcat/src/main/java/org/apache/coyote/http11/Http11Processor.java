@@ -1,17 +1,17 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.core.ApplicationProcessor;
+import org.apache.catalina.core.StaticResourceHandler;
+import org.apache.catalina.mapping.Controller;
+import org.apache.catalina.mapping.RequestMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;
 import org.apache.coyote.util.response.HttpContentTypeResolver;
 import org.apache.coyote.util.response.HttpResponse;
+import org.apache.coyote.util.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,80 +33,70 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        OutputStream outputStream = null;
-        try (final var inputStream = connection.getInputStream()) {
-            outputStream = connection.getOutputStream();
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream()) {
+
             HttpRequest request = HttpRequestParser.parse(inputStream);
+            HttpResponse response = new HttpResponse();
+
             if (request == null) {
-                respond(HttpResponse.notFound(), outputStream);
+                handleError(outputStream, response, HttpStatus.NOT_FOUND);
                 return;
             }
-            if (handleApiRequest(request, outputStream)) {
+
+            Controller controller = RequestMapping.getController(request.getPath());
+            if (controller != null) {
+                controller.service(request, response);
+                response.send(outputStream);
                 return;
             }
-            if (handleStaticResourceRequest(request.getPath(), outputStream)) {
+
+            if (handleStaticResource(request, response)) {
+                response.send(outputStream);
                 return;
             }
-            respond(HttpResponse.notFound(), outputStream);
-        } catch (IOException | UncheckedServletException e) {
-            handleError(outputStream, e);
+
+            handleError(outputStream, response, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("process error: {}", e.getMessage(), e);
+            handleError(connection, new HttpResponse(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private void handleError(OutputStream outputStream, Exception e) {
-        if (outputStream == null) {
-            return;
-        }
-        try {
-            respond(HttpResponse.internalServerError(), outputStream);
-        } catch (IOException ex) {
-            log.error("응답 실패! : {}", ex.getMessage(), ex);
-        }
-    }
-
-    private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
-        if ("/login".equals(request.getPath())) {
-            HttpResponse loginResponse = ApplicationProcessor.processLogin(request);
-            respond(loginResponse, outputStream);
-            return true;
-        }
-        if ("/register".equals(request.getPath()) && "POST".equals(request.getMethod())) {
-            HttpResponse registerResponse = ApplicationProcessor.processRegister(request);
-            respond(registerResponse, outputStream);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean handleStaticResourceRequest(String requestPath, OutputStream outputStream) throws IOException {
-        String resourcePath = StaticResourcePathGenerator.generate(requestPath);
-        if (resourcePath == null) {
+    private boolean handleStaticResource(HttpRequest request, HttpResponse response) {
+        String resourcePath = "static" + request.getPath();
+        byte[] body = StaticResourceHandler.readResource(resourcePath);
+        if (body == null) {
             return false;
         }
-        byte[] resourceBody = readPathFile(resourcePath);
-        if (resourceBody == null) {
-            return false;
-        }
-        respond(HttpResponse.of(
-                "HTTP/1.1 200 OK",
-                HttpContentTypeResolver.resolve(resourcePath),
-                resourceBody
-        ), outputStream);
+        response.setStatus(HttpStatus.OK);
+        response.addHeader("Content-Type", HttpContentTypeResolver.resolve(request.getPath()));
+        response.setBody(body);
         return true;
     }
 
-    private byte[] readPathFile(String requestPath) throws IOException {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(requestPath)) {
-            if (inputStream == null) {
-                return null;
-            }
-            return inputStream.readAllBytes();
+    private void handleError(OutputStream outputStream, HttpResponse response, HttpStatus status) {
+        response.setStatus(status);
+        byte[] body = StaticResourceHandler.readResource("static/" + status.getCode() + ".html");
+        if (body != null) {
+            response.setBody(body);
+            response.addHeader("Content-Type", "text/html;charset=utf-8");
+        }
+        try {
+            response.send(outputStream);
+        } catch (IOException e) {
+            log.error("handleError send error: {}", e.getMessage(), e);
         }
     }
 
-    private void respond(HttpResponse httpResponse, OutputStream outputStream) throws IOException {
-        outputStream.write(httpResponse.createHeader().getBytes());
-        outputStream.write(httpResponse.getBody());
-        outputStream.flush();
+    private void handleError(Socket connection, HttpResponse response, HttpStatus status) {
+        if (connection.isClosed()) {
+            return;
+        }
+        try {
+            handleError(connection.getOutputStream(), response, status);
+        } catch (IOException e) {
+            log.error("handleError connection error: {}", e.getMessage(), e);
+        }
     }
 }

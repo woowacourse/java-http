@@ -61,15 +61,15 @@ public class ResourceHandler {
     }
 
     private void redirectLogin(final HttpRequest request, final HttpResponse response) {
-        String account = request.getQueryParameter("account");
-        String password = request.getQueryParameter("password");
+        final var account = request.getQueryParameter("account");
+        final var password = request.getQueryParameter("password");
 
         if (account == null || account.isBlank()) {
             response.setStatusCode(StatusCode.UNAUTHORIZED);
             response.setBodyAndContentLength(getContent("/401.html"));
             return;
         }
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        final var user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user);
@@ -82,7 +82,8 @@ public class ResourceHandler {
     }
 
     private String getContent(final String resourcePath) {
-        try (final var inputStream = getClass().getClassLoader().getResourceAsStream(getWholeResourcePath(resourcePath))) {
+        final var wholeResourcePath = getWholeResourcePath(resourcePath);
+        try (final var inputStream = getClass().getClassLoader().getResourceAsStream(wholeResourcePath)) {
             if (inputStream == null) {
                 return "Not found: " + resourcePath;
             }

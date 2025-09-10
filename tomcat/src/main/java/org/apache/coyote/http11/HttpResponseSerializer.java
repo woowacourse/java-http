@@ -15,7 +15,7 @@ public class HttpResponseSerializer {
 
     private static String build(HttpResponse httpResponse) {
         StringBuilder builder = new StringBuilder();
-        builder.append(httpResponse.getStatus()).append("\r\n");
+        builder.append(httpResponse.getStatus().getValue()).append("\r\n");
 
         for (Map.Entry<String, String> entry : httpResponse.getHeaders().entrySet()) {
             builder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" ").append("\r\n");

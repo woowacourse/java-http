@@ -14,10 +14,7 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private static final String STATUS_OK = "HTTP/1.1 200 OK ";
-    private static final String STATUS_FOUND = "HTTP/1.1 302 Found ";
-
-    private String status;
+    private HttpStatus status;
     private final Map<String, String> headers = new LinkedHashMap<>();
     private String body;
     private final List<String> cookies = new ArrayList<>();
@@ -27,7 +24,7 @@ public class HttpResponse {
     }
 
     public void found(final String redirectLocation) {
-        status = STATUS_FOUND;
+        status = HttpStatus.FOUND;
         headers.put("Location", redirectLocation);
         headers.put("Content-Length", "0");
     }
@@ -39,14 +36,14 @@ public class HttpResponse {
             return;
         }
         body = new String(Files.readAllBytes(Paths.get(url.toURI())));
-        status = STATUS_OK;
+        status = HttpStatus.OK;
         headers.put("Content-Type", getContentType(path));
         headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 
     public void ok(final String body, final String contentType) {
         this.body = body;
-        status = STATUS_OK;
+        status = HttpStatus.OK;
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
@@ -62,7 +59,7 @@ public class HttpResponse {
         return "text/html;charset=utf-8";
     }
 
-    public String getStatus() {
+    public HttpStatus getStatus() {
         return status;
     }
 

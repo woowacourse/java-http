@@ -36,7 +36,7 @@ public final class HttpServletContainer {
         try {
             handlers.getOrDefault(path, defaultServlet).service(request, response);
         } catch (FileNotFoundException e) {
-            throw new HttpStatusException(e, HttpStatus.BAD_REQUEST);
+            throw new HttpStatusException(e, HttpStatus.NOT_FOUND);
         }
 
         processResponse(request, response);

@@ -1,5 +1,7 @@
 package com.spring.http;
 
+import com.spring.http.enums.HttpStatus;
+import com.techcourse.exception.HttpStatusException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +96,7 @@ public final class HttpHeader {
 
     public String getContentType() {
         if (!containKey(CONTENT_TYPE)) {
-            throw new IllegalArgumentException("Content-Type header is missing");
+            throw new HttpStatusException("Content-Type header is missing", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         }
         return get(CONTENT_TYPE);
     }

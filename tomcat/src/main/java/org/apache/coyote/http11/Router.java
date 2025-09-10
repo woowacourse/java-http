@@ -39,6 +39,13 @@ public class Router {
             HttpRequest httpRequest,
             HttpResponse httpResponse
     ) throws IOException {
+        if (httpRequest.uri().equals("/login")) {
+            if(httpRequest.getSession() != null) {
+                httpResponse.setStatusCode(HttpStatus.FOUND);
+                httpResponse.setHeader("Location", "http://localhost:8080");
+            }
+            return;
+        }
         staticHandler.serve(httpRequest, httpResponse);
     }
 

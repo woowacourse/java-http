@@ -29,7 +29,7 @@ public abstract class AbstractController implements Controller {
     private HttpResponse getMethodNotAllowedResponse() {
         return new HttpResponse(
                 HttpStatusCode.METHOD_NOT_ALLOWED,
-                ContentType.HTML,
+                ContentType.TEXT,
                 "Method not allowed"
         );
     }

@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -15,26 +16,19 @@ public class Http11Request {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final String QUERY_PARAMETER_DELIMiTER = "?";
 
-    private String header;
-    private String firstLine;
     private String[] firstLineConditions;
+    private final Map<String, String> header = new HashMap<>();
     private String path;
     private Map<String, String> queryParams;
+    private Http11Cookie cookies;
+    private String body;
 
     public Http11Request(InputStream inputStream) throws IOException {
-        extractHeader(inputStream);
+        extractHeaderAndBody(inputStream);
     }
 
     public String getPath() {
         return path;
-    }
-
-    public String getQueryParamValue(String queryParam) {
-        return queryParams.get(queryParam);
-    }
-
-    public Map<String, String> getQueryParams() {
-        return queryParams;
     }
 
     public String getRequestMethod() {
@@ -43,7 +37,15 @@ public class Http11Request {
         return requestMethod;
     }
 
-    private void extractHeader(InputStream inputStream) throws IOException {
+    public String getBody() {
+        return body;
+    }
+
+    public Http11Cookie getCookies() {
+        return cookies;
+    }
+
+    private void extractHeaderAndBody(InputStream inputStream) throws IOException {
         final StringBuilder requestHeader = new StringBuilder();
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream, DEFAULT_CHARSET));
@@ -52,20 +54,64 @@ public class Http11Request {
         while (((line = bufferedReader.readLine()) != null) && (!line.isEmpty())) {
             requestHeader.append(line).append("\r\n");
         }
-        header = requestHeader.toString();
+        String header = requestHeader.toString();
 
         String[] requestConditions = header.split("\r\n");
         if (requestConditions.length < 1) {
             throw new IOException("Invalid HTTP request: empty header");
         }
 
-        firstLine = requestConditions[0];
+        extractFirstLineConditions(requestConditions);
+        extractHeaders(requestConditions);
+        int contentLength = getContentLength();
+        extractCookies();
+        extractBody(bufferedReader, contentLength);
+        extractUri();
+    }
+
+    private void extractCookies() {
+        this.cookies = new Http11Cookie(header.get("cookie"));
+    }
+
+    private int getContentLength() {
+        String contentLength = this.header.get("content-length");
+        if (contentLength == null) {
+            return 0;
+        }
+
+        return Integer.parseInt(contentLength);
+    }
+
+    private void extractHeaders(String[] requestConditions) {
+        for (int i = 1; i < requestConditions.length; i++) {
+            String[] set = requestConditions[i].split(":", 2);
+            this.header.put(set[0].trim().toLowerCase(), set[1].trim());
+        }
+    }
+
+    private void extractBody(BufferedReader br, int contentLength) throws IOException {
+        if (contentLength <= 0) {
+            this.body = "";
+            return;
+        }
+        char[] buf = new char[contentLength];
+        int off = 0;
+        while (off < contentLength) {
+            int r = br.read(buf, off, contentLength - off);
+            if (r == -1) {
+                throw new IOException("Unexpected EOF while reading body");
+            }
+            off += r;
+        }
+        this.body = new String(buf, 0, off);
+    }
+
+    private void extractFirstLineConditions(String[] requestConditions) throws IOException {
+        String firstLine = requestConditions[0];
         firstLineConditions = firstLine.split(" ");
         if (firstLineConditions.length < 3) {
             throw new IOException("Invalid HTTP request line: " + firstLine);
         }
-
-        extractUri();
     }
 
     private void extractUri() {

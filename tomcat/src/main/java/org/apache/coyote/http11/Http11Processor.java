@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.spring.http.enums.HttpStatus;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 import com.techcourse.exception.HttpStatusException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
@@ -7,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import com.spring.http.request.HttpRequest;
-import com.spring.http.response.HttpResponse;
 import org.apache.catalina.servlet.HttpServletContainer;
 import org.apache.coyote.Processor;
 import org.apache.coyote.util.HttpRequestParser;
@@ -40,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final HttpResponse response = processResponse(reader);
+            final HttpResponse response = handleRequest(reader);
 
             final byte[] output = HttpResponseParser.parse(response);
             outputStream.write(output);
@@ -50,29 +51,37 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse processResponse(BufferedReader reader) throws IOException {
-        HttpResponse response = new HttpResponse(DEFAULT_VERSION);
+    private HttpResponse handleRequest(BufferedReader reader) throws IOException {
         try {
-            final HttpRequest request = HttpRequestParser.parse(reader);
-            response = new HttpResponse(request);
-            
-            HttpServletContainer.handle(request, response);
+            final HttpRequest request = parseRequest(reader);
+            final HttpResponse response = createResponse(request);
+
+            processServletRequest(request, response);
             return response;
         } catch (HttpStatusException e) {
-            log.error("HttpStatusException 발생 = {}", e.getMessage(), e);
-            processResponse(null, response, e);
-            return response;
+            return handleHttpStatusException(e);
         } catch (IllegalStateException | IllegalArgumentException e) {
-            ResponseUtil.handleBadRequest(null, response);
-            return response;
+            return handleHttpStatusException(new HttpStatusException(e, HttpStatus.BAD_REQUEST));
         }
     }
 
-    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatusException exception)
-            throws IOException {
-        log.error("HttpStatusException 발생 = {}", exception.getMessage(), exception);
+    private HttpRequest parseRequest(BufferedReader reader) throws IOException {
+        return HttpRequestParser.parse(reader);
+    }
 
-        response.setStatus(exception.getHttpStatus());
-        ResponseUtil.handleErrorPage(request, response);
+    private HttpResponse createResponse(HttpRequest request) {
+        return new HttpResponse(request);
+    }
+
+    private void processServletRequest(HttpRequest request, HttpResponse response) throws IOException {
+        HttpServletContainer.handle(request, response);
+    }
+
+    private HttpResponse handleHttpStatusException(HttpStatusException e) throws IOException {
+        log.error("HttpStatusException 발생 = {}", e.getMessage(), e);
+        final HttpResponse response = new HttpResponse(DEFAULT_VERSION);
+        response.setStatus(e.getHttpStatus());
+        ResponseUtil.handleErrorPage(null, response);
+        return response;
     }
 }

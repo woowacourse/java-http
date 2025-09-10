@@ -20,7 +20,7 @@ public record Resource(String path, String type, String content) {
         ) {
             String extension = Arrays.asList(path.split("\\.")).getLast();
             String content = bufferedReader.lines()
-                    .collect(Collectors.joining(System.lineSeparator(), "", System.lineSeparator()));
+                    .collect(Collectors.joining("\r\n", "", "\r\n"));
 
             return new Resource(path, extension, content);
         }

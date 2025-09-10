@@ -56,13 +56,13 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = 0;
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            fullRequest.append(line).append(System.lineSeparator());
+            fullRequest.append(line).append("\r\n");
             if (line.startsWith("Content-Length")) {
                 contentLength = Integer.parseInt(line.substring(line.indexOf(":") + 1).trim());
             }
         }
 
-        fullRequest.append(System.lineSeparator());
+        fullRequest.append("\r\n");
 
         if (contentLength > 0) {
             char[] body = new char[contentLength];
@@ -85,6 +85,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getUrl(String request) {
-        return request.split(System.lineSeparator())[0].split(" ")[1].split("\\?")[0];
+        return request.split("\r\n")[0].split(" ")[1].split("\\?")[0];
     }
 }

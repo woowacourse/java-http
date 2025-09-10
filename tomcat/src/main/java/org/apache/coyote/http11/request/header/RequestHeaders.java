@@ -28,7 +28,7 @@ public record RequestHeaders(
     }
 
     private static List<String> parseHeaderLines(String request) {
-        return Arrays.stream(request.split(System.lineSeparator()))
+        return Arrays.stream(request.split("\r\n"))
                 .skip(1)
                 .takeWhile(line -> !line.isEmpty())
                 .toList();

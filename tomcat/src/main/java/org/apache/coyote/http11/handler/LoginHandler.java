@@ -93,7 +93,9 @@ public class LoginHandler extends HttpRequestHandler {
     }
 
     public Map<String, String> parserBody(String request) {
-        String urlEncodedBody = request.split("\\n\\n")[1];
+        System.out.println("request = " + request);
+        String urlEncodedBody = request.split("\r\n\r\n")[1];
+        System.out.println("urlEncodedBody = " + urlEncodedBody);
         Map<String, String> result = new HashMap<>();
         String[] pairs = urlEncodedBody.split("&");
 
@@ -113,7 +115,7 @@ public class LoginHandler extends HttpRequestHandler {
     }
 
     private String getCookie(String request, String key) {
-        String[] headers = request.split("\\n");
+        String[] headers = request.split("\r\n");
         for (String header : headers) {
             if (header.startsWith("Cookie:")) {
                 String[] cookies = header.substring(7).split(";");

@@ -48,6 +48,6 @@ public abstract class HttpRequestHandler {
     }
 
     protected String getUrl(String request) {
-        return request.split(System.lineSeparator())[0].split(" ")[1].split("\\?")[0];
+        return request.split("\r\n")[0].split(" ")[1].split("\\?")[0];
     }
 }

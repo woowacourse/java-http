@@ -14,7 +14,7 @@ public enum HttpMethod {
     }
 
     public static HttpMethod fromHttp11Request(String request) {
-        String method = request.split(System.lineSeparator())[0].split(" ")[0];
+        String method = request.split("\r\n")[0].split(" ")[0];
         if (method.isBlank()) {
             throw new IllegalArgumentException("Cannot resolve Http Request.");
         }

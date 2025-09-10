@@ -18,11 +18,15 @@ public final class HttpCookie {
             return Collections.emptyMap();
         }
         final Map<String, String> cookies = new HashMap<>();
-        final String[] cookiePairs = cookieHeader.split("; ");
+        final String[] cookiePairs = cookieHeader.split(";");
         for (final String cookiePair : cookiePairs) {
-            final String[] keyValue = cookiePair.split("=");
+            final String trimmedPair = cookiePair.trim();
+            if (trimmedPair.isEmpty()) {
+                continue;
+            }
+            final String[] keyValue = trimmedPair.split("=", 2);
             if (keyValue.length == 2) {
-                cookies.put(keyValue[0], keyValue[1]);
+                cookies.put(keyValue[0].trim(), keyValue[1]);
             }
         }
         return Collections.unmodifiableMap(cookies);

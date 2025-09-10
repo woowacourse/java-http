@@ -25,4 +25,20 @@ public class HttpHeaders {
     public Set<String> keySet() {
         return headers.keySet();
     }
+
+    public String getContentLength() {
+        final List<String> values = headers.get("Content-Length");
+        if (values == null || values.isEmpty()) {
+            return "0";
+        }
+        return values.get(0);
+    }
+
+    public String getFirst(final String name) {
+        final List<String> values = headers.get(name);
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.getFirst();
+    }
 }

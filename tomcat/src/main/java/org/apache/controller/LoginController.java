@@ -31,7 +31,7 @@ public class LoginController implements Controller {
 
         Optional<User> user = getUser(account);
 
-        boolean isAuthenticated = authenticateUser(user, password);
+        boolean isAuthenticated = isAuthenticatedUser(user, password);
         if (!isAuthenticated) {
             response.setRedirection("/401.html");
             return;
@@ -48,7 +48,7 @@ public class LoginController implements Controller {
         return user;
     }
 
-    private boolean authenticateUser(Optional<User> user, String password) {
+    private boolean isAuthenticatedUser(Optional<User> user, String password) {
         return user.isPresent() && user.get().checkPassword(password);
     }
 

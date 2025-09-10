@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import java.util.List;
 import org.apache.coyote.http11.handler.DispatcherHandler;
 import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.dynamic.LoginHandler;
+import org.apache.coyote.http11.handler.statics.StaticResourceHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.dto;
+package org.apache.coyote.http11.request.dto;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.util.HttpHeaders;
+import org.apache.coyote.http11.http.HttpHeaders;
 
 public record HttpRequest(
         String method,

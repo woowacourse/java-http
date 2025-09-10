@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.request.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,14 +8,14 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.dto.HttpRequest;
-import org.apache.coyote.http11.dto.HttpRequestUri;
+import org.apache.coyote.http11.request.dto.HttpRequest;
+import org.apache.coyote.http11.request.dto.HttpRequestUri;
+import org.apache.coyote.http11.http.HttpHeaders;
 
 public final class HttpRequestParser {
 

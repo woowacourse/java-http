@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.dto;
+package org.apache.coyote.http11.request.dto;
 
 public record HttpRequestUri(
         String method,

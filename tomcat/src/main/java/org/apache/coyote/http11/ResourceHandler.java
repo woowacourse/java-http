@@ -3,8 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -45,63 +44,58 @@ public class ResourceHandler {
     }
 
     private void setBody(final HttpRequest request, final HttpResponse response) {
-        if(Objects.equals(request.getResourcePath(), "/")) {
+        if (Objects.equals(request.getResourcePath(), "/")) {
             response.setBodyAndContentLength("Hello world!");
             return;
         }
-
-        if(request.hasQueryParameter()) {
-            if(Objects.equals(request.getResourcePath(), "/login")) {
+        if (request.hasQueryParameter()) {
+            if (Objects.equals(request.getResourcePath(), "/login")) {
                 redirectLogin(request, response);
                 return;
             }
         }
-        if(!request.hasQueryParameter()) {
-            final var resourcePath = getStaticResourcePath(request.getResourcePath());
+        if (!request.hasQueryParameter()) {
             response.setStatusCode(StatusCode.OK);
-            response.setBodyAndContentLength(getContent(resourcePath));
+            response.setBodyAndContentLength(getContent(request.getResourcePath()));
         }
-    }
-
-    private String getStaticResourcePath(final String resourcePath) {
-        if (resourcePath.contains(EXTENSION_DELIMITER)) {
-            return STATIC_PREFIX + resourcePath;
-        }
-        return STATIC_PREFIX + resourcePath + DEFAULT_EXTENSION;
     }
 
     private void redirectLogin(final HttpRequest request, final HttpResponse response) {
         String account = request.getQueryParameter("account");
+        String password = request.getQueryParameter("password");
 
         if (account == null || account.isBlank()) {
             response.setStatusCode(StatusCode.UNAUTHORIZED);
-            response.setBodyAndContentLength(getContent("401.html"));
+            response.setBodyAndContentLength(getContent("/401.html"));
             return;
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if (user.isPresent()) {
+        if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user);
             response.setStatusCode(StatusCode.FOUND);
             response.setLocation("/index.html");
             return;
         }
         response.setStatusCode(StatusCode.UNAUTHORIZED);
-        response.setBodyAndContentLength(getContent("401.html"));
+        response.setBodyAndContentLength(getContent("/401.html"));
     }
 
-    private String getContent(String resourcePath) {
-        final var resource = ClassLoader.getSystemResource(resourcePath);
-
-        if (resource == null) {
-            return "Not found: " + resourcePath;
-        }
-        try {
-            final var path = Paths.get(resource.getPath());
-
-            return Files.readString(path);
+    private String getContent(final String resourcePath) {
+        try (final var inputStream = getClass().getClassLoader().getResourceAsStream(getWholeResourcePath(resourcePath))) {
+            if (inputStream == null) {
+                return "Not found: " + resourcePath;
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getWholeResourcePath(final String resourcePathPart) {
+        if (resourcePathPart.contains(EXTENSION_DELIMITER)) {
+            return STATIC_PREFIX + resourcePathPart;
+        }
+        return STATIC_PREFIX + resourcePathPart + DEFAULT_EXTENSION;
     }
 }

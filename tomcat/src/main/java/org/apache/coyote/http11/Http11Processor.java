@@ -142,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
         final var cookie = httpRequest.getHttpCookie();
         if (!cookie.hasCookie("JSESSIONID")) {
             final var session = httpRequest.getSession(true);
-            response.addCookie("JSESSIONID=" + session.getId());
+            response.addCookie("JSESSIONID", session.getId());
         }
         return response;
     }

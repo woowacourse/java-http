@@ -42,8 +42,12 @@ public class Http11Response {
         return new Http11Response(302, Map.of("Location", location), new byte[0]);
     }
 
-    public void addCookie(final String value) {
-        headers.put("Set-Cookie", value);
+    public void addCookie(
+            final String name,
+            final String value
+    ) {
+        final String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", name, value);
+        headers.put("Set-Cookie", cookieValue);
     }
 
     public byte[] getResponseBytes() {

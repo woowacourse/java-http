@@ -26,18 +26,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(Socket connection) {
+        //TODO: 프로세스 메서드에서도 try-catch를 없앨 수 있을까 ?
         try (final var inputStream = new Http11InputBuffer(connection.getInputStream());
              final var outputStream = new Http11OutputBuffer(connection.getOutputStream())) {
             HttpRequest httpRequest = new HttpRequestParser().parse(inputStream);
             HttpResponse httpResponse = new HttpResponse();
-            try {
-                router.handle(httpRequest, httpResponse);
-            } catch (Throwable throwable) {
-                log.error("Handler error", throwable);
-                httpResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                httpResponse.setHeader("Content-Type", ContentType.PLAIN.getMimeType());
-                httpResponse.setBody(HttpResponse.bytes(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()));
-            }
+
+            router.handle(httpRequest, httpResponse);
             outputStream.commitAndWrite(httpResponse);
 
         } catch (IOException | UncheckedServletException e) {

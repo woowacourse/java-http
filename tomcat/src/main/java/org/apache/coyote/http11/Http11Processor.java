@@ -10,24 +10,23 @@ import java.nio.file.Paths;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.SessionManager;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.Api;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.controller.UserController;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.service.UserService;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
-    private final UserService userService = new UserService(SESSION_MANAGER);
+    private final UserController userController = new UserController(SESSION_MANAGER);
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -48,32 +47,34 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse();
 
             try {
+                // ===================
+                Api api = request.getApi();
+                var handlerMethod = userController.getHandlerMethod(api);
+                if (handlerMethod != null) {
+                    handlerMethod.accept(request, response);
+                }
+
+/*
                 if (request.getPath().get().equals("/login")) {
                     if (request.getMethod() == HttpMethod.GET) {
-                        if (userService.getLoggedUser(request.getCookies()) == null) {
-                            request.setPath("/login.html");
-                        } else {
-                            request.setPath("/index.html");
-                        }
+                        userController.loginPage(request, response);
                     }
                     if (request.getMethod() == HttpMethod.POST) {
-                        userService.login(request, response);
-                        response.setHttpStatus(HttpStatus.FOUND);
-                        response.getHeaders().put("Location", "/index.html");
+                        userController.login(request, response);
                     }
                 }
 
                 if (request.getPath().get().equals("/register")) {
                     if (request.getMethod() == HttpMethod.GET) {
-                        request.setPath("/register.html");
+                        userController.registerPage(request, response);
                     }
                     if (request.getMethod() == HttpMethod.POST) {
-                        userService.register(request);
-                        response.setHttpStatus(HttpStatus.FOUND);
-                        response.getHeaders().put("Location", "/index.html");
+                        userController.register(request, response);
                     }
                 }
+*/
                 response.setContentType(ContentType.fromPath(request.getPath()));
+                // ===================
             } catch (UnauthorizedException e) {
                 request.setPath("/401.html");
                 response.setContentType(ContentType.HTML);

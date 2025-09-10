@@ -124,4 +124,8 @@ public class HttpRequest {
     public void setPath(String path) {
         this.path = new Path(path);
     }
+
+    public Api getApi() {
+        return new Api(method, path.get());
+    }
 }

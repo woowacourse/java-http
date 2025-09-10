@@ -57,6 +57,11 @@ public class Http11Response {
         return fileContents.toString();
     }
 
+    public void sendRedirect(String path) throws Http11ParseException {
+        putStatusLine("HTTP/1.1 302 Found");
+        putHeader("Location", "/index.html");
+    }
+
     public void putStatusLine(String line) throws Http11ParseException {
         String[] lineParts = line.split(" ");
         this.version = lineParts[0];

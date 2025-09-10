@@ -122,16 +122,7 @@ public class Http11Processor implements Runnable, Processor {
         String statusLine = "HTTP/1.1 200 OK";
         String responseBody;
 
-        if ("/login".equals(path) || "/login.html".equals(path)) {
-            final Http11Cookie cookie = request.getCookie();
-            if (cookie.isContainsSessionId() && SessionManager.getInstance().containsSession(cookie.getSessionId())) {
-                statusLine = "HTTP/1.1 302 Found";
-                responseHeaders.put("Location", "/index.html");
-                responseBody = "";
-            } else {
-                responseBody = readFileFromClasspath("static/login.html");
-            }
-        } else if (!"/".equals(path)) {
+        if (!"/".equals(path)) {
             responseBody = readFileFromClasspath("static" + path);
             if (responseBody.isEmpty()) {
                 statusLine = "HTTP/1.1 404 Not Found";
@@ -147,39 +138,7 @@ public class Http11Processor implements Runnable, Processor {
     private String handlePostRequest(final String path, final Http11Request request, 
                                      final Map<String, String> responseHeaders) {
         Map<String, String> params = request.getParams();
-
-        if ("/login".equals(path)) {
-            try {
-                final User user = InMemoryUserRepository.findByAccount(params.get("account"))
-                        .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));
-
-                if (user.checkPassword(params.get("password"))) {
-                    createSessionAndSetCookie(user, request, responseHeaders);
-                    responseHeaders.put("Location", "/index.html");
-                    return "HTTP/1.1 302 Found";
-                } else {
-                    responseHeaders.put("Location", "/401.html");
-                    return "HTTP/1.1 302 Found";
-                }
-            } catch (IllegalArgumentException e) {
-                responseHeaders.put("Location", "/401.html");
-                return "HTTP/1.1 302 Found";
-            }
-        }
         return "HTTP/1.1 404 Not Found";
-    }
-
-    private void createSessionAndSetCookie(final User user, final Http11Request request, 
-                                           final Map<String, String> responseHeaders) {
-        final Http11Cookie cookie = request.getCookie();
-        if (cookie.isNotContainsSessionId() || !SessionManager.getInstance().containsSession(cookie.getSessionId())) {
-            final String sessionId = UUID.randomUUID().toString();
-            final Http11Session session = new Http11Session(sessionId);
-            session.setAttribute("user", user);
-            SessionManager.getInstance().add(session);
-            // TODO: CookieSecurityConfig를 통한 HttpOnly 기본, Secure/SameSite 설정 전략 등 고려하기
-            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
-        }
     }
 
     private String readFileFromClasspath(String resourcePath) {

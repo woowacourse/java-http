@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.vo;
+package org.apache.catalina.vo;
 
 import java.util.HashMap;
 import java.util.Map;

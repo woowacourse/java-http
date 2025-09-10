@@ -4,10 +4,10 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.vo.HttpCookie;
-import org.apache.coyote.http11.vo.HttpRequest;
-import org.apache.coyote.http11.vo.HttpResponse;
-import org.apache.coyote.http11.vo.HttpStatus;
+import org.apache.catalina.vo.HttpCookie;
+import org.apache.catalina.vo.HttpRequest;
+import org.apache.catalina.vo.HttpResponse;
+import org.apache.catalina.vo.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

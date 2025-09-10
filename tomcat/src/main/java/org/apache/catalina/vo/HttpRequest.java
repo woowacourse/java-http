@@ -1,10 +1,9 @@
-package org.apache.coyote.http11.vo;
+package org.apache.catalina.vo;
 
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
 import java.util.Map;
-import java.util.UUID;
 
 public record HttpRequest(
     String method,
@@ -15,19 +14,6 @@ public record HttpRequest(
 
     private static final String SESSION_COOKIE_ID = "JSESSIONID";
 
-    public Session getSession() {
-        final var sessionManager = SessionManager.getInstance();
-        final var cookie = getCookie();
-        if (cookie.containsKey(SESSION_COOKIE_ID)) {
-            final var sessionId = cookie.get(SESSION_COOKIE_ID);
-            return sessionManager.findSession(sessionId);
-        }
-        final var uuid = UUID.randomUUID();
-        final var session = new Session(uuid.toString());
-        sessionManager.add(session);
-        return session;
-    }
-
     public Session getSession(final boolean create) {
         final var sessionManager = SessionManager.getInstance();
         final var cookie = getCookie();
@@ -35,15 +21,12 @@ public record HttpRequest(
             final var sessionId = cookie.get(SESSION_COOKIE_ID);
             final var session = sessionManager.findSession(sessionId);
             if (session == null) {
-                final var uuid = UUID.randomUUID();
-                final var newSession = new Session(uuid.toString());
-                sessionManager.add(newSession);
-                return newSession;
+                return sessionManager.generateNewSession();
             }
             return session;
         }
         if (create) {
-            return getSession();
+            return sessionManager.generateNewSession();
         }
         return null;
     }

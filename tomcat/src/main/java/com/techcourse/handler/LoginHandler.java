@@ -56,7 +56,9 @@ public class LoginHandler implements HttpRequestHandler {
         if (userAttribute == null) {
             return false;
         }
-        User user = (User) userAttribute;
-        return true;
+        if(userAttribute instanceof User) {
+            return true;
+        }
+        return false;
     }
 }

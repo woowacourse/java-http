@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import org.apache.catalina.RequestCookie;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.message.HttpMethod;
@@ -101,7 +101,7 @@ public class Http11InputBuffer {
     }
 
     private Map<String, String> parseHeaders(InputStream inputStream) throws IOException {
-        Map<String, String> headers = new TreeMap<>();
+        Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = readLine(inputStream)) != null && !line.isEmpty()) {
             int colonIndex = line.indexOf(":");
@@ -115,7 +115,7 @@ public class Http11InputBuffer {
     }
 
     private RequestCookie parseToCookie(String rawCookies) {
-        Map<String, String> cookieValues = new TreeMap<>();
+        Map<String, String> cookieValues = new HashMap<>();
         String[] pairs = rawCookies.split("; ");
         for (String pair : pairs) {
             String[] splitPair = pair.split("=", 2);

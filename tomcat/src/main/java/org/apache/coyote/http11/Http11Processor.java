@@ -80,7 +80,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
                 httpResponseHeader.add("Content-Type",
-                        StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()));
+                        StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()) + ";charset=utf-8");
                 httpResponseHeader.add("Content-Length",
                         String.valueOf(DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8).length));
 
@@ -109,7 +109,8 @@ public class Http11Processor implements Runnable, Processor {
         StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest.getPath(), httpRequest.getHttpVersion());
 
         HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
-        httpResponseHeader.add("Content-Type", StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()));
+        httpResponseHeader.add("Content-Type",
+                StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()) + ";charset=utf-8");
         httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
 //        httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         // TODO: charset 관련 처리

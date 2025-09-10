@@ -56,7 +56,7 @@ public class Http11OutputBuffer {
     private void serializeResponseHeader(HttpResponseHeader header,
                                          StringBuilder responseBuilder) {
         for (String key : header.getValues().keySet()) {
-            responseBuilder.append(key).append(": ").append(header.get(key));
+            responseBuilder.append(key).append(": ").append(header.get(key)).append(" ");
             responseBuilder.append("\r\n");
         }
     }

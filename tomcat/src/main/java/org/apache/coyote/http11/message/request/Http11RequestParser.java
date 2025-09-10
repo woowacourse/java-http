@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.cookie.RequestCookie;
 import org.apache.coyote.http11.io.Http11InputBuffer;
+import org.apache.coyote.http11.message.HttpMethod;
 
 public class Http11RequestParser {
 

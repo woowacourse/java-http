@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import org.apache.coyote.http11.message.Http11RequestParser;
-import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.message.request.Http11RequestParser;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class Http11InputBuffer {
 

@@ -1,25 +1,33 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.catalina.cookie.ResponseCookie;
+import org.apache.catalina.cookie.RequestCookie;
 
-public class HttpResponseHeader {
+public class HttpRequestHeader {
 
     private final Map<String, String> values;
-    private ResponseCookie cookie;
+    private RequestCookie cookie;
 
-    public HttpResponseHeader() {
-        this.values = new HashMap<>();
+    public HttpRequestHeader(Map<String, String> values) {
+        this.values = values;
+    }
+
+    public HttpRequestHeader() {
+        this.values = new LinkedHashMap<>();
     }
 
     public void add(String key, String value) {
         this.values.put(key, value);
     }
 
-    public void addCookie(ResponseCookie cookie) {
-        this.cookie = cookie;
+    public void addCookie(RequestCookie requestCookie) {
+        this.cookie = requestCookie;
         this.values.remove("Cookie");
+    }
+
+    public boolean contains(String key) {
+        return values.containsKey(key);
     }
 
     public String get(String comparedKey) {
@@ -30,15 +38,11 @@ public class HttpResponseHeader {
                 .orElseThrow(() -> new IllegalArgumentException(comparedKey + "와 일치하는 값이 헤더에 존재하지 않습니다."));
     }
 
-    public Map<String, String> getValues() {
-        return new HashMap<>(values);
-    }
-
     public boolean hasCookie() {
         return this.cookie != null;
     }
 
-    public ResponseCookie getCookie() {
+    public RequestCookie getCookie() {
         return this.cookie;
     }
 }

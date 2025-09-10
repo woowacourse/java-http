@@ -10,8 +10,8 @@ import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.io.Http11InputBuffer;
 import org.apache.coyote.http11.io.Http11OutputBuffer;
-import org.apache.coyote.http11.message.HttpRequest;
-import org.apache.coyote.http11.message.HttpResponse;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

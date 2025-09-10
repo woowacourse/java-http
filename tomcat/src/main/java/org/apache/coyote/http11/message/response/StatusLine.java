@@ -1,4 +1,7 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.response;
+
+import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public record StatusLine(
         HttpStatus status,

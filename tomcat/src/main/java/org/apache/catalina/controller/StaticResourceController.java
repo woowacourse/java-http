@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import org.apache.coyote.http11.message.HttpRequest;
-import org.apache.coyote.http11.message.HttpResponse;
-import org.apache.coyote.http11.message.HttpResponseHeader;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpResponseHeader;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.StaticResourceExtension;
-import org.apache.coyote.http11.message.StatusLine;
+import org.apache.coyote.http11.message.response.StatusLine;
 
 public class StaticResourceController implements Controller {
     @Override

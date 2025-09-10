@@ -7,7 +7,7 @@ import org.apache.catalina.controller.RegisterController;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.message.HttpMethod;
-import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class RequestMapping {
 

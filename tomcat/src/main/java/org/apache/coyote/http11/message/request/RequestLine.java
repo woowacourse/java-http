@@ -1,4 +1,6 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
+
+import org.apache.coyote.http11.message.HttpMethod;
 
 public record RequestLine(
         HttpMethod httpMethod,

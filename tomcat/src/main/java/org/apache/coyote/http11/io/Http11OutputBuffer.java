@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.cookie.ResponseCookie;
-import org.apache.coyote.http11.message.HttpResponse;
-import org.apache.coyote.http11.message.HttpResponseHeader;
-import org.apache.coyote.http11.message.StatusLine;
+import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpResponseHeader;
+import org.apache.coyote.http11.message.response.StatusLine;
 
 public class Http11OutputBuffer {
 

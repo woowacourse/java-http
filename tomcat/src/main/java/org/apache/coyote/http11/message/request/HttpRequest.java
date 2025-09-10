@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.cookie.RequestCookie;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.message.HttpMethod;
 
 public class HttpRequest {
 

@@ -15,7 +15,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -109,9 +108,8 @@ public class Http11Processor implements Runnable, Processor {
         }
         log.info(user.toString());
         if (request.getSession() == null) {
-            String sessionId = UUID.randomUUID().toString();
-            sessionManager.add(new Session(sessionId));
-            return create302LoginResponse("/index.html", sessionId);
+            Session session = createSession(user);
+            return create302LoginResponse("/index.html", session.getId());
         }
         return create302Response("/index.html");
     }
@@ -119,7 +117,15 @@ public class Http11Processor implements Runnable, Processor {
     private String register(HttpRequest request) {
         User user = new User(request.getBody("account"), request.getBody("password"), request.getBody("email"));
         InMemoryUserRepository.save(user);
-        return create302Response("/index.html");
+        Session session = createSession(user);
+        return create302LoginResponse("/index.html", session.getId());
+    }
+
+    private Session createSession(User user) {
+        Session session = new Session();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return session;
     }
 
     private Path getStaticResource(String url) {

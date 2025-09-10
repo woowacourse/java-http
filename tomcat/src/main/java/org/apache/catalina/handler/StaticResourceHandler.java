@@ -2,8 +2,8 @@ package org.apache.catalina.handler;
 
 import org.apache.coyote.http11.response.HttpResponse;
 
-import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
@@ -13,32 +13,65 @@ public class StaticResourceHandler {
     }
 
     public static HttpResponse serveStaticResource(final String path) throws Exception {
-        final var classpathLocation = "static" + path;
-        final var resourceUrl = StaticResourceHandler.class.getClassLoader()
-                .getResource(classpathLocation);
-        if (resourceUrl == null) {
-            return HttpResponse.builder()
-                    .status(404, "Not Found")
-                    .contentType("text/plain;charset=utf-8")
-                    .body(("Resource not found: " + path).getBytes())
-                    .build();
+        final var rootPath = getStaticRootPath();
+        final var requestedPath = resolveRequestedPath(rootPath, path);
+
+        if (!isUnderRoot(rootPath, requestedPath)) {
+            return forbiddenResponse();
         }
 
-        final var contentType = detectContentType(resourceUrl);
-        final var body = Files.readAllBytes(Paths.get(resourceUrl.toURI()));
+        if (!Files.exists(requestedPath) || Files.isDirectory(requestedPath)) {
+            return notFoundResponse(path);
+        }
 
+        return okResponse(requestedPath);
+    }
+
+    private static Path getStaticRootPath() throws Exception {
+        final var rootUrl = Objects.requireNonNull(
+                StaticResourceHandler.class.getClassLoader()
+                        .getResource("static"),
+                "Static root not found"
+        );
+        return Paths.get(rootUrl.toURI())
+                .toRealPath();
+    }
+
+    private static Path resolveRequestedPath(final Path rootPath, final String path) {
+        final var relativePath = path.startsWith("/") ? path.substring(1) : path;
+
+        return rootPath.resolve(relativePath)
+                .normalize();
+    }
+
+    private static boolean isUnderRoot(final Path rootPath, final Path requestedPath) {
+        return requestedPath.startsWith(rootPath);
+    }
+
+    private static HttpResponse forbiddenResponse() {
         return HttpResponse.builder()
-                .status(200, "OK")
-                .contentType(contentType)
-                .body(body)
+                .status(403, "Forbidden")
+                .contentType("text/plain;charset=utf-8")
+                .body("Forbidden".getBytes())
                 .build();
     }
 
-    private static String detectContentType(final URL resourceUrl) throws Exception {
-        final var path = Paths.get(Objects.requireNonNull(resourceUrl)
-                .toURI());
-        final var contentType = Files.probeContentType(path);
-        
-        return contentType != null ? contentType : "text/plain;charset=utf-8";
+    private static HttpResponse notFoundResponse(final String path) {
+        return HttpResponse.builder()
+                .status(404, "Not Found")
+                .contentType("text/plain;charset=utf-8")
+                .body(("Resource not found: " + path).getBytes())
+                .build();
+    }
+
+    private static HttpResponse okResponse(final Path requestedPath) throws Exception {
+        final var contentType = Files.probeContentType(requestedPath);
+        final var body = Files.readAllBytes(requestedPath);
+
+        return HttpResponse.builder()
+                .status(200, "OK")
+                .contentType(contentType != null ? contentType : "text/plain;charset=utf-8")
+                .body(body)
+                .build();
     }
 }

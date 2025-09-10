@@ -76,7 +76,7 @@ public class HttpRequest {
 
     public Session getSession() {
         if (httpCookie.get("SID") == null) {
-            return SessionManager.add();
+            return SessionManager.createNew();
         }
         return SessionManager.findSession(httpCookie.get("SID"));
     }

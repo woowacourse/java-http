@@ -8,7 +8,7 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    public static Session add() {
+    public static Session createNew() {
         UUID uuid = UUID.randomUUID();
         Session session = new Session(uuid.toString());
         SESSIONS.put(uuid.toString(), session);

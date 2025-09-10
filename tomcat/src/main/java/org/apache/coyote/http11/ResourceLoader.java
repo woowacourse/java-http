@@ -6,18 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class HttpResponseHandler {
-
-    public HttpResponse handleResponse(HttpRequest request, HttpStatusCode statusCode) throws IOException {
-        HttpProtocol httpProtocol = request.getHttpProtocol();
-        String resourcePath = request.getResourcePath();
-        HttpResponseBody body = findResource(resourcePath);
-        return new HttpResponse(httpProtocol, statusCode, body);
-    }
-
-    private HttpResponseBody findResource(String resourcePath) throws IOException {
+public class ResourceLoader {
+    public static byte[] findResource(String resourcePath) throws IOException {
         if (resourcePath.equals("/")) {
-            return new HttpResponseBody("Hello world!".getBytes(StandardCharsets.UTF_8), MimeType.TEXT_HTML);
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
         int index = resourcePath.lastIndexOf("/");
@@ -35,12 +27,10 @@ public class HttpResponseHandler {
         }
 
         Path path = Path.of(systemResource.getPath());
-
-        final var responseBody = Files.readAllBytes(path);
-        return new HttpResponseBody(responseBody, getContentType(resourcePath));
+        return Files.readAllBytes(path);
     }
 
-    private MimeType getContentType(String resourcePath) {
+    public static MimeType getMimeType(String resourcePath) {
         String extension = ".html";
         if (resourcePath.equals("/")) {
             return MimeType.getMimeType(extension);

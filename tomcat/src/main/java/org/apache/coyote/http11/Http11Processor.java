@@ -1,17 +1,19 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticFileController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.SessionSupport;
-import org.apache.coyote.http11.util.StaticResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +23,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Manager manager;
+    private final Map<String, Controller> controllerMap = new HashMap<>();
+    private final Controller staticFileController = new StaticFileController();
 
     public Http11Processor(final Socket connection, final Manager manager) {
         this.connection = connection;
         this.manager = manager;
+        controllerMap.put("/login", new LoginController(manager));
+        controllerMap.put("/register", new RegisterController());
     }
 
     @Override
@@ -38,64 +44,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
         ) {
-            final var httpRequest = HttpRequest.from(inputStream);
-            final var httpResponse = new HttpResponse(outputStream);
+            final var request = HttpRequest.from(inputStream);
+            final var response = new HttpResponse(outputStream);
 
-            final var session = SessionSupport.findSessionOrCreate(
-                    manager, httpRequest.getRequestCookies(), httpResponse);
+            final HttpSession session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
 
-            //=========== POST 요청 처리 ============
-            if (httpRequest.getMethod() == HttpMethod.POST) {
-                final var parameters = httpRequest.getParameters();
-                String redirectUrl = "/index.html";
-
-                if ("/login".equals(httpRequest.getPath())) {
-                    final var account = parameters.get("account");
-                    final var password = parameters.get("password");
-                    final Optional<User> optionalUser = findUserByAccount(account);
-
-                    if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-                        SessionSupport.rotateSessionAfterLogin(manager, session, optionalUser.get(), httpResponse);
-                        log.info("로그인 성공 account: {}", account);
-                    } else {
-                        redirectUrl = "/401.html";
-                        log.info("로그인 실패 account: {}", account);
-                    }
-                }
-
-                if ("/register".equals(httpRequest.getPath())) {
-                    final var newUser = new User(
-                            parameters.get("account"),
-                            parameters.get("password"),
-                            parameters.get("email")
-                    );
-                    InMemoryUserRepository.save(newUser);
-                    log.info("Registered new user: {}", newUser.getAccount());
-                }
-
-                httpResponse.sendRedirect(redirectUrl);
-                return;
-            }
-
-            //=========== GET 요청 처리 ============
-            var requestPath = httpRequest.getPath();
-
-            if ("/login".equals(requestPath) && session.getAttribute("user") != null) {
-                httpResponse.sendRedirect("/index.html");
-                return;
-            }
-
-            if (requestPath.isBlank() || "/".equals(requestPath)) {
-                requestPath = "index.html";
-            }
-
-            final var responseBody = StaticResourceResolver.read(requestPath);
-            if (responseBody == null) {
-                httpResponse.sendNotFound();
-                return;
-            }
-            final var mimeType = ContentType.from(requestPath).getMimeType();
-            httpResponse.sendOk(mimeType, responseBody);
+            final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
+            controller.service(request, response, session);
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -106,12 +61,5 @@ public class Http11Processor implements Runnable, Processor {
                 log.error("500 에러 전송 실패: {}", ioEx.getMessage(), ioEx);
             }
         }
-    }
-
-    public Optional<User> findUserByAccount(final String account) {
-        if (account == null || account.isBlank()) {
-            return Optional.empty();
-        }
-        return InMemoryUserRepository.findByAccount(account);
     }
 }

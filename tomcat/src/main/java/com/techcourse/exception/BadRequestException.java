@@ -1,6 +1,6 @@
 package com.techcourse.exception;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 
 public class BadRequestException extends HttpStatusException {
 

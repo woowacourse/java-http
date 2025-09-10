@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.http.enums.HttpMethod;
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpMethod;
+import com.spring.http.enums.HttpStatus;
 import com.techcourse.exception.HttpStatusException;
 import java.io.BufferedReader;
 import java.io.IOException;

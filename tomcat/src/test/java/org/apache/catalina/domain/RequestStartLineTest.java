@@ -3,7 +3,7 @@ package org.apache.catalina.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.http.enums.HttpMethod;
+import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.util.List;
 import org.apache.catalina.domain.request.RequestStartLine;

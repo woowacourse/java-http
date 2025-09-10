@@ -1,6 +1,6 @@
 package org.apache.catalina.util;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

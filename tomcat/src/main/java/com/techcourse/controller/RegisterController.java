@@ -1,21 +1,22 @@
-package com.http.servlet;
+package com.techcourse.controller;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.HttpStatusException;
 import com.techcourse.model.User;
+import com.spring.controller.Controller;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.response.HttpResponse;
-import org.apache.catalina.servlet.HttpServlet;
 import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterServlet implements HttpServlet {
+public class RegisterController implements Controller {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterServlet.class);
+
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
@@ -43,5 +44,4 @@ public class RegisterServlet implements HttpServlet {
         response.addHeader("Location", "/index.html");
         log.info("회원가입 완료 아이디 : {}", account);
     }
-
 }

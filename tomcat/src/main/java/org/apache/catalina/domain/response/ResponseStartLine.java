@@ -1,6 +1,6 @@
 package org.apache.catalina.domain.response;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 import org.apache.catalina.domain.request.HttpRequest;
 
 public final class ResponseStartLine {

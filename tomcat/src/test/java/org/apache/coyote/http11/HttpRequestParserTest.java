@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.http.enums.HttpMethod;
+import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.io.BufferedReader;
 import java.io.IOException;

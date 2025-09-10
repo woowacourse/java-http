@@ -1,6 +1,6 @@
 package org.apache.catalina.domain.request;
 
-import com.http.enums.HttpMethod;
+import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.util.List;
 

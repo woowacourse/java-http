@@ -1,6 +1,6 @@
 package org.apache.catalina.domain.response;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

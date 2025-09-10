@@ -1,8 +1,7 @@
 package org.apache.catalina.servlet;
 
-import com.http.enums.HttpStatus;
-import com.http.servlet.LoginServlet;
-import com.http.servlet.RegisterServlet;
+import com.spring.servlet.DispatcherServlet;
+import com.spring.http.enums.HttpStatus;
 import com.techcourse.exception.HttpStatusException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,8 +25,9 @@ public final class HttpServletContainer {
     }
 
     static {
-        handlers.put("/login", new LoginServlet());
-        handlers.put("/register", new RegisterServlet());
+        final HttpServlet dispatcherServlet = new DispatcherServlet();
+        handlers.put("/login", dispatcherServlet);
+        handlers.put("/register", dispatcherServlet);
     }
 
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {

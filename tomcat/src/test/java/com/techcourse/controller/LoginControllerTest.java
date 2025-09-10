@@ -1,4 +1,4 @@
-package com.http.servlet;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,11 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.http.enums.HttpMethod;
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpMethod;
+import com.spring.http.enums.HttpStatus;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnAuthorizedException;
 import com.techcourse.model.User;
+import com.spring.controller.Controller;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -23,14 +24,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginServletTest {
+class LoginControllerTest {
 
     private final String version = "HTTP/1.1";
-    private LoginServlet loginRequestHandler;
+    private Controller loginController;
 
     @BeforeEach
     void setUp() {
-        loginRequestHandler = new LoginServlet();
+        loginController = new LoginController();
 
         // 테스트용 사용자 데이터 초기화
         User testUser = new User(1L, "admin", "password123", "admin@test.com");
@@ -45,7 +46,7 @@ class LoginServletTest {
         HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then
-        assertDoesNotThrow(() -> loginRequestHandler.service(httpRequest, httpResponse));
+        assertDoesNotThrow(() -> loginController.service(httpRequest, httpResponse));
     }
 
     @DisplayName("잘못된 계정으로 로그인에 실패한다")
@@ -58,7 +59,7 @@ class LoginServletTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> loginRequestHandler.service(httpRequest, httpResponse)
+                () -> loginController.service(httpRequest, httpResponse)
         );
         assertEquals("해당 회원을 찾을 수 없습니다.", exception.getMessage());
     }
@@ -71,7 +72,7 @@ class LoginServletTest {
         HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then
-        assertThatThrownBy(() -> loginRequestHandler.service(httpRequest, httpResponse))
+        assertThatThrownBy(() -> loginController.service(httpRequest, httpResponse))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 회원을 찾을 수 없습니다.");
     }
@@ -84,7 +85,7 @@ class LoginServletTest {
         HttpResponse httpResponse = new HttpResponse(version);
 
         // when & then - 빈 패스워드는 UnAuthorizedException 발생
-        assertThatThrownBy(() -> loginRequestHandler.service(httpRequest, httpResponse))
+        assertThatThrownBy(() -> loginController.service(httpRequest, httpResponse))
                 .isInstanceOf(UnAuthorizedException.class)
                 .hasMessage("잘못된 인증입니다.");
     }
@@ -97,8 +98,8 @@ class LoginServletTest {
         HttpResponse loginResponse = new HttpResponse(version);
 
         // 로그인 실행
-        loginRequestHandler.service(loginRequest, loginResponse);
-        
+        loginController.service(loginRequest, loginResponse);
+
         // 세션에서 사용자 정보 확인을 위해 같은 세션을 사용하는 GET 요청 생성
         RequestStartLine getStartLine = new RequestStartLine(HttpMethod.GET, "/login", version);
         HttpHeader getHeader = new HttpHeader();
@@ -107,7 +108,7 @@ class LoginServletTest {
         HttpResponse getResponse = new HttpResponse(version);
 
         // when
-        loginRequestHandler.doGet(getRequest, getResponse);
+        loginController.doGet(getRequest, getResponse);
 
         // then - 302 리다이렉트 확인은 세션이 제대로 작동할 때만 가능
         assertThat(getResponse.getStatus()).isNotEqualTo(HttpStatus.FOUND);
@@ -138,7 +139,7 @@ class LoginServletTest {
         HttpResponse httpResponse = new HttpResponse(version);
 
         // when
-        loginRequestHandler.doGet(httpRequest, httpResponse);
+        loginController.doGet(httpRequest, httpResponse);
 
         // then
         assertThat(httpResponse.getBody()).isNotNull();

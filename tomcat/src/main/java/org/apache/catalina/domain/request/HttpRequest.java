@@ -1,6 +1,6 @@
 package org.apache.catalina.domain.request;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 import com.techcourse.exception.HttpStatusException;
 import java.util.Map;
 import org.apache.catalina.domain.HttpHeader;

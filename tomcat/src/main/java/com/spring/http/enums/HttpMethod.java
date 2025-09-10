@@ -1,4 +1,4 @@
-package com.http.enums;
+package com.spring.http.enums;
 
 import com.techcourse.exception.BadRequestException;
 import java.util.Locale;

@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

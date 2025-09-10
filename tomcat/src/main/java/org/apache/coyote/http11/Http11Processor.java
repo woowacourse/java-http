@@ -103,12 +103,27 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse serveStaticPath(RequestLine requestLine, MimeType mimeType) throws IOException {
-        final Path filePath = getFilePath(requestLine, mimeType);
+        String path = appendExtension(requestLine, mimeType);
+        Path filePath = getFilePath(path);
+
         if (filePath == null) {
-            return HttpResponse.of(HttpStatus.NOT_FOUND, mimeType, "");
+            Path notFoundPath = getFilePath("/404.html");
+            return serveTextFile(notFoundPath, HttpStatus.NOT_FOUND, MimeType.HTML);
         }
-        final String responseBody = Files.readString(filePath, StandardCharsets.UTF_8);
-        return HttpResponse.of(HttpStatus.OK, mimeType, responseBody);
+        return serveTextFile(filePath, HttpStatus.OK, mimeType);
+    }
+
+    private String appendExtension(RequestLine requestLine, MimeType mimeType) {
+        String path = requestLine.getPath();
+        if (requestLine.getExtension().isEmpty()) {
+            path += EXTENSION_SEPARATOR + mimeType.getExtension();
+        }
+        return path;
+    }
+
+    private HttpResponse serveTextFile(Path filePath, HttpStatus status, MimeType mimeType) throws IOException {
+        String responseBody = Files.readString(filePath, StandardCharsets.UTF_8);
+        return HttpResponse.of(status, mimeType, responseBody);
     }
 
     private HttpResponse dispatchRequest(String path, Map<String, String> queryParams, MimeType mimeType,
@@ -122,11 +137,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.of(HttpStatus.NOT_FOUND, mimeType, "Not Found");
     }
 
-    private Path getFilePath(RequestLine requestLine, MimeType mimeType) {
-        String path = requestLine.getPath();
-        if (requestLine.getExtension().isEmpty()) {
-            path += EXTENSION_SEPARATOR + mimeType;
-        }
+    private Path getFilePath(String path) {
         URL resource = getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + path);
         if (resource == null) {
             return null;

@@ -36,4 +36,8 @@ public enum MimeType {
     public String getType() {
         return type;
     }
+
+    public String getExtension() {
+        return extension;
+    }
 }

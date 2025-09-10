@@ -22,7 +22,7 @@ public class HttpCookie {
             return new HttpCookie(new HashMap<>());
         }
 
-        final String[] cookiePairs = rawCookie.split(COOKIE_SEPARATOR, 2);
+        final String[] cookiePairs = rawCookie.split(COOKIE_SEPARATOR);
         final Map<String, String> cookies = new HashMap<>();
         for (String cookiePair : cookiePairs) {
             final int separatorIndex = cookiePair.indexOf(KEY_VALUE_SEPARATOR);

@@ -22,7 +22,9 @@ public class HttpResponse {
     }
 
     public static HttpResponse createEmptyResponse() {
-        return new HttpResponse();
+        final HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setDefaultStatus();
+        return httpResponse;
     }
 
     public void addAttribute(final String key, final Object value) {
@@ -51,6 +53,10 @@ public class HttpResponse {
         formatLine.add("");
         formatLine.add(new String(responseBodyValue.get(), StandardCharsets.UTF_8));
         return formatLine;
+    }
+
+    public void setDefaultStatus() {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public void setOk(final String bodyValue) {

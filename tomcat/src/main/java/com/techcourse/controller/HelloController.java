@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class HelloController implements Handler {
 
     @Override
-    public Function<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi) {
+    public Function<HttpRequest, HttpResponse> findHandlerMethod(Api requestApi) {
         if (requestApi.path().equals("/") || requestApi.path().equals("\\")) {
             return this::hello;
         }

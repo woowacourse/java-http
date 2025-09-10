@@ -8,5 +8,5 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Handler {
 
-    Function<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi);
+    Function<HttpRequest, HttpResponse> findHandlerMethod(Api requestApi);
 }

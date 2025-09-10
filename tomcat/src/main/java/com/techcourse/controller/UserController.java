@@ -34,7 +34,7 @@ public class UserController implements Handler {
     }
 
     @Override
-    public Function<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi) {
+    public Function<HttpRequest, HttpResponse> findHandlerMethod(Api requestApi) {
         return supports.get(requestApi);
     }
 

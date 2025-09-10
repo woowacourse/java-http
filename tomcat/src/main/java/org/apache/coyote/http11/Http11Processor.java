@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 Api api = request.getApi();
                 for (var handler : handlers) {
-                    var handlerMethod = handler.getHandlerMethod(api);
+                    var handlerMethod = handler.findHandlerMethod(api);
                     if (handlerMethod != null) {
                         response = handlerMethod.apply(request);
                         break;

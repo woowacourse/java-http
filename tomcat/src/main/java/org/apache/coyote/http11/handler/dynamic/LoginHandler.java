@@ -46,11 +46,12 @@ public class LoginHandler implements Handler {
                 })
                 .map(session -> (User) session.getAttribute("user"))
                 .isPresent();
+
         if (loggedIn) {
             response.sendRedirect("/index.html");
-            return;
+        } else {
+            StaticResourceUtils.serve(response, "/login", HttpStatus.OK);
         }
-        StaticResourceUtils.serve(response, "login.html", HttpStatus.OK);
     }
 
     private void handlePost(HttpRequest request, HttpResponse response) throws IOException {

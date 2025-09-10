@@ -38,6 +38,18 @@ public class StaticResourceHandler implements Handler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
+        if (!"GET".equalsIgnoreCase(request.method())) {
+            return false;
+        }
+
+        if (!request.queryParams().isEmpty()) {
+            return false;
+        }
+
+        if (request.path().equals("/login")) {
+            return true;
+        }
+
         String path = request.path().replaceFirst(STATIC_REGEX, "");
         path = normalizePath(path);
         if (path.contains(INVALID_PATH_SEQUENCE)) {
@@ -87,6 +99,10 @@ public class StaticResourceHandler implements Handler {
         }
         if (path.isEmpty()) {
             path = defaultDocument;
+        }
+        // 확장자 없으면 .html 붙이기
+        if (!path.contains(".")) {
+            path = path + ".html";
         }
         return path;
     }

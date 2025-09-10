@@ -2,30 +2,24 @@ package org.apache.coyote.http11.handler;
 
 import com.techcourse.service.UserService;
 import java.util.Map;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResourceLoader;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryParser;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.controller.AbstractController;
 
-public class RegisterHandler implements HttpHandler {
+public class RegisterController extends AbstractController {
 
     private final HttpResourceLoader httpResourceLoader;
     private final QueryParser queryParser;
 
-    public RegisterHandler(final HttpResourceLoader httpResourceLoader, final QueryParser queryParser) {
+    public RegisterController(final HttpResourceLoader httpResourceLoader, final QueryParser queryParser) {
         this.httpResourceLoader = httpResourceLoader;
         this.queryParser = queryParser;
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) throws Exception {
-        RequestLine requestLine = request.requestLine();
-        if (requestLine.method() == HttpMethod.GET) {
-            return httpResourceLoader.load(request.getPath());
-        }
-
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         String requestBody = new String(request.body());
         Map<String, String> queriesFromBody = queryParser.parse(requestBody);
 
@@ -35,6 +29,13 @@ public class RegisterHandler implements HttpHandler {
 
         UserService.register(account, email, password);
 
-        return HttpResponse.redirect("/index.html");
+        HttpResponse actualResponse = HttpResponse.redirect("/index.html");
+        response.setHttpResponse(actualResponse);
+    }
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        HttpResponse actualResponse = httpResourceLoader.load(request.getPath());
+        response.setHttpResponse(actualResponse);
     }
 }

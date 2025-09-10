@@ -2,27 +2,27 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.handler.HttpHandler;
-import org.apache.coyote.http11.handler.HttpResourceHandler;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.handler.HttpResourceController;
 
 public class Resolver {
 
-    private final Map<String, HttpHandler> routes = new LinkedHashMap<>();
+    private final Map<String, Controller> routes = new LinkedHashMap<>();
 
-    private final HttpResourceHandler httpResourceHandler;
+    private final HttpResourceController httpResourceController;
 
-    public Resolver(final HttpResourceHandler httpResourceHandler) {
-        this.httpResourceHandler = httpResourceHandler;
+    public Resolver(final HttpResourceController httpResourceController) {
+        this.httpResourceController = httpResourceController;
     }
 
-    public Resolver register(final String path, final HttpHandler httpHandler) {
-        routes.put(path, httpHandler);
+    public Resolver register(final String path, final Controller controller) {
+        routes.put(path, controller);
         return this;
     }
 
-    public HttpHandler resolve(final String path) {
+    public Controller resolve(final String path) {
         if (!routes.containsKey(path)) {
-            return httpResourceHandler;
+            return httpResourceController;
         }
         return routes.get(path);
     }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,10 +15,10 @@ public final class HttpResponse {
     private static final String EQUAL = "=";
     private static final String SET_COOKIE = "Set-Cookie";
 
-    private final HttpStatus status;
-    private final Map<String, String> headers;
-    private final HttpCookie httpCookie;
-    private final byte[] body;
+    private HttpStatus status;
+    private Map<String, String> headers;
+    private HttpCookie httpCookie;
+    private byte[] body;
 
     public HttpResponse(
             HttpStatus status,
@@ -29,6 +30,10 @@ public final class HttpResponse {
         this.headers = headers;
         this.httpCookie = httpCookie;
         this.body = body;
+    }
+
+    public static HttpResponse create() {
+        return new HttpResponse(HttpStatus.OK, new HashMap<>(), new HttpCookie(), new byte[0]);
     }
 
     public static HttpResponse redirect(String location) {
@@ -67,6 +72,13 @@ public final class HttpResponse {
 
         addHeader(SET_COOKIE, totalSetCookie);
         return uuid;
+    }
+
+    public void setHttpResponse(HttpResponse response) {
+        this.status = response.status;
+        this.headers = response.headers;
+        this.httpCookie = response.httpCookie;
+        this.body = response.body;
     }
 
     public Map<String, String> headers() {

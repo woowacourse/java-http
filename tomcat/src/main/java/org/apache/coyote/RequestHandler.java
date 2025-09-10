@@ -29,7 +29,7 @@ public class RequestHandler {
         if (request.method().equals("POST")) {
             return handlePost(request);
         }
-        return null;
+        return handleUnsupportedMethod();
     }
 
     private byte[] handleGet(final HttpRequest request) throws IOException {
@@ -119,5 +119,9 @@ public class RequestHandler {
         loginSession.setAttribute("user", user);
         sessionManager.add(loginSession);
         return uuid;
+    }
+
+    private byte[] handleUnsupportedMethod() {
+        return responseBuilder.build(null, HttpStatus.FORBIDDEN, null, null);
     }
 }

@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.handler.HttpResourceController;
+import org.apache.coyote.http11.controller.HttpResourceController;
 
 public class Resolver {
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.controller;
 
 import java.util.LinkedHashMap;
 import org.apache.coyote.http11.HttpRequest;

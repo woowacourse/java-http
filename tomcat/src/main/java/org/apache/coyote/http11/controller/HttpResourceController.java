@@ -1,9 +1,8 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResourceLoader;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.controller.AbstractController;
 
 public class HttpResourceController extends AbstractController {
 

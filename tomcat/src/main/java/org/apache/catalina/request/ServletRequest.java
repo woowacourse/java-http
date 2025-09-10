@@ -11,10 +11,8 @@ import org.apache.coyote.HttpRequest;
 
 public class ServletRequest {
 
-    private static final char PATH_DELIMITER = '?';
-
     private final String method;
-    private final String path;
+    private final Path path;
     private final Parameters parameters;
     private final HttpHeader headers;
     private final HttpCookie cookies;
@@ -24,13 +22,13 @@ public class ServletRequest {
     public ServletRequest(HttpRequest request) {
         this.method = request.getMethod();
         this.headers = new HttpHeader(request.getHeaders());
-        this.path = parsePath(request.getUri());
+        this.path = new Path(request.getUri());
         this.body = request.getBody();
         this.parameters = new Parameters(request.getUri(), body, headers.get(HttpHeaderName.CONTENT_TYPE.getValue()));
         this.cookies = new HttpCookie(headers.get(HttpHeaderName.COOKIE.getValue()));
     }
 
-    public String getPath() {
+    public Path getPath() {
         return path;
     }
 
@@ -71,15 +69,6 @@ public class ServletRequest {
         }
 
         return !Objects.equals(getCookie(HttpCookieName.JSESSIONID.getValue()), session.getId());
-    }
-
-    private String parsePath(String uri) {
-        final int queryIndex = uri.indexOf(PATH_DELIMITER);
-
-        if (queryIndex == -1) {
-            return uri;
-        }
-        return uri.substring(0, queryIndex);
     }
 
     private Session createNewSession() {

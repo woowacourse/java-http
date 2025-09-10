@@ -19,7 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,14 @@ public class Http11Processor implements Runnable, Processor {
 
                 if ("/register.html".equals(path)) {
                     handleRegister(queryParams, httpCookie, outputStream);
+                    return;
+                }
+            }
+
+            if ("GET".equals(method) && "/login.html".equals(path) && httpCookie.contains("JSESSIONID")) {
+                final String sessionId = httpCookie.getValue("JSESSIONID");
+                if (SessionManager.getInstance().findSession(sessionId).isPresent()) {
+                    sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
                     return;
                 }
             }
@@ -292,8 +301,10 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
-            final String id = UUID.randomUUID().toString();
-            httpCookie.add("JSESSIONID", id);
+            final Session session = Session.create();
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
+            httpCookie.add("JSESSIONID", session.getId());
             sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
             return;
         }
@@ -325,8 +336,10 @@ public class Http11Processor implements Runnable, Processor {
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         log.info("new user : {}", newUser);
-        final String id = UUID.randomUUID().toString();
-        httpCookie.add("JSESSIONID", id);
+        final Session session = Session.create();
+        session.setAttribute("user", newUser);
+        SessionManager.getInstance().add(session);
+        httpCookie.add("JSESSIONID", session.getId());
         sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
     }
 }

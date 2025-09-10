@@ -17,6 +17,15 @@ import java.util.Optional;
 import org.apache.catalina.ResponseCookie;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.io.Http11InputBuffer;
+import org.apache.coyote.http11.io.Http11OutputBuffer;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.message.HttpResponse;
+import org.apache.coyote.http11.message.HttpResponseHeader;
+import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.StaticResourceExtension;
+import org.apache.coyote.http11.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

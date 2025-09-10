@@ -1,9 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.ResponseCookie;
+import org.apache.coyote.http11.message.HttpResponse;
+import org.apache.coyote.http11.message.HttpResponseHeader;
+import org.apache.coyote.http11.message.StatusLine;
 
 public class Http11OutputBuffer {
 

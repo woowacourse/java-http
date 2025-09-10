@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.catalina.RequestCookie;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.message.HttpRequestHeader;
+import org.apache.coyote.http11.message.RequestLine;
 
 public class Http11InputBuffer {
 

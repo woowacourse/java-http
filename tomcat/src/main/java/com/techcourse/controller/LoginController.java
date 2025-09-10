@@ -63,7 +63,8 @@ public class LoginController extends AbstractController {
             throw new UnAuthorizedException("잘못된 인증입니다.");
         }
 
-        Session session = request.getSession(true);
+        SessionManager sessionManager = new SessionManager();
+        Session session = sessionManager.getSessionWithCookie(request, httpResponse, true);
         session.setAttribute("user", user);
         httpResponse.setStatus(HttpStatus.FOUND);
         httpResponse.addHeader("Location", "/index.html");

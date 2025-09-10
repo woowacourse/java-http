@@ -44,7 +44,7 @@ public class AuthService {
     }
 
     public boolean isLoggedIn(HttpCookie httpCookie) {
-        if (!httpCookie.hasJSESSIONID()) {
+        if (!httpCookie.hasJSessionId()) {
             return false;
         }
         String sessionId = httpCookie.getJSESSIONID();
@@ -57,7 +57,7 @@ public class AuthService {
     }
 
     private String getOrCreateSession(HttpCookie httpCookie) {
-        if (httpCookie.hasJSESSIONID()) {
+        if (httpCookie.hasJSessionId()) {
             String sessionId = httpCookie.getJSESSIONID();
             SessionManager sessionManager = SessionManager.getInstance();
             Session session = sessionManager.findSession(sessionId);

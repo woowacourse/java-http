@@ -1,22 +1,30 @@
 package org.apache.coyote.http11.service;
 
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.parser.RequestResult;
-
-import java.util.Map;
+import org.apache.coyote.http11.HttpRequests;
+import org.apache.coyote.http11.parser.HttpResponse;
 
 public class HelloService implements HttpService {
 
     private static final byte[] content = "Hello world!".getBytes();
 
     @Override
-    public RequestResult doGet(final Map<String, String> query, HttpCookies cookies, Session session) {
-        return new RequestResult(content, "Content-Type: text/html;charset=utf-8 ");
+    public void doGet(HttpRequests httpRequests, HttpResponse httpResponse) {
+        httpResponse.setContent(content);
+        httpResponse.setContentType("text/html;charset=utf-8");
     }
 
     @Override
-    public RequestResult doPost(Map<String, String> query, HttpCookies cookies, Session session) {
+    public void doPost(HttpRequests httpRequests, HttpResponse httpResponse) {
         throw new IllegalArgumentException("제공되지 않는 기능입니다");
+    }
+
+    @Override
+    public void doUpdate(HttpRequests httpRequests, HttpResponse httpResponse) {
+        throw new IllegalArgumentException("제공되지 않는 기능입니다.");
+    }
+
+    @Override
+    public void doDelete(HttpRequests httpRequests, HttpResponse httpResponse) {
+        throw new IllegalArgumentException("제공되지 않는 기능입니다.");
     }
 }

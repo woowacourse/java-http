@@ -1,15 +1,15 @@
 package org.apache.coyote.http11.service;
 
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.parser.RequestResult;
-
-import java.io.IOException;
-import java.util.Map;
+import org.apache.coyote.http11.HttpRequests;
+import org.apache.coyote.http11.parser.HttpResponse;
 
 public interface HttpService {
 
-    RequestResult doGet(Map<String, String> query, HttpCookies cookies, Session session) throws IOException;
+    void doGet(HttpRequests httpRequests, HttpResponse httpResponse);
 
-    RequestResult doPost(Map<String, String> query, HttpCookies cookies, Session session) throws IOException;
+    void doPost(HttpRequests httpRequests, HttpResponse httpResponse);
+
+    void doUpdate(HttpRequests httpRequests, HttpResponse httpResponse);
+
+    void doDelete(HttpRequests httpRequests, HttpResponse httpResponse);
 }

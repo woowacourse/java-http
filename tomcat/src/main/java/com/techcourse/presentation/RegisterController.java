@@ -1,7 +1,6 @@
 package com.techcourse.presentation;
 
 import com.techcourse.application.LoginService;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,19 +26,12 @@ public class RegisterController implements Controller {
 
     public HttpResponse register(final String protocol) {
         return staticResourceController.getResource(
-                new HttpRequest("GET", BASE_URL + ".html", protocol, new HashMap<>(), new HashMap<>(), "")
+                new HttpRequest("GET", BASE_URL + ".html", protocol, new HashMap<>(), new HashMap<>())
         );
     }
 
     public HttpResponse register(final HttpRequest request) {
-        final String body = request.body();
-        final Map<String, String> params = new HashMap<>();
-        for (String pair : body.split("&")) {
-            final int index = pair.indexOf('=');
-            final String k = URLDecoder.decode(pair.substring(0, index), StandardCharsets.UTF_8);
-            final String v = URLDecoder.decode(pair.substring(index + 1), StandardCharsets.UTF_8);
-            params.put(k, v);
-        }
+        final Map<String, String> params = request.params();
 
         try {
             if (params.size() != 3 || !params.containsKey("account") || !params.containsKey("password")

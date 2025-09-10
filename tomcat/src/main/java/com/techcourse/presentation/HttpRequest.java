@@ -7,8 +7,7 @@ public record HttpRequest(
         String path,
         String protocol,
         Map<String, String> params,
-        Map<String, String> headers,
-        String body
+        Map<String, String> headers
 ) {
 
 }

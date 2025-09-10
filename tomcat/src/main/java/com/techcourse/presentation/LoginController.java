@@ -2,8 +2,6 @@ package com.techcourse.presentation;
 
 import com.techcourse.application.LoginService;
 import com.techcourse.model.User;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,30 +26,23 @@ public class LoginController implements Controller {
 
     public HttpResponse login(final String protocol) {
         return staticResourceController.getResource(
-                new HttpRequest("GET", "/login.html", protocol, new HashMap<>(), new HashMap<>(), "")
+                new HttpRequest("GET", "/login.html", protocol, new HashMap<>(), new HashMap<>())
         );
     }
 
     public HttpResponse login(final HttpRequest request) {
-        final String body = request.body();
-        final Map<String, String> bodyParams = new HashMap<>();
-        for (String pair : body.split("&")) {
-            final int index = pair.indexOf('=');
-            final String k = URLDecoder.decode(pair.substring(0, index), StandardCharsets.UTF_8);
-            final String v = URLDecoder.decode(pair.substring(index + 1), StandardCharsets.UTF_8);
-            bodyParams.put(k, v);
-        }
+        final Map<String, String> params = request.params();
 
         try {
-            if (bodyParams.size() != 2 || !bodyParams.containsKey("account") || !bodyParams.containsKey("password")) {
-                log.debug("요청 파라미터: {}", bodyParams);
+            if (params.size() != 2 || !params.containsKey("account") || !params.containsKey("password")) {
+                log.debug("요청 파라미터: {}", params);
                 throw new IllegalArgumentException("적절하지 않은 로그인 요청입니다.");
             }
 
-            final User user = loginService.login(bodyParams.get("account"), bodyParams.get("password"));
+            final User user = loginService.login(params.get("account"), params.get("password"));
         } catch (IllegalArgumentException e) {
             return staticResourceController.getResource(
-                    new HttpRequest("GET", "/401.html", request.protocol(), new HashMap<>(), new HashMap<>(), "")
+                    new HttpRequest("GET", "/401.html", request.protocol(), new HashMap<>(), new HashMap<>())
             );
         }
 

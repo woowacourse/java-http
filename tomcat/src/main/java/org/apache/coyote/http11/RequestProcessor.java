@@ -8,8 +8,6 @@ import com.techcourse.presentation.LoginController;
 import com.techcourse.presentation.RegisterController;
 import com.techcourse.presentation.StaticResourceController;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +43,7 @@ public class RequestProcessor {
     }
 
     public String process(final List<String> headers, final String body) {
-        final HttpRequest request = parse(headers, body);
+        final HttpRequest request = HttpRequestParser.parseHttpRequest(headers, body);
 
         final Controller responsibleController = priority.stream()
                 .map(controllers::get)
@@ -56,33 +54,6 @@ public class RequestProcessor {
         final HttpResponse response = responsibleController.getResource(request);
 
         return createResponseMessage(response);
-    }
-
-    private HttpRequest parse(final List<String> headers, final String body) {
-        final String requestLine = headers.getFirst();
-        final String[] parts = requestLine.split(" ");
-
-        final String method = parts[0];
-        final String url = parts[1];
-        final String path = url.split("\\?")[0];
-        final String protocol = parts[2].trim();
-        final Map<String, String> requestParams = new HashMap<>();
-
-        if (url.contains("?")) {
-            final String queries = url.split("\\?")[1];
-
-            Arrays.stream(queries.split("&"))
-                    .map(query -> Map.entry(query.split("=")[0], query.split("=")[1]))
-                    .forEach(entry -> requestParams.put(entry.getKey(), entry.getValue()));
-        }
-
-        final Map<String, String> requestHeaders = new HashMap<>();
-        for (int i = 1; i < headers.size(); ++i) {
-            final String header = headers.get(i);
-            requestHeaders.put(header.split(":")[0].trim(), header.split(":")[1].trim());
-        }
-
-        return new HttpRequest(method, path, protocol, requestParams, requestHeaders, body);
     }
 
     private String createResponseMessage(final HttpResponse response) {

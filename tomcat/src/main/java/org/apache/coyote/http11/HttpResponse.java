@@ -9,7 +9,7 @@ public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
-    private final HttpVersion httpVersion;
+    private final ProtocolVersion protocolVersion;
     private final ResponseStatus responseStatus;
     private final ContentType contentType;
     private final String location;
@@ -17,13 +17,13 @@ public class HttpResponse {
     private final long contentLength;
     private final byte[] body;
 
-    public HttpResponse(HttpVersion httpVersion,
+    public HttpResponse(ProtocolVersion protocolVersion,
                         ResponseStatus responseStatus,
                         ContentType contentType,
                         String location,
                         long contentLength,
                         byte[] body) {
-        this.httpVersion = httpVersion;
+        this.protocolVersion = protocolVersion;
         this.responseStatus = responseStatus;
         this.contentType = contentType;
         this.location = location;
@@ -34,7 +34,7 @@ public class HttpResponse {
 
     public static HttpResponse of(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
         return new HttpResponse(
-                HttpVersion.HTTP11,
+                ProtocolVersion.HTTP11,
                 responseStatus,
                 contentType,
                 null,
@@ -44,7 +44,7 @@ public class HttpResponse {
 
     public static HttpResponse forRedirect(ResponseStatus responseStatus, String location) {
         return new HttpResponse(
-                HttpVersion.HTTP11,
+                ProtocolVersion.HTTP11,
                 responseStatus,
                 ContentType.HTML,
                 location,
@@ -89,7 +89,7 @@ public class HttpResponse {
     }
 
     private String getStatusLine() {
-        return httpVersion.getResponseHeader() + " " + responseStatus.getResponseHeader();
+        return protocolVersion.getResponseHeader() + " " + responseStatus.getResponseHeader();
     }
 
     private String buildContentTypeHeader() {

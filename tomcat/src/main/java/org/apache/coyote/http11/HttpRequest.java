@@ -7,7 +7,7 @@ public class HttpRequest {
 
     private final Method method;
     private final String path;
-    private final HttpVersion httpVersion;
+    private final ProtocolVersion protocolVersion;
     private final ContentType contentType;
     private final int contentLength;
     private final List<HttpCookie> cookies;
@@ -16,14 +16,14 @@ public class HttpRequest {
 
     public HttpRequest(Method method,
                        String path,
-                       HttpVersion httpVersion,
+                       ProtocolVersion protocolVersion,
                        ContentType contentType,
                        int contentLength, List<HttpCookie> httpCookie,
                        Map<String, String> queryParameter,
                        Map<String, String> body) {
         this.method = method;
         this.path = path;
-        this.httpVersion = httpVersion;
+        this.protocolVersion = protocolVersion;
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.cookies = httpCookie;
@@ -73,7 +73,7 @@ public class HttpRequest {
         return "HttpRequest{" +
                 "method=" + method +
                 ", path='" + path + '\'' +
-                ", httpVersion=" + httpVersion +
+                ", httpVersion=" + protocolVersion +
                 ", contentType=" + contentType +
                 ", contentLength=" + contentLength +
                 ", queryParameter=" + queryParameter +

@@ -9,6 +9,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.MimeType;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.util.ResourceUtil;
 
@@ -23,32 +24,29 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         if (isLoginUser(httpRequest)) {
             String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
-            httpResponse.setHttpResponse(ResponseEntity.found(body, "text/html;charset=utf-8"));
-            return;
+            return ResponseEntity.found(body, MimeType.HTML, "/index.html");
         }
 
         String body = ResourceUtil.readStaticResource("/login.html", this.getClass());
-        httpResponse.setHttpResponse(ResponseEntity.ok(body, "text/html;charset=utf-8"));
+        return ResponseEntity.ok(body, MimeType.HTML);
     }
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> bodyParams = httpRequest.getBodyParams();
 
         // account, password 쿼리 파라미터가 둘 다 없는 경우 login.html 반환
         if (bodyParams.isEmpty()) {
             String body = ResourceUtil.readStaticResource("/login.html", this.getClass());
 
-            httpResponse.setHttpResponse(ResponseEntity.ok(body, "text/html;charset=utf-8"));
-            return;
+            return ResponseEntity.ok(body, MimeType.HTML);
         }
 
         if (!isValidParams(bodyParams)) {
-            httpResponse.setHttpResponse(ResponseEntity.badRequest("account or password is missing."));
-            return;
+            return ResponseEntity.badRequest("account or password is missing.");
         }
 
         String account = bodyParams.get("account");
@@ -57,17 +55,17 @@ public class LoginController extends AbstractController {
         boolean isLoginSuccess = loginService.login(account, password);
         if (!isLoginSuccess) {
             String body = ResourceUtil.readStaticResource("/401.html", this.getClass());
-            httpResponse.setHttpResponse(ResponseEntity.unauthorized(body, "text/html;charset=utf-8"));
-            return;
+            return ResponseEntity.unauthorized(body, MimeType.HTML);
         }
 
         String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
-        httpResponse.setHttpResponse(ResponseEntity.found(body, "text/html;charset=utf-8"));
+        HttpResponse response = ResponseEntity.found(body, MimeType.HTML, "/index.html");
 
         Session session = new Session(UUID.randomUUID().toString());
         session.setAttribute(session.getId(), account);
         sessionManager.add(session);
-        httpResponse.addCookie("JSESSIONID=" + session.getId());
+        response.addCookie("JSESSIONID=" + session.getId());
+        return response;
     }
 
     private boolean isLoginUser(HttpRequest httpRequest) {

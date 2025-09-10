@@ -15,18 +15,22 @@ public class StaticResourceHandler {
     }
 
     public static HttpResponse serveStaticResource(final String path) throws Exception {
-        final var rootPath = getStaticRootPath();
-        final var requestedPath = resolveRequestedPath(rootPath, path);
+        try {
+            final var rootPath = getStaticRootPath();
+            final var requestedPath = resolveRequestedPath(rootPath, path);
 
-        if (!isUnderRoot(rootPath, requestedPath)) {
-            return forbiddenResponse();
-        }
+            if (!isUnderRoot(rootPath, requestedPath)) {
+                return forbiddenResponse();
+            }
 
-        if (!Files.exists(requestedPath) || Files.isDirectory(requestedPath)) {
+            if (!Files.exists(requestedPath) || Files.isDirectory(requestedPath)) {
+                return notFoundResponse(path);
+            }
+
+            return okResponse(requestedPath);
+        } catch (URISyntaxException | IOException e) {
             return notFoundResponse(path);
         }
-
-        return okResponse(requestedPath);
     }
 
     private static Path getStaticRootPath() throws URISyntaxException, IOException {

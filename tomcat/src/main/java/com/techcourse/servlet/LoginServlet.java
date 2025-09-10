@@ -91,7 +91,8 @@ public class LoginServlet implements Servlet {
     }
 
     private User getUser(final Session session) {
-        return (User) session.getAttribute("user");
+//        return (User) session.getAttribute("user");
+        return session.getAttribute("user", User.class);
     }
 
     private String readLoginPage() {

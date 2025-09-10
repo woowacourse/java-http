@@ -16,8 +16,18 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
+    public <T> T getAttribute(String name, Class<T> type) {
+        Object value = values.get(name);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (type.isInstance(value)) {
+            return type.cast(value);
+        }
+
+        throw new ClassCastException("Failed to convert value of type " + value.getClass());
     }
 
     public void setAttribute(final String name, final Object value) {

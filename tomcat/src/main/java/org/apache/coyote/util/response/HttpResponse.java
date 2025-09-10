@@ -32,11 +32,24 @@ public class HttpResponse {
         return new HttpResponse("HTTP/1.1 500 Internal Server Error", "text/html;charset=utf-8", body);
     }
 
+    public static HttpResponse unauthorized() {
+        byte[] body = readErrorFile("static/401.html");
+        return new HttpResponse("HTTP/1.1 401 Unauthorized", "text/html;charset=utf-8", body);
+    }
+
+    public static HttpResponse methodNotAllowed() {
+        byte[] body = readErrorFile("static/405.html");
+        return new HttpResponse("HTTP/1.1 405 Method Not Allowed", "text/html;charset=utf-8", body);
+    }
+
     private static byte[] readErrorFile(String path) {
         try (InputStream is = HttpResponse.class.getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
                 if (path.contains("404")) {
                     return "404 Not Found".getBytes();
+                }
+                if (path.contains("401")) {
+                    return "401 Unauthorized".getBytes();
                 }
                 return "500 Internal Server Error".getBytes();
             }

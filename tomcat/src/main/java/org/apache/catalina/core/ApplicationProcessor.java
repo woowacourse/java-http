@@ -19,31 +19,42 @@ public class ApplicationProcessor {
 
     public static HttpResponse processLogin(HttpRequest httpRequest) {
         if ("GET".equals(httpRequest.getMethod())) {
-            Session existingSession = httpRequest.getSession(false);
-            if (existingSession != null && getUser(existingSession) != null) {
-                return HttpResponse.redirect("/index.html");
-            }
-            try {
-                final String path = "static/login.html";
-                final byte[] body = readResource(path);
-                final String contentType = HttpContentTypeResolver.resolve(path);
-                return HttpResponse.of("HTTP/1.1 200 OK", contentType, body);
-            } catch (IOException e) {
-                return HttpResponse.internalServerError();
-            }
+            return processLoginGet(httpRequest);
         }
+        if ("POST".equals(httpRequest.getMethod())) {
+            return processLoginPost(httpRequest);
+        }
+        return HttpResponse.methodNotAllowed();
+    }
+
+    private static HttpResponse processLoginGet(HttpRequest httpRequest) {
+        Session existingSession = httpRequest.getSession(false);
+        if (existingSession != null && getUser(existingSession) != null) {
+            return HttpResponse.redirect("/index.html");
+        }
+        try {
+            final String path = "static/login.html";
+            final byte[] body = readResource(path);
+            final String contentType = HttpContentTypeResolver.resolve(path);
+            return HttpResponse.of("HTTP/1.1 200 OK", contentType, body);
+        } catch (IOException e) {
+            return HttpResponse.internalServerError();
+        }
+    }
+
+    private static HttpResponse processLoginPost(HttpRequest httpRequest) {
         Session existingSession = httpRequest.getSession(false);
         if (existingSession != null && getUser(existingSession) != null) {
             return HttpResponse.redirect("/index.html");
         }
         String account = httpRequest.getQueryValue("account").orElse(null);
         String password = httpRequest.getQueryValue("password").orElse(null);
-        if (account == null || password == null) {
-            return HttpResponse.redirect("401.html");
+        if (account == null || account.isBlank() || password == null || password.isBlank()) {
+            return HttpResponse.unauthorized();
         }
         Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
         if (userOpt.isEmpty() || !userOpt.get().checkPassword(password)) {
-            return HttpResponse.redirect("401.html");
+            return HttpResponse.unauthorized();
         }
         User user = userOpt.get();
         final Session session = httpRequest.changeSessionId();

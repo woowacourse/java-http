@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SessionManager implements Manager {
+public final class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();

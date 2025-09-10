@@ -19,12 +19,19 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(HttpProtocolVersion protocolVersion, HttpStatus status, ContentType contentType, String bodyText) {
+        validateFields(protocolVersion, status, contentType, bodyText);
         StatusLine statusLine = new StatusLine(protocolVersion, status);
         HttpHeaders headers = HttpHeaders.empty();
         headers.add(CommonHeaderKeys.CONTENT_TYPE.getKey(), contentType.getValueWithUtf8Charset());
         byte[] body = bodyText.getBytes(StandardCharsets.UTF_8);
         headers.add(CommonHeaderKeys.CONTENT_LENGTH.getKey(), String.valueOf(body.length));
         return new HttpResponse(statusLine, headers, body);
+    }
+
+    private static void validateFields(HttpProtocolVersion protocolVersion, HttpStatus status, ContentType contentType, String bodyText) {
+        if (protocolVersion == null || status == null || contentType == null || bodyText == null) {
+            throw new IllegalArgumentException("응답을 만드는 과정에서 오류가 발생했습니다.");
+        }
     }
 
     public void addHeader(String key, String value) {

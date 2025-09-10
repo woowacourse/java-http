@@ -18,7 +18,6 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//TODO: 중복 코드, 뎁스 줄이기  (2025-09-9, 화, 20:57)
 public class LoginServlet extends HttpServlet {
     private static final String LOGIN_PAGE = "static/login.html";
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
@@ -30,15 +29,10 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         try {
-            if (request.hasJSessionCookie()) {
-                String jSessionId = request.getJSessionId();
-                Session session = sessionManager.findSession(jSessionId);
-                if (session != null && session.getAttribute(USER_ACCOUNT) != null) {
-                    authService.loginCheck(String.valueOf(session.getAttribute(USER_ACCOUNT)));
-                    response.setStatus(HttpStatus.SEE_OTHER);
-                    response.addToHeader("Location", "/index.html");
-                    return;
-                }
+            Session session = findValidSession(request);
+            if (session != null) {
+                sendRedirect(response, "/index.html");
+                return;
             }
 
             byte[] content = StaticFileLoader.loadStaticFile(LOGIN_PAGE);
@@ -57,32 +51,48 @@ public class LoginServlet extends HttpServlet {
 
         try {
             User user = authService.login(new LoginRequest(account, password));
+            addSessionAndCookie(request, response, user);
+            sendRedirect(response, "/index.html");
 
-            response.setStatus(HttpStatus.SEE_OTHER);
-            addJSessionCookie(request, response, user);
-            response.addToHeader("Location", "/index.html");
-
-            log.info("로그인 성공! 아이디 : " + account);
+            log.info("로그인 성공! 아이디 : {}", account);
         } catch (BusinessException e) {
-            response.setStatus(HttpStatus.SEE_OTHER);
-            response.addToHeader("Location", "/401.html");
+            sendRedirect(response, "/401.html");
         } catch (Exception e) {
             ServletExceptionHandler.getInstance().handle(response, e);
         }
     }
 
-    //TODO: 세션 발급 로직의 경계 케이스 따져보기  (2025-09-9, 화, 3:46)
-    // https://github.com/woowacourse/java-http/pull/899#discussion_r2331128229
-    private void addJSessionCookie(HttpRequest request, HttpResponse response, User user) {
+    private void sendRedirect(HttpResponse response, String location) {
+        response.setStatus(HttpStatus.SEE_OTHER);
+        response.addToHeader("Location", location);
+    }
+
+    private Session findValidSession(HttpRequest request) {
         if (!request.hasJSessionCookie()) {
-            Session session = new Session();
-            session.setAttribute(USER_ACCOUNT, user.getAccount());
-            SessionManager.getInstance().add(session);
-
-            HttpCookie cookie = new HttpCookie();
-            cookie.addJSessionId(session.getId());
-
-            response.addToHeader("Set-Cookie", cookie.toHeaderString());
+            return null;
         }
+        Session session = sessionManager.findSession(request.getJSessionId());
+        if (session == null) {
+            return null;
+        }
+        Object account = session.getAttribute(USER_ACCOUNT);
+        if (account == null) {
+            return null;
+        }
+        authService.loginCheck(String.valueOf(account));
+        return session;
+    }
+
+    private void addSessionAndCookie(HttpRequest request, HttpResponse response, User user) {
+        if (request.hasJSessionCookie()) {
+            return;
+        }
+        Session session = new Session();
+        session.setAttribute(USER_ACCOUNT, user.getAccount());
+        sessionManager.add(session);
+
+        HttpCookie cookie = new HttpCookie();
+        cookie.addJSessionId(session.getId());
+        response.addToHeader("Set-Cookie", cookie.toHeaderString());
     }
 }

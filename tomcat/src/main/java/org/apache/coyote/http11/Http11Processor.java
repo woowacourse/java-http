@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             final var controller = requestMapping.getController(request.getPath());
             var response = (controller != null)
                     ? controller.service(request)
-                    : StaticResourceHandler.serveStaticResource(request.getPath());
+                    : handleStaticResource(request);
 
             if (session instanceof SimpleHttpSession s && s.isNew()) {
                 response = response.toBuilder()
@@ -60,6 +60,18 @@ public class Http11Processor implements Runnable, Processor {
             log.error("Internal Server Error: {}", e.getMessage(), e);
             sendInternalServerErrorResponse(connection);
         }
+    }
+
+    private HttpResponse handleStaticResource(final HttpRequest request) throws Exception {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return HttpResponse.builder()
+                    .status(405, "Method Not Allowed")
+                    .contentType("text/plain;charset=utf-8")
+                    .body("Method Not Allowed".getBytes())
+                    .build();
+        }
+        
+        return StaticResourceHandler.serveStaticResource(request.getPath());
     }
 
     private void sendInternalServerErrorResponse(final Socket connection) {

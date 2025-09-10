@@ -5,6 +5,10 @@ import org.apache.coyote.http11.response.HttpStatus;
 
 public class Http4xxException extends RuntimeException {
 
+    public Http4xxException() {
+        super("잘못된 요청입니다.");
+    }
+
     public Http4xxException(String message, Http11Response response, HttpStatus httpStatus) {
         super(message);
         response.setState(httpStatus);

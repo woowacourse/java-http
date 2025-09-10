@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -35,10 +33,9 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final InputStream inputStream = connection.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            
-            final Http11Request httpRequest = Http11Request.from(bufferedReader);
+        try {
+            final InputStream inputStream = connection.getInputStream();
+            final Http11Request httpRequest = Http11Request.from(inputStream);
             final Http11Response httpResponse = new Http11Response();
             httpResponse.setContentType(httpRequest.parseResourcePath());
 

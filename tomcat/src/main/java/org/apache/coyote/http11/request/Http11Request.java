@@ -2,8 +2,11 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.catalina.exception.Http4xxException;
 import org.apache.coyote.http11.domain.HttpCookies;
 import org.apache.coyote.http11.domain.HttpMethod;
 
@@ -13,27 +16,28 @@ public record Http11Request(
         RequestBody body
 ) {
 
-    public static Http11Request from(final BufferedReader bufferedReader) throws IOException {
-        final String line = bufferedReader.readLine();
-        final RequestLine requestLine = RequestLine.parse(line);
+    public static Http11Request from(final InputStream inputStream) throws IOException {
+        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            final String line = bufferedReader.readLine();
+            if (line == null || line.isBlank()) {
+                throw new Http4xxException();
+            }
+            final RequestLine requestLine = RequestLine.parse(line);
 
-        final List<String> headers = extractHeaderLines(bufferedReader);
-        final RequestHeaders requestHeaders = RequestHeaders.parse(headers);
+            final List<String> headers = extractHeaderLines(bufferedReader);
+            final RequestHeaders requestHeaders = RequestHeaders.parse(headers);
 
-        final int contentLength = requestHeaders.getContentLength();
-        final String body = readBody(bufferedReader, contentLength);
-        final RequestBody requestBody = RequestBody.parse(body);
+            final int contentLength = requestHeaders.getContentLength();
+            final String body = readBody(inputStream, contentLength);
+            final RequestBody requestBody = RequestBody.parse(body);
 
-        return new Http11Request(requestLine, requestHeaders, requestBody);
+            return new Http11Request(requestLine, requestHeaders, requestBody);
+        }
     }
 
-    private static String readBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
-        if (contentLength <= 0) {
-            return "";
-        }
-        char[] bodyChars = new char[contentLength];
-        bufferedReader.read(bodyChars, 0, contentLength);
-        return new String(bodyChars);
+    private static String readBody(final InputStream inputStream, final int contentLength) throws IOException {
+        byte[] bytes = inputStream.readNBytes(contentLength);
+        return new String(bytes);
     }
 
     private static List<String> extractHeaderLines(final BufferedReader bufferedReader) {

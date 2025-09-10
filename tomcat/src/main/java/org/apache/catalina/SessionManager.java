@@ -18,7 +18,7 @@ public class SessionManager {
         SESSIONS.put(key, session);
     }
 
-    public Session getAttribute(String key) {
+    public Session getSession(String key) {
         return SESSIONS.get(key);
     }
 }

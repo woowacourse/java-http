@@ -39,7 +39,7 @@ public class HttpRequest {
         String sessionId = getCookieValue("JSESSIONID");
 
         if (sessionId != null) {
-            Session session = sessionManager.getAttribute(sessionId);
+            Session session = sessionManager.getSession(sessionId);
             if (session != null) return session;
         }
 

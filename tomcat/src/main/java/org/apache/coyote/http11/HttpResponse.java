@@ -52,7 +52,7 @@ public class HttpResponse {
         this.statusCode = statusCode;
     }
 
-    public void setLocation(String location) {
+    public void sendRedirect(String location) {
         this.location = location;
     }
 }

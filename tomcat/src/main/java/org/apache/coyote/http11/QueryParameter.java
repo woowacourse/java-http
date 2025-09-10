@@ -1,36 +1,35 @@
 package org.apache.coyote.http11;
 
 import java.net.URLDecoder;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryParameters {
+public class QueryParameter {
 
     private static final String PAIR_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int VALID_PAIR_COUNT = 2;
 
-    private final Map<String, String> parameterInfo;
+    private final Map<String, String> queryParameter;
 
-    public QueryParameters() {
-        this.parameterInfo = new HashMap<>();
+    public QueryParameter() {
+        this.queryParameter = new HashMap<>();
     }
 
-    public QueryParameters(String queryString) {
-        this.parameterInfo = new HashMap<>();
+    public QueryParameter(String queryString) {
+        this.queryParameter = new HashMap<>();
         doParse(queryString);
     }
 
     public String getParameter(String key) {
-        return parameterInfo.get(key);
+        return queryParameter.get(key);
     }
 
     public boolean hasAnyParameter() {
-        return !parameterInfo.isEmpty();
+        return !queryParameter.isEmpty();
     }
 
-    public void addParametersFromBody(String body) {
+    public void addParameterFromBody(String body) {
         doParse(body);
     }
 
@@ -40,7 +39,7 @@ public class QueryParameters {
         }
         String[] pairs = data.split(PAIR_DELIMITER);
         for (String pair : pairs) {
-            String[] keyValue = pair.split(KEY_VALUE_DELIMITER, 2);
+            String[] keyValue = pair.split(KEY_VALUE_DELIMITER, VALID_PAIR_COUNT);
             if (keyValue[0].isBlank()) {
                 continue;
             }
@@ -50,7 +49,7 @@ public class QueryParameters {
                 if(keyValue.length > 1) {
                     value = URLDecoder.decode(keyValue[1], "UTF-8");
                 }
-                parameterInfo.put(key, value);
+                queryParameter.put(key, value);
             } catch (java.io.UnsupportedEncodingException e) {
                 throw new IllegalArgumentException("Failed to decode parameter: " + pair, e);
             }

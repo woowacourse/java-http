@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Cookies {
+public class Cookie {
 
     private static final String COOKIE_DELIMITER = "; =";
     private static final String KEY_VALUE_DELIMITER = "=";
 
-    private final Map<String, String> cookies;
+    private final Map<String, String> cookie;
 
-    public Cookies(String cookieHeader) {
-        this.cookies = parse(cookieHeader);
+    public Cookie(String cookieHeader) {
+        this.cookie = parse(cookieHeader);
     }
 
     private Map<String, String> parse(String cookieHeader) {
@@ -29,11 +29,11 @@ public class Cookies {
                 ));
     }
 
-    public String getCookie(String name) {
-        return cookies.get(name);
+    public boolean hasCookie(String name) {
+        return cookie.containsKey(name);
     }
 
-    public boolean hasCookie(String name) {
-        return cookies.containsKey(name);
+    public String getCookie(String name) {
+        return cookie.get(name);
     }
 }

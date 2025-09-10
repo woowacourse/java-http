@@ -70,17 +70,17 @@ public class HttpRequestParser {
         final var delimiterIndex = requestUri.indexOf(REQUEST_URI_DELIMITER);
 
         String resourcePath = requestUri;
-        QueryParameters queryParameters = new QueryParameters();
+        QueryParameter queryParameter = new QueryParameter();
 
         if (delimiterIndex != -1) {
             resourcePath = requestUri.substring(0, delimiterIndex);
-            queryParameters = new QueryParameters(requestUri.substring(delimiterIndex + 1));
+            queryParameter = new QueryParameter(requestUri.substring(delimiterIndex + 1));
         }
 
         if(body != null && Objects.equals(headers.get("Content-Type"), "application/x-www-form-urlencoded")) {
-            queryParameters.addParametersFromBody(body);
+            queryParameter.addParameterFromBody(body);
         }
 
-        return new HttpRequest(resourcePath, queryParameters, headers, body);
+        return new HttpRequest(resourcePath, queryParameter, headers, body);
     }
 }

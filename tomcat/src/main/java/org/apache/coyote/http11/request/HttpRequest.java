@@ -7,13 +7,17 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 
 public record HttpRequest(
         HttpMethod httpMethod,
         RequestUri requestUri,
         QueryParameters queryParameters,
         Map<String, String> headers,
-        String body
+        String body,
+        HttpCookie cookies
 ) {
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
@@ -25,17 +29,21 @@ public record HttpRequest(
         final HttpMethod httpMethod = HttpMethod.from(requestLine.method());
 
         final Map<String, String> headers = RequestHeaderParser.parse(reader);
+        
         String body = "";
         if (httpMethod.type() == HttpMethodType.POST) {
             body = RequestBodyParser.parse(reader, headers);
         }
+
+        final HttpCookie cookies = new HttpCookie(headers.get("cookie"));
 
         return new HttpRequest(
                 httpMethod,
                 uri,
                 queryParameters,
                 headers,
-                body
+                body,
+                cookies
         );
     }
 
@@ -66,5 +74,10 @@ public record HttpRequest(
         }
         
         return null;
+    }
+
+    public Session getSession(boolean create) {
+        String sessionId = cookies.getJSessionId();
+        return SessionManager.getInstance().getSession(sessionId, create);
     }
 }

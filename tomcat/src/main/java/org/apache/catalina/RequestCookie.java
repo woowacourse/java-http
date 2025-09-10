@@ -23,7 +23,7 @@ public class RequestCookie {
         return this.cookieValues.get(key);
     }
 
-    public Map<String, String> getCookieValues() {
-        return cookieValues;
+    public boolean contains(String key) {
+        return this.cookieValues.containsKey(key);
     }
 }

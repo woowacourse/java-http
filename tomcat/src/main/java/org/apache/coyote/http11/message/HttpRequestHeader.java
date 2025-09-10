@@ -34,11 +34,12 @@ public class HttpRequestHeader {
         return values.keySet().stream()
                 .filter(key -> key.equals(comparedKey))
                 .findAny()
+                .map(values::get)
                 .orElseThrow(() -> new IllegalArgumentException(comparedKey + "와 일치하는 값이 헤더에 존재하지 않습니다."));
     }
 
     public boolean hasCookie() {
-        return this.values != null;
+        return this.cookie != null;
     }
 
     public RequestCookie getCookie() {

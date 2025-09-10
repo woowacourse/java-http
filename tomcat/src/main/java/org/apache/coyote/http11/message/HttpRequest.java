@@ -23,7 +23,9 @@ public class HttpRequest {
 
         if (header.hasCookie()) {
             RequestCookie cookie = header.getCookie();
-            jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
+            if (cookie.contains(JAVA_SESSION_ID_KEY)) {
+                jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
+            }
         }
 
         if (jSessionId != null) {

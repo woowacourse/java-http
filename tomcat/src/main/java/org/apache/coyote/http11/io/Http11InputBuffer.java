@@ -34,29 +34,33 @@ public class Http11InputBuffer {
         }
 
         RequestLine requestLine = RequestLine.createFromRawRequestLine(rawRequestLine);
-        if (!requestLine.httpVersion().equals(INVALID_HTTP_VERSION)) {
-            throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
-        }
+        checkHttpVersion(requestLine);
 
         Map<String, String> rawHeaders = parseHeaders(inputStream);
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(rawHeaders);
 
-        String requestBody = null;
-        if (requestLine.httpMethod().equals(HttpMethod.POST) && httpRequestHeader.contains("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
-            if (contentLength > 0) {
-                requestBody = readRequestBody(contentLength, httpRequestHeader, requestBody);
-            }
-        }
+        RequestCookie requestCookie = parseCookie(httpRequestHeader);
+        httpRequestHeader.addCookie(requestCookie);
 
+        String requestBody = parseRequestBody(requestLine, httpRequestHeader);
+
+        return new HttpRequest(requestLine, httpRequestHeader, requestBody);
+    }
+
+    private RequestCookie parseCookie(HttpRequestHeader httpRequestHeader) {
         RequestCookie requestCookie = null;
         if (httpRequestHeader.contains("Cookie")) {
             String rawCookie = httpRequestHeader.get("Cookie");
             requestCookie = parseToCookie(rawCookie);
             httpRequestHeader.addCookie(requestCookie);
         }
+        return requestCookie;
+    }
 
-        return new HttpRequest(requestLine, httpRequestHeader, requestBody);
+    private static void checkHttpVersion(RequestLine requestLine) {
+        if (!requestLine.httpVersion().equals(INVALID_HTTP_VERSION)) {
+            throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
+        }
     }
 
     private String readRequestBody(int contentLength, HttpRequestHeader httpRequestHeader, String requestBody)
@@ -66,6 +70,18 @@ public class Http11InputBuffer {
         if (httpRequestHeader.contains("Content-Type")) {
             String contentType = httpRequestHeader.get("Content-Type");
             requestBody = new String(body, extractBodyCharset(contentType));
+        }
+        return requestBody;
+    }
+
+    private String parseRequestBody(RequestLine requestLine, HttpRequestHeader httpRequestHeader) throws IOException {
+        String requestBody = null;
+
+        if (requestLine.httpMethod().equals(HttpMethod.POST) && httpRequestHeader.contains("Content-Length")) {
+            int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
+            if (contentLength > 0) {
+                requestBody = readRequestBody(contentLength, httpRequestHeader, requestBody);
+            }
         }
         return requestBody;
     }

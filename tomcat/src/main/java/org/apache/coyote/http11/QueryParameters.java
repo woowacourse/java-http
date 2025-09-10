@@ -33,4 +33,8 @@ public class QueryParameters {
     public String getParameter(String key) {
         return parameterInfo.get(key);
     }
+
+    public boolean hasAnyParameter() {
+        return !parameterInfo.isEmpty();
+    }
 }

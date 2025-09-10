@@ -17,4 +17,8 @@ public class HttpRequest {
     public String getQueryParameter(String key) {
         return queryParameters.getParameter(key);
     }
+
+    public boolean hasQueryParameter() {
+        return queryParameters.hasAnyParameter();
+    }
 }

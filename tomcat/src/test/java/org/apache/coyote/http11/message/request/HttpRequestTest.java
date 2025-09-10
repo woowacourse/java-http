@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
+import org.apache.coyote.http11.message.parser.HttpHeadersParser;
+import org.apache.coyote.http11.message.parser.RequestLineParser;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -23,7 +25,7 @@ class HttpRequestTest {
         BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
 
         // when & then
-        assertThatCode(() -> HttpRequest.from(reader))
+        assertThatCode(() -> HttpRequest.from(reader, new RequestLineParser(), new HttpHeadersParser()))
                 .doesNotThrowAnyException();
     }
 
@@ -38,7 +40,7 @@ class HttpRequestTest {
         BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(reader))
+        assertThatThrownBy(() -> HttpRequest.from(reader, new RequestLineParser(), new HttpHeadersParser()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -56,7 +58,7 @@ class HttpRequestTest {
                         "\r\n" +
                         body;
         BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
-        HttpRequest request = HttpRequest.from(reader);
+        HttpRequest request = HttpRequest.from(reader, new RequestLineParser(), new HttpHeadersParser());
 
         // 요청 라인 검증
         assertEquals(HttpMethod.POST, request.getMethod());

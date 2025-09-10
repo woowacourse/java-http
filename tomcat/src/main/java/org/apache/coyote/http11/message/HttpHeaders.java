@@ -9,6 +9,7 @@ import java.util.TreeMap;
 public class HttpHeaders {
     public static final String VALID_HEADER_KEY_PATTERN = "^[A-Za-z0-9-]+$";
     public static final String VALID_HEADER_VALUE_PATTERN = ".*[\\r\\n\\x00-\\x1F\\x7F].*";
+    public static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -39,6 +40,10 @@ public class HttpHeaders {
         headers.computeIfAbsent(sanitize(name), key -> new ArrayList<>()).add(sanitize(value));
     }
 
+    public boolean hasContentLength() {
+        return contains(CONTENT_LENGTH);
+    }
+
     public boolean contains(String key) {
         return headers.containsKey(key);
     }
@@ -55,6 +60,12 @@ public class HttpHeaders {
         return values.getFirst();
     }
 
+    public int getContentLength() {
+        if (hasContentLength()) {
+            return Integer.parseInt(getFirst(CONTENT_LENGTH));
+        }
+        return 0;
+    }
 
     public List<String> getLines() {
         List<String> lines = new ArrayList<>();

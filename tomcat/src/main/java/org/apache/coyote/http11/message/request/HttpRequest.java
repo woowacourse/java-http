@@ -4,14 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.message.HttpBody;
 import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.parser.HttpBodyParser;
+import org.apache.coyote.http11.message.parser.Parser;
 import org.apache.coyote.http11.message.response.ContentType;
 
 public class HttpRequest {
@@ -27,42 +27,16 @@ public class HttpRequest {
         this.body = body;
     }
 
-    //TODO: 뎁스 줄이기. Parser 분리?  (2025-09-9, 화, 21:9)
-    public static HttpRequest from(BufferedReader reader) throws IOException {
+    public static HttpRequest from(BufferedReader reader,
+                                   Parser<RequestLine> requestLineParser,
+                                   Parser<HttpHeaders> httpHeadersParser) throws IOException {
         // 요청 라인
-        String rawRequestLine = reader.readLine();
-        if (rawRequestLine == null || rawRequestLine.isBlank()) {
-            throw new IllegalArgumentException("Empty request");
-        }
-        String[] requestLineTokens = rawRequestLine.split(" ");
-        if (requestLineTokens.length != REQUEST_LINE_ELEMENT_COUNT) {
-            throw new IllegalArgumentException("Invalid Request Line: " + rawRequestLine);
-        }
-        HttpMethod method = HttpMethod.from(requestLineTokens[0]);
-        RequestUri requestUri = RequestUri.from(requestLineTokens[1]);
-        String version = requestLineTokens[2];
-
-        RequestLine requestLine = new RequestLine(method, requestUri, version);
-
-        // 헤더 읽기
-        List<String> headerLines = new ArrayList<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isBlank()) {
-            headerLines.add(line);
-        }
-        HttpHeaders headers = HttpHeaders.fromLines(headerLines);
-
+        RequestLine requestLine = requestLineParser.parse(reader);
+        // 헤더
+        HttpHeaders headers = httpHeadersParser.parse(reader);
         // 바디 읽기
-        HttpBody body = HttpBody.init();
-        if (headers.contains("Content-Length")) {
-            int contentLength = Integer.parseInt(headers.getFirst("Content-Length"));
-            char[] bodyChars = new char[contentLength];
-            int read = reader.read(bodyChars, 0, contentLength);
-            if (read != contentLength) {
-                throw new IOException("Unexpected end of body");
-            }
-            body = HttpBody.from(new String(bodyChars));
-        }
+        HttpBodyParser httpBodyParser = new HttpBodyParser(headers);
+        HttpBody body = httpBodyParser.parse(reader);
 
         return new HttpRequest(requestLine, headers, body);
     }

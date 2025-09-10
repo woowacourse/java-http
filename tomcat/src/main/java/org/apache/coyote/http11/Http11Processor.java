@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.servlet.ServletContainer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.message.parser.HttpHeadersParser;
+import org.apache.coyote.http11.message.parser.RequestLineParser;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
@@ -38,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
                         new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
                 var writer = connection.getOutputStream()
         ) {
-            HttpRequest request = HttpRequest.from(reader);
+            HttpRequest request = HttpRequest.from(reader, new RequestLineParser(), new HttpHeadersParser());
             HttpResponse response = new HttpResponse();
 
             servletContainer.executeServlet(request, response);

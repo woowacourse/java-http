@@ -69,31 +69,14 @@ public class Http11Processor implements Runnable, Processor {
 
             String httpMethod = requestLineInfo[0];
             String url = requestLineInfo[1];
-            String response;
 
-            StringBuilder header = new StringBuilder();
-            String line;
-            int contentLength = 0;
-            String cookieHeader = "";
-            while ((line = br.readLine()) != null && !line.isBlank()) {
-                header.append(line).append("\r\n");
-                if (line.startsWith("Content-Length:")) {
-                    String lengthStr = line.substring("Content-Length:".length()).trim();
-                    contentLength = Integer.parseInt(lengthStr);
-                }
-                if (line.startsWith("Cookie: ")) {
-                    cookieHeader = line.substring("Cookie:".length()).trim();
-                }
-            }
-
-            StringBuilder body = new StringBuilder();
-            if (contentLength > 0) {
-                char[] bodyChars = new char[contentLength];
-                br.read(bodyChars, 0, contentLength);
-                body.append(bodyChars);
-            }
+            Map<String, String> parsedComponents = parseRequestComponents(br);
+            String body = parsedComponents.get("body");
+            String cookieHeader = parsedComponents.get("cookie");
 
             HttpCookie cookie = new HttpCookie(cookieHeader);
+            String response;
+
             if (url.equals("/")) {
                 response = sendDefaultResource();
                 sendResponse(outputStream, response);
@@ -141,6 +124,39 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private Map<String, String> parseRequestComponents(BufferedReader br) throws IOException {
+        Map<String, String> parsedComponents = new HashMap<>();
+        StringBuilder bodyBuilder = new StringBuilder();
+        int contentLength = 0;
+        String cookieHeader = "";
+        String line;
+
+        while ((line = br.readLine()) != null && !line.isBlank()) {
+            String[] headerParts = line.split(":", 2);
+            if (headerParts.length == 2) {
+                String headerName = headerParts[0].trim();
+                String headerValue = headerParts[1].trim();
+                parsedComponents.put(headerName, headerValue);
+
+                if (headerName.equalsIgnoreCase("Content-Length")) {
+                    contentLength = Integer.parseInt(headerValue);
+                }
+                if (headerName.equalsIgnoreCase("Cookie")) {
+                    cookieHeader = headerValue;
+                }
+            }
+        }
+
+        if (contentLength > 0) {
+            char[] bodyChars = new char[contentLength];
+            br.read(bodyChars, 0, contentLength);
+            bodyBuilder.append(bodyChars);
+        }
+        parsedComponents.put("body", bodyBuilder.toString());
+        parsedComponents.put("cookie", cookieHeader);
+        return parsedComponents;
+    }
+
     private String sendDefaultResource() throws IOException {
         final var responseBody = "Hello world!";
         return String.join("\r\n",
@@ -157,8 +173,8 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String loginUserResponse(StringBuilder body, HttpCookie cookie) throws URISyntaxException, IOException {
-        Map<String, String> queryParams = parseQueryParams(body.toString());
+    private String loginUserResponse(String body, HttpCookie cookie) throws URISyntaxException, IOException {
+        Map<String, String> queryParams = parseQueryParams(body);
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
@@ -185,8 +201,8 @@ public class Http11Processor implements Runnable, Processor {
         return getRedirectResponse("static/401.html", UNAUTHORIZED, null);
     }
 
-    private String registerUserResponse(StringBuilder body) throws IOException, URISyntaxException {
-        Map<String, String> formData = parseQueryParams(body.toString());
+    private String registerUserResponse(String body) throws IOException, URISyntaxException {
+        Map<String, String> formData = parseQueryParams(body);
         String account = formData.get("account");
         String password = formData.get("password");
         String email = formData.get("email");

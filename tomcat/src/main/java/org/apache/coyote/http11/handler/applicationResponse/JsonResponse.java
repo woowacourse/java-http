@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.controllerResponse;
+package org.apache.coyote.http11.handler.applicationResponse;
 
 import java.util.HashMap;
 import org.apache.coyote.http11.general.ContentType;

@@ -61,34 +61,37 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse createResponse(final HttpRequest request) throws IOException {
         String requestPath = request.getPath();
         
-        if (Objects.equals("/login", requestPath)) {
-            handleLoginRequest(request);
+        if (Objects.equals("/login", requestPath) && request.getMethodType() == HttpMethodType.POST) {
+            return handleLoginRequest(request);
         }
         
         String resolvedPath = resolveFilePath(requestPath);
         return generateHttpResponse(resolvedPath);
     }
 
-    private void handleLoginRequest(final HttpRequest request) {
-        if (request.getMethodType() != HttpMethodType.GET) {
-            return;
-        }
-        
+    private HttpResponse handleLoginRequest(final HttpRequest request) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         
-        if (account != null && password != null) {
-            processLoginCredentials(account, password);
+        if (account == null || password == null) {
+            log.info("로그인 파라미터 누락 - account: {}, password: {}", account, password);
+            return HttpResponse.redirect("/401.html");
         }
+        
+        return processLoginCredentials(account, password);
     }
 
-    private void processLoginCredentials(final String account, final String password) {
-        InMemoryUserRepository.findByAccount(account)
+    private HttpResponse processLoginCredentials(final String account, final String password) {
+        return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
-            .ifPresentOrElse(
-                user -> log.info("로그인 성공: {}", user),
-                () -> log.info("로그인 실패 - account: {}, password: {}", account, password)
-            );
+            .map(user -> {
+                log.info("로그인 성공: {}", user);
+                return HttpResponse.redirect("/index.html");
+            })
+            .orElseGet(() -> {
+                log.info("로그인 실패 - account: {}, password: {}", account, password);
+                return HttpResponse.redirect("/401.html");
+            });
     }
 
     private String resolveFilePath(final String requestPath) {

@@ -20,6 +20,7 @@ public class HttpResponse {
     private boolean committed = false;
     private String reason = "OK";
     private int status = 200;
+    private boolean redirected = false;
 
     public HttpResponse(String version) {
         this.version = version;
@@ -49,16 +50,23 @@ public class HttpResponse {
     }
 
     public HttpResponse write(String text) throws IOException {
+        if (redirected) {
+            throw new IllegalStateException("Redirect response cannot cannot have a body");
+        }
         body.write(text.getBytes(StandardCharsets.UTF_8));
         return this;
     }
 
     public HttpResponse write(byte[] bytes) throws IOException {
+        if (redirected) {
+            throw new IllegalStateException("Redirect response cannot cannot have a body");
+        }
         body.write(bytes);
         return this;
     }
 
     public void sendRedirect(String location) {
+        this.redirected = true;
         status(HttpStatus.FOUND.getCode(), HttpStatus.FOUND.getReason());
         header("Location", location);
         headers.put("Content-Length", "0");

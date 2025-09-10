@@ -5,9 +5,12 @@ import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpResponse;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler {
 
+    private final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
     private final ApiRouter apiRouter = new ApiRouter();
 
     public HttpResponse handleHttpRequest(HttpRequest httpRequest) {
@@ -17,6 +20,7 @@ public class RequestHandler {
             }
             return getResponseFromHandler(httpRequest);
         } catch (Exception exception) {
+            logger.error(exception.getMessage(), exception);
             return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ContentType.TEXT_HTML, "알 수 없는 오류가 발생했습니다.");
         }
     }

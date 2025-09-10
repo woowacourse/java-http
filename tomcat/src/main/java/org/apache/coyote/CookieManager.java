@@ -28,6 +28,7 @@ public class CookieManager {
             int idx = cookie.indexOf("=");
             if(idx == -1){
                 addCookie(cookie, "");
+                return;
             }
             addCookie(
                     cookie.substring(0, idx),

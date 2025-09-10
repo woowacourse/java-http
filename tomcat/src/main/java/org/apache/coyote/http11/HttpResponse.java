@@ -9,13 +9,12 @@ public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
-    private final ProtocolVersion protocolVersion;
-    private final ResponseStatus responseStatus;
-    private final ContentType contentType;
-    private final String location;
-    private final List<HttpCookie> httpCookies;
-    private final long contentLength;
-    private final byte[] body;
+    private StatusLine statusLine;
+    private ContentType contentType;
+    private String location;
+    private List<HttpCookie> httpCookies;
+    private long contentLength;
+    private byte[] body;
 
     public HttpResponse(ProtocolVersion protocolVersion,
                         ResponseStatus responseStatus,
@@ -23,8 +22,7 @@ public class HttpResponse {
                         String location,
                         long contentLength,
                         byte[] body) {
-        this.protocolVersion = protocolVersion;
-        this.responseStatus = responseStatus;
+        this.statusLine = new StatusLine(protocolVersion, responseStatus);
         this.contentType = contentType;
         this.location = location;
         this.httpCookies = new ArrayList<>();
@@ -69,7 +67,7 @@ public class HttpResponse {
 
     private String buildHeaders() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getStatusLine()).append(CRLF);
+        sb.append(statusLine.convertToResponseLine()).append(CRLF);
         if (location != null && !location.isBlank()) {
             sb.append("Location: ").append(location).append(CRLF);
         }
@@ -86,10 +84,6 @@ public class HttpResponse {
         sb.append("Content-Length: ").append(contentLength).append(CRLF);
         sb.append(CRLF);
         return sb.toString();
-    }
-
-    private String getStatusLine() {
-        return protocolVersion.getResponseHeader() + " " + responseStatus.getResponseHeader();
     }
 
     private String buildContentTypeHeader() {

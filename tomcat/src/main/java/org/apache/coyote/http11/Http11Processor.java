@@ -9,15 +9,14 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.application.Handler;
 import org.apache.coyote.http11.application.ViewResolver;
 import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.exception.ExceptionHandlerManager;
 import org.apache.coyote.http11.request.Api;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.controller.UserController;
-import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
@@ -28,8 +27,9 @@ public class Http11Processor implements Runnable, Processor {
     private final List<Handler> handlers = List.of(
         new UserController(SESSION_MANAGER)
     );
-    private final ViewResolver viewResolver = new ViewResolver();
     private final Socket connection;
+    private final ViewResolver viewResolver = new ViewResolver();
+    private final ExceptionHandlerManager exceptionHandlerManager = new ExceptionHandlerManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -57,16 +57,9 @@ public class Http11Processor implements Runnable, Processor {
                         break;
                     }
                 }
-            } catch (UnauthorizedException e) {
-                request.setPath("/401.html");
-                response.setStatus(HttpStatus.UNAUTHORIZED);
-                response.getHeaders().clear();
-            } catch (IllegalArgumentException e) {
-                request.setPath("/404.html");
-                response.setStatus(HttpStatus.NOT_FOUND);
-                response.getHeaders().clear();
+            } catch (Exception e) {
+                exceptionHandlerManager.handle(request, response, e);
             }
-
             viewResolver.resolve(request, response);
             final var output = response.buildResponse();
             outputStream.write(output.getBytes());

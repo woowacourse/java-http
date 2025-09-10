@@ -11,7 +11,6 @@ import org.apache.coyote.http11.general.HttpProtocolVersion;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpResponse;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
-import org.apache.coyote.http11.httpResponse.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,27 +19,26 @@ public class StaticFileHandler {
     private static final Logger logger = LoggerFactory.getLogger(StaticFileHandler.class);
     public static final String DEFAULT_EXTENSION_OF_STATIC_FILE = ".html";
 
-    public static HttpResponse handle(HttpRequest httpRequest, URL resourceUrl) {
+    public static HttpResponse handle(HttpRequest httpRequest) {
+        URL resourceUrl = StaticFileHandler.class.getClassLoader().getResource("static" + httpRequest.getPath());
+        if (httpRequest.getPath().endsWith(".css")) {
+            return buildHttpResponse(resourceUrl, httpRequest.getProtocolVersion(), ContentType.TEXT_CSS);
+        }
+        return buildHttpResponse(resourceUrl, httpRequest.getProtocolVersion(), ContentType.TEXT_HTML);
+    }
+
+    private static HttpResponse buildHttpResponse(URL resourceUrl, HttpProtocolVersion protocolVersion, ContentType contentType) {
         try {
             String responseBody = Files.readString(Path.of(resourceUrl.toURI()), StandardCharsets.UTF_8);
-            if (httpRequest.getPath().endsWith(".css")) {
-                return new HttpResponse(ContentType.TEXT_CSS, new StatusLine(httpRequest.getProtocolVersion(), HttpStatus.OK), responseBody);
-            }
-            return new HttpResponse(ContentType.TEXT_HTML, new StatusLine(httpRequest.getProtocolVersion(), HttpStatus.OK), responseBody);
+            return HttpResponse.of(protocolVersion, HttpStatus.OK, contentType, responseBody);
         } catch (IOException | URISyntaxException | NullPointerException exception) {
             logger.error(exception.getMessage(), exception);
-            return new HttpResponse(ContentType.TEXT_HTML, new StatusLine(httpRequest.getProtocolVersion(), HttpStatus.NOT_FOUND), null);
+            return HttpResponse.of(protocolVersion, HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, "존재하지 않습니다.");
         }
     }
 
-    public static HttpResponse handleDefault(HttpProtocolVersion protocolVersion, HttpStatus status, String viewName) {
-        try {
-            URL resourceUrl = StaticFileHandler.class.getClassLoader().getResource("static/" + viewName + DEFAULT_EXTENSION_OF_STATIC_FILE);
-            String responseBody = Files.readString(Path.of(resourceUrl.toURI()));
-            return new HttpResponse(ContentType.TEXT_HTML, new StatusLine(protocolVersion, status), responseBody);
-        } catch (IOException | URISyntaxException | NullPointerException exception) {
-            logger.error(exception.getMessage(), exception);
-            return new HttpResponse(ContentType.TEXT_HTML, new StatusLine(protocolVersion, HttpStatus.NOT_FOUND), null);
-        }
+    public static HttpResponse handleDefault(HttpProtocolVersion protocolVersion, String viewName) {
+        URL resourceUrl = StaticFileHandler.class.getClassLoader().getResource("static/" + viewName + DEFAULT_EXTENSION_OF_STATIC_FILE);
+        return buildHttpResponse(resourceUrl, protocolVersion, ContentType.TEXT_HTML);
     }
 }

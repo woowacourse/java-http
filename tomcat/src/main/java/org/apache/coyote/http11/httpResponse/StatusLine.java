@@ -12,6 +12,10 @@ public class StatusLine {
         this.status = status;
     }
 
+    public HttpProtocolVersion getProtocolVersion() {
+        return protocolVersion;
+    }
+
     public int getStatusCode() {
         return this.status.getCode();
     }

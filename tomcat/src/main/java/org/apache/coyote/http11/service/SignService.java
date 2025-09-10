@@ -2,9 +2,8 @@ package org.apache.coyote.http11.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.parser.RequestResult;
+import org.apache.coyote.http11.HttpRequests;
+import org.apache.coyote.http11.parser.HttpResponse;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,28 +13,36 @@ import java.util.Map;
 public class SignService implements HttpService {
 
     @Override
-    public RequestResult doGet(
-            Map<String, String> query,
-            HttpCookies cookies,
-            Session session
-    ) throws IOException {
-        return new RequestResult(getSignupHtml(), "text/html;charset=utf-8 ");
+    public void doGet(
+            HttpRequests httpRequests, HttpResponse httpResponse
+    ) {
+        httpResponse.setContent(getSignupHtml());
+        httpResponse.setContentType("text/html;charset=utf-8");
+        httpResponse.setStatusLine("HTTP/1.1 200 OK");
     }
 
-    private byte[] getSignupHtml() throws IOException {
+    private byte[] getSignupHtml() {
         URL resource = ClassLoader.getSystemClassLoader()
                 .getResource("static/register.html");
 
-        FileInputStream fileInputStream = new FileInputStream(resource.getFile());
-        return fileInputStream.readAllBytes();
+        if (resource != null) {
+            try (FileInputStream fileInputStream = new FileInputStream(resource.getFile())) {
+                return fileInputStream.readAllBytes();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("파일을 찾는데 실패하였습니다.");
+            }
+        }
+        throw new IllegalArgumentException("파일을 찾는데 실패하였습니다.");
     }
 
     @Override
-    public RequestResult doPost(
-            Map<String, String> query,
-            HttpCookies cookies,
-            Session session
-    ) throws IOException {
+    public void doPost(
+            HttpRequests httpRequests,
+            HttpResponse httpResponse
+    ) {
+        Map<String, String> query = httpRequests.getHttpBody()
+                .getBody();
+
         String account = query.get("account");
         String password = query.get("password");
         String email = query.get("email");
@@ -45,26 +52,49 @@ public class SignService implements HttpService {
         }
 
         if (InMemoryUserRepository.existByAccount(account)) {
-            return new RequestResult(getErrorHtml(), "text/html;charset=utf-8 ");
+            httpResponse.setContent(getInternalErrorHtml());
+            httpResponse.setContentType("text/html;charset=utf-8");
+            httpResponse.setStatusLine("HTTP/1.1 200 OK");
         }
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return new RequestResult(getRedirectHtml(), "text/html;charset=utf-8 ");
+
+        httpResponse.setContent(getRedirectHtml());
+        httpResponse.setContentType("text/html;charset=utf-8");
+        httpResponse.setStatusLine("HTTP/1.1 200 OK");
     }
 
-    private byte[] getErrorHtml() throws IOException {
-        URL resource = ClassLoader.getSystemClassLoader()
-                .getResource("static/500.html");
-
-        FileInputStream fileInputStream = new FileInputStream(resource.getFile());
-        return fileInputStream.readAllBytes();
+    @Override
+    public void doUpdate(HttpRequests httpRequests, HttpResponse httpResponse) {
+        httpResponse.setContent(getInternalErrorHtml());
+        httpResponse.setContentType("text/html;charset=utf-8");
+        httpResponse.setStatusLine("HTTP/1.1 200 OK");
     }
 
-    private byte[] getRedirectHtml() throws IOException {
-        URL resource = ClassLoader.getSystemClassLoader()
-                .getResource("static/index.html");
+    @Override
+    public void doDelete(HttpRequests httpRequests, HttpResponse httpResponse) {
+        throw new IllegalArgumentException("지원하지 않는 기능입니다.;");
+    }
 
-        FileInputStream fileInputStream = new FileInputStream(resource.getFile());
-        return fileInputStream.readAllBytes();
+    private byte[] getInternalErrorHtml() {
+        return getHtml("static/500.html");
+    }
+
+    private byte[] getHtml(String path) {
+        URL resource = ClassLoader.getSystemClassLoader()
+                .getResource(path);
+
+        if (resource != null) {
+            try (FileInputStream fileInputStream = new FileInputStream(resource.getFile())) {
+                return fileInputStream.readAllBytes();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("파일을 찾는데 실패하였습니다.");
+            }
+        }
+        throw new IllegalArgumentException("파일을 찾는데 실패하였습니다.");
+    }
+
+    private byte[] getRedirectHtml() {
+        return getHtml("static/index.html");
     }
 }

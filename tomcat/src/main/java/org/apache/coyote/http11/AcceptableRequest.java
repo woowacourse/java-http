@@ -6,11 +6,6 @@ public class AcceptableRequest {
 
     private static final List<String> requests = List.of("GET", "POST", "DELETE", "UPDATE");
 
-    public static boolean isRequestExist(String buffer) {
-        return requests.stream()
-                .anyMatch(buffer::startsWith);
-    }
-
     public static boolean isGet(String method) {
         return method.equals("GET");
     }

@@ -10,9 +10,18 @@ public class HttpHeader {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
 
+    public static HttpHeader createErrorHttpHeader(final String path) {
+        return new HttpHeader(RequestLine.createErrorRequestLine(path));
+    }
+
     public HttpHeader(final String requestLine, final List<String> headers) {
         this.requestLine = new RequestLine(requestLine);
         this.headers = HttpHeaderParser.getHeaders(headers);
+    }
+
+    private HttpHeader(final RequestLine requestLine) {
+        this.requestLine = requestLine;
+        headers = null;
     }
 
     public HttpMethod getHttpMethod() {

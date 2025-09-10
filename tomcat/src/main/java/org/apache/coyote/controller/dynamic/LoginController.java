@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.coyote.controller.dynamic;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -13,6 +13,9 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Cookie;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.HttpRequest;
 import org.apache.coyote.httpRequest.httpBody.HttpBody;
 import org.apache.coyote.httpRequest.httpHeader.HttpHeader;
@@ -34,19 +37,9 @@ public class LoginController implements Controller {
         if (httpMethod.equals(HttpMethod.GET)) {
             doGet(request, response);
         }
-        if(httpMethod.equals(HttpMethod.POST)) {
-            doPost(request,response);
+        if (httpMethod.equals(HttpMethod.POST)) {
+            doPost(request, response);
         }
-    }
-
-    private void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
-        if (processLogin(request, response)) {
-            response.updateStatusLine("HTTP/1.1", StatusCode.FOUND);
-            response.addHeader("Content-Length", "0");
-            response.addHeader("Location", "/index.html");
-            return;
-        }
-        responseErrorPage("/401.html", StatusCode.NOT_FOUND, response);
     }
 
     private void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
@@ -59,14 +52,23 @@ public class LoginController implements Controller {
             return;
         }
         printMemberLog(httpHeader);
-        responseHtml(httpHeader, response);
+        responseLoginHtml(response);
     }
 
-    private void responseHtml(
-            final HttpHeader httpHeader,
+    private void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+        if (processLogin(request, response)) {
+            response.updateStatusLine("HTTP/1.1", StatusCode.FOUND);
+            response.addHeader("Content-Length", "0");
+            response.addHeader("Location", "/index.html");
+            return;
+        }
+        throw new HttpException(ErrorCode.NOT_EXISTS_MEMBER);
+    }
+
+    private void responseLoginHtml(
             final HttpResponse httpResponse
     ) throws IOException {
-        final String body = getStaticResponseBody("static" + httpHeader.getPurePath());
+        final String body = getStaticResponseBody("static/login.html");
         httpResponse.updateStatusLine("HTTP/1.1", StatusCode.OK);
         httpResponse.updateBody(body);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
@@ -124,17 +126,5 @@ public class LoginController implements Controller {
         }
 
         return false;
-    }
-
-    private void responseErrorPage(
-            final String errorPagePath,
-            final StatusCode statusCode,
-            final HttpResponse httpResponse
-    ) throws IOException {
-        final String body = getStaticResponseBody("static" + errorPagePath);
-        httpResponse.updateStatusLine("HTTP/1.1", statusCode);
-        httpResponse.updateBody(body);
-        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
-        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 }

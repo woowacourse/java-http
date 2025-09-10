@@ -11,12 +11,12 @@ import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Parameters;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,6 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    // private static final int MAX_REQUEST_SIZE = 104_857_600; // 10MB
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
     private final Socket connection;
@@ -49,13 +48,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
-
-            // response
-            ContentType contentType = ContentType.NONE;
-            HttpStatus httpStatus = HttpStatus.OK;
-            Headers headers = new Headers();
-            String responseBody = "";
-            Cookies responseCookies = new Cookies();
+            HttpResponse response = new HttpResponse();
 
             try {
                 if (request.getPath().get().equals("/login")) {
@@ -67,9 +60,9 @@ public class Http11Processor implements Runnable, Processor {
                         }
                     }
                     if (request.getMethod() == HttpMethod.POST) {
-                        login(request.getBody(), responseCookies);
-                        httpStatus = HttpStatus.FOUND;
-                        headers.put("Location", "/index.html");
+                        login(request, response);
+                        response.setHttpStatus(HttpStatus.FOUND);
+                        response.getHeaders().put("Location", "/index.html");
                     }
                 }
 
@@ -78,30 +71,29 @@ public class Http11Processor implements Runnable, Processor {
                         request.setPath("/register.html");
                     }
                     if (request.getMethod() == HttpMethod.POST) {
-                        register(request.getBody());
-                        httpStatus = HttpStatus.FOUND;
-                        headers.put("Location", "/index.html");
+                        register(request);
+                        response.setHttpStatus(HttpStatus.FOUND);
+                        response.getHeaders().put("Location", "/index.html");
                     }
                 }
-
-                contentType = ContentType.fromPath(request.getPath());
+                response.setContentType(ContentType.fromPath(request.getPath()));
             } catch (UnauthorizedException e) {
-                contentType = ContentType.HTML;
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                headers.clear();
                 request.setPath("/401.html");
+                response.setContentType(ContentType.HTML);
+                response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+                response.getHeaders().clear();
             } catch (IllegalArgumentException e) {
-                contentType = ContentType.HTML;
-                httpStatus = HttpStatus.NOT_FOUND;
-                headers.clear();
                 request.setPath("/404.html");
+                response.setContentType(ContentType.HTML);
+                response.setHttpStatus(HttpStatus.NOT_FOUND);
+                response.getHeaders().clear();
             }
 
-            if (contentType.isText() && !httpStatus.is3xx()) {
-                responseBody = getStaticPage(request.getPath().get());
+            if (response.isStaticPage()) {
+                response.setResponseBody(getStaticPage(request.getPath().get()));
             }
-            final var response = buildResponse(httpStatus, contentType, headers, responseCookies, responseBody);
-            outputStream.write(response.getBytes());
+            final var output = response.buildResponse();
+            outputStream.write(output.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -120,31 +112,6 @@ public class Http11Processor implements Runnable, Processor {
         return (User)session.getAttribute("user");
     }
 
-    private String buildResponse(HttpStatus status, ContentType contentType, Headers headers, Cookies cookies,
-        String responseBody) {
-        int bodyLength = getBodyLength(responseBody);
-        return "HTTP/1.1 " + status.getCode() + " " + status.getName() + "\r\n"
-            + "Content-Type: " + contentType.getType() + ";charset=utf-8" + "\r\n"
-            + "Content-Length: " + bodyLength + "\r\n"
-            + addIfNotEmpty(headers.toString())
-            + addIfNotEmpty(cookies.toString())
-            + "\r\n" + responseBody;
-    }
-
-    private String addIfNotEmpty(String value) {
-        if (value.isEmpty()) {
-            return "";
-        }
-        return value + "\r\n";
-    }
-
-    private int getBodyLength(String responseBody) {
-        if (responseBody == null) {
-            return 0;
-        }
-        return responseBody.getBytes().length;
-    }
-
     private String getStaticPage(String requestPath) throws IOException, URISyntaxException {
         String normalizedPath = Paths.get(requestPath).normalize().toString();
         if (normalizedPath.contains("..")) {
@@ -161,7 +128,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(Parameters queryParams, Cookies responseCookies) {
+    private void login(HttpRequest request, HttpResponse response) {
+        Cookies responseCookies = response.getResponseCookies();
+        Parameters queryParams = request.getBody();
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         User user = findUser(account, password);
@@ -186,7 +155,8 @@ public class Http11Processor implements Runnable, Processor {
         return user.get();
     }
 
-    private void register(Parameters parameters) {
+    private void register(HttpRequest request) {
+        Parameters parameters = request.getBody();
         String account = parameters.get("account");
         String email = parameters.get("email");
         String password = parameters.get("password");

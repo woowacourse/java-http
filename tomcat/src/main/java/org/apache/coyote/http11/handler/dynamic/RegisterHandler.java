@@ -50,7 +50,7 @@ public class RegisterHandler implements Handler {
             InMemoryUserRepository.save(user);
             log.info("회원가입 완료 = {}, {}, {}", account, email, password);
 
-            StaticResourceUtils.serve(response, "index.html", HttpStatus.CREATED);
+            response.sendRedirect("/index.html");
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 실패 - {}", e.getMessage());
             StaticResourceUtils.serve(response, "401.html", HttpStatus.UNAUTHORIZED);

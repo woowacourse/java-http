@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -19,7 +20,9 @@ import org.apache.coyote.http11.request.FormUrlEncodedHttpRequestParser;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.startline.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseParser;
+import org.apache.coyote.http11.response.HttpResponseFactory;
+import org.apache.coyote.http11.response.body.ResponseBody;
+import org.apache.coyote.http11.response.header.ResponseHeader;
 import org.apache.coyote.http11.response.startline.HttpStatusCode;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -80,17 +83,26 @@ public class Http11Processor implements Runnable, Processor {
             sendHttpResponse(response, outputStream);
         } catch (HttpStatusException e) {
             final HttpStatusCode statusCode = e.getStatusCode();
-            final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(statusCode);
+            final HttpResponse errorResponse = HttpResponseFactory.createStaticHttpResponse(statusCode,
+                    "/" + statusCode.getStatusCode() + ".html");
             sendHttpResponse(errorResponse, outputStream);
         }
     }
 
     private HttpResponse handleWelcomePage() {
-        return HttpResponseParser.createPlainTextHttpResponse("Hello world!");
+        final ResponseBody responseBody = ResponseBody.createPlainTextResponseBody("Hello world!");
+        final ResponseHeader contentTypeHeader = ResponseHeader.createContentTypeHeader(responseBody);
+        final ResponseHeader contentLengthHeader = ResponseHeader.createContentLength(responseBody);
+
+        return HttpResponseFactory.createHttpResponse(
+                HttpStatusCode.OK,
+                List.of(contentTypeHeader, contentLengthHeader),
+                responseBody
+        );
     }
 
     private HttpResponse handleRegisterGetRequest() throws IOException {
-        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/register.html");
+        return HttpResponseFactory.createStaticHttpResponse(HttpStatusCode.OK, "/register.html");
     }
 
     private HttpResponse handleRegisterPostRequest(final HttpRequest httpRequest) {
@@ -98,11 +110,12 @@ public class Http11Processor implements Runnable, Processor {
         final String password = httpRequest.getBodyParameter("password");
         final String email = httpRequest.getBodyParameter("email");
         userService.signup(account, password, email);
-        return HttpResponseParser.parseToRedirectHttpResponse("/index.html");
+
+        return HttpResponseFactory.createRedirectHttpResponse("/index.html");
     }
 
     private HttpResponse handleStaticResourceGetRequest(final HttpRequest httpRequest) throws IOException {
-        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, httpRequest.getStaticResourcePath());
+        return HttpResponseFactory.createStaticHttpResponse(HttpStatusCode.OK, httpRequest.getStaticResourcePath());
     }
 
     private HttpResponse handleLoginGetRequest(final HttpRequest httpRequest) throws IOException {
@@ -110,11 +123,11 @@ public class Http11Processor implements Runnable, Processor {
         if (session.isPresent()) {
             final User loginUser = (User) session.get().getAttribute("user");
             if (loginUser != null) {
-                return HttpResponseParser.parseToRedirectHttpResponse("/index.html");
+                return HttpResponseFactory.createRedirectHttpResponse("/index.html");
             }
         }
 
-        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
+        return HttpResponseFactory.createStaticHttpResponse(HttpStatusCode.OK, "/login.html");
     }
 
     private HttpResponse handleLoginPostRequest(final HttpRequest httpRequest) throws IOException {
@@ -123,13 +136,14 @@ public class Http11Processor implements Runnable, Processor {
         final Optional<User> user = userService.login(account, password);
 
         if (user.isEmpty()) {
-            return HttpResponseParser.parseToErrorResponse(HttpStatusCode.UNAUTHORIZED);
+            final HttpStatusCode statusCode = HttpStatusCode.UNAUTHORIZED;
+            return HttpResponseFactory.createStaticHttpResponse(statusCode, "/" + statusCode.getStatusCode() + ".html");
         }
 
         log.info("user: " + user.get());
         final Session session = sessionManager.createAndSaveSession(Map.of("user", user.get()));
         final HttpCookie sessionCookie = SessionCookieFactory.createSessionCookie(session);
-        final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
+        final HttpResponse response = HttpResponseFactory.createRedirectHttpResponse("/index.html");
         response.setCookie(sessionCookie);
         return response;
     }

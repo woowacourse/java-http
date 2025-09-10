@@ -8,7 +8,6 @@ public class ResponseBody {
     private final MimeType contentMimeType;
     private final byte[] content;
 
-    // TODO : 빈내용 / 정적 파일 내용 내려주기 / 원하는 문자열(ex. hello world!) 내려주기 & 별도 클래스로 분리하기
     public static ResponseBody createEmptyResponseBody() {
         return new ResponseBody(MimeType.HTML, new byte[0]);
     }

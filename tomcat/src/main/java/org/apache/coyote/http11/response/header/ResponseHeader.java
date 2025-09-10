@@ -7,7 +7,6 @@ public class ResponseHeader {
     private final String key;
     private final String value;
 
-    // TODO : 구체적인 헤더에 대한 생성 -> 별도 클래스로 분리하기
     public static ResponseHeader createContentTypeHeader(final ResponseBody responseBody) {
         return new ResponseHeader("Content-Type", responseBody.getContentMimeType().getMimeType());
     }

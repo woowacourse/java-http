@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.SessionManager;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.Session;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,5 +60,20 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void logLoginAccount(final HttpRequest request) {
+        if (!Objects.equals(request.getResourcePath(), "/login")) {
+            return;
+        }
+        String account = request.getQueryParameter("account");
+
+        if (account == null || account.isBlank()) {
+            throw new IllegalArgumentException("Missing account parameter");
+        }
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new RuntimeException("account " + account + " not found"));
+
+        log.info("user : {}", user);
     }
 }

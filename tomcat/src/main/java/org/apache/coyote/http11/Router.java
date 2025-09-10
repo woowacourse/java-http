@@ -42,9 +42,11 @@ public class Router {
     ) throws IOException {
         if (httpRequest.uri().equals("/login")) {
             loginController.login(httpRequest, httpResponse);
+            return;
         }
         if (httpRequest.uri().equals("/register")) {
             loginController.register(httpRequest, httpResponse);
+            return;
         }
         staticHandler.serveErrorPage(httpResponse, HttpStatus.NOT_FOUND);
     }

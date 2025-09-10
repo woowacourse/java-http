@@ -56,7 +56,8 @@ public final class HttpRequestParser {
         if (contentLength > 0) {
             body = http11InputBuffer.readBytes(contentLength);
         }
-        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body)), httpCookie);
+        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body, UTF_8)),
+                httpCookie);
     }
 
     private Map<String, String> parseQuery(String queryString) {

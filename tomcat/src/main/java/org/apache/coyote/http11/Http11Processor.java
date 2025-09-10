@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
@@ -41,7 +39,6 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.buildResponse(StandardCharsets.UTF_8));
             outputStream.flush();
-            response.sendError();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } catch (Http11ParseException ex) {

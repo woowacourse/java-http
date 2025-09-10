@@ -41,7 +41,7 @@ public class Http11Request {
         if (queryIndex != -1) {
             this.path = uri.substring(0, queryIndex);
         } else {
-            this.path = uri; // 전체를 path 로 사용
+            this.path = uri;
         }
 
         Map<String, String> map = new LinkedHashMap<>();

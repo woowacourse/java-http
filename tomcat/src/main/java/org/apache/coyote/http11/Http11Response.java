@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.coyote.http11.exception.Http11ParseException;
+import org.apache.coyote.http11.exception.util.ErrorResourceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,16 +69,21 @@ public class Http11Response {
 
     public void sendRedirect(String path) throws Http11ParseException {
         putStatusLine("HTTP/1.1 302 Found");
-        putHeader("Location", "/index.html");
+        putHeader("Location", path);
     }
 
-    public void sendError() {
-        this.statusLine = "HTTP/1.1 400 Bad Request";
-        String responseBody = readFileFromClasspath("static/400.html");
+    public void sendError(int code) throws Http11ParseException {
+        Http11Status status = Http11Status.findByCode(code);
+        this.statusLine = status.getStatusLine();
+        String responseBody = readFileFromClasspath(ErrorResourceMapper.getResource(400));
         final Map<String, String> responseHeaders = new LinkedHashMap<>();
         responseHeaders.put("Content-Type", MediaType.HTML.getMimeType());
         responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         this.headers = responseHeaders;
+    }
+
+    public void sendError(Http11Status status) throws Http11ParseException {
+        sendError(status.getCode());
     }
 
     public void putStatusLine(String line) throws Http11ParseException {

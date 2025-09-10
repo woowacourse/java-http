@@ -43,8 +43,8 @@ public final class HttpResponse {
         StringBuilder response = new StringBuilder();
 
         int statusCode = status.code();
-        String reason = status.reason();
-        response.append(String.format(RESPONSE_LINE_FORMAT, HttpVersion.HTTP_1_1.getName(), statusCode, reason));
+        String message = status.reason();
+        response.append(String.format(RESPONSE_LINE_FORMAT, HttpVersion.HTTP_1_1.getName(), statusCode, message));
 
         for (Entry<String, String> header : headers().entrySet()) {
             response.append(header.getKey())
@@ -67,10 +67,6 @@ public final class HttpResponse {
 
         addHeader(SET_COOKIE, totalSetCookie);
         return uuid;
-    }
-
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
     }
 
     public Map<String, String> headers() {

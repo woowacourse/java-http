@@ -35,7 +35,7 @@ public class LoginHandler implements HttpHandler {
                     return response;
                 }
             }
-            return httpResourceLoader.load(request.path());
+            return httpResourceLoader.load(request.getPath());
         }
         request.getHttpCookie().getSession().ifPresent(oldId -> {
             Session old = sessionManager.findSession(oldId);

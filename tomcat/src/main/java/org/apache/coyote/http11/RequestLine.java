@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public record RequestLine(
         HttpMethod method,
-        String uri,
+        String path,
         HttpVersion version
 ) {
 }

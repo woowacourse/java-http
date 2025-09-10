@@ -61,19 +61,4 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
-
-    private void logLoginAccount(final HttpRequest request) {
-        if (!Objects.equals(request.getResourcePath(), "/login")) {
-            return;
-        }
-        String account = request.getQueryParameter("account");
-
-        if (account == null || account.isBlank()) {
-            throw new IllegalArgumentException("Missing account parameter");
-        }
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("account " + account + " not found"));
-
-        log.info("user : {}", user);
-    }
 }

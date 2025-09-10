@@ -14,7 +14,7 @@ public enum ContentType {
     FORM_URLENCODED(null, "application/x-www-form-urlencoded"),
     DEFAULT(null, "application/octet-stream");
 
-    public static final String UTF_8 = ";charset=utf-8";
+    private static final String UTF_8 = ";charset=utf-8";
     private final String extension;
     private final String mimeType;
 

@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
         try (
                 connection;
                 var reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream(), StandardCharsets.ISO_8859_1));
+                        new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
                 var writer = connection.getOutputStream()
         ) {
             HttpRequest request = HttpRequest.from(reader);

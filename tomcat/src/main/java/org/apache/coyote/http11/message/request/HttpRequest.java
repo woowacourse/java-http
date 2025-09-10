@@ -56,8 +56,6 @@ public class HttpRequest {
         }
         HttpHeaders headers = HttpHeaders.fromLines(headerLines);
 
-        //TODO: Content-Length(바이트)와 문자 기반 Reader의 불일치 (2025-09-9, 화, 21:10)
-        // https://github.com/woowacourse/java-http/pull/899#discussion_r2331128303
         // 바디 읽기
         HttpBody body = HttpBody.init();
         if (headers.contains("Content-Length")) {

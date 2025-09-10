@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 public class StartLine {
-    private static final String RESOURCE_PATH = "static";
-    private static final String ROUTE_PATH = "/";
 
     private final HttpMethod httpMethod;
     private final String uri;
@@ -12,19 +10,6 @@ public class StartLine {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.httpVersion = httpVersion;
-    }
-
-    public String extractPath() {
-        if (uri.equals(ROUTE_PATH)) {
-            return uri;
-        }
-
-        String path = uri;
-        if (!path.matches(".*\\.(html|css|js|png|jpg|jpeg|gif|ico)$")) {
-            path += ".html";
-        }
-
-        return RESOURCE_PATH + path;
     }
 
     public String getUri() {

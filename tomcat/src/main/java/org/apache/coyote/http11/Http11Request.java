@@ -31,7 +31,8 @@ public class Http11Request {
         return new Http11Request(startLineWithHeaders, body);
     }
 
-    private static List<String> extractRequestHeadersWithStartLine(final BufferedReader bufferedReader) throws IOException {
+    private static List<String> extractRequestHeadersWithStartLine(final BufferedReader bufferedReader)
+            throws IOException {
         List<String> requestHeaders = new ArrayList<>();
         String requestLine;
         while ((requestLine = bufferedReader.readLine()) != null && !requestLine.isEmpty()) {
@@ -41,7 +42,8 @@ public class Http11Request {
         return requestHeaders;
     }
 
-    private static String extractRequestBody(final BufferedReader bufferedReader, final List<String> headers) throws IOException {
+    private static String extractRequestBody(final BufferedReader bufferedReader, final List<String> headers)
+            throws IOException {
         //Content-Length 헤더가 있는지 봐야함.
         final int contentLength = headers.stream()
                 .filter(header -> header.startsWith("Content-Length:"))
@@ -94,10 +96,6 @@ public class Http11Request {
         return null;
     }
 
-    public String extractPath() {
-        return startLine.extractPath();
-    }
-
     public String getUri() {
         return startLine.getUri();
     }
@@ -109,7 +107,7 @@ public class Http11Request {
     private List<Header> extractHeaders(final List<String> lines) {
         List<Header> headerList = new ArrayList<>();
 
-        for (int i = 1; i < lines.size(); i ++) {
+        for (int i = 1; i < lines.size(); i++) {
             String line = lines.get(i);
             String[] splittedLines = line.split(":", 2);
             if (splittedLines.length == 2) {

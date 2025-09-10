@@ -9,6 +9,7 @@ public class DynamicControllerMapping {
     private final Map<RequestKey, Controller> controllers = new HashMap<>();
 
     public DynamicControllerMapping() {
+        register("/", HttpMethod.GET, new RootController());
         register("/login", HttpMethod.POST, new LoginController());
         register("/login", HttpMethod.GET, new LoginController());
         register("/register", HttpMethod.POST, new RegisterController());

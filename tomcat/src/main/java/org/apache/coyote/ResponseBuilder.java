@@ -11,6 +11,10 @@ public class ResponseBuilder {
         HTML(List.of(".html", ".htm"), "text/html;charset=utf-8"),
         CSS(List.of(".css"), "text/css"),
         JAVASCRIPT(List.of(".js"), "application/javascript"),
+        GIF(List.of(".gif"), "image/gif"),
+        JPG(List.of(".jpg", ".jpeg"), "image/jpeg"),
+        PNG(List.of(".png"), "image/png"),
+        SVG(List.of(".svg"), "image/svg+xml"),
         DEFAULT(List.of(""), "text/plain");
 
         private final List<String> fileExtensions;
@@ -39,7 +43,8 @@ public class ResponseBuilder {
         }
     }
 
-    public String build(final String requestUri, final HttpStatus status, final byte[] body, final Map<String, String> headers) {
+    public byte[] build(final String requestUri, final HttpStatus status, final byte[] body,
+                        final Map<String, String> headers) {
         StringBuilder builder = new StringBuilder();
 
         builder.append("HTTP/1.1 ").append(status.getName()).append(" \r\n");
@@ -52,14 +57,19 @@ public class ResponseBuilder {
             headers.forEach((key, value) -> builder.append(key).append(": ").append(value).append(" \r\n"));
         }
         if (body == null) {
-            return builder.toString();
+            return builder.toString().getBytes();
         }
 
         builder.append("Content-Length: ").append(body.length).append(" \r\n");
         builder.append("\r\n");
-        builder.append(new String(body));
 
-        return builder.toString();
+        byte[] messageBytes = builder.toString().getBytes();
+        byte[] result = new byte[messageBytes.length + body.length];
+
+        System.arraycopy(messageBytes, 0, result, 0, messageBytes.length);
+        System.arraycopy(body, 0, result, messageBytes.length, body.length);
+
+        return result;
     }
 
     private String getContentType(final String uri) {

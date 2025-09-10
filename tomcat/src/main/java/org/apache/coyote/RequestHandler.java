@@ -22,7 +22,7 @@ public class RequestHandler {
         this.service = new Service();
     }
 
-    public String handle(final HttpRequest request) throws IOException {
+    public byte[] handle(final HttpRequest request) throws IOException {
         if (request.method().equals("GET")) {
             return handleGet(request);
         }
@@ -32,7 +32,7 @@ public class RequestHandler {
         return null;
     }
 
-    private String handleGet(final HttpRequest request) throws IOException {
+    private byte[] handleGet(final HttpRequest request) throws IOException {
         String uri = request.uri();
 
         if (uri.contains(".")) {
@@ -49,7 +49,7 @@ public class RequestHandler {
         return responseBuilder.build(null, HttpStatus.FORBIDDEN, null, null);
     }
 
-    private String handleRedirect(final HttpRequest request) throws IOException {
+    private byte[] handleRedirect(final HttpRequest request) throws IOException {
         HttpCookie cookie = new HttpCookie(request.headers().get("Cookie"));
         String sessionId = cookie.getValue("JSESSIONID");
         if (sessionId == null) {
@@ -67,7 +67,7 @@ public class RequestHandler {
         return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
     }
 
-    private String handlePost(final HttpRequest request) {
+    private byte[] handlePost(final HttpRequest request) {
         if (request.body() == null) {
             return responseBuilder.build(null, HttpStatus.BAD_REQUEST, null, null);
         }

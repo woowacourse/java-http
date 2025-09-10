@@ -1,21 +1,35 @@
 package org.apache.coyote.http11;
 
-public class HttpRequestBody {
-    private final byte[] body;
+import java.util.HashMap;
+import java.util.Map;
 
-    public HttpRequestBody(byte[] body) {
+public class HttpRequestBody {
+    private final String body;
+
+    public HttpRequestBody(String body) {
         this.body = body;
     }
 
-    public String asString() {
-        return new String(body);
+    public HttpRequestBody() {
+        this.body = "";
     }
 
-    public byte[] getBody() {
+    public String getBody() {
         return body;
     }
 
     public int getLength() {
-        return body.length;
+        return body.length();
+    }
+
+    public Map<String, String> getFormData() {
+        HashMap<String, String> formData = new HashMap<>();
+
+        String[] split = body.split("&");
+        for (String data : split) {
+            String[] keyValue = data.split("=");
+            formData.put(keyValue[0], keyValue[1]);
+        }
+        return formData;
     }
 }

@@ -1,17 +1,21 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+
 public class HttpRequest {
 
     private final HttpStartLine startLine;
-    private final HttpHeader header;
+    private final HttpRequestHeader header;
     private final HttpRequestBody body;
     private final HttpQueryParameter queryParameter;
+    private final HttpCookie cookie;
 
-    public HttpRequest(HttpStartLine startLine, HttpHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
+    public HttpRequest(HttpStartLine startLine, HttpRequestHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
         this.queryParameter = queryParameter;
+        this.cookie = header.getCookie();
     }
 
     public HttpMethod getHttpMethod() {
@@ -20,6 +24,10 @@ public class HttpRequest {
 
     public HttpUri getUri() {
         return startLine.getUri();
+    }
+
+    public boolean hasQueryParameter() {
+        return !queryParameter.isEmpty();
     }
 
     public String getResourcePath() {
@@ -32,5 +40,21 @@ public class HttpRequest {
 
     public String getQueryParameter(String name) {
         return queryParameter.getValue(name);
+    }
+
+    public HttpRequestBody getBody() {
+        return body;
+    }
+
+    public HttpRequestHeader getHeader() {
+        return  header;
+    }
+
+    public HttpCookie getCookies() {
+        return cookie;
+    }
+
+    public String getCookie(String name) {
+        return cookie.getCookie(name);
     }
 }

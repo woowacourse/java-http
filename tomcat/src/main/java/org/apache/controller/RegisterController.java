@@ -11,31 +11,32 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 
 public class RegisterController implements Controller {
 
     @Override
-    public boolean isProcessable(final String path) {
-        return path.contains("/register");
+    public boolean isProcessable(HttpRequest httpRequest) {
+        return httpRequest.pathEquals("/register");
     }
 
     @Override
-    public Map<String, Object> process(final Map<String, String> requests) throws URISyntaxException, IOException {
+    public Map<String, Object> process(HttpRequest httpRequest) throws URISyntaxException, IOException {
         Map<String, Object> response = new HashMap<>();
-        String method = requests.get("Method");
+        String method = httpRequest.getMethod();
 
         if (method.equals("POST")) {
-            response = postRegister(requests);
+            response = postRegister(httpRequest);
         }
 
         if (method.equals("GET")) {
-            response = getRegister(requests);
+            response = getRegister(httpRequest);
         }
         return response;
     }
 
-    public Map<String, Object> postRegister(final Map<String, String> requests) throws IOException, URISyntaxException {
+    public Map<String, Object> postRegister(HttpRequest httpRequest) throws IOException, URISyntaxException {
         Map<String, Object> response = new HashMap<>();
         String filePath = "/index.html";
         final ClassLoader classLoader = getClass().getClassLoader();
@@ -49,9 +50,9 @@ public class RegisterController implements Controller {
         final Path path = resourceFile.toPath();
 
         try {
-            String account = requests.get("account");
-            String password = requests.get("password");
-            String email = requests.get("email");
+            String account = httpRequest.getBodyAttribute("account");
+            String password = httpRequest.getBodyAttribute("password");
+            String email = httpRequest.getBodyAttribute("email");
 
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
@@ -59,18 +60,17 @@ public class RegisterController implements Controller {
             response.put("responseBody", new String(Files.readAllBytes(path)));
             response.put("status", HttpStatus.FOUND);
         } catch (Exception e) {
-            // TODO: 회원가입 실패 시 예외처
+            // TODO: 회원가입 실패 시 예외처리
         }
 
         return response;
     }
 
-    public Map<String, Object> getRegister(final Map<String, String> requests) throws IOException, URISyntaxException {
+    public Map<String, Object> getRegister(HttpRequest httpRequest) throws IOException, URISyntaxException {
         Map<String, Object> response = new HashMap<>();
 
-        String filePath = requests.get("Path") + ".html";
         final ClassLoader classLoader = getClass().getClassLoader();
-        final URL url = classLoader.getResource("static" + filePath);
+        final URL url = classLoader.getResource(httpRequest.getStaticFilePath());
 
         if (url == null) {
             throw new IOException("파일이 존재하지 않습니다.");

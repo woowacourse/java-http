@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.http.HttpCookie;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,23 +26,22 @@ public class LoginController implements Controller {
     SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public boolean isProcessable(final String path) {
-        return path.contains("/login");
+    public boolean isProcessable(HttpRequest httpRequest) {
+        return httpRequest.pathEquals("/login");
     }
 
     @Override
-    public Map<String, Object> process(final Map<String, String> requests) throws URISyntaxException, IOException {
+    public Map<String, Object> process(HttpRequest httpRequest) throws URISyntaxException, IOException {
 
-        return login(requests);
+        return login(httpRequest);
     }
 
-    private Map<String, Object> login(final Map<String, String> requests) throws URISyntaxException, IOException {
+    private Map<String, Object> login(HttpRequest httpRequest) throws URISyntaxException, IOException {
 
         // 로그인된 상태에서 로그인 페이지에 접근하면 index 페이지로 리다이렉트
-        if (requests.get("Method").equals("GET")) {
-            if (requests.containsKey("Cookie")) {
-                HttpCookie httpCookie = new HttpCookie();
-                httpCookie.parseCookie(requests.get("Cookie"));
+        if (httpRequest.getMethod().equals("GET")) {
+            if (httpRequest.containsCookie()) {
+                HttpCookie httpCookie = httpRequest.getHttpCookie();
 
                 String jsessionID = httpCookie.getJSessionId();
                 Session session = sessionManager.findSession(jsessionID);
@@ -54,8 +54,8 @@ public class LoginController implements Controller {
             return makeResponseBody("/login", HttpStatus.OK, null);
         }
 
-        String account = requests.get("account");
-        String password = requests.get("password");
+        String account = httpRequest.getBodyAttribute("account");
+        String password = httpRequest.getBodyAttribute("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
@@ -64,17 +64,14 @@ public class LoginController implements Controller {
             return makeResponseBody("/login", HttpStatus.UNAUTHORIZED, null);
         }
 
-        if (user.checkPassword(password)) { // 로그인 성공 시,
+        if (user.checkPassword(password)) {
             HttpCookie cookie = new HttpCookie();
 
-            // UUID를 id로 세션을 만들고
             String sessionId = UUID.randomUUID().toString();
 
-            // 유저 정보 넣고
             Session session = new Session(sessionId);
             session.setAttribute("user", user);
 
-            // 세션 매니저에 넣음
             sessionManager.add(session);
 
             cookie.setjSessionId(sessionId);

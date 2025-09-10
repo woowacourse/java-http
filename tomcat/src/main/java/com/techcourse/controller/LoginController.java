@@ -28,6 +28,7 @@ public class LoginController extends AbstractController {
         Session session = SessionManager.findSession(cookie.getValue());
         if (session != null && isExistUser(session.getUser().getAccount())) {
             response.setRedirection("/index.html");
+            return;
         }
         response.setRedirection("/login.html");
     }

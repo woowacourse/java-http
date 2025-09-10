@@ -13,13 +13,6 @@ public class HttpResponse {
     private ResponseHeaders responseHeaders;
     private ResponseBody responseBody;
 
-    public HttpResponse(final ResponseLine responseLine, final ResponseHeaders responseHeaders,
-                        final ResponseBody responseBody) {
-        this.responseLine = responseLine;
-        this.responseHeaders = responseHeaders;
-        this.responseBody = responseBody;
-    }
-
     public static HttpResponse createEmptyResponse() {
         return new HttpResponse(null, ResponseHeaders.createEmptyHeaders(), null);
     }
@@ -54,5 +47,12 @@ public class HttpResponse {
     public HttpResponse addResponseHeaders(final List<ResponseHeader> headers) {
         headers.forEach(this::addResponseHeader);
         return this;
+    }
+
+    private HttpResponse(final ResponseLine responseLine, final ResponseHeaders responseHeaders,
+                         final ResponseBody responseBody) {
+        this.responseLine = responseLine;
+        this.responseHeaders = responseHeaders;
+        this.responseBody = responseBody;
     }
 }

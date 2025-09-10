@@ -20,8 +20,8 @@ public class RegisterServlet implements HttpServlet {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         final String fileName = request.requestStartLine().path() + ".html";
-        final byte[] loginHtml = FileParser.loadStaticResourceByFileName(fileName);
-        response.setBody(loginHtml);
+        final byte[] registerHtml = FileParser.loadStaticResourceByFileName(fileName);
+        response.setBody(registerHtml);
     }
 
     @Override

@@ -63,6 +63,7 @@ public class Http11Processor implements Runnable, Processor {
                 exceptionHandlerManager.handle(request, response, e);
             }
             viewResolver.resolve(request, response);
+
             final var output = response.buildResponse();
             outputStream.write(output.getBytes());
             outputStream.flush();

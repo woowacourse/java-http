@@ -7,55 +7,27 @@ import org.apache.coyote.http11.common.Headers;
 public class HttpResponse {
 
     private ContentType contentType = ContentType.NONE;
-    private HttpStatus httpStatus = HttpStatus.OK;
+    private HttpStatus status = HttpStatus.OK;
     private Headers headers = new Headers();
-    private String responseBody = "";
-    private Cookies responseCookies = new Cookies();
+    private String body = "";
+    private Cookies cookies = new Cookies();
 
     public ContentType getContentType() {
         return contentType;
     }
 
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
-    public Headers getHeaders() {
-        return headers;
-    }
-
-    public String getResponseBody() {
-        return responseBody;
-    }
-
-    public void setResponseBody(String responseBody) {
-        this.responseBody = responseBody;
-    }
-
-    public Cookies getResponseCookies() {
-        return responseCookies;
-    }
-
     public boolean isStaticPage() {
-        return contentType.isText() && !httpStatus.is3xx();
+        return contentType.isText() && !status.is3xx();
     }
 
     public String buildResponse() {
-        int bodyLength = getBodyLength(getResponseBody());
-        return "HTTP/1.1 " + getHttpStatus().getCode() + " " + getHttpStatus().getName() + "\r\n"
+        int bodyLength = getBodyLength(getBody());
+        return "HTTP/1.1 " + getStatus().getCode() + " " + getStatus().getName() + "\r\n"
             + "Content-Type: " + getContentType().getType() + ";charset=utf-8" + "\r\n"
             + "Content-Length: " + bodyLength + "\r\n"
             + addIfNotEmpty(getHeaders().toString())
-            + addIfNotEmpty(getResponseCookies().toString())
-            + "\r\n" + getResponseBody();
+            + addIfNotEmpty(getCookies().toString())
+            + "\r\n" + getBody();
     }
 
     private String addIfNotEmpty(String value) {
@@ -70,5 +42,86 @@ public class HttpResponse {
             return 0;
         }
         return responseBody.getBytes().length;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public Cookies getCookies() {
+        return cookies;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public HttpResponse() {
+    }
+
+    private HttpResponse(ContentType contentType, HttpStatus status, Headers headers, String body, Cookies cookies) {
+        this.contentType = contentType;
+        this.status = status;
+        this.headers = headers;
+        this.body = body;
+        this.cookies = cookies;
+    }
+
+    public static class Builder {
+
+        private ContentType contentType = ContentType.NONE;
+        private HttpStatus status = HttpStatus.OK;
+        private Headers headers = new Headers();
+        private String body = "";
+        private Cookies cookies = new Cookies();
+
+        public Builder contentType(ContentType contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+
+        public Builder status(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder header(String key, String value) {
+            this.headers.put(key, value);
+            return this;
+        }
+
+        public Builder body(String body) {
+            this.body = body;
+            return this;
+        }
+
+        public Builder cookie(String key, String value) {
+            this.cookies.put(key, value);
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(contentType, status, headers, body, cookies);
+        }
     }
 }

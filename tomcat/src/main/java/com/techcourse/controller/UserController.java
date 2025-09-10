@@ -1,9 +1,8 @@
 package com.techcourse.controller;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.function.Function;
 
-import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
@@ -17,13 +16,14 @@ import com.techcourse.service.UserService;
 
 public class UserController {
 
-    private final Map<Api, BiConsumer<HttpRequest, HttpResponse>> supports = Map.of(
+    private static final String SESSION_NAME = "JSESSIONID";
+
+    private final Map<Api, Function<HttpRequest, HttpResponse>> supports = Map.of(
         new Api(HttpMethod.GET, "/login"), this::loginPage,
         new Api(HttpMethod.POST, "/login"), this::login,
         new Api(HttpMethod.GET, "/register"), this::registerPage,
         new Api(HttpMethod.POST, "/register"), this::register
     );
-
     private final UserService userService;
     private final SessionManager sessionManager;
 
@@ -32,30 +32,35 @@ public class UserController {
         this.sessionManager = sessionManager;
     }
 
-    public BiConsumer<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi) {
+    public Function<HttpRequest, HttpResponse> getHandlerMethod(Api requestApi) {
         return supports.get(requestApi);
     }
 
-    public void login(HttpRequest request, HttpResponse response) {
+    public HttpResponse login(HttpRequest request) {
         var requestBody = request.getBody();
         User user = userService.login(requestBody);
         Session session = new Session();
         session.setAttribute("user", user);
         sessionManager.add(session);
-        Cookies responseCookies = response.getResponseCookies();
-        responseCookies.put("JSESSIONID", session.getId());
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.getHeaders().put("Location", "/index.html");
+
+        return HttpResponse.builder()
+            .status(HttpStatus.FOUND)
+            .header("Location", "/index.html")
+            .cookie(SESSION_NAME, session.getId())
+            .build();
     }
 
-    public void register(HttpRequest request, HttpResponse response) {
+    public HttpResponse register(HttpRequest request) {
         userService.register(request);
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.getHeaders().put("Location", "/index.html");
+
+        return HttpResponse.builder()
+            .status(HttpStatus.FOUND)
+            .header("Location", "/index.html")
+            .build();
     }
 
-    public void loginPage(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getCookies().get("JSESSIONID");
+    public HttpResponse loginPage(HttpRequest request) {
+        String sessionId = request.getCookies().get(SESSION_NAME);
         if (sessionId == null) {
             request.setPath("/index.html");
         }
@@ -65,9 +70,11 @@ public class UserController {
         } else {
             request.setPath("/index.html");
         }
+        return new HttpResponse();
     }
 
-    public void registerPage(HttpRequest request, HttpResponse response) {
+    public HttpResponse registerPage(HttpRequest request) {
         request.setPath("/register.html");
+        return new HttpResponse();
     }
 }

@@ -47,48 +47,24 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse();
 
             try {
-                // ===================
                 Api api = request.getApi();
                 var handlerMethod = userController.getHandlerMethod(api);
                 if (handlerMethod != null) {
-                    handlerMethod.accept(request, response);
+                    response = handlerMethod.apply(request);
                 }
-
-/*
-                if (request.getPath().get().equals("/login")) {
-                    if (request.getMethod() == HttpMethod.GET) {
-                        userController.loginPage(request, response);
-                    }
-                    if (request.getMethod() == HttpMethod.POST) {
-                        userController.login(request, response);
-                    }
-                }
-
-                if (request.getPath().get().equals("/register")) {
-                    if (request.getMethod() == HttpMethod.GET) {
-                        userController.registerPage(request, response);
-                    }
-                    if (request.getMethod() == HttpMethod.POST) {
-                        userController.register(request, response);
-                    }
-                }
-*/
-                response.setContentType(ContentType.fromPath(request.getPath()));
-                // ===================
             } catch (UnauthorizedException e) {
                 request.setPath("/401.html");
-                response.setContentType(ContentType.HTML);
-                response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+                response.setStatus(HttpStatus.UNAUTHORIZED);
                 response.getHeaders().clear();
             } catch (IllegalArgumentException e) {
                 request.setPath("/404.html");
-                response.setContentType(ContentType.HTML);
-                response.setHttpStatus(HttpStatus.NOT_FOUND);
+                response.setStatus(HttpStatus.NOT_FOUND);
                 response.getHeaders().clear();
             }
 
+            response.setContentType(ContentType.fromPath(request.getPath()));
             if (response.isStaticPage()) {
-                response.setResponseBody(getStaticPage(request.getPath().get()));
+                response.setBody(getStaticPage(request.getPath().get()));
             }
             final var output = response.buildResponse();
             outputStream.write(output.getBytes());

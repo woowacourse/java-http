@@ -6,7 +6,8 @@ public enum ContentType {
     HTML("text/html;charset=utf-8", ".html"),
     CSS("text/css;charset=utf-8", ".css"),
     JS("application/javascript;charset=utf-8", ".js"),
-    PLAIN("text/plain;charset=utf-8", null);
+    PLAIN("text/plain;charset=utf-8", null),
+    SVG("image/svg+xml", ".svg");
 
     private final String mimeType;
     private final String extension;
@@ -23,10 +24,16 @@ public enum ContentType {
     public static String fromPath(final String path) {
         final String extension = getExtension(path);
         return Arrays.stream(values())
-                .filter(type -> type.extension.equals(extension))
+                .filter(type -> type.extension != null && type.extension.equals(extension))
                 .findFirst()
                 .orElse(PLAIN)
                 .mimeType;
+    }
+
+    public static boolean supports(final String path) {
+        final String extension = getExtension(path);
+        return Arrays.stream(values())
+                .anyMatch(type -> type.extension != null && type.extension.equals(extension));
     }
 
     private static String getExtension(final String path) {

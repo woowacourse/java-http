@@ -20,7 +20,7 @@ public class StaticResourceHandler implements Handler {
     @Override
     public boolean canHandle(final HttpRequest request) {
         final String path = request.getPath();
-        return path.equals(DEFAULT_PATH) || path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js");
+        return path.equals(DEFAULT_PATH) || ContentType.supports(path);
     }
 
     @Override

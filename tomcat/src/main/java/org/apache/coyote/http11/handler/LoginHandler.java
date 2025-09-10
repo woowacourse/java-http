@@ -65,7 +65,7 @@ public class LoginHandler extends HttpRequestHandler {
         Map<String, String> body = parserBody(request);
         String account = body.get("account");
         String password = body.get("password");
-        if (account == null | password == null) {
+        if (account == null || password == null) {
             Resource responseBody = getResource("/login.html");
             MimeType mimeType = MimeType.fromResource(responseBody);
             return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());

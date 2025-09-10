@@ -38,45 +38,62 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(input);
             HttpResponse response = new HttpResponse(out);
 
-            if ("/login".equals(request.getPath()) && request.isParams()) {
-                String account = request.getParams().get("account");
-                String password = request.getParams().get("password");
+            processRequest(request, response);
 
-                if (account == null || password == null) {
-                    response.sendError(HttpStatus.BAD_REQUEST);
-                    return;
-                }
-
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-                if (optionalUser.isEmpty()) {
-                    response.sendError(HttpStatus.UNAUTHORIZED);
-                    return;
-                }
-
-                User user = optionalUser.get();
-                if (!user.checkPassword(password)) {
-                    response.sendError(HttpStatus.UNAUTHORIZED);
-                    return;
-                }
-
-                log.info(user.toString());
-                response.sendRedirect("/index");
-                return;
-            }
-
-            if (checkStaticFile(request.getPath(), response)) {
-                return;
-            }
-
-            response.sendError(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            try (HttpResponse response = new HttpResponse(new BufferedOutputStream(connection.getOutputStream()))) {
-                log.error(e.getMessage());
-                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
-            } catch (Exception exception) {
-                log.error(exception.getMessage());
-            }
+            handleError(e);
         }
+    }
+
+    private void processRequest(HttpRequest request, HttpResponse response) throws IOException {
+        if (!"/login".equals(request.getPath())) {
+            handleStaticFileRequest(request.getPath(), response);
+            return;
+        }
+
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            handleStaticFileRequest("/login.html", response);
+            return;
+        }
+
+        handleLoginRequest(request, response);
+    }
+
+    private void handleLoginRequest(HttpRequest request, HttpResponse response) throws IOException {
+        if (!request.isParams()) {
+            response.sendError(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
+        String account = request.getParams().get("account");
+        String password = request.getParams().get("password");
+
+        if (account == null || password == null) {
+            response.sendError(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isEmpty()) {
+            response.sendError(HttpStatus.UNAUTHORIZED);
+            return;
+        }
+
+        User user = optionalUser.get();
+        if (!user.checkPassword(password)) {
+            response.sendError(HttpStatus.UNAUTHORIZED);
+            return;
+        }
+
+        log.info(user.toString());
+        response.sendRedirect("/index");
+    }
+
+    private void handleStaticFileRequest(String path, HttpResponse response) throws IOException {
+        if (checkStaticFile(path, response)) {
+            return;
+        }
+        response.sendError(HttpStatus.NOT_FOUND);
     }
 
     private boolean checkStaticFile(String path, HttpResponse response) throws IOException {
@@ -89,11 +106,12 @@ public class Http11Processor implements Runnable, Processor {
             in = getClass().getClassLoader().getResourceAsStream("static" + path + ".html");
         }
 
-        if (in != null) {
-            serveStaticFile(response, in, path);
-            return true;
+        if (in == null) {
+            return false;
         }
-        return false;
+
+        serveStaticFile(response, in, path);
+        return true;
     }
 
     private void serveStaticFile(HttpResponse response, InputStream inputStream, String path) throws IOException {
@@ -107,6 +125,15 @@ public class Http11Processor implements Runnable, Processor {
             byte[] body = inputStream.readAllBytes();
 
             response.send(HttpStatus.OK, contentType, body);
+        }
+    }
+
+    private void handleError(Exception e) {
+        try (HttpResponse response = new HttpResponse(new BufferedOutputStream(connection.getOutputStream()))) {
+            log.error(e.getMessage());
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
         }
     }
 }

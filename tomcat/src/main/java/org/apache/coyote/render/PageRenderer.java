@@ -1,5 +1,7 @@
 package org.apache.coyote.render;
 
+import java.util.Map;
+import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.util.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,30 +15,29 @@ public class PageRenderer{
     private static final String STATIC_FILE_ROOT = "static";
     private static final Logger log = LoggerFactory.getLogger(PageRenderer.class);
 
-    public String handle(final String method, final String path) {
+    public String handle(final String method, final String path, HttpCookie httpCookie) {
         if(!method.equals("GET")){
-            throw new IllegalArgumentException("정적 응답 생성중 에러 발생");
+            throw new IllegalArgumentException("정적 응답 생성중 부적절한 Method가 들어왔습니다.");
         }
-        return createStaticFileResponse(path);
+        return createStaticFileResponse(HttpStatus.OK.getStatusCode(), path);
     }
 
-    public static String createStaticFileResponse(String path) {
+    public static String createStaticFileResponse(int statusCode,String path) {
         path = path.trim();
         path = PageEndpoint.findPageByPath(path);
-        String content = "";
-        String contentType = null;
+        String content;
+        String contentType;
         try {
             content = readStaticFile(path);
             contentType = ContentType.findContentType(path);
-            return HttpResponseBuilder.getStaticHttpResponse(200, contentType, content);
+            return HttpResponseBuilder.getStaticHttpResponse(statusCode, contentType, content);
         } catch (IOException e) {
-            return HttpResponseBuilder.getErrorHttpResponse(404);
+            return HttpResponseBuilder.getErrorHttpResponse(statusCode);
         }
     }
 
     private static String readStaticFile(final String path) throws IOException {
         String fullPath = STATIC_FILE_ROOT + path;
-
         try (InputStream inputStream = PageRenderer.class.getClassLoader().getResourceAsStream(fullPath)) {
             if (inputStream == null) {
                 throw new IOException("파일을 찾을 수 없습니다: " + fullPath);
@@ -45,4 +46,7 @@ public class PageRenderer{
         }
     }
 
+    public static String sendRedirect(int statusCode, Map<String,String> headers) {
+        return HttpResponseBuilder.getRedirectResponseString(statusCode, headers);
+    }
 }

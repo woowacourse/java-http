@@ -1,43 +1,40 @@
 package org.apache.coyote.router;
 
-import org.apache.coyote.render.PageRenderer;
-import org.apache.coyote.render.UserLoginProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
+import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.handler.UserLoginHandler;
+import org.apache.coyote.handler.UserRegisterHandler;
+import org.apache.coyote.render.PageRenderer;
 
 public class RequestRouter {
 
-    private static final String LOGIN_REQUEST = "loginRequest";
-    private static final String STATIC_REQUEST =  "staticRequest";
+    private static final String LOGIN_REQUEST = "/login";
+    private static final String REGISTER_REQUEST =  "/register";
 
-    private static final Logger log = LoggerFactory.getLogger(RequestRouter.class);
-    private final UserLoginProcessor userLoginProcessor;
+    private final UserLoginHandler userLoginHandler;
+    private final UserRegisterHandler userRegisterHandler;
     private final PageRenderer pageRenderer;
 
-    public RequestRouter() {
-        this.userLoginProcessor = new UserLoginProcessor();
-        this.pageRenderer = new PageRenderer();
+    public RequestRouter(
+            final UserLoginHandler userLoginHandler,
+            final UserRegisterHandler userRegisterHandler,
+            final PageRenderer pageRenderer
+    ) {
+        this.userLoginHandler = userLoginHandler;
+        this.userRegisterHandler = userRegisterHandler;
+        this.pageRenderer = pageRenderer;
     }
 
-    public String handleRoute(final String method,final  String path, final Map<String, String> queryParams) {
-        final String requestType = determineRequestType(path,queryParams);
-
-        switch (requestType) {
-            case LOGIN_REQUEST:
-                return userLoginProcessor.handle(method, path, queryParams);
-            default:
-                return pageRenderer.handle(method, path);
-        }
-    }
-
-    private String determineRequestType(final String path, final Map<String, String> queryParams) {
-        if(queryParams != null){
-            if (path.startsWith("/login")) {
-                return LOGIN_REQUEST;
-            }
-        }
-        return STATIC_REQUEST;
+    public String handleRoute(
+            final String method,
+            final  String path,
+            final Map<String, String> formData,
+            final HttpCookie httpCookie
+    ) {
+        return switch (path) {
+            case LOGIN_REQUEST -> userLoginHandler.handle(method, path, formData, httpCookie);
+            case REGISTER_REQUEST -> userRegisterHandler.handle(method, path, formData, httpCookie);
+            default -> pageRenderer.handle(method, path, httpCookie);
+        };
     }
 }

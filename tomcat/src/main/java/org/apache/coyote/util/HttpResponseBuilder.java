@@ -1,12 +1,11 @@
 package org.apache.coyote.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.render.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponseBuilder {
 
@@ -15,11 +14,26 @@ public class HttpResponseBuilder {
 
     public static String getStaticHttpResponse(final int statusCode, final String contentType, final String content) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + getStatusCodeStatus(statusCode) + " ",
+                "HTTP/1.1 " + statusCode + " " + HttpStatus.getMessageByStatusCode(statusCode) + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + content.getBytes().length + " ",
                 "",
-                content);
+                content
+        );
+    }
+
+    public static String getRedirectResponseString(int statusCode, Map<String, String> headers) {
+        StringBuilder response = new StringBuilder();
+        response.append("HTTP/1.1 ").append(statusCode)
+                .append(" ").append(HttpStatus.getMessageByStatusCode(statusCode))
+                .append("\r\n");
+
+        if (headers != null) {
+            headers.forEach((key, value) -> response.append(key).append(": ").append(value).append("\r\n"));
+        }
+
+        response.append("Content-Length: 0\r\n\r\n");
+        return response.toString();
     }
 
     public static String getErrorHttpResponse(final int statusCode) {
@@ -41,11 +55,5 @@ public class HttpResponseBuilder {
         }
 
         return new String(inputStream.readAllBytes());
-    }
-
-    private static String getStatusCodeStatus(int statusCode) {
-        Map<Integer, String> statusTexts = new HashMap<>();
-        statusTexts.put(200, "OK");
-        return statusTexts.getOrDefault(statusCode,"Unknown");
     }
 }

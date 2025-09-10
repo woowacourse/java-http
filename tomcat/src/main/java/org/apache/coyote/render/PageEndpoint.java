@@ -2,7 +2,8 @@ package org.apache.coyote.render;
 
 public enum PageEndpoint {
     BASIC("/","/index.html"),
-    LOGIN("/login","/login.html");
+    LOGIN("/login","/login.html"),
+    REGISTER("/register","/register.html");
 
     private final String endPoint;
     private final String page;

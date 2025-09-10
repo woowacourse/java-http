@@ -19,14 +19,7 @@ public class HttpRequest {
     }
 
     public HttpSession getSession(SessionManager sessionManager, boolean create) {
-        String jSessionId = null;
-
-        if (header.hasCookie()) {
-            RequestCookie cookie = header.getCookie();
-            if (cookie.contains(JAVA_SESSION_ID_KEY)) {
-                jSessionId = cookie.findByKey(JAVA_SESSION_ID_KEY);
-            }
-        }
+        String jSessionId = extractSessionIdFromCookie();
 
         if (jSessionId != null) {
             HttpSession existingSession = sessionManager.findSession(jSessionId);
@@ -39,6 +32,16 @@ public class HttpRequest {
             return sessionManager.createSession();
         }
 
+        return null;
+    }
+
+    private String extractSessionIdFromCookie() {
+        if (header.hasCookie()) {
+            RequestCookie cookie = header.getCookie();
+            if (cookie.contains(JAVA_SESSION_ID_KEY)) {
+                return cookie.findByKey(JAVA_SESSION_ID_KEY);
+            }
+        }
         return null;
     }
 

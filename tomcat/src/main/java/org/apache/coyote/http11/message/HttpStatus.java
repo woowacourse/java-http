@@ -7,20 +7,19 @@ public enum HttpStatus {
     UNAUTHORIZED("UNAUTHORIZED", 401),
     ;
 
-    // TODO: Status - StatusCode 네이밍 정리하기
-    private final String status;
-    private final int statusCode;
+    private final String reasonPhrase;
+    private final int code;
 
-    HttpStatus(String status, int statusCode) {
-        this.status = status;
-        this.statusCode = statusCode;
+    HttpStatus(String reasonPhrase, int code) {
+        this.reasonPhrase = reasonPhrase;
+        this.code = code;
     }
 
     public String getStatus() {
-        return status;
+        return reasonPhrase;
     }
 
     public int getStatusCode() {
-        return statusCode;
+        return code;
     }
 }

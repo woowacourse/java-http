@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.core.ApplicationProcessor;
-import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;
 import org.apache.coyote.util.response.HttpContentTypeResolver;
@@ -49,16 +49,18 @@ public class Http11Processor implements Runnable, Processor {
             }
             respond(HttpResponse.notFound(), outputStream);
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
             handleError(outputStream, e);
         }
     }
 
     private void handleError(OutputStream outputStream, Exception e) {
+        if (outputStream == null) {
+            return;
+        }
         try {
             respond(HttpResponse.internalServerError(), outputStream);
         } catch (IOException ex) {
-            log.error("Error response failed: {}", ex.getMessage(), ex);
+            log.error("응답 실패! : {}", ex.getMessage(), ex);
         }
     }
 

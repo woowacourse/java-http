@@ -36,17 +36,19 @@ public class Http11Processor implements Runnable, Processor {
             final var httpRequest = HttpRequestParser.parse(inputStream);
             final var httpResponse = new HttpResponse();
 
-            final var cookies = httpRequest.getCookies();
-            final var jsessionid = cookies.getCookie("JSESSIONID");
+            final Cookie cookie = httpRequest.getCookies();
+            final String jsessionid = cookie.getCookie("JSESSIONID");
 
-            Session session = null;
+            Session session;
             if (jsessionid != null) {
                 session = SessionManager.findSession(jsessionid).orElse(null);
+            } else {
+                session = null;
             }
 
             if (session == null) {
                 session = SessionManager.createSession();
-                httpResponse.setCookie("JSESSIONID=" + session.getId() + "; Path=/");
+                httpResponse.addCookie(Cookie.ofJSessionId(session.getId()));
             }
             httpRequest.setSession(session);
 

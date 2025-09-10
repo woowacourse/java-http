@@ -35,7 +35,7 @@ public class HttpResponse {
         return sb.toString().getBytes();
     }
 
-    public void setCookie(String setCookie) {
+    public void addCookie(String setCookie) {
         this.setCookie = setCookie;
     }
 

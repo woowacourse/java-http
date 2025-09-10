@@ -88,7 +88,7 @@ public class ResourceHandler {
 
             final var session = request.getSession();
             session.setAttribute("user", user.get());
-
+            response.addCookie(Cookie.ofJSessionId(session.getId()));
             response.setStatusCode(StatusCode.FOUND);
             response.sendRedirect("/index.html");
             return;

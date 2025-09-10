@@ -9,14 +9,12 @@ public class HttpRequest {
     private final String resourcePath;
     private final QueryParameter queryParameter;
     private final Map<String, String> headers;
-    private final String body;
     private Session session;
 
-    public HttpRequest(String resourcePath, QueryParameter queryParameter, Map<String, String> headers, String body) {
+    public HttpRequest(String resourcePath, QueryParameter queryParameter, Map<String, String> headers) {
         this.resourcePath = resourcePath;
         this.queryParameter = queryParameter;
         this.headers = headers;
-        this.body = body;
     }
 
     public Session getSession() {

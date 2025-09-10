@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 public class Cookie {
 
-    private static final String COOKIE_DELIMITER = "; =";
     private static final String KEY_VALUE_DELIMITER = "=";
 
     private final Map<String, String> cookie;
@@ -15,11 +14,15 @@ public class Cookie {
         this.cookie = parse(cookieHeader);
     }
 
+    public static String ofJSessionId(String sessionId) {
+        return "JSESSIONID=" + sessionId + "; Path=/";
+    }
+
     private Map<String, String> parse(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isBlank()) {
             return Map.of();
         }
-        return Stream.of(cookieHeader.split(COOKIE_DELIMITER))
+        return Stream.of(cookieHeader.split(";"))
                 .map(String::trim)
                 .map(cookie -> cookie.split(KEY_VALUE_DELIMITER, 2))
                 .filter(parts -> parts.length == 2)
@@ -27,10 +30,6 @@ public class Cookie {
                         parts -> parts[0].trim(),
                         parts -> parts[1].trim()
                 ));
-    }
-
-    public boolean hasCookie(String name) {
-        return cookie.containsKey(name);
     }
 
     public String getCookie(String name) {

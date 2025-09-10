@@ -33,7 +33,7 @@ public class HttpRequestParser {
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         String line;
-        while((line = bufferedReader.readLine()) != null && !line.isBlank()) {
+        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
             int headerDelimiterIndex = line.indexOf(":");
 
             if (headerDelimiterIndex != -1) {
@@ -46,7 +46,7 @@ public class HttpRequestParser {
     }
 
     private static String getBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
-        if(headers.containsKey("Content-Length")) {
+        if (headers.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
 
             char[] bodyChars = new char[contentLength];
@@ -77,10 +77,10 @@ public class HttpRequestParser {
             queryParameter = new QueryParameter(requestUri.substring(delimiterIndex + 1));
         }
 
-        if(body != null && Objects.equals(headers.get("Content-Type"), "application/x-www-form-urlencoded")) {
+        if (body != null && Objects.equals(headers.get("Content-Type"), "application/x-www-form-urlencoded")) {
             queryParameter.addParameterFromBody(body);
         }
 
-        return new HttpRequest(resourcePath, queryParameter, headers, body);
+        return new HttpRequest(resourcePath, queryParameter, headers);
     }
 }

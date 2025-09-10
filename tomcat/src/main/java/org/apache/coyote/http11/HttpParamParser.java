@@ -20,7 +20,7 @@ public class HttpParamParser {
             if (keyValue.length == 2 && keyValue[1] != null) {
                 value = keyValue[1].trim();
             }
-            if (!key.isEmpty() || !value.isEmpty()) {
+            if (!key.isEmpty()) {
                 map.put(key, value);
             }
         }

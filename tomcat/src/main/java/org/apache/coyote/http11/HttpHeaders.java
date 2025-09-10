@@ -35,7 +35,7 @@ public class HttpHeaders {
         }
         String key = line.substring(0, colonIndex).trim();
         String value = line.substring(colonIndex + 1).trim();
-        if (!key.isEmpty() && !value.isEmpty()) {
+        if (!key.isEmpty()) {
             headers.put(key, value);
         }
     }

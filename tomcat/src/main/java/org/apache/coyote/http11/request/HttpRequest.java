@@ -25,17 +25,17 @@ public class HttpRequest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         MappingLine mappingLine = new MappingLine(bufferedReader);
-        Map<String, String> headers = getHeaders(bufferedReader);
-        byte[] body = getBody(headers, bufferedReader);
+        Map<String, String> headers = parsedHeaders(bufferedReader);
+        byte[] body = parsedBody(headers, bufferedReader);
 
         return new HttpRequest(mappingLine, headers, body);
     }
 
-    private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+    private static Map<String, String> parsedHeaders(BufferedReader bufferedReader) throws IOException {
         String line;
         Map<String, String> headers = new LinkedHashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            int idx = line.indexOf(':'); // split 2
+            int idx = line.indexOf(':');
             if (idx <= 0) {
                 throw new IllegalArgumentException();
             }
@@ -46,18 +46,38 @@ public class HttpRequest {
         return headers;
     }
 
-    private static byte[] getBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
+    private static byte[] parsedBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
         String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
             return new byte[0];
         }
 
         int length = Integer.parseInt(contentLength);
-        return bufferedReader.readLine().getBytes(String.valueOf(length));
+        if (length <= 0) {
+            return new byte[0];
+        }
+
+        char[] cbuf = new char[length];
+        int off = 0;
+        while (off < length) {
+            int n = bufferedReader.read(cbuf, off, length - off);
+
+            if (n == -1) {
+                break;
+            }
+            off += n;
+        }
+
+        String bodyString = new String(cbuf, 0, off);
+        return bodyString.getBytes();
     }
 
     public MappingLine getMappingLine() {
         return mappingLine;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
     public byte[] toBytes() {
@@ -82,5 +102,9 @@ public class HttpRequest {
         System.arraycopy(body, 0, result, headerBytes.length, body.length);
 
         return result;
+    }
+
+    public byte[] parsedBody() {
+        return body;
     }
 }

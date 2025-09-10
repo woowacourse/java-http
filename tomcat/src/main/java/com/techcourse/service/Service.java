@@ -1,4 +1,4 @@
-package com.techcourse;
+package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -15,5 +15,13 @@ public class Service {
         }
 
         throw new IllegalArgumentException("invalid password");
+    }
+
+    public void create(Map<String, String> signInRequest) {
+        String account = signInRequest.get("account");
+        String password = signInRequest.get("password");
+        String email = signInRequest.get("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
     }
 }

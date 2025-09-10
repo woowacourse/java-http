@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.general.Cookies;
-import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
+import org.apache.coyote.http11.handler.controllerResponse.ApplicationResponse;
 import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
 import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
 import org.apache.coyote.http11.httpRequest.CookieParser;
@@ -25,7 +25,7 @@ public class UserService {
         this.sessionManager = sessionManager;
     }
 
-    public ControllerResponse loginPage(HttpRequest httpRequest) {
+    public ApplicationResponse loginPage(HttpRequest httpRequest) {
         String sessionId = findSessionId(httpRequest);
         if (sessionId == null || !isValidSession(sessionId)) {
             JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
@@ -51,7 +51,7 @@ public class UserService {
         return user != null;
     }
 
-    public ControllerResponse login(HttpRequest httpRequest) {
+    public ApplicationResponse login(HttpRequest httpRequest) {
         String account = httpRequest.getBodyValueOf("account");
         String password = httpRequest.getBodyValueOf("password");
         if (account != null && password != null) {
@@ -60,7 +60,7 @@ public class UserService {
         throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
-    private ControllerResponse handleLoginResult(String account, String password) {
+    private ApplicationResponse handleLoginResult(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
             .orElse(null);
         if (user == null || !user.isPasswordValid(password)) {
@@ -81,11 +81,11 @@ public class UserService {
         return session;
     }
 
-    public ControllerResponse registerPage() {
+    public ApplicationResponse registerPage() {
         return new StaticFileResponse(HttpStatus.OK, "register");
     }
 
-    public ControllerResponse register(HttpRequest httpRequest) {
+    public ApplicationResponse register(HttpRequest httpRequest) {
         String account = httpRequest.getBodyValueOf("account");
         String email = httpRequest.getBodyValueOf("email");
         String password = httpRequest.getBodyValueOf("password");

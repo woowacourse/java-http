@@ -14,7 +14,7 @@ public class AuthService {
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     public static final String SESSION_KEY_USER = "user";
 
-    public String authenticate(Map<String, String> authInfo, HttpCookie httpCookie) {
+    public String login(Map<String, String> authInfo, HttpCookie httpCookie) {
         User user = InMemoryUserRepository.findByAccount(authInfo.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 정보입니다."));
         if (!user.checkPassword(authInfo.get("password"))) {
@@ -28,7 +28,13 @@ public class AuthService {
     }
 
     public String register(Map<String, String> registerInfo, HttpCookie httpCookie) {
-        User user = new User(registerInfo.get("account"), registerInfo.get("password"), registerInfo.get("email"));
+        String account = registerInfo.get("account");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+        }
+        
+        User user = new User(account, registerInfo.get("password"), registerInfo.get("email"));
         InMemoryUserRepository.save(user);
         
         String sessionId = getOrCreateSession(httpCookie);

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
@@ -42,13 +41,17 @@ public class AuthController extends AbstractController {
     }
     
     private HttpResponse handleRegister(Map<String, String> formData, HttpCookie httpCookie) throws IOException {
-        String sessionId = authService.register(formData, httpCookie);
-        return handleAuthSuccess(sessionId);
+        try {
+            String sessionId = authService.register(formData, httpCookie);
+            return handleAuthSuccess(sessionId);
+        } catch (IllegalArgumentException e) {
+            return send401Page();
+        }
     }
     
     private HttpResponse handleLogin(Map<String, String> formData, HttpCookie httpCookie) throws IOException, URISyntaxException {
         try {
-            String sessionId = authService.authenticate(formData, httpCookie);
+            String sessionId = authService.login(formData, httpCookie);
             return handleAuthSuccess(sessionId);
         } catch (IllegalArgumentException e) {
             return send401Page();
@@ -72,7 +75,7 @@ public class AuthController extends AbstractController {
         try (InputStream inputStream = AuthController.class.getClassLoader().getResourceAsStream("static/401.html")) {
             byte[] responseBody = inputStream.readAllBytes();
             HttpHeaders headers = HttpHeaders.html()
-                .add("Content-Length", String.valueOf(responseBody.length));
+                    .add("Content-Length", String.valueOf(responseBody.length));
             
             return new HttpResponse(
                     "HTTP/1.1",
@@ -91,9 +94,8 @@ public class AuthController extends AbstractController {
         if (authService.isLoggedIn(httpCookie)) {
             return buildRedirectResponse(INDEX_HTML);
         } else {
-            // 로그인하지 않은 사용자는 StaticResourceController를 통해 페이지를 보여줌
             String requestLine = "GET " + pagePath + " HTTP/1.1";
-            HttpRequest request = HttpRequest.from(requestLine, new HashMap<>(), "");
+            HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), "");
             StaticResourceController staticController = new StaticResourceController();
             return staticController.service(request);
         }

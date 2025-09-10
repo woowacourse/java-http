@@ -114,13 +114,19 @@ class IOStreamTest {
         @Test
         void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
             final OutputStream outputStream = mock(OutputStream.class);
-
+//            outputStream = mock(OutputStream.class);
             /**
              * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
+             * 근데, final이 붙여야 닫힘! final을 붙이지 않으면 자동으로 close가 발생하지 않음.
+             * 또는, 변수에 대한 재할당이 없는 경우에 close가 발생함 (effectively final)
+             * 재할당이 있으면 컴파일 시점에 컴파일 에러가 발생함.
              */
-            outputStream.close();
+//            outputStream.close();
+            try (outputStream) {
+
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }

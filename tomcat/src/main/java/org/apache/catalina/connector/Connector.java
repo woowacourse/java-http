@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.web.FrontController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Connector implements Runnable {
-
+    private static final FrontController frontController = new FrontController();
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
@@ -68,7 +69,7 @@ public class Connector implements Runnable {
             return;
         }
 
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, frontController);
         new Thread(processor).start();
     }
 

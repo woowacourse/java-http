@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.util.Cookie;
@@ -14,42 +15,17 @@ public class HttpRequestParser {
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String[] requestLineParts = readRequestLine(br);
-        if (requestLineParts == null) {
+        String requestLineString = br.readLine();
+        if (requestLineString == null || requestLineString.isEmpty()) {
             return null;
         }
 
-        String method = requestLineParts[0];
-        String path = parsePath(requestLineParts[1]);
-        Map<String, String> queries = parseUrlQueries(requestLineParts[1]);
-        String version = requestLineParts[2];
-
+        RequestLine requestLine = new RequestLine(requestLineString);
         Map<String, String> headers = parseHeaders(br);
-        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
-        String cookieHeader = headers.get("cookie");
+        Map<String, String> body = parseBody(br, headers);
+        Cookie cookie = Cookie.parse(headers.get("cookie"));
 
-        Map<String, String> body = new HashMap<>();
-        if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
-            char[] bodyChars = new char[contentLength];
-            br.read(bodyChars, 0, contentLength);
-            String bodyString = new String(bodyChars);
-            body.putAll(parseBodyQueries(bodyString));
-        }
-
-        Cookie cookie = Cookie.parse(cookieHeader);
-        return new HttpRequest(method, path, version, headers, queries, body, cookie);
-    }
-
-    private static String[] readRequestLine(BufferedReader br) throws IOException {
-        String line = br.readLine();
-        if (line == null || line.isEmpty()) {
-            return null;
-        }
-        String[] firstLine = line.split(" ", 3);
-        if (firstLine.length != 3) {
-            return null;
-        }
-        return firstLine;
+        return new HttpRequest(requestLine, headers, body, cookie);
     }
 
     private static Map<String, String> parseHeaders(final BufferedReader br) throws IOException {
@@ -66,43 +42,33 @@ public class HttpRequestParser {
         return headers;
     }
 
-    private static String parsePath(String fullPath) {
-        int queryStart = fullPath.indexOf('?');
-        if (queryStart != -1) {
-            return fullPath.substring(0, queryStart);
+    private static Map<String, String> parseBody(BufferedReader br, Map<String, String> headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+        if (contentLength == 0) {
+            return new HashMap<>();
         }
-        return fullPath;
+        char[] bodyChars = new char[contentLength];
+        br.read(bodyChars, 0, contentLength);
+        String bodyString = new String(bodyChars);
+        return parseQueryString(bodyString);
     }
 
-    private static Map<String, String> parseUrlQueries(String fullPath) {
-        int queryStart = fullPath.indexOf('?');
-        if (queryStart != -1 && queryStart < fullPath.length() - 1) {
-            return parseQueryString(fullPath.substring(queryStart + 1));
+    private static Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> queryParams = new HashMap<>();
+        if (queryString == null || queryString.isBlank()) {
+            return queryParams;
         }
-        return new HashMap<>();
+        String[] pairs = queryString.split("&");
+        return Arrays.stream(pairs)
+                .map(pair -> pair.split("=", 2))
+                .collect(HashMap::new, (map, pair) -> {
+                    String key = urlDecode(pair[0]);
+                    String value = pair.length > 1 ? urlDecode(pair[1]) : "";
+                    map.put(key, value);
+                }, HashMap::putAll);
     }
 
-    private static Map<String, String> parseBodyQueries(String query) {
-        return parseQueryString(query);
-    }
-
-    private static Map<String, String> parseQueryString(String query) {
-        Map<String, String> queryMap = new HashMap<>();
-        if (query == null || query.isBlank()) {
-            return queryMap;
-        }
-        for (String pair : query.split("&")) {
-            int eqIdx = pair.indexOf("=");
-            String key, value;
-            if (eqIdx > -1) {
-                key = URLDecoder.decode(pair.substring(0, eqIdx), StandardCharsets.UTF_8);
-                value = URLDecoder.decode(pair.substring(eqIdx + 1), StandardCharsets.UTF_8);
-            } else {
-                key = URLDecoder.decode(pair, StandardCharsets.UTF_8);
-                value = "";
-            }
-            queryMap.put(key, value);
-        }
-        return queryMap;
+    private static String urlDecode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

@@ -9,42 +9,28 @@ import org.apache.coyote.util.Cookie;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
-    private final String version;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
-    private final Map<String, String> queries;
-    private final Cookie cookie;
     private final Map<String, String> body;
+    private final Cookie cookie;
 
-    public HttpRequest(
-            String method,
-            String path,
-            String version,
-            Map<String, String> headers,
-            Map<String, String> queries,
-            Map<String, String> body,
-            Cookie cookie
-    ) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
+    public HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> body, Cookie cookie) {
+        this.requestLine = requestLine;
         this.headers = headers;
-        this.queries = queries;
         this.body = body;
         this.cookie = cookie;
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public Optional<String> getQueryValue(String key) {
-        return Optional.ofNullable(queries.get(key));
+        return Optional.ofNullable(requestLine.getQueryParams().get(key));
     }
 
     public Map<String, String> getBody() {

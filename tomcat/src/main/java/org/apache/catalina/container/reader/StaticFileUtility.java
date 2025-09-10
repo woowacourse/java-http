@@ -55,7 +55,7 @@ public class StaticFileUtility {
     private static void validateEmptyFile(String fileUri) {
         ClassLoader classLoader = StaticFileUtility.class.getClassLoader();
         URL resourceUrl = classLoader.getResource(BASE_URI + fileUri);
-        if (resourceUrl != null) {
+        if (resourceUrl == null) {
             throw new FileReadException("존재하지 않는 파일입니다.");
         }
     }

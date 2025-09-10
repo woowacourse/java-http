@@ -48,8 +48,8 @@ public class Http11OutputBuffer {
 
     private void serializeStatusLine(StatusLine statusLine, StringBuilder responseBuilder) {
         responseBuilder.append(
-                String.format("%s %d %s ", statusLine.httpVersion(), statusLine.statusCode().getStatusCode(),
-                        statusLine.statusCode().getStatus()));
+                String.format("%s %d %s ", statusLine.httpVersion(), statusLine.status().getStatusCode(),
+                        statusLine.status().getStatus()));
         responseBuilder.append("\r\n");
     }
 

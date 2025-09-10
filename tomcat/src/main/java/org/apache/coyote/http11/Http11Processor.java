@@ -75,8 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (path.equals("/")) {
-                StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest.getPath(),
-                        httpRequest.getHttpVersion());
+                StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest);
 
                 HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
                 httpResponseHeader.add("Content-Type",
@@ -106,14 +105,12 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getPathOfResource(uri);
         String responseBody = readFile(resource);
 
-        StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest.getPath(), httpRequest.getHttpVersion());
+        StatusLine statusLine = new StatusLine(HttpStatus.OK, httpRequest);
 
         HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
         httpResponseHeader.add("Content-Type",
                 StaticResourceExtension.findMimeTypeByUrl(httpRequest.getPath()) + ";charset=utf-8");
         httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-//        httpResponseHeader.add("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-        // TODO: charset 관련 처리
 
         return new HttpResponse(statusLine, httpResponseHeader, responseBody);
     }
@@ -157,16 +154,14 @@ public class Http11Processor implements Runnable, Processor {
             httpResponseHeader.add("Location", "index.html");
             httpResponseHeader.addCookie(responseCookie);
 
-            StatusLine statusLine = new StatusLine(HttpStatus.FOUND, httpRequest.getPath(),
-                    httpRequest.getHttpVersion());
+            StatusLine statusLine = new StatusLine(HttpStatus.FOUND, httpRequest);
 
             return new HttpResponse(statusLine, httpResponseHeader, null);
         }
 
         httpResponseHeader.add("Location", "401.html");
 
-        StatusLine statusLine = new StatusLine(HttpStatus.UNAUTHORIZED, httpRequest.getPath(),
-                httpRequest.getHttpVersion());
+        StatusLine statusLine = new StatusLine(HttpStatus.UNAUTHORIZED, httpRequest);
         return new HttpResponse(statusLine, httpResponseHeader, null);
     }
 
@@ -179,7 +174,7 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
 
         ResponseCookie responseCookie = getCookie(httpRequest, user);
-        StatusLine statusLine = new StatusLine(HttpStatus.FOUND, httpRequest.getPath(), httpRequest.getHttpVersion());
+        StatusLine statusLine = new StatusLine(HttpStatus.FOUND, httpRequest);
 
         HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
         httpResponseHeader.add("Location", "index.html");

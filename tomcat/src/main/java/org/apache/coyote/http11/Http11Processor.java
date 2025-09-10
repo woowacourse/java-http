@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final StaticFileHandler STATIC_FILE_HANDLER = new StaticFileHandler();
+    private static final Router ROUTER = new Router(STATIC_FILE_HANDLER);
 
     private final Socket connection;
 
@@ -74,8 +76,7 @@ public class Http11Processor implements Runnable, Processor {
 
     // 2. 라우팅 및 핸들러 실행
     private HandlerResult handleRequest(final HttpRequest request) {
-        final Router router = new Router(new StaticFileHandler());
-        final Handler handler = router.route(request);
+        final Handler handler = ROUTER.route(request);
         return handler.doHandle(request);
     }
 
@@ -100,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         // JSESSIONID 쿠키가 없다면 쿠키 헤더 설정
-        if (!request.httpCookie().containsCookie(COOKIE_JSESSIONID)) {
+        if (result.requiresSession() && !request.httpCookie().containsCookie(COOKIE_JSESSIONID)) {
             response.addHeader(SET_COOKIE_HEADER, COOKIE_JSESSIONID + EQUAL + UUID.randomUUID());
         }
         return response;

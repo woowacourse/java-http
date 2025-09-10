@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.handler;
 
 import static org.apache.coyote.http11.HttpConstants.COOKIE_JSESSIONID;
-import static org.apache.coyote.http11.HttpConstants.DEFAULT_PROTOCOL;
 import static org.apache.coyote.http11.HttpConstants.EMPTY;
 import static org.apache.coyote.http11.HttpConstants.GET_HTTP_METHOD;
 import static org.apache.coyote.http11.HttpConstants.INDEX_PAGE;
@@ -12,11 +11,8 @@ import static org.apache.coyote.http11.HttpConstants.UNAUTHORIZED_PAGE;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.coyote.http11.dto.HttpCookie;
 import org.apache.coyote.http11.dto.HttpRequest;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -103,7 +99,8 @@ public class LoginHandler implements Handler {
     // 401 Unauthorized 처리
     private HandlerResult handleUnauthorizedRequest(final HttpRequest request) {
         final HttpRequest newRequest = new HttpRequest(
-                request.method(), SLASH + UNAUTHORIZED_PAGE, request.query(), request.protocol(), request.headers(), request.httpCookie()
+                request.method(), SLASH + UNAUTHORIZED_PAGE, request.query(), request.protocol(), request.headers(),
+                request.httpCookie()
         );
         final HandlerResult result = staticFileHandler.doHandle(newRequest);
 
@@ -126,6 +123,7 @@ public class LoginHandler implements Handler {
                 .status(Status.FOUND)
                 .header(LOCATION_HEADER, SLASH + page)
                 .cookie(COOKIE_JSESSIONID, sessionId)
+                .requiresSession(true)
                 .build();
     }
 
@@ -152,7 +150,7 @@ public class LoginHandler implements Handler {
 
     // ==== 유효성 검증 헬퍼 메서드 ====
     private boolean hasMissingCredentials(final String account, final String password) {
-        return account == null || account.isBlank() || password == null || password.isBlank();
+        return account.isBlank() || password.isBlank();
     }
 
     private boolean isPasswordMismatch(final User user, final String password) {

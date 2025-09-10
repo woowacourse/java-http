@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.dto.HttpCookie;
 
-public class HttpCookieParser {
+public final class HttpCookieParser {
 
     private HttpCookieParser() {
     }

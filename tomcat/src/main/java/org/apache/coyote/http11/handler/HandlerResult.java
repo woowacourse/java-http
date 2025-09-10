@@ -10,14 +10,16 @@ public class HandlerResult {
 
     private final Status status;
     private final ContentType contentType;
-    private final byte[] body;
     private final Map<String, String> headers;
+    private final byte[] body;
+    private final boolean requiresSession;
 
     private HandlerResult(final Builder builder) {
         this.status = builder.status;
         this.contentType = builder.contentType;
-        this.body = builder.body;
         this.headers = Map.copyOf(builder.headers);
+        this.body = builder.body;
+        this.requiresSession = builder.requiresSession;
     }
 
     public static Builder builder() {
@@ -28,16 +30,21 @@ public class HandlerResult {
         return status;
     }
 
+
     public ContentType contentType() {
         return contentType;
+    }
+
+    public Map<String, String> headers() {
+        return headers;
     }
 
     public byte[] body() {
         return body;
     }
 
-    public Map<String, String> headers() {
-        return headers;
+    public boolean requiresSession() {
+        return requiresSession;
     }
 
     public static class Builder {
@@ -46,6 +53,7 @@ public class HandlerResult {
         private Status status;
         private ContentType contentType = ContentType.TEXT;
         private byte[] body = new byte[0];
+        private boolean requiresSession = false; // 4. 빌더에 필드 및 기본값 추가
 
         public Builder status(final Status status) {
             this.status = status;
@@ -64,6 +72,12 @@ public class HandlerResult {
 
         public Builder header(final String name, final String value) {
             this.headers.put(name, value);
+            return this;
+        }
+
+
+        public Builder requiresSession(final boolean requiresSession) {
+            this.requiresSession = requiresSession;
             return this;
         }
 

@@ -1,7 +1,6 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import org.apache.catalina.Context;
 import org.apache.catalina.ServletContainer;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
@@ -14,10 +13,15 @@ public class Tomcat {
     private ServletContainer container;
     private Connector connector;
 
-    public void start() {
-        final Context context = new Context();
-        container = context.createServletContainer();
+    public Tomcat() {
+        container = new ServletContainer();
+    }
 
+    public ServletContainer getServletContainer() {
+        return container;
+    }
+
+    public void start() {
         connector = new Connector(container);
         connector.start();
 

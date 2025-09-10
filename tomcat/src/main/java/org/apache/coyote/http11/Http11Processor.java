@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.catalina.ServletContainer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -39,7 +41,17 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final HttpRequest request = parseRequest(requestLine);
+            // 헤더 읽기
+            final Map<String, String> headers = new HashMap<>();
+            String headerLine;
+            while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
+                final String[] headerParts = headerLine.split(":", 2);
+                if (headerParts.length == 2) {
+                    headers.put(headerParts[0].trim().toLowerCase(), headerParts[1].trim());
+                }
+            }
+
+            final HttpRequest request = parseRequest(requestLine, headers, reader);
             final HttpResponse response = new HttpResponse(outputStream);
 
             container.service(request, response);
@@ -49,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest parseRequest(final String requestLine) {
+    private HttpRequest parseRequest(final String requestLine, final Map<String, String> headers, final BufferedReader reader) throws IOException {
         final String[] requestParts = requestLine.split(" ");
         if (requestParts.length < 2) {
             throw new IllegalArgumentException("Invalid request line: " + requestLine);
@@ -67,6 +79,22 @@ public class Http11Processor implements Runnable, Processor {
             queryString = urlParts[1];
         }
 
-        return new HttpRequest(method, uri, queryString);
+        // POST 요청이면 본문 읽기
+        String body = null;
+        if ("POST".equals(method)) {
+            final String contentLength = headers.get("content-length");
+            if (contentLength != null) {
+                try {
+                    final int length = Integer.parseInt(contentLength);
+                    final char[] buffer = new char[length];
+                    reader.read(buffer, 0, length);
+                    body = new String(buffer);
+                } catch (final NumberFormatException e) {
+                    log.warn("Invalid content-length: {}", contentLength);
+                }
+            }
+        }
+
+        return new HttpRequest(method, uri, queryString, body, headers.get("cookie"));
     }
 }

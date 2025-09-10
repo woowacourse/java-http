@@ -8,8 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import org.apache.catalina.Servlet;
 import org.apache.coyote.http11.ContentTypeMapper;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +26,8 @@ public class StaticResourceServlet implements Servlet {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
-        if (!"GET".equals(request.getMethod())) {
-            response.setStatus(405);
+        if (HttpMethod.GET != request.getMethod()) {
+            response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
             response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
             return;
         }
@@ -39,7 +41,7 @@ public class StaticResourceServlet implements Servlet {
 
         final StaticFileResult result = readStaticFile(uri);
 
-        response.setStatus(result.statusCode);
+        response.setStatus(result.status);
         response.setContentType(result.contentType);
         response.write(result.content);
     }
@@ -49,7 +51,7 @@ public class StaticResourceServlet implements Servlet {
         if (uri.contains("..") || uri.contains("\\")) {
             log.warn("Path traversal attempt detected: {}", uri);
             return new StaticFileResult(
-                    400,
+                    HttpStatus.BAD_REQUEST,
                     "text/html; charset=utf-8",
                     createErrorPage("Bad Request", 400)
             );
@@ -60,7 +62,7 @@ public class StaticResourceServlet implements Servlet {
         if (inputStream == null) {
             log.warn("Static file not found: {}", uri);
             return new StaticFileResult(
-                    404,
+                    HttpStatus.NOT_FOUND,
                     "text/html; charset=utf-8",
                     createErrorPage("File Not Found", 404)
             );
@@ -74,19 +76,19 @@ public class StaticResourceServlet implements Servlet {
 
             final String contentType = ContentTypeMapper.get(uri);
 
-            return new StaticFileResult(200, contentType, content);
+            return new StaticFileResult(HttpStatus.OK, contentType, content);
 
         } catch (final IOException e) {
             log.error("Failed to read static file: {}", uri, e);
             return new StaticFileResult(
-                    500,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
                     "text/html; charset=utf-8",
                     createErrorPage("Error loading file", 500)
             );
         }
     }
 
-    private record StaticFileResult(int statusCode, String contentType, String content) {
+    private record StaticFileResult(HttpStatus status, String contentType, String content) {
     }
 
     private String createErrorPage(final String message, final int statusCode) {

@@ -4,6 +4,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,16 +13,32 @@ public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String queryString;
     private final Map<String, String> parameters;
+    private final HttpCookie cookies;
 
     public HttpRequest(final String method, final String uri, final String queryString) {
-        this.method = method;
+        this(method, uri, queryString, null, null);
+    }
+
+    public HttpRequest(final String method, final String uri, final String queryString, final String body) {
+        this(method, uri, queryString, body, null);
+    }
+
+    public HttpRequest(final String method, final String uri, final String queryString, final String body, final String cookieHeader) {
+        this.method = HttpMethod.fromString(method);
         this.uri = uri;
         this.queryString = queryString;
-        this.parameters = parseParameters(queryString);
+        this.parameters = new HashMap<>();
+        this.cookies = new HttpCookie(cookieHeader);
+
+        parameters.putAll(parseParameters(queryString));
+
+        if (HttpMethod.POST == this.method && body != null) {
+            parameters.putAll(parseParameters(body));
+        }
     }
 
     private Map<String, String> parseParameters(final String queryString) {
@@ -46,7 +64,7 @@ public class HttpRequest {
         return params;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
@@ -64,5 +82,22 @@ public class HttpRequest {
 
     public Map<String, String> getParameters() {
         return new HashMap<>(parameters);
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
+    }
+
+    public String getCookieValue(final String name) {
+        return cookies.getValue(name);
+    }
+
+    public Session getSession() {
+        return getSession(true);
+    }
+
+    public Session getSession(final boolean create) {
+        final String sessionId = getCookieValue("JSESSIONID");
+        return SessionManager.getInstance().getOrCreateSession(sessionId, create);
     }
 }

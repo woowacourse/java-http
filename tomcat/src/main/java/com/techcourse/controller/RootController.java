@@ -18,9 +18,4 @@ public class RootController extends AbstractController {
         response.setHeader(HttpHeader.CONTENT_TYPE.getValue(), "text/html;charset=utf-8");
         response.setBody("Hello world!");
     }
-
-    @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-
-    }
 }

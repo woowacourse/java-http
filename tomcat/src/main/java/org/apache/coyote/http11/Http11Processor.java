@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,7 +59,9 @@ public class Http11Processor implements Runnable, Processor {
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 final String[] headerParts = line.split(": ", 2);
                 if (headerParts.length == 2) {
-                    requestHeaders.put(headerParts[0], headerParts[1]);
+                    String key = URLDecoder.decode(headerParts[0], StandardCharsets.UTF_8);
+                    String value = URLDecoder.decode(headerParts[1], StandardCharsets.UTF_8);
+                    requestHeaders.put(key, value);
                 }
             }
 
@@ -213,7 +216,9 @@ public class Http11Processor implements Runnable, Processor {
             for (final String pair : pairs) {
                 final String[] keyValue = pair.split("=");
                 if (keyValue.length >= 2) {
-                    parameters.put(keyValue[0], keyValue[1]);
+                    String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                    String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                    parameters.put(key, value);
                 }
             }
         }

@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final Http11Response response = new Http11Response();
 
-            final String path = extractPath(request.getUri());
+            final String path = request.getPath();
             final Http11Method method = request.getMethod();
 
             String statusLine = "HTTP/1.1 200 OK";
@@ -184,16 +184,6 @@ public class Http11Processor implements Runnable, Processor {
             // TODO: CookieSecurityConfig를 통한 HttpOnly 기본, Secure/SameSite 설정 전략 등 고려하기
             responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
         }
-    }
-
-    private String extractPath(final String uri) {
-        if (uri == null || uri.isEmpty()) {
-            return "/";
-        }
-        if (uri.contains("?")) {
-            return uri.substring(0, uri.indexOf("?"));
-        }
-        return uri;
     }
 
     private Map<String, String> parseRequestBody(final String requestBody) {

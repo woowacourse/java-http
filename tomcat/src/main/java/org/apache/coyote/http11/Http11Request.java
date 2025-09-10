@@ -15,6 +15,8 @@ public class Http11Request {
     private Http11Method method;
     private String uri;
     private String version;
+    private String path;
+    private Map<String, String> params;
     private Map<String, String> headers;
     private String body;
     private Http11Cookie cookie;
@@ -31,6 +33,13 @@ public class Http11Request {
         this.method = Http11Method.from(requestLineParts[0]);
         this.uri = requestLineParts[1];
         this.version = requestLineParts[2];
+
+        int queryIndex = uri.indexOf("?");
+        if (queryIndex != -1) {
+            this.path = uri.substring(0, queryIndex);
+        } else {
+            this.path = uri; // 전체를 path 로 사용
+        }
 
         Map<String, String> map = new LinkedHashMap<>();
         String line;
@@ -68,6 +77,10 @@ public class Http11Request {
 
     public String getUri() {
         return uri;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public String getVersion() {

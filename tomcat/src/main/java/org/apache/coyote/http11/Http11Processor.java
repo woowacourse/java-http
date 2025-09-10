@@ -93,6 +93,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info(user.toString());
+        response.addCookie(HttpCookie.createSessionId());
         response.sendRedirect("/index");
     }
 

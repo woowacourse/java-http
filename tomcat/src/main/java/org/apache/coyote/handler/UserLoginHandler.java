@@ -61,7 +61,7 @@ public class UserLoginHandler implements RequestHandler{
 
             return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/", sessionId);
         } catch (IllegalArgumentException e) {
-            return PageRenderer.sendRedirect(HttpStatus.UNAUTHORIZED.getStatusCode(), "/login.html", null);
+            return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/401.html", null);
         }
     }
 

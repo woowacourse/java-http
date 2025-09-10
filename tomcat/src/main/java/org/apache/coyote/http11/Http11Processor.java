@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(input);
             HttpResponse response = new HttpResponse(out);
 
-            if ("/login".equals(request.getPath())) {
+            if ("/login".equals(request.getPath()) && request.isParams()) {
                 String account = request.getParams().get("account");
                 String password = request.getParams().get("password");
 

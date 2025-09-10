@@ -83,6 +83,10 @@ public class HttpRequest {
         return path;
     }
 
+    public boolean isParams() {
+        return !params.isEmpty();
+    }
+
     public Map<String, String> getParams() {
         return params;
     }

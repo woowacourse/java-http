@@ -15,10 +15,10 @@ public class ControllerMapper {
     private static final Map<String, Controller> CONTROLLERS = new HashMap<>();
 
     static {
-        CONTROLLERS.put("/index.html", new IndexController());
+        CONTROLLERS.put("/", new IndexController());
+        CONTROLLERS.put("/index", new IndexController());
         CONTROLLERS.put("/register", new RegisterController());
         CONTROLLERS.put("/login", new LoginController());
-        CONTROLLERS.put("/login.html", new LoginController());
         CONTROLLERS.put("/logout", new LogoutController());
     }
 

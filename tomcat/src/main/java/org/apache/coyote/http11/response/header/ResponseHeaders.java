@@ -11,6 +11,10 @@ public class ResponseHeaders {
         this.headers = new ArrayList<>(headers);
     }
 
+    public static ResponseHeaders createEmptyHeaders() {
+        return new ResponseHeaders(new ArrayList<>());
+    }
+
     public void add(final ResponseHeader header) {
         headers.add(header);
     }

@@ -21,8 +21,8 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
-    public boolean matches(final HttpMethod httpMethod, final String requestPath) {
-        return this.requestLine.isMethodEqualsTo(httpMethod) && this.requestLine.isPathEqualsTo(requestPath);
+    public boolean isPathEqualsTo(final String path) {
+        return this.requestLine.isPathEqualsTo(path);
     }
 
     public String getBodyParameter(final String key) {
@@ -35,6 +35,14 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return HttpCookie.from(requestHeaders);
+    }
+
+    public boolean isGet() {
+        return requestLine.isMethodEqualsTo(HttpMethod.GET);
+    }
+
+    public boolean isPost() {
+        return requestLine.isMethodEqualsTo(HttpMethod.POST);
     }
 
     private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders,

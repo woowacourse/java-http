@@ -16,14 +16,14 @@ public enum ContentTypeValue {
     }
 
     public static ContentTypeValue findByTarget(final String target) {
-        validateNull(target);
+        validateNotNull(target);
         return Arrays.stream(ContentTypeValue.values())
                 .filter(contentTypeValue -> target.equals(contentTypeValue.format))
                 .findFirst()
                 .orElse(OCTET_STREAM);
     }
 
-    private static void validateNull(final String targetContentTypeValue) {
+    private static void validateNotNull(final String targetContentTypeValue) {
         if (targetContentTypeValue == null) {
             throw new IllegalArgumentException("targetContentType은 null일 수 없습니다");
         }

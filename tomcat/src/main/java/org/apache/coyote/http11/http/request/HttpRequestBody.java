@@ -1,8 +1,13 @@
 package org.apache.coyote.http11.http.request;
 
 import http.HttpHeaderKey;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 
 public class HttpRequestBody {
@@ -13,22 +18,55 @@ public class HttpRequestBody {
         this.value = value;
     }
 
-    public static HttpRequestBody of(final InputStream inputStream, final HttpHeader httpHeader) throws IOException {
-        validateNull(inputStream, httpHeader);
-        byte[] value = new byte[0];
-        if (httpHeader.containsKey(HttpHeaderKey.CONTENT_LENGTH.getValue())) {
-            final int contentLength = Integer.parseInt(httpHeader.getValue(HttpHeaderKey.CONTENT_LENGTH.getValue()));
-            value = inputStream.readNBytes(contentLength);
+    public static HttpRequestBody of(final BufferedReader bufferedReader, final HttpHeader httpHeader)
+            throws IOException {
+        validateNotNull(bufferedReader, httpHeader);
+
+        Optional<String> contentLengthOpt = httpHeader.getFirstValue(
+                HttpHeaderKey.CONTENT_LENGTH.getValue().toLowerCase());
+
+        byte[] body = new byte[0];
+
+        if (contentLengthOpt.isPresent()) {
+            final int contentLength = Integer.parseInt(contentLengthOpt.get());
+            if (contentLength > 0) {
+                char[] bodyReads = new char[contentLength];
+
+                int readLength = bufferedReader.read(bodyReads, 0, contentLength);
+
+                if (readLength > 0) {
+                    body = new String(bodyReads, 0, readLength).getBytes(StandardCharsets.UTF_8);
+                }
+            }
         }
-        return new HttpRequestBody(value);
+        return new HttpRequestBody(body);
     }
 
-    private static void validateNull(final InputStream inputStream, final HttpHeader httpHeader) {
-        if (inputStream == null) {
-            throw new IllegalArgumentException("inputStream은 null일 수 없습니다");
+    public Map<String, String> getBodyElement() {
+        String bodyLine = new String(value, StandardCharsets.UTF_8);
+        return parseBodyValue(bodyLine);
+    }
+
+    private Map<String, String> parseBodyValue(final String target) {
+        final Map<String, String> bodyValue = new HashMap<>();
+        final String[] elements = target.split("&");
+
+        for (String element : elements) {
+            final String[] values = element.split("=");
+            final String key = URLDecoder.decode(values[0], StandardCharsets.UTF_8);
+            final String value = URLDecoder.decode(values[1], StandardCharsets.UTF_8);
+            bodyValue.put(key, value);
+        }
+
+        return bodyValue;
+    }
+
+    private static void validateNotNull(final BufferedReader bufferedReader, final HttpHeader httpHeader) {
+        if (bufferedReader == null) {
+            throw new IllegalArgumentException("BufferedReader는 null일 수 없습니다");
         }
         if (httpHeader == null) {
-            throw new IllegalArgumentException("httpHeader는 null일 수 없습니다");
+            throw new IllegalArgumentException("HttpHeader는 null일 수 없습니다");
         }
     }
 

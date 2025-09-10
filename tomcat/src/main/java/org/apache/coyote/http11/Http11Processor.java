@@ -2,10 +2,16 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.HttpController;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.http.common.startline.HttpMethod;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
@@ -18,10 +24,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpController httpController;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.httpController = new HttpController();
+        this.sessionManager = SessionManager.INSTANCE;
     }
 
     @Override
@@ -34,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = HttpRequest.from(inputStream);
+            HttpRequest httpRequest = HttpRequest.from(inputStream, sessionManager);
 
             String response = findTargetMethod(httpRequest);
 
@@ -49,7 +57,15 @@ public class Http11Processor implements Runnable, Processor {
     private String findTargetMethod(final HttpRequest httpRequest) throws IOException, URISyntaxException {
         HttpMethod method = httpRequest.getMethod();
         String path = httpRequest.getPath();
+        try {
+            return handleTargetMethod(httpRequest, method, path);
+        } catch (UnauthorizedException e) {
+            log.error("UnauthorizedException catch: {} {}", method, path, e);
+            return HttpResponse.unauthorized().getResponseFormat();
+        }
+    }
 
+    private String handleTargetMethod(final HttpRequest httpRequest, final HttpMethod method, final String path) {
         if (method == HttpMethod.GET && path.equals("/")) {
             return helloWorld();
         }
@@ -74,14 +90,49 @@ public class Http11Processor implements Runnable, Processor {
         if (method == HttpMethod.GET && path.equals("/login")) {
             return getLoginHtml(httpRequest);
         }
+        if (method == HttpMethod.POST && path.equals("/login")) {
+            return login(httpRequest);
+        }
+        if (method == HttpMethod.GET && path.equals("/register")) {
+            return getRegisterHtml();
+        }
+        if (method == HttpMethod.POST && path.equals("/register")) {
+            return getRegister(httpRequest);
+        }
         throw new IllegalArgumentException("대상 경로 메서드가 존재하지 않습니다: %s".formatted(method + " " + path));
     }
 
-    private String getLoginHtml(final HttpRequest httpRequest) {
-        final String account = httpRequest.getTargetQueryParameter("account");
-        final String password = httpRequest.getTargetQueryParameter("password");
+    private String getRegister(final HttpRequest httpRequest) {
+        final HttpResponse httpResponse = httpController.getRegister(httpRequest);
+        return httpResponse.getResponseFormat();
+    }
 
-        final HttpResponse httpResponse = httpController.login(account, password);
+    private String getRegisterHtml() {
+        final HttpResponse httpResponse = httpController.getRegisterHtml();
+        return httpResponse.getResponseFormat();
+    }
+
+    private String login(final HttpRequest httpRequest) {
+        final HttpResponse httpResponse = httpController.login(httpRequest);
+        handleSessionCreation(httpResponse);
+        return httpResponse.getResponseFormat();
+    }
+
+    private void handleSessionCreation(final HttpResponse httpResponse) {
+        Object userAttribute = httpResponse.getAttribute("session_user");
+        if (userAttribute instanceof User) {
+            final String sessionId = UUID.randomUUID().toString();
+            final HttpSession session = new Session(sessionId);
+
+            session.setAttribute("user", userAttribute);
+            sessionManager.add(session);
+
+            httpResponse.setCookie("JSESSIONID", sessionId);
+        }
+    }
+
+    private String getLoginHtml(final HttpRequest httpRequest) {
+        final HttpResponse httpResponse = httpController.getLoginHtml(httpRequest);
         return httpResponse.getResponseFormat();
     }
 

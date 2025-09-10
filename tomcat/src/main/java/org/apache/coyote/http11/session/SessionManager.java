@@ -16,7 +16,10 @@ public class SessionManager {
     }
 
     public static Session findSession(String id) {
-        return SESSIONS.get(id);
+        if(SESSIONS.containsKey(id)) {
+            return SESSIONS.get(id);
+        }
+        return createNew();
     }
 
     public static void remove(Session session) {

@@ -1,15 +1,16 @@
 package org.apache.catalina.servlet;
 
-import com.http.enums.HttpStatus;
-import com.http.servlet.LoginServlet;
+import com.spring.servlet.DispatcherServlet;
+import com.spring.http.enums.HttpStatus;
+import com.techcourse.exception.HttpStatusException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 import org.apache.catalina.servlet.impl.DefaultServlet;
-import org.apache.coyote.http11.ResponseProcessor;
+import org.apache.coyote.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,33 +25,38 @@ public final class HttpServletContainer {
     }
 
     static {
-        handlers.put("/login", new LoginServlet());
+        final HttpServlet dispatcherServlet = new DispatcherServlet();
+        handlers.put("/login", dispatcherServlet);
+        handlers.put("/register", dispatcherServlet);
     }
 
     public static void handle(HttpRequest request, HttpResponse response) throws IOException {
         final String path = request.requestStartLine().path();
-        HttpStatus status = HttpStatus.OK;
 
         try {
-            handlers.getOrDefault(path, defaultServlet).handle(request, response);
+            handlers.getOrDefault(path, defaultServlet).service(request, response);
+        } catch (HttpStatusException e) {
+            throw e;
         } catch (FileNotFoundException e) {
-            status = HttpStatus.NOT_FOUND;
+            response.setStatus(HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
-            status = HttpStatus.BAD_REQUEST;
+            response.setStatus(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            log.error("서버 오류 발생 = {}", e.getMessage(), e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        processResponse(request, response, status);
+        processResponse(request, response);
     }
 
-    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatus status)
+    private static void processResponse(HttpRequest request, HttpResponse response)
             throws IOException {
-        if (status != HttpStatus.OK) {
-            ResponseProcessor.handleErrorPage(response, status);
+        if (response.getStatus().isError()) {
+            log.debug("에러 페이지 접근 status : {}", response.getStatus());
+            ResponseUtil.handleErrorPage(request, response);
             return;
         }
 
-        ResponseProcessor.handle(request, response, status);
+        ResponseUtil.handle(request, response);
     }
 }

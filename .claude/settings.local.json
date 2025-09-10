@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Read(/C:\\java_project\\java-http\\tomcat\\src\\main\\java\\org\\apache\\catalina\\servlet/**)"
+      "Read(/C:\\java_project\\java-http\\tomcat\\src\\main\\java\\org\\apache\\catalina\\servlet/**)",
+      "Bash(./gradlew:*)"
     ],
     "deny": [],
     "ask": []

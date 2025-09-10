@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
-import org.apache.catalina.domain.HttpResponse;
+import com.spring.http.response.HttpResponse;
 
 public final class HttpResponseParser {
 
@@ -25,10 +25,7 @@ public final class HttpResponseParser {
     }
 
     private static String parseHeader(HttpResponse httpResponse) {
-        StringBuilder builder = new StringBuilder();
-        httpResponse.getHeaders()
-                .forEach((key, value) -> builder.append(key).append(": ").append(value).append(" ").append(CRLF));
-        return builder.toString();
+        return httpResponse.getHeaderString();
     }
 
     private static byte[] concatBytes(byte[] a, byte[] b) {

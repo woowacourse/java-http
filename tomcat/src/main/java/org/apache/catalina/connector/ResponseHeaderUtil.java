@@ -1,8 +1,8 @@
 package org.apache.catalina.connector;
 
-import java.util.Map;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
+import com.spring.http.HttpHeader;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 
 public final class ResponseHeaderUtil {
 
@@ -46,18 +46,24 @@ public final class ResponseHeaderUtil {
     }
 
     private static void applyContentTypeFromAccept(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.headers() == null) {
+        final HttpHeader header = httpRequest.header();
+        if (header == null) {
+            defaultContentType(httpResponse);
             return;
         }
 
-        final Map<String, String> headers = httpRequest.headers();
-        if (!containNormalizeHeaderKey(headers, ACCEPT)) {
-            httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+        final String accept = header.get(ACCEPT);
+        if (accept == null) {
+            defaultContentType(httpResponse);
             return;
         }
 
-        final String accept = headers.get(ACCEPT).split(",")[0];
-        httpResponse.addHeader(CONTENT_TYPE, accept);
+        final String contentType = accept.split(",")[0];
+        httpResponse.addHeader(CONTENT_TYPE, contentType);
+    }
+
+    private static void defaultContentType(HttpResponse httpResponse) {
+        httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
     }
 
     private static void processContentLength(HttpResponse httpResponse) {
@@ -66,23 +72,5 @@ public final class ResponseHeaderUtil {
         }
 
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(httpResponse.getBody().length));
-    }
-
-    // TODO Header 객체로 만들어서 처리하는게 좋을 거 같음
-    private static boolean containNormalizeHeaderKey(Map<String, String> headers, String key) {
-        return headers.keySet().stream()
-                .anyMatch(k -> normalizeHeaderKey(k).equals(normalizeHeaderKey(key)));
-    }
-
-    private static String normalizeHeaderKey(String key) {
-        String[] tokens = key.split("-");
-        StringBuilder builder = new StringBuilder();
-        for (String token : tokens) {
-            builder.append(Character.toUpperCase(token.charAt(0)))
-                    .append(token.substring(1).toLowerCase())
-                    .append("-");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        return builder.toString();
     }
 }

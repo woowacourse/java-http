@@ -1,21 +1,25 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.BadRequestException;
+import com.techcourse.exception.HttpStatusException;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import org.apache.catalina.domain.HttpRequest;
-import org.apache.catalina.domain.HttpResponse;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 import org.apache.catalina.servlet.HttpServletContainer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.HttpRequestParser;
+import org.apache.coyote.util.HttpResponseParser;
+import org.apache.coyote.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String DEFAULT_VERSION = "HTTP/1.1";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -47,15 +51,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processResponse(BufferedReader reader) throws IOException {
-        final HttpResponse response = new HttpResponse();
+        HttpResponse response = new HttpResponse(DEFAULT_VERSION);
         try {
             final HttpRequest request = HttpRequestParser.parse(reader);
+            response = new HttpResponse(request);
+            
             HttpServletContainer.handle(request, response);
-
             return response;
-        } catch (BadRequestException | IllegalArgumentException e) {
-            ResponseProcessor.handleBadRequest(response);
+        } catch (HttpStatusException e) {
+            log.error("HttpStatusException 발생 = {}", e.getMessage(), e);
+            processResponse(null, response, e);
+            return response;
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            ResponseUtil.handleBadRequest(null, response);
             return response;
         }
+    }
+
+    private static void processResponse(HttpRequest request, HttpResponse response, HttpStatusException exception)
+            throws IOException {
+        log.error("HttpStatusException 발생 = {}", exception.getMessage(), exception);
+
+        response.setStatus(exception.getHttpStatus());
+        ResponseUtil.handleErrorPage(request, response);
     }
 }

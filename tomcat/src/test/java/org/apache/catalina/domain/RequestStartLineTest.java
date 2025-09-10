@@ -1,10 +1,12 @@
 package org.apache.catalina.domain;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.util.List;
+import com.spring.http.request.RequestStartLine;
 import org.junit.jupiter.api.Test;
 
 class RequestStartLineTest {
@@ -18,9 +20,9 @@ class RequestStartLineTest {
         RequestStartLine result = RequestStartLine.from(requestLines);
 
         // then
-        assertEquals("GET", result.method());
-        assertEquals("/index.html", result.path());
-        assertEquals("HTTP/1.1", result.version());
+        assertThat(result.method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.path()).isEqualTo("/index.html");
+        assertThat(result.version()).isEqualTo("HTTP/1.1");
     }
 
     @Test
@@ -32,9 +34,9 @@ class RequestStartLineTest {
         RequestStartLine result = RequestStartLine.from(requestLines);
 
         // then
-        assertEquals("GET", result.method());
-        assertEquals("/login", result.path());
-        assertEquals("HTTP/1.1", result.version());
+        assertThat(result.method()).isEqualTo(HttpMethod.GET);
+        assertThat(result.path()).isEqualTo("/login");
+        assertThat(result.version()).isEqualTo("HTTP/1.1");
     }
 
     @Test
@@ -46,9 +48,9 @@ class RequestStartLineTest {
         RequestStartLine result = RequestStartLine.from(requestLines);
 
         // then
-        assertEquals("POST", result.method());
-        assertEquals("/api/users", result.path());
-        assertEquals("HTTP/1.1", result.version());
+        assertThat(result.method()).isEqualTo(HttpMethod.POST);
+        assertThat(result.path()).isEqualTo("/api/users");
+        assertThat(result.version()).isEqualTo("HTTP/1.1");
     }
 
     @Test
@@ -116,7 +118,7 @@ class RequestStartLineTest {
         RequestStartLine result2 = RequestStartLine.from(requestLines2);
 
         // then
-        assertEquals("/index.html", result1.path());
-        assertEquals("/index.html", result2.path());
+        assertThat(result1.path()).isEqualTo("/index.html");
+        assertThat(result2.path()).isEqualTo("/index.html");
     }
 }

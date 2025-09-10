@@ -1,6 +1,6 @@
 package org.apache.catalina.util;
 
-import com.http.enums.HttpStatus;
+import com.spring.http.enums.HttpStatus;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public final class FileParser {
         validatePath(path);
 
         String resourcePath = path.startsWith("/") ? path.substring(1) : path;
-        resourcePath = "static/" + resourcePath;
+        resourcePath = getResourcePath(resourcePath);
 
         return FileParser.class.getClassLoader().getResource(resourcePath);
     }
@@ -72,7 +72,7 @@ public final class FileParser {
     }
 
     public static byte[] loadErrorPage(HttpStatus httpStatus) throws IOException {
-        String errorPagePath = "error/" + httpStatus.getCode() + ".html";
+        String errorPagePath = getResourcePath(httpStatus.getCode() + ".html");
         
         final URL url = FileParser.class.getClassLoader().getResource(errorPagePath);
         
@@ -90,5 +90,9 @@ public final class FileParser {
             httpStatus.getCode(),
             httpStatus.getReasonPhrase()
         );
+    }
+
+    private static String getResourcePath(String resourcePath) {
+        return "static/" + resourcePath;
     }
 }

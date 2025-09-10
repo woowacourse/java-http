@@ -1,9 +1,10 @@
-package org.apache.catalina.domain;
+package com.spring.http.request;
 
+import com.spring.http.enums.HttpMethod;
 import com.techcourse.exception.BadRequestException;
 import java.util.List;
 
-public record RequestStartLine(String method, String path, String version) {
+public record RequestStartLine(HttpMethod method, String path, String version) {
 
     private static final int STARTLINE_SIZE = 3;
 
@@ -16,7 +17,7 @@ public record RequestStartLine(String method, String path, String version) {
             throw new BadRequestException("Invalid start line: " + startLine);
         }
 
-        final String method = tokens[0];
+        final HttpMethod method = HttpMethod.from(tokens[0]);
         final String path = parsePath(tokens[1]);
         final String version = tokens[2];
 

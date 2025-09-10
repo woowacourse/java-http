@@ -44,6 +44,7 @@ public class ResourceHandler {
 
     private void setBody(final HttpRequest request, final HttpResponse response) {
         if (Objects.equals(request.getResourcePath(), "/")) {
+            response.setStatusCode(StatusCode.OK);
             response.setBodyAndContentLength("Hello world!");
             return;
         }
@@ -54,6 +55,7 @@ public class ResourceHandler {
             }
             if (Objects.equals(request.getResourcePath(), "/register")) {
                 saveUser(request, response);
+                return;
             }
         }
         if (!request.hasQueryParameter()) {
@@ -99,6 +101,7 @@ public class ResourceHandler {
     private String getContent(final String resourcePath) {
         final var wholeResourcePath = getWholeResourcePath(resourcePath);
         try (final var inputStream = getClass().getClassLoader().getResourceAsStream(wholeResourcePath)) {
+
             if (inputStream == null) {
                 return "Not found: " + resourcePath;
             }

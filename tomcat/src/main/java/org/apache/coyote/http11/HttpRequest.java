@@ -27,4 +27,12 @@ public class HttpRequest {
     public boolean hasQueryParameter() {
         return queryParameters.hasAnyParameter();
     }
+
+    public String getHeader(String name) {
+        return headers.get(name);
+    }
+
+    public Cookies getCookies() {
+        return new Cookies(getHeader("Cookie"));
+    }
 }

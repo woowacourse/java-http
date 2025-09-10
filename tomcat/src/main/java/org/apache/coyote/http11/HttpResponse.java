@@ -4,6 +4,7 @@ public class HttpResponse {
     private StatusCode statusCode;
     private String location;
     private String contentType;
+    private String setCookie;
     private int contentLength;
     private String body;
 
@@ -22,6 +23,9 @@ public class HttpResponse {
         if (location != null && !location.isBlank()) {
             sb.append("Location: ").append(location).append("\r\n");
         }
+        if (setCookie != null && !setCookie.isBlank()) {
+            sb.append("Set-Cookie: ").append(setCookie).append("\r\n");
+        }
         sb.append("Content-Type: ").append(contentType).append("\r\n");
         sb.append("Content-Length: ").append(contentLength).append("\r\n");
         sb.append("\r\n");
@@ -29,6 +33,10 @@ public class HttpResponse {
         sb.append(body != null ? body : "");
 
         return sb.toString().getBytes();
+    }
+
+    public void setCookie(String setCookie) {
+        this.setCookie = setCookie;
     }
 
     public void setContentType(String contentType) {

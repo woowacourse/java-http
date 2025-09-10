@@ -2,9 +2,11 @@ package org.apache.catalina.request;
 
 import java.util.Objects;
 import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.cookie.HttpCookieName;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpHeaderName;
 import org.apache.coyote.HttpRequest;
 
 public class ServletRequest {
@@ -24,8 +26,8 @@ public class ServletRequest {
         this.headers = new HttpHeader(request.getHeaders());
         this.path = parsePath(request.getUri());
         this.body = request.getBody();
-        this.parameters = new Parameters(request.getUri(), body, headers.getContentType());
-        this.cookies = new HttpCookie(headers.getCookie());
+        this.parameters = new Parameters(request.getUri(), body, headers.get(HttpHeaderName.CONTENT_TYPE.getValue()));
+        this.cookies = new HttpCookie(headers.get(HttpHeaderName.COOKIE.getValue()));
     }
 
     public String getPath() {
@@ -45,7 +47,7 @@ public class ServletRequest {
             return session;
         }
 
-        final String sessionId = getCookie("JSESSIONID");
+        final String sessionId = getCookie(HttpCookieName.JSESSIONID.getValue());
         if (sessionId != null) {
             final Session existingSession = SessionManager.getInstance().findSession(sessionId);
             if (existingSession != null) {
@@ -68,7 +70,7 @@ public class ServletRequest {
             return false;
         }
 
-        return !Objects.equals(getCookie("JSESSIONID"), session.getId());
+        return !Objects.equals(getCookie(HttpCookieName.JSESSIONID.getValue()), session.getId());
     }
 
     private String parsePath(String uri) {

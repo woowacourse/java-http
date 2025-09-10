@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.apache.catalina.request.ServletRequest;
 import org.apache.catalina.response.ServletResponse;
+import org.apache.coyote.HttpHeaderName;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestHandler;
 import org.apache.coyote.HttpResponse;
@@ -109,7 +110,7 @@ public class Http11Processor implements Runnable, Processor {
     private void updateResponseWithError(HttpStatus status, ServletResponse response, Exception e) {
         response.setStatus(status);
         response.setBody(e.getMessage());
-        response.setContentType("text/plain;charset=utf-8");
+        response.setHeader(HttpHeaderName.CONTENT_TYPE.getValue(), "text/plain;charset=utf-8");
     }
 
     private void checkSessionCreated(ServletRequest request, ServletResponse response) {

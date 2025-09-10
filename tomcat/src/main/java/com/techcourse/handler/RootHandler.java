@@ -4,6 +4,7 @@ import static org.apache.coyote.HttpStatus.OK;
 
 import org.apache.catalina.request.ServletRequest;
 import org.apache.catalina.response.ServletResponse;
+import org.apache.coyote.HttpHeaderName;
 import org.apache.coyote.HttpRequestHandler;
 
 public class RootHandler implements HttpRequestHandler {
@@ -11,7 +12,7 @@ public class RootHandler implements HttpRequestHandler {
     @Override
     public void handleGet(ServletRequest request, ServletResponse response) {
         response.setStatus(OK);
-        response.setContentType("text/html;charset=utf-8");
+        response.setHeader(HttpHeaderName.CONTENT_TYPE.getValue(), "text/html;charset=utf-8");
         response.setBody("Hello world!");
     }
 

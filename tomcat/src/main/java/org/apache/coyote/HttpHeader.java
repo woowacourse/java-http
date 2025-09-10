@@ -24,7 +24,7 @@ public class HttpHeader {
     }
 
     public void set(String name, String value) {
-        if(name == null || value == null){
+        if (name == null || value == null) {
             return;
         }
         final String normalizedName = name.toLowerCase();
@@ -34,16 +34,16 @@ public class HttpHeader {
     }
 
     public void add(String name, String value) {
-        if(name == null || value == null){
+        if (name == null || value == null) {
             return;
         }
         String normalizedName = name.toLowerCase();
         headers.computeIfAbsent(normalizedName, key -> new ArrayList<>()).add(value);
     }
 
-    public String getHeader(String name) {
+    public String get(String name) {
         final String normalizedName = name.toLowerCase();
-        if(headers.get(normalizedName) == null){
+        if (headers.get(normalizedName) == null) {
             return null;
         }
         return headers.get(normalizedName).getFirst();
@@ -55,29 +55,5 @@ public class HttpHeader {
                         Entry::getKey,
                         entry -> new ArrayList<>(entry.getValue())
                 ));
-    }
-
-    public String getContentType() {
-        return getHeader("content-type");
-    }
-
-    public String getCookie() {
-        return getHeader("cookie");
-    }
-
-    public String getContentLength() {
-        return getHeader("content-length");
-    }
-
-    public void setContentType(String contentType) {
-        set("content-type", contentType);
-    }
-
-    public void setContentLength(String contentLength) {
-        set("content-length", contentLength);
-    }
-
-    public void setLocation(String location) {
-        set("location", location);
     }
 }

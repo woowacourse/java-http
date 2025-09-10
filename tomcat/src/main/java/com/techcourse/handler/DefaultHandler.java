@@ -11,6 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.apache.catalina.request.ServletRequest;
 import org.apache.catalina.response.ServletResponse;
+import org.apache.coyote.HttpHeaderName;
 import org.apache.coyote.HttpRequestHandler;
 
 public class DefaultHandler implements HttpRequestHandler {
@@ -35,7 +36,7 @@ public class DefaultHandler implements HttpRequestHandler {
 
     private static void buildSuccessResponse(ServletResponse response, String mimeType, String content) {
         response.setStatus(OK);
-        response.setContentType(mimeType + ";charset=utf-8");
+        response.setHeader(HttpHeaderName.CONTENT_TYPE.getValue(), mimeType + ";charset=utf-8");
         response.setBody(content);
     }
 

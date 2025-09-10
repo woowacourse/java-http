@@ -34,7 +34,7 @@ public class HttpRequest {
             this.uri = tokenizer.nextToken();
             this.protocol = tokenizer.nextToken();
             this.headers = parseHeaders(reader);
-            this.body = parseBody(reader, headers.getContentLength());
+            this.body = parseBody(reader, headers.get(HttpHeaderName.CONTENT_LENGTH.getValue()));
 
         } catch (IOException e) {
             throw new UncheckedServletException(e);

@@ -20,16 +20,14 @@ public class LoginController implements Controller {
 
     @Override
     public boolean isProcessableRequest(HttpRequest request) {
-        return request.getMethod() == HttpMethod.GET
-                && request.getUri().equals("/login")
-                && request.checkQueryStringExistence("account")
-                && request.checkQueryStringExistence("password");
+        return request.getMethod() == HttpMethod.POST
+                && request.getUri().equals("/login");
     }
 
     @Override
     public void processRequest(HttpRequest request, HttpResponse response) {
-        String account = request.getQueryString("account");
-        String password = request.getQueryString("password");
+        String account = request.getBody("account");
+        String password = request.getBody("password");
 
         Optional<User> user = getUser(account);
 

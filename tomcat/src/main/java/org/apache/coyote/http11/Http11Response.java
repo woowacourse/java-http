@@ -12,103 +12,55 @@ public class Http11Response {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
-    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
-    private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
-    private static final String JS_CONTENT_TYPE = "application/javascript;charset=utf-8";
-    private static final String SVG_CONTENT_TYPE = "image/svg+xml;charset=utf-8";
 
-    private final String protocolVersion;
-    private final int statusCode;
-    private final String statusMessage;
-    private final Map<String, String> headers;
-    private final String body;
+    private String protocolVersion;
+    private int statusCode;
+    private String statusMessage;
+    private Map<String, String> headers;
+    private String body;
 
-    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                HTML_CONTENT_TYPE,
-                body
-        );
+    public Http11Response() {
+        this(null, 0, null, null, null);
     }
 
-    public static Http11Response createCssResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                CSS_CONTENT_TYPE,
-                body
-        );
-    }
-
-    public static Http11Response createJsResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                JS_CONTENT_TYPE,
-                body
-        );
-    }
-
-    public static Http11Response createSvgResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                SVG_CONTENT_TYPE,
-                body
-        );
-    }
-
-    public static Http11Response createRedirectResponse(final String redirectTarget) {
-        return createRedirectResponse(redirectTarget, new LinkedHashMap<>());
-    }
-
-    public static Http11Response createRedirectResponse(final String redirectTarget, final Map<String, String> headers) {
-        headers.put(LOCATION, redirectTarget);
-
-        return new Http11Response(
-                HTTP11_VERSION,
-                HttpStatus.FOUND,
-                headers,
-                HTML_CONTENT_TYPE,
-                new byte[0]
-        );
-    }
-
-    private Http11Response(
-            final String protocolVersion,
+    public void setStaticResponse(
             final HttpStatus httpStatus,
-            final Map<String, String> headers,
-            final String contentType,
-            final byte[] body
+            final byte[] body,
+            final String contentType
     ) {
-        this(
-                protocolVersion,
-                httpStatus.getCode(),
-                httpStatus.name(),
-                headers,
-                new String(body, StandardCharsets.UTF_8)
-        );
+        final LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(CONTENT_TYPE, contentType);
         headers.put(CONTENT_LENGTH, String.valueOf(body.length));
+
+        this.protocolVersion = HTTP11_VERSION;
+        this.statusCode = httpStatus.getCode();
+        this.statusMessage = httpStatus.name();
+        this.headers = headers;
+        this.body = new String(body, StandardCharsets.UTF_8);
     }
 
-    private Http11Response(
-            final String protocolVersion,
-            final int statusCode,
-            final String statusMessage,
-            final Map<String, String> headers,
-            final String body
-    ) {
-        this.protocolVersion = protocolVersion;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+    public void setRedirectResponse(final String redirectTarget) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(LOCATION, redirectTarget);
+        headers.put(CONTENT_LENGTH, "0");
+
+        this.protocolVersion = HTTP11_VERSION;
+        this.statusCode = HttpStatus.FOUND.getCode();
+        this.statusMessage = HttpStatus.FOUND.name();
         this.headers = headers;
-        this.body = body;
+    }
+
+    public void setRedirectResponse(
+            final String redirectTarget,
+            final Map<String, String> headers
+    ) {
+        headers.put(LOCATION, redirectTarget);
+        headers.put(CONTENT_LENGTH, "0");
+
+        this.protocolVersion = HTTP11_VERSION;
+        this.statusCode = HttpStatus.FOUND.getCode();
+        this.statusMessage = HttpStatus.FOUND.name();
+        this.headers = headers;
     }
 
     public byte[] toMessage() {
@@ -136,5 +88,19 @@ public class Http11Response {
                 "",
                 body
         );
+    }
+
+    private Http11Response(
+            final String protocolVersion,
+            final int statusCode,
+            final String statusMessage,
+            final Map<String, String> headers,
+            final String body
+    ) {
+        this.protocolVersion = protocolVersion;
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.headers = headers;
+        this.body = body;
     }
 }

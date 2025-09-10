@@ -30,6 +30,10 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public static HttpResponse empty() {
+        return new HttpResponse(null, null, null, null, 0, new byte[0]);
+    }
+
     public static HttpResponse of(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
         return new HttpResponse(
                 ProtocolVersion.HTTP11,
@@ -40,6 +44,13 @@ public class HttpResponse {
                 body);
     }
 
+    public void setDefaultResponse(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
+        this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
+        this.contentType = contentType;
+        this.body = body;
+        this.contentLength = body.length;
+    }
+
     public static HttpResponse forRedirect(ResponseStatus responseStatus, String location) {
         return new HttpResponse(
                 ProtocolVersion.HTTP11,
@@ -48,6 +59,14 @@ public class HttpResponse {
                 location,
                 0L,
                 new byte[0]);
+    }
+
+    public void sendRedirect(ResponseStatus responseStatus, String location) {
+        this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
+        this.location = location;
+        this.contentType = ContentType.HTML;
+        this.contentLength = 0;
+        this.body = new byte[0];
     }
 
     public void setCookie(String key, String value) {

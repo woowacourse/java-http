@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
@@ -35,8 +34,8 @@ public class Http11Processor implements Runnable, Processor {
             router.handle(httpRequest, httpResponse);
             outputStream.commitAndWrite(httpResponse);
 
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("IO error during request processing", e);
         }
     }
 }

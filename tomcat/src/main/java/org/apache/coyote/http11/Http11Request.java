@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Http11Request {
 
     private static final String HEADER_DELIMITER = ": ";
+    private static final String COOKIE_HEADER = "Cookie";
 
-    private static int pointer;
+    private static final AtomicInteger pointer = new AtomicInteger(0);
 
     private final String method;
     private final String target;
@@ -20,8 +22,8 @@ public class Http11Request {
     private final String body;
 
     public static Http11Request create(final List<String> requestMessage) {
-        pointer = 0;
-        final String[] firstLine = requestMessage.get(pointer++).split(" ");
+        pointer.set(0);
+        final String[] firstLine = requestMessage.get(pointer.getAndIncrement()).split(" ");
         validateFirstLineSize(firstLine);
 
         final String method = firstLine[0];
@@ -36,9 +38,9 @@ public class Http11Request {
 
         final Map<String, String> headers = getHeaders(requestMessage);
         Http11Cookie cookie = null;
-        if (headers.containsKey("Cookie")) {
-            cookie = Http11Cookie.create(headers.get("Cookie"));
-            headers.remove("cookie");
+        if (headers.containsKey(COOKIE_HEADER)) {
+            cookie = Http11Cookie.create(headers.get(COOKIE_HEADER));
+            headers.remove(COOKIE_HEADER);
         }
 
         final String body = getBody(requestMessage);
@@ -83,8 +85,8 @@ public class Http11Request {
     ) {
         String line;
         final Map<String, String> headers = new HashMap<>();
-        while (pointer < requestMessage.size()) {
-            line = requestMessage.get(pointer++);
+        while (pointer.get() < requestMessage.size()) {
+            line = requestMessage.get(pointer.getAndIncrement());
             if (line.isBlank()) {
                 break;
             }
@@ -104,8 +106,8 @@ public class Http11Request {
     ) {
         String line;
         final StringBuilder sb = new StringBuilder();
-        while (pointer < requestMessage.size()) {
-            line = requestMessage.get(pointer++);
+        while (pointer.get() < requestMessage.size()) {
+            line = requestMessage.get(pointer.getAndIncrement());
 
             sb.append(line);
         }

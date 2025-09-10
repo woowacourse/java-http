@@ -1,0 +1,153 @@
+package com.techcourse.handler;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import com.techcourse.exception.NotFoundException;
+import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.request.HttpRequest;
+import com.techcourse.http.request.RequestBody;
+import com.techcourse.http.request.RequestHeader;
+import com.techcourse.http.response.HttpResponse;
+import com.techcourse.http.session.Session;
+import com.techcourse.http.session.SessionRepository;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class LoginRequestHandlerTest {
+
+    private LoginRequestHandler loginRequestHandler;
+
+    @BeforeEach
+    void setUp() {
+        loginRequestHandler = new LoginRequestHandler(HttpVersion.HTTP_1_1);
+    }
+
+    @DisplayName("세션 없는 GET 요청")
+    @Test
+    void handleLoginRequestTest1() {
+        // given
+        String requestLine = "GET /login.html HTTP/1.1";
+        RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
+        RequestBody requestBody = RequestBody.empty();
+        HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+
+        // when
+        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+
+        // then
+        String responseString = new String(response.toBytes());
+        assertThat(responseString).contains("HTTP/1.1 200 OK");
+        assertThat(responseString).contains("Content-Type: text/html;charset=utf-8");
+    }
+
+    @DisplayName("세션 있는 GET 요청")
+    @Test
+    void handleLoginRequestTest2() {
+        // given
+        Session session = Session.newSession();
+        SessionRepository.save(session);
+
+        String requestLine = "GET /login.html HTTP/1.1";
+        RequestHeader requestHeader = RequestHeader.from(List.of(
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + session.getId()
+        ));
+        RequestBody requestBody = RequestBody.empty();
+        HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+
+        // when
+        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+
+        // then
+        String responseString = new String(response.toBytes());
+        assertThat(responseString).contains("HTTP/1.1 302 Found");
+        assertThat(responseString).contains("Location: /index.html");
+    }
+
+    @DisplayName("유효한 로그인 요청인 경우")
+    @Test
+    void handleLoginRequestTest3() {
+        // given
+        String requestLine = "POST /login HTTP/1.1";
+        RequestHeader requestHeader = RequestHeader.from(List.of(
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 25"
+        ));
+        RequestBody requestBody = RequestBody.from("account=gugu&password=password");
+        HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+
+        // when
+        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+
+        // then
+        String responseString = new String(response.toBytes());
+
+        assertAll(
+                () -> assertThat(responseString).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(responseString).contains("Location: /index.html"),
+                () -> assertThat(responseString).contains("Set-Cookie: JSESSIONID=")
+        );
+    }
+
+    @DisplayName("잘못된 비밀번호를 입력한 경우")
+    @Test
+    void handleLoginRequestTest4() {
+        // given
+        String requestLine = "POST /login HTTP/1.1";
+        RequestHeader requestHeader = RequestHeader.from(List.of(
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 25"
+        ));
+        RequestBody requestBody = RequestBody.from("account=gugu&password=wrongpassword");
+        HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+
+        // when
+        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+
+        // then
+        String responseString = new String(response.toBytes());
+        assertThat(responseString).contains("HTTP/1.1 302 Found");
+        assertThat(responseString).contains("Location: /401.html");
+    }
+
+    @DisplayName("존재하지 않는 사용자의 경우")
+    @Test
+    void handleLoginRequestTest5() {
+        // given
+        String requestLine = "POST /login HTTP/1.1";
+        RequestHeader requestHeader = RequestHeader.from(List.of(
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 25"
+        ));
+        RequestBody requestBody = RequestBody.from("account=nonexistent&password=password");
+        HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+
+        // when & then
+        assertThatThrownBy(() -> loginRequestHandler.handleLoginRequest(httpRequest))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 유저입니다.");
+    }
+
+    @DisplayName("지원하지 않는 http method의 경우")
+    @Test
+    void handleLoginRequestTest6() {
+        // given
+        String requestLine = "PUT /login HTTP/1.1";
+        RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
+        RequestBody requestBody = RequestBody.empty();
+        HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+
+        // when & then
+        assertThatThrownBy(() -> loginRequestHandler.handleLoginRequest(httpRequest))
+                .isInstanceOf(UncheckedServletException.class)
+                .hasMessage("지원하지 않는 Http Method 입니다.");
+    }
+}

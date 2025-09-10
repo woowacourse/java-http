@@ -1,27 +1,26 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.handler.LoginRequestHandler;
+import com.techcourse.handler.RegisterRequestHandler;
 import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpStatus;
+import com.techcourse.http.common.HttpCookie;
+import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
+import com.techcourse.http.request.RequestBody;
+import com.techcourse.http.request.RequestHeader;
 import com.techcourse.http.response.HttpResponse;
-import com.techcourse.model.User;
+import com.techcourse.http.response.ResponseBody;
+import com.techcourse.util.FileUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final LoginRequestHandler loginRequestHandler = new LoginRequestHandler(HttpVersion.HTTP_1_1);
+    private final RegisterRequestHandler registerRequestHandler = new RegisterRequestHandler(HttpVersion.HTTP_1_1);
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -49,70 +50,78 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()
         ) {
-            String line = bufferedReader.readLine();
-            HttpRequest httpRequest = HttpRequest.from(line);
+            String requestLine = bufferedReader.readLine();
+            RequestHeader requestHeader = RequestHeader.from(parseRequestHeader(bufferedReader));
+            RequestBody requestBody = parseRequestBody(bufferedReader, requestHeader);
 
-            printLoginUser(httpRequest);
+            HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+            HttpResponse httpResponse = handleHttpRequest(httpRequest);
 
-            HttpResponse response = createResponseBody(httpRequest);
-
-            outputStream.write(response.toBytes());
+            outputStream.write(httpResponse.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void printLoginUser(final HttpRequest httpRequest) {
+    private List<String> parseRequestHeader(
+            final BufferedReader reader
+    ) throws IOException {
+        List<String> httpRequestHeaders = new ArrayList<>();
+        String line = reader.readLine();
+        if (line == null) {
+            return httpRequestHeaders;
+        }
+        while (!"".equals(line)) {
+            httpRequestHeaders.add(line);
+            line = reader.readLine();
+        }
+        return httpRequestHeaders;
+    }
+
+    private RequestBody parseRequestBody(
+            final BufferedReader reader, final RequestHeader requestHeader
+    ) throws IOException {
+        if (requestHeader.hasContentLengthKey()) {
+            int contentLength = requestHeader.getContentLength();
+
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+
+            return RequestBody.from(new String(buffer));
+        }
+        return RequestBody.empty();
+    }
+
+    private HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
         if (httpRequest.getFilePath().equals("/login.html")) {
-            Map<String, String> queryParams = httpRequest.getRequestParams();
-
-            String account = queryParams.get("account");
-            String password = queryParams.get("password");
-
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
-
-            if (user.checkPassword(password)) {
-                log.info("user : {}", user);
-            }
+            return loginRequestHandler.handleLoginRequest(httpRequest);
         }
+        if (httpRequest.getFilePath().equals("/register.html")) {
+            return registerRequestHandler.handleRegisterRequest(httpRequest);
+        }
+        return createResponse(httpRequest);
     }
 
-    private HttpResponse createResponseBody(final HttpRequest httpRequest) {
+    private HttpResponse createResponse(final HttpRequest httpRequest) {
+        HttpVersion httpVersion = httpRequest.getHttpVersion();
+
         if (httpRequest.isRootPath()) {
-            return new HttpResponse("1.1", HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
+            return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(), ResponseBody.helloWorld());
         }
 
-        String fileName = createFileName(httpRequest.getFilePath());
+        String fileName = FileUtil.createFileName(httpRequest.getFilePath());
+
         if ("/static/favicon.ico".equals(fileName)) {
-            return new HttpResponse("1.1", HttpStatus.NO_CONTENT, ContentType.IMAGE_X_ICON, "");
+            return HttpResponse.noContent(httpVersion, ContentType.IMAGE_X_ICON, HttpCookie.empty(),
+                    ResponseBody.empty());
+        }
+        if ("/static/.well-known/appspecific/com.chrome.devtools.json".equals(fileName)) {
+            return HttpResponse.noContent(httpVersion, ContentType.APPLICATION_JSON, HttpCookie.empty(),
+                    ResponseBody.empty());
         }
 
-        String responseBody = readResource(fileName);
-        return new HttpResponse("1.1", HttpStatus.OK, httpRequest.getContentType(), responseBody);
-    }
-    
-    private String readResource(final String fileName) {
-        try {
-            URL url = getClass().getResource(fileName);
-            Objects.requireNonNull(url, fileName + "에 파일이 없습니다.");
-
-            Path filePath = Paths.get(url.toURI());
-            return Files.readString(filePath);
-        } catch (URISyntaxException | IOException | NullPointerException e) {
-            throw new NotFoundException("존재하지 않는 파일입니다. :" + e.getMessage());
-        }
-    }
-
-    private String createFileName(String path) {
-        return String.format("/static/%s", toNormalizedPath(path));
-    }
-
-    private String toNormalizedPath(String path) {
-        if (path.startsWith("/")) {
-            return path.substring(1);
-        }
-        return path;
+        return HttpResponse.ok(httpVersion, httpRequest.getContentType(), HttpCookie.empty(),
+                ResponseBody.createBy(httpRequest));
     }
 }

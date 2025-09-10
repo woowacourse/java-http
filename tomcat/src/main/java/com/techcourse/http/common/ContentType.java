@@ -11,6 +11,7 @@ public enum ContentType {
     APPLICATION_JAVASCRIPT("js", "application/javascript"),
     IMAGE_X_ICON("ico", "image/x-icon"),
     IMAGE_SVG_XML("svg", "image/svg+xml"),
+    APPLICATION_JSON("json", "application/json"),
     ;
 
     private final String extension;
@@ -23,10 +24,14 @@ public enum ContentType {
 
     public static ContentType from(final String extension) {
         Objects.requireNonNull(extension);
+        String normalized = extension.trim()
+                .toLowerCase()
+                .replaceFirst("^\\.", "");
+
         return Arrays.stream(values())
-                .filter(value -> value.extension.equals(extension))
+                .filter(value -> value.extension.equals(normalized))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 Content type 확장자입니다: " + extension));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 Content type 확장자입니다: " + normalized));
     }
 
     public String getMediaType() {

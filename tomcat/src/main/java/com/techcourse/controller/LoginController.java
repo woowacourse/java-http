@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.controller.AbstractController;
+import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -41,8 +42,7 @@ public class LoginController extends AbstractController {
         Optional<User> user = getUser(account);
         boolean isAuthenticated = isAuthenticatedUser(user, password);
         if (!isAuthenticated) {
-            response.setRedirection("/401.html");
-            return;
+            throw new UnauthorizedException("로그인에 실패했습니다.");
         }
 
         String sessionId = makeSession(user.get());

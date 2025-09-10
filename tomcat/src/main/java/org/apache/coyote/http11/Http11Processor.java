@@ -8,6 +8,7 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.handler.RequestHandler;
 import org.apache.coyote.http.request.HttpRequestParser;
+import org.apache.catalina.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +18,13 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestHandler requestHandler;
     private final HttpRequestParser httpRequestParser;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
         this.requestHandler = new RequestHandler();
-        this.httpRequestParser = new HttpRequestParser();
+        this.httpRequestParser = new HttpRequestParser(sessionManager);
     }
 
     @Override

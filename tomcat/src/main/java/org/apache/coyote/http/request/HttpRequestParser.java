@@ -4,8 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequestParser {
+
+    private final SessionManager sessionManager;
+
+    public HttpRequestParser(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public HttpRequest parse(BufferedReader reader) throws IOException {
         final var requestLine = parseRequestLine(reader);
@@ -16,7 +23,8 @@ public class HttpRequestParser {
                 requestLine.method(),
                 requestLine.endpoint(),
                 headers,
-                body
+                body,
+                sessionManager
         );
     }
 

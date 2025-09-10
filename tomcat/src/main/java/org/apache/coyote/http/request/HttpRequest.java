@@ -14,13 +14,15 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final String body;
     private final HttpCookie cookies;
+    private final SessionManager sessionManager;
 
-    public HttpRequest(String method, String endpoint, Map<String, String> headers, String body) {
+    public HttpRequest(String method, String endpoint, Map<String, String> headers, String body, SessionManager sessionManager) {
         this.method = method;
         this.endpoint = endpoint;
         this.headers = Map.copyOf(headers);
         this.body = body;
         this.cookies = HttpCookie.parse(headers.get("Cookie"));
+        this.sessionManager = sessionManager;
     }
 
     public Map<String, String> parseFormData() {
@@ -64,7 +66,7 @@ public class HttpRequest {
 
         if (sessionId != null) {
             try {
-                Session session = SessionManager.getInstance().findSession(sessionId);
+                Session session = sessionManager.findSession(sessionId);
                 if (session != null) {
                     return session;
                 }
@@ -74,7 +76,7 @@ public class HttpRequest {
         }
 
         if (create) {
-            return SessionManager.getInstance().createSession();
+            return sessionManager.createSession();
         }
 
         return null;

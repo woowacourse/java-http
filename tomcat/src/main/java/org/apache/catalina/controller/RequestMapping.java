@@ -1,5 +1,8 @@
 package org.apache.catalina.controller;
 
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 

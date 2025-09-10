@@ -18,16 +18,16 @@ public class HttpResponse implements AutoCloseable {
 
     public void send(HttpStatus status, String contentType, byte[] body) throws IOException {
         String header = String.format("""
-                HTTP/1.1 %d %s\r
-                Content-Type: %s\r
-                Content-Length: %d\r
-                \r
-                """,
-            status.getCode(),
-            status.getMessage(),
-            contentType,
-            body.length
-    );
+                        HTTP/1.1 %d %s\r
+                        Content-Type: %s\r
+                        Content-Length: %d\r
+                        \r
+                        """,
+                status.getCode(),
+                status.getMessage(),
+                contentType,
+                body.length
+        );
         outputStream.write(header.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
         outputStream.flush();
@@ -35,15 +35,15 @@ public class HttpResponse implements AutoCloseable {
 
     public void sendRedirect(String location) throws IOException {
         String header = String.format("""
-                HTTP/1.1 %d %s\r
-                Location: %s\r
-                Content-Length: 0\r
-                \r
-                """,
-            HttpStatus.FOUND.getCode(),
-            HttpStatus.FOUND.getMessage(),
-            location
-    );
+                        HTTP/1.1 %d %s\r
+                        Location: %s\r
+                        Content-Length: 0\r
+                        \r
+                        """,
+                HttpStatus.FOUND.getCode(),
+                HttpStatus.FOUND.getMessage(),
+                location
+        );
         outputStream.write(header.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
@@ -67,7 +67,6 @@ public class HttpResponse implements AutoCloseable {
     }
 
     private byte[] getErrorBody(HttpStatus status) {
-        System.out.println(status.getCode());
         String errorPage = String.format("static/%d.html", status.getCode());
         try (InputStream errorPageStream = getClass().getClassLoader().getResourceAsStream(errorPage)) {
             if (errorPageStream != null) {

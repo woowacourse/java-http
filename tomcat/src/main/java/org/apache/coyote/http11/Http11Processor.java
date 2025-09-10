@@ -39,24 +39,31 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse(out);
 
             processRequest(request, response);
-
         } catch (Exception e) {
             handleError(e);
         }
     }
 
     private void processRequest(HttpRequest request, HttpResponse response) throws IOException {
-        if (!"/login".equals(request.getPath())) {
-            handleStaticFileRequest(request.getPath(), response);
+        if ("/login".equals(request.getPath())) {
+            if ("GET".equalsIgnoreCase(request.getMethod())) {
+                handleStaticFileRequest("/login.html", response);
+                return;
+            }
+            handleLoginRequest(request, response);
             return;
         }
 
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            handleStaticFileRequest("/login.html", response);
+        if ("/register".equals(request.getPath())) {
+            if ("GET".equalsIgnoreCase(request.getMethod())) {
+                handleStaticFileRequest("/register.html", response);
+                return;
+            }
+            handleRegisterRequest(request, response);
             return;
         }
 
-        handleLoginRequest(request, response);
+        handleStaticFileRequest(request.getPath(), response);
     }
 
     private void handleLoginRequest(HttpRequest request, HttpResponse response) throws IOException {
@@ -86,6 +93,32 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info(user.toString());
+        response.sendRedirect("/index");
+    }
+
+    private void handleRegisterRequest(HttpRequest request, HttpResponse response) throws IOException {
+        if (!request.isParams()) {
+            response.sendError(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
+        String account = request.getParams().get("account");
+        String password = request.getParams().get("password");
+        String email = request.getParams().get("email");
+
+        if (account == null || password == null || email == null) {
+            response.sendError(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            response.sendError(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
+        User user = new User(InMemoryUserRepository.generateId(), account, password, email);
+        InMemoryUserRepository.save(user);
+
         response.sendRedirect("/index");
     }
 

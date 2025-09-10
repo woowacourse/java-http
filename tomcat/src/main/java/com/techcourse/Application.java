@@ -1,11 +1,13 @@
 package com.techcourse;
 
 import org.apache.catalina.startup.Tomcat;
+import org.apache.coyote.http11.SessionManager;
 
 public class Application {
 
     public static void main(String[] args) {
-        final var tomcat = new Tomcat();
+        final var sessionManager = new SessionManager();
+        final var tomcat = new Tomcat(sessionManager);
         tomcat.start();
     }
 }

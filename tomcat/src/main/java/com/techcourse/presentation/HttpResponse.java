@@ -35,11 +35,6 @@ public record HttpResponse(
             return this;
         }
 
-        public Builder headers(Map<String, String> headers) {
-            this.headers.putAll(headers);
-            return this;
-        }
-
         public Builder body(String body) {
             this.body = body;
             return this;
@@ -67,6 +62,11 @@ public record HttpResponse(
 
         public Builder contentLength(int length) {
             this.headers.put("Content-Length", String.valueOf(length));
+            return this;
+        }
+
+        public Builder addCookie(String cookieValue) {
+            this.headers.put("Set-Cookie", cookieValue);
             return this;
         }
 

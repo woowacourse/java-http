@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import org.apache.catalina.SessionService;
 
 public class RequestProcessor {
 
@@ -31,7 +30,7 @@ public class RequestProcessor {
                 "LoginController",
                 key -> {
                     priority.add(key);
-                    return new LoginController(new LoginService(), staticResourceController, new SessionService());
+                    return new LoginController(new LoginService(), staticResourceController);
                 }
         );
         controllers.computeIfAbsent(

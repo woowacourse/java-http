@@ -19,12 +19,12 @@ public class RequestLine {
 
     public static RequestLine from(final String requestLine) {
         if(requestLine == null || requestLine.isBlank()) {
-            throw new IllegalStateException("잘못된 형식의 requestLine입니다: " + requestLine);
+            throw new IllegalArgumentException("잘못된 형식의 requestLine입니다: " + requestLine);
         }
 
         String[] requestLineParts = requestLine.split(" ");
         if (requestLineParts.length != 3) {
-            throw new IllegalStateException("잘못된 형식의 requestLine입니다: " + requestLine);
+            throw new IllegalArgumentException("잘못된 형식의 requestLine입니다: " + requestLine);
         }
         String methodString = requestLineParts[0];
         String requestUri = requestLineParts[1];

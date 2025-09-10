@@ -29,6 +29,13 @@ public class HttpResponse {
         return response;
     }
 
+    public static HttpResponse redirect(String location) {
+        HttpResponse response = new HttpResponse("HTTP/1.1", HttpStatus.FOUND, null, "");
+        response.addHeader("Location", location);
+        response.addHeader(CONTENT_LENGTH_HEADER, "0");
+        return response;
+    }
+    
     public void initHeaders() {
         if (mimeType != null) {
             headers.put(CONTENT_TYPE_HEADER, mimeType.getType() + ";charset=utf-8");

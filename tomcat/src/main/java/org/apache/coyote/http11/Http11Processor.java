@@ -96,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestLine.getPath().equals("/login") && isLoggedIn(requestHeaders)) {
-            return redirectTo("/index.html", mimeType);
+            return HttpResponse.redirect("/index.html");
         }
 
         return serveStaticPath(requestLine, mimeType);
@@ -150,20 +150,20 @@ public class Http11Processor implements Runnable, Processor {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         if (account == null || account.isBlank() || password == null || password.isBlank()) {
-            return redirectTo("/401.html", mimeType);
+            return HttpResponse.redirect("/401.html");
         }
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> handleLoginSuccess(user, mimeType, requestHeaders))
                 .orElseGet(() -> {
                     log.info("login failure: account= {}", account);
-                    return redirectTo("/401.html", mimeType);
+                    return HttpResponse.redirect("/401.html");
                 });
     }
 
     private HttpResponse handleLoginSuccess(User user, MimeType mimeType, Map<String, String> requestHeaders) {
         log.info("login success: account= {}", user.getAccount());
-        HttpResponse httpResponse = redirectTo("/index.html", mimeType);
+        HttpResponse httpResponse = HttpResponse.redirect("/index.html");
         String jsessionid = getOrCreateJsessionId(requestHeaders, httpResponse);
         Session session = new Session(jsessionid);
         session.setAttribute("user", user);
@@ -177,31 +177,24 @@ public class Http11Processor implements Runnable, Processor {
         String email = queryParams.get("email");
         if (account == null || account.isBlank() || password == null || password.isBlank() || email == null
                 || email.isBlank()) {
-            return redirectTo("/401.html", mimeType);
+            return HttpResponse.redirect("/401.html");
         }
 
         return InMemoryUserRepository.findByAccount(account)
                 .map(existingUser -> {
                     if (existingUser.checkPassword(password)) {
                         log.info("register failure: account= {} already registered", account);
-                        return redirectTo("/register.html", mimeType);
                     } else {
                         log.info("register failure: duplicate account= {}", account);
-                        return redirectTo("/register.html", mimeType);
                     }
+                    return HttpResponse.redirect("/register.html");
                 })
                 .orElseGet(() -> {
                     User user = new User(account, password, email);
                     InMemoryUserRepository.save(user);
                     log.info("register success: account= {} email= {}", account, email);
-                    return redirectTo("/index.html", mimeType);
+                    return HttpResponse.redirect("/index.html");
                 });
-    }
-
-    private HttpResponse redirectTo(String location, MimeType mimeType) {
-        HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, mimeType, "");
-        httpResponse.addHeader("Location", location);
-        return httpResponse;
     }
 
     private String getOrCreateJsessionId(Map<String, String> requestHeaders, HttpResponse httpResponse) {

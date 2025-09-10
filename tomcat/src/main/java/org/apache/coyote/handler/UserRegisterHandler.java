@@ -5,21 +5,21 @@ import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.render.HttpStatus;
+import org.apache.coyote.render.MethodType;
 import org.apache.coyote.render.PageRenderer;
 
 public class UserRegisterHandler implements RequestHandler{
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
-    private static final String POST_METHOD_REQUEST = "POST";
-    private static final String GET_METHOD_REQUEST = "GET";
+
 
     @Override
     public String handle(final String method, final String path, final Map<String, String> queryParams, HttpCookie cookie) {
-        if (method.equals(GET_METHOD_REQUEST)) {
+        if (method.equals(MethodType.GET.getMethod())) {
             return handleRegisterGet();
         }
-        if (method.equals(POST_METHOD_REQUEST)) {
+        if (method.equals(MethodType.POST.getMethod())) {
             return handleRegisterPost(method, queryParams);
         }
         throw new IllegalArgumentException("회원가입중 문제가 발생했습니다.");
@@ -31,7 +31,7 @@ public class UserRegisterHandler implements RequestHandler{
 
     private String handleRegisterPost(String method, Map<String, String> queryParams) {
         try {
-            if (method.equals(POST_METHOD_REQUEST)) {
+            if (method.equals(MethodType.POST.getMethod())) {
                 validateAccountDuplicated(queryParams);
 
                 User beforeSaveUser = new User(

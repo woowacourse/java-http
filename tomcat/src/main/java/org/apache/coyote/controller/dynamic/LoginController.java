@@ -3,17 +3,14 @@ package org.apache.coyote.controller.dynamic;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Cookie;
 import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.resource.StaticResourceReader;
 import org.apache.coyote.error.ErrorCode;
 import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.HttpRequest;
@@ -28,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final StaticResourceReader staticResourceReader = StaticResourceReader.getInstance();
     private static final SessionManager sessionManager = new SessionManager();
 
     @Override
@@ -75,7 +73,7 @@ public class LoginController implements Controller {
     }
 
     private void responseLoginHtml(final HttpResponse httpResponse) throws IOException {
-        final String body = getStaticResponseBody("static/login.html");
+        final String body = staticResourceReader.getStaticResponseBody("static/login.html");
         httpResponse.updateStatusLine("HTTP/1.1", StatusCode.OK);
         httpResponse.updateBody(body);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
@@ -92,20 +90,6 @@ public class LoginController implements Controller {
                 .orElse(null);
         if (user != null && user.checkPassword(queries.get("password"))) {
             log.info("user : {}", user);
-        }
-    }
-
-    private String getStaticResponseBody(final String fileUrl) throws IOException {
-        try {
-            final URI uri = getClass().getClassLoader()
-                    .getResource(fileUrl)
-                    .toURI();
-            final Path htmlPath = Path.of(uri);
-            final byte[] read = Files.readAllBytes(htmlPath);
-            final String body = new String(read, StandardCharsets.UTF_8);
-            return body;
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("존재하지 않은 정적 파일입니다.");
         }
     }
 

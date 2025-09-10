@@ -28,4 +28,8 @@ public enum ContentType {
                 .map(contentType -> contentType.mimeType)
                 .orElse(HTML.mimeType);
     }
+
+    public String getContentType() {
+        return this.mimeType;
+    }
 }

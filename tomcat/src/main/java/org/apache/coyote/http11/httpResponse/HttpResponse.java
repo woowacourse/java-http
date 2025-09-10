@@ -2,45 +2,53 @@ package org.apache.coyote.http11.httpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.httpRequest.HttpRequest;
-import org.apache.coyote.http11.httpRequest.ProtocolVersion;
+import java.util.Map;
 
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
     private final StatusLine statusLine;
-    private final ResponseHeader headers;
-    private final ResponseBody responseBody;
+    private ResponseHeader responseHeader;
+    private ResponseBody responseBody;
 
     private HttpResponse(
             final StatusLine statusLine,
-            final ResponseHeader headers,
+            final ResponseHeader responseHeader,
             final ResponseBody responseBody
     ) {
         this.statusLine = statusLine;
-        this.headers = headers;
+        this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse build(final HttpRequest httpRequest) throws IOException {
-        final ResponseBody responseBody = new ResponseBody(httpRequest);
-        final ResponseContent responseContent = responseBody.getContent();
-
-        final ResponseHeader responseHeader = ResponseHeader.build(httpRequest, responseContent);
-
-        final ProtocolVersion protocolVersion = httpRequest.getProtocolVersion();
-        final HttpStatus httpStatus = responseContent.httpStatus();
-        final StatusLine statusLine = StatusLine.build(protocolVersion, httpStatus);
+    public static HttpResponse status(final HttpStatus httpStatus) {
+        final StatusLine statusLine = StatusLine.build(httpStatus);
+        final ResponseBody responseBody = ResponseBody.empty();
+        final ResponseHeader responseHeader = ResponseHeader.defaultOf(responseBody.getBody());
 
         return new HttpResponse(statusLine, responseHeader, responseBody);
     }
 
-    public byte[] getBytes() throws IOException {
-        final ResponseContent content = responseBody.getContent();
+    public HttpResponse body(final String body) throws IOException {
+        this.responseHeader = responseHeader.build(body);
+        this.responseBody = responseBody.build(body);
 
+        return this;
+    }
+
+    public HttpResponse build(final String path, final String body) {
+        final String contentType = ContentType.getContentType(path);
+
+        this.responseHeader = responseHeader.build(body, contentType);
+        this.responseBody = responseBody.build(body);
+
+        return this;
+    }
+
+    public byte[] getBytes() throws IOException {
         final String header = buildHeader();
-        final String body = content.body();
+        final String body = responseBody.getBody();
 
         return (header + body).getBytes(StandardCharsets.UTF_8);
     }
@@ -49,8 +57,9 @@ public class HttpResponse {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(statusLine.toString()).append(CRLF);
 
-        for (String header : headers.getHeaders()) {
-            stringBuilder.append(header).append(CRLF);
+        final Map<String, String> headers = responseHeader.getHeaders();
+        for (String headersName : headers.keySet()) {
+            stringBuilder.append(headersName).append(": ").append(headers.get(headersName)).append(CRLF);
         }
         stringBuilder.append(CRLF);
 

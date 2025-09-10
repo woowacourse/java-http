@@ -16,14 +16,13 @@ public class StatusLine {
     }
 
     public static StatusLine build(
-            final ProtocolVersion protocolVersion,
             final HttpStatus httpStatus
     ) {
-        return new StatusLine(protocolVersion, httpStatus);
+        return new StatusLine(ProtocolVersion.HTTP_1_1, httpStatus);
     }
 
     @Override
     public String toString() {
-        return protocolVersion.getVersion() + " " + httpStatus.toString();
+        return protocolVersion.getVersion() + " " + httpStatus.getCode() + " " + httpStatus.getMessage();
     }
 }

@@ -2,19 +2,30 @@ package org.apache.coyote.http11.httpResponse;
 
 public enum HttpStatus {
 
-    OK(200),
-    FOUND(302),
-    NOT_FOUND(404),
+    OK(200, "OK"),
+    FOUND(302, "Found"),
+    BAD_REQUEST(400, "Bad Request"),
+    NOT_FOUND(404, "Not Found"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     ;
 
-    private final int statusCode;
+    private final int code;
+    private final String message;
 
-    HttpStatus(final int statusCode) {
-        this.statusCode = statusCode;
+    HttpStatus(
+        final int code,
+        final String message
+    ) {
+        this.code = code;
+        this.message = message;
     }
 
-    @Override
-    public String toString() {
-        return this.statusCode + " " + name().replace("_", " ");
+    public int getCode() {
+        return this.code;
+    }
+
+    public String getMessage() {
+        return this.message;
     }
 }

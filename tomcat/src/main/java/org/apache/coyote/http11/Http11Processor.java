@@ -6,7 +6,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.application.Controller;
+import org.apache.coyote.http11.application.Handler;
+import org.apache.coyote.http11.application.ViewResolver;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
-    private final List<Controller> controllers = List.of(
+    private final List<Handler> handlers = List.of(
         new UserController(SESSION_MANAGER)
     );
     private final ViewResolver viewResolver = new ViewResolver();
@@ -49,8 +50,8 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 Api api = request.getApi();
-                for (var controller : controllers) {
-                    var handlerMethod = controller.getHandlerMethod(api);
+                for (var handler : handlers) {
+                    var handlerMethod = handler.getHandlerMethod(api);
                     if (handlerMethod != null) {
                         response = handlerMethod.apply(request);
                         break;

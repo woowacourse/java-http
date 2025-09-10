@@ -3,7 +3,7 @@ package com.techcourse.controller;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.coyote.http11.application.Controller;
+import org.apache.coyote.http11.application.Handler;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
@@ -15,7 +15,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
-public class UserController implements Controller {
+public class UserController implements Handler {
 
     private static final String SESSION_NAME = "JSESSIONID";
 

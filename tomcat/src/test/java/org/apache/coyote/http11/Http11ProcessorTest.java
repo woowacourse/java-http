@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -112,7 +114,13 @@ class Http11ProcessorTest {
                 "Content-Length: " + 0 + " \r\n" +
                 "\r\n";
 
-        assertThat(socket.output()).isEqualTo(expected);
+        var actual = Arrays.stream(socket.output().split("\r\n"))
+                .filter(line -> !line.startsWith("Set-Cookie")) // 쿠키 제외
+                .collect(Collectors.joining("\r\n"))+
+                "\r\n" +
+                "\r\n";
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

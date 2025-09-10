@@ -92,4 +92,19 @@ public class Request {
         return body;
     }
 
+    public boolean containsCookieKey(String cookieKey){
+        if(headers.containsKey("Cookie")){
+            Cookie cookie = new Cookie(headers.get("Cookie"));
+            return cookie.containsCookieKey(cookieKey);
+        }
+        return false;
+    }
+
+    public String getCookieValue(String cookieKey){
+        if(headers.containsKey("Cookie")){
+            Cookie cookie = new Cookie(headers.get("Cookie"));
+            return cookie.getCookie(cookieKey);
+        }
+        return "";
+    }
 }

@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.ErrorMessage;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import java.util.UUID;
+import org.apache.coyote.Cookie;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
@@ -35,9 +36,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response response;
 
+    private SessionMap sessionMap;
+
     public Http11Processor(final Socket connection) {
         response = new Response();
         response.setProtocolVersion("HTTP/1.1");
+        sessionMap = new SessionMap();
         this.connection = connection;
     }
 
@@ -57,25 +61,37 @@ public class Http11Processor implements Runnable, Processor {
             String httpMethod = request.getHttpMethod();
             String uri = request.getUrl();
             Path path = parsePath(uri);
-
+            // 로그인 처리
             if (uri.startsWith("/login")) {
+                if (httpMethod.equals("GET")) {
+                    if (request.containsCookieKey("JSESSIONID")){
+                        // 세션 아이디 로그인 후 리다이엑트
+                        String jsessionid = request.getCookieValue("JSESSIONID");
+                        Session session = sessionMap.findSession(jsessionid);
+                        log.info(session.getUser().toString());
+                        redirectToIndexPage(path, outputStream);
+                        return;
+                    }
+                }
                 if (httpMethod.equals("POST")) {
+                    // 리퀘스트 바디 로그인
                     requestBodyLogin(path, outputStream);
                     return;
                 }
                 if(uri.contains("?")){
+                    // 쿼리 파라미터 로그인
                     queryParameterLogin(uri, path, outputStream);
                     return;
                 }
             }
-
+            // 회원 가입 처리
             if (httpMethod.equals("POST") && uri.startsWith("/register")) {
                 if (register(parseQueryString(request.getBody()))) {
                     redirectToIndexPage(path, outputStream);
                     return;
                 }
             }
-
+            // 기타 정적 리소스 반환
             staticResourceResponse(path);
             sendResponse(outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
@@ -150,6 +166,17 @@ public class Http11Processor implements Runnable, Processor {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
         user.logUserInfo(password, log);
+        if(user.checkPassword(password)){   // 로그인 성공
+            if(!request.containsCookieKey("JSESSIONID")){
+                String sessionId = UUID.randomUUID().toString();    // 세션 ID 생성
+                Session session = new Session(sessionId);   // 새 세션 생성
+                session.setAttribute("user", user); // 세션에 user 정보에 user 저장
+                sessionMap.addSession(sessionId, session);  // 세션 맵에 새 세션 등록
+                Cookie cookie = new Cookie();   // 새 쿠키 생성
+                cookie.addCookie("JSESSIONID", sessionId);  // 쿠키에 세션 아이디 매핑
+                response.addHeader("Set-Cookie", cookie.generateCookieLine());  // 헤더에 설정
+            }
+        }
         return user.checkPassword(password);
     }
 

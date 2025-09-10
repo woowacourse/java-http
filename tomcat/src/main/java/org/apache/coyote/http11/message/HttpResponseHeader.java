@@ -2,7 +2,7 @@ package org.apache.coyote.http11.message;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.ResponseCookie;
+import org.apache.catalina.cookie.ResponseCookie;
 
 public class HttpResponseHeader {
 

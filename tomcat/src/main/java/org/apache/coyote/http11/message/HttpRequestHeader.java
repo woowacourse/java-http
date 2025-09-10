@@ -2,7 +2,7 @@ package org.apache.coyote.http11.message;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.catalina.RequestCookie;
+import org.apache.catalina.cookie.RequestCookie;
 
 public class HttpRequestHeader {
 

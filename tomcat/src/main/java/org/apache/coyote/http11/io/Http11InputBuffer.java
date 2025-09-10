@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.RequestCookie;
+import org.apache.catalina.cookie.RequestCookie;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpRequestHeader;

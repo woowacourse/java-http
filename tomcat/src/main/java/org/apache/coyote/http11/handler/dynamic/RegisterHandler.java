@@ -26,7 +26,7 @@ public class RegisterHandler implements Handler {
     public void handle(HttpRequest request, HttpResponse response) throws IOException {
         switch (request.method().toUpperCase()) {
             case "POST" -> handlePost(request, response);
-            default     -> StaticResourceUtils.serve(response, "405.html", HttpStatus.METHOD_NOT_ALLOWED);
+            default     -> StaticResourceUtils.serve(response, "404.html", HttpStatus.METHOD_NOT_ALLOWED);
         }
     }
 

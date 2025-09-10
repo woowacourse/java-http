@@ -31,7 +31,7 @@ public class LoginHandler implements Handler {
         switch (request.method().toUpperCase()) {
             case "GET"  -> handleGet(request, response);
             case "POST" -> handlePost(request, response);
-            default     -> StaticResourceUtils.serve(response, "405.html", HttpStatus.METHOD_NOT_ALLOWED);
+            default     -> StaticResourceUtils.serve(response, "404.html", HttpStatus.METHOD_NOT_ALLOWED);
         }
     }
 

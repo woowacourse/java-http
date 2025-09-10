@@ -35,8 +35,10 @@ public class HttpBody {
         final Map<String, String> bodyData = new HashMap<>();
         final String[] datas = body.split("&");
         for (String data : datas) {
-            String[] dataResult = data.split("=");
-            bodyData.put(dataResult[0], dataResult[1]);
+            final String[] dataResult = data.split("=");
+            if (dataResult.length == 2) {
+                bodyData.put(dataResult[0], dataResult[1]);
+            }
         }
         return bodyData;
     }

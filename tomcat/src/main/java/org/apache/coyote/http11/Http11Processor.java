@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -38,13 +39,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             try {
                 HttpRequest request = new HttpRequest(inputStream);
-                String response = getResponse(request);
+                HttpResponse response = getResponse(request);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             } catch (IOException e) {
-                String errorResponse = create400Response();
-                outputStream.write(errorResponse.getBytes());
+                byte[] body = Files.readAllBytes(getStaticResource("/400.html"));
+                Map<String, String> headers = Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", String.valueOf(body.length));
+                HttpResponse response = new HttpResponse(HttpStatus.BAD_REQUEST, headers, body);
+                outputStream.write(response.getBytes());
                 outputStream.flush();
             }
         } catch (IOException | UncheckedServletException e) {
@@ -52,17 +55,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpRequest request) throws IOException {
+    private HttpResponse getResponse(HttpRequest request) throws IOException {
         try {
             if (request.equalPath("/")) {
                 if (request.equalMethod(HttpMethod.GET)) {
-                    return create200Response("Hello world!", ContentType.TEXT_PLAIN);
+                    byte[] body = "Hello world!".getBytes();
+                    Map<String, String> headers = Map.of("Content-Type", ContentType.TEXT_PLAIN.getMimeType(), "Content-Length", String.valueOf(body.length));
+                    return new HttpResponse(HttpStatus.OK, headers, body);
                 }
             }
             if (request.equalPath("/login")) {
                 if (request.equalMethod(HttpMethod.GET)) {
                     if (request.getSession() != null) {
-                        return create302Response("/index.html");
+                        Map<String, String> headers = Map.of("Location", "/index.html");
+                        return new HttpResponse(HttpStatus.FOUND, headers, null);
+
                     }
                     return createStaticResourceResponse("/login.html");
                 }
@@ -83,46 +90,59 @@ public class Http11Processor implements Runnable, Processor {
                     return createStaticResourceResponse(request.getPath());
                 }
             }
-            return create404Response();
+            byte[] body = Files.readAllBytes(getStaticResource("/404.html"));
+            Map<String, String> headers = Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", String.valueOf(body.length));
+            return new HttpResponse(HttpStatus.NOT_FOUND, headers, body);
         } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
-            return create500Response();
+            byte[] body = Files.readAllBytes(getStaticResource("/500.html"));
+            Map<String, String> headers = Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", String.valueOf(body.length));
+            return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, headers, body);
         }
     }
 
-    private String createStaticResourceResponse(String path) throws IOException {
+    private HttpResponse createStaticResourceResponse(String path) throws IOException {
         Path staticResource = getStaticResource(path);
         if (staticResource == null) {
-            return create404Response();
+            byte[] body = Files.readAllBytes(getStaticResource("/404.html"));
+            Map<String, String> headers = Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", String.valueOf(body.length));
+            return new HttpResponse(HttpStatus.NOT_FOUND, headers, body);
         }
         String fileExtension = path.split("\\.")[1];
-        return create200Response(Files.readString(staticResource), ContentType.of(fileExtension));
+        byte[] body = Files.readAllBytes(staticResource);
+        Map<String, String> headers = Map.of("Content-Type", ContentType.of(fileExtension).getMimeType(), "Content-Length", String.valueOf(body.length));
+        return new HttpResponse(HttpStatus.OK, headers, body);
     }
 
-    private String login(HttpRequest request) {
+    private HttpResponse login(HttpRequest request) {
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(request.getBody("account"));
         if (optionalUser.isEmpty()) {
             log.info("존재하지 않는 유저입니다.");
-            return create302Response("/401.html");
+            Map<String, String> headers = Map.of("Location", "/401.html");
+            return new HttpResponse(HttpStatus.FOUND, headers, null);
         }
         User user = optionalUser.get();
         if (!user.checkPassword(request.getBody("password"))) {
             log.info("비밀번호가 일치하지 않습니다.");
-            return create302Response("/401.html");
+            Map<String, String> headers = Map.of("Location", "/401.html");
+            return new HttpResponse(HttpStatus.FOUND, headers, null);
         }
         log.info(user.toString());
         if (request.getSession() == null) {
             Session session = createSession(user);
-            return create302LoginResponse("/index.html", session.getId());
+            Map<String, String> headers = Map.of("Set-Cookie", "JSESSIONID=" + session.getId(), "Location", "/index.html");
+            return new HttpResponse(HttpStatus.FOUND, headers, null);
         }
-        return create302Response("/index.html");
+        Map<String, String> headers = Map.of("Location", "/index.html");
+        return new HttpResponse(HttpStatus.FOUND, headers, null);
     }
 
-    private String register(HttpRequest request) {
+    private HttpResponse register(HttpRequest request) {
         User user = new User(request.getBody("account"), request.getBody("password"), request.getBody("email"));
         InMemoryUserRepository.save(user);
         Session session = createSession(user);
-        return create302LoginResponse("/index.html", session.getId());
+        Map<String, String> headers = Map.of("Set-Cookie", "JSESSIONID=" + session.getId(), "Location", "/index.html");
+        return new HttpResponse(HttpStatus.FOUND, headers, null);
     }
 
     private Session createSession(User user) {
@@ -138,59 +158,5 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
         return Path.of(resourceURL.getFile());
-    }
-
-    private String create200Response(String body, ContentType contentType) throws IOException {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getMimeType() + " ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
-    }
-
-    private String create302Response(String path) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + path,
-                "");
-    }
-
-    private String create302LoginResponse(String path, String sessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Set-Cookie: JSESSIONID=" + sessionId,
-                "Location: " + path,
-                "");
-    }
-
-    private String create400Response() throws IOException {
-        String body = Files.readString(getStaticResource("/400.html"));
-        return String.join("\r\n",
-                "HTTP/1.1 400 Bad Request ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
-    }
-
-    private String create404Response() throws IOException {
-        String body = Files.readString(getStaticResource("/404.html"));
-        return String.join("\r\n",
-                "HTTP/1.1 404 NOT FOUND ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
-    }
-
-    private String create500Response() throws IOException {
-        String body = Files.readString(getStaticResource("/500.html"));
-        return String.join("\r\n",
-                "HTTP/1.1 500 Internal Server Error ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
     }
 }

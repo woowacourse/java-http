@@ -1,9 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -13,11 +11,12 @@ import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Cookies;
+import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Parameters;
-import org.apache.coyote.http11.response.Headers;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,7 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int MAX_REQUEST_SIZE = 104_857_600; // 10MB
+    // private static final int MAX_REQUEST_SIZE = 104_857_600; // 10MB
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
     private final Socket connection;
@@ -49,20 +48,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            // request
-            Request request = parseRequest(inputStream);
-            validateHeader(request.header);
-            String[] words = request.header.split(" ");
-            String requestPath = words[1].split("\\?")[0];
-            HttpMethod httpMethod = HttpMethod.from(words[0]);
-            Cookies requestCookies = Cookies.from(request.header);
-            Parameters parameters = null;
-            if (request.header.split("\\?").length > 1) {
-                parameters = parseParameters(request.header.split("\\?")[1]);
-            }
-            if (httpMethod == HttpMethod.POST) {
-                parameters = parseParameters(request.body);
-            }
+            HttpRequest request = new HttpRequest(inputStream);
 
             // response
             ContentType contentType = ContentType.NONE;
@@ -72,59 +58,47 @@ public class Http11Processor implements Runnable, Processor {
             Cookies responseCookies = new Cookies();
 
             try {
-                if (requestPath.equals("/login")) {
-                    if (httpMethod == HttpMethod.GET) {
-                        if (getLoggedUser(requestCookies) == null) {
-                            requestPath = "/login.html";
+                if (request.getPath().get().equals("/login")) {
+                    if (request.getMethod() == HttpMethod.GET) {
+                        if (getLoggedUser(request.getCookies()) == null) {
+                            request.setPath("/login.html");
                         } else {
-                            requestPath = "/index.html";
+                            request.setPath("/index.html");
                         }
-                        contentType = ContentType.HTML;
                     }
-                    if (httpMethod == HttpMethod.POST) {
-                        login(parameters, responseCookies);
+                    if (request.getMethod() == HttpMethod.POST) {
+                        login(request.getBody(), responseCookies);
                         httpStatus = HttpStatus.FOUND;
-                        contentType = ContentType.HTML;
                         headers.put("Location", "/index.html");
                     }
                 }
 
-                if (requestPath.equals("/register")) {
-                    if (httpMethod == HttpMethod.GET) {
-                        contentType = ContentType.HTML;
-                        requestPath = "/register.html";
+                if (request.getPath().get().equals("/register")) {
+                    if (request.getMethod() == HttpMethod.GET) {
+                        request.setPath("/register.html");
                     }
-                    if (httpMethod == HttpMethod.POST) {
-                        register(parameters);
+                    if (request.getMethod() == HttpMethod.POST) {
+                        register(request.getBody());
                         httpStatus = HttpStatus.FOUND;
-                        contentType = ContentType.HTML;
                         headers.put("Location", "/index.html");
                     }
                 }
 
-                if (requestPath.endsWith(".html")) {
-                    contentType = ContentType.HTML;
-                }
-                if (requestPath.endsWith(".css")) {
-                    contentType = ContentType.CSS;
-                }
-                if (requestPath.endsWith(".js")) {
-                    contentType = ContentType.JAVASCRIPT;
-                }
+                contentType = ContentType.fromPath(request.getPath());
             } catch (UnauthorizedException e) {
                 contentType = ContentType.HTML;
                 httpStatus = HttpStatus.UNAUTHORIZED;
                 headers.clear();
-                requestPath = "/401.html";
+                request.setPath("/401.html");
             } catch (IllegalArgumentException e) {
                 contentType = ContentType.HTML;
                 httpStatus = HttpStatus.NOT_FOUND;
                 headers.clear();
-                requestPath = "/404.html";
+                request.setPath("/404.html");
             }
 
             if (contentType.isText() && !httpStatus.is3xx()) {
-                responseBody = getStaticPage(requestPath);
+                responseBody = getStaticPage(request.getPath().get());
             }
             final var response = buildResponse(httpStatus, contentType, headers, responseCookies, responseBody);
             outputStream.write(response.getBytes());
@@ -144,12 +118,6 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
         return (User)session.getAttribute("user");
-    }
-
-    private void validateHeader(String header) {
-        if (header.split(" ").length < 3) {
-            throw new IllegalArgumentException("유효하지 않은 요청 포맷입니다.");
-        }
     }
 
     private String buildResponse(HttpStatus status, ContentType contentType, Headers headers, Cookies cookies,
@@ -228,52 +196,5 @@ public class Http11Processor implements Runnable, Processor {
             });
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-    }
-
-    private Parameters parseParameters(String originalParams) {
-        Parameters parameters = new Parameters();
-        for (var p : originalParams.split("&")) {
-            parameters.put(p);
-        }
-        return parameters;
-    }
-
-    private Request parseRequest(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-        int byteSum = 0;
-        String line;
-        int contentLength = 0;
-        StringBuilder sb = new StringBuilder();
-        while ((line = reader.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            sb.append(line).append("\r\n");
-            byteSum += line.length() + 2;
-            if (byteSum > MAX_REQUEST_SIZE) {
-                throw new IllegalArgumentException("최대 크기를 초과한 요청입니다.");
-            }
-
-            // Content-Length 파싱
-            if (line.toLowerCase().startsWith("content-length:")) {
-                contentLength = Integer.parseInt(line.substring(15).trim());
-            }
-        }
-
-        String body = "";
-        if (contentLength > 0) {
-            char[] buffer = new char[contentLength];
-            int bytesRead = reader.read(buffer, 0, contentLength);
-            body = new String(buffer, 0, bytesRead);
-        }
-        return new Request(sb.toString(), body);
-    }
-
-    private record Request(
-        String header,
-        String body
-    ) {
-
     }
 }

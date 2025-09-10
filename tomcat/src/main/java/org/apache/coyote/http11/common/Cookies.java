@@ -8,20 +8,15 @@ public class Cookies {
     public static final String HEADER_NAME = "Cookie: ";
     private final Map<String, String> data = new HashMap<>();
 
-    public static Cookies from(String header) {
-        for (var line : header.split("\r\n")) {
-            if (line.startsWith(HEADER_NAME)) {
-                line = line.substring(HEADER_NAME.length());
-                Cookies cookies = new Cookies();
-                String[] originalCookies = line.split("; ");
-                for (var originalCookie : originalCookies) {
-                    String[] keyAndValue = originalCookie.split("=");
-                    cookies.put(keyAndValue[0], keyAndValue[1]);
-                }
-                return cookies;
-            }
+    public static Cookies from(String line) {
+        line = line.substring(HEADER_NAME.length());
+        Cookies cookies = new Cookies();
+        String[] originalCookies = line.split("; ");
+        for (var originalCookie : originalCookies) {
+            String[] keyAndValue = originalCookie.split("=");
+            cookies.put(keyAndValue[0], keyAndValue[1]);
         }
-        return new Cookies();
+        return cookies;
     }
 
     public void put(String key, String value) {

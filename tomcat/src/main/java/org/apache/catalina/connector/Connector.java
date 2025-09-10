@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.ServletContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -15,19 +19,33 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 200;
 
     private final ServerSocket serverSocket;
     private final ServletContainer container;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(final ServletContainer container) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, container);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, container);
     }
 
-    public Connector(final int port, final int acceptCount, final ServletContainer container) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, final ServletContainer container) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.container = container;
+        this.executorService = createThreadPool(maxThreads, acceptCount);
         this.stopped = false;
+    }
+
+    private ExecutorService createThreadPool(final int maxThreads, final int acceptCount) {
+        // ThreadPoolExecutor로 대기 큐 크기 제한
+        return new ThreadPoolExecutor(
+                maxThreads / 4,  // corePoolSize: 최소 스레드 수
+                maxThreads,      // maximumPoolSize: 최대 스레드 수
+                60L,             // keepAliveTime: 놀고 있는 스레드 생존 시간
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(acceptCount) // 대기 큐 크기 제한
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -68,11 +86,22 @@ public class Connector implements Runnable {
             return;
         }
         final var processor = new Http11Processor(connection, container);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
+        // 스레드 풀 정리
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
         try {
             serverSocket.close();
         } catch (final IOException e) {

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package com.techcourse.dto;
 
 public record LoginRequest(
     String account,

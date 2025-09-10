@@ -11,10 +11,19 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.Cookies;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.Parameters;
+import org.apache.coyote.http11.response.Headers;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 

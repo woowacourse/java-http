@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -65,6 +66,10 @@ public class Http11Processor implements Runnable, Processor {
             return handleLoginRequest(request);
         }
         
+        if (Objects.equals("/register", requestPath) && request.getMethodType() == HttpMethodType.POST) {
+            return handleRegisterRequest(request);
+        }
+        
         String resolvedPath = resolveFilePath(requestPath);
         return generateHttpResponse(resolvedPath);
     }
@@ -92,6 +97,28 @@ public class Http11Processor implements Runnable, Processor {
                 log.info("로그인 실패 - account: {}, password: {}", account, password);
                 return HttpResponse.redirect("/401.html");
             });
+    }
+
+    private HttpResponse handleRegisterRequest(final HttpRequest request) {
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        
+        if (account == null || password == null || email == null) {
+            log.info("회원가입 파라미터 누락 - account: {}, password: {}, email: {}", account, password, email);
+            return HttpResponse.redirect("/register.html");
+        }
+        
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            log.info("중복된 계정으로 회원가입 시도: {}", account);
+            return HttpResponse.redirect("/register.html");
+        }
+        
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        log.info("회원가입 성공: {}", newUser);
+        
+        return HttpResponse.redirect("/index.html");
     }
 
     private String resolveFilePath(final String requestPath) {

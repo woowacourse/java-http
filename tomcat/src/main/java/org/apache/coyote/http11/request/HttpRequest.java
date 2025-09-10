@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public record HttpRequest(
@@ -26,7 +25,10 @@ public record HttpRequest(
         final HttpMethod httpMethod = HttpMethod.from(requestLine.method());
 
         final Map<String, String> headers = RequestHeaderParser.parse(reader);
-        final String body = httpMethod.type() == HttpMethodType.POST ? RequestBodyParser.parse(reader, headers) : "";
+        String body = "";
+        if (httpMethod.type() == HttpMethodType.POST) {
+            body = RequestBodyParser.parse(reader, headers);
+        }
 
         return new HttpRequest(
                 httpMethod,

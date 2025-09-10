@@ -18,12 +18,13 @@ public record HttpRequest(
 ) {
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
-        final RequestLine requestLine = RequestLine.from(inputStream);
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        
+        final RequestLine requestLine = RequestLine.from(reader);
         final RequestUri uri = RequestUri.from(requestLine.uri());
         final QueryParameters queryParameters = QueryParameters.from(uri.queryString());
         final HttpMethod httpMethod = HttpMethod.from(requestLine.method());
 
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final Map<String, String> headers = RequestHeaderParser.parse(reader);
         final String body = httpMethod.type() == HttpMethodType.POST ? RequestBodyParser.parse(reader, headers) : "";
 

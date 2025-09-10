@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -6,7 +6,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.util.HttpStatus;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.http.HttpStatus;
 
 public class HttpResponse {
 
@@ -42,8 +43,9 @@ public class HttpResponse {
         return header("Content-Type", contentType);
     }
 
-    public HttpResponse cookie(String name, String value) {
-        return header("Set-Cookie", name + "=" + value + "; Path=/; HttpOnly; SameSite=Lax");
+    public HttpResponse cookie(Cookie cookie) {
+        ensureNotCommitted();
+        return header("Set-Cookie", cookie.toHeaderValue());
     }
 
     public HttpResponse write(String text) throws IOException {

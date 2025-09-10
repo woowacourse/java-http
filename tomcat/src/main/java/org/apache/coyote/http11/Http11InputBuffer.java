@@ -14,7 +14,6 @@ public final class Http11InputBuffer implements AutoCloseable {
     private int limit = 0;
 
     private static final int DEFAULT_BUF = 8192;
-    private static final int MAX_LINE = 8192;
 
     public Http11InputBuffer(InputStream inputStream) {
         this(inputStream, DEFAULT_BUF);

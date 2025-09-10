@@ -49,11 +49,11 @@ public final class HttpRequestParser {
         Map<String, String> query = parseQuery(queryString);
 
         byte[] body = new byte[0];
-        int contentLength = headers.containsKey("content-length") ? Integer.parseInt(headers.get("content-length")) : 0;
+        int contentLength = headers.containsKey("Content-Length") ? Integer.parseInt(headers.get("Content-Length")) : 0;
         if (contentLength > 0) {
             body = http11InputBuffer.readBytes(contentLength);
         }
-        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body, UTF_8)));
+        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body)));
     }
 
     private Map<String, String> parseQuery(String queryString) {

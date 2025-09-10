@@ -13,8 +13,8 @@ import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
-import org.apache.http.HttpResponse;
 import org.apache.http.request.HttpRequest;
+import org.apache.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -36,12 +36,17 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = new HttpRequest(inputStream);
+            try {
+                HttpRequest request = new HttpRequest(inputStream);
+                String response = getResponse(request);
 
-            String response = getResponse(request);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } catch (IOException e) {
+                String errorResponse = create400Response();
+                outputStream.write(errorResponse.getBytes());
+                outputStream.flush();
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -157,6 +162,16 @@ public class Http11Processor implements Runnable, Processor {
                 "Set-Cookie: JSESSIONID=" + sessionId,
                 "Location: " + path,
                 "");
+    }
+
+    private String create400Response() throws IOException {
+        String body = Files.readString(getStaticResource("/400.html"));
+        return String.join("\r\n",
+                "HTTP/1.1 400 Bad Request ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
     }
 
     private String create404Response() throws IOException {

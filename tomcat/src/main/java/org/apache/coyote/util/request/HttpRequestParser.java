@@ -28,15 +28,16 @@ public class HttpRequestParser {
         int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
         String cookieHeader = headers.get("cookie");
 
+        Map<String, String> body = new HashMap<>();
         if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
             char[] bodyChars = new char[contentLength];
             br.read(bodyChars, 0, contentLength);
-            String body = new String(bodyChars);
-            queries.putAll(parseBodyQueries(body));
+            String bodyString = new String(bodyChars);
+            body.putAll(parseBodyQueries(bodyString));
         }
 
         Cookie cookie = Cookie.parse(cookieHeader);
-        return new HttpRequest(method, path, version, queries, cookie);
+        return new HttpRequest(method, path, version, headers, queries, body, cookie);
     }
 
     private static String[] readRequestLine(BufferedReader br) throws IOException {

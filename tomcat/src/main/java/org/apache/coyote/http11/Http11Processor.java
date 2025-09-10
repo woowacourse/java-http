@@ -179,10 +179,23 @@ public class Http11Processor implements Runnable, Processor {
                 || email.isBlank()) {
             return redirectTo("/401.html", mimeType);
         }
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        log.info("register success: account= {} email= {}", account, email);
-        return redirectTo("/index.html", mimeType);
+
+        return InMemoryUserRepository.findByAccount(account)
+                .map(existingUser -> {
+                    if (existingUser.checkPassword(password)) {
+                        log.info("register failure: account= {} already registered", account);
+                        return redirectTo("/register.html", mimeType);
+                    } else {
+                        log.info("register failure: duplicate account= {}", account);
+                        return redirectTo("/register.html", mimeType);
+                    }
+                })
+                .orElseGet(() -> {
+                    User user = new User(account, password, email);
+                    InMemoryUserRepository.save(user);
+                    log.info("register success: account= {} email= {}", account, email);
+                    return redirectTo("/index.html", mimeType);
+                });
     }
 
     private HttpResponse redirectTo(String location, MimeType mimeType) {

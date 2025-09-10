@@ -21,6 +21,14 @@ public record HttpResponse(
         );
     }
 
+    public static HttpResponse redirect(String location) {
+        return new HttpResponse(
+            HttpStatus.FOUND,
+            HttpResponseHeader.redirect(location),
+            ""
+        );
+    }
+
     public String toHttpResponse() {
         return String.join("\r\n",
                 status.getStatusLine() + " ",

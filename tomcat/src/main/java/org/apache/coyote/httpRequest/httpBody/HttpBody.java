@@ -2,6 +2,8 @@ package org.apache.coyote.httpRequest.httpBody;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.httpHeader.ContentType;
 
 public class HttpBody {
@@ -27,7 +29,7 @@ public class HttpBody {
     ) {
         return switch (contentType) {
             case APPLICATION_FORM_URLENCODED -> createBodyDataByForm(body);
-            default -> throw new IllegalArgumentException("지원하지 않는 Content-Type: " + contentType);
+            default -> throw new HttpException(ErrorCode.NOT_ALLOW_MEDIA_TYPE);
         };
     }
 

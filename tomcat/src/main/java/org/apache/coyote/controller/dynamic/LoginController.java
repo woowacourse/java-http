@@ -37,9 +37,11 @@ public class LoginController implements Controller {
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {
             doGet(request, response);
+            return;
         }
         if (httpMethod.equals(HttpMethod.POST)) {
             doPost(request, response);
+            return;
         }
         throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }

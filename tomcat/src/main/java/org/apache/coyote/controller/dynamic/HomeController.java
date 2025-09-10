@@ -21,6 +21,7 @@ public class HomeController implements Controller {
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {
             doGet(response);
+            return;
         }
         throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }

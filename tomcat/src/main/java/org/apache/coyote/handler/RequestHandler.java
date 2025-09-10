@@ -8,6 +8,8 @@ import org.apache.coyote.controller.dynamic.LoginController;
 import org.apache.coyote.controller.dynamic.RegisterController;
 import org.apache.coyote.controller.resource.ResourceType;
 import org.apache.coyote.controller.resource.StaticController;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 
 public class RequestHandler {
 
@@ -30,6 +32,6 @@ public class RequestHandler {
         if (findController != null) {
             return findController;
         }
-        throw new IllegalArgumentException("지원하지 않은 경로입니다.");
+        throw new HttpException(ErrorCode.NOT_ALLOW_PATH);
     }
 }

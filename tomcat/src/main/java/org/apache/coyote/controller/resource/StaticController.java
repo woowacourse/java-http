@@ -24,6 +24,7 @@ public class StaticController implements Controller {
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod == HttpMethod.GET) {
             responseStaticFile(httpHeader, response);
+            return;
         }
         throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }

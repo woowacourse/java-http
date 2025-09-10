@@ -8,7 +8,8 @@ public enum ErrorPage {
     PAGE_401("/401.html", StatusCode.UNAUTHORIZED),
     PAGE_404("/404.html", StatusCode.NOT_FOUND),
     PAGE_405("/405.html", StatusCode.NOT_ALLOW_METHOD),
-    PAGE_500("/500.html",StatusCode.INTERNAL_SERVER_ERROR);
+    PAGE_415("/415.html", StatusCode.NOT_SUPPORTED_MEDIA_TYPE),
+    PAGE_500("/500.html", StatusCode.INTERNAL_SERVER_ERROR);
 
     private final String page;
     private final StatusCode statusCode;

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
@@ -11,6 +12,13 @@ public class SessionManager implements Manager {
 
     public static SessionManager getInstance() {
         return INSTANCE;
+    }
+
+    public static Http11Session createSession() {
+        String sessionId = UUID.randomUUID().toString();
+        Http11Session session = new Http11Session(sessionId);
+        SESSIONS.put(sessionId, session);
+        return session;
     }
 
     @Override

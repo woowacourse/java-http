@@ -61,28 +61,27 @@ public class Http11Processor implements Runnable, Processor {
         final InputStreamReader inputStreamReader = new InputStreamReader(requestInputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        final List<String> requestMessage = new ArrayList<>();
+        final List<String> headerLines = new ArrayList<>();
         String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            requestMessage.add(line);
-            if (line.isEmpty()) {
-                break;
-            }
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
         }
 
-        final Optional<String> contentLengthHeader = requestMessage.stream()
+        final int contentLength = headerLines.stream()
                 .filter(l -> l.startsWith("Content-Length:"))
-                .map(l -> l.split(":")[1].trim())
-                .findFirst();
+                .map(l -> Integer.parseInt(l.split(":")[1].trim()))
+                .findFirst()
+                .orElse(0);
 
-        if (contentLengthHeader.isPresent()) {
-            final int contentLength = Integer.parseInt(contentLengthHeader.get());
-            final char[] bodyChars = new char[contentLength];
+        final char[] bodyChars = new char[contentLength];
+        if (contentLength > 0) {
             bufferedReader.read(bodyChars, 0, contentLength);
-            requestMessage.add(new String(bodyChars));
         }
 
-        return Http11Request.create(requestMessage);
+        final String rawHttpRequest = String.join("\r\n", headerLines)
+                + "\r\n\r\n"
+                + new String(bodyChars);
+        return Http11Request.create(rawHttpRequest);
     }
 
     private Http11Response findResponse(final Http11Request request) throws IOException {
@@ -154,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final User user = userOrEmpty.get();
-        return handleAuthorizedRequest(user, request);
+        return handleAuthorizedRequest(user);
     }
 
     private Http11Response handleRegisterRequest(final Http11Request request) throws IOException {
@@ -175,10 +174,10 @@ public class Http11Processor implements Runnable, Processor {
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        return handleAuthorizedRequest(user, request);
+        return handleAuthorizedRequest(user);
     }
 
-    private Http11Response handleAuthorizedRequest(final User user, final Http11Request request) throws IOException {
+    private Http11Response handleAuthorizedRequest(final User user) {
         final String sessionId = generateSessionID();
 
         final Session session = new Session(sessionId);
@@ -186,7 +185,7 @@ public class Http11Processor implements Runnable, Processor {
         sessionManager.add(session);
 
         final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Set-Cookie", String.format("JSESSIONID=%s", sessionId));
+        headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", sessionId));
 
         return Http11Response.createRedirectResponse("/index.html", headers);
     }

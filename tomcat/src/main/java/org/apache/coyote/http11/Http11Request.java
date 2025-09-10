@@ -1,17 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Http11Request {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String COOKIE_HEADER = "Cookie";
-
-    private static final AtomicInteger pointer = new AtomicInteger(0);
 
     private final String method;
     private final String target;
@@ -21,9 +17,13 @@ public class Http11Request {
     private final Http11Cookie cookie;
     private final String body;
 
-    public static Http11Request create(final List<String> requestMessage) {
-        pointer.set(0);
-        final String[] firstLine = requestMessage.get(pointer.getAndIncrement()).split(" ");
+    public static Http11Request create(final String rawHttpRequest) {
+        final String[] headersAndBody = rawHttpRequest.split("\r\n\r\n", 2);
+
+        final String[] headerLines = headersAndBody[0].split("\r\n");
+        final String body = headersAndBody[1];
+
+        final String[] firstLine = headerLines[0].split(" ");
         validateFirstLineSize(firstLine);
 
         final String method = firstLine[0];
@@ -36,14 +36,12 @@ public class Http11Request {
             target = target.substring(0, queryParamStartIndex);
         }
 
-        final Map<String, String> headers = getHeaders(requestMessage);
+        final Map<String, String> headers = getHeaders(headerLines);
         Http11Cookie cookie = null;
         if (headers.containsKey(COOKIE_HEADER)) {
             cookie = Http11Cookie.create(headers.get(COOKIE_HEADER));
             headers.remove(COOKIE_HEADER);
         }
-
-        final String body = getBody(requestMessage);
 
         return new Http11Request(method, target, queryParams, httpVersion, headers, cookie, body);
     }
@@ -81,15 +79,12 @@ public class Http11Request {
     }
 
     private static Map<String, String> getHeaders(
-            final List<String> requestMessage
+            final String[] headerLines
     ) {
         String line;
         final Map<String, String> headers = new HashMap<>();
-        while (pointer.get() < requestMessage.size()) {
-            line = requestMessage.get(pointer.getAndIncrement());
-            if (line.isBlank()) {
-                break;
-            }
+        for (int i = 1; i < headerLines.length; i++) {
+            line = headerLines[i];
 
             final String[] headerLine = line.split(HEADER_DELIMITER);
             if (headerLine.length != 2) {
@@ -99,19 +94,6 @@ public class Http11Request {
             headers.put(headerLine[0], headerLine[1]);
         }
         return headers;
-    }
-
-    private static String getBody(
-            final List<String> requestMessage
-    ) {
-        String line;
-        final StringBuilder sb = new StringBuilder();
-        while (pointer.get() < requestMessage.size()) {
-            line = requestMessage.get(pointer.getAndIncrement());
-
-            sb.append(line);
-        }
-        return sb.toString();
     }
 
     public Http11Request(

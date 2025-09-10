@@ -3,23 +3,23 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.request.ServletRequest;
 import org.apache.catalina.response.ServletResponse;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements HttpRequestHandler {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String LOGIN_PAGE_PATH = "/login.html";
     private static final String MAIN_PAGE_PATH = "/index.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
     @Override
-    public void handleGet(ServletRequest request, ServletResponse response) {
+    public void doGet(ServletRequest request, ServletResponse response) {
         if (isLoginUser(request)) {
             response.sendRedirect(MAIN_PAGE_PATH);
             return;
@@ -28,8 +28,7 @@ public class LoginHandler implements HttpRequestHandler {
     }
 
     @Override
-    public void handlePost(ServletRequest request, ServletResponse response) {
-
+    public void doPost(ServletRequest request, ServletResponse response) {
         final User findUser = InMemoryUserRepository.findByAccount(request.getParameter(ACCOUNT_KEY))
                 .orElseThrow(() -> new UnauthorizedException(
                         "존재하지 않는 사용자 입니다 account: " + request.getParameter(ACCOUNT_KEY)));
@@ -40,23 +39,22 @@ public class LoginHandler implements HttpRequestHandler {
 
         log.info("로그인 성공! account : {}", findUser.getAccount());
 
-        Session session = request.getSession(true);
+        final Session session = request.getSession(true);
         session.setAttribute("user", findUser);
 
         response.sendRedirect(MAIN_PAGE_PATH);
     }
 
     private boolean isLoginUser(ServletRequest request) {
-        Session session = request.getSession(false);
+        final Session session = request.getSession(false);
         if (session == null) {
             return false;
         }
 
-        Object userAttribute = session.getAttribute("user");
+        final Object userAttribute = session.getAttribute("user");
         if (userAttribute == null) {
             return false;
         }
-        User user = (User) userAttribute;
-        return true;
+        return userAttribute instanceof User;
     }
 }

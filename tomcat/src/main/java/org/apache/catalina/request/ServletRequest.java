@@ -2,17 +2,17 @@ package org.apache.catalina.request;
 
 import java.util.Objects;
 import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.cookie.HttpCookieName;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpHeaderName;
 import org.apache.coyote.HttpRequest;
 
 public class ServletRequest {
 
-    private static final char PATH_DELIMITER = '?';
-
-    private final String method;
-    private final String path;
+    private final HttpMethod method;
+    private final Path path;
     private final Parameters parameters;
     private final HttpHeader headers;
     private final HttpCookie cookies;
@@ -20,19 +20,19 @@ public class ServletRequest {
     private Session session;
 
     public ServletRequest(HttpRequest request) {
-        this.method = request.getMethod();
+        this.method = HttpMethod.of(request.getMethod());
         this.headers = new HttpHeader(request.getHeaders());
-        this.path = parsePath(request.getUri());
+        this.path = new Path(request.getUri());
         this.body = request.getBody();
-        this.parameters = new Parameters(request.getUri(), body, headers.getContentType());
-        this.cookies = new HttpCookie(headers.getCookie());
+        this.parameters = new Parameters(request.getUri(), body, headers.get(HttpHeaderName.CONTENT_TYPE.getValue()));
+        this.cookies = new HttpCookie(headers.get(HttpHeaderName.COOKIE.getValue()));
     }
 
-    public String getPath() {
+    public Path getPath() {
         return path;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
@@ -45,7 +45,7 @@ public class ServletRequest {
             return session;
         }
 
-        final String sessionId = getCookie("JSESSIONID");
+        final String sessionId = getCookie(HttpCookieName.JSESSIONID.getValue());
         if (sessionId != null) {
             final Session existingSession = SessionManager.getInstance().findSession(sessionId);
             if (existingSession != null) {
@@ -68,16 +68,7 @@ public class ServletRequest {
             return false;
         }
 
-        return !Objects.equals(getCookie("JSESSIONID"), session.getId());
-    }
-
-    private String parsePath(String uri) {
-        final int queryIndex = uri.indexOf(PATH_DELIMITER);
-
-        if (queryIndex == -1) {
-            return uri;
-        }
-        return uri.substring(0, queryIndex);
+        return !Objects.equals(getCookie(HttpCookieName.JSESSIONID.getValue()), session.getId());
     }
 
     private Session createNewSession() {

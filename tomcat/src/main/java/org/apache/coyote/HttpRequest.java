@@ -24,17 +24,17 @@ public class HttpRequest {
 
     public HttpRequest(InputStream inputStream) {
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String requestLine = reader.readLine();
+            final String requestLine = reader.readLine();
             validateRequestLine(requestLine);
 
-            StringTokenizer tokenizer = new StringTokenizer(requestLine);
+            final StringTokenizer tokenizer = new StringTokenizer(requestLine);
             this.method = tokenizer.nextToken();
             this.uri = tokenizer.nextToken();
             this.protocol = tokenizer.nextToken();
             this.headers = parseHeaders(reader);
-            this.body = parseBody(reader, headers.getContentLength());
+            this.body = parseBody(reader, headers.get(HttpHeaderName.CONTENT_LENGTH.getValue()));
 
         } catch (IOException e) {
             throw new UncheckedServletException(e);
@@ -58,7 +58,7 @@ public class HttpRequest {
     }
 
     private HttpHeader parseHeaders(BufferedReader reader) throws IOException {
-        HttpHeader headers = new HttpHeader();
+        final HttpHeader headers = new HttpHeader();
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -104,7 +104,7 @@ public class HttpRequest {
             return EMPTY_BODY;
         }
 
-        char[] buffer = new char[length];
+        final char[] buffer = new char[length];
         reader.read(buffer, 0, length);
         return new String(buffer);
     }

@@ -28,7 +28,7 @@ public class Parameters {
     }
 
     private Map<String, String> parseQuery(String uri) {
-        int queryIndex = uri.indexOf(PATH_DELIMITER);
+        final int queryIndex = uri.indexOf(PATH_DELIMITER);
 
         if (queryIndex == -1) {
             return Collections.emptyMap();

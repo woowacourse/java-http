@@ -13,16 +13,20 @@ public class HttpResponse {
     private final String protocol;
     private HttpStatus status;
     private String body;
-    private HttpHeader headers;
+    private final HttpHeader headers;
 
     public HttpResponse(String protocol) {
         this.protocol = protocol;
-        initialize();
+        this.headers = new HttpHeader();
+        this.body = EMPTY_BODY;
     }
 
     public void setBody(String body) {
         this.body = body;
-        setContentLength();
+        headers.set(
+                HttpHeaderName.CONTENT_LENGTH.getValue(),
+                String.valueOf(body.getBytes(StandardCharsets.UTF_8).length)
+        );
     }
 
     public void addHeader(String name, String value) {
@@ -54,14 +58,5 @@ public class HttpResponse {
             }
         }
         return builder.toString();
-    }
-
-    private void initialize() {
-        this.headers = new HttpHeader();
-        this.body = EMPTY_BODY;
-    }
-
-    private void setContentLength() {
-        headers.setContentLength(String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 }

@@ -32,11 +32,8 @@ public class HttpHeaders {
         return httpHeaders;
     }
 
-
-    //TODO: 여기에도 sanitize 적용하기  (2025-09-7, 일, 17:22)
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895285
     public void add(String name, String value) {
-        headers.computeIfAbsent(name, key -> new ArrayList<>()).add(value);
+        headers.computeIfAbsent(sanitize(name), key -> new ArrayList<>()).add(sanitize(value));
     }
 
     public boolean contains(String key) {
@@ -75,11 +72,11 @@ public class HttpHeaders {
     }
 
     // 헤더 인젝션 방지용 메서드
-    private static String sanitize(String str) {
-        if (str == null) {
+    private static String sanitize(String value) {
+        if (value == null) {
             throw new IllegalArgumentException("헤더의 키/값이 null입니다");
         }
 
-        return str.replaceAll("[\\r\\n]", "");
+        return value.replaceAll("[\\r\\n]", "");
     }
 }

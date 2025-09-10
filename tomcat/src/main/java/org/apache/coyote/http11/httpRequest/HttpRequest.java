@@ -26,6 +26,10 @@ public class HttpRequest {
         return this.requestLine.findParamsValue(name);
     }
 
+    public ProtocolVersion getProtocolVersion() {
+        return this.requestLine.getProtocolVersion();
+    }
+
     public Optional<String> findParamsValueFromBody(final String name) {
         return this.requestBody.findParamsValue(name);
     }

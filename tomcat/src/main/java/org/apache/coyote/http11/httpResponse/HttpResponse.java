@@ -3,6 +3,7 @@ package org.apache.coyote.http11.httpResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
+import org.apache.coyote.http11.httpRequest.ProtocolVersion;
 
 public class HttpResponse {
 
@@ -28,8 +29,9 @@ public class HttpResponse {
 
         final ResponseHeader responseHeader = ResponseHeader.build(httpRequest, responseContent);
 
+        final ProtocolVersion protocolVersion = httpRequest.getProtocolVersion();
         final HttpStatus httpStatus = responseContent.httpStatus();
-        final StatusLine statusLine = StatusLine.build(httpStatus);
+        final StatusLine statusLine = StatusLine.build(protocolVersion, httpStatus);
 
         return new HttpResponse(statusLine, responseHeader, responseBody);
     }

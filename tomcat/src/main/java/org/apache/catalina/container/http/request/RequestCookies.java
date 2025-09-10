@@ -31,8 +31,10 @@ public class RequestCookies {
             return cookieRead;
         }
 
-        String cookieHeader = cookieHeaderOptional.get();
-        List<String> cookieLines = List.of(cookieHeader.split(";"));
+        String cookieHeaderLine = cookieHeaderOptional.get();
+        String cookieHeaderValue = List.of(cookieHeaderLine.split(":")).getLast();
+
+        List<String> cookieLines = List.of(cookieHeaderValue.split(";"));
         for (String cookieLine : cookieLines) {
             int index = cookieLine.indexOf("=");
             String key = cookieLine.substring(0, index).trim();

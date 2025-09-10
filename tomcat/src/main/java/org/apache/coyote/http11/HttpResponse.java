@@ -73,7 +73,9 @@ public class HttpResponse {
         }
         if (!httpCookies.isEmpty()) {
             for (HttpCookie httpCookie : httpCookies) {
-                sb.append(httpCookie.getSetCookieValue());
+                sb.append("Set-Cookie: ")
+                        .append(httpCookie.getKey()).append("=").append(httpCookie.getValue())
+                        .append(CRLF);
             }
         }
         sb.append("Content-Length: ").append(contentLength).append(CRLF);

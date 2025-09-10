@@ -15,12 +15,12 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public String getSetCookieValue() {
-        return "Set-Cookie: " + key + "=" + value + "\r\n";
-    }
-
     public boolean isKey(String key) {
         return this.key.equals(key);
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public String getValue() {

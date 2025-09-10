@@ -7,6 +7,7 @@ import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.render.HttpStatus;
 import org.apache.coyote.render.MethodType;
 import org.apache.coyote.render.PageRenderer;
+import org.apache.coyote.util.HeaderParser;
 
 public class UserRegisterHandler implements RequestHandler{
     private static final String ACCOUNT = "account";
@@ -44,7 +45,8 @@ public class UserRegisterHandler implements RequestHandler{
         } catch (IllegalArgumentException e) {
             return PageRenderer.createStaticFileResponse(HttpStatus.UNAUTHORIZED.getStatusCode(), "/401.html");
         }
-        return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/");
+        return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(),
+                HeaderParser.createRedirectHeaders("/", null,null));
     }
 
 

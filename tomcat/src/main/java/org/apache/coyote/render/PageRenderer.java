@@ -1,5 +1,6 @@
 package org.apache.coyote.render;
 
+import java.util.Map;
 import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.util.HttpResponseBuilder;
 import org.slf4j.Logger;
@@ -45,12 +46,8 @@ public class PageRenderer{
         }
     }
 
-    public static String sendRedirect(int statusCode,String location) {
-        return HttpResponseBuilder.getRedirectResponseString(statusCode, location, null);
-    }
-
-    public static String sendRedirect(int statusCode,String location, String sessionId) {
-        return HttpResponseBuilder.getRedirectResponseString(statusCode, location, sessionId);
+    public static String sendRedirect(int statusCode, Map<String,String> headers) {
+        return HttpResponseBuilder.getRedirectResponseString(statusCode, headers);
     }
 
 }

@@ -22,8 +22,6 @@ public class HttpCookie {
         return cookies.get(JSESSIONID);
     }
 
-
-
     private void parseCookies(String cookieHeader) {
         String[] pairs = cookieHeader.split(";");
         for (String pair : pairs) {
@@ -34,6 +32,10 @@ public class HttpCookie {
                 cookies.put(key, value);
             }
         }
+    }
+
+    public String createSessionCookie(String sessionId) {
+        return "JSESSIONID=" + sessionId + "; Path=/; HttpOnly";
     }
 }
 

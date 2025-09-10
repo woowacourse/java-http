@@ -1,11 +1,11 @@
 package org.apache.coyote.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 import org.apache.coyote.render.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class HttpResponseBuilder {
 
@@ -22,15 +22,15 @@ public class HttpResponseBuilder {
                 content
         );
     }
-    public static String getRedirectResponseString(int statusCode, String location, String sessionId) {
+
+    public static String getRedirectResponseString(int statusCode, Map<String, String> headers) {
         StringBuilder response = new StringBuilder();
         response.append("HTTP/1.1 ").append(statusCode)
                 .append(" ").append(HttpStatus.getMessageByStatusCode(statusCode))
                 .append("\r\n");
-        response.append("Location: ").append(location).append("\r\n");
 
-        if (sessionId != null) {
-            response.append("Set-Cookie: JSESSIONID=").append(sessionId).append("; Path=/; HttpOnly\r\n");
+        if (headers != null) {
+            headers.forEach((key, value) -> response.append(key).append(": ").append(value).append("\r\n"));
         }
 
         response.append("Content-Length: 0\r\n\r\n");

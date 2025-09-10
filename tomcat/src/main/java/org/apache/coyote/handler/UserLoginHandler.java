@@ -10,6 +10,7 @@ import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.render.HttpStatus;
 import org.apache.coyote.render.MethodType;
 import org.apache.coyote.render.PageRenderer;
+import org.apache.coyote.util.HeaderParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,6 @@ public class UserLoginHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(UserLoginHandler.class);
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
-
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
@@ -39,7 +39,8 @@ public class UserLoginHandler implements RequestHandler {
             try {
                 Session session = sessionManager.findSession(httpCookie.getSessionId());
                 if (session != null && session.getAttribute("user") != null) {
-                    return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/", httpCookie.getSessionId());
+                    return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(),
+                            HeaderParser.createRedirectHeaders("/", httpCookie, session.getId()));
                 }
             } catch (IOException e) {
                 log.warn("Invalid session: {}", httpCookie.getSessionId(), e);
@@ -53,21 +54,19 @@ public class UserLoginHandler implements RequestHandler {
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
 
         if (!checkUserPassword(user, queryParams.get(PASSWORD))) {
-            return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/401.html", null);
+            return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), HeaderParser.createRedirectHeaders("/401.html",null,null));
         }
 
-        String sessionId = httpCookie.generateJSESSIONID();
+        String sessionId = sessionManager.generateJSESSIONID();
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
         sessionManager.add(session);
 
-        return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(), "/", sessionId);
+        return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(),
+                HeaderParser.createRedirectHeaders("/", httpCookie, sessionId));
     }
 
     private boolean checkUserPassword(final User user, final String inputPassword) {
-        if (!user.checkPassword(inputPassword)) {
-            return false;
-        }
-        return true;
+        return user.checkPassword(inputPassword);
     }
 }

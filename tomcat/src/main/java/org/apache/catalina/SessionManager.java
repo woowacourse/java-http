@@ -3,6 +3,7 @@ package org.apache.catalina;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager implements Manager {
 
@@ -35,6 +36,11 @@ public class SessionManager implements Manager {
         if (session != null && session.getId() != null) {
             SESSIONS.remove(session.getId());
         }
+    }
+
+    public String generateJSESSIONID() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 }
 

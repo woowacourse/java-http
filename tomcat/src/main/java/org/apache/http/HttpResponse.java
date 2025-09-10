@@ -31,6 +31,7 @@ public class HttpResponse {
             outputStream.write(message.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException e) {
+            e.printStackTrace();
             throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
         }
     }

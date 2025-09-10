@@ -1,7 +1,7 @@
 package org.apache.controller;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.request.HttpRequest;
 import org.apache.http.value.HttpHeader;
 import org.apache.http.value.HttpMethod;
 import org.apache.http.value.StatusCode;

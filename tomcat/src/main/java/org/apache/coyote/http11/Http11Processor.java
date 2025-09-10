@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -145,7 +144,11 @@ public class Http11Processor implements Runnable, Processor {
         }
         // login 화면 요청인 경우
         if (method.equalsIgnoreCase("GET") && uri.equals("/login")) {
-            return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("login.html"));
+            final var session = request.getSession(false);
+            if (session == null) {
+                return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("login.html"));
+            }
+            return new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("index.html"));
         }
         // register 화면 요청인 경우
         if (method.equalsIgnoreCase("GET") && uri.equals("/register")) {
@@ -183,20 +186,16 @@ public class Http11Processor implements Runnable, Processor {
                 return new HttpResponse("text/html", HttpStatus.UNAUTHORIZED, readStaticFileByName("401.html"));
             }
 
-            if (user.get().checkPassword(password)) {
-                log.info("user : {}", user);
-                final var httpResponse = new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("index.html"));
-                if (request.headers().containsKey("Cookie")) {
-                    final var requestCookie = new HttpCookie(request.headers().get("Cookie"));
-                    if (requestCookie.containsKey("JSESSIONID")) {
-                        return httpResponse;
-                    }
-                }
+            final var savedUser = user.get();
+            if (savedUser.checkPassword(password)) {
+                log.info("user : {}", savedUser);
+                final var session = request.getSession(true);
+                session.setAttribute("user", savedUser);
 
-                final var uuid = UUID.randomUUID();
                 final var cookie = new HttpCookie();
-                cookie.add("JSESSIONID", uuid.toString());
+                cookie.add("JSESSIONID", session.getId());
 
+                final var httpResponse = new HttpResponse("text/html", HttpStatus.OK, readStaticFileByName("index.html"));
                 httpResponse.setCookie(cookie);
                 return httpResponse;
             }

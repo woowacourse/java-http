@@ -50,6 +50,7 @@ public class Http11Processor implements Runnable, Processor {
                 sendErrorResponse(outputStream);
                 return;
             }
+            final Http11Response response = new Http11Response();
 
             final String path = extractPath(request.getUri());
             final Http11Method method = request.getMethod();
@@ -72,11 +73,16 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-            final String response = buildResponse(statusLine, responseHeaders, responseBody);
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            response.putStatusLine(statusLine);
+            response.putHeaders(responseHeaders);
+            response.putBody(responseBody);
+
+            outputStream.write(response.buildResponse(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } catch (Http11ParseException ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
 

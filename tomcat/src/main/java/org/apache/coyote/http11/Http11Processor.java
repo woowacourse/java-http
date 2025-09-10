@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.cookie.SessionCookieFactory;
 import org.apache.coyote.http11.exception.HttpStatusException;
 import org.apache.coyote.http11.httprequest.HttpMethod;
 import org.apache.coyote.http11.httprequest.HttpRequest;
@@ -126,7 +127,7 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("user: " + user.get());
         final Session session = sessionManager.createAndSaveSession(Map.of("user", user.get()));
-        final HttpCookie sessionCookie = sessionManager.createSessionCookie(session);
+        final HttpCookie sessionCookie = SessionCookieFactory.createSessionCookie(session);
         final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
         response.setCookie(sessionCookie);
         return response;

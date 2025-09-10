@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -14,7 +13,7 @@ class HttpRequestTest {
     void request_start_line을_파싱한다() throws IOException {
         String rawRequest = "GET /login?account=jjangu&password=hooni HTTP/1.1";
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(rawRequest.getBytes());
-        HttpRequest httpRequest = new HttpRequest(byteArrayInputStream, new SessionManager());
+        HttpRequest httpRequest = new HttpRequest(byteArrayInputStream);
 
         String path = httpRequest.getPath();
         String accountValue = httpRequest.getParameter("account");

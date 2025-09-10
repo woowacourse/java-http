@@ -22,7 +22,7 @@ public class HttpRequest {
     private final Map<String, String> body;
     private final Session session;
 
-    public HttpRequest(InputStream inputStream, SessionManager sessionManager) throws IOException {
+    public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestStartLine = bufferedReader.readLine();
         String url = requestStartLine.split(" ")[1];
@@ -36,7 +36,7 @@ public class HttpRequest {
         }
         this.headers = readHeaders(bufferedReader);
         this.cookies = readCookies(headers);
-        this.session = sessionManager.findSession(getCookie("JSESSIONID"));
+        this.session = SessionManager.getInstance().findSession((getCookie("JSESSIONID")));
         if (headers.containsKey("Content-Length")) {
             this.body = readBody(bufferedReader, Integer.parseInt(headers.get("Content-Length")));
         } else {

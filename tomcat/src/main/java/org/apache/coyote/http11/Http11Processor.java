@@ -19,7 +19,6 @@ import java.util.Optional;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -37,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = new HttpRequest(inputStream, sessionManager);
+            HttpRequest request = new HttpRequest(inputStream);
 
             String response = getResponse(request);
 
@@ -124,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
     private Session createSession(User user) {
         Session session = new Session();
         session.setAttribute("user", user);
-        sessionManager.add(session);
+        SessionManager.getInstance().add(session);
         return session;
     }
 

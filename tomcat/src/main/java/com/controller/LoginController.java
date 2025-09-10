@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,8 @@ public class LoginController extends AbstractController {
 
     @Override
     public Http11Response doGet(final Http11Request request) {
-        Session session = request.getSession(false);
+        String sessionId = request.getSessionId();
+        Session session = SessionManager.getOrCreateSession(sessionId, false);
         if (session != null && session.getAttribute("user") != null) {
             return Http11Response.redirect("/index.html", COOKIE + session.getId());
         }
@@ -52,7 +54,8 @@ public class LoginController extends AbstractController {
 
         if (loginSuccess.isPresent()) {
             log.info("로그인 성공 - {}", account);
-            Session session = request.getSession(true);
+            String sessionId = request.getSessionId();
+            Session session = SessionManager.getOrCreateSession(sessionId, true);
             session.setAttribute("user", loginSuccess.get());
             String cookieHeader = COOKIE + session.getId();
             return Http11Response.redirect("/index.html", cookieHeader);

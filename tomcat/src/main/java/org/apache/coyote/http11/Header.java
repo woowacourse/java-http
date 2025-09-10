@@ -9,6 +9,10 @@ public class Header {
         this.value = value;
     }
 
+    public boolean isContentLength() {
+        return header.equals("Content-Length");
+    }
+
     public boolean isCookeHeader() {
         return header.equals("Cookie");
     }

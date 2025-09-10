@@ -8,10 +8,10 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public Http11Response control(final Http11Request request) {
-        if (request.getHttpMethod() == HttpMethod.GET) {
+        if (request.isSameHttpMethod(HttpMethod.GET)) {
             return doGet(request);
         }
-        if (request.getHttpMethod() == HttpMethod.POST) {
+        if (request.isSameHttpMethod(HttpMethod.POST)) {
             return doPost(request);
         }
 

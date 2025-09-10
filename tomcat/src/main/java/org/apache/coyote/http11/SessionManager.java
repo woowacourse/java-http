@@ -2,17 +2,33 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 
-    public static void add(final Session session) {
+    public static Session getOrCreateSession(final String sessionId, final boolean create) {
+        Session session = findSession(sessionId);
+        if (session != null) {
+            return session;
+        }
+
+        if (create) {
+            Session newSession = new Session(UUID.randomUUID().toString());
+            add(newSession);
+            return newSession;
+        }
+        return null;
+    }
+
+    private static void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Session findSession(final String id) {
+    private static Session findSession(final String id) {
         return SESSIONS.get(id);
     }
 

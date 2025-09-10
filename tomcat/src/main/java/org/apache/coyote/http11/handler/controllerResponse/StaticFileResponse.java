@@ -1,7 +1,10 @@
 package org.apache.coyote.http11.handler.controllerResponse;
 
 import java.util.HashMap;
+import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.general.HttpProtocolVersion;
+import org.apache.coyote.http11.httpResponse.HttpResponse;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
 
 public record StaticFileResponse(HttpStatus status, HttpHeaders headers, String content) implements ApplicationResponse {
@@ -13,5 +16,10 @@ public record StaticFileResponse(HttpStatus status, HttpHeaders headers, String 
     @Override
     public void addHeader(String key, String value) {
         headers.add(key, value);
+    }
+
+    @Override
+    public HttpResponse toHttpResponse(HttpProtocolVersion protocolVersion) {
+        return HttpResponse.of(protocolVersion, this.status, ContentType.TEXT_HTML, content);
     }
 }

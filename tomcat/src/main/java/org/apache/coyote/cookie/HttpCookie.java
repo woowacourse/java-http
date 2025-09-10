@@ -2,7 +2,6 @@ package org.apache.coyote.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpCookie {
     private static final String JSESSIONID = "JSESSIONID";
@@ -23,10 +22,7 @@ public class HttpCookie {
         return cookies.get(JSESSIONID);
     }
 
-    public String generateJSESSIONID() {
-        UUID uuid = UUID.randomUUID();
-        return uuid.toString();
-    }
+
 
     private void parseCookies(String cookieHeader) {
         String[] pairs = cookieHeader.split(";");

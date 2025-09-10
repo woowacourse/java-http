@@ -250,10 +250,6 @@ public class Http11Processor implements Runnable, Processor {
         response.append("Content-Type: ").append(contentType).append(";charset=utf-8\r\n");
         response.append("Content-Length: ").append(bytes.length).append("\r\n");
 
-        if (jSessionId != null) {
-            response.append("Set-Cookie: JSESSIONID=").append(jSessionId).append("\r\n");
-        }
-
         response.append("\r\n");
         response.append(responseBody);
 

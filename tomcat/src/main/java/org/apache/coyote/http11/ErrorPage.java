@@ -4,7 +4,7 @@ import org.apache.coyote.http11.exception.CommonException;
 
 public enum ErrorPage {
 
-    UNAUTHORIZE("401.html", 401),
+    UNAUTHORIZED("401.html", 401),
     NOT_FOUND("404.html", 404),
     ;
 

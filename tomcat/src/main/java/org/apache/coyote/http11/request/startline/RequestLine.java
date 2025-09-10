@@ -16,10 +16,6 @@ public class RequestLine {
         return new RequestLine(httpMethod, requestUri, httpVersion);
     }
 
-    public HttpMethod getHttpMethod() {
-        return this.httpMethod;
-    }
-
     public boolean isPathEqualsTo(final String requestPath) {
         return this.requestUri.isPathEqualsTo(requestPath);
     }

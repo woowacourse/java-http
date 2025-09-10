@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.core.ApplicationProcessor;
-import org.apache.catalina.util.StaticResourcePathGenerator;
+import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.Processor;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;

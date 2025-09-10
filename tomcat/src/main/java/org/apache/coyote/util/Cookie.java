@@ -1,4 +1,4 @@
-package org.apache.catalina.util;
+package org.apache.coyote.util;
 
 import java.util.Arrays;
 import java.util.Map;

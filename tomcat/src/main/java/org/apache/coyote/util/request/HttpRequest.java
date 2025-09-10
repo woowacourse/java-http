@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.catalina.util.Cookie;
+import org.apache.coyote.util.Cookie;
 
 public class HttpRequest {
 

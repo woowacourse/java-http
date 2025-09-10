@@ -1,4 +1,4 @@
-package org.apache.catalina.util;
+package org.apache.coyote.util;
 
 public class StaticResourcePathGenerator {
 

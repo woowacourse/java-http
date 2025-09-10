@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.session;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +27,19 @@ public class HttpCookie {
         }
     }
 
+    public void add(String key, String value) {
+        cookies.put(key, value);
+    }
+
     public String get(String name) {
         return cookies.get(name);
     }
 
-    public Map<String, String> asMap() {
-        return Collections.unmodifiableMap(cookies);
+    public String toHeaderValue() {
+        StringBuilder sb = new StringBuilder();
+        for (String key : cookies.keySet()) {
+            sb.append(key).append("=").append(cookies.get(key)).append("; ");
+        }
+        return sb.toString();
     }
 }

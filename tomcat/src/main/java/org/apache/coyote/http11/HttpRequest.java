@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Map;
+import org.apache.coyote.http11.session.HttpCookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -13,6 +16,7 @@ public class HttpRequest {
     private final Map<String, String> query;
     private final byte[] body;
     private final Map<String, String> form;
+    private HttpCookie httpCookie;
 
     public HttpRequest(
             String method,
@@ -21,7 +25,8 @@ public class HttpRequest {
             Map<String, String> headers,
             Map<String, String> query,
             byte[] body,
-            Map<String, String> form
+            Map<String, String> form,
+            HttpCookie httpCookie
     ) {
         this.method = method;
         this.uri = uri;
@@ -30,6 +35,7 @@ public class HttpRequest {
         this.query = query;
         this.body = body;
         this.form = form;
+        this.httpCookie = httpCookie;
     }
 
     public String method() {
@@ -66,5 +72,12 @@ public class HttpRequest {
 
     public String getForm(String key) {
         return form.get(key);
+    }
+
+    public Session getSession() {
+        if (httpCookie.get("SID") == null) {
+            return SessionManager.add();
+        }
+        return SessionManager.findSession(httpCookie.get("SID"));
     }
 }

@@ -1,28 +1,25 @@
 package org.apache.coyote.http11.session;
 
-import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.catalina.Manager;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class SessionManager implements Manager {
+public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    @Override
-    public void add(HttpSession session) {
+    public static Session add() {
         UUID uuid = UUID.randomUUID();
-        SESSIONS.put(uuid.toString(), (Session) session);
+        Session session = new Session(uuid.toString());
+        SESSIONS.put(uuid.toString(), session);
+        return session;
     }
 
-    @Override
-    public HttpSession findSession(String id) {
-        return (HttpSession) SESSIONS.get(id);
+    public static Session findSession(String id) {
+        return SESSIONS.get(id);
     }
 
-    @Override
-    public void remove(HttpSession session) {
+    public static void remove(Session session) {
         SESSIONS.remove(session.getId());
     }
 }

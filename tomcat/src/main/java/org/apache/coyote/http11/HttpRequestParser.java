@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.session.HttpCookie;
 
 public final class HttpRequestParser {
 
@@ -38,6 +39,8 @@ public final class HttpRequestParser {
             String value = line.substring(idx + 1).trim();
             headers.put(name.toLowerCase(), value);
         }
+        String cookieHeader = headers.get("cookie");
+        HttpCookie httpCookie = new HttpCookie(cookieHeader);
         String uri, queryString = "";
         int q = target.indexOf('?');
         if (q >= 0) {
@@ -49,11 +52,11 @@ public final class HttpRequestParser {
         Map<String, String> query = parseQuery(queryString);
 
         byte[] body = new byte[0];
-        int contentLength = headers.containsKey("Content-Length") ? Integer.parseInt(headers.get("Content-Length")) : 0;
+        int contentLength = headers.containsKey("content-length") ? Integer.parseInt(headers.get("content-length")) : 0;
         if (contentLength > 0) {
             body = http11InputBuffer.readBytes(contentLength);
         }
-        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body)));
+        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body)), httpCookie);
     }
 
     private Map<String, String> parseQuery(String queryString) {

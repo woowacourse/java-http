@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Optional;
 import org.apache.coyote.http11.exception.CommonException;
+import org.apache.coyote.http11.session.Session;
 
 public class LoginController {
 
@@ -14,12 +14,13 @@ public class LoginController {
         String account = httpRequest.getForm("account");
         String password = httpRequest.getForm("password");
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            throw new CommonException(HttpStatus.UNAUTHORIZED);
-        }
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new CommonException(HttpStatus.UNAUTHORIZED));
 
-        if (user.get().checkPassword(password)) {
+        if (user.checkPassword(password)) {
+            Session session = httpRequest.getSession();
+            session.setAttribute("user", user);
+            httpResponse.addCookie("SID", session.getId());
             httpResponse.setStatusCode(HttpStatus.FOUND);
             httpResponse.setHeader("Location", "http://localhost:8080");
             System.out.println(account + " 로그인 완료");

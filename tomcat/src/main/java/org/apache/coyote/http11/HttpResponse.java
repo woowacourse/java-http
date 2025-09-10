@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.session.HttpCookie;
 
 public class HttpResponse {
 
@@ -11,6 +12,7 @@ public class HttpResponse {
     private final Map<String, String> headers = new LinkedHashMap<>();
     private byte[] body = new byte[0];
     private boolean committed = false;
+    private HttpCookie httpCookie = new HttpCookie("");
 
     public static byte[] bytes(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
@@ -54,8 +56,21 @@ public class HttpResponse {
         return committed;
     }
 
-    void markCommitted() {
+    public HttpCookie httpCookie() {
+        return httpCookie;
+    }
+
+    public void markCommitted() {
         committed = true;
+    }
+
+    public void addCookie(String key, String value) {
+        httpCookie.add(key, value);
+        setHeader("Set-Cookie", httpCookie.toHeaderValue());
+    }
+
+    public void setHttpCookie(HttpCookie httpCookie) {
+        this.httpCookie = httpCookie;
     }
 }
 

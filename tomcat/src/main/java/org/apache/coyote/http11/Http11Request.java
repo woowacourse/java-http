@@ -137,13 +137,6 @@ public class Http11Request {
         return urlEncodedResponseBody;
     }
 
-    public Optional<String> findQueryParam(final String key) {
-        if (queryParams.containsKey(key)) {
-            return Optional.of(queryParams.get(key));
-        }
-        return Optional.empty();
-    }
-
     public Optional<String> findCookie(final String cookieName) {
         if (cookie == null) {
             return Optional.empty();

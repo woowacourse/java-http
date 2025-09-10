@@ -30,7 +30,6 @@ public class HandlerResult {
         return status;
     }
 
-
     public ContentType contentType() {
         return contentType;
     }
@@ -49,11 +48,11 @@ public class HandlerResult {
 
     public static class Builder {
 
-        private final Map<String, String> headers = new LinkedHashMap<>();
         private Status status;
         private ContentType contentType = ContentType.TEXT;
+        private final Map<String, String> headers = new LinkedHashMap<>();
         private byte[] body = new byte[0];
-        private boolean requiresSession = false; // 4. 빌더에 필드 및 기본값 추가
+        private boolean requiresSession = false;
 
         public Builder status(final Status status) {
             this.status = status;
@@ -65,16 +64,15 @@ public class HandlerResult {
             return this;
         }
 
-        public Builder body(final byte[] body) {
-            this.body = body;
-            return this;
-        }
-
         public Builder header(final String name, final String value) {
             this.headers.put(name, value);
             return this;
         }
 
+        public Builder body(final byte[] body) {
+            this.body = body;
+            return this;
+        }
 
         public Builder requiresSession(final boolean requiresSession) {
             this.requiresSession = requiresSession;

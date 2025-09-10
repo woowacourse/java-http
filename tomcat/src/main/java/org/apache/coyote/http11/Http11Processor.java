@@ -1,27 +1,37 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
+import static org.apache.coyote.http11.HttpConstants.CONTENT_LENGTH_HEADER;
+import static org.apache.coyote.http11.HttpConstants.CONTENT_TYPE_HEADER;
+import static org.apache.coyote.http11.HttpConstants.COOKIE_JSESSIONID;
+import static org.apache.coyote.http11.HttpConstants.DEFAULT_PROTOCOL;
+import static org.apache.coyote.http11.HttpConstants.EQUAL;
+import static org.apache.coyote.http11.HttpConstants.SET_COOKIE_HEADER;
+
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.dto.HttpRequest;
+import org.apache.coyote.http11.dto.HttpResponse;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handler.HandlerResult;
+import org.apache.coyote.http11.handler.StaticFileHandler;
+import org.apache.coyote.http11.parser.HttpRequestParser;
+import org.apache.coyote.http11.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final StaticFileHandler STATIC_FILE_HANDLER = new StaticFileHandler();
+    private static final Router ROUTER = new Router(STATIC_FILE_HANDLER);
 
     private final Socket connection;
 
@@ -40,112 +50,60 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            // 1. 요청 라인(Request Line) 읽기
-            final String requestLine = readRequestLine(inputStream);
-            if (requestLine == null) {
-                return;
-            }
+            // 1. HTTP 요청 파싱
+            final HttpRequest request = readRequest(inputStream);
 
-            // 2. 요청 라인(Request Line) URI 부분 파싱
-            final String requestUriPath = parseRequestLineUriPath(requestLine);
+            // 2. 라우팅 및 핸들러 실행
+            final HandlerResult result = handleRequest(request);
 
-            // 3. 경로를 추출할 URI 처리
-            String uriPath = requestUriPath;
-            if (requestUriPath.startsWith("/login")) {
-                final int index = requestUriPath.indexOf("?");
-                uriPath = requestUriPath.substring(0, index);
-                String queryString = requestUriPath.substring(index + 1);
-                Map<String, String> queryParams = mapQueryParams(queryString);
-                findUserByAccount(queryParams);
-            }
-
-            // 3. 요청된 URI 경로 추출 (기본 /index.html)
-            final String rawPath = extractRequestUriRawPath(uriPath);
-
-            // 4. 실제 (정적) 리소스 경로 생성 (static 디렉터리 매핑)
-            final String resourcePath = createResourcePath(rawPath);
-
-            // 5. classPath에 해당하는 (정적) 리소스 찾기
-            final URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
-            if (resourceUrl == null) {
-                return;
-            }
-
-            // 6. 파일 읽기
-            final File resourceFile = new File(resourceUrl.getFile());
-            final byte[] fileContentBytes = Files.readAllBytes(resourceFile.toPath());
-
-            // 7. HTTP 응답 헤더(Response Header) 생성
-            final String contentTypeHeader = getContentTypeHeader(rawPath);
-            final int contentLength = fileContentBytes.length;
-            final String responseHeaders = createResponseHeaders(contentTypeHeader, contentLength);
-
-            // 8. HTTP 응답 전송하기
-            outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(fileContentBytes);
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            // 3. HTTP 응답 생성 및 전송
+            sendResponse(outputStream, request, result);
+        } catch (final IllegalArgumentException e) {
+            log.warn(e.getMessage());
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readRequestLine(final InputStream inputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        return bufferedReader.readLine();
-    }
-
-    private String parseRequestLineUriPath(final String requestLine) {
-        final String[] requestTokens = requestLine.split(" ");
-        return requestTokens[1];
-    }
-
-    private String extractRequestUriRawPath(final String requestUriPath) {
-        String rawPath = requestUriPath;
-        if (rawPath == null || rawPath.isBlank() || "/".equals(rawPath)) {
-            rawPath = "/index.html";
-        } else if (rawPath.startsWith("/login")) {
-            return String.format("%s.html", rawPath);
+    // 1. HTTP 요청 파싱
+    private HttpRequest readRequest(final InputStream inputStream) throws IOException {
+        final Optional<HttpRequest> optionalRequest = HttpRequestParser.parse(inputStream);
+        if (optionalRequest.isEmpty()) {
+            throw new IllegalArgumentException("Invalid or empty HTTP request");
         }
-        return rawPath;
+        return optionalRequest.get();
     }
 
-    private String createResourcePath(final String rawPath) {
-        return "static" + rawPath;
+    // 2. 라우팅 및 핸들러 실행
+    private HandlerResult handleRequest(final HttpRequest request) {
+        final Handler handler = ROUTER.route(request);
+        return handler.doHandle(request);
     }
 
-    private String getContentTypeHeader(final String rawPath) {
-        String contentType = "text/html";
-        if (rawPath.endsWith(".css")) {
-            contentType = "text/css";
-        } else if (rawPath.endsWith(".js")) {
-            contentType = "text/javascript";
+    // 3. HTTP 응답 생성 및 전송
+    private void sendResponse(final OutputStream outputStream, final HttpRequest request, final HandlerResult result)
+            throws IOException {
+        final HttpResponse response = buildHttpResponse(request, result);
+        outputStream.write(response.toBytes());
+        outputStream.write(result.body());
+        outputStream.flush();
+    }
+
+    // 3.1 HTTP 응답 생성 및 헤더 설정
+    private HttpResponse buildHttpResponse(final HttpRequest request, final HandlerResult result) {
+        final HttpResponse response = new HttpResponse(DEFAULT_PROTOCOL, result.status(), new LinkedHashMap<>());
+        response.addHeader(CONTENT_TYPE_HEADER, result.contentType().value());
+        response.addHeader(CONTENT_LENGTH_HEADER, String.valueOf(result.body().length));
+
+        // 핸들러별 추가 헤더 설정 (e.g. LoginHandler의 302 Location)
+        for (final Entry<String, String> header : result.headers().entrySet()) {
+            response.addHeader(header.getKey(), header.getValue());
         }
-        return String.format("%s;charset=utf-8", contentType);
-    }
 
-    private String createResponseHeaders(final String contentTypeHeader, final int contentLength) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                contentTypeHeader,
-                "Content-Length: " + contentLength,
-                "",
-                "");
-    }
-
-    private Map<String, String> mapQueryParams(final String queryString) {
-        final Map<String, String> queryParams = new HashMap<>();
-        final String[] pairs = queryString.split("&");
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=");
-            queryParams.put(keyValue[0], keyValue[1]);
+        // JSESSIONID 쿠키가 없다면 쿠키 헤더 설정
+        if (result.requiresSession() && !request.httpCookie().containsCookie(COOKIE_JSESSIONID)) {
+            response.addHeader(SET_COOKIE_HEADER, COOKIE_JSESSIONID + EQUAL + UUID.randomUUID());
         }
-        return queryParams;
-    }
-
-    private void findUserByAccount(final Map<String, String> queryParams) {
-        final String account = queryParams.get("account");
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        log.info("user : {}", user);
+        return response;
     }
 }

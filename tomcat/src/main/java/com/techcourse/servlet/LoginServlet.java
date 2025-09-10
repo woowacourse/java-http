@@ -9,16 +9,14 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.catalina.Servlet;
+import org.apache.catalina.HttpServlet;
 import org.apache.catalina.Session;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginServlet implements Servlet {
+public class LoginServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
@@ -28,22 +26,7 @@ public class LoginServlet implements Servlet {
     }
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) {
-        if (HttpMethod.GET == request.getMethod()) {
-            handleGet(request, response);
-            return;
-        }
-
-        if (HttpMethod.POST == request.getMethod()) {
-            handlePost(request, response);
-            return;
-        }
-
-        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-        response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
-    }
-
-    private void handleGet(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         // 이미 로그인된 상태인지 체크
         final Session session = request.getSession(false);
         if (session != null && getUser(session) != null) {
@@ -57,7 +40,8 @@ public class LoginServlet implements Servlet {
         response.write(loginHtml);
     }
 
-    private void handlePost(final HttpRequest request, final HttpResponse response) {
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
 
@@ -78,9 +62,8 @@ public class LoginServlet implements Servlet {
         if (user.checkPassword(password)) {
             log.info("로그인 성공: 회원 조회 결과 - {}", user);
 
-            // 세션에 사용자 정보 저장
             final Session session = request.getSession(true);
-            session.setAttribute("user", user);
+            session.setAttribute("userId", user.getAccount());
             response.addCookie("JSESSIONID", session.getId());
             response.sendRedirect("/");
             return;
@@ -91,7 +74,11 @@ public class LoginServlet implements Servlet {
     }
 
     private User getUser(final Session session) {
-        return session.getAttribute("user", User.class);
+        final String userId = session.getAttribute("userId", String.class);
+        if (userId == null) {
+            return null;
+        }
+        return InMemoryUserRepository.findByAccount(userId).orElse(null);
     }
 
     private String readLoginPage() {
@@ -104,21 +91,10 @@ public class LoginServlet implements Servlet {
 
         } catch (final IOException e) {
             log.error("Failed to read login.html", e);
-            return createErrorPage("Error loading login page", 500);
+            return createErrorPage("Error loading login page");
         }
     }
 
-    private String createErrorPage(final String message, final int statusCode) {
-        return String.format("""
-                <html>
-                <head><title>Error %d</title></head>
-                <body>
-                    <h1>%s</h1>
-                    <p>Status Code: %d</p>
-                </body>
-                </html>
-                """, statusCode, message, statusCode);
-    }
 
     @Override
     public void destroy() {

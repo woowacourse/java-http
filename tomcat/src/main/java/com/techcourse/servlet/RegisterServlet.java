@@ -9,15 +9,13 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.catalina.Servlet;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.catalina.HttpServlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterServlet implements Servlet {
+public class RegisterServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterServlet.class);
 
@@ -27,27 +25,13 @@ public class RegisterServlet implements Servlet {
     }
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) {
-        if (HttpMethod.GET == request.getMethod()) {
-            handleGet(request, response);
-            return;
-        }
-
-        if (HttpMethod.POST == request.getMethod()) {
-            handlePost(request, response);
-            return;
-        }
-
-        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-        response.write("<html><body><h1>405 Method Not Allowed</h1></body></html>");
-    }
-
-    private void handleGet(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String registerHtml = readRegisterPage();
         response.write(registerHtml);
     }
 
-    private void handlePost(final HttpRequest request, final HttpResponse response) {
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final String account = request.getParameter("account");
         final String email = request.getParameter("email");
         final String password = request.getParameter("password");
@@ -91,21 +75,10 @@ public class RegisterServlet implements Servlet {
 
         } catch (final IOException e) {
             log.error("Failed to read register.html", e);
-            return createErrorPage("Error loading register page", 500);
+            return createErrorPage("Error loading register page");
         }
     }
 
-    private String createErrorPage(final String message, final int statusCode) {
-        return String.format("""
-                <html>
-                <head><title>Error %d</title>
-                <body>
-                    <h1>%s</h1>
-                    <p>Status Code: %d</p>
-                </body>
-                </html>
-                """, statusCode, message, statusCode);
-    }
 
     @Override
     public void destroy() {

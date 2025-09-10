@@ -1,9 +1,9 @@
 package org.apache.catalina.mapper;
 
-import com.techcourse.handler.DefaultController;
-import com.techcourse.handler.LoginController;
-import com.techcourse.handler.RegisterController;
-import com.techcourse.handler.RootController;
+import com.techcourse.controller.DefaultController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootController;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

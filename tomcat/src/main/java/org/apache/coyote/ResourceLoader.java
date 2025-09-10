@@ -14,7 +14,7 @@ public class ResourceLoader {
         URL url = getUrl(uri);
 
         if (url == null) {
-            return new byte[0];
+            return null;
         }
 
         final var targetFile = url.getFile();

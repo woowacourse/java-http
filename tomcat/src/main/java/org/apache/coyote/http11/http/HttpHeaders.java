@@ -1,10 +1,9 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.http;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class HttpHeaders {
@@ -18,13 +17,5 @@ public class HttpHeaders {
         return headers.containsKey(key)
                 ? Optional.of(headers.get(key).get(0))
                 : Optional.empty();
-    }
-
-    public List<String> getAll(String key) {
-        return headers.getOrDefault(key, List.of());
-    }
-
-    public Set<String> keySet() {
-        return headers.keySet();
     }
 }

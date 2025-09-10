@@ -1,15 +1,14 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.handler.statics;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.dto.HttpRequest;
-import org.apache.coyote.http11.helper.Responses;
-import org.apache.coyote.http11.util.HttpStatus;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.request.dto.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +38,19 @@ public class StaticResourceHandler implements Handler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
+        if (!"GET".equalsIgnoreCase(request.method())) {
+            return false;
+        }
+
+        if (!request.queryParams().isEmpty()) {
+            return false;
+        }
+
+        // /login은 LoginHandler가 처리하도록 제거
+        if (request.path().equals("/login")) {
+            return false;
+        }
+
         String path = request.path().replaceFirst(STATIC_REGEX, "");
         path = normalizePath(path);
         if (path.contains(INVALID_PATH_SEQUENCE)) {
@@ -49,22 +61,36 @@ public class StaticResourceHandler implements Handler {
     }
 
     @Override
-    public void handle(HttpRequest request, OutputStream outputStream) throws IOException {
+    public void handle(HttpRequest request, HttpResponse response) throws IOException {
         String resourcePath = request.path().replaceFirst(STATIC_REGEX, "");
         String normalizedResourcePath = normalizePath(resourcePath);
         String fullPath = base + SUFFIX + normalizedResourcePath;
 
         try {
-            loadResourceBytes(fullPath).ifPresentOrElse(
-                    bytes -> respondBinary(outputStream, request.version(), normalizedResourcePath, bytes),
-                    () -> respondNotFound(outputStream, request.version())
-            );
+            Optional<byte[]> bytesOpt = loadResourceBytes(fullPath);
+            if (bytesOpt.isPresent()) {
+                byte[] bytes = bytesOpt.get();
+                String contentType = resolveContentType(normalizedResourcePath);
+
+                response.status(HttpStatus.OK.getCode(), HttpStatus.OK.getReason())
+                        .contentType(contentType)
+                        .write(bytes);
+
+            } else {
+                response.status(HttpStatus.NOT_FOUND.getCode(), HttpStatus.NOT_FOUND.getReason())
+                        .contentType("text/plain")
+                        .write("404 Not Found");
+            }
         } catch (IOException e) {
             log.error("I/O error while serving static resource '{}': {}", request.path(), e.getMessage(), e);
-            Responses.serverError(outputStream, request.version());
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR.getCode(), HttpStatus.INTERNAL_SERVER_ERROR.getReason())
+                    .contentType("text/plain")
+                    .write("500 Internal Server Error");
         } catch (Exception e) {
             log.error("Unexpected error while serving static resource '{}': {}", request.path(), e.getMessage(), e);
-            Responses.serverError(outputStream, request.version());
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR.getCode(), HttpStatus.INTERNAL_SERVER_ERROR.getReason())
+                    .contentType("text/plain")
+                    .write("500 Internal Server Error");
         }
     }
 
@@ -75,6 +101,10 @@ public class StaticResourceHandler implements Handler {
         if (path.isEmpty()) {
             path = defaultDocument;
         }
+        // 확장자 없으면 .html 붙이기
+        if (!path.contains(".")) {
+            path = path + ".html";
+        }
         return path;
     }
 
@@ -84,25 +114,6 @@ public class StaticResourceHandler implements Handler {
                 return Optional.empty();
             }
             return Optional.of(resourceStream.readAllBytes());
-        }
-    }
-
-    private void respondBinary(OutputStream out, String version, String resourcePath, byte[] bytes) {
-        try {
-            String contentType = resolveContentType(resourcePath);
-            Responses.binary(out, version,
-                    HttpStatus.OK.getCode(), HttpStatus.OK.getReason(),
-                    contentType, bytes);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void respondNotFound(OutputStream out, String version) {
-        try {
-            Responses.notFound(out, version);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 

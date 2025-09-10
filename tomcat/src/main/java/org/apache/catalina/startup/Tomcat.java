@@ -4,8 +4,10 @@ import java.util.List;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.DispatcherHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.dynamic.LoginHandler;
+import org.apache.coyote.http11.handler.dynamic.RegisterHandler;
+import org.apache.coyote.http11.handler.statics.NotFoundHandler;
+import org.apache.coyote.http11.handler.statics.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,9 @@ public class Tomcat {
     public void start() {
         List<Handler> handlers = List.of(
                 new StaticResourceHandler("static", "index.html"),
-                new LoginHandler()
+                new LoginHandler(),
+                new RegisterHandler(),
+                new NotFoundHandler()
         );
 
         DispatcherHandler dispatcher = new DispatcherHandler(handlers);

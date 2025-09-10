@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
         User user = createNewUser(request);
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공! 아이디 : {}", user.getAccount());
-        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, null);
         response.setLocation("/index.html");
         return response;
     }

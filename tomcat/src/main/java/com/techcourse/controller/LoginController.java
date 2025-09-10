@@ -33,7 +33,7 @@ public class LoginController extends AbstractController {
             return new HttpResponse(HttpStatusCode.OK, ContentType.HTML, "/login.html");
         }
 
-        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, null);
         response.setLocation("/index.html");
         return response;
     }
@@ -47,7 +47,7 @@ public class LoginController extends AbstractController {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("로그인 성공! 아이디: {}", user.get().getAccount());
-            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+            HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, null);
             setUserSession(request, user.get());
             response.setLocation("/index.html");
             return response;

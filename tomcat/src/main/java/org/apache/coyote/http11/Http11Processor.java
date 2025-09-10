@@ -2,14 +2,6 @@ package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +16,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,48 +48,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            // 요청 헤더
-            String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                throw new IllegalArgumentException("invalid http request");
-            }
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            final HttpResponse response = getHttpResponse(httpRequest);
 
-            int contentLength = 0;
-            String line;
-            HttpCookie httpCookie = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.isEmpty()) {
-                    break;
-                }
-                if (line.toLowerCase().startsWith("cookie")) {
-                    String[] keyValue = line.split(":");
-                    if (keyValue.length == 2) {
-                        httpCookie = new HttpCookie(keyValue[1].trim());
-                    }
-                }
-                if (line.toLowerCase().startsWith("content-length")) { // request body의 길이
-                    String[] keyValue = line.split(":");
-                    if (keyValue.length == 2) {
-                        contentLength = Integer.parseInt(keyValue[1].trim());
-                    }
-                }
-            }
-
-            String body = "";
-            if (contentLength > 0) {
-                char[] bodyChars = new char[contentLength];
-                bufferedReader.read(bodyChars, 0, contentLength);
-                body = new String(bodyChars);
-            }
-
-            // 요청 헤더 파싱
-            String requestMethod = requestLine.split(" ")[0];
-            String requestUri = requestLine.split(" ")[1];
-            String requestUriPath = getRequestUriPath(requestUri);
-            Map<String, String> queryParameters = getQueryParameters(requestUri);
-
-            // 응답
-            final HttpResponse response = getHttpResponse(requestMethod, requestUriPath, queryParameters, httpCookie, body);
             outputStream.write(response.toString().getBytes(UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -97,31 +58,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getRequestUriPath(String requestUri) {
-        int index = requestUri.lastIndexOf("?");
-        if (index == -1) {
-            return requestUri;
-        }
-        return requestUri.substring(0, requestUri.lastIndexOf("?"));
-    }
-
-    private Map<String, String> getQueryParameters(String requestUri) {
-        int index = requestUri.lastIndexOf("?");
-        if (index == -1) {
-            return Map.of();
-        }
-        String queryString = requestUri.substring(index + 1);
-        return parseQueryParameters(queryString);
-    }
-
-    private HttpResponse getHttpResponse(
-        String requestMethod,
-        String requestUriPath,
-        Map<String, String> queryParameters,
-        HttpCookie httpCookie,
-        String body
-    ) throws IOException {
-        Session session = getSession(httpCookie);
+    private HttpResponse getHttpResponse(HttpRequest request) throws IOException {
+        Session session = getSession(request.getHttpCookie());
+        String requestMethod = request.getRequestMethod();
+        String requestUriPath = request.getRequestUriPath();
+        String body = request.getBody();
         if (requestMethod.equals("GET") && requestUriPath.equals("/")) {
             String responseBody = "Hello world!";
             return HttpResponse.builder()

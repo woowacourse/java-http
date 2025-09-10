@@ -10,6 +10,10 @@ public class HttpHeader {
         this.value = value;
     }
 
+    public boolean nameEquals(String other) {
+        return name.toLowerCase().equals(other.toLowerCase());
+    }
+
     public String getValue() {
         return value;
     }

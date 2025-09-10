@@ -52,4 +52,16 @@ public class HttpRequest {
         }
         return null;
     }
+
+    public Session changeSessionId() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        String sessionId = SessionManager.getSessionId(cookie);
+        if (sessionId != null) {
+            sessionManager.remove(sessionId);
+        }
+        String newSessionId = SessionManager.generateSessionId();
+        Session newSession = new Session(newSessionId);
+        sessionManager.add(newSession);
+        return newSession;
+    }
 }

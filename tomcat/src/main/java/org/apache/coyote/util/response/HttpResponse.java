@@ -66,7 +66,12 @@ public class HttpResponse {
     }
 
     public void addCookie(String name, String value) {
-        addHeader("Set-Cookie", name + "=" + value);
+        // SameSite=Lax: CSRF 방어. 대부분의 경우 CSRF를 막아주면서, GET 요청 링크를 통한 세션은 유지시켜줌.
+        // HttpOnly: 클라이언트 측 스크립트가 쿠키에 접근하는 것을 방지 (XSS 보호).
+        // Path=/: 쿠키를 전체 사이트에서 사용하도록 설정.
+        // Secure: HTTPS를 사용하는 경우에만 쿠키를 전송하도록 함. (현재는 HTTP 환경이므로 주석 처리)
+        String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", name, value);
+        addHeader("Set-Cookie", cookieValue);
     }
 
     public byte[] getBody() {

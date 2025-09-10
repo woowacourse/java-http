@@ -33,4 +33,8 @@ public class SessionManager {
     public Session findCustomSession(final String id) {
         return SESSIONS.get(id);
     }
+
+    public void remove(final String id) {
+        SESSIONS.remove(id);
+    }
 }

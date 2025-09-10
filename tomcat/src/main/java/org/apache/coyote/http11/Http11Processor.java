@@ -85,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse buildResponse(RequestLine requestLine, MimeType mimeType, Map<String, String> requestHeaders)
             throws IOException {
         if (requestLine.isRootPath()) {
-            return HttpResponse.of(HttpStatus.OK, mimeType, "Hello world!");
+            return HttpResponse.of(HttpStatus.OK, MimeType.HTML, "Hello world!");
         }
 
         if (requestLine.hasQuery()) {

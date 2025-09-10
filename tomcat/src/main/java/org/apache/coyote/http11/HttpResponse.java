@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
@@ -19,7 +19,7 @@ public class HttpResponse {
         this.protocolVersion = protocolVersion;
         this.status = status;
         this.mimeType = mimeType;
-        this.headers = new HashMap<>();
+        this.headers = new LinkedHashMap<>();
         this.body = body;
     }
 
@@ -45,6 +45,7 @@ public class HttpResponse {
     public String toHttpResponseString() {
         StringBuilder sb = new StringBuilder();
         buildHeaders(sb);
+        sb.append("\r\n");
         appendBody(sb);
         return sb.toString();
     }
@@ -59,9 +60,9 @@ public class HttpResponse {
             sb.append(key)
                     .append(": ")
                     .append(headers.get(key))
+                    .append(" ")
                     .append("\r\n");
         }
-        sb.append("\r\n");
     }
 
     private void appendBody(StringBuilder sb) {

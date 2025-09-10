@@ -2,10 +2,10 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.coyote.http11.exception.Http11ParseException;
 
 public class Http11Response {
 

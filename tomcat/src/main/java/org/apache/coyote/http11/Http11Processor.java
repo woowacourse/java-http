@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.Http11ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

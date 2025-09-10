@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
@@ -70,14 +69,14 @@ public class RequestHandler {
 
     private HttpResponse handleStaticResource(HttpRequest httpRequest) {
         if (httpRequest.getPath().equals("/index") || httpRequest.getPath().equals("/index.html")) {
-            if (httpRequest.getSession(false) == null) {
+            if (sessionManager.getSession(httpRequest.getSessionId()) == null) {
                 return HttpResponse.forRedirect(ResponseStatus.FOUND, "/login.html");
             }
         }
         if (httpRequest.getPath().equals("/login") || httpRequest.getPath().equals("/login.html") ||
                 httpRequest.getPath().equals("/register") || httpRequest.getPath().equals("/register.html")) {
-            if (httpRequest.getSession(false) != null) {
-                Session session = httpRequest.getSession(false);
+            if (sessionManager.getSession(httpRequest.getSessionId()) != null) {
+                final var session = sessionManager.getSession(httpRequest.getSessionId());
                 User user = (User) session.getAttribute("user");
                 return HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
             }
@@ -98,16 +97,14 @@ public class RequestHandler {
         }
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        sessionManager.setSession();
-        final var session = httpRequest.getSession(true);
-        session.setAttribute("user", user);
-        HttpResponse httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
-        httpResponse.setCookie("JSESSIONID", session.getId());
+        final var session = sessionManager.createSession();
+        final var httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        httpResponse.setSession(session);
         return httpResponse;
     }
 
     private HttpResponse handleLogin(HttpRequest httpRequest) {
-        Map<String, String> requestBody = httpRequest.getBody();
+        final Map<String, String> requestBody = httpRequest.getBody();
         final String account = requestBody.getOrDefault("account", "");
         final String password = requestBody.getOrDefault("password", "");
         if (account.isBlank() || password.isBlank()) {
@@ -118,10 +115,9 @@ public class RequestHandler {
             throw new UnauthorizedException();
         }
         log.info("회원 조회 성공 : {}", user);
-        final var session = httpRequest.getSession(true);
-        session.setAttribute("user", user);
-        HttpResponse httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
-        httpResponse.setCookie("JSESSIONID", session.getId());
+        final var session = sessionManager.createSession();
+        final var httpResponse = HttpResponse.forRedirect(ResponseStatus.FOUND, "/index.html");
+        httpResponse.setSession(session);
         return httpResponse;
     }
 

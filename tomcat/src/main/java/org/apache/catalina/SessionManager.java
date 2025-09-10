@@ -2,13 +2,14 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    private SessionManager() {};
+    private SessionManager() {}
 
     public static SessionManager getInstance() {
         return INSTANCE;
@@ -19,6 +20,13 @@ public class SessionManager {
     }
 
     public Session getSession(String key) {
-        return SESSIONS.get(key);
+        return SESSIONS.getOrDefault(key, null);
+    }
+
+    public Session createSession() {
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        setSession(sessionId, session);
+        return session;
     }
 }

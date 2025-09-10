@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.Session;
 
 public class HttpResponse {
 
@@ -62,6 +63,10 @@ public class HttpResponse {
         return fullResponse.getBytes();
     }
 
+    public void setSession(Session session) {
+        httpCookies.add(new HttpCookie("JSESSIONID", session.getId()));
+    }
+
     private String buildHeaders() {
         StringBuilder sb = new StringBuilder();
         sb.append(getStatusLine()).append(CRLF);
@@ -88,9 +93,9 @@ public class HttpResponse {
     }
 
     private String buildContentTypeHeader() {
-        if(contentType == ContentType.HTML || contentType == ContentType.JS || contentType == ContentType.CSS) {
+        if (contentType == ContentType.HTML || contentType == ContentType.JS || contentType == ContentType.CSS) {
             return "Content-Type: " + contentType.getFirstMimeType() + ";charset=utf-8";
         }
-        return "Content-Type: " +contentType.getFirstMimeType();
+        return "Content-Type: " + contentType.getFirstMimeType();
     }
 }

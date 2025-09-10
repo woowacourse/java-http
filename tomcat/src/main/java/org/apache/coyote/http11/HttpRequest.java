@@ -2,9 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
@@ -34,27 +31,8 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public Session getSession(boolean create) {
-        SessionManager sessionManager = SessionManager.getInstance();
-        String sessionId = getCookieValue("JSESSIONID");
-
-        if (sessionId != null) {
-            Session session = sessionManager.getSession(sessionId);
-            if (session != null) return session;
-        }
-
-        if (create) {
-            String newSessionId = generateSessionId();
-            Session newSession = new Session(newSessionId);
-            sessionManager.setSession(newSessionId, newSession);
-            return newSession;
-        }
-
-        return null;
-    }
-
-    private String generateSessionId() {
-        return UUID.randomUUID().toString();
+    public String getSessionId() {
+        return getCookieValue("JSESSIONID");
     }
 
     public Method getMethod() {

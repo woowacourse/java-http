@@ -14,7 +14,10 @@ public class HttpHeader {
         return new HttpHeader(RequestLine.createErrorRequestLine(path));
     }
 
-    public HttpHeader(final String requestLine, final List<String> headers) {
+    public HttpHeader(
+            final String requestLine,
+            final List<String> headers
+    ) {
         this.requestLine = new RequestLine(requestLine);
         this.headers = HttpHeaderParser.getHeaders(headers);
     }

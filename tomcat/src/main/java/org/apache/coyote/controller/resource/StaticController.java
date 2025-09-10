@@ -16,16 +16,21 @@ import org.apache.coyote.httpResponse.StatusCode;
 public class StaticController implements Controller {
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
         final HttpHeader httpHeader = request.getHttpHeader();
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
-
         if (httpMethod == HttpMethod.GET) {
             responseStaticFile(httpHeader, response);
         }
     }
 
-    private void responseStaticFile(final HttpHeader httpHeader, final HttpResponse httpResponse) throws IOException {
+    private void responseStaticFile(
+            final HttpHeader httpHeader,
+            final HttpResponse httpResponse
+    ) throws IOException {
         final String path = httpHeader.getPurePath();
         final String body = getStaticResponseBody("static" + path);
         httpResponse.updateStatusLine("HTTP/1.1", StatusCode.OK);

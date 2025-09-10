@@ -15,7 +15,10 @@ import org.apache.coyote.httpResponse.HttpResponse;
 public class ErrorPageController implements Controller {
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
         final HttpHeader httpHeader = request.getHttpHeader();
         String path = httpHeader.getPurePath();
         responseErrorPage(path, response);

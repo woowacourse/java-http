@@ -12,7 +12,10 @@ public enum ErrorCode {
     private final String message;
     private final StatusCode statusCode;
 
-    ErrorCode(final String message, final StatusCode statusCode) {
+    ErrorCode(
+            final String message,
+            final StatusCode statusCode
+    ) {
         this.message = message;
         this.statusCode = statusCode;
     }

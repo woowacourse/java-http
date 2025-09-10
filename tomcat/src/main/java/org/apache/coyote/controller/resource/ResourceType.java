@@ -12,7 +12,10 @@ public enum ResourceType {
     private final String extension;
     private final String type;
 
-    ResourceType(final String extension, final String type) {
+    ResourceType(
+            final String extension,
+            final String type
+    ) {
         this.extension = extension;
         this.type = type;
     }

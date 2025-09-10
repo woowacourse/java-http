@@ -19,7 +19,10 @@ import org.apache.coyote.httpResponse.StatusCode;
 public class RegisterController implements Controller {
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
         final HttpHeader httpHeader = request.getHttpHeader();
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {
@@ -30,7 +33,10 @@ public class RegisterController implements Controller {
         }
     }
 
-    private void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    private void doGet(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
         responseHtml(request.getHttpHeader(), response);
     }
 

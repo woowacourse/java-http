@@ -7,17 +7,6 @@ public class HttpResponse {
     private final HttpResponseHeader responseHeader;
     private String body;
 
-
-    public HttpResponse(
-            final String protocol,
-            final StatusCode statusCode,
-            final String body
-    ) {
-        final StatusLine statusLine = new StatusLine(protocol, statusCode);
-        this.responseHeader = new HttpResponseHeader(statusLine);
-        this.body = body;
-    }
-
     public HttpResponse() {
         this.responseHeader = new HttpResponseHeader();
         this.body = null;

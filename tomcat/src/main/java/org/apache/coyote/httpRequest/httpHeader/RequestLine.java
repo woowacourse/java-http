@@ -20,7 +20,11 @@ public class RequestLine {
         this.protocol = HttpHeaderParser.findProtocol(trimmedRequestLine);
     }
 
-    private RequestLine(final HttpMethod httpMethod, final String path, final String protocol) {
+    private RequestLine(
+            final HttpMethod httpMethod,
+            final String path,
+            final String protocol
+    ) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.protocol = protocol;

@@ -31,7 +31,10 @@ public class LoginController implements Controller {
     private static final SessionManager sessionManager = new SessionManager();
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
         final HttpHeader httpHeader = request.getHttpHeader();
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {
@@ -42,7 +45,10 @@ public class LoginController implements Controller {
         }
     }
 
-    private void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    private void doGet(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
         final HttpHeader httpHeader = request.getHttpHeader();
         final String jsessionid = httpHeader.getCookie("JSESSIONID");
         if (jsessionid != null && sessionManager.findSession(jsessionid) != null) {
@@ -55,7 +61,10 @@ public class LoginController implements Controller {
         responseLoginHtml(response);
     }
 
-    private void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+    private void doPost(
+            final HttpRequest request,
+            final HttpResponse response
+    ) {
         if (processLogin(request, response)) {
             response.updateStatusLine("HTTP/1.1", StatusCode.FOUND);
             response.addHeader("Content-Length", "0");
@@ -65,9 +74,7 @@ public class LoginController implements Controller {
         throw new HttpException(ErrorCode.NOT_EXISTS_MEMBER);
     }
 
-    private void responseLoginHtml(
-            final HttpResponse httpResponse
-    ) throws IOException {
+    private void responseLoginHtml(final HttpResponse httpResponse) throws IOException {
         final String body = getStaticResponseBody("static/login.html");
         httpResponse.updateStatusLine("HTTP/1.1", StatusCode.OK);
         httpResponse.updateBody(body);

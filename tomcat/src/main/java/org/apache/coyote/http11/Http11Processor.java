@@ -44,7 +44,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processRequest(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    private void processRequest(
+            final HttpRequest httpRequest,
+            final HttpResponse httpResponse
+    ) throws IOException {
         try {
             final HttpHeader httpHeader = httpRequest.getHttpHeader();
             final Controller controller = RequestHandler.getController(httpHeader.getPurePath());

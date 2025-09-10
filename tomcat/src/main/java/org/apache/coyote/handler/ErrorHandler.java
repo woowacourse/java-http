@@ -22,9 +22,7 @@ public class ErrorHandler {
         errorPageController.service(httpErrorRequest, httpResponse);
     }
 
-    public static void handleServerError(
-            final HttpResponse httpResponse
-    ) throws IOException {
+    public static void handleServerError(final HttpResponse httpResponse) throws IOException {
         HttpRequest httpRequest = HttpRequest.createErrorRequest(ErrorPage.PAGE_500.getPage());
         errorPageController.service(httpRequest, httpResponse);
     }

@@ -1,6 +1,5 @@
 package org.apache.coyote.controller.dynamic;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.httpRequest.HttpRequest;
@@ -12,7 +11,10 @@ import org.apache.coyote.httpResponse.StatusCode;
 public class HomeController implements Controller {
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(
+            final HttpRequest request,
+            final HttpResponse response
+    ) {
         final HttpHeader httpHeader = request.getHttpHeader();
         final HttpMethod httpMethod = httpHeader.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {

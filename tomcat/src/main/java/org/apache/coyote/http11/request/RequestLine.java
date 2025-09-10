@@ -39,7 +39,7 @@ public record RequestLine(HttpMethod method,
         for (String query : splitPathQuery) {
             final String[] keyValue = query.split("=");
             if (keyValue.length != 2) {
-                return null;
+                continue;
             }
             queries.put(keyValue[0], keyValue[1]);
         }

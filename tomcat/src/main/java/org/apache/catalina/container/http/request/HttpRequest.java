@@ -92,8 +92,11 @@ public class HttpRequest {
         //TODO: 헤더도 바이트 단위로 읽는 것을 고려  (2025-09-9, 화, 14:26)
         List<String> headerLines = new ArrayList<>();
 
-        String line;
-        while (!(line = reader.readLine()).isEmpty()) {
+        while (true) {
+            String line = reader.readLine();
+            if (line == null || line.isEmpty()) {
+                break;
+            }
             headerLines.add(line);
         }
         return headerLines;

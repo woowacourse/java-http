@@ -4,6 +4,7 @@ import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
 import com.techcourse.service.LoginService;
+import com.techcourse.service.RegisterService;
 import java.util.List;
 import org.apache.coyote.http11.exception.InternalServerErrorException;
 
@@ -11,7 +12,7 @@ public enum ControllerProvider {
     INSTANCE;
 
     private static final List<Controller> CONTROLLERS = List.of(
-            new RegisterController(),
+            new RegisterController(new RegisterService()),
             new LoginController(new LoginService()),
             new StaticResourceController()
     );

@@ -105,10 +105,6 @@ public class HttpRequest {
         return parameters.get(name);
     }
 
-    public void setSession(final HttpSession session) {
-        this.session = session;
-    }
-
     public HttpSession getSession(final boolean create) {
         if (session != null) {
             return session;

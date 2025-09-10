@@ -3,10 +3,10 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import org.apache.coyote.http11.dto.HttpRequest;
-import org.apache.coyote.http11.helper.Responses;
+import org.apache.coyote.http11.request.dto.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-public class DispatcherHandler implements Handler {
+public class DispatcherHandler {
 
     private final List<Handler> chain;
 
@@ -14,19 +14,15 @@ public class DispatcherHandler implements Handler {
         this.chain = chain;
     }
 
-    @Override
-    public boolean canHandle(HttpRequest req) {
-        return true;
-    }
+    public void dispatch(HttpRequest request, OutputStream outputStream) throws IOException {
+        HttpResponse response = new HttpResponse(request.version());
 
-    @Override
-    public void handle(HttpRequest request, OutputStream outputStream) throws IOException {
         for (Handler handler : chain) {
             if (handler.canHandle(request)) {
-                handler.handle(request, outputStream);
-                return;
+                handler.handle(request, response);
+                break;
             }
         }
-        Responses.notFound(outputStream, request.version());
+        response.commit(outputStream);
     }
 }

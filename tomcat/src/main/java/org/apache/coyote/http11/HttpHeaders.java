@@ -42,13 +42,17 @@ public class HttpHeaders {
     public static HttpHeaders html() {
         return new HttpHeaders().add("Content-Type", "text/html;charset=utf-8");
     }
-    
+
+    public static HttpHeaders fromFile(String fileName) {
+        return new HttpHeaders().add("Content-Type", getContentType(fileName));
+    }
+
     public static HttpHeaders redirect(String location) {
         return new HttpHeaders()
             .add("Location", location)
             .add("Content-Length", "0");
     }
-    
+
     public static HttpHeaders empty() {
         return new HttpHeaders()
             .add("Content-Type", "text/html;charset=utf-8")
@@ -62,9 +66,5 @@ public class HttpHeaders {
             fileExtension = fileName.substring(lastDotIndex);
         }
         return CONTENT_TYPE_MAP.getOrDefault(fileExtension, "text/html;charset=utf-8");
-    }
-
-    public static HttpHeaders fromFile(String fileName) {
-        return new HttpHeaders().add("Content-Type", getContentType(fileName));
     }
 }

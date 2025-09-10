@@ -40,7 +40,7 @@ public class StaticResourceController extends AbstractController {
                 return send404Page();
             }
             byte[] responseBody = inputStream.readAllBytes();
-            HttpHeaders headers = HttpHeaders.forFile(finalResourcePath)
+            HttpHeaders headers = HttpHeaders.fromFile(finalResourcePath)
                 .add("Content-Length", String.valueOf(responseBody.length));
             
             return new HttpResponse("HTTP/1.1", HttpStatus.OK, headers, 

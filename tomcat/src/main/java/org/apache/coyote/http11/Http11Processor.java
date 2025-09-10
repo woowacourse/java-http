@@ -57,8 +57,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();) {
 
-            Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStream, sessionManager,
-                    DEFAULT_HEADER_CHARSET, DEFAULT_BODY_CHARSET);
+            Http11InputBuffer http11InputBuffer = new Http11InputBuffer(inputStream, DEFAULT_HEADER_CHARSET,
+                    DEFAULT_BODY_CHARSET);
             Http11OutputBuffer http11OutputBuffer = new Http11OutputBuffer(outputStream);
 
             HttpRequest httpRequest = http11InputBuffer.read();

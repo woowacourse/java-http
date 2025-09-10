@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.RequestCookie;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpRequestHeader;
@@ -19,14 +18,11 @@ public class Http11InputBuffer {
     private static final String INVALID_HTTP_VERSION = "HTTP/1.1";
 
     private final InputStream inputStream;
-    private final SessionManager sessionManager;
     private final Charset defaultHeaderCharset;
     private final Charset defaultBodyCharset;
 
-    public Http11InputBuffer(InputStream inputStream, SessionManager sessionManager, Charset defaultHeaderCharset,
-                             Charset defaultBodyCharset) {
+    public Http11InputBuffer(InputStream inputStream, Charset defaultHeaderCharset, Charset defaultBodyCharset) {
         this.inputStream = inputStream;
-        this.sessionManager = sessionManager;
         this.defaultHeaderCharset = defaultHeaderCharset;
         this.defaultBodyCharset = defaultBodyCharset;
     }

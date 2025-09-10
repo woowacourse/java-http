@@ -16,20 +16,35 @@ public class HttpResponse implements AutoCloseable {
         this.outputStream = outputStream;
     }
 
-    public void send(HttpStatus status, String contentType,
-                     byte[] body) throws IOException {
-        String header = String.format(
-                "HTTP/1.1 %d %s \r\n" +
-                        "Content-Type: %s \r\n" +
-                        "Content-Length: %d \r\n" +
-                        "\r\n",
-                status.getCode(),
-                status.getMessage(),
-                contentType,
-                body.length
-        );
+    public void send(HttpStatus status, String contentType, byte[] body) throws IOException {
+        String header = String.format("""
+                HTTP/1.1 %d %s\r
+                Content-Type: %s\r
+                Content-Length: %d\r
+                \r
+                """,
+            status.getCode(),
+            status.getMessage(),
+            contentType,
+            body.length
+    );
         outputStream.write(header.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
+        outputStream.flush();
+    }
+
+    public void sendRedirect(String location) throws IOException {
+        String header = String.format("""
+                HTTP/1.1 %d %s\r
+                Location: %s\r
+                Content-Length: 0\r
+                \r
+                """,
+            HttpStatus.FOUND.getCode(),
+            HttpStatus.FOUND.getMessage(),
+            location
+    );
+        outputStream.write(header.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 

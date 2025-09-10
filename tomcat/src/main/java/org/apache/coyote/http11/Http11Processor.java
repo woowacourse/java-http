@@ -60,9 +60,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 log.info(user.toString());
-                if (checkStaticFile("/index.html", response)) {
-                    return;
-                }
+                response.sendRedirect("/index");
+                return;
             }
 
             if (checkStaticFile(request.getPath(), response)) {

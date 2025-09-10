@@ -10,11 +10,11 @@ public class RequestBody {
     private final Map<String, String> body;
 
     public RequestBody(Optional<String> content) {
-        if (content.isEmpty()) {
-            this.body = new HashMap<>();
+        if (content.isPresent() && !content.get().isEmpty()) {
+            this.body = parseBody(content.get());
             return;
         }
-        this.body = parseBody(content.get());
+        this.body = new HashMap<>();
     }
 
     public boolean containKey(String key) {

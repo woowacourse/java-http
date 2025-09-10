@@ -18,10 +18,13 @@ public final class Cookie {
             return new Cookie(Map.of());
         }
         Map<String, String> map = Arrays.stream(headerValue.split(";"))
-                .map(String::trim)
                 .map(kv -> kv.split("=", 2))
                 .filter(arr -> arr.length == 2)
-                .collect(Collectors.toMap(a -> a[0], a -> a[1]));
+                .collect(Collectors.toMap(
+                        arr -> arr[0].trim(),
+                        arr -> arr[1].trim(),
+                        (oldValue, newValue) -> newValue
+                ));
         return new Cookie(map);
     }
 

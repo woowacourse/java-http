@@ -78,9 +78,8 @@ public class LoginServlet implements Servlet {
         if (user.checkPassword(password)) {
             log.info("로그인 성공: 회원 조회 결과 - {}", user);
 
-            // 세션에 사용자 정보 저장
             final Session session = request.getSession(true);
-            session.setAttribute("user", user);
+            session.setAttribute("userId", user.getAccount());
             response.addCookie("JSESSIONID", session.getId());
             response.sendRedirect("/");
             return;
@@ -91,7 +90,11 @@ public class LoginServlet implements Servlet {
     }
 
     private User getUser(final Session session) {
-        return session.getAttribute("user", User.class);
+        final String userId = session.getAttribute("userId", String.class);
+        if (userId == null) {
+            return null;
+        }
+        return InMemoryUserRepository.findByAccount(userId).orElse(null);
     }
 
     private String readLoginPage() {

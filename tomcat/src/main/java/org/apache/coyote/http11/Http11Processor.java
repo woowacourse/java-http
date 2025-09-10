@@ -55,24 +55,12 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller = ControllerMapper.getController(request.getPath());
             controller.service(request, response);
 
-            String statusLine = "HTTP/1.1 200 OK";
-            String responseBody = "Hello world!";
+            response.putStatusLine("HTTP/1.1 200 OK");
+            response.putBody("Hello world!");
+
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
             responseHeaders.put("Content-Type", MediaType.detectMimeType(path));
-
-            if (Http11Method.GET.equals(method)) {
-                Entry<String, String> getResult = handleGetRequest(path, request, responseHeaders);
-                statusLine = getResult.getKey();
-                responseBody = getResult.getValue();
-            } else if (Http11Method.POST.equals(method)) {
-                statusLine = handlePostRequest(path, request, responseHeaders);
-                responseBody = "";
-            }
-
-            responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-            response.putStatusLine(statusLine);
             response.putHeaders(responseHeaders);
-            response.putBody(responseBody);
 
             outputStream.write(response.buildResponse(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -96,30 +84,6 @@ public class Http11Processor implements Runnable, Processor {
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
-    }
-
-    private Entry<String, String> handleGetRequest(final String path, final Http11Request request, 
-                                                   final Map<String, String> responseHeaders) {
-        String statusLine = "HTTP/1.1 200 OK";
-        String responseBody;
-
-        if (!"/".equals(path)) {
-            responseBody = readFileFromClasspath("static" + path);
-            if (responseBody.isEmpty()) {
-                statusLine = "HTTP/1.1 404 Not Found";
-                responseBody = readFileFromClasspath("static/404.html");
-            }
-        } else {
-            responseBody = "Hello world!";
-        }
-
-        return new AbstractMap.SimpleEntry<>(statusLine, responseBody);
-    }
-
-    private String handlePostRequest(final String path, final Http11Request request, 
-                                     final Map<String, String> responseHeaders) {
-        Map<String, String> params = request.getParams();
-        return "HTTP/1.1 404 Not Found";
     }
 
     private String readFileFromClasspath(String resourcePath) {

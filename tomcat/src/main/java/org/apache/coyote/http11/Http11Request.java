@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.exception.Http11ParseException;
@@ -60,6 +63,22 @@ public class Http11Request {
             this.body = "";
         }
 
+        if (this.body.isEmpty()) {
+            this.params = Collections.emptyMap();
+        } else {
+            final Map<String, String> params = new HashMap<>();
+            final String[] pairs = body.split("&");
+            for (String pair : pairs) {
+                final String[] keyValue = pair.split("=", 2);
+                if (keyValue.length == 2) {
+                    final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                    final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                    params.put(key, value);
+                }
+            }
+            this.params = params;
+        }
+
         this.cookie = new Http11Cookie(map.getOrDefault("Cookie", null));
     }
 
@@ -81,6 +100,10 @@ public class Http11Request {
 
     public String getPath() {
         return path;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
     }
 
     public String getVersion() {

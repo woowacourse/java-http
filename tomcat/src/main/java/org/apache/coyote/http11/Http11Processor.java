@@ -193,23 +193,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseRequestBody(final String requestBody) {
-        if (requestBody == null || requestBody.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        final Map<String, String> params = new HashMap<>();
-        final String[] pairs = requestBody.split("&");
-        for (String pair : pairs) {
-            final String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                params.put(key, value);
-            }
-        }
-        return params;
-    }
-
     private String readFileFromClasspath(String resourcePath) {
         final InputStream input = getClass().getClassLoader().getResourceAsStream(resourcePath);
         if (input == null) {

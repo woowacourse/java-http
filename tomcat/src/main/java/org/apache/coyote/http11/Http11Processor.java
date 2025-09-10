@@ -11,7 +11,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerProvider;
-import org.apache.coyote.http11.exception.InternalServerErrorException;
+import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -61,8 +61,11 @@ public class Http11Processor implements Runnable, Processor {
         try {
             final Controller controller = controllerProvider.findByPath(path);
             controller.service(request, response);
-        } catch (InternalServerErrorException e) {
+        } catch (NotFoundException e) {
             log.warn("존재하지 않는 path 입니다: %s".formatted(path));
+            response.setNotFound();
+        } catch (Exception e) {
+            log.error("의도치 않은 에러가 발생했습니다", e);
             response.setInternalServerError();
         }
     }

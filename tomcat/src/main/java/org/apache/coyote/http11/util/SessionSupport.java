@@ -4,10 +4,10 @@ import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.RequestCookies;
-import org.apache.coyote.http11.ResponseCookie;
-import org.apache.coyote.http11.ResponseHeaders;
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.request.RequestCookies;
+import org.apache.coyote.http11.response.ResponseCookie;
+import org.apache.coyote.http11.response.ResponseHeaders;
+import org.apache.catalina.Session;
 
 public final class SessionSupport {
 

@@ -3,7 +3,7 @@ package org.apache.coyote.http11.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.ResponseHeaders;
+import org.apache.coyote.http11.response.ResponseHeaders;
 
 public final class HttpResponseWriter {
 

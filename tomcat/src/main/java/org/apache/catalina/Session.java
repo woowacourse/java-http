@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.catalina.Manager;
 
 public class Session implements HttpSession {
 

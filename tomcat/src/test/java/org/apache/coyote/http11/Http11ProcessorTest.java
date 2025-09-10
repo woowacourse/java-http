@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

@@ -1,9 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 

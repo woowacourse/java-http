@@ -1,16 +1,12 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.application.Controller;
-import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.Api;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -31,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private final List<Controller> controllers = List.of(
         new UserController(SESSION_MANAGER)
     );
+    private final ViewResolver viewResolver = new ViewResolver();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -69,31 +66,12 @@ public class Http11Processor implements Runnable, Processor {
                 response.getHeaders().clear();
             }
 
-            response.setContentType(ContentType.fromPath(request.getPath()));
-            if (response.isStaticPage()) {
-                response.setBody(getStaticPage(request.getPath().get()));
-            }
+            viewResolver.resolve(request, response);
             final var output = response.buildResponse();
             outputStream.write(output.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private String getStaticPage(String requestPath) throws IOException, URISyntaxException {
-        String normalizedPath = Paths.get(requestPath).normalize().toString();
-        if (normalizedPath.contains("..")) {
-            throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
-        }
-        if (normalizedPath.equals("/") || normalizedPath.equals("\\")) {
-            return "Hello world!";
-        }
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("static" + normalizedPath)) {
-            if (inputStream == null) {
-                throw new IllegalArgumentException("존재하지 않는 페이지입니다.");
-            }
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 }

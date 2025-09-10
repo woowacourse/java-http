@@ -60,7 +60,13 @@ public class RequestHandler {
             final var sessionId = HttpCookie.generateJSessionId();
             return HttpResponse.redirectWithCookie("/index.html", HttpCookie.JSESSIONID, sessionId);
         } else {
-            return handleStaticFile("/login.html", "text/html");
+            try {
+                final var path = Path.of(getClass().getResource("/static/401.html").getPath());
+                final var content = new String(Files.readAllBytes(path));
+                return HttpResponse.unauthorized(content);
+            } catch (Exception e) {
+                return HttpResponse.unauthorized("401 Unauthorized");
+            }
         }
     }
 

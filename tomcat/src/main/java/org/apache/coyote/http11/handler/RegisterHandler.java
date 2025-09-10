@@ -23,7 +23,7 @@ public class RegisterHandler implements HttpHandler {
     public HttpResponse handle(final HttpRequest request) throws Exception {
         RequestLine requestLine = request.requestLine();
         if (requestLine.method() == HttpMethod.GET) {
-            return httpResourceLoader.load(request.path());
+            return httpResourceLoader.load(request.getPath());
         }
 
         String requestBody = new String(request.body());

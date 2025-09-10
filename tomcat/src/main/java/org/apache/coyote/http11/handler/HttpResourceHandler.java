@@ -14,7 +14,7 @@ public class HttpResourceHandler implements HttpHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws Exception {
-        String path = request.path();
+        String path = request.getPath();
 
         return httpResourceLoader.load(path);
     }

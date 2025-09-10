@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.error.ErrorMapper;
 import org.apache.coyote.http11.handler.GreetingHandler;
 import org.apache.coyote.http11.handler.HttpHandler;
@@ -56,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = httpRequestReader.read(inputStream);
-            String path = httpRequest.path();
+            String path = httpRequest.getPath();
             HttpHandler handler = resolver.resolve(path);
             HttpResponse response = handler.handle(httpRequest);
 

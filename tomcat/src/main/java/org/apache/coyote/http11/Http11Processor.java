@@ -2,12 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.RequestMapping;
 import java.net.Socket;
-import org.apache.controller.Controller;
 import org.apache.coyote.Processor;
-import org.apache.exception.DataNotFoundException;
-import org.apache.exception.InvalidRequestException;
-import org.apache.http.request.HttpRequest;
-import org.apache.http.response.HttpResponse;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.exception.DataNotFoundException;
+import org.apache.coyote.exception.InvalidRequestException;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

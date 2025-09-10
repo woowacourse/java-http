@@ -1,9 +1,9 @@
 package com.techcourse.controller;
 
 import java.util.List;
-import org.apache.controller.Controller;
-import org.apache.exception.DataNotFoundException;
-import org.apache.http.request.HttpRequest;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.exception.DataNotFoundException;
+import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 

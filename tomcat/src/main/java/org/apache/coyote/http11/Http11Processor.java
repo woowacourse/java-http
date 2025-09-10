@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.NotFoundHandler;
 import org.apache.coyote.http11.handler.RegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -24,7 +25,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final List<Handler> handlers = List.of(
             new LoginHandler(),
             new StaticResourceHandler(),
-            new RegisterHandler()
+            new RegisterHandler(),
+            new NotFoundHandler()
     );
 
     private final Socket connection;

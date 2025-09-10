@@ -18,20 +18,27 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(String statusLine, String resourcePath) {
-        String contentType = HttpContentTypeResolver.resolve(resourcePath);
-        byte[] body = readStaticFile(resourcePath);
-        return new HttpResponse(statusLine, contentType, body);
-    }
-
     public static HttpResponse of(String statusLine, String contentType, byte[] body) {
         return new HttpResponse(statusLine, contentType, body);
     }
 
-    private static byte[] readStaticFile(String path) {
+    public static HttpResponse notFound() {
+        byte[] body = readErrorFile("static/404.html");
+        return new HttpResponse("HTTP/1.1 404 Not Found", "text/html;charset=utf-8", body);
+    }
+
+    public static HttpResponse internalServerError() {
+        byte[] body = readErrorFile("static/500.html");
+        return new HttpResponse("HTTP/1.1 500 Internal Server Error", "text/html;charset=utf-8", body);
+    }
+
+    private static byte[] readErrorFile(String path) {
         try (InputStream is = HttpResponse.class.getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
-                return "404 Not Found".getBytes();
+                if (path.contains("404")) {
+                    return "404 Not Found".getBytes();
+                }
+                return "500 Internal Server Error".getBytes();
             }
             return is.readAllBytes();
         } catch (IOException e) {
@@ -62,14 +69,11 @@ public class HttpResponse {
     }
 
     public void addHeader(String key, String value) {
-        headers.put(key, value);
+        String sanitizedValue = value.replaceAll("\\r|\\n", "");
+        headers.put(key, sanitizedValue);
     }
 
     public void addCookie(String name, String value) {
-        // SameSite=Lax: CSRF 방어. 대부분의 경우 CSRF를 막아주면서, GET 요청 링크를 통한 세션은 유지시켜줌.
-        // HttpOnly: 클라이언트 측 스크립트가 쿠키에 접근하는 것을 방지 (XSS 보호).
-        // Path=/: 쿠키를 전체 사이트에서 사용하도록 설정.
-        // Secure: HTTPS를 사용하는 경우에만 쿠키를 전송하도록 함. (현재는 HTTP 환경이므로 주석 처리)
         String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", name, value);
         addHeader("Set-Cookie", cookieValue);
     }

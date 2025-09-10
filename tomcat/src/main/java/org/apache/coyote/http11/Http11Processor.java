@@ -33,24 +33,32 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
+        OutputStream outputStream = null;
+        try (final var inputStream = connection.getInputStream()) {
+            outputStream = connection.getOutputStream();
             HttpRequest request = HttpRequestParser.parse(inputStream);
             if (request == null) {
-                respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
+                respond(HttpResponse.notFound(), outputStream);
                 return;
             }
             if (handleApiRequest(request, outputStream)) {
                 return;
             }
-            String resourcePath = StaticResourcePathGenerator.generate(request.getPath());
-            if (handleStaticResourceRequest(resourcePath, outputStream)) {
+            if (handleStaticResourceRequest(request.getPath(), outputStream)) {
                 return;
             }
-            respond(HttpResponse.of("HTTP/1.1 404 Not Found", "static/404.html"), outputStream);
+            respond(HttpResponse.notFound(), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+            handleError(outputStream, e);
+        }
+    }
+
+    private void handleError(OutputStream outputStream, Exception e) {
+        try {
+            respond(HttpResponse.internalServerError(), outputStream);
+        } catch (IOException ex) {
+            log.error("Error response failed: {}", ex.getMessage(), ex);
         }
     }
 
@@ -68,7 +76,8 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private boolean handleStaticResourceRequest(String resourcePath, OutputStream outputStream) throws IOException {
+    private boolean handleStaticResourceRequest(String requestPath, OutputStream outputStream) throws IOException {
+        String resourcePath = StaticResourcePathGenerator.generate(requestPath);
         if (resourcePath == null) {
             return false;
         }
@@ -84,14 +93,12 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private byte[] readPathFile(String requestPath) {
+    private byte[] readPathFile(String requestPath) throws IOException {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(requestPath)) {
             if (inputStream == null) {
                 return null;
             }
             return inputStream.readAllBytes();
-        } catch (IOException e) {
-            return null;
         }
     }
 

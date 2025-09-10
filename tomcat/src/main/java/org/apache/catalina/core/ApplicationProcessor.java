@@ -2,10 +2,13 @@ package org.apache.catalina.core;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.util.request.HttpRequest;
+import org.apache.coyote.util.response.HttpContentTypeResolver;
 import org.apache.coyote.util.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +23,14 @@ public class ApplicationProcessor {
             if (existingSession != null && getUser(existingSession) != null) {
                 return HttpResponse.redirect("/index.html");
             }
-            return HttpResponse.of("HTTP/1.1 200 OK", "static/login.html");
+            try {
+                final String path = "static/login.html";
+                final byte[] body = readResource(path);
+                final String contentType = HttpContentTypeResolver.resolve(path);
+                return HttpResponse.of("HTTP/1.1 200 OK", contentType, body);
+            } catch (IOException e) {
+                return HttpResponse.internalServerError();
+            }
         }
         Session existingSession = httpRequest.getSession(false);
         if (existingSession != null && getUser(existingSession) != null) {
@@ -55,6 +65,15 @@ public class ApplicationProcessor {
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공! 아이디: {}", user.getAccount());
         return HttpResponse.redirect("/index.html");
+    }
+
+    private static byte[] readResource(String path) throws IOException {
+        try (InputStream inputStream = ApplicationProcessor.class.getClassLoader().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                throw new IOException("Resource not found: " + path);
+            }
+            return inputStream.readAllBytes();
+        }
     }
 
     private static User getUser(Session session) {

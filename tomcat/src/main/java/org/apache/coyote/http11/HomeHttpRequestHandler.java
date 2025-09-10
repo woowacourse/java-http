@@ -3,12 +3,12 @@ package org.apache.coyote.http11;
 public class HomeHttpRequestHandler implements HttpRequestHandler {
 
     @Override
-    public boolean support(final RequestStartLine requestStartLine) {
-        return requestStartLine.requestMethod() == RequestMethod.GET && requestStartLine.requestUrl().equals("/");
+    public boolean support(final HttpRequest httpRequest) {
+        return httpRequest.getRequestMethod() == RequestMethod.GET && httpRequest.getRequestUrl().equals("/");
     }
 
     @Override
-    public String response(final RequestStartLine requestStartLine) {
+    public String response(final HttpRequest httpRequest) {
         String responseBody = "Hello world!";
 
         return String.join("\r\n",

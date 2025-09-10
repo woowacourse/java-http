@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.session.HttpCookie;
 
@@ -12,7 +14,7 @@ public class HttpResponse {
     private final Map<String, String> headers = new LinkedHashMap<>();
     private byte[] body = new byte[0];
     private boolean committed = false;
-    private HttpCookie httpCookie = new HttpCookie("");
+    private final List<ResponseCookie> cookies = new ArrayList<>();
 
     public static byte[] bytes(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
@@ -23,6 +25,25 @@ public class HttpResponse {
     ) {
         this.statusCode = httpStatus.getStatusCode();
         this.reason = httpStatus.getReasonPhrase();
+    }
+
+    public void addCookie(String name, String value) {
+        cookies.add(new ResponseCookie(name, value));
+        updateSetCookieHeaders();
+    }
+
+    public void addCookie(ResponseCookie cookie) {
+        cookies.add(cookie);
+        updateSetCookieHeaders();
+    }
+
+    private void updateSetCookieHeaders() {
+        headers.entrySet().removeIf(entry ->
+                entry.getKey().equalsIgnoreCase("Set-Cookie"));
+        for (int i = 0; i < cookies.size(); i++) {
+            String headerName = i == 0 ? "Set-Cookie" : "Set-Cookie-" + i;
+            headers.put(headerName, cookies.get(i).toSetCookieHeader());
+        }
     }
 
     public void setHeader(
@@ -62,11 +83,6 @@ public class HttpResponse {
 
     public void markCommitted() {
         committed = true;
-    }
-
-    public void addCookie(String key, String value) {
-        httpCookie.add(key, value);
-        setHeader("Set-Cookie", httpCookie.toHeaderValue());
     }
 
     public void setHttpCookie(HttpCookie httpCookie) {

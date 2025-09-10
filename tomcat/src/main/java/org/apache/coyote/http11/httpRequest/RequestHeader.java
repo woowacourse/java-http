@@ -11,6 +11,10 @@ public class RequestHeader {
         this.headers = headers;
     }
 
+    public boolean hasCookie() {
+        return this.headers.containsKey("Cookie");
+    }
+
     public Optional<String> findValue(final String name) {
         return Optional.ofNullable(this.headers.get(name));
     }

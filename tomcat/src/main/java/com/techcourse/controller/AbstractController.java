@@ -9,8 +9,6 @@ import org.apache.coyote.http11.httpResponse.HttpStatus;
 
 public class AbstractController implements Controller {
 
-    private static final String METHOD_NOT_ALLOWED_PATH = "/405.html";
-
     @Override
     public HttpResponse service(final HttpRequest httpRequest) throws Exception {
         final RequestMethod requestMethod = httpRequest.getRequestMethod();
@@ -36,6 +34,6 @@ public class AbstractController implements Controller {
 
     private HttpResponse defaultResponse() throws IOException {
         return HttpResponse.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .build(METHOD_NOT_ALLOWED_PATH, ResourceParser.parse(METHOD_NOT_ALLOWED_PATH));
+                .build(Page.METHOD_NOT_ALLOWED.getPath(), ResourceParser.parse(Page.METHOD_NOT_ALLOWED.getPath()));
     }
 }

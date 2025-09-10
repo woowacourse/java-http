@@ -38,6 +38,10 @@ public class HttpRequest {
         return this.requestBody.findParamsValue(name);
     }
 
+    public boolean hasCookie() {
+        return this.headers.hasCookie();
+    }
+
     public Optional<String> findCookie() {
         return headers.findValue("Cookie");
     }

@@ -1,5 +1,6 @@
 package com.techcourse.util;
 
+import com.techcourse.controller.Page;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -9,12 +10,13 @@ import java.nio.file.Path;
 public class ResourceParser {
 
     private static final String DEFAULT_RESOURCE_PATH = "static";
-    private static final String NOT_FOUND_PATH = "/404.html";
+
+    private ResourceParser() {}
 
     public static String parse(final String filePath) throws IOException {
         URL resource = ResourceParser.class.getClassLoader().getResource(DEFAULT_RESOURCE_PATH + filePath);
         if (resource == null) {
-            resource = ResourceParser.class.getClassLoader().getResource(DEFAULT_RESOURCE_PATH + NOT_FOUND_PATH);
+            resource = ResourceParser.class.getClassLoader().getResource(DEFAULT_RESOURCE_PATH + Page.NOT_FOUND.getPath());
         }
 
         final File file = new File(resource.getFile());

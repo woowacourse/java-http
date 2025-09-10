@@ -3,6 +3,7 @@ package org.apache.coyote.http11.httpResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.apache.coyote.http11.httpRequest.HttpCookie;
 
 public class HttpResponse {
 
@@ -42,6 +43,18 @@ public class HttpResponse {
 
         this.responseHeader = responseHeader.build(body, contentType);
         this.responseBody = responseBody.build(body);
+
+        return this;
+    }
+
+    public HttpResponse location(final String location) {
+        this.responseHeader = responseHeader.location(location);
+
+        return this;
+    }
+
+    public HttpResponse setCookie(final HttpCookie httpCookie) {
+        this.responseHeader = responseHeader.setCookie(httpCookie);
 
         return this;
     }

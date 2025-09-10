@@ -22,13 +22,4 @@ public enum HttpStatus {
     public String getReasonPhrase() {
         return reasonPhrase;
     }
-
-    public String getStatusLine() {
-        return "HTTP/1.1 " + code + " " + reasonPhrase;
-    }
-
-    @Override
-    public String toString() {
-        return getStatusLine();
-    }
 }

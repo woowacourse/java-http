@@ -2,26 +2,32 @@ package org.apache.coyote.http11.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.coyote.session.Session;
 
-public class HttpCookie {
+public final class HttpCookie {
 
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String EQUAL = "=";
-    private static final String COOKIE = "Cookie";
-    private static final String SET_COOKIE = "Set-Cookie";
+    public static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> cookies = new HashMap<>();
 
-    public Map<String, String> parseCookie(final Map<String, String> requestHeaders, final String uuid) {
-        Map<String, String> answer = new HashMap<>();
-        String totalSetCookie = JSESSIONID + EQUAL + uuid;
+    public void addCookie(final String key, final String value) {
+        cookies.put(key, value);
+    }
 
-        if (!requestHeaders.containsKey(COOKIE)) {
-            answer.put(SET_COOKIE, totalSetCookie);
-            cookies.put(JSESSIONID, uuid);
-            return answer;
-        }
+    public void addSession(final Session session) {
+        cookies.put(JSESSIONID, session.getId());
+    }
 
-        return answer;
+    public boolean hasSession() {
+        return cookies.containsKey(JSESSIONID);
+    }
+
+    public String getSessionId() {
+        return cookies.get(JSESSIONID);
+    }
+
+    public Optional<String> getSession() {
+        return Optional.ofNullable(cookies.get(JSESSIONID));
     }
 }

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.dto.ResourceResult;
+import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class HttpResponseBuilder {
 
@@ -22,7 +23,7 @@ public class HttpResponseBuilder {
         headers.put("Content-Type", resourceResult.mimeType());
         headers.put("Content-Length", String.valueOf(resourceResult.body().length));
 
-        return new HttpResponse(status, headers, resourceResult.body());
+        return new HttpResponse(status, headers, new HttpCookie(), resourceResult.body());
     }
 
     private String formatPath(final String path) {

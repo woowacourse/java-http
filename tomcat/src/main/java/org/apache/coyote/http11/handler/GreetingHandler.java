@@ -9,6 +9,7 @@ public class GreetingHandler implements HttpHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        return new HttpResponse(HttpStatus.OK, new LinkedHashMap<>(), "Hello world!".getBytes());
+        return new HttpResponse(HttpStatus.OK, new LinkedHashMap<>(), request.getHttpCookie(),
+                "Hello world!".getBytes());
     }
 }

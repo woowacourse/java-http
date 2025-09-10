@@ -3,7 +3,6 @@ package org.apache.coyote.http11.handler;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResourceLoader;
@@ -17,25 +16,33 @@ public class LoginHandler implements HttpHandler {
 
     private final HttpResourceLoader httpResourceLoader;
     private final QueryParser queryParser;
-    private final HttpCookie httpCookie;
     private final SessionManager sessionManager;
 
     public LoginHandler(final HttpResourceLoader httpResourceLoader, final QueryParser queryParser,
-                        final HttpCookie httpCookie, final SessionManager sessionManager) {
+                        final SessionManager sessionManager) {
         this.httpResourceLoader = httpResourceLoader;
         this.queryParser = queryParser;
-        this.httpCookie = httpCookie;
         this.sessionManager = sessionManager;
     }
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws Exception {
+        HttpResponse response = HttpResponse.redirect("/index.html");
         if (request.requestLine().method() == HttpMethod.GET) {
+            HttpCookie httpCookie = request.getHttpCookie();
+            if (httpCookie.hasSession()) {
+                if (sessionManager.hasSession(httpCookie.getSessionId())) {
+                    return response;
+                }
+            }
             return httpResourceLoader.load(request.path());
         }
-        String sessionId = UUID.randomUUID().toString();
-        // TODO: Session 파싱 중복 제거 고려
-        Map<String, String> headers = httpCookie.parseCookie(request.headers(), sessionId);
+        request.getHttpCookie().getSession().ifPresent(oldId -> {
+            Session old = sessionManager.findSession(oldId);
+            if (old != null) {
+                sessionManager.remove(old);
+            }
+        });
 
         String requestBody = new String(request.body());
         Map<String, String> queriesFromBody = queryParser.parse(requestBody);
@@ -44,10 +51,12 @@ public class LoginHandler implements HttpHandler {
         String password = queriesFromBody.get("password");
 
         User user = UserService.login(account, password);
+
+        String sessionId = response.addSessionIfAbsent();
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
         sessionManager.add(session);
 
-        return HttpResponse.redirect("/index.html", headers);
+        return response;
     }
 }

@@ -25,7 +25,6 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpResourceLoader httpResourceLoader;
     private final HttpResourceHandler httpResourceHandler;
     private final HttpResponseWriter httpResponseWriter;
-    private final HttpCookie httpCookie;
     private final SessionManager sessionManager;
     private final Resolver resolver;
     private final ErrorMapper errorMapper;
@@ -37,11 +36,10 @@ public class Http11Processor implements Runnable, Processor {
         this.httpResourceLoader = new HttpResourceLoader();
         this.httpResourceHandler = new HttpResourceHandler(httpResourceLoader);
         this.httpResponseWriter = new HttpResponseWriter();
-        this.httpCookie = new HttpCookie();
         this.sessionManager = new SessionManager();
         this.resolver = new Resolver(httpResourceHandler)
                 .register("/", new GreetingHandler())
-                .register("/login", new LoginHandler(httpResourceLoader, queryParser, httpCookie, sessionManager))
+                .register("/login", new LoginHandler(httpResourceLoader, queryParser, sessionManager))
                 .register("/register", new RegisterHandler(httpResourceLoader, queryParser))
         ;
         this.errorMapper = new ErrorMapper(httpResourceLoader);
@@ -59,9 +57,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = httpRequestReader.read(inputStream);
             String path = httpRequest.path();
-
             HttpHandler handler = resolver.resolve(path);
-
             HttpResponse response = handler.handle(httpRequest);
 
             httpResponseWriter.write(outputStream, response);

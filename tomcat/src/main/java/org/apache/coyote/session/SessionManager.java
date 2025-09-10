@@ -21,4 +21,12 @@ public class SessionManager implements Manager {
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }
+
+    public boolean hasSession(final String id) {
+        return SESSIONS.containsKey(id);
+    }
+
+    public Map<String, Session> getSessions() {
+        return SESSIONS;
+    }
 }

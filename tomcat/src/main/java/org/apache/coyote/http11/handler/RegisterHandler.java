@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.service.UserService;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -36,6 +35,6 @@ public class RegisterHandler implements HttpHandler {
 
         UserService.register(account, email, password);
 
-        return HttpResponse.redirect("/index.html", new LinkedHashMap<>());
+        return HttpResponse.redirect("/index.html");
     }
 }

@@ -11,6 +11,9 @@ import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.response.HttpResponse;
 import org.apache.catalina.servlet.HttpServletContainer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.HttpRequestParser;
+import org.apache.coyote.util.HttpResponseParser;
+import org.apache.coyote.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
             processResponse(null, response, e);
             return response;
         } catch (IllegalStateException | IllegalArgumentException e) {
-            ResponseProcessor.handleBadRequest(null, response);
+            ResponseUtil.handleBadRequest(null, response);
             return response;
         }
     }
@@ -70,6 +73,6 @@ public class Http11Processor implements Runnable, Processor {
         log.error("HttpStatusException 발생 = {}", exception.getMessage(), exception);
 
         response.setStatus(exception.getHttpStatus());
-        ResponseProcessor.handleErrorPage(request, response);
+        ResponseUtil.handleErrorPage(request, response);
     }
 }

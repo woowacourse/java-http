@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.util;
 
 import com.spring.http.enums.HttpStatus;
 import java.io.IOException;
@@ -7,11 +7,11 @@ import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.response.HttpResponse;
 import org.apache.catalina.util.FileParser;
 
-public final class ResponseProcessor {
+public final class ResponseUtil {
 
     private static final String DEFAULT_VERSION = "HTTP/1.1";
 
-    private ResponseProcessor() {
+    private ResponseUtil() {
     }
 
     public static void handle(HttpRequest request, HttpResponse response) {

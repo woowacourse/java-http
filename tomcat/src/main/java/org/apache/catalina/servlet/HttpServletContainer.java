@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.catalina.domain.request.HttpRequest;
 import org.apache.catalina.domain.response.HttpResponse;
 import org.apache.catalina.servlet.impl.DefaultServlet;
-import org.apache.coyote.http11.ResponseProcessor;
+import org.apache.coyote.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,10 +53,10 @@ public final class HttpServletContainer {
             throws IOException {
         if (response.getStatus().isError()) {
             log.debug("에러 페이지 접근 status : {}", response.getStatus());
-            ResponseProcessor.handleErrorPage(request, response);
+            ResponseUtil.handleErrorPage(request, response);
             return;
         }
 
-        ResponseProcessor.handle(request, response);
+        ResponseUtil.handle(request, response);
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public record Resource(String path, String type, String content) {
+public record TextResource(String path, String type, String content) {
 
-    public static Resource fromPath(String path) throws IOException {
+    public static TextResource fromPath(String path) throws IOException {
         try (
                 InputStream inputStream = Objects.requireNonNull(
                         ClassLoader.getSystemClassLoader().getResourceAsStream(path)
@@ -22,7 +22,7 @@ public record Resource(String path, String type, String content) {
             String content = bufferedReader.lines()
                     .collect(Collectors.joining("\r\n", "", "\r\n"));
 
-            return new Resource(path, extension, content);
+            return new TextResource(path, extension, content);
         }
     }
 }

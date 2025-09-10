@@ -1,5 +1,9 @@
 package org.apache.coyote.http11.handler;
 
+import com.techcourse.auth.LoginHandler;
+import com.techcourse.resource.RootPathHandler;
+import com.techcourse.resource.StaticResourceHandler;
+
 import java.util.Map;
 
 public class HttpRequestHandlerContainer {

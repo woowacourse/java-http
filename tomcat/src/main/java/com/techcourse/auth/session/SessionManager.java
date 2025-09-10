@@ -1,8 +1,7 @@
-package org.apache.catalina;
+package com.techcourse.auth.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class SessionManager {
 
@@ -20,17 +19,9 @@ public class SessionManager {
         SESSIONS.remove(id);
     }
 
-    public Session create() {
-        final String id = UUID.randomUUID().toString();
-        final Session session = new Session(id);
-        add(session);
-        return session;
-    }
-
     public void invalidate(String id) {
         Session session = find(id);
         if (session != null) {
-            session.invalidate();
             remove(id);
         }
     }

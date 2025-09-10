@@ -94,16 +94,16 @@ public class Request {
 
     public boolean containsCookieKey(String cookieKey){
         if(headers.containsKey("Cookie")){
-            Cookie cookie = new Cookie(headers.get("Cookie"));
-            return cookie.containsCookieKey(cookieKey);
+            CookieManager cookieManager = new CookieManager(headers.get("Cookie"));
+            return cookieManager.containsCookieKey(cookieKey);
         }
         return false;
     }
 
     public String getCookieValue(String cookieKey){
         if(headers.containsKey("Cookie")){
-            Cookie cookie = new Cookie(headers.get("Cookie"));
-            return cookie.getCookie(cookieKey);
+            CookieManager cookieManager = new CookieManager(headers.get("Cookie"));
+            return cookieManager.getCookie(cookieKey);
         }
         return "";
     }

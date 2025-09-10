@@ -1,16 +1,12 @@
 package org.apache.coyote.http11;
 
+import static com.techcourse.exception.ErrorMessage.ACCOUNT_NOT_FOUND;
+import static com.techcourse.exception.ErrorMessage.INVALID_PASSWORD;
+import static com.techcourse.exception.ErrorMessage.INVALID_QUERY_STRING;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.util.UUID;
-import org.apache.coyote.Cookie;
-import org.apache.coyote.Processor;
-import org.apache.coyote.Request;
-import org.apache.coyote.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,9 +18,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static com.techcourse.exception.ErrorMessage.*;
+import org.apache.coyote.CookieManager;
+import org.apache.coyote.Processor;
+import org.apache.coyote.Request;
+import org.apache.coyote.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -36,12 +37,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response response;
 
-    private SessionMap sessionMap;
+    private SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         response = new Response();
         response.setProtocolVersion("HTTP/1.1");
-        sessionMap = new SessionMap();
+        sessionManager = new SessionManager();
         this.connection = connection;
     }
 
@@ -64,13 +65,16 @@ public class Http11Processor implements Runnable, Processor {
             // 로그인 처리
             if (uri.startsWith("/login")) {
                 if (httpMethod.equals("GET")) {
-                    if (request.containsCookieKey("JSESSIONID")){
+                    if (request.containsCookieKey("JSESSIONID")) {
                         // 세션 아이디 로그인 후 리다이엑트
                         String jsessionid = request.getCookieValue("JSESSIONID");
-                        Session session = sessionMap.findSession(jsessionid);
-                        log.info(session.getUser().toString());
-                        redirectToIndexPage(path, outputStream);
-                        return;
+                        Session session = sessionManager.findSession(jsessionid);
+                        if(session!=null){
+                            log.info(session.getUser().toString());
+                            redirectToIndexPage(path, outputStream);
+                            return;
+                        }
+                        sessionManager.remove(jsessionid);
                     }
                 }
                 if (httpMethod.equals("POST")) {
@@ -78,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
                     requestBodyLogin(path, outputStream);
                     return;
                 }
-                if(uri.contains("?")){
+                if (uri.contains("?")) {
                     // 쿼리 파라미터 로그인
                     queryParameterLogin(uri, path, outputStream);
                     return;
@@ -107,7 +111,8 @@ public class Http11Processor implements Runnable, Processor {
         throw new IllegalArgumentException(INVALID_PASSWORD.getMessage());
     }
 
-    private void queryParameterLogin(String uri, Path path, OutputStream outputStream) throws IOException, URISyntaxException {
+    private void queryParameterLogin(String uri, Path path, OutputStream outputStream)
+            throws IOException, URISyntaxException {
         if (login(parseQueryParameter(uri))) {
             redirectToIndexPage(path, outputStream);
             return;
@@ -166,16 +171,16 @@ public class Http11Processor implements Runnable, Processor {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
         user.logUserInfo(password, log);
-        if(user.checkPassword(password)){   // 로그인 성공
-            if(!request.containsCookieKey("JSESSIONID")){
+        if (user.checkPassword(password)) {   // 로그인 성공
                 String sessionId = UUID.randomUUID().toString();    // 세션 ID 생성
                 Session session = new Session(sessionId);   // 새 세션 생성
                 session.setAttribute("user", user); // 세션에 user 정보에 user 저장
-                sessionMap.addSession(sessionId, session);  // 세션 맵에 새 세션 등록
-                Cookie cookie = new Cookie();   // 새 쿠키 생성
-                cookie.addCookie("JSESSIONID", sessionId);  // 쿠키에 세션 아이디 매핑
-                response.addHeader("Set-Cookie", cookie.generateCookieLine());  // 헤더에 설정
-            }
+                sessionManager.addSession(sessionId, session);  // 세션 맵에 새 세션 등록
+                CookieManager cookieManager = new CookieManager();
+                cookieManager.addCookie("JSESSIONID", sessionId);  // 쿠키에 세션 아이디 매핑
+                for (Map.Entry<String, String> entry : cookieManager.getCookieMap().entrySet()) {
+                    response.addCookie(entry.getKey(), entry.getValue());
+                }
         }
         return user.checkPassword(password);
     }
@@ -217,7 +222,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String formatHttpResponse() {
-        return String.join("\r\n",
+        String ret = String.join("\r\n",
                 response.getProtocolVersion() + " " +
                         response.getStatusCode() + " " +
                         response.getStatusMessage() + " ",
@@ -225,8 +230,15 @@ public class Http11Processor implements Runnable, Processor {
                         .entrySet()
                         .stream()
                         .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                        .collect(Collectors.joining("\r\n")),
-                "\r\n" + response.getBody()
-        );
+                        .collect(Collectors.joining("\r\n")));
+        if (response.getCookieMapSize() != 0) {
+            ret += "\r\n" + response.getCookieMap()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + " ")
+                    .collect(Collectors.joining("\r\n"));
+        }
+        ret += "\r\n\r\n" + response.getBody();
+        return ret;
     }
 }

@@ -4,7 +4,7 @@ import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SessionMap {
+public class SessionManager {
 
     private static final Map<String, Session> sessionMap = new HashMap<>();
 
@@ -16,9 +16,13 @@ public class SessionMap {
         return sessionMap.get(sessionId);
     }
 
-    public SessionMap() {}
+    public SessionManager() {}
 
     private User getUser(Session session) {
         return (User) session.getAttribute("user");
+    }
+
+    public void remove(String sessionId){
+        sessionMap.remove(sessionId);
     }
 }

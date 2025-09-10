@@ -4,15 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class Cookie {
+public class CookieManager {
 
     private Map<String, String> cookieMap;
 
-    public Cookie() {
+    public CookieManager() {
         cookieMap = new HashMap<>();
     }
 
-    public Cookie(String cookieLine) {
+    public CookieManager(String cookieLine) {
         cookieMap = new HashMap<>();
         parseCookies(cookieLine);
     }
@@ -46,6 +46,10 @@ public class Cookie {
 
     public boolean containsCookieKey(String cookieKey){
         return cookieMap.containsKey(cookieKey);
+    }
+
+    public Map<String, String> getCookieMap() {
+        return cookieMap;
     }
 
     public String getCookie(String cookieKey){

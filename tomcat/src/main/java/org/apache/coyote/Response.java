@@ -1,15 +1,16 @@
 package org.apache.coyote;
 
-import org.apache.coyote.http11.HttpStatusCode;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpStatusCode;
 
 public class Response {
 
     private String protocolVersion;
 
-    private Map<String, String> headers;
+    private Map<String, String> headers;    // 쿠키는 별도로 관리
+
+    private CookieManager cookieManager = new CookieManager();
 
     private String body = "";
 
@@ -23,19 +24,31 @@ public class Response {
         this.protocolVersion = protocolVersion;
     }
 
-    public void addHeader(String key, String val){
+    public void addHeader(String key, String val) {
         headers.put(key, val);
     }
 
-    public void setBody(String body){
+    public void addCookie(String key, String val) {
+        cookieManager.addCookie(key, val);
+    }
+
+    public Map<String, String> getCookieMap() {
+        return cookieManager.getCookieMap();
+    }
+
+    public int getCookieMapSize(){
+        return cookieManager.getCookieMap().size();
+    }
+
+    public void setBody(String body) {
         this.body = body;
     }
 
-    public void setHttpStatusCode(HttpStatusCode httpStatusCode){
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
     }
 
-    public String getStatusCode(){
+    public String getStatusCode() {
         return String.valueOf(httpStatusCode.getCode());
     }
 

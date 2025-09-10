@@ -2,6 +2,8 @@ package org.apache.catalina.handler;
 
 import org.apache.coyote.http11.response.HttpResponse;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,21 +29,22 @@ public class StaticResourceHandler {
         return okResponse(requestedPath);
     }
 
-    private static Path getStaticRootPath() throws Exception {
+    private static Path getStaticRootPath() throws URISyntaxException, IOException {
         final var rootUrl = Objects.requireNonNull(
                 StaticResourceHandler.class.getClassLoader()
                         .getResource("static"),
                 "Static root not found"
         );
+        
         return Paths.get(rootUrl.toURI())
                 .toRealPath();
     }
 
-    private static Path resolveRequestedPath(final Path rootPath, final String path) {
+    private static Path resolveRequestedPath(final Path rootPath, final String path) throws IOException {
         final var relativePath = path.startsWith("/") ? path.substring(1) : path;
 
         return rootPath.resolve(relativePath)
-                .normalize();
+                .toRealPath();
     }
 
     private static boolean isUnderRoot(final Path rootPath, final Path requestedPath) {

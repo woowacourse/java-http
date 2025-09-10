@@ -2,6 +2,8 @@ package org.apache.coyote.controller.dynamic;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.controller.Controller;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.HttpRequest;
 import org.apache.coyote.httpRequest.httpHeader.HttpHeader;
 import org.apache.coyote.httpRequest.httpHeader.HttpMethod;
@@ -20,6 +22,7 @@ public class HomeController implements Controller {
         if (httpMethod.equals(HttpMethod.GET)) {
             doGet(response);
         }
+        throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }
 
     private void doGet(final HttpResponse response) {

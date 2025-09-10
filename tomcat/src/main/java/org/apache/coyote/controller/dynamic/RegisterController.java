@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.resource.StaticResourceReader;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.HttpRequest;
 import org.apache.coyote.httpRequest.httpBody.HttpBody;
 import org.apache.coyote.httpRequest.httpHeader.HttpHeader;
@@ -30,6 +32,7 @@ public class RegisterController implements Controller {
         if (httpMethod.equals(HttpMethod.POST)) {
             doPost(request, response);
         }
+        throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }
 
     private void doGet(

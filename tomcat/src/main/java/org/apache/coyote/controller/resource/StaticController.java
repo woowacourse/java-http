@@ -3,6 +3,8 @@ package org.apache.coyote.controller.resource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.controller.Controller;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 import org.apache.coyote.httpRequest.HttpRequest;
 import org.apache.coyote.httpRequest.httpHeader.HttpHeader;
 import org.apache.coyote.httpRequest.httpHeader.HttpMethod;
@@ -23,6 +25,7 @@ public class StaticController implements Controller {
         if (httpMethod == HttpMethod.GET) {
             responseStaticFile(httpHeader, response);
         }
+        throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
     }
 
     private void responseStaticFile(

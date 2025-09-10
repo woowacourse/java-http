@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -69,15 +68,16 @@ public class StaticResourceController implements Controller {
             throw new IllegalArgumentException("요청 경로에 해당하는 자원이 없습니다.");
         }
 
-        final Map<String, String> responseHeaders = new LinkedHashMap<>();
-
         if ("/".equals(request.path())) {
             final String body = "Hello world!";
 
-            responseHeaders.put("Content-Type", "text/html;charset=utf-8");
-            responseHeaders.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-
-            return new HttpResponse(request.protocol(), "200 OK", responseHeaders, body);
+            return HttpResponse.builder()
+                    .protocol(request.protocol())
+                    .statusCode("200 OK")
+                    .contentType("text/html;charset=utf-8")
+                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                    .body(body)
+                    .build();
         }
 
         final Path filePath = RESOURCE_PATHS.get(request.path());
@@ -87,10 +87,13 @@ public class StaticResourceController implements Controller {
             final String contentType = Files.probeContentType(filePath);
             final String body = new String(Files.readAllBytes(filePath));
 
-            responseHeaders.put("Content-Type", contentType + ";charset=utf-8");
-            responseHeaders.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
-
-            return new HttpResponse(request.protocol(), statusCode, responseHeaders, body);
+            return HttpResponse.builder()
+                    .protocol(request.protocol())
+                    .statusCode(statusCode)
+                    .contentType(contentType + ";charset=utf-8")
+                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                    .body(body)
+                    .build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

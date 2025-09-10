@@ -3,7 +3,6 @@ package com.techcourse.presentation;
 import com.techcourse.application.LoginService;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +43,24 @@ public class RegisterController implements Controller {
         } catch (IllegalArgumentException e) {
             final String errorMessage = e.getMessage();
 
-            final Map<String, String> responseHeaders = new LinkedHashMap<>();
-            responseHeaders.put("Content-Type", "text/plain;charset=utf-8");
-            responseHeaders.put("Content-Length", String.valueOf(errorMessage.getBytes(StandardCharsets.UTF_8).length));
-
-            return new HttpResponse(request.protocol(), "400 Bad Request", responseHeaders, errorMessage);
+            return HttpResponse.builder()
+                    .protocol(request.protocol())
+                    .badRequest()
+                    .contentType("text/plain;charset=utf-8")
+                    .contentLength(errorMessage.getBytes(StandardCharsets.UTF_8).length)
+                    .body(errorMessage)
+                    .build();
         }
 
-        final String redirectPath = "http://localhost:8080/index.html";
-
-        final Map<String, String> responseHeaders = new LinkedHashMap<>();
-        responseHeaders.put("Location", redirectPath);
-        responseHeaders.put("Content-Type", "text/html;charset=utf-8");
-        responseHeaders.put("Content-Length", "0");
-
-        return new HttpResponse(request.protocol(), "303 See Other", responseHeaders, "회원가입이 완료되었습니다.");
+        final String body = "회원가입이 완료되었습니다.";
+        return HttpResponse.builder()
+                .protocol(request.protocol())
+                .seeOther()
+                .header("Location", "http://localhost:8080/index.html")
+                .contentType("text/html;charset=utf-8")
+                .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                .body(body)
+                .build();
     }
 
     @Override

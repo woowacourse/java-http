@@ -3,7 +3,6 @@ package com.techcourse.presentation;
 import com.techcourse.application.LoginService;
 import com.techcourse.model.User;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.http11.HttpCookie;
@@ -46,21 +45,21 @@ public class LoginController implements Controller {
             );
         }
 
-        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        final HttpResponse.Builder responseBuilder = HttpResponse.builder()
+                .protocol(request.protocol())
+                .found()
+                .header("Location", "http://localhost:8080/index.html")
+                .contentType("text/html;charset=utf-8")
+                .contentLength(0);
 
         HttpCookie httpCookie = new HttpCookie(request);
         if (!httpCookie.hasAttribute("JSESSIONID")) {
             final UUID token = UUID.randomUUID();
             final MyCookie cookie = new MyCookie("JSESSIONID", token.toString());
-            responseHeaders.put("Set-Cookie", cookie.getName() + "=" + cookie.getValue());
+            responseBuilder.header("Set-Cookie", cookie.getName() + "=" + cookie.getValue());
         }
 
-        final String redirectPath = "http://localhost:8080/index.html";
-        responseHeaders.put("Location", redirectPath);
-        responseHeaders.put("Content-Type", "text/html;charset=utf-8");
-        responseHeaders.put("Content-Length", "0");
-
-        return new HttpResponse(request.protocol(), "302 Found", responseHeaders, "");
+        return responseBuilder.build();
     }
 
     @Override

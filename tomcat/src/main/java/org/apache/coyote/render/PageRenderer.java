@@ -49,5 +49,4 @@ public class PageRenderer{
     public static String sendRedirect(int statusCode, Map<String,String> headers) {
         return HttpResponseBuilder.getRedirectResponseString(statusCode, headers);
     }
-
 }

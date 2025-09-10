@@ -12,7 +12,6 @@ public class HttpResponseBuilder {
     private static final Logger log = LoggerFactory.getLogger(HttpResponseBuilder.class);
     private static final String STATIC_FILE_ROOT = "static";
 
-
     public static String getStaticHttpResponse(final int statusCode, final String contentType, final String content) {
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " " + HttpStatus.getMessageByStatusCode(statusCode) + " ",
@@ -37,7 +36,6 @@ public class HttpResponseBuilder {
         return response.toString();
     }
 
-
     public static String getErrorHttpResponse(final int statusCode) {
         try {
             String errorPageContent = readErrorPage(statusCode);
@@ -58,5 +56,4 @@ public class HttpResponseBuilder {
 
         return new String(inputStream.readAllBytes());
     }
-
 }

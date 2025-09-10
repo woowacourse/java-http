@@ -11,9 +11,6 @@ import org.apache.coyote.http11.HttpStatus;
 public class StaticResourceController extends AbstractController {
     
     private static final String STATIC_RESOURCE_PATH = "static";
-    private static final String QUERY_PARAM_STARTER = "?";
-    private static final String HTML_EXTENSION = ".html";
-    private static final String INDEX_HTML = "/index.html";
     
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
@@ -32,7 +29,7 @@ public class StaticResourceController extends AbstractController {
     
     private HttpResponse process(HttpRequest request) throws IOException {
         String requestUri = request.getRequestUri();
-        String resourcePath = requestUri.equals("/") ? INDEX_HTML : requestUri;
+        String resourcePath = requestUri.equals("/") ? "/index.html" : requestUri;
         String finalResourcePath = resolveResourcePath(resourcePath);
         
         try (InputStream inputStream = StaticResourceController.class.getClassLoader().getResourceAsStream(finalResourcePath)) {
@@ -49,13 +46,13 @@ public class StaticResourceController extends AbstractController {
     }
     
     private String resolveResourcePath(String requestUri) {
-        int queryIndex = requestUri.indexOf(QUERY_PARAM_STARTER);
+        int queryIndex = requestUri.indexOf("?");
         if (queryIndex != -1) {
             requestUri = requestUri.substring(0, queryIndex);
         }
         
         if (hasNoExtension(requestUri)) {
-            return STATIC_RESOURCE_PATH + requestUri + HTML_EXTENSION;
+            return STATIC_RESOURCE_PATH + requestUri + ".html";
         }
         return STATIC_RESOURCE_PATH + requestUri;
     }

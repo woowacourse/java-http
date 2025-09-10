@@ -14,8 +14,6 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class AuthController extends AbstractController {
     
-    private static final String INDEX_HTML = "/index.html";
-    
     private final AuthService authService = new AuthService();
     
     @Override
@@ -59,7 +57,7 @@ public class AuthController extends AbstractController {
     }
     
     private HttpResponse handleAuthSuccess(String sessionId) {
-        return buildAuthRedirectResponse(INDEX_HTML, sessionId);
+        return buildAuthRedirectResponse("/index.html", sessionId);
     }
     
     private HttpResponse buildAuthRedirectResponse(String location, String sessionId) {
@@ -92,7 +90,7 @@ public class AuthController extends AbstractController {
     
     private HttpResponse handleAuthPageAccess(String pagePath, HttpCookie httpCookie) throws Exception {
         if (authService.isLoggedIn(httpCookie)) {
-            return buildRedirectResponse(INDEX_HTML);
+            return buildRedirectResponse("/index.html");
         } else {
             String requestLine = "GET " + pagePath + " HTTP/1.1";
             HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), "");

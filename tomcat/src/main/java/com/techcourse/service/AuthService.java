@@ -11,8 +11,9 @@ import org.slf4j.LoggerFactory;
 
 public class AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     public static final String SESSION_KEY_USER = "user";
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     public String login(Map<String, String> authInfo, HttpCookie httpCookie) {
         User user = InMemoryUserRepository.findByAccount(authInfo.get("account"))

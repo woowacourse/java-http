@@ -1,13 +1,14 @@
 package org.apache.coyote.http11;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
@@ -78,7 +79,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 3797 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

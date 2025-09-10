@@ -11,11 +11,11 @@ public abstract class AbstractController implements Controller {
         if (request.isPost()) doPost(request, response);
     }
 
-    protected void doPost(Http11Request request, Http11Response response) throws Exception {
+    protected void doGet(Http11Request request, Http11Response response) throws Exception {
         /* NOOP */
     }
 
-    protected void doGet(Http11Request request, Http11Response response) throws Exception {
+    protected void doPost(Http11Request request, Http11Response response) throws Exception {
         /* NOOP */
     }
 }

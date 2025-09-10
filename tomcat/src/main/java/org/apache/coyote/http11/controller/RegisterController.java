@@ -17,6 +17,12 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
+    protected void doGet(Http11Request request, Http11Response response) throws Exception {
+        response.putHeader("Content-Type", "text/html; charset=utf-8");
+        response.putBody(response.readFileFromClasspath("static/register.html"));
+    }
+
+    @Override
     protected void doPost(Http11Request request, Http11Response response) throws Exception {
         final User user = new User(request.getParam("account"), request.getParam("password"), request.getParam("email"));
         InMemoryUserRepository.save(user);
@@ -24,12 +30,6 @@ public class RegisterController extends AbstractController {
         createSessionAndSetCookie(user, request, response);
         response.putStatusLine("HTTP/1.1 302 Found");
         response.putHeader("Location", "/index.html");
-    }
-
-    @Override
-    protected void doGet(Http11Request request, Http11Response response) throws Exception {
-        response.putHeader("Content-Type", "text/html; charset=utf-8");
-        response.putBody(response.readFileFromClasspath("static/register.html"));
     }
 
     private void createSessionAndSetCookie(final User user, final Http11Request request, final Http11Response response) {

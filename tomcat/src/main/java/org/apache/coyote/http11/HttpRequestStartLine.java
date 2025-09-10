@@ -3,12 +3,12 @@ package org.apache.coyote.http11;
 public class HttpRequestStartLine {
 
     private final String httpMethod;
-    private final String rawUri;
+    private final String path;
     private final String httpVersion;
 
-    public HttpRequestStartLine(final String httpMethod, final String uri, final String httpVersion) {
+    public HttpRequestStartLine(final String httpMethod, final String path, final String httpVersion) {
         this.httpMethod = httpMethod;
-        this.rawUri = uri;
+        this.path = path;
         this.httpVersion = httpVersion;
     }
 
@@ -32,18 +32,18 @@ public class HttpRequestStartLine {
         return httpMethod;
     }
 
-    public String getUri() {
-        int queryIndex = rawUri.indexOf("?");
+    public String getPath() {
+        int queryIndex = path.indexOf("?");
         if (queryIndex >= 0) {
-            return rawUri.substring(0, queryIndex);
+            return path.substring(0, queryIndex);
         }
-        return rawUri;
+        return path;
     }
 
     public String getQueryString() {
-        int queryIndex = rawUri.indexOf("?");
-        if (queryIndex >= 0 && queryIndex + 1 < rawUri.length()) {
-            return rawUri.substring(queryIndex + 1);
+        int queryIndex = path.indexOf("?");
+        if (queryIndex >= 0 && queryIndex + 1 < path.length()) {
+            return path.substring(queryIndex + 1);
         }
         return "";
     }

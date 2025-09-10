@@ -60,8 +60,8 @@ public class HttpRequest {
         return startLine.getHttpMethod();
     }
 
-    public String getUri() {
-        return startLine.getUri();
+    public String getPath() {
+        return startLine.getPath();
     }
 
     public Map<String, List<String>> getQueryParameters() {

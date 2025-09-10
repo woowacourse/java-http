@@ -94,8 +94,6 @@ public class HttpRequest {
         return headers;
     }
 
-    //TODO: Content-Type 파라미터 포함 시 바디 파싱 실패 가능  (2025-09-9, 화, 21:12)
-    // https://github.com/woowacourse/java-http/pull/899#discussion_r2331128305
     public Map<String, String> getBodyParams() {
         ContentType contentType = ContentType.fromMimeType(headers.getFirst("Content-Type"));
         String bodyText = body.toText();

@@ -51,16 +51,6 @@ public class HttpResponse {
         this.contentLength = body.length;
     }
 
-    public static HttpResponse forRedirect(ResponseStatus responseStatus, String location) {
-        return new HttpResponse(
-                ProtocolVersion.HTTP11,
-                responseStatus,
-                ContentType.HTML,
-                location,
-                0L,
-                new byte[0]);
-    }
-
     public void sendRedirect(ResponseStatus responseStatus, String location) {
         this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
         this.location = location;

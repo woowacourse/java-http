@@ -74,11 +74,8 @@ public class HttpRequest {
     }
 
     public boolean hasCookie(String key) {
-        HttpCookie httpCookie = cookies.stream()
-                .filter(cookie -> cookie.isKey(key))
-                .findFirst()
-                .orElse(null);
-        return httpCookie != null;
+        return cookies.stream()
+                .anyMatch(cookie -> cookie.isKey(key));
     }
 
     public String getCookieValue(String key) {

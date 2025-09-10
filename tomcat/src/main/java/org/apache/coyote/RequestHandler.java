@@ -132,7 +132,6 @@ public class RequestHandler {
         return HttpResponse.of(ResponseStatus.UNAUTHORIZED, ContentType.HTML, body);
     }
 
-
     private String getStaticFilePath(HttpRequest httpRequest) {
         final var staticFilePath = "static" + httpRequest.getPath();
         if (httpRequest.getContentType() == ContentType.HTML && !staticFilePath.endsWith(".html")) {

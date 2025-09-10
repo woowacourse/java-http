@@ -128,11 +128,7 @@ public class Http11Request {
         final String[] pairs = body.split("&");
         for (final String pair : pairs) {
             final String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
-                continue;
-            }
-            throw new IllegalArgumentException(String.format("Wrong x-www-form-urlencoded request : %s", pair));
+            urlEncodedResponseBody.put(keyValue[0], keyValue[1]);
         }
         return urlEncodedResponseBody;
     }

@@ -42,6 +42,15 @@ public class HttpRequestBody {
         return new HttpRequestBody(body);
     }
 
+    private static void validateNotNull(final BufferedReader bufferedReader, final HttpHeader httpHeader) {
+        if (bufferedReader == null) {
+            throw new IllegalArgumentException("BufferedReader는 null일 수 없습니다");
+        }
+        if (httpHeader == null) {
+            throw new IllegalArgumentException("HttpHeader는 null일 수 없습니다");
+        }
+    }
+
     public Map<String, String> getBodyElement() {
         String bodyLine = new String(value, StandardCharsets.UTF_8);
         return parseBodyValue(bodyLine);
@@ -59,15 +68,6 @@ public class HttpRequestBody {
         }
 
         return bodyValue;
-    }
-
-    private static void validateNotNull(final BufferedReader bufferedReader, final HttpHeader httpHeader) {
-        if (bufferedReader == null) {
-            throw new IllegalArgumentException("BufferedReader는 null일 수 없습니다");
-        }
-        if (httpHeader == null) {
-            throw new IllegalArgumentException("HttpHeader는 null일 수 없습니다");
-        }
     }
 
     public byte[] getValue() {

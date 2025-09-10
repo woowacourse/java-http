@@ -6,6 +6,6 @@ import org.apache.coyote.http11.http.response.HttpResponse;
 public interface Controller {
 
     boolean isProvide(String path);
-    
+
     void service(HttpRequest request, HttpResponse response);
 }

@@ -1,37 +1,33 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.apache.controller.Controller;
 import org.apache.controller.LoginController;
+import org.apache.controller.LoginRedirectionController;
+import org.apache.controller.RegisterController;
+import org.apache.controller.RegisterRedirectionController;
 import org.apache.controller.RootController;
 import org.apache.controller.StaticFileController;
 import org.apache.coyote.Processor;
 import org.apache.exception.DataNotFoundException;
 import org.apache.exception.InvalidRequestException;
-import org.apache.exception.SocketReadException;
-import org.apache.exception.SocketWriteException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final StaticFileController staticFileController = new StaticFileController();
     private static final List<Controller> controllers = List.of(
             new LoginController(),
-            new RootController(),
-            new StaticFileController()
-    );
+            new LoginRedirectionController(),
+            new RegisterController(),
+            new RegisterRedirectionController(),
+            new RootController());
 
     private final Socket connection;
 
@@ -50,13 +46,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = makeRequest(inputStream);
-            HttpResponse response = makeResponse(request.getVersion());
+            HttpRequest request = new HttpRequest(inputStream);
+            HttpResponse response = new HttpResponse(request.getVersion());
 
-            Controller controller = findControllerByRequest(request);
-            controller.processRequest(request, response);
+            processCommonRequest(request, response);
+            processResourceLoadRequest(request, response);
+            validateRequestProcess(response);
 
-            writeResponseMessage(response, outputStream);
+            response.writeMessage(outputStream);
 
         } catch (InvalidRequestException e) {
             log.info(e.getMessage(), e);
@@ -70,43 +67,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest makeRequest(InputStream inputStream) {
-        List<String> message = readRequestMessage(inputStream);
-        return new HttpRequest(message);
+    private void processCommonRequest(HttpRequest request, HttpResponse response) {
+        Optional<Controller> controllerOptional = controllers.stream()
+                .filter(controller -> controller.isProcessableRequest(request))
+                .findFirst();
+        controllerOptional.ifPresent(controller -> controller.processRequest(request, response));
     }
 
-    private HttpResponse makeResponse(HttpVersion httpVersion) {
-        return new HttpResponse(httpVersion);
-    }
-
-    private List<String> readRequestMessage(InputStream inputStream) {
-        try {
-            //TODO: 요청 메세지의 다른 줄도 읽어보자.  (2025-09-5, 금, 1:7)
-            List<String> message = new ArrayList<>();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            message.add(bufferedReader.readLine());
-            return message;
-        } catch (IOException e) {
-            throw new SocketReadException("HTTP 요청 메세지가 올바르지 않습니다.");
+    private void processResourceLoadRequest(HttpRequest request, HttpResponse response) {
+        boolean isNotProcessedRequest = !response.isProcessed();
+        boolean canProcess = staticFileController.isProcessableRequest(request);
+        if (isNotProcessedRequest && canProcess) {
+            staticFileController.processRequest(request, response);
         }
     }
 
-    private void writeResponseMessage(HttpResponse response, OutputStream outputStream) {
-        String message = response.getMessage();
-        try {
-            outputStream.write(message.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-        } catch (IOException e) {
-            throw new SocketWriteException("소켓에 데이터를 쓰는중 오류가 발생했습니다.");
+    private void validateRequestProcess(HttpResponse response) {
+        if (!response.isProcessed()) {
+            throw new DataNotFoundException("URI에 해당하는 요청 처리가 존재하지 않습니다.");
         }
-    }
-
-    private Controller findControllerByRequest(HttpRequest request) {
-        for (Controller controller : controllers) {
-            if (controller.isProcessableRequest(request)) {
-                return controller;
-            }
-        }
-        throw new DataNotFoundException("URI에 해당하는 요청 처리가 존재하지 않습니다.");
     }
 }

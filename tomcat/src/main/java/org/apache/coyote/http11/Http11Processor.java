@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response findResponse(final Http11Request request) throws IOException {
         final String requestMethod = request.getMethod();
-        final String requestTarget = request.getTarget();
+        final String requestTarget = request.getPath();
 
         if (requestMethod.equals("GET")) {
             if (requestTarget.equals("/"))  {

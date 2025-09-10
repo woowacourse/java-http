@@ -17,9 +17,9 @@ public class Http11Response {
     private static final String JS_CONTENT_TYPE = "application/javascript;charset=utf-8";
     private static final String SVG_CONTENT_TYPE = "image/svg+xml;charset=utf-8";
 
-    private final String httpVersion;
-    private final int httpStatusCode;
-    private final String httpStatusMessage;
+    private final String protocolVersion;
+    private final int statusCode;
+    private final String statusMessage;
     private final Map<String, String> headers;
     private final String body;
 
@@ -80,14 +80,14 @@ public class Http11Response {
     }
 
     private Http11Response(
-            final String httpVersion,
+            final String protocolVersion,
             final HttpStatus httpStatus,
             final Map<String, String> headers,
             final String contentType,
             final byte[] body
     ) {
         this(
-                httpVersion,
+                protocolVersion,
                 httpStatus.getCode(),
                 httpStatus.name(),
                 headers,
@@ -98,15 +98,15 @@ public class Http11Response {
     }
 
     private Http11Response(
-            final String httpVersion,
-            final int httpStatusCode,
-            final String httpStatusMessage,
+            final String protocolVersion,
+            final int statusCode,
+            final String statusMessage,
             final Map<String, String> headers,
             final String body
     ) {
-        this.httpVersion = httpVersion;
-        this.httpStatusCode = httpStatusCode;
-        this.httpStatusMessage = httpStatusMessage;
+        this.protocolVersion = protocolVersion;
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
         this.headers = headers;
         this.body = body;
     }
@@ -125,13 +125,13 @@ public class Http11Response {
 
         if (body == null) {
             return String.join("\r\n",
-                    String.format("%s %s %s ", httpVersion, httpStatusCode, httpStatusMessage),
+                    String.format("%s %s %s ", protocolVersion, statusCode, statusMessage),
                     headerString,
                     ""
             );
         }
         return String.join("\r\n",
-                String.format("%s %s %s ", httpVersion, httpStatusCode, httpStatusMessage),
+                String.format("%s %s %s ", protocolVersion, statusCode, statusMessage),
                 headerString,
                 "",
                 body

@@ -10,9 +10,9 @@ public class Http11Request {
     private static final String COOKIE_HEADER = "Cookie";
 
     private final String method;
-    private final String target;
+    private final String path;
     private final Map<String, String> queryParams;
-    private final String httpVersion;
+    private final String protocolVersion;
     private final Map<String, String> headers;
     private final Http11Cookie cookie;
     private final String body;
@@ -98,17 +98,17 @@ public class Http11Request {
 
     public Http11Request(
             final String method,
-            final String target,
+            final String path,
             final Map<String, String> queryParams,
-            final String httpVersion,
+            final String protocolVersion,
             final Map<String, String> headers,
             final Http11Cookie cookie,
             final String body
     ) {
         this.method = method;
-        this.target = target;
+        this.path = path;
         this.queryParams = queryParams;
-        this.httpVersion = httpVersion;
+        this.protocolVersion = protocolVersion;
         this.headers = headers;
         this.cookie = cookie;
         this.body = body;
@@ -140,8 +140,8 @@ public class Http11Request {
         return cookie.findCookie(cookieName);
     }
 
-    public String getTarget() {
-        return target;
+    public String getPath() {
+        return path;
     }
 
     public String getMethod() {

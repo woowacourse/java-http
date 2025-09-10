@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -51,6 +52,9 @@ public class ResourceHandler {
                 redirectLogin(request, response);
                 return;
             }
+            if (Objects.equals(request.getResourcePath(), "/register")) {
+                saveUser(request, response);
+            }
         }
         if (!request.hasQueryParameter()) {
             response.setStatusCode(StatusCode.OK);
@@ -77,6 +81,19 @@ public class ResourceHandler {
         }
         response.setStatusCode(StatusCode.UNAUTHORIZED);
         response.setBodyAndContentLength(getContent("/401.html"));
+    }
+
+    private void saveUser(HttpRequest request, HttpResponse response) {
+        final var account = request.getQueryParameter("account");
+        final var password = request.getQueryParameter("password");
+        final var email = request.getQueryParameter("email");
+
+        final var user = new User(2L, account, password, email);
+        InMemoryUserRepository.save(user);
+
+        log.info("user : {}", user);
+        response.setStatusCode(StatusCode.FOUND);
+        response.setLocation("/index.html");
     }
 
     private String getContent(final String resourcePath) {

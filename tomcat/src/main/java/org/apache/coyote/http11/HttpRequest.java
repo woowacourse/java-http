@@ -1,13 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+
 public class HttpRequest {
 
     private final String resourcePath;
     private final QueryParameters queryParameters;
+    private final Map<String, String> headers;
+    private final String body;
 
-    public HttpRequest(String resourcePath, QueryParameters queryParameters) {
+    public HttpRequest(String resourcePath, QueryParameters queryParameters, Map<String, String> headers, String body) {
         this.resourcePath = resourcePath;
         this.queryParameters = queryParameters;
+        this.headers = headers;
+        this.body = body;
     }
 
     public String getResourcePath() {

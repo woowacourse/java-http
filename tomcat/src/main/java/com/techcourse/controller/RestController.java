@@ -32,6 +32,7 @@ public class RestController {
             log.info("{}", user.toString());
             UUID sessionId = UUID.randomUUID();
             Session session = new Session(sessionId.toString());
+            session.setAttribute("user", user);
             sessionManager.add(session);
 
             Map<String, String> headers = Map.of(

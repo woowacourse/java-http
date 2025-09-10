@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import com.techcourse.service.LoginService;
 import jakarta.servlet.http.HttpSession;
@@ -54,11 +55,14 @@ public class LoginController extends AbstractController {
         final String account = bodyElement.get("account");
         final String password = bodyElement.get("password");
 
-        final User user = loginService.login(account, password);
-
-        response.setFound("index.html");
-        String sessionId = UUID.randomUUID().toString();
-        response.setCookie("JSESSIONID", sessionId);
-        response.addAttribute("session_user", user);
+        try {
+            final User user = loginService.login(account, password);
+            response.setFound("index.html");
+            String sessionId = UUID.randomUUID().toString();
+            response.setCookie("JSESSIONID", sessionId);
+            response.addAttribute("session_user", user);
+        } catch (UnauthorizedException e) {
+            response.setUnauthorized();
+        }
     }
 }

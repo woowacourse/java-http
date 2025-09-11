@@ -1,5 +1,6 @@
 package com.techcourse;
 
+import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.model.LoginService;
@@ -16,6 +17,7 @@ public class WebApplicationInitializer {
     static {
         requestMapping.addMapping("/login", new LoginController(new LoginService()));
         requestMapping.addMapping("/register", new RegisterController(new RegisterService()));
+        requestMapping.addMapping("/", new GreetingController());
     }
 
     public static RequestMapping getRequestMapping() {

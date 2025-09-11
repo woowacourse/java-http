@@ -22,7 +22,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("Location: /404.html");
+        assertThat(socket.output()).contains("Hello world!");
     }
 
     @Test

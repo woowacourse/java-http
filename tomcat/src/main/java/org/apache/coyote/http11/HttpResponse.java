@@ -5,14 +5,20 @@ import java.util.List;
 
 public class HttpResponse {
 
-    private final HttpStatus httpStatus;
+    private final ResponseLine responseLine;
     private final List<HttpHeader> headers;
-    private final String responseBody;
+    private final String body;
 
-    public HttpResponse(HttpStatus httpStatus, List<HttpHeader> headers, String responseBody) {
-        this.httpStatus = httpStatus;
+    public HttpResponse(HttpStatus httpStatus, List<HttpHeader> headers, String body) {
+        this.responseLine = new ResponseLine("HTTP/1.1", httpStatus);
         this.headers = new ArrayList<>(headers);
-        this.responseBody = responseBody;
+        this.body = body;
+    }
+
+    public HttpResponse(String protocolVersion, HttpStatus httpStatus, List<HttpHeader> headers, String body) {
+        this.responseLine = new ResponseLine(protocolVersion, httpStatus);
+        this.headers = new ArrayList<>(headers);
+        this.body = body;
     }
 
     public static HttpResponseBuilder builder() {
@@ -21,13 +27,16 @@ public class HttpResponse {
 
     @Override
     public String toString() {
+        String protocolVersion = responseLine.getProtocolVersion();
+        int statusCode = responseLine.getStatusCode();
+        String statusMessage = responseLine.getStatusMessage();
         StringBuilder sb = new StringBuilder();
-        sb.append("HTTP/1.1 %s %s ".formatted(httpStatus.getCode(), httpStatus.getMessage())).append("\r\n");
+        sb.append("%s %d %s ".formatted(protocolVersion, statusCode, statusMessage)).append("\r\n");
         for (HttpHeader httpHeader : headers) {
             sb.append("%s: %s ".formatted(httpHeader.getName(), httpHeader.getValue())).append("\r\n");
         }
         sb.append("").append("\r\n");
-        sb.append(responseBody);
+        sb.append(body);
         return sb.toString();
     }
 }

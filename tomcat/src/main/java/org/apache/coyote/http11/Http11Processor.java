@@ -210,7 +210,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         log.atInfo().log("user: {}", user);
         return user;
-    }
+    }   
 
     private String readStaticFile(String filePath) throws IOException {
         String staticFilePath = STATIC_RESOURCE_PATH + filePath;

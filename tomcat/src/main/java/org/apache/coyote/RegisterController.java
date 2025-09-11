@@ -1,0 +1,33 @@
+package org.apache.coyote;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.ErrorMessage;
+import com.techcourse.model.User;
+import org.apache.coyote.http11.Request;
+import org.apache.coyote.http11.Response;
+
+import java.util.Map;
+
+import static org.apache.coyote.util.StringParser.parseQueryParameter;
+
+public class RegisterController extends AbstractController {
+
+    private final StaticRenderer staticRenderer = new StaticRenderer();
+
+    @Override
+    protected void doPost(Request request, Response response) throws Exception {
+        if (register(parseQueryParameter(request.getBody()))) {
+            staticRenderer.redirectToIndexPage(response);
+        }
+        throw new IllegalArgumentException(ErrorMessage.INVALID_REGISTER_REQUEST.getMessage());
+    }
+
+    private boolean register(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return InMemoryUserRepository.findByAccount(account).isPresent();
+    }
+}

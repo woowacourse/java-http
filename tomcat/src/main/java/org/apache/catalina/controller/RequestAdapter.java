@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 public class RequestAdapter {
 
@@ -53,7 +54,7 @@ public class RequestAdapter {
                     .protocol(request.getProtocol())
                     .status(405, "Method Not Allowed")
                     .contentType("text/plain;charset=utf-8")
-                    .body("Method Not Allowed".getBytes())
+                    .body("Method Not Allowed".getBytes(StandardCharsets.UTF_8))
                     .build();
         }
 

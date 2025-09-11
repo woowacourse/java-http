@@ -7,8 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final SessionManager INSTANCE = new SessionManager();
+    private static final SessionManager INSTANCE;
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
+
+    static {
+        INSTANCE = new SessionManager();
+    }
 
     public static SessionManager getInstance() {
         return INSTANCE;

@@ -3,38 +3,84 @@ package org.apache.catalina.vo;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
+import java.util.Collections;
 import java.util.Map;
 
-public record HttpRequest(
-    String method,
-    String uri,
-    Map<String, String> headers,
-    String body
-) {
+public class HttpRequest {
 
-    private static final String SESSION_COOKIE_ID = "JSESSIONID";
+    private final String method;
+    private final Path path;
+    private final String version;
+    private final Map<String, String> headers;
+    private final String body;
 
-    public Session getSession(final boolean create) {
-        final var sessionManager = SessionManager.getInstance();
-        final var cookie = getCookie();
-        if (cookie.containsKey(SESSION_COOKIE_ID)) {
-            final var sessionId = cookie.get(SESSION_COOKIE_ID);
-            final var session = sessionManager.findSession(sessionId);
-            if (session == null) {
-                return sessionManager.generateNewSession();
-            }
-            return session;
-        }
-        if (create) {
-            return sessionManager.generateNewSession();
-        }
-        return null;
+    public HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
+        validateVersion(version);
+        this.method = method;
+        this.path = new Path(path);
+        this.version = version;
+        this.headers = headers;
+        this.body = body;
     }
 
-    private HttpCookie getCookie() {
-        if (headers.containsKey("Cookie")) {
-            return new HttpCookie(headers.get("Cookie"));
+    private void validateVersion(String version) {
+        if (!version.equalsIgnoreCase("HTTP/1.1")) {
+            throw new IllegalArgumentException();
         }
-        return new HttpCookie();
+    }
+
+    public String extractMimeType() {
+//        if (headers.containsKey("Accept")) {
+//            return headers.get("Accept");
+//        }
+        // TODO:
+        // 파일 요청이 아닌 경우 모두 JSON 응답
+        final var fileExtension = path.getFileExtension()
+                .orElseGet(() -> FileExtension.JSON);
+        return Mime.getMimeTypeValue(fileExtension);
+    }
+
+    public Session getSession(final boolean create) {
+        final var cookies = getCookies();
+        final var session = cookies.extractSession();
+        if (session == null) {
+            if (create) {
+                final var sessionManager = SessionManager.getInstance();
+                return sessionManager.generateNewSession();
+            }
+            return null;
+        }
+        return session;
+    }
+
+    public Map<String, String> getPathParams() {
+        return path.getQueryParams();
+    }
+
+    private Cookies getCookies() {
+        if (headers.containsKey("Cookie")) {
+            return new Cookies(headers.get("Cookie"));
+        }
+        return new Cookies();
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path.getValue();
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public Map<String, String> getHeaders() {
+        return Collections.unmodifiableMap(headers);
+    }
+
+    public String getBody() {
+        return body;
     }
 }

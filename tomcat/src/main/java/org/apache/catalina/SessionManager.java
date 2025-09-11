@@ -1,5 +1,7 @@
 package org.apache.catalina;
 
+import org.apache.catalina.vo.Cookie;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,9 +19,13 @@ public class SessionManager {
     }
 
     public Session generateNewSession() {
-        final var session = new Session(UUID.randomUUID().toString());
+        final var session = new Session();
         sessions.put(session.getId(), session);
         return session;
+    }
+
+    public Cookie generateSessionCookie(final Session session) {
+        return Cookie.of(session);
     }
 
     public void add(final Session session) {

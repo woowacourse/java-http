@@ -1,18 +1,19 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
     private final RequestMethod requestMethod;
     private final String requestUrl;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
     private final RequestHeader requestHeader;
     private final Map<String, String> parameters;
     private final SessionManager sessionManager;
@@ -20,7 +21,7 @@ public class HttpRequest {
     public HttpRequest(
             final RequestMethod requestMethod,
             final String requestUrl,
-            final String httpVersion,
+            final HttpVersion httpVersion,
             final RequestHeader requestHeader,
             final Map<String, String> parameters,
             final SessionManager sessionManager
@@ -40,7 +41,8 @@ public class HttpRequest {
         String bodyPart = parts.length > 1 ? parts[1] : "";
 
         String[] headerLines = headerPart.split("\r\n");
-        String[] requestLine = headerLines[0].trim().split(" ");
+        String[] requestLine = headerLines[0].trim()
+                .split(" ");
 
         RequestMethod requestMethod = RequestMethod.valueOf(requestLine[0]);
         String requestUrl = requestLine[1];
@@ -63,7 +65,7 @@ public class HttpRequest {
         return new HttpRequest(
                 requestMethod,
                 requestUrl,
-                requestHttpVersion,
+                HttpVersion.from(requestHttpVersion.trim()),
                 requestHeader,
                 parameters,
                 new SessionManager()
@@ -78,7 +80,7 @@ public class HttpRequest {
         return requestUrl;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 
@@ -100,7 +102,8 @@ public class HttpRequest {
         }
 
         if (create) {
-            Session session = new Session(UUID.randomUUID().toString());
+            Session session = new Session(UUID.randomUUID()
+                    .toString());
             sessionManager.add(session);
             return session;
         }

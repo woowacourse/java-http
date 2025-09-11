@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
     private void handle(final HttpRequest httpRequest, final OutputStream outputStream) {
         for (Controller handler : controllers) {
             if (handler.support(httpRequest)) {
-                HttpResponse httpResponse = HttpResponse.defaultHttpResponse(HttpVersion.ONE_ONE);
+                HttpResponse httpResponse = HttpResponse.defaultHttpResponse(httpRequest.getHttpVersion());
 
                 try {
                     handler.service(httpRequest, httpResponse);

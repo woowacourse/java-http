@@ -9,6 +9,7 @@ public enum HttpStatus {
     UNAUTHORIZED(401),
     NOT_FOUND(404),
     NOT_ALLOWED(405),
+    NONE(0),
     ;
 
     private final int status;

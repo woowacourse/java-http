@@ -1,14 +1,14 @@
 package org.apache.catalina.executor;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.TimeUnit;
 
 public class ThreadContainer {
 
-    private static final int DEFAULT_TIMEOUT = 0;
+    private static final int DEFAULT_TIMEOUT = 60;
     private final ExecutorService executorService;
 
     public ThreadContainer(int queueSize, int maxThreads) {
@@ -18,7 +18,7 @@ public class ThreadContainer {
                 maxThreads,
                 DEFAULT_TIMEOUT,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(queueSize),
+                new ArrayBlockingQueue<>(queueSize),
                 new AbortPolicy()
         );
     }

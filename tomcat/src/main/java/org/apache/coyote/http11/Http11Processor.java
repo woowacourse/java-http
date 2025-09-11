@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -71,15 +71,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleSessionCreation(final HttpResponse httpResponse) {
-        Object userAttribute = httpResponse.getAttribute("session_user");
-        if (userAttribute instanceof User) {
-            final String sessionId = UUID.randomUUID().toString();
-            final HttpSession session = new Session(sessionId);
-
-            session.setAttribute("user", userAttribute);
-            sessionManager.add(session);
-
-            httpResponse.setCookie("JSESSIONID", sessionId);
+        final Set<String> sessionAttributeKeys = httpResponse.getAllAttributeKeys();
+        if (sessionAttributeKeys.isEmpty()) {
+            return;
         }
+
+        final String sessionId = UUID.randomUUID().toString();
+        final HttpSession session = new Session(sessionId);
+        sessionAttributeKeys.forEach(key -> session.setAttribute(key, httpResponse.getAttribute(key)));
+        sessionManager.add(session);
+
+        httpResponse.setCookie("JSESSIONID", sessionId);
     }
 }

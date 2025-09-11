@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.http.common.HttpCookie;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
@@ -93,6 +92,12 @@ public class HttpRequest {
         return HttpRequestBody.from(bodyBytes);
     }
 
+    public void invalidateExistSession() {
+        if (this.httpSession != null) {
+            this.httpSession.invalidate();
+        }
+    }
+
     public HttpMethod getMethod() {
         return httpStartLine.getMethod();
     }
@@ -119,8 +124,8 @@ public class HttpRequest {
         return httpStartLine.getTargetQueryParameter(cleanTarget);
     }
 
-    public Map<String, String> getBodyElement() {
-        return httpRequestBody.getBodyElement();
+    public String getBodyElement(final String target) {
+        return httpRequestBody.getBodyElement().get(target);
     }
 
     public HttpCookie getCookie() {

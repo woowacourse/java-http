@@ -4,7 +4,6 @@ import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import com.techcourse.service.LoginService;
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
@@ -45,14 +44,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final HttpSession oldSession = request.getSession();
-        if (oldSession != null) {
-            oldSession.invalidate();
-        }
+        request.invalidateExistSession();
 
-        final Map<String, String> bodyElement = request.getBodyElement();
-        final String account = bodyElement.get("account");
-        final String password = bodyElement.get("password");
+        final String account = request.getBodyElement("account");
+        final String password = request.getBodyElement("password");
 
         try {
             final User user = loginService.login(account, password);

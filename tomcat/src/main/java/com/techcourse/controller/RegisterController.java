@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.RegisterService;
-import java.util.Map;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
@@ -26,11 +25,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> bodyElement = request.getBodyElement();
-
-        final String account = bodyElement.get("account");
-        final String password = bodyElement.get("password");
-        final String email = bodyElement.get("email");
+        final String account = request.getBodyElement("account");
+        final String password = request.getBodyElement("password");
+        final String email = request.getBodyElement("email");
 
         registerService.register(account, password, email);
 

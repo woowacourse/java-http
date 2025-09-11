@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 import org.apache.coyote.http11.http.common.startline.HttpVersion;
 
@@ -34,6 +35,11 @@ public class HttpResponse {
     public Object getAttribute(String key) {
         return this.sessionAttributes.get(key);
     }
+
+    public Set<String> getAllAttributeKeys() {
+        return sessionAttributes.keySet();
+    }
+
 
     public String getResponseFormat() {
         final List<String> responseLines = getResponseLines();

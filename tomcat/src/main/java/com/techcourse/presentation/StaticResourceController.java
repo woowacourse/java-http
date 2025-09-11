@@ -3,6 +3,7 @@ package com.techcourse.presentation;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,19 +63,48 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public ResponseWithType getResource(final ParsedResourcePath request) {
+    public HttpResponse getResource(final HttpRequest request) {
+        if (!isResponsible(request.path())) {
+            throw new IllegalArgumentException("요청 경로에 해당하는 자원이 없습니다.");
+        }
+
         if ("/".equals(request.path())) {
-            return new ResponseWithType("text/html", "Hello world!");
+            final String body = "Hello world!";
+
+            return HttpResponse.builder()
+                    .protocol(request.protocol())
+                    .statusCode("200 OK")
+                    .contentType("text/html;charset=utf-8")
+                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                    .body(body)
+                    .build();
         }
 
         final Path filePath = RESOURCE_PATHS.get(request.path());
+        final String statusCode = getStatusCode(request.path());
+
         try {
             final String contentType = Files.probeContentType(filePath);
-            final String response = new String(Files.readAllBytes(filePath));
+            final String body = new String(Files.readAllBytes(filePath));
 
-            return new ResponseWithType(contentType, response);
+            return HttpResponse.builder()
+                    .protocol(request.protocol())
+                    .statusCode(statusCode)
+                    .contentType(contentType + ";charset=utf-8")
+                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                    .body(body)
+                    .build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getStatusCode(final String pathName) {
+        return switch (pathName) {
+            case "/401.html" -> "401 Unauthorized";
+            case "/404.html" -> "404 Not Found";
+            case "/500.html" -> "500 Internal Server Error";
+            default -> "200 OK";
+        };
     }
 }

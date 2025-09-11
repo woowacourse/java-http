@@ -1,26 +1,14 @@
 package org.apache.catalina.controller;
 
-import com.techcourse.controller.HelloController;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class FrontController {
 
     private final RequestMapping requestMapping;
-    private final AbstractController staticResourceController;
 
-    public FrontController() {
-        this.requestMapping = new RequestMapping();
-        this.staticResourceController = new StaticResourceController();
-        initializeControllers();
-    }
-
-    private void initializeControllers() {
-        requestMapping.addController("/", new HelloController());
-        requestMapping.addController("/login", new LoginController());
-        requestMapping.addController("/register", new RegisterController());
+    public FrontController(RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
     }
 
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -29,4 +17,3 @@ public class FrontController {
         controller.service(request, response);
     }
 }
-

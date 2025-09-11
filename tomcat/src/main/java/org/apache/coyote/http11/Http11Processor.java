@@ -17,9 +17,9 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final FrontController frontController;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final FrontController frontController) {
         this.connection = connection;
-        this.frontController = new FrontController();
+        this.frontController = frontController;
     }
 
     @Override

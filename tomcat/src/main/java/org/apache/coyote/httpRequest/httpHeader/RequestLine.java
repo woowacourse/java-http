@@ -30,7 +30,6 @@ public class RequestLine {
         this.protocol = protocol;
     }
 
-
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

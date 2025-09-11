@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -39,10 +37,8 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller = REQUEST_MAPPING.getController(request);
 
             controller.service(request, response);
-        } catch (final IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
         } catch (final Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
     }
 }

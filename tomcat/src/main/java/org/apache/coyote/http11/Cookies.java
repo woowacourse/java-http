@@ -13,9 +13,11 @@ public class Cookies {
         this.cookies = cookies;
     }
 
-    public Cookies(final String cookie) {
-        final List<String> keyValues = Arrays.stream(cookie.split(";")).map(String::trim).toList();
-        this.cookies = keyValues.stream()
+    public Cookies(final String cookieHeader) {
+        final List<String> cookieKeyValues = Arrays.stream(cookieHeader.split(";"))
+                .map(String::trim)
+                .toList();
+        this.cookies = cookieKeyValues.stream()
                 .map(keyValue -> keyValue.split("="))
                 .collect(
                         Collectors.toMap(
@@ -25,7 +27,7 @@ public class Cookies {
                 );
     }
 
-    public String toCookieList() {
+    public String formatToCookieList() {
         final List<String> cookieList = cookies.entrySet().stream()
                 .map(cookie -> String.format("%s=%s", cookie.getKey(), cookie.getValue()))
                 .toList();

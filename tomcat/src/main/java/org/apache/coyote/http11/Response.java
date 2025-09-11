@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -18,39 +19,58 @@ public class Response {
             Map.entry(200, "OK"),
             Map.entry(302, "Found")
     );
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
+    private static final String HOST = "http://localhost:8080";
+    private static final String CRLF = "\r\n";
 
     private final OutputStream outputStream;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers;
 
     public Response(final OutputStream outputStream) {
         this.outputStream = outputStream;
+        this.headers = new HashMap<>();
     }
 
     public void addCookies(final Cookies cookies) {
-        headers.put("Set-Cookie", cookies.toCookieList());
+        headers.put(SET_COOKIE, cookies.formatToCookieList());
     }
 
     public void sendResource(final String resource) throws IOException {
-        final URL resourceUrl = getResourceUrl(resource);
-        final Path resourcePath = Paths.get(resourceUrl.getFile());
+        try {
+            final URL resourceUrl = getResourceUrl(resource);
+            final Path resourcePath = Paths.get(resourceUrl.getFile());
 
-        byte[] messageBody = Files.readAllBytes(resourcePath);
-        headers.put("Content-Type", Files.probeContentType(resourcePath));
-        headers.put("Content-Length", String.valueOf(messageBody.length));
+            byte[] messageBody = Files.readAllBytes(resourcePath);
+            headers.put(CONTENT_TYPE, Files.probeContentType(resourcePath));
+            headers.put(CONTENT_LENGTH, String.valueOf(messageBody.length));
 
-        outputStream.write(buildResponseLine(200).getBytes(StandardCharsets.UTF_8));
-        outputStream.write(buildHeaders().getBytes(StandardCharsets.UTF_8));
-        outputStream.write(messageBody);
-        outputStream.flush();
+            outputStream.write(buildResponseLine(200).getBytes(StandardCharsets.UTF_8));
+            outputStream.write(buildHeaders().getBytes(StandardCharsets.UTF_8));
+            outputStream.write(messageBody);
+            outputStream.flush();
+        } catch (
+                final NullPointerException |
+                      IOException |
+                      OutOfMemoryError |
+                      SecurityException e) {
+            throw new IOException("Resource를 전송할 수 없습니다.", e);
+        }
     }
 
     public void sendRedirection(final String location) throws IOException {
-        headers.put("Location", String.format("http://localhost:8080%s", location));
-        headers.put("Content-Length", "0");
+        try {
+            headers.put(LOCATION, String.format("%s%s", HOST, location));
+            headers.put(CONTENT_LENGTH, "0");
 
-        outputStream.write(buildResponseLine(302).getBytes(StandardCharsets.UTF_8));
-        outputStream.write(buildHeaders().getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+            outputStream.write(buildResponseLine(302).getBytes(StandardCharsets.UTF_8));
+            outputStream.write(buildHeaders().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (final IOException | IllegalFormatException | NullPointerException e) {
+            throw new IOException("Redirection을 전송할 수 없습니다.", e);
+        }
     }
 
     private URL getResourceUrl(final String resource) throws FileNotFoundException {
@@ -62,16 +82,16 @@ public class Response {
     }
 
     private String buildResponseLine(final int statusCode) {
-        return String.format("HTTP/1.1 %d %s \r\n", statusCode, STATUS.get(statusCode));
+        return String.format("HTTP/1.1 %d %s " + CRLF, statusCode, STATUS.get(statusCode));
     }
 
     private String buildHeaders() {
         final StringBuilder stringBuilder = new StringBuilder();
         for (final Entry<String, String> header : headers.entrySet()) {
             final String headerLine = String.format("%s: %s ", header.getKey(), header.getValue());
-            stringBuilder.append(headerLine).append("\r\n");
+            stringBuilder.append(headerLine).append(CRLF);
         }
-        stringBuilder.append("\r\n");
+        stringBuilder.append(CRLF);
         return stringBuilder.toString();
     }
 }

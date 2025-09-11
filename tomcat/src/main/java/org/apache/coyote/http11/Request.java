@@ -19,13 +19,11 @@ public class Request {
     private static final int SKIP_REQUEST_LINE = 1;
     private static final int FIELD_NAME_INDEX = 0;
     private static final int FIELD_VALUE_NAME = 1;
-
     private static final String CONTENT_LENGTH = "content-length";
     private static final String COOKIE = "cookie";
 
     private final String method;
     private final String requestURI;
-    private final Map<String, String> queries = null;
     private final Map<String, String> headers;
     private final String messageBody;
 
@@ -38,10 +36,22 @@ public class Request {
             this.requestURI = requestLine.get(REQUEST_URI_INDEX);
             this.headers = parseHeaders(lines);
             this.messageBody = parseMessageBody(reader);
-        } catch (final IllegalArgumentException | ArrayIndexOutOfBoundsException | NullPointerException |
-                       IOException | NoSuchElementException e) {
+        } catch (
+                final IllegalArgumentException |
+                      ArrayIndexOutOfBoundsException |
+                      NullPointerException |
+                      IOException |
+                      NoSuchElementException e
+        ) {
             throw new IOException("HTTP Request를 해석할 수 없습니다.", e);
         }
+    }
+
+    public Cookies getCookies() {
+        if (!containsHeader(COOKIE)) {
+            return null;
+        }
+        return new Cookies(getHeader(COOKIE));
     }
 
     private List<String> readRequestAndHeaderLines(final BufferedReader reader) throws IOException {
@@ -85,13 +95,6 @@ public class Request {
 
     public String getHeader(final String filedName) {
         return headers.get(filedName.toLowerCase());
-    }
-
-    public Cookies getCookies() {
-        if (!containsHeader(COOKIE)) {
-            return null;
-        }
-        return new Cookies(getHeader(COOKIE));
     }
 
     public String getMethod() {

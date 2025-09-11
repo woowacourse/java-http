@@ -17,11 +17,11 @@ public class InMemoryUserRepository {
     private InMemoryUserRepository() {
     }
 
-    public static void save(User user) {
+    public static void save(final User user) {
         database.put(user.getAccount(), user);
     }
 
-    public static Optional<User> findByAccount(String account) {
+    public static Optional<User> findByAccount(final String account) {
         return Optional.ofNullable(database.get(account));
     }
 }

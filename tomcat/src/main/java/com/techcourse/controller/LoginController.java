@@ -25,7 +25,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> headers = request.getHeaders();
         if (existsSession(headers)) {
             ResponseWriters.ok(response, "index.html");
@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> loginRequest = request.getBodyMap();
         try {
             User user = service.getUser(loginRequest);

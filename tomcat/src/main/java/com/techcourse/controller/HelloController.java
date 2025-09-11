@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class HelloController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         ok(response, "Hello world!");
     }
 }

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestReader {
+public class HttpRequestBuilder {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String QUERY_PARAM_SEPARATOR = "&";

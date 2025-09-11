@@ -8,7 +8,7 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.common.HttpRequest;
-import org.apache.coyote.common.HttpRequestReader;
+import org.apache.coyote.common.HttpRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final HttpRequest request = HttpRequestReader.read(bufferedReader);
+            final HttpRequest request = HttpRequestBuilder.read(bufferedReader);
 
             log.info("{} {} | message: {} {}", request.getMethod(), request.getPath(), request.getHeaders(), request.getBody());
 

@@ -9,11 +9,10 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(final Request request, final Response response) throws Exception {
         final String method = request.getMethod();
-        if (method.equals("GET")) {
-            doGet(request, response);
-        }
-        if (method.equals("POST")) {
-            doPost(request, response);
+        switch (method) {
+            case "GET" -> doGet(request, response);
+            case "POST" -> doPost(request, response);
+            default -> throw new IllegalArgumentException("처리할 수 없는 HTTP Method 입니다.");
         }
     }
 

@@ -43,21 +43,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
         ) {
-            final var request = HttpRequest.from(inputStream);
-            final var response = new HttpResponse(outputStream);
-
-            final var session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
-            final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
-            controller.service(request, response, session);
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            try (final var outputStream = connection.getOutputStream()) {
+            try {
+                final var request = HttpRequest.from(inputStream);
+                final var response = new HttpResponse(outputStream);
+                final var session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
+                final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
+                controller.service(request, response, session);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
                 final var response = new HttpResponse(outputStream);
                 response.sendServerError();
-            } catch (IOException ioEx) {
-                log.error("500 에러 전송 실패: {}", ioEx.getMessage(), ioEx);
             }
+        } catch (IOException e) {
+            log.error("I/O error during processing: {}", e.getMessage(), e);
         }
     }
 }

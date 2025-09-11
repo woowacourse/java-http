@@ -44,12 +44,15 @@ public class Http11Processor implements Runnable, Processor {
 
             // method + path로 실행할 작업의 분기 처리를 나열합니다.
             if (request.getMethod().equals("GET") && request.getPath().startsWith("/index.html")) {
+                // GET 요청 index 페이지
                 staticResource = StaticResourceProvider.getStaticResource("/index.html");
                 responseStatusCode = "200 OK";
             } else if (request.getMethod().equals("GET") && request.getPath().startsWith("/login")) {
+                // GET 요청 로그인 페이지
                 staticResource = StaticResourceProvider.getStaticResource("/login.html");
                 responseStatusCode = "200 OK";
             } else if (request.getMethod().equals("POST") && request.getPath().startsWith("/login")) {
+                // POST 요청 로그인 처리
                 if (isLoginSuccess(request.getBodyParam("account"), request.getBodyParam("password"))) {
                     staticResource = StaticResourceProvider.getStaticResource("/index.html");
                     responseStatusCode = "302 Found";
@@ -58,7 +61,24 @@ public class Http11Processor implements Runnable, Processor {
                     staticResource = StaticResourceProvider.getStaticResource("/401.html");
                     responseStatusCode = "401 Unauthorized";
                 }
+            } else if (request.getMethod().equals("GET") && request.getPath().startsWith("/register")) {
+                // GET 요청 회원가입 페이지
+                staticResource = StaticResourceProvider.getStaticResource("/register.html");
+                responseStatusCode = "200 OK";
+            } else if (request.getMethod().equals("POST") && request.getPath().startsWith("/register")) {
+                // POST 요청 회원가입 처리
+                final String account = request.getBodyParam("account");
+                final String email = request.getBodyParam("email");
+                final String password = request.getBodyParam("password");
+
+                final User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+
+                staticResource = StaticResourceProvider.getStaticResource("/index.html");
+                responseStatusCode = "302 Found";
+                responseHeaders.put("Location", "/index.html");
             } else {
+                // 정적 리소스 요청
                 staticResource = StaticResourceProvider.getStaticResource(request.getPath());
                 responseStatusCode = staticResource != null ? "200 OK" : "404 Not Found";
             }

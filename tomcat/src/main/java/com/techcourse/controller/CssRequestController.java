@@ -1,10 +1,15 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
+
+import org.apache.catalina.Controller;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.RequestMethod;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 
-public class CssRequestHandler implements HttpRequestHandler {
+public class CssRequestController implements Controller {
 
     @Override
     public boolean support(final HttpRequest httpRequest) {
@@ -13,7 +18,7 @@ public class CssRequestHandler implements HttpRequestHandler {
     }
 
     @Override
-    public void response(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         URL resource = getClass().getClassLoader()
                 .getResource("static" + httpRequest.getRequestUrl());
         Path resourcePath = Path.of(resource.getPath());

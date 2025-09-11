@@ -1,17 +1,21 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Controller;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.RequestMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class LoginPostRequestHandler implements HttpRequestHandler {
+public class LoginPostRequestController implements Controller {
 
 
-    private static final Logger log = LoggerFactory.getLogger(LoginPostRequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginPostRequestController.class);
 
     @Override
     public boolean support(final HttpRequest httpRequest) {
@@ -21,7 +25,7 @@ public class LoginPostRequestHandler implements HttpRequestHandler {
     }
 
     @Override
-    public void response(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
         if (foundUser.isEmpty()) {
             log.info("존재하지 않는 user입니다.");

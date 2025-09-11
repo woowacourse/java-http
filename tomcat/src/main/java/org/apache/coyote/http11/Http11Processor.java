@@ -1,6 +1,15 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.CssRequestController;
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.HtmlRequestController;
+import com.techcourse.controller.JsRequestController;
+import com.techcourse.controller.LoginPostRequestController;
+import com.techcourse.controller.LoginRequestController;
+import com.techcourse.controller.RegisterGetRequestController;
+import com.techcourse.controller.RegisterPostRequestController;
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +27,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final List<HttpRequestHandler> httpRequestHandlers = List.of(
-            new HomeHttpRequestHandler(),
-            new HtmlRequestHandler(),
-            new CssRequestHandler(),
-            new JsRequestHandler(),
-            new LoginRequestHandler(),
-            new LoginPostRequestHandler(),
-            new RegisterGetRequestHandler(),
-            new RegisterPostRequestHandler()
+    private final List<Controller> controllers = List.of(
+            new HomeController(),
+            new HtmlRequestController(),
+            new CssRequestController(),
+            new JsRequestController(),
+            new LoginRequestController(),
+            new LoginPostRequestController(),
+            new RegisterGetRequestController(),
+            new RegisterPostRequestController()
     );
 
     private final Socket connection;
@@ -80,12 +89,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handle(final HttpRequest httpRequest, final OutputStream outputStream) {
-        for (HttpRequestHandler handler : httpRequestHandlers) {
+        for (Controller handler : controllers) {
             if (handler.support(httpRequest)) {
                 HttpResponse httpResponse = HttpResponse.defaultHttpResponse(HttpVersion.ONE_ONE);
 
                 try {
-                    handler.response(httpRequest, httpResponse);
+                    handler.service(httpRequest, httpResponse);
 
                     byte[] responseBytes = httpResponse.buildHttpResponse()
                             .getBytes(StandardCharsets.UTF_8);

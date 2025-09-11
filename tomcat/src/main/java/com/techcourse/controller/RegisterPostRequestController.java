@@ -1,9 +1,13 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Controller;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.RequestMethod;
 
-public class RegisterPostRequestHandler implements HttpRequestHandler {
+public class RegisterPostRequestController implements Controller {
 
     @Override
     public boolean support(final HttpRequest httpRequest) {
@@ -13,7 +17,7 @@ public class RegisterPostRequestHandler implements HttpRequestHandler {
     }
 
     @Override
-    public void response(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String account = httpRequest.getParameter("account");
         String password = httpRequest.getParameter("password");
         String email = httpRequest.getParameter("email");

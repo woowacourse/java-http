@@ -60,7 +60,7 @@ public class MappingLine { // GET /endPoint HTTP/1.1
         return method;
     }
 
-    public String getUrl() {
+    public String getPath() {
         return path;
     }
 }

@@ -45,6 +45,10 @@ public class ResponseEntity {
         return buildResponse(HttpStatus.NO_CONTENT, null, DEFAULT_CONTENT_TYPE);
     }
 
+    public static HttpResponse notAllowed() {
+        return buildResponse(HttpStatus.NOT_ALLOWED, null, DEFAULT_CONTENT_TYPE);
+    }
+
     private static HttpResponse buildResponse(byte[] body, String contentType) {
         return buildResponse(HttpStatus.OK, body, contentType);
     }

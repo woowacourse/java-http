@@ -8,6 +8,7 @@ public enum HttpStatus {
     BAD_REQUEST(400),
     UNAUTHORIZED(401),
     NOT_FOUND(404),
+    NOT_ALLOWED(405),
     ;
 
     private final int status;

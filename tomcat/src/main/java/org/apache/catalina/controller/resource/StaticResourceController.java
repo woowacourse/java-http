@@ -3,6 +3,8 @@ package org.apache.catalina.controller.resource;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,14 +94,23 @@ public final class StaticResourceController extends AbstractController {
     }
 
     private Optional<byte[]> readStaticResource(final String path) {
-        final String resourcePath = "static" + path;
-        try (final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (resourceStream == null) {
+        try {
+            final String normalizedPath = new URI(path).normalize().getPath();
+            if (normalizedPath.contains("..") || normalizedPath.contains("\\") || normalizedPath.contains("\0")) {
                 return Optional.empty();
             }
-            return Optional.of(resourceStream.readAllBytes());
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
+
+            final String resourcePath = "static" + normalizedPath;
+            try (final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+                if (resourceStream == null) {
+                    return Optional.empty();
+                }
+                return Optional.of(resourceStream.readAllBytes());
+            } catch (IOException e) {
+                throw new UncheckedServletException(e);
+            }
+        } catch (URISyntaxException e) {
+            return Optional.empty();
         }
     }
 

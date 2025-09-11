@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.mapping.AbstractController;
+import org.apache.coyote.util.StaticResourceHandler;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.response.HttpResponse;
 import org.apache.coyote.util.response.HttpStatus;

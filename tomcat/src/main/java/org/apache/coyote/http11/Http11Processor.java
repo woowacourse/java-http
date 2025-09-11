@@ -1,12 +1,11 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.core.StaticResourceHandler;
 import org.apache.catalina.mapping.Controller;
 import org.apache.catalina.mapping.RequestMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.util.StaticResourceHandler;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;
 import org.apache.coyote.util.response.HttpContentTypeResolver;
@@ -37,29 +36,26 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = HttpRequestParser.parse(inputStream);
-            HttpResponse response = new HttpResponse();
-
             if (request == null) {
-                handleError(outputStream, response, HttpStatus.NOT_FOUND);
+                createNotFoundResponse().send(outputStream);
                 return;
             }
-
             Controller controller = RequestMapping.getController(request.getPath());
             if (controller != null) {
+                HttpResponse response = new HttpResponse();
                 controller.service(request, response);
                 response.send(outputStream);
                 return;
             }
-
+            HttpResponse response = new HttpResponse();
             if (handleStaticResource(request, response)) {
                 response.send(outputStream);
                 return;
             }
-
-            handleError(outputStream, response, HttpStatus.NOT_FOUND);
+            createNotFoundResponse().send(outputStream);
         } catch (Exception e) {
             log.error("process error: {}", e.getMessage(), e);
-            handleError(connection, new HttpResponse(), HttpStatus.INTERNAL_SERVER_ERROR);
+            handleInternalServerError(connection);
         }
     }
 
@@ -75,28 +71,34 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private void handleError(OutputStream outputStream, HttpResponse response, HttpStatus status) {
-        response.setStatus(status);
-        byte[] body = StaticResourceHandler.readResource("static/" + status.getCode() + ".html");
-        if (body != null) {
-            response.setBody(body);
-            response.addHeader("Content-Type", "text/html;charset=utf-8");
-        }
-        try {
-            response.send(outputStream);
-        } catch (IOException e) {
-            log.error("handleError send error: {}", e.getMessage(), e);
-        }
-    }
-
-    private void handleError(Socket connection, HttpResponse response, HttpStatus status) {
+    private void handleInternalServerError(Socket connection) {
         if (connection.isClosed()) {
             return;
         }
         try {
-            handleError(connection.getOutputStream(), response, status);
+            createInternalServerErrorResponse().send(connection.getOutputStream());
         } catch (IOException e) {
-            log.error("handleError connection error: {}", e.getMessage(), e);
+            log.error("handleInternalServerError send error: {}", e.getMessage(), e);
         }
+    }
+
+    private HttpResponse createNotFoundResponse() {
+        return createErrorResponse(HttpStatus.NOT_FOUND);
+    }
+
+    private HttpResponse createInternalServerErrorResponse() {
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private HttpResponse createErrorResponse(HttpStatus status) {
+        HttpResponse response = new HttpResponse();
+        response.setStatus(status);
+        String resourcePath = "static/" + status.getCode() + ".html";
+        byte[] body = StaticResourceHandler.readResource(resourcePath);
+        if (body != null) {
+            response.setBody(body);
+            response.addHeader("Content-Type", "text/html;charset=utf-8");
+        }
+        return response;
     }
 }

@@ -1,11 +1,10 @@
 package org.apache.coyote.http.response;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpVersion;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HttpResponse {
 
@@ -62,8 +61,8 @@ public class HttpResponse {
         List<String> lines = new ArrayList<>();
 
         lines.add(httpVersion.toProtocolString() + " " + httpStatus.toStatusLine() + " ");
-        lines.add("Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ");
-        lines.add("Content-Length: " + getContentLength() + " ");
+        lines.add(contentType.toHeaderLine() + " ");
+        lines.add(responseBody.toContentLengthHeaderLine() + " ");
 
         if (!location.isEmpty()) {
             lines.add(location.toHttpHeaderFormat());
@@ -76,11 +75,5 @@ public class HttpResponse {
         lines.add(responseBody.value());
 
         return String.join("\r\n", lines);
-    }
-
-    private int getContentLength() {
-        return responseBody.value()
-                .getBytes(StandardCharsets.UTF_8)
-                .length;
     }
 }

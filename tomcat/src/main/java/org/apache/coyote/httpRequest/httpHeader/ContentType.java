@@ -1,6 +1,8 @@
 package org.apache.coyote.httpRequest.httpHeader;
 
 import java.util.Arrays;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
 
 public enum ContentType {
 
@@ -17,6 +19,6 @@ public enum ContentType {
         return Arrays.stream(ContentType.values())
                 .filter(type -> input.contains(type.contentType))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("지원하지 않은 형식입니다."));
+                .orElseThrow(() -> new HttpException(ErrorCode.NOT_ALLOW_MEDIA_TYPE));
     }
 }

@@ -1,0 +1,88 @@
+package org.apache.coyote.controller.dynamic;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.resource.StaticResourceReader;
+import org.apache.coyote.error.ErrorCode;
+import org.apache.coyote.error.HttpException;
+import org.apache.coyote.httpRequest.HttpRequest;
+import org.apache.coyote.httpRequest.httpBody.HttpBody;
+import org.apache.coyote.httpRequest.httpHeader.HttpHeader;
+import org.apache.coyote.httpRequest.httpHeader.HttpMethod;
+import org.apache.coyote.httpResponse.HttpResponse;
+import org.apache.coyote.httpResponse.StatusCode;
+
+public class RegisterController implements Controller {
+
+    private static final StaticResourceReader staticResourceReader = StaticResourceReader.getInstance();
+
+    @Override
+    public void service(
+            final HttpRequest request,
+            final HttpResponse response
+    ) throws IOException {
+        final HttpHeader httpHeader = request.getHttpHeader();
+        final HttpMethod httpMethod = httpHeader.getHttpMethod();
+        if (httpMethod.equals(HttpMethod.GET)) {
+            doGet(response);
+            return;
+        }
+        if (httpMethod.equals(HttpMethod.POST)) {
+            doPost(request, response);
+            return;
+        }
+        throw new HttpException(ErrorCode.NOT_ALLOW_METHOD);
+    }
+
+    private void doGet(final HttpResponse response) throws IOException {
+        responseRegisterHtml(response);
+    }
+
+    private void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+        if (registerMember(request)) {
+            response.updateStatusLine("HTTP/1.1", StatusCode.FOUND);
+            response.addHeader("Content-Length", "0");
+            response.addHeader("Location", "/index.html");
+            return;
+        }
+        responseRegisterErrorPage(response);
+    }
+
+    private void responseRegisterHtml(final HttpResponse httpResponse) throws IOException {
+        final String body = staticResourceReader.getStaticResponseBody("static/register.html");
+        httpResponse.updateStatusLine("HTTP/1.1", StatusCode.OK);
+        httpResponse.updateBody(body);
+        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+    }
+
+    private boolean registerMember(final HttpRequest httpRequest) {
+        final HttpBody httpBody = httpRequest.getHttpBody();
+        final String account = httpBody.getData("account");
+        final String email = httpBody.getData("email");
+        final String password = httpBody.getData("password");
+        if (account == null || email == null || password == null) {
+            return false;
+        }
+        boolean isAlreadyRegister = InMemoryUserRepository.findByAccount(account)
+                .isPresent();
+        if (isAlreadyRegister) {
+            return false;
+        }
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        return true;
+    }
+
+    private void responseRegisterErrorPage(final HttpResponse httpResponse) throws IOException {
+        final String body = staticResourceReader.getStaticResponseBody("static/register.html");
+        httpResponse.updateStatusLine("HTTP/1.1", StatusCode.BAD_REQUEST);
+        httpResponse.updateBody(body);
+        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+    }
+}

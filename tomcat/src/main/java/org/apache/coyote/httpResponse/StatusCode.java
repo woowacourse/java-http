@@ -6,7 +6,10 @@ public enum StatusCode {
     FOUND(302, "Found"),
     BAD_REQUEST(400, "BadRequest"),
     UNAUTHORIZED(401, "Unauthorized"),
-    NOT_FOUND(404, "NotFound");
+    NOT_FOUND(404, "NotFound"),
+    NOT_ALLOW_METHOD(405, "MethodNotAllowed"),
+    NOT_SUPPORTED_MEDIA_TYPE(415, "NotSupportedMediaType"),
+    INTERNAL_SERVER_ERROR(500, "InternalServerError");
 
     private final int code;
     private final String message;

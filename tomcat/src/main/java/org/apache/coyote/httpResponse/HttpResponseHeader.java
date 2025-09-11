@@ -7,13 +7,11 @@ import java.util.Map;
 
 public class HttpResponseHeader {
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final Map<String, String> headers;
 
-    public HttpResponseHeader(
-            final StatusLine statusLine
-    ) {
-        this.statusLine = statusLine;
+    public HttpResponseHeader() {
+        this.statusLine = new StatusLine("HTTP/1.1", StatusCode.OK);
         this.headers = new LinkedHashMap<>();
     }
 
@@ -22,6 +20,13 @@ public class HttpResponseHeader {
             final String value
     ) {
         headers.put(key, value);
+    }
+
+    public void updateStatusLine(
+            final String protocol,
+            final StatusCode statusCode
+    ) {
+        this.statusLine = new StatusLine(protocol, statusCode);
     }
 
     public String getHeaders() {

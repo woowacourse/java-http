@@ -9,11 +9,25 @@ public class RequestLine {
     private final String path;
     private final String protocol;
 
+    public static RequestLine createErrorRequestLine(final String errorPath) {
+        return new RequestLine(HttpMethod.GET, errorPath, "HTTP/1.1");
+    }
+
     public RequestLine(final String requestLine) {
         final String trimmedRequestLine = requestLine.trim();
         this.httpMethod = HttpHeaderParser.findHttpMethod(trimmedRequestLine);
         this.path = HttpHeaderParser.findPath(trimmedRequestLine);
         this.protocol = HttpHeaderParser.findProtocol(trimmedRequestLine);
+    }
+
+    private RequestLine(
+            final HttpMethod httpMethod,
+            final String path,
+            final String protocol
+    ) {
+        this.httpMethod = httpMethod;
+        this.path = path;
+        this.protocol = protocol;
     }
 
     public HttpMethod getHttpMethod() {

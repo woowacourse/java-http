@@ -4,6 +4,7 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.ContentTypeSearcher;
@@ -91,7 +92,7 @@ public class LoginController extends AbstractController {
 
             HttpStatus statusCode = HttpStatus.FOUND;
 
-            if (!cookies.isCookieExist("JSESSIONID")) {
+            if (needsNewSession(cookies, loginedUser)) {
                 UUID uuid = UUID.randomUUID();
 
                 Session session = new Session(uuid.toString());
@@ -112,5 +113,41 @@ public class LoginController extends AbstractController {
             response.status(statusCode);
             response.location("/401.html");
         }
+    }
+
+    private boolean needsNewSession(Http11Cookie cookies, User loginedUser) {
+        if (!cookies.isCookieExist("JSESSIONID")) {
+            return true;
+        }
+
+        if (!isSameUser(cookies, loginedUser)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isSameUser(Http11Cookie cookies, User loggedInUser) {
+        if (cookies == null || loggedInUser == null) {
+            return false;
+        }
+
+        String sessionId = cookies.getCookie("JSESSIONID");
+        if (sessionId == null) {
+            return false;
+        }
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            return false;
+        }
+
+        Object object = session.getAttribute("user");
+        if (!(object instanceof User)) {
+            return false;
+        }
+
+        User sessionUser = (User) object;
+        return Objects.equals(sessionUser.getAccount(), loggedInUser.getAccount());
     }
 }

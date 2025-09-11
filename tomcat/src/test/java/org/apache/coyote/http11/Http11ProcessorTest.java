@@ -1,22 +1,27 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.ContextConfig;
 import org.apache.catalina.connector.CoyoteAdapter;
+import org.apache.catalina.core.CatalinaContainer;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private final static CatalinaContainer CATALINA_CONTAINER = ContextConfig.CATALINA_CONTAINER;
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var adapter = new CoyoteAdapter();
+        final var adapter = new CoyoteAdapter(CATALINA_CONTAINER);
         final var processor = new Http11Processor(socket, adapter);
 
         // when
@@ -44,7 +49,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var adapter = new CoyoteAdapter();
+        final var adapter = new CoyoteAdapter(CATALINA_CONTAINER);
         final Http11Processor processor = new Http11Processor(socket, adapter);
 
         // when
@@ -70,7 +75,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var adapter = new CoyoteAdapter();
+        final var adapter = new CoyoteAdapter(CATALINA_CONTAINER);
         final Http11Processor processor = new Http11Processor(socket, adapter);
 
         // when
@@ -98,7 +103,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var adapter = new CoyoteAdapter();
+        final var adapter = new CoyoteAdapter(CATALINA_CONTAINER);
         final Http11Processor processor = new Http11Processor(socket, adapter);
 
         // when
@@ -121,7 +126,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var adapter = new CoyoteAdapter();
+        final var adapter = new CoyoteAdapter(CATALINA_CONTAINER);
         final Http11Processor processor = new Http11Processor(socket, adapter);
 
         // when
@@ -131,6 +136,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         var expected1 = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n";
+        assertNotNull(resource);
         var expected2 = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).contains(expected1);
         assertThat(socket.output()).contains(expected2);

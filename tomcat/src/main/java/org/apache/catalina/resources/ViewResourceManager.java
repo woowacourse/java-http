@@ -1,13 +1,13 @@
-package org.apache.catalina.resource;
+package org.apache.catalina.resources;
 
 import java.util.Objects;
 
-public class ViewResourceLoader extends ResourceLoader {
+public class ViewResourceManager extends ResourceManager {
 
     private static final String HTML_EXTENSION = ".html";
 
     @Override
-    public String resolve(String resourcePath) {
+    public String resolve(final String resourcePath) {
         if (Objects.equals(resourcePath, "/")) {
             return resourcePath;
         }
@@ -15,6 +15,5 @@ public class ViewResourceLoader extends ResourceLoader {
         return resourcePath.endsWith(HTML_EXTENSION)
                 ? resourcePath
                 : resourcePath + HTML_EXTENSION;
-
     }
 }

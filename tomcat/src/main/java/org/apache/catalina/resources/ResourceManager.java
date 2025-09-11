@@ -1,14 +1,10 @@
-package org.apache.catalina.resource;
+package org.apache.catalina.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class ResourceLoader {
-
-    private static final Logger log = LoggerFactory.getLogger(ResourceLoader.class);
+public abstract class ResourceManager {
 
     private static final String STATIC_PATH = "static";
 

@@ -1,7 +1,8 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Controller;
 import org.apache.catalina.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;

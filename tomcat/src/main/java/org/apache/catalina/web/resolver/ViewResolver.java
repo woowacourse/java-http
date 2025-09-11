@@ -1,20 +1,20 @@
-package org.apache.catalina.resolver;
+package org.apache.catalina.web.resolver;
 
 import java.io.IOException;
+import org.apache.catalina.Resolver;
 import org.apache.catalina.exception.PathNotFoundException;
-import org.apache.catalina.resource.ViewResourceLoader;
+import org.apache.catalina.resources.ResourceManager;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 
 
-// ViewResolver는 SpringMvc 구현 개념이지만, 현재 실습에선 편의상 Catalina 내 포함시킵니다.
-public class ViewResolver {
+public class ViewResolver implements Resolver {
 
     private static final String HEADER_KEY_LOCATION = "Location";
-    private final ViewResourceLoader viewResourceLoader;
+    private final ResourceManager resourceManager;
 
-    public ViewResolver(ViewResourceLoader viewResourceLoader) {
-        this.viewResourceLoader = viewResourceLoader;
+    public ViewResolver(ResourceManager resourceManager) {
+        this.resourceManager = resourceManager;
     }
 
     public void resolve(String resourcePath, Http11Response response) {
@@ -23,7 +23,7 @@ public class ViewResolver {
             return;
         }
         try {
-            byte[] responseBody = viewResourceLoader.getResponseBody(resourcePath);
+            byte[] responseBody = resourceManager.getResponseBody(resourcePath);
             response.setBody(responseBody);
         } catch (IOException e) {
             throw new PathNotFoundException(response);

@@ -1,6 +1,6 @@
 package org.apache.catalina.exception;
 
-import org.apache.catalina.resolver.ViewResolver;
+import org.apache.catalina.Resolver;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
@@ -10,15 +10,15 @@ public class ExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
 
-    private final ViewResolver viewResolver;
+    private final Resolver resolver;
 
-    public ExceptionHandler(final ViewResolver viewResolver) {
-        this.viewResolver = viewResolver;
+    public ExceptionHandler(final Resolver resolver) {
+        this.resolver = resolver;
     }
 
     public void handle(final Exception e, final Http11Request request, final Http11Response response) {
         final String resourcePath = request.parseResourcePath();
         log.error("Exception occurred while processing request for resource: {}", resourcePath, e);
-        viewResolver.resolve(response.getState().getResourcePath(), response);
+        resolver.resolve(response.getState().getResourcePath(), response);
     }
 }

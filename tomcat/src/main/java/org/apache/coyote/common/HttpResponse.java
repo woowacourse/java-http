@@ -1,20 +1,14 @@
 package org.apache.coyote.common;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
-    private final String protocol;
-    private final HttpStatus status;
-    private final Map<String, String> headers;
-    private final byte[] body;
-
-    public HttpResponse(final String protocol, final HttpStatus status, final Map<String, String> headers, final byte[] body) {
-        this.protocol = protocol;
-        this.status = status;
-        this.headers = headers;
-        this.body = body;
-    }
+    private String protocol;
+    private HttpStatus status;
+    private Map<String, String> headers;
+    private byte[] body;
 
     public byte[] getBytes() {
         String message = getMessage();
@@ -48,5 +42,22 @@ public class HttpResponse {
         builder.append("\r\n");
 
         return builder.toString();
+    }
+
+    public void setProtocol(final String protocol) {
+        this.protocol = protocol;
+    }
+
+    public void setStatus(final HttpStatus status) {
+        this.status = status;
+    }
+
+    public void setHeaders(final Map<String, String> headers) {
+        this.headers = new HashMap<>(headers);
+    }
+
+    public void setBody(final byte[] body) {
+        this.body = new byte[body.length];
+        System.arraycopy(body, 0, this.body, 0, body.length);
     }
 }

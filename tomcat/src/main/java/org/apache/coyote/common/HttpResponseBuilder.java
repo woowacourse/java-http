@@ -46,19 +46,20 @@ public class HttpResponseBuilder {
 
     public HttpResponse build(final HttpRequest request, final HttpStatus status, final Map<String, String> headers,
                               final byte[] body) {
+
         if (body == null) {
-            return new HttpResponse(request.getProtocol(), status, headers, body);
+            return new HttpResponse();
         }
 
         String path = request.getPath();
         String contentType = path.contains(".") ? getContentType(request.getPath()) : getContentType(request.getPath() + ".html");
         if (headers != null) {
             headers.put("Content-Type", contentType);
-            return new HttpResponse(request.getProtocol(), status, headers, body);
+            return new HttpResponse();
         }
         Map<String, String> newHeaders = new HashMap<>();
         newHeaders.put("Content-Type", contentType);
-        return new HttpResponse(request.getProtocol(), status, newHeaders, body);
+        return new HttpResponse();
     }
 
     private String getContentType(final String uri) {

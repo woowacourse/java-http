@@ -6,22 +6,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestHandler;
+import org.apache.coyote.RequestMapping;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpRequestBuilder;
+import org.apache.coyote.common.HttpResponse;
+import org.apache.coyote.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final RequestMapping requestMapping = new RequestMapping();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestHandler requestHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestHandler = new RequestHandler();
     }
 
     @Override
@@ -40,12 +41,16 @@ public class Http11Processor implements Runnable, Processor {
 
             log.info("{} {} | message: {} {}", request.getMethod(), request.getPath(), request.getHeaders(), request.getBody());
 
-            final var response = requestHandler.handle(request);
+            final Controller controller = requestMapping.getController(request);
+            final HttpResponse response = new HttpResponse();
+            controller.service(request, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

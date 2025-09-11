@@ -51,4 +51,11 @@ public class HttpRequest {
     public String getBody() {
         return body;
     }
+
+    public HttpCookie getCookie() {
+        if (!headers.containsKey("Cookie")) {
+            return null;
+        }
+        return new HttpCookie(headers.get("Cookie"));
+    }
 }

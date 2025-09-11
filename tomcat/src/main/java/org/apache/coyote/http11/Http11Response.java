@@ -53,13 +53,12 @@ public class Http11Response {
         outputStream.flush();
     }
 
-    public void sendRedirect(final String path) throws IOException {
+    public void sendRedirect(final String path) {
         setStatus(Http11Status.FOUND);
         putHeader(LOCATION, path);
-        send();
     }
 
-    public void sendError(final Http11Status status) throws IOException {
+    public void sendError(final Http11Status status) {
         try {
             setStatus(status);
             final String resourcePath = ErrorResourceMapper.getResource(status.getCode());
@@ -72,7 +71,6 @@ public class Http11Response {
             putHeader(CONTENT_TYPE, "text/plain; charset=utf-8");
             putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         }
-        send();
     }
 
     public void readFileFromClasspath(final String resourcePath) throws IOException {

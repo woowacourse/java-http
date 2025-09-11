@@ -81,12 +81,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handle(final HttpRequest httpRequest, final OutputStream outputStream) {
-        for (Controller handler : controllers) {
-            if (handler.support(httpRequest)) {
+        for (Controller controller : controllers) {
+            if (controller.support(httpRequest)) {
                 HttpResponse httpResponse = HttpResponse.defaultHttpResponse(httpRequest.getHttpVersion());
 
                 try {
-                    handler.service(httpRequest, httpResponse);
+                    controller.service(httpRequest, httpResponse);
 
                     byte[] responseBytes = httpResponse.buildHttpResponse()
                             .getBytes(StandardCharsets.UTF_8);

@@ -1,20 +1,19 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.Controller;
+import org.apache.catalina.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.RequestMethod;
 
-public class HomeController implements Controller {
+public class HomeController extends AbstractController {
 
     @Override
     public boolean support(final HttpRequest httpRequest) {
-        return httpRequest.getRequestMethod() == RequestMethod.GET && httpRequest.getRequestUrl()
+        return httpRequest.getRequestUrl()
                 .equals("/");
     }
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         httpResponse.ok()
                 .write("Hello world!");
     }

@@ -70,7 +70,7 @@ public final class HttpHeaders {
         if (contentLength == null || contentLength.isEmpty()) {
             return 0;
         }
-        return Integer.parseInt(contentLength.get(0));
+        return Integer.parseInt(contentLength.getFirst());
     }
 
     public Map<String, List<String>> getHeaders() {

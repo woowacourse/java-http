@@ -23,13 +23,13 @@ public class HttpResponse implements AutoCloseable {
 
     private String buildHeader(HttpStatus status, String contentType, int contentLength, String... additionalHeaders) {
         StringBuilder headerBuilder = new StringBuilder();
-        headerBuilder.append(String.format("HTTP/1.1 %d %s\r\n", status.getCode(), status.getMessage()));
+        headerBuilder.append(String.format("HTTP/1.1 %d %s \r\n", status.getCode(), status.getMessage()));
 
         if (contentType != null) {
-            headerBuilder.append(String.format("Content-Type: %s\r\n", contentType));
+            headerBuilder.append(String.format("Content-Type: %s \r\n", contentType));
         }
 
-        headerBuilder.append(String.format("Content-Length: %d\r\n", contentLength));
+        headerBuilder.append(String.format("Content-Length: %d \r\n", contentLength));
 
         for (String header : additionalHeaders) {
             if (header != null && !header.isEmpty()) {

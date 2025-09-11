@@ -76,14 +76,14 @@ public class Http11Processor implements Runnable, Processor {
             return handleRegister(method, request.getRequestBody());
         }
 
-        return serveStaticFile(path, existingJSessionId);
+        return serveStaticFile(path);
     }
 
     private String handleLogin(final String method, final String requestBody) throws IOException, URISyntaxException {
         if ("POST".equals(method)) {
             return processLogin(requestBody);
         }
-        return serveStaticFile("/login.html", null);
+        return serveStaticFile("/login.html");
     }
 
     private String handleRegister(final String method, final String requestBody)
@@ -91,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
         if ("POST".equals(method)) {
             return processRegister(requestBody);
         }
-        return serveStaticFile("/register.html", null);
+        return serveStaticFile("/register.html");
     }
 
     private String processLogin(final String requestBody) {
@@ -163,11 +163,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String serveStaticFile(final String path, final String existingJSessionId)
+    private String serveStaticFile(final String path)
             throws IOException, URISyntaxException {
         final byte[] fileBytes = readFile(path);
 
-        return generateOkResponse(path, fileBytes, existingJSessionId);
+        return generateOkResponse(path, fileBytes);
     }
 
     private Map<String, String> parseFormData(final String formData) {
@@ -207,7 +207,7 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(filePath);
     }
 
-    private String generateOkResponse(final String path, final byte[] bytes, final String jSessionId) {
+    private String generateOkResponse(final String path, final byte[] bytes) {
         final String responseBody = new String(bytes);
         final String contentType = getContentType(path);
 

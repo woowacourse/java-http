@@ -57,8 +57,9 @@ public class RequestHandler {
 
         final var user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
-            final var sessionId = HttpCookie.generateJSessionId();
-            return HttpResponse.redirectWithCookie("/index.html", HttpCookie.JSESSIONID, sessionId);
+            final var session = request.getSession(true);
+            session.setAttribute("user", user.get());
+            return HttpResponse.redirectWithCookie("/index.html", HttpCookie.JSESSIONID, session.getId());
         } else {
             try {
                 final var path = Path.of(getClass().getResource("/static/401.html").getPath());

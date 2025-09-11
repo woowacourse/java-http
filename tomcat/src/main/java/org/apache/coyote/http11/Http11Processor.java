@@ -16,9 +16,11 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -60,17 +62,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final List<String> headers = getHeaders(bufferedReader);
+            final HttpRequest request = parseRequest(inputStream, bufferedReader);
 
-            final String[] request = headers.getFirst().split(" ");
-            final String method = request[0];
-            final String requestUri = request[1];
-            log.debug("request : {} {}", method, requestUri);
-
-            final int contentLength = getContentLengthFromHeaders(headers);
-            final String body = readRequestBody(bufferedReader, contentLength);
-
-            final String path = parsePath(requestUri);
+            final String path = parsePath(request.getPath());
             final URL resource = getResourceUrl(path);
 
             if (resource == null) {
@@ -79,13 +73,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final Map<String, String> queryParams = mergeParameters(
-                    extractQueryParams(requestUri),
-                    parseQueryString(body)
+                    extractQueryParams(request.getRequestLine().getPath()),
+                    parseQueryString(request.getBodyAsString())
             );
 
-            final HttpCookie httpCookie = parseCookieFromHeader(headers);
+            final HttpCookie httpCookie = parseCookieFromHeader(request.getHeaders());
 
-            if ("POST".equals(method) && !queryParams.isEmpty()) {
+            if (HttpMethod.POST == request.getMethod() && !queryParams.isEmpty()) {
                 if ("/login.html".equals(path)) {
                     handleLogin(queryParams, httpCookie, outputStream);
                     return;
@@ -97,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if ("GET".equals(method) && "/login.html".equals(path) && httpCookie.contains("JSESSIONID")) {
+            if (HttpMethod.GET == request.getMethod() && "/login.html".equals(path) && httpCookie.contains("JSESSIONID")) {
                 final String sessionId = httpCookie.getValue("JSESSIONID");
                 if (SessionManager.getInstance().findSession(sessionId).isPresent()) {
                     sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
@@ -111,10 +105,35 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getHeaders(final BufferedReader bufferedReader) {
-        return bufferedReader.lines()
+    private HttpRequest parseRequest(final InputStream inputStream, final BufferedReader bufferedReader) throws IOException {
+        final String[] request = bufferedReader.readLine().split(" ");
+        final RequestLine requestLine = new RequestLine(HttpMethod.valueOf(request[0]), request[1], request[2]);
+        final List<String> lines = getHeaders(bufferedReader);
+        final Map<String, List<String>> headers = parseHeaders(lines);
+        final HttpHeaders httpHeaders = new HttpHeaders(headers);
+        final int contentLength = getContentLengthFromHeaders(lines);
+        final byte[] body = readRequestBody(bufferedReader, contentLength);
+
+        return new HttpRequest(requestLine, httpHeaders, body);
+    }
+
+    private List<String> getHeaders(final BufferedReader reader) throws IOException {
+        return reader.lines()
                 .takeWhile(line -> !line.isBlank())
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, List<String>> parseHeaders(List<String> lines) {
+        return lines.stream()
+                .map(line -> line.split(":", 2))
+                .collect(Collectors.groupingBy(
+                        arr -> arr[0].trim(),
+                        LinkedHashMap::new,
+                        Collectors.mapping(
+                                arr -> arr.length > 1 ? arr[1].trim() : "",
+                                Collectors.toList()
+                        )
+                ));
     }
 
     private int getContentLengthFromHeaders(final List<String> headers) {
@@ -126,14 +145,21 @@ public class Http11Processor implements Runnable, Processor {
                 .orElse(0);
     }
 
-    private String readRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+    private byte[] readRequestBody(final BufferedReader reader, final int contentLength) throws IOException {
         if (contentLength <= 0) {
-            return "";
+            return new byte[0];
         }
+
         char[] bodyChars = new char[contentLength];
-        bufferedReader.read(bodyChars);
-        return new String(bodyChars);
+        int read = reader.read(bodyChars, 0, contentLength);
+
+        if (read == -1) {
+            return new byte[0];
+        }
+
+        return new String(bodyChars, 0, read).getBytes(StandardCharsets.UTF_8);
     }
+
 
     private String parsePath(final String requestUri) {
         String path = requestUri;
@@ -160,13 +186,10 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private HttpCookie parseCookieFromHeader(final List<String> headers) {
-        return headers.stream()
-                .filter(h -> h.startsWith("Cookie"))
-                .map(h -> h.substring("Cookie:".length()).trim())
-                .map(HttpCookie::fromHeader)
-                .findFirst()
-                .orElse(HttpCookie.fromHeader(null));
+    private HttpCookie parseCookieFromHeader(final HttpHeaders headers) {
+        Optional<String> cookieHeader = headers.get("Cookie");
+        return cookieHeader.map(HttpCookie::fromHeader)
+                .orElseGet(() -> HttpCookie.fromHeader(null));
     }
 
     private Map<String, String> mergeParameters(
@@ -194,17 +217,16 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final String[] pairs = queryString.split("&");
+
         for (final String pair : pairs) {
             final String[] keyValue = pair.split("=", 2);
             final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-            String value = "";
-            if (keyValue.length > 1) {
-                value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-            }
+            String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8) : "";
             queryMap.put(key, value);
         }
         return queryMap;
     }
+
 
     private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
         final String resourceName = resource.getFile();

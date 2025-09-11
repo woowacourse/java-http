@@ -28,7 +28,7 @@ public final class Http11Response {
             final String name,
             final String value
     ) {
-        this.headers.put(name, List.of(value));
+        this.headers.put(name, new ArrayList<>(List.of(value)));
     }
 
     public void addHeader(

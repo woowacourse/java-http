@@ -98,7 +98,15 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {
-            executorService.shutdown(); // 서버 종료 시 스레드풀 정리
+            executorService.shutdown(); // 서버 종료 시 스레드풀 정리 (실행 중인 작업은 계속 실행)
+            try {
+                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow(); // 5초 안에 종료되지 않으면 강제 종료
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 

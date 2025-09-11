@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import org.apache.catalina.handler.RequestMappingHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            RequestMappingHandler requestMappingHandler = RequestMappingHandler.getInstance();
+            RequestMapping requestMapping = RequestMapping.getInstance();
 
             HttpRequest request = getHttpRequest(inputStream);
-            HttpResponse response = requestMappingHandler.request(request);
+            HttpResponse response = requestMapping.request(request);
 
             respond(response, outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

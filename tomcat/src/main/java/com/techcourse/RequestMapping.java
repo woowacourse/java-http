@@ -1,5 +1,9 @@
-package org.apache.catalina.handler;
+package com.techcourse;
 
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -8,34 +12,28 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 
-public class RequestMappingHandler {
+public class RequestMapping {
 
-    private static final RequestMappingHandler INSTANCE = new RequestMappingHandler();
+    private static final RequestMapping INSTANCE = new RequestMapping();
 
-    public static RequestMappingHandler getInstance() {
+    public static RequestMapping getInstance() {
         return INSTANCE;
     }
 
     public HttpResponse request(HttpRequest request) {
         HttpResponse response = new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/404.html");
 
+        if (request.isStaticResource()) {
+            response = StaticResourceController.getInstance().service(request);
+        }
         if (request.getPath().equals("/")) {
-            response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
-        }
-        if (request.getPath().endsWith(".html")) {
-            response = new HttpResponse(HttpStatusCode.OK, ContentType.HTML, request.getPath());
-        }
-        if (request.getPath().endsWith(".css")) {
-            response = new HttpResponse(HttpStatusCode.OK, ContentType.CSS, request.getPath());
-        }
-        if (request.getPath().endsWith(".js")) {
-            response = new HttpResponse(HttpStatusCode.OK, ContentType.JAVASCRIPT, request.getPath());
+            response = HomeController.getInstance().service(request);
         }
         if (request.getPath().equals("/login")) {
-            response = LoginHandler.getInstance().handle(request);
+            response = LoginController.getInstance().service(request);
         }
         if (request.getPath().equals("/register")) {
-            response = RegisterHandler.getInstance().handle(request);
+            response = RegisterController.getInstance().service(request);
         }
 
         setSession(request, response);

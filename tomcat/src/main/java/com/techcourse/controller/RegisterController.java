@@ -1,4 +1,4 @@
-package org.apache.catalina.handler;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -10,30 +10,26 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterHandler {
+public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
-    private static final RegisterHandler INSTANCE = new RegisterHandler();
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final RegisterController INSTANCE = new RegisterController();
 
-    public static RegisterHandler getInstance() {
+    public static RegisterController getInstance() {
         return INSTANCE;
     }
 
-    public HttpResponse handle(HttpRequest request) {
-        if (request.getMethod().equals("GET")) {
-            return new HttpResponse(HttpStatusCode.OK, ContentType.HTML, "/register.html");
-        }
-        if (request.getMethod().equals("POST")) {
-            return register(request);
-        }
-        return new HttpResponse(HttpStatusCode.NOT_FOUND, ContentType.HTML, "/404.html"); // TODO: 405 페이지 필요
+    @Override
+    protected HttpResponse doGet(HttpRequest request) {
+        return new HttpResponse(HttpStatusCode.OK, ContentType.HTML, "/register.html");
     }
 
-    private HttpResponse register(HttpRequest request) {
+    @Override
+    protected HttpResponse doPost(HttpRequest request) {
         User user = createNewUser(request);
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공! 아이디 : {}", user.getAccount());
-        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, "/index.html");
+        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, ContentType.HTML, null);
         response.setLocation("/index.html");
         return response;
     }

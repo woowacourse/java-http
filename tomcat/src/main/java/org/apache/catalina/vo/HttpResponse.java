@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class HttpResponse {
 
+    private static final String DEFAULT_VERSION = "HTTP/1.1";
+
     private final String version;
     private final HttpStatus status;
     private final Map<String, String> headers;
@@ -19,11 +21,11 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(HttpStatus status, String body) {
-        return new HttpResponse("1.1", status, new HashMap<>(), body);
+        return new HttpResponse(DEFAULT_VERSION, status, new HashMap<>(), body);
     }
 
     public static HttpResponse of(HttpStatus status) {
-        return new HttpResponse("1.1", status, new HashMap<>(), "");
+        return new HttpResponse(DEFAULT_VERSION, status, new HashMap<>(), "");
     }
 
     public void setContentType(final String value) {
@@ -47,7 +49,7 @@ public class HttpResponse {
     }
 
     public String getStatusLine() {
-        return String.format("HTTP/%s %d %s", version, getStatusCode(), getStatusReason());
+        return String.format("%s %d %s ", version, getStatusCode(), getStatusReason());
     }
 
     public String getHeaderString() {
@@ -56,7 +58,7 @@ public class HttpResponse {
         }
         final var result = new StringBuilder();
         for (String key : headers.keySet()) {
-            result.append(String.format("%s: %s", key, headers.get(key)));
+            result.append(String.format("%s: %s ", key, headers.get(key)));
             result.append("\r\n");
         }
         return result.toString();
@@ -64,5 +66,14 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    @Override
+    public String toString() {
+        return String.join("\r\n",
+                getStatusLine(),
+                getHeaderString(),
+                getBody()
+        );
     }
 }

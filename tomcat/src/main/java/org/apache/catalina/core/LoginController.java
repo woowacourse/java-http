@@ -22,9 +22,18 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/index.html");
             return;
         }
+
+        byte[] body = StaticResourceHandler.readResource("static/login.html");
+        if (body == null) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.addHeader("Content-Type", "text/html;charset=utf-8");
+            response.setBody("Login page not found".getBytes());
+            return;
+        }
+
         response.setStatus(HttpStatus.OK);
         response.addHeader("Content-Type", "text/html;charset=utf-8");
-        response.setBody(StaticResourceHandler.readResource("static/login.html"));
+        response.setBody(body);
     }
 
     @Override

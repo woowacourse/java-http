@@ -13,7 +13,9 @@ public abstract class AbstractController implements Controller {
         }
         if (request.getMethod().equals("POST")) {
             doPost(request, response);
+            return;
         }
+        response.setStatus(org.apache.coyote.util.response.HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

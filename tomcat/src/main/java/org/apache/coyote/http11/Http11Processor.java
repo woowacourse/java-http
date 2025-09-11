@@ -1,17 +1,16 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
 import org.apache.coyote.Processor;
-import org.apache.coyote.config.AppConfig;
-import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.dto.HttpRequest;
+import org.apache.coyote.dto.HttpResponse;
 import org.apache.coyote.dto.RequestLine;
-import org.apache.coyote.router.RequestRouter;
+import org.apache.coyote.handler.Controller;
+import org.apache.coyote.handler.RequestMapping;
 import org.apache.coyote.util.HeaderParser;
 import org.apache.coyote.util.PostBodyParser;
 import org.apache.coyote.util.RequestLineParser;
@@ -23,11 +22,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestRouter requestRouter;
+    private final RequestMapping requestMapping = RequestMapping.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestRouter = AppConfig.getInstance().getRequestRouter();
     }
 
     @Override
@@ -46,28 +44,26 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error(e.getMessage() ,e);
         }
     }
 
-    private String createResponse(final BufferedReader reader) throws IOException {
+    private String createResponse(final BufferedReader reader) throws Exception {
          RequestLine requestLine = getRequestLine(reader);
 
         final Map<String, String> header = HeaderParser.parseHeader(reader);
-
-        final String cookieHeader = header.get("Cookie");
-        final HttpCookie httpCookie = new HttpCookie(cookieHeader);
 
         if (requestLine.method().equals("POST")) {
             requestLine = getPostRequestInfo(reader, header, requestLine);
         }
 
-        final HttpRequest httpRequest = new HttpRequest(requestLine, httpCookie);
+        final HttpRequest httpRequest = new HttpRequest(requestLine, header);
 
-        return requestRouter.handleRoute(
-                httpRequest
-        );
+        HttpResponse httpResponse = new HttpResponse();
+        Controller controller = requestMapping.getController(httpRequest);
+        controller.service(httpRequest, httpResponse);
+        return httpResponse.toHttpString();
     }
 
     private RequestLine getRequestLine(BufferedReader reader) throws IOException {

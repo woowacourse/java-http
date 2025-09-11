@@ -5,23 +5,31 @@ import org.apache.coyote.dto.HttpResponse;
 
 public class HttpResponseBuilder {
 
-    public static HttpResponse staticResponse(String version, int statusCode, String contentType, String content) {
-        return new HttpResponse(
-                version,
-                statusCode,
-                null,
-                contentType,
-                content
-        );
+    public static void staticResponse(
+            String version,
+            int statusCode,
+            String contentType,
+            String content,
+            HttpResponse response
+    ) {
+        response.setVersion(version);
+        response.setStatusCode(statusCode);
+        response.setHeaders(null);
+        response.setContentType(contentType);
+        response.setBody(content);
     }
 
-    public static HttpResponse redirectResponse(String version ,int statusCode, Map<String,String> headers) {
-        return new HttpResponse(
-                version,
-                statusCode,
-                headers,
-                null,
-                null
-        );
+    public static void redirectResponse(
+            String version,
+            int statusCode,
+            Map<String, String> headers,
+            HttpResponse response
+    ) {
+        response.setVersion(version);
+        response.setStatusCode(statusCode);
+        response.setHeaders(headers);
+        response.setContentType(null);
+        response.setBody("");
     }
+
 }

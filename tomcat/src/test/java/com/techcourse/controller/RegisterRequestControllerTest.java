@@ -81,7 +81,7 @@ class RegisterRequestControllerTest {
         // when & then
         assertThatThrownBy(() -> registerRequestHandler.service(httpRequest))
                 .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("지원하지 않는 Http Method 입니다.");
+                .hasMessage("지원하는 Http Method가 아닙니다.");
     }
 
     @DisplayName("Post 요청 : 기존 세션 ID가 존재하는 경우")

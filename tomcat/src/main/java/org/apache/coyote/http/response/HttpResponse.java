@@ -31,18 +31,17 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok(
-            final HttpVersion httpVersion, final ContentType contentType, final HttpCookie httpCookie,
-            final ResponseBody responseBody
+            final HttpVersion httpVersion, final ContentType contentType, final ResponseBody responseBody
     ) {
-        return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(), contentType, httpCookie, responseBody);
+        return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(), contentType, HttpCookie.empty(),
+                responseBody);
     }
 
     public static HttpResponse noContent(
-            final HttpVersion httpVersion, final ContentType contentType, final HttpCookie httpCookie,
-            final ResponseBody responseBody
+            final HttpVersion httpVersion, final ContentType contentType
     ) {
-        return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(), contentType, httpCookie,
-                responseBody);
+        return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(), contentType, HttpCookie.empty(),
+                ResponseBody.empty());
     }
 
     public static HttpResponse found(

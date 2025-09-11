@@ -29,8 +29,7 @@ public class LoginRequestController extends AbstractRequestController {
         if (!httpRequest.hasEmptySessionId()) {
             return createGetLoginResponseBySession(httpRequest);
         }
-        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
-                ResponseBody.createBy(httpRequest));
+        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
     }
 
     private HttpResponse createGetLoginResponseBySession(final HttpRequest httpRequest) {
@@ -40,8 +39,7 @@ public class LoginRequestController extends AbstractRequestController {
             return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
                     HttpCookie.empty());
         }
-        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
-                ResponseBody.createBy(httpRequest));
+        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
     }
 
     @Override

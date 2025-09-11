@@ -23,8 +23,7 @@ public class RegisterRequestController extends AbstractRequestController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
-                ResponseBody.createBy(httpRequest));
+        return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
     }
 
     @Override

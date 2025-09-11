@@ -20,11 +20,10 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.empty();
         ResponseBody responseBody = ResponseBody.helloWorld();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -38,11 +37,9 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.APPLICATION_JSON;
-        HttpCookie httpCookie = HttpCookie.empty();
-        ResponseBody responseBody = ResponseBody.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.noContent(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.noContent(httpVersion, contentType);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -74,17 +71,15 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.from("JSESSIONID=abc123; theme=dark");
         ResponseBody responseBody = ResponseBody.helloWorld();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         String responseString = new String(httpResponse.toBytes());
 
         assertAll(
-                () -> assertThat(responseString).contains("Set-Cookie: JSESSIONID=abc123; theme=dark"),
                 () -> assertThat(responseString).contains("Content-Type: text/html;charset=utf-8"),
                 () -> assertThat(responseString).contains("Content-Length: 12") // "Hello world!" = 12 bytes
         );
@@ -96,11 +91,10 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.empty();
         ResponseBody responseBody = ResponseBody.helloWorld();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         String responseString = new String(httpResponse.toBytes());
@@ -129,11 +123,10 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.empty();
         ResponseBody responseBody = ResponseBody.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         String responseString = new String(httpResponse.toBytes());

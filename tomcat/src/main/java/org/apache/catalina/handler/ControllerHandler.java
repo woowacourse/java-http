@@ -2,18 +2,18 @@ package org.apache.catalina.handler;
 
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.exception.PathNotFoundException;
-import org.apache.catalina.resolver.ViewResolver;
+import org.apache.catalina.resolver.ResourceHandler;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 
 public class ControllerHandler implements RequestHandler {
 
     private final HandlerMapping handlerMapping;
-    private final ViewResolver viewResolver;
+    private final ResourceHandler resourceHandler;
 
-    public ControllerHandler(final HandlerMapping handlerMapping, final ViewResolver viewResolver) {
+    public ControllerHandler(final HandlerMapping handlerMapping, final ResourceHandler resourceHandler) {
         this.handlerMapping = handlerMapping;
-        this.viewResolver = viewResolver;
+        this.resourceHandler = resourceHandler;
     }
 
     @Override
@@ -30,6 +30,6 @@ public class ControllerHandler implements RequestHandler {
             throw new PathNotFoundException(response);
         }
         String viewPath = controller.service(request, response);
-        viewResolver.resolve(viewPath, response);
+        resourceHandler.resolve(viewPath, response);
     }
 }

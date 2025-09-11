@@ -59,4 +59,8 @@ public class Http11Response {
     public void setBody(final byte[] bytes) {
         this.body.setBytes(bytes);
     }
+
+    public HttpStatus getHttpStatus() {
+        return statusLine.getStatus();
+    }
 }

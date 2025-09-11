@@ -11,7 +11,7 @@ import org.apache.catalina.handler.ControllerHandler;
 import org.apache.catalina.handler.HandlerMapping;
 import org.apache.catalina.handler.RequestHandler;
 import org.apache.catalina.handler.StaticResourceRequestHandler;
-import org.apache.catalina.resolver.ViewResolver;
+import org.apache.catalina.resolver.ResourceHandler;
 import org.apache.catalina.resource.ResourceLoader;
 import org.apache.catalina.resource.StaticResourceLoader;
 import org.apache.catalina.resource.ViewResourceLoader;
@@ -26,7 +26,7 @@ public class ApplicationContext {
 
     public final static HandlerMapping HANDLER_MAPPING = new HandlerMapping(controllerMap);
     public final static ResourceLoader STATIC_RESOURCE_MAPPER = new StaticResourceLoader();
-    public final static ViewResolver VIEW_RESOLVER = new ViewResolver(new ViewResourceLoader());
+    public final static ResourceHandler VIEW_RESOLVER = new ResourceHandler(new ViewResourceLoader());
     public final static ExceptionHandler EXCEPTION_HANDLER = new ExceptionHandler(VIEW_RESOLVER);
 
     public final static List<RequestHandler> REQUEST_HANDLERS = List.of(

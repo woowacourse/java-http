@@ -36,7 +36,8 @@ public class RegisterController extends AbstractController {
         }
         checkDuplication(response, account);
         saveUser(account, password, email);
-        return "/index";
+        response.setState(HttpStatus.Found);
+        return "/index.html";
     }
 
     private boolean isRequestBodyValid(final String account, final String password, final String email) {

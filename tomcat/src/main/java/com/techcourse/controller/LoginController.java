@@ -61,7 +61,7 @@ public class LoginController extends AbstractController {
 
     private String handleLoginSuccess(final Http11Response response) {
         response.setState(HttpStatus.Found);
-        return "/index";
+        return "/index.html";
     }
 
     private User findUser(final String account, final String password, final Http11Response response) {

@@ -17,24 +17,27 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
+    public static final String ENDPOINT = "/login";
+
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String USER_SESSION_KEY = "USER";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String REDIRECTION_PATH = "/index.html";
 
     @Override
     protected void registerCommands() {
-        this.addCommand(HttpMethod.GET, this::getToLoginPage);
-        this.addCommand(HttpMethod.POST, this::postToLogin);
+        this.addCommand(HttpMethod.GET, this::doGet);
+        this.addCommand(HttpMethod.POST, this::doPost);
     }
 
-    public String getToLoginPage(final Http11Request request, final Http11Response response) {
+    public String doGet(final Http11Request request, final Http11Response response) {
         if (isSessionValid(request)) {
             return handleLoginSuccess(response);
         }
-        return "/login";
+        return ENDPOINT;
     }
 
-    public String postToLogin(final Http11Request request, final Http11Response response) {
+    public String doPost(final Http11Request request, final Http11Response response) {
         final String account = request.body().getValueByKey("account");
         final String password = request.body().getValueByKey("password");
 
@@ -61,7 +64,7 @@ public class LoginController extends AbstractController {
 
     private String handleLoginSuccess(final Http11Response response) {
         response.setState(HttpStatus.Found);
-        return "/index.html";
+        return REDIRECTION_PATH;
     }
 
     private User findUser(final String account, final String password, final Http11Response response) {

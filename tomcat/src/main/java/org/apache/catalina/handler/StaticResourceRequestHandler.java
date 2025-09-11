@@ -1,6 +1,7 @@
 package org.apache.catalina.handler;
 
 import java.io.IOException;
+import org.apache.catalina.RequestHandler;
 import org.apache.catalina.exception.PathNotFoundException;
 import org.apache.catalina.resource.ResourceLoader;
 import org.apache.coyote.http11.request.Http11Request;

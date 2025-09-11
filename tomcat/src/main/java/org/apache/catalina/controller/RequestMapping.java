@@ -1,20 +1,22 @@
-package org.apache.catalina.handler;
+package org.apache.catalina.controller;
 
 import java.util.Map;
-import org.apache.catalina.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HandlerMapping {
+// RequestMapping은 SpringMvc 구현 개념이지만, 현재 실습에선 편의상 Catalina 내 포함시킵니다.
+public class RequestMapping {
 
-    private static final Logger log = LoggerFactory.getLogger(HandlerMapping.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
+
+
     private final Map<String, Controller> controllerMap;
 
-    public HandlerMapping(Map<String, Controller> controllerMap) {
+    public RequestMapping(final Map<String, Controller> controllerMap) {
         this.controllerMap = controllerMap;
     }
 
-    public boolean existsController(String resourcePath) {
+    public boolean existsController(final String resourcePath) {
         return controllerMap.containsKey(resourcePath);
     }
 

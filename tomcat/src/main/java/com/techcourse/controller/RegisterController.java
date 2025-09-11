@@ -14,19 +14,22 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
+    public static final String ENDPOINT = "/register";
+
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final String REDIRECTION_PATH = "/index.html";
 
     @Override
     protected void registerCommands() {
-        this.addCommand(HttpMethod.GET, this::getPage);
-        this.addCommand(HttpMethod.POST, this::postToRegister);
+        this.addCommand(HttpMethod.GET, this::doGet);
+        this.addCommand(HttpMethod.POST, this::doPost);
     }
 
-    public String getPage(final Http11Request request, final Http11Response response) {
-        return "/register";
+    public String doGet(final Http11Request request, final Http11Response response) {
+        return ENDPOINT;
     }
 
-    public String postToRegister(final Http11Request request, final Http11Response response) {
+    public String doPost(final Http11Request request, final Http11Response response) {
         final String account = request.getBodyValueByKey("account");
         final String password = request.getBodyValueByKey("password");
         final String email = request.getBodyValueByKey("email");
@@ -37,7 +40,7 @@ public class RegisterController extends AbstractController {
         checkDuplication(response, account);
         saveUser(account, password, email);
         response.setState(HttpStatus.Found);
-        return "/index.html";
+        return REDIRECTION_PATH;
     }
 
     private boolean isRequestBodyValid(final String account, final String password, final String email) {

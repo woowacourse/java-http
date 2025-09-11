@@ -5,5 +5,5 @@ import org.apache.coyote.http11.response.Http11Response;
 
 public interface Controller {
 
-    String service(Http11Request request, Http11Response response);
+    String handle(Http11Request request, Http11Response response);
 }

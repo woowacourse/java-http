@@ -22,12 +22,12 @@ public abstract class AbstractController implements Controller {
 
     protected abstract void registerCommands();
 
-    protected void addCommand(HttpMethod method, HttpMethodCommand command) {
+    protected void addCommand(final HttpMethod method, final HttpMethodCommand command) {
         commands.put(method, command);
     }
 
     @Override
-    public String service(final Http11Request request, final Http11Response response) {
+    public String handle(final Http11Request request, final Http11Response response) {
         log.debug("Request HTTP Method: {}", request.getMethod());
         final HttpMethodCommand command = commands.get(request.getMethod());
         if (command == null) {

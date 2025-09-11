@@ -6,12 +6,14 @@ import org.apache.catalina.resource.ViewResourceLoader;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class ResourceHandler {
+
+// ViewResolver는 SpringMvc 구현 개념이지만, 현재 실습에선 편의상 Catalina 내 포함시킵니다.
+public class ViewResolver {
 
     private static final String HEADER_KEY_LOCATION = "Location";
     private final ViewResourceLoader viewResourceLoader;
 
-    public ResourceHandler(ViewResourceLoader viewResourceLoader) {
+    public ViewResolver(ViewResourceLoader viewResourceLoader) {
         this.viewResourceLoader = viewResourceLoader;
     }
 

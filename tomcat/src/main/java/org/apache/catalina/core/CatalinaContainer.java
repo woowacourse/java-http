@@ -1,20 +1,20 @@
-package org.apache.catalina.connector;
+package org.apache.catalina.core;
 
 import java.util.List;
+import org.apache.catalina.RequestHandler;
 import org.apache.catalina.exception.ExceptionHandler;
 import org.apache.catalina.exception.Http4xxException;
 import org.apache.catalina.exception.PathNotFoundException;
-import org.apache.catalina.handler.RequestHandler;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class HandlerDispatcher {
+public class CatalinaContainer {
 
     private final List<RequestHandler> requestHandlers;
     private final ExceptionHandler exceptionHandler;
 
-    public HandlerDispatcher(final List<RequestHandler> requestHandlers, final ExceptionHandler exceptionHandler) {
+    public CatalinaContainer(final List<RequestHandler> requestHandlers, final ExceptionHandler exceptionHandler) {
         this.requestHandlers = requestHandlers;
         this.exceptionHandler = exceptionHandler;
     }

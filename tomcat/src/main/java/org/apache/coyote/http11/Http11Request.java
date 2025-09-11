@@ -6,20 +6,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.coyote.RequestLine;
 
 public class Http11Request {
 
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private static final String QUERY_PARAMETER_DELIMiTER = "?";
 
-    private String[] firstLineConditions;
+    private RequestLine requestLine;
     private final Map<String, String> header = new HashMap<>();
-    private String path;
-    private Map<String, String> queryParams;
     private Http11Cookie cookies;
     private String body;
 
@@ -28,13 +24,11 @@ public class Http11Request {
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public String getRequestMethod() {
-        String requestMethod = firstLineConditions[0];
-
-        return requestMethod;
+        return requestLine.getMethod();
     }
 
     public String getBody() {
@@ -63,10 +57,8 @@ public class Http11Request {
 
         extractFirstLineConditions(requestConditions);
         extractHeaders(requestConditions);
-        int contentLength = getContentLength();
         extractCookies();
-        extractBody(bufferedReader, contentLength);
-        extractUri();
+        extractBody(bufferedReader, getContentLength());
     }
 
     private void extractCookies() {
@@ -106,32 +98,7 @@ public class Http11Request {
         this.body = new String(buf, 0, off);
     }
 
-    private void extractFirstLineConditions(String[] requestConditions) throws IOException {
-        String firstLine = requestConditions[0];
-        firstLineConditions = firstLine.split(" ");
-        if (firstLineConditions.length < 3) {
-            throw new IOException("Invalid HTTP request line: " + firstLine);
-        }
-    }
-
-    private void extractUri() {
-        String uri = firstLineConditions[1];
-
-        if (uri.contains(QUERY_PARAMETER_DELIMiTER)) {
-            int queryStartIndex = uri.indexOf(QUERY_PARAMETER_DELIMiTER);
-            path = uri.substring(0, queryStartIndex);
-            String queryString = uri.substring(queryStartIndex + 1);
-
-            queryParams = Arrays.stream(queryString.split("&"))
-                    .map(param -> param.split("=", 2))
-                    .collect(Collectors.toMap(
-                            arr -> arr[0],
-                            arr -> arr[1] //TODO: 쿼리 파라미터에서 "query" 처럼 "="을 아예 쓰지 않는 경우 추후에 고려
-                    ));
-
-        } else {
-            path = uri;
-            queryParams = Map.of();
-        }
+    private void extractFirstLineConditions(String[] requestConditions) {
+        this.requestLine = new RequestLine(requestConditions[0]);
     }
 }

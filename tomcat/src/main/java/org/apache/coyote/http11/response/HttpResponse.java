@@ -26,10 +26,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public HttpResponse(Map<String, String> headers, byte[] body) {
-        this(new StatusLine(), headers, body);
-    }
-
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, byte[] body) {
         this(new StatusLine(httpStatus), headers, body);
     }
@@ -56,11 +52,6 @@ public class HttpResponse {
         headers.put("Content-Length", String.valueOf(bytes.length));
     }
 
-    public void addHeader(String contentType) {
-        headers.put("Content-Type", contentType + ";" + DEFAULT_ENCODING_TYPE);
-        headers.put("Content-Length", String.valueOf(0));
-    }
-
     public void addHeader() {
         headers.put("Content-Type", DEFAULT_CONTENT_TYPE + ";" + DEFAULT_ENCODING_TYPE);
         headers.put("Content-Length", String.valueOf(0));
@@ -70,7 +61,6 @@ public class HttpResponse {
         headers.putAll(additionalHeaders);
         headers.put("Content-Type", DEFAULT_CONTENT_TYPE + ";" + DEFAULT_ENCODING_TYPE);
         headers.put("Content-Length", String.valueOf(0));
-
     }
 
     public byte[] toBytes() {

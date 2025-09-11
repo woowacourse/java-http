@@ -18,10 +18,6 @@ public enum HttpStatus {
         this.status = status;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
     @Override
     public String toString() {
         return String.join(" ",

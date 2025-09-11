@@ -12,49 +12,49 @@ import org.apache.catalina.SessionManager;
 
 public class LoginHandler {
 
-    private final ResponseBuilder responseBuilder;
+    private final HttpResponseBuilder responseBuilder;
     private final Service service;
 
-    public LoginHandler(ResponseBuilder responseBuilder, Service service) {
+    public LoginHandler(HttpResponseBuilder responseBuilder, Service service) {
         this.responseBuilder = responseBuilder;
         this.service = service;
     }
 
-    public byte[] handle(final HttpRequest request) throws IOException {
-        if (request.method().equals("GET")) {
+    public HttpResponse handle(final HttpRequest request) throws IOException {
+        if (request.getMethod().equals("GET")) {
             return handleGet(request);
         }
-        if (request.method().equals("POST")) {
+        if (request.getMethod().equals("POST")) {
             return handlePost(request);
         }
-        return handleUnsupportedMethod();
+        return handleUnsupportedMethod(request);
     }
 
-    private byte[] handleGet(final HttpRequest request) throws IOException {
-        String uri = request.uri();
+    private HttpResponse handleGet(final HttpRequest request) throws IOException {
+        String uri = request.getPath();
 
         if (uri.contains(".")) {
             final byte[] body = ResourceLoader.get(uri);
-            return responseBuilder.build(uri, HttpStatus.OK, body, null);
+            return responseBuilder.build(request, HttpStatus.OK, null, body);
         }
-        if (request.queryParams() == null && request.body() == null) {
-            if (request.headers().containsKey("Cookie") && request.headers().get("Cookie").contains("JSESSIONID")) {
+        if (request.getQueryParams() == null && request.getBody() == null) {
+            if (request.getHeaders().containsKey("Cookie") && request.getHeader("Cookie").contains("JSESSIONID")) {
                 return handleRedirect(request);
             }
             final byte[] body = ResourceLoader.get(uri + ".html");
-            return responseBuilder.build(uri + ".html", HttpStatus.OK, body, null);
+            return responseBuilder.build(request, HttpStatus.OK, null, body);
         }
-        return responseBuilder.build(null, HttpStatus.FORBIDDEN, null, null);
+        return responseBuilder.build(request, HttpStatus.FORBIDDEN, null, null);
     }
 
-    private byte[] handlePost(HttpRequest request) {
-        if (request.body() == null) {
-            return responseBuilder.build(null, HttpStatus.BAD_REQUEST, null, null);
+    private HttpResponse handlePost(HttpRequest request) {
+        if (request.getBody() == null) {
+            return responseBuilder.build(request, HttpStatus.BAD_REQUEST, null, null);
         }
 
         Map<String, String> body = new HashMap<>();
 
-        for (String keyValue : request.body().split("&")) {
+        for (String keyValue : request.getBody().split("&")) {
             int index = keyValue.indexOf("=");
             String key = keyValue.substring(0, index);
             String value = keyValue.substring(index + 1);
@@ -69,30 +69,30 @@ public class LoginHandler {
             headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             headers.put("Location", "/index.html");
 
-            return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
+            return responseBuilder.build(request, HttpStatus.FOUND, headers, null);
         } catch (IllegalArgumentException e) {
             final Map<String, String> headers = new HashMap<>();
             headers.put("Location", "/401.html");
-            return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
+            return responseBuilder.build(request, HttpStatus.FOUND, headers, null);
         }
     }
 
-    private byte[] handleRedirect(final HttpRequest request) throws IOException {
-        HttpCookie cookie = new HttpCookie(request.headers().get("Cookie"));
+    private HttpResponse handleRedirect(final HttpRequest request) throws IOException {
+        HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
         String sessionId = cookie.getValue("JSESSIONID");
         if (sessionId == null) {
-            final byte[] body = ResourceLoader.get(request.uri() + ".html");
-            return responseBuilder.build(request.uri() + ".html", HttpStatus.OK, body, null);
+            final byte[] body = ResourceLoader.get(request.getPath() + ".html");
+            return responseBuilder.build(request, HttpStatus.OK, null, body);
         }
         Manager sessionManager = SessionManager.getInstance();
         Session session = sessionManager.findSession(sessionId);
         if (session == null) {
-            final byte[] body = ResourceLoader.get(request.uri() + ".html");
-            return responseBuilder.build(request.uri() + ".html", HttpStatus.OK, body, null);
+            final byte[] body = ResourceLoader.get(request.getPath() + ".html");
+            return responseBuilder.build(request, HttpStatus.OK, null, body);
         }
         final Map<String, String> headers = new HashMap<>();
         headers.put("Location", "/index.html");
-        return responseBuilder.build(null, HttpStatus.FOUND, null, headers);
+        return responseBuilder.build(request, HttpStatus.FOUND, headers, null);
     }
 
     private UUID createSession(final User user) {
@@ -104,7 +104,7 @@ public class LoginHandler {
         return uuid;
     }
 
-    private byte[] handleUnsupportedMethod() {
-        return responseBuilder.build(null, HttpStatus.FORBIDDEN, null, null);
+    private HttpResponse handleUnsupportedMethod(final HttpRequest request) {
+        return responseBuilder.build(request, HttpStatus.FORBIDDEN, null, null);
     }
 }

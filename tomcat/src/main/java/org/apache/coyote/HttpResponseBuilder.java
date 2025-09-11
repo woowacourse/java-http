@@ -1,10 +1,11 @@
 package org.apache.coyote;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResponseBuilder {
+public class HttpResponseBuilder {
 
     private enum MediaTypes {
 
@@ -43,33 +44,21 @@ public class ResponseBuilder {
         }
     }
 
-    public byte[] build(final String requestUri, final HttpStatus status, final byte[] body,
-                        final Map<String, String> headers) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("HTTP/1.1 ").append(status.getName()).append(" \r\n");
-
-        if (requestUri != null) {
-            String contentType = getContentType(requestUri);
-            builder.append("Content-Type: ").append(contentType).append(" \r\n");
-        }
-        if (headers != null) {
-            headers.forEach((key, value) -> builder.append(key).append(": ").append(value).append(" \r\n"));
-        }
+    public HttpResponse build(final HttpRequest request, final HttpStatus status, final Map<String, String> headers,
+                              final byte[] body) {
         if (body == null) {
-            return builder.toString().getBytes();
+            return new HttpResponse(request.getProtocol(), status, headers, body);
         }
 
-        builder.append("Content-Length: ").append(body.length).append(" \r\n");
-        builder.append("\r\n");
-
-        byte[] messageBytes = builder.toString().getBytes();
-        byte[] result = new byte[messageBytes.length + body.length];
-
-        System.arraycopy(messageBytes, 0, result, 0, messageBytes.length);
-        System.arraycopy(body, 0, result, messageBytes.length, body.length);
-
-        return result;
+        String path = request.getPath();
+        String contentType = path.contains(".") ? getContentType(request.getPath()) : getContentType(request.getPath() + ".html");
+        if (headers != null) {
+            headers.put("Content-Type", contentType);
+            return new HttpResponse(request.getProtocol(), status, headers, body);
+        }
+        Map<String, String> newHeaders = new HashMap<>();
+        newHeaders.put("Content-Type", contentType);
+        return new HttpResponse(request.getProtocol(), status, newHeaders, body);
     }
 
     private String getContentType(final String uri) {

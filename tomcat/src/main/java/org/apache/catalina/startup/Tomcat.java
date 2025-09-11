@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
-    private static final int MAX_THREADS_COUNT = 10;
+    private static final int MAX_THREADS_COUNT = 250;
     private static final int DEFAULT_CORE_THREAD_COUNT = 10;
 
     public void start() {
@@ -39,7 +39,7 @@ public class Tomcat {
                 MAX_THREADS_COUNT,
                 60L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(10)
+                new LinkedBlockingQueue<>(100)
         );
     }
 }

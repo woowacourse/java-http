@@ -1,4 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
+
+import org.apache.coyote.http11.model.Cookie;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
 
 import java.util.Map;
 import java.util.Optional;

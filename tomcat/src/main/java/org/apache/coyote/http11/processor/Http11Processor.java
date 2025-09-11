@@ -1,7 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.processor;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.HttpResponse;
+import org.apache.coyote.http11.parser.HttpRequestParser;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

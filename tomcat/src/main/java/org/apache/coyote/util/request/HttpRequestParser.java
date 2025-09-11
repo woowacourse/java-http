@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.util.Cookie;
@@ -51,7 +50,6 @@ public class HttpRequestParser {
         if (tokens.length != 3) {
             throw new IOException("Invalid Request-Line: " + requestLineString);
         }
-
         String method = tokens[0];
         String[] uriTokens = tokens[1].split("\\?", 2);
         String path = uriTokens[0];
@@ -61,9 +59,7 @@ public class HttpRequestParser {
         } else {
             queryParams = new HashMap<>();
         }
-
         String version = tokens[2];
-
         return new RequestLine(method, path, version, queryParams);
     }
 
@@ -81,12 +77,12 @@ public class HttpRequestParser {
         return headers;
     }
 
-    private static Map<String, String> parseBody(InputStream inputStream, Map<String, String> headers) throws IOException {
+    private static Map<String, String> parseBody(InputStream inputStream, Map<String, String> headers)
+            throws IOException {
         int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
         if (contentLength == 0) {
             return new HashMap<>();
         }
-
         byte[] bodyBytes = new byte[contentLength];
         int bytesRead = 0;
         while (bytesRead < contentLength) {
@@ -96,7 +92,6 @@ public class HttpRequestParser {
             }
             bytesRead += result;
         }
-
         String bodyString = new String(bodyBytes, StandardCharsets.UTF_8);
         return parseQueryString(bodyString);
     }

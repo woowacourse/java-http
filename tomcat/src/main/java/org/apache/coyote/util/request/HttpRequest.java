@@ -2,7 +2,6 @@ package org.apache.coyote.util.request;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.util.Cookie;
@@ -27,10 +26,6 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public Optional<String> getQueryValue(String key) {
-        return Optional.ofNullable(requestLine.getQueryParams().get(key));
     }
 
     public Map<String, String> getBody() {

@@ -79,14 +79,23 @@ public class Request {
                 ));
     }
 
-    private String parseMessageBody(final BufferedReader requestReader) throws IOException {
+    private String parseMessageBody(final BufferedReader reader) throws IOException {
         if (!headers.containsKey(CONTENT_LENGTH)) {
             return null;
         }
         final int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
+
         final char[] buffer = new char[contentLength];
-        requestReader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        int totalRead = 0;
+        while (totalRead < contentLength) {
+            int charsRead = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (charsRead == -1) {
+                break;
+            }
+            totalRead += charsRead;
+        }
+
+        return new String(buffer, 0, totalRead);
     }
 
     public boolean containsHeader(final String filedName) {

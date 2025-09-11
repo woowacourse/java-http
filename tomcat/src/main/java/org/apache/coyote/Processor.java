@@ -16,6 +16,7 @@
  */
 package org.apache.coyote;
 
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -24,9 +25,8 @@ import java.net.Socket;
 public interface Processor {
 
     /**
-     * Process a connection. This is called whenever an event occurs (e.g. more
-     * data arrives) that allows processing to continue for a connection that is
-     * not currently being processed.
+     * Process a connection. This is called whenever an event occurs (e.g. more data arrives) that allows processing to
+     * continue for a connection that is not currently being processed.
      */
-    void process(Socket socket);
+    void process(Socket socket) throws IOException;
 }

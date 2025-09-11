@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.parser.HeaderParser;
-import org.apache.coyote.http11.parser.QueryParamsParser;
+import org.apache.coyote.parser.HeaderParser;
+import org.apache.coyote.parser.QueryParamsParser;
 
 public class HttpRequest {
 
@@ -24,32 +24,34 @@ public class HttpRequest {
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
         RequestLine requestLine = RequestLine.from(reader.readLine());
-
         Map<String, String> headers = HeaderParser.parse(reader);
-
-        String body = "";
-        String contentLengthValue = headers.get("Content-Length");
-        if (contentLengthValue != null) {
-            int contentLength = Integer.parseInt(contentLengthValue);
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            body = new String(buffer);
-        }
-
-        Map<String, String> parameters = new HashMap<>();
-        String queryString = requestLine.getQueryString();
-        if (queryString != null && !queryString.isEmpty()) {
-            Map<String, String> parsedQueryParams = QueryParamsParser.parse(queryString);
-            parameters.putAll(parsedQueryParams);
-        }
-
-        String contentType = headers.get("Content-Type");
-        if (body != null && !body.isEmpty() && contentType != null && contentType.startsWith(
-                "application/x-www-form-urlencoded")) {
-            Map<String, String> parsedQueryParams = QueryParamsParser.parse(body);
-            parameters.putAll(parsedQueryParams);
-        }
+        String body = readBody(reader, headers);
+        Map<String, String> parameters = parseParameters(requestLine, body, headers);
         return new HttpRequest(requestLine, headers, body, parameters);
+    }
+
+    private static String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        String contentLengthValue = headers.get("Content-Length");
+        if (contentLengthValue == null) {
+            return "";
+        }
+        int contentLength = Integer.parseInt(contentLengthValue);
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
+    private static Map<String, String> parseParameters(RequestLine requestLine, String body,
+                                                       Map<String, String> headers) {
+        Map<String, String> parameters = new HashMap<>();
+        if (requestLine.hasQuery()) {
+            parameters.putAll(QueryParamsParser.parse(requestLine.getQueryString()));
+        }
+        String contentType = headers.get("Content-Type");
+        if (!body.isEmpty() && contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
+            parameters.putAll(QueryParamsParser.parse(body));
+        }
+        return parameters;
     }
 
     public String getParameter(String name) {
@@ -96,7 +98,7 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    String getHeader(String name) {
+    public String getHeader(String name) {
         return headers.get(name);
     }
 }

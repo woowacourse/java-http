@@ -1,6 +1,6 @@
 package com.techcourse.db;
 
-import com.techcourse.model.User;
+import com.techcourse.user.model.User;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +21,12 @@ public class InMemoryUserRepository {
     public static boolean existsById(Long id) {
         return database.values().stream()
                 .anyMatch(user -> user.hasSameId(id));
+    }
+
+    public static Optional<User> findById(Long id) {
+        return database.values().stream()
+                .filter(user -> user.hasSameId(id))
+                .findFirst();
     }
 
     public static void save(User user) {

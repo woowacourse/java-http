@@ -1,7 +1,5 @@
 package org.apache.coyote;
 
-import java.util.Arrays;
-
 public enum HttpMethod {
 
     GET("GET"),
@@ -13,16 +11,16 @@ public enum HttpMethod {
         this.name = name;
     }
 
-    public static HttpMethod fromHttp11Request(String request) {
-        String method = request.split("\r\n")[0].split(" ")[0];
-        if (method.isBlank()) {
-            throw new IllegalArgumentException("Cannot resolve Http Request.");
-        }
-        return Arrays.stream(values())
-                .filter(value -> method.equals(value.name))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Cannot resolve Http Method from request: " + method));
-    }
+//    public static HttpMethod fromHttp11Request(HttpRequest request) {
+//        String method = request.getMethod();
+//        if (method.isBlank()) {
+//            throw new IllegalArgumentException("Cannot resolve Http Request.");
+//        }
+//        return Arrays.stream(values())
+//                .filter(value -> method.equals(value.name))
+//                .findFirst()
+//                .orElseThrow(() -> new IllegalArgumentException("Cannot resolve Http Method from request: " + method));
+//    }
 
     public String getName() {
         return name;

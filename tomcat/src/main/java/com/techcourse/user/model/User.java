@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.user.model;
 
 public class User {
 

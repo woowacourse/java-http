@@ -1,36 +1,78 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.HttpStatus;
-import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.HttpVersion;
+import org.apache.coyote.http11.response.header.ContentLength;
+import org.apache.coyote.http11.response.header.ContentType;
+import org.apache.coyote.http11.response.header.ResponseHeader;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-// 임시 클래스
 public record HttpResponse(
-        HttpStatus httpStatus,
-        String body,
-        MimeType mimeType,
-        Map<String, String> headers
+        HttpVersion version,
+        HttpStatus status,
+        ResponseBody responseBody,
+        List<ResponseHeader> headers
 ) {
 
-    public String toHttpResponse() {
-        StringBuilder builder = new StringBuilder();
+    private static final String CRLF = "\r\n";
 
-        // status line
-        builder.append("HTTP/1.1 ").append(httpStatus.getPhrase());
-        builder.append("\r\n");
+    public static Builder http11Builder(HttpStatus status) {
+        return new Builder(HttpVersion.HTTP1_1, status);
+    }
 
-        // headers
-        builder.append("Content-Type: ").append(mimeType.getMimeType()).append("\r\n");
-        builder.append("Content-Length: ").append(body.getBytes(StandardCharsets.UTF_8).length).append("\r\n");
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            builder.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
+    public void write(OutputStream outputStream) throws IOException {
+        outputStream.write((version.getName() + " " + status.getPhrase() + CRLF).getBytes(StandardCharsets.UTF_8));
+
+        for (ResponseHeader header : headers) {
+            outputStream.write((header.getName() + ": " + header.getValue() + CRLF).getBytes(StandardCharsets.UTF_8));
         }
-        builder.append("\r\n");
+        outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
 
-        // body
-        builder.append(body);
-        return builder.toString();
+        if (responseBody != null) {
+            outputStream.write(responseBody.data());
+        }
+    }
+
+    public static class Builder {
+        private final HttpVersion version;
+        private final HttpStatus status;
+        private final List<ResponseHeader> headers = new ArrayList<>();
+        private ResponseBody responseBody = null;
+
+        public Builder(HttpVersion version, HttpStatus status) {
+            this.version = version;
+            this.status = status;
+        }
+
+        public static Builder http11(HttpStatus status) {
+            return new Builder(HttpVersion.HTTP1_1, status);
+        }
+
+        public Builder body(ResponseBody responseBody) {
+            this.responseBody = responseBody;
+            headers.add(ContentType.fromResponseBody(responseBody));
+            headers.add(ContentLength.fromResponseBody(responseBody));
+            return this;
+        }
+
+        public Builder header(ResponseHeader header) {
+            this.headers.add(header);
+            return this;
+        }
+
+        public Builder headers(Collection<ResponseHeader> headers) {
+            this.headers.addAll(headers);
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(version, status, responseBody, headers);
+        }
     }
 }

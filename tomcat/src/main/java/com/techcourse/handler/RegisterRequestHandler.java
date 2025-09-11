@@ -1,10 +1,8 @@
 package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpMethod;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
@@ -14,7 +12,7 @@ import com.techcourse.model.User;
 import java.util.Map;
 import java.util.UUID;
 
-public class RegisterRequestHandler {
+public class RegisterRequestHandler extends AbstractRequestHandler {
 
     private final HttpVersion httpVersion;
 
@@ -22,24 +20,14 @@ public class RegisterRequestHandler {
         this.httpVersion = httpVersion;
     }
 
-    public HttpResponse handleRegisterRequest(final HttpRequest httpRequest) {
-        HttpMethod httpMethod = httpRequest.getHttpMethod();
-
-        if (httpMethod == HttpMethod.GET) {
-            return handleGetHttpMethod(httpRequest);
-        }
-        if (httpMethod == HttpMethod.POST) {
-            return handlePostHttpMethod(httpRequest);
-        }
-        throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
-    }
-
-    private HttpResponse handleGetHttpMethod(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
                 ResponseBody.createBy(httpRequest));
     }
 
-    private HttpResponse handlePostHttpMethod(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         Map<String, String> requestBodies = httpRequest.getRequestBody();
         registerUser(requestBodies);
 

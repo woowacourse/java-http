@@ -103,10 +103,10 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
         try {
             if (httpRequest.getFilePath().equals("/login.html")) {
-                return loginRequestHandler.handleLoginRequest(httpRequest);
+                return loginRequestHandler.service(httpRequest);
             }
             if (httpRequest.getFilePath().equals("/register.html")) {
-                return registerRequestHandler.handleRegisterRequest(httpRequest);
+                return registerRequestHandler.service(httpRequest);
             }
             return createResponse(httpRequest);
         } catch (NotFoundException e) {

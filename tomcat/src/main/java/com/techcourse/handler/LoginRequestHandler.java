@@ -2,10 +2,8 @@ package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.NotFoundException;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.common.ContentType;
 import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpMethod;
 import com.techcourse.http.common.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
@@ -17,7 +15,7 @@ import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
 
-public class LoginRequestHandler {
+public class LoginRequestHandler extends AbstractRequestHandler {
 
     private final HttpVersion httpVersion;
 
@@ -25,20 +23,8 @@ public class LoginRequestHandler {
         this.httpVersion = httpVersion;
     }
 
-    public HttpResponse handleLoginRequest(final HttpRequest httpRequest) {
-        HttpMethod httpMethod = httpRequest.getHttpMethod();
-
-        if (httpMethod == HttpMethod.GET) {
-            return handleGetHttpMethod(httpRequest);
-        }
-        if (httpMethod == HttpMethod.POST) {
-            return handlePostHttpMethod(httpRequest);
-        }
-
-        throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
-    }
-
-    private HttpResponse handleGetHttpMethod(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         if (!httpRequest.hasEmptySessionId()) {
             return createGetLoginResponseBySession(httpRequest);
         }
@@ -57,7 +43,8 @@ public class LoginRequestHandler {
                 ResponseBody.createBy(httpRequest));
     }
 
-    private HttpResponse handlePostHttpMethod(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         Map<String, String> requestBody = httpRequest.getRequestBody();
 
         String account = requestBody.get("account");

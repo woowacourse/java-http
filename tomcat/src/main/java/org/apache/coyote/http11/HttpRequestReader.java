@@ -26,23 +26,13 @@ public class HttpRequestReader {
         RequestLine requestLine = readRequestLine(in);
         Map<String, String> headers = readHeaders(in);
 
-        String uri = requestLine.uri();
+        String uri = requestLine.path();
         String path = findPath(uri);
-        Map<String, String> queries = parseQueryString(uri);
 
         int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
         byte[] body = in.readNBytes(contentLength);
 
-        return new HttpRequest(requestLine, headers, path, queries, body);
-    }
-
-    private Map<String, String> parseQueryString(final String uri) {
-        if (!uri.contains(QUESTION)) {
-            return Map.of();
-        }
-        final String queryString = extractQueryString(uri);
-
-        return queryParser.parse(queryString);
+        return new HttpRequest(requestLine, headers, path, body);
     }
 
     private RequestLine readRequestLine(final BufferedInputStream in) throws IOException {
@@ -100,14 +90,5 @@ public class HttpRequestReader {
         }
 
         return uri.substring(0, queryStartIndex);
-    }
-
-    private String extractQueryString(final String uri) {
-        int questionIndex = uri.indexOf(QUESTION);
-        if (questionIndex < 0) {
-            return uri;
-        }
-
-        return uri.substring(questionIndex + 1);
     }
 }

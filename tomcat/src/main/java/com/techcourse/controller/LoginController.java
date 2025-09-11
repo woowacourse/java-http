@@ -34,6 +34,7 @@ public class LoginController extends AbstractController {
         final var bodyBytes = readStaticFile("static/login.html");
 
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(200, "OK")
                 .contentType("text/html;charset=utf-8")
                 .body(bodyBytes)

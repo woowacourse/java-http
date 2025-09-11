@@ -1,8 +1,8 @@
 package org.apache.coyote.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public record RequestBody(
         Map<String, String> values
@@ -13,11 +13,11 @@ public record RequestBody(
     }
 
     public static RequestBody empty() {
-        return new RequestBody(new ConcurrentHashMap<>());
+        return new RequestBody(new HashMap<>());
     }
 
     private static Map<String, String> convertToRequestBodyMap(final String requestBodyString) {
-        Map<String, String> requestBodyMap = new ConcurrentHashMap<>();
+        Map<String, String> requestBodyMap = new HashMap<>();
 
         if (requestBodyString.isEmpty()) {
             return requestBodyMap;

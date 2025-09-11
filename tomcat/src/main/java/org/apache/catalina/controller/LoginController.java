@@ -38,8 +38,8 @@ public class LoginController implements Controller {
         handleForFailed(request, response, httpResponseHeader);
     }
 
-    private static void handleForFailed(HttpRequest request, HttpResponse response,
-                                        HttpResponseHeader httpResponseHeader) {
+    private void handleForFailed(HttpRequest request, HttpResponse response,
+                                 HttpResponseHeader httpResponseHeader) {
         httpResponseHeader.add("Location", "401.html");
 
         StatusLine statusLine = new StatusLine(HttpStatus.UNAUTHORIZED, request);

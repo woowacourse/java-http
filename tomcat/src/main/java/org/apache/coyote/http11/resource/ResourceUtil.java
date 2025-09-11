@@ -16,7 +16,7 @@ public class ResourceUtil {
             - root path 가 static/ 이렇게 되어 있을 것
      **/
     public static URL resolve(String resourcePath) {
-        String resourceFullPath = RESOURCE_ROOT_PATH + resourcePath;
+        String resourceFullPath = RESOURCE_ROOT_PATH + normalize(resourcePath);
         return ResourceUtil.class.getClassLoader().getResource(resourceFullPath);
     }
 
@@ -24,5 +24,12 @@ public class ResourceUtil {
         try (InputStream inputStream = resource.openStream()) {
             return inputStream.readAllBytes();
         }
+    }
+
+    private static String normalize(String url) {
+        if (url.startsWith("/")) {
+            return url.substring(1);
+        }
+        return url;
     }
 }

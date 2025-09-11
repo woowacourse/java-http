@@ -32,11 +32,4 @@ public class ViewController extends AbstractController {
         }
         ResponseWriters.ok(httpResponse, body, contentType);
     }
-
-    private String normalize(String url) {
-        if (url.startsWith("/")) {
-            return url.substring(1);
-        }
-        return url;
-    }
 }

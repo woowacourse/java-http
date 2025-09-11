@@ -1,4 +1,4 @@
-package com.techcourse.http.common;
+package org.apache.coyote.http;
 
 import com.techcourse.exception.NotFoundException;
 import java.util.Arrays;

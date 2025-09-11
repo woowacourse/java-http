@@ -1,4 +1,4 @@
-package com.techcourse.http.common;
+package org.apache.coyote.http.response;
 
 
 public enum HttpStatus {
@@ -16,7 +16,9 @@ public enum HttpStatus {
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     CONFLICT(409, "Conflict"),
-    UNPROCESSABLE_ENTITY(422, "Unprocessable Entity");
+    UNPROCESSABLE_ENTITY(422, "Unprocessable Entity"),
+
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private final int code;
     private final String reasonPhrase;

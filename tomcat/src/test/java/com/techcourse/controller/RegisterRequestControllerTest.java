@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,28 +6,28 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.HttpVersion;
-import com.techcourse.http.request.HttpRequest;
-import com.techcourse.http.request.RequestBody;
-import com.techcourse.http.request.RequestHeader;
-import com.techcourse.http.response.HttpResponse;
 import java.util.List;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RegisterRequestHandlerTest {
+class RegisterRequestControllerTest {
 
-    private RegisterRequestHandler registerRequestHandler;
+    private RegisterRequestController registerRequestHandler;
 
     @BeforeEach
     void setUp() {
-        registerRequestHandler = new RegisterRequestHandler(HttpVersion.HTTP_1_1);
+        registerRequestHandler = new RegisterRequestController(HttpVersion.HTTP_1_1);
     }
 
     @DisplayName("Get 요청")
     @Test
-    void handleRegisterRequestTest1() {
+    void serviceTest1() {
         // given
         String requestLine = "GET /register.html HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
@@ -35,7 +35,7 @@ class RegisterRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = registerRequestHandler.handleRegisterRequest(httpRequest);
+        HttpResponse response = registerRequestHandler.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());
@@ -45,7 +45,7 @@ class RegisterRequestHandlerTest {
 
     @DisplayName("Post 요청: 새로운 회원을 등록하는 경우")
     @Test
-    void handleRegisterRequestTest2() {
+    void serviceTest2() {
         // given
         String requestLine = "POST /register HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of(
@@ -57,7 +57,7 @@ class RegisterRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = registerRequestHandler.handleRegisterRequest(httpRequest);
+        HttpResponse response = registerRequestHandler.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());
@@ -71,7 +71,7 @@ class RegisterRequestHandlerTest {
 
     @DisplayName("지원하지 않는 http 메서드의 경우")
     @Test
-    void handleRegisterRequestTest3() {
+    void serviceTest3() {
         // given
         String requestLine = "PUT /register HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
@@ -79,14 +79,14 @@ class RegisterRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when & then
-        assertThatThrownBy(() -> registerRequestHandler.handleRegisterRequest(httpRequest))
+        assertThatThrownBy(() -> registerRequestHandler.service(httpRequest))
                 .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("지원하지 않는 Http Method 입니다.");
+                .hasMessage("지원하는 Http Method가 아닙니다.");
     }
 
     @DisplayName("Post 요청 : 기존 세션 ID가 존재하는 경우")
     @Test
-    void handleRegisterRequestTest4() {
+    void serviceTest4() {
         // given
         String requestLine = "POST /register HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of(
@@ -99,7 +99,7 @@ class RegisterRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = registerRequestHandler.handleRegisterRequest(httpRequest);
+        HttpResponse response = registerRequestHandler.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());

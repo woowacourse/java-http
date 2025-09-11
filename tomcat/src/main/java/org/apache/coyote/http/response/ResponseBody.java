@@ -1,7 +1,8 @@
-package com.techcourse.http.response;
+package org.apache.coyote.http.response;
 
-import com.techcourse.http.request.HttpRequest;
 import com.techcourse.util.FileUtil;
+import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http.request.HttpRequest;
 
 public record ResponseBody(
         String value
@@ -20,5 +21,13 @@ public record ResponseBody(
 
         String responseBodyValue = FileUtil.readResource(fileName);
         return new ResponseBody(responseBodyValue);
+    }
+
+    public String toContentLengthHeaderLine() {
+        int contentLength = value()
+                .getBytes(StandardCharsets.UTF_8)
+                .length;
+
+        return "Content-Length: " + contentLength;
     }
 }

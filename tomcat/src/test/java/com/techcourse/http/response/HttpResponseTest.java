@@ -3,9 +3,12 @@ package com.techcourse.http.response;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpVersion;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.Location;
+import org.apache.coyote.http.response.ResponseBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,11 +20,10 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.empty();
         ResponseBody responseBody = ResponseBody.helloWorld();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -35,11 +37,9 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.APPLICATION_JSON;
-        HttpCookie httpCookie = HttpCookie.empty();
-        ResponseBody responseBody = ResponseBody.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.noContent(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.noContent(httpVersion, contentType);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -56,7 +56,7 @@ class HttpResponseTest {
         HttpCookie httpCookie = HttpCookie.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, httpCookie);
+        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, ContentType.APPLICATION_JSON, httpCookie);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -71,17 +71,15 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.from("JSESSIONID=abc123; theme=dark");
         ResponseBody responseBody = ResponseBody.helloWorld();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         String responseString = new String(httpResponse.toBytes());
 
         assertAll(
-                () -> assertThat(responseString).contains("Set-Cookie: JSESSIONID=abc123; theme=dark"),
                 () -> assertThat(responseString).contains("Content-Type: text/html;charset=utf-8"),
                 () -> assertThat(responseString).contains("Content-Length: 12") // "Hello world!" = 12 bytes
         );
@@ -93,11 +91,10 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.empty();
         ResponseBody responseBody = ResponseBody.helloWorld();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         String responseString = new String(httpResponse.toBytes());
@@ -113,7 +110,7 @@ class HttpResponseTest {
         HttpCookie httpCookie = HttpCookie.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, httpCookie);
+        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, ContentType.APPLICATION_JSON, httpCookie);
 
         // then
         String responseString = new String(httpResponse.toBytes());
@@ -126,11 +123,10 @@ class HttpResponseTest {
         // given
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
         ContentType contentType = ContentType.TEXT_HTML;
-        HttpCookie httpCookie = HttpCookie.empty();
         ResponseBody responseBody = ResponseBody.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, httpCookie, responseBody);
+        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
 
         // then
         String responseString = new String(httpResponse.toBytes());

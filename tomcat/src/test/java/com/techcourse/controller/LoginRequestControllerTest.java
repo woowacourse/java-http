@@ -1,4 +1,4 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,30 +6,30 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.HttpVersion;
-import com.techcourse.http.request.HttpRequest;
-import com.techcourse.http.request.RequestBody;
-import com.techcourse.http.request.RequestHeader;
-import com.techcourse.http.response.HttpResponse;
-import com.techcourse.http.session.Session;
-import com.techcourse.http.session.SessionRepository;
 import java.util.List;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginRequestHandlerTest {
+class LoginRequestControllerTest {
 
-    private LoginRequestHandler loginRequestHandler;
+    private LoginRequestController loginRequestController;
 
     @BeforeEach
     void setUp() {
-        loginRequestHandler = new LoginRequestHandler(HttpVersion.HTTP_1_1);
+        loginRequestController = new LoginRequestController(HttpVersion.HTTP_1_1);
     }
 
     @DisplayName("세션 없는 GET 요청")
     @Test
-    void handleLoginRequestTest1() {
+    void serviceTest1() {
         // given
         String requestLine = "GET /login.html HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
@@ -37,7 +37,7 @@ class LoginRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+        HttpResponse response = loginRequestController.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());
@@ -47,7 +47,7 @@ class LoginRequestHandlerTest {
 
     @DisplayName("세션 있는 GET 요청")
     @Test
-    void handleLoginRequestTest2() {
+    void serviceTest2() {
         // given
         Session session = Session.newSession();
         SessionRepository.save(session);
@@ -61,7 +61,7 @@ class LoginRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+        HttpResponse response = loginRequestController.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());
@@ -71,7 +71,7 @@ class LoginRequestHandlerTest {
 
     @DisplayName("유효한 로그인 요청인 경우")
     @Test
-    void handleLoginRequestTest3() {
+    void serviceTest3() {
         // given
         String requestLine = "POST /login HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of(
@@ -83,7 +83,7 @@ class LoginRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+        HttpResponse response = loginRequestController.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());
@@ -97,7 +97,7 @@ class LoginRequestHandlerTest {
 
     @DisplayName("잘못된 비밀번호를 입력한 경우")
     @Test
-    void handleLoginRequestTest4() {
+    void serviceTest4() {
         // given
         String requestLine = "POST /login HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of(
@@ -109,7 +109,7 @@ class LoginRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when
-        HttpResponse response = loginRequestHandler.handleLoginRequest(httpRequest);
+        HttpResponse response = loginRequestController.service(httpRequest);
 
         // then
         String responseString = new String(response.toBytes());
@@ -119,7 +119,7 @@ class LoginRequestHandlerTest {
 
     @DisplayName("존재하지 않는 사용자의 경우")
     @Test
-    void handleLoginRequestTest5() {
+    void serviceTest5() {
         // given
         String requestLine = "POST /login HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of(
@@ -131,14 +131,14 @@ class LoginRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when & then
-        assertThatThrownBy(() -> loginRequestHandler.handleLoginRequest(httpRequest))
+        assertThatThrownBy(() -> loginRequestController.service(httpRequest))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 유저입니다.");
     }
 
     @DisplayName("지원하지 않는 http method의 경우")
     @Test
-    void handleLoginRequestTest6() {
+    void serviceTest6() {
         // given
         String requestLine = "PUT /login HTTP/1.1";
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
@@ -146,8 +146,8 @@ class LoginRequestHandlerTest {
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // when & then
-        assertThatThrownBy(() -> loginRequestHandler.handleLoginRequest(httpRequest))
+        assertThatThrownBy(() -> loginRequestController.service(httpRequest))
                 .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("지원하지 않는 Http Method 입니다.");
+                .hasMessage("지원하는 Http Method가 아닙니다.");
     }
 }

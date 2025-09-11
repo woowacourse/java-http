@@ -1,12 +1,10 @@
-package com.techcourse.http.response;
+package org.apache.coyote.http.response;
 
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpStatus;
-import com.techcourse.http.common.HttpVersion;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpVersion;
 
 public class HttpResponse {
 
@@ -33,24 +31,24 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok(
-            final HttpVersion httpVersion, final ContentType contentType, final HttpCookie httpCookie,
-            final ResponseBody responseBody
+            final HttpVersion httpVersion, final ContentType contentType, final ResponseBody responseBody
     ) {
-        return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(), contentType, httpCookie, responseBody);
-    }
-
-    public static HttpResponse noContent(
-            final HttpVersion httpVersion, final ContentType contentType, final HttpCookie httpCookie,
-            final ResponseBody responseBody
-    ) {
-        return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(), contentType, httpCookie,
+        return new HttpResponse(httpVersion, HttpStatus.OK, Location.empty(), contentType, HttpCookie.empty(),
                 responseBody);
     }
 
-    public static HttpResponse found(
-            final HttpVersion httpVersion, final Location location, final HttpCookie httpCookie
+    public static HttpResponse noContent(
+            final HttpVersion httpVersion, final ContentType contentType
     ) {
-        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, ContentType.APPLICATION_JSON, httpCookie,
+        return new HttpResponse(httpVersion, HttpStatus.NO_CONTENT, Location.empty(), contentType, HttpCookie.empty(),
+                ResponseBody.empty());
+    }
+
+    public static HttpResponse found(
+            final HttpVersion httpVersion, final Location location, final ContentType contentType,
+            final HttpCookie httpCookie
+    ) {
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, contentType, httpCookie,
                 ResponseBody.empty());
     }
 
@@ -62,8 +60,8 @@ public class HttpResponse {
         List<String> lines = new ArrayList<>();
 
         lines.add(httpVersion.toProtocolString() + " " + httpStatus.toStatusLine() + " ");
-        lines.add("Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ");
-        lines.add("Content-Length: " + getContentLength() + " ");
+        lines.add(contentType.toHeaderLine() + " ");
+        lines.add(responseBody.toContentLengthHeaderLine() + " ");
 
         if (!location.isEmpty()) {
             lines.add(location.toHttpHeaderFormat());
@@ -76,11 +74,5 @@ public class HttpResponse {
         lines.add(responseBody.value());
 
         return String.join("\r\n", lines);
-    }
-
-    private int getContentLength() {
-        return responseBody.value()
-                .getBytes(StandardCharsets.UTF_8)
-                .length;
     }
 }

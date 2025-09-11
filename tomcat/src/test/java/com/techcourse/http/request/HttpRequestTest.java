@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpMethod;
-import com.techcourse.http.common.HttpVersion;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpVersion;
 import java.util.List;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
-package com.techcourse.http.common;
+package org.apache.coyote.http;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -18,7 +18,7 @@ public class HttpCookie {
     }
 
     private static Map<String, String> convertToHttpCookieMap(final String cookieString) {
-        Map<String, String> httpCookieMap = new ConcurrentHashMap<>();
+        Map<String, String> httpCookieMap = new HashMap<>();
 
         if (cookieString == null || cookieString.isEmpty()) {
             return httpCookieMap;
@@ -41,7 +41,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie empty() {
-        return new HttpCookie(new ConcurrentHashMap<>());
+        return new HttpCookie(new HashMap<>());
     }
 
     public boolean hasEmptySessionId() {

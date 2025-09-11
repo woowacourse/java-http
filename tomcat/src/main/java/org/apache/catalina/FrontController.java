@@ -1,8 +1,8 @@
 package org.apache.catalina;
 
 import com.controller.Controller;
-import com.mapping.DynamicControllerMapping;
-import com.mapping.StaticControllerMapping;
+import org.apache.catalina.mapping.DynamicControllerMapping;
+import org.apache.catalina.mapping.StaticControllerMapping;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpMethod;

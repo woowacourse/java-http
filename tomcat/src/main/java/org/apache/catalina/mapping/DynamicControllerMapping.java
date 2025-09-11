@@ -1,4 +1,4 @@
-package com.mapping;
+package org.apache.catalina.mapping;
 
 import com.controller.Controller;
 import com.controller.LoginController;

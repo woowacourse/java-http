@@ -30,7 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final Http11Request http11Request = Http11Request.from(inputStream);
+            final Http11Request http11Request = Http11RequestReader.parse(inputStream);
             final Http11Response http11Response = frontController.service(http11Request);
             outputStream.write(http11Response.toBytes());
             outputStream.flush();

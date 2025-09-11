@@ -21,5 +21,4 @@ public class RequestLineParser {
         }
         return new RequestLine(method, path, queryParams, version);
     }
-
 }

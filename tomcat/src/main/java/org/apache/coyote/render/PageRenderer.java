@@ -38,6 +38,7 @@ public class PageRenderer extends AbstractController {
 
     private static String readStaticFile(final String path) throws IOException {
         String fullPath = STATIC_FILE_ROOT + path;
+
         try (InputStream inputStream = PageRenderer.class.getClassLoader().getResourceAsStream(fullPath)) {
             if (inputStream == null) {
                 throw new IOException("파일을 찾을 수 없습니다: " + fullPath);

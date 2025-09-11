@@ -1,6 +1,6 @@
 package org.apache.catalina.context;
 
-import com.techcourse.controller.DefaultController;
+import com.techcourse.controller.HomeController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.List;
@@ -21,7 +21,7 @@ public class ApplicationContext {
     public final static Map<String, Controller> controllerMap = Map.of(
             "/login", new LoginController(),
             "/register", new RegisterController(),
-            "/", new DefaultController()
+            "/", new HomeController()
     );
 
     public final static HandlerMapping HANDLER_MAPPING = new HandlerMapping(controllerMap);

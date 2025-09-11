@@ -10,12 +10,7 @@ public class SessionManager {
     private SessionManager() {
     }
 
-    public static Session getOrCreateSession(final String sessionId, final boolean create) {
-        Session session = findSession(sessionId);
-        if (session != null) {
-            return session;
-        }
-
+    public static Session create(final boolean create) {
         if (create) {
             Session newSession = new Session(UUID.randomUUID().toString());
             add(newSession);
@@ -24,12 +19,12 @@ public class SessionManager {
         return null;
     }
 
-    private static void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+    public static Session findSession(final String id) {
+        return SESSIONS.get(id);
     }
 
-    private static Session findSession(final String id) {
-        return SESSIONS.get(id);
+    private static void add(final Session session) {
+        SESSIONS.put(session.getId(), session);
     }
 
     public static void remove(final String id) {

@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
     @Override
     public Http11Response doGet(final Http11Request request) {
         String sessionId = request.getSessionId();
-        Session session = SessionManager.getOrCreateSession(sessionId, false);
+        Session session = SessionManager.findSession(sessionId);
         if (session != null && session.getAttribute("user") != null) {
             return Http11Response.redirect("/index.html", COOKIE + session.getId());
         }
@@ -55,9 +55,20 @@ public class LoginController extends AbstractController {
         if (loginSuccess.isPresent()) {
             log.info("로그인 성공 - {}", account);
             String sessionId = request.getSessionId();
-            Session session = SessionManager.getOrCreateSession(sessionId, true);
-            session.setAttribute("user", loginSuccess.get());
-            String cookieHeader = COOKIE + session.getId();
+            if (sessionId == null) {
+                //로그인을 성공하고, 세션이 없는 상황 -> 즉 첫 로그인 요청인 상황임
+                Session session = SessionManager.create(true);
+                session.setAttribute("user", loginSuccess.get());
+
+                return Http11Response.redirect("/index.html", COOKIE + session.getId());
+            }
+            Session oldSession = SessionManager.findSession(sessionId);
+            oldSession.invalidate();
+            SessionManager.remove(sessionId);
+
+            Session newSession = SessionManager.create(true);
+            newSession.setAttribute("user", loginSuccess.get());
+            String cookieHeader = COOKIE + newSession.getId();
             return Http11Response.redirect("/index.html", cookieHeader);
         }
         log.warn("로그인 실패 - {}", account);

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class Cookies {
 
@@ -18,8 +19,8 @@ public class Cookies {
                 .map(String::trim)
                 .toList();
         this.cookies = cookieKeyValues.stream()
-                .filter(String::isBlank)
-                .filter(cookieKeyValue -> !cookieKeyValue.contains("="))
+                .filter(StringUtils::isNotBlank)
+                .filter(cookieKeyValue -> cookieKeyValue.contains("="))
                 .map(keyValue -> keyValue.split("=", 2))
                 .collect(
                         Collectors.toMap(

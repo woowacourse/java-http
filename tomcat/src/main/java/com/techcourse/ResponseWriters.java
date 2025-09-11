@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
-import org.apache.coyote.http11.dispatcher.handlerAdapter.ViewResolver;
 import org.apache.coyote.http11.resource.ResourceUtil;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -12,7 +11,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 public class ResponseWriters {
 
     public static void ok(HttpResponse httpResponse, String resourcePath) throws IOException {
-        URL url = ViewResolver.resolve(resourcePath);
+        URL url = ResourceUtil.resolve(resourcePath);
         if (url == null) {
             notFound(httpResponse);
         }

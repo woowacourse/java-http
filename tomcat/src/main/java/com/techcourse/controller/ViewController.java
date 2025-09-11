@@ -4,7 +4,6 @@ import com.techcourse.ResponseWriters;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.apache.coyote.http11.dispatcher.handlerAdapter.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.resource.ResourceUtil;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -14,7 +13,7 @@ public class ViewController extends AbstractController {
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         String resourcePath = httpRequest.getMappingLine().getPath();
-        URL url = ViewResolver.resolve(resourcePath);
+        URL url = ResourceUtil.resolve(resourcePath);
         byte[] body;
         try {
             body = ResourceUtil.readAll(url);

@@ -48,7 +48,7 @@ class ContentTypeTest {
         String mimeType = "non-exists";
 
         // when
-        ContentType actual = ContentType.fromPath(mimeType);
+        ContentType actual = ContentType.fromMimeType(mimeType);
 
         // then
         assertThat(actual).isEqualTo(ContentType.DEFAULT);

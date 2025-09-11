@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class HttpHeaders {
+    public static final String VALID_HEADER_KEY_PATTERN = "^[A-Za-z0-9-]+$";
+    public static final String VALID_HEADER_VALUE_PATTERN = ".*[\\r\\n\\x00-\\x1F\\x7F].*";
+    public static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     private HttpHeaders() {
@@ -25,18 +29,19 @@ public class HttpHeaders {
 
             String[] parts = line.split(":", 2);
             validateHeader(line, parts);
-            String name = sanitize(parts[0].trim());
-            String value = sanitize(parts[1].trim());
+            String name = parts[0].trim();
+            String value = parts[1].trim();
             httpHeaders.add(name, value);
         }
         return httpHeaders;
     }
 
-
-    //TODO: 여기에도 sanitize 적용하기  (2025-09-7, 일, 17:22)
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895285
     public void add(String name, String value) {
-        headers.computeIfAbsent(name, key -> new ArrayList<>()).add(value);
+        headers.computeIfAbsent(sanitize(name), key -> new ArrayList<>()).add(sanitize(value));
+    }
+
+    public boolean hasContentLength() {
+        return contains(CONTENT_LENGTH);
     }
 
     public boolean contains(String key) {
@@ -55,6 +60,12 @@ public class HttpHeaders {
         return values.getFirst();
     }
 
+    public int getContentLength() {
+        if (hasContentLength()) {
+            return Integer.parseInt(getFirst(CONTENT_LENGTH));
+        }
+        return 0;
+    }
 
     public List<String> getLines() {
         List<String> lines = new ArrayList<>();
@@ -66,20 +77,33 @@ public class HttpHeaders {
         return lines;
     }
 
-    //TODO: 헤더 유효성 검증 강화 필요  (2025-09-7, 일, 17:23)
-    // https://github.com/woowacourse/java-http/pull/800#discussion_r2326895289
     private static void validateHeader(String line, String[] parts) {
-        if (parts.length != 2) {
+        if (parts.length != 2 || parts[0] == null || parts[1] == null) {
             throw new IllegalArgumentException("유효하지 않은 헤더: " + line);
+        }
+
+        validateHeaderKey(parts);
+        validateHeaderValue(parts);
+    }
+
+    private static void validateHeaderKey(String[] parts) {
+        if (!parts[0].matches(VALID_HEADER_KEY_PATTERN)) {
+            throw new IllegalArgumentException("잘못된 헤더 이름: " + parts[0]);
+        }
+    }
+
+    private static void validateHeaderValue(String[] parts) {
+        if (parts[1].matches(VALID_HEADER_VALUE_PATTERN)) {
+            throw new IllegalArgumentException("잘못된 헤더 값: " + parts[1]);
         }
     }
 
     // 헤더 인젝션 방지용 메서드
-    private static String sanitize(String str) {
-        if (str == null) {
+    private static String sanitize(String value) {
+        if (value == null) {
             throw new IllegalArgumentException("헤더의 키/값이 null입니다");
         }
 
-        return str.replaceAll("[\\r\\n]", "");
+        return value.replaceAll("[\\r\\n]", "");
     }
 }

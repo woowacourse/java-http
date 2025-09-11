@@ -1,18 +1,22 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
+
+import org.apache.coyote.http11.processor.ResourceHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
+    private String version;
     private StatusCode statusCode;
-    private String location;
-    private String contentType;
-    private String setCookie;
-    private int contentLength;
+    private final Map<String, String> headers;
     private String body;
 
     public HttpResponse() {
+        this.version = "HTTP/1.1";
         this.statusCode = StatusCode.INTERNAL_SERVER_ERROR;
-        this.location = "";
-        this.contentType = ResourceHandler.TEXT_HTML_CHARSET_UTF_8;
-        this.contentLength = 0;
+        this.headers = new HashMap<>();
+        setHeader("Content-Type", ResourceHandler.TEXT_HTML_CHARSET_UTF_8);
+        setHeader("Content-Length", "0");
         this.body = "";
     }
 
@@ -20,14 +24,9 @@ public class HttpResponse {
         StringBuilder sb = new StringBuilder();
         sb.append("HTTP/1.1 ").append(statusCode.getStatusCode()).append(" ").append(statusCode.getMessage()).append("\r\n");
 
-        if (location != null && !location.isBlank()) {
-            sb.append("Location: ").append(location).append("\r\n");
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
         }
-        if (setCookie != null && !setCookie.isBlank()) {
-            sb.append("Set-Cookie: ").append(setCookie).append("\r\n");
-        }
-        sb.append("Content-Type: ").append(contentType).append("\r\n");
-        sb.append("Content-Length: ").append(contentLength).append("\r\n");
         sb.append("\r\n");
 
         sb.append(body != null ? body : "");
@@ -35,17 +34,21 @@ public class HttpResponse {
         return sb.toString().getBytes();
     }
 
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
     public void addCookie(String setCookie) {
-        this.setCookie = setCookie;
+        setHeader("Set-Cookie", setCookie);
     }
 
     public void setContentType(String contentType) {
-        this.contentType = contentType;
+        setHeader("Content-Type", contentType);
     }
 
     public void setBodyAndContentLength(String body) {
         this.body = body;
-        this.contentLength = body.getBytes().length;
+        setHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
     public void setStatusCode(StatusCode statusCode) {
@@ -53,6 +56,6 @@ public class HttpResponse {
     }
 
     public void sendRedirect(String location) {
-        this.location = location;
+        setHeader("Location", location);
     }
 }

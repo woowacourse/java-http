@@ -1,4 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.parser;
+
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpMethod;
+import org.apache.coyote.http11.model.QueryParameter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -61,19 +65,23 @@ public class HttpRequestParser {
                                                 final Map<String, String> headers,
                                                 final String body
     ) {
-        final var chunks = requestLine.split(CHUNK_DELIMITER);
-        if (chunks.length < VALID_CHUNK_COUNT) {
+        final var requestLineChunks = requestLine.split(CHUNK_DELIMITER);
+        
+        if (requestLineChunks.length < VALID_CHUNK_COUNT) {
             throw new IllegalArgumentException("Invalid request line : " + requestLine);
         }
 
-        final var requestUri = chunks[REQUEST_URI_INDEX];
+        final var httpMethod = HttpMethod.valueOf(requestLineChunks[0]);
+        final var requestUri = requestLineChunks[REQUEST_URI_INDEX];
+        final var httpVersion = requestLineChunks[2];
+
         final var delimiterIndex = requestUri.indexOf(REQUEST_URI_DELIMITER);
 
-        String resourcePath = requestUri;
+        String path = requestUri;
         QueryParameter queryParameter = new QueryParameter();
 
         if (delimiterIndex != -1) {
-            resourcePath = requestUri.substring(0, delimiterIndex);
+            path = requestUri.substring(0, delimiterIndex);
             queryParameter = new QueryParameter(requestUri.substring(delimiterIndex + 1));
         }
 
@@ -81,6 +89,6 @@ public class HttpRequestParser {
             queryParameter.addParameterFromBody(body);
         }
 
-        return new HttpRequest(resourcePath, queryParameter, headers);
+        return new HttpRequest(httpMethod, path, httpVersion, queryParameter, headers);
     }
 }

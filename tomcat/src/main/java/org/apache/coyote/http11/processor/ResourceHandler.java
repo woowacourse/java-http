@@ -1,7 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.processor;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.model.Cookie;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
+import org.apache.coyote.http11.model.StatusCode;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -27,15 +32,15 @@ public class ResourceHandler {
     }
 
     private void setContentType(final HttpRequest request, final HttpResponse response) {
-        if (request.getResourcePath().endsWith(".html")) {
+        if (request.getPath().endsWith(".html")) {
             response.setContentType(TEXT_HTML_CHARSET_UTF_8);
             return;
         }
-        if (request.getResourcePath().endsWith(".css")) {
+        if (request.getPath().endsWith(".css")) {
             response.setContentType(TEXT_CSS_CHARSET_UTF_8);
             return;
         }
-        if (request.getResourcePath().endsWith(".js")) {
+        if (request.getPath().endsWith(".js")) {
             response.setContentType(APPLICATION_JAVASCRIPT_CHARSET_UTF_8);
             return;
         }
@@ -43,12 +48,12 @@ public class ResourceHandler {
     }
 
     private void setBody(final HttpRequest request, final HttpResponse response) {
-        if (Objects.equals(request.getResourcePath(), "/")) {
+        if (Objects.equals(request.getPath(), "/")) {
             response.setStatusCode(StatusCode.OK);
             response.setBodyAndContentLength("Hello world!");
             return;
         }
-        if (Objects.equals(request.getResourcePath(), "/login")) {
+        if (Objects.equals(request.getPath(), "/login")) {
             final var session = request.getSession();
             if (session != null && session.getAttribute("user") != null) {
                 response.setStatusCode(StatusCode.FOUND);
@@ -57,17 +62,17 @@ public class ResourceHandler {
             }
         }
         if (request.hasQueryParameter()) {
-            if (Objects.equals(request.getResourcePath(), "/login")) {
+            if (Objects.equals(request.getPath(), "/login")) {
                 redirectLogin(request, response);
                 return;
             }
-            if (Objects.equals(request.getResourcePath(), "/register")) {
+            if (Objects.equals(request.getPath(), "/register")) {
                 saveUser(request, response);
                 return;
             }
         }
         if (!request.hasQueryParameter()) {
-            String body = getContent(request.getResourcePath());
+            String body = getContent(request.getPath());
             if (body == null) {
                 response.setStatusCode(StatusCode.NOT_FOUND);
                 body = getContent("/404.html");

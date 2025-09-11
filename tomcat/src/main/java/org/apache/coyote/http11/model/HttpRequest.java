@@ -1,16 +1,27 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
+
+import org.apache.coyote.http11.session.Session;
 
 import java.util.Map;
 
 public class HttpRequest {
 
-    private final String resourcePath;
+    private final HttpMethod method;
+    private final String path;
+    private final String version;
     private final QueryParameter queryParameter;
     private final Map<String, String> headers;
     private Session session;
 
-    public HttpRequest(String resourcePath, QueryParameter queryParameter, Map<String, String> headers) {
-        this.resourcePath = resourcePath;
+    public HttpRequest(HttpMethod method,
+                       String path,
+                       String version,
+                       QueryParameter queryParameter,
+                       Map<String, String> headers) {
+
+        this.method = method;
+        this.path = path;
+        this.version = version;
         this.queryParameter = queryParameter;
         this.headers = headers;
     }
@@ -23,8 +34,8 @@ public class HttpRequest {
         this.session = session;
     }
 
-    public String getResourcePath() {
-        return resourcePath;
+    public String getPath() {
+        return path;
     }
 
     public String getQueryParameter(String key) {

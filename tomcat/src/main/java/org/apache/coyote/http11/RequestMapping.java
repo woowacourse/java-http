@@ -1,5 +1,10 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.HomeController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticRequestController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

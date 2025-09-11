@@ -27,10 +27,6 @@ public class FrontController {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         String path = request.getPath();
         Controller controller = requestMapping.getController(path);
-        if (controller == null) {
-            staticResourceController.service(request, response);
-            return;
-        }
         controller.service(request, response);
     }
 }

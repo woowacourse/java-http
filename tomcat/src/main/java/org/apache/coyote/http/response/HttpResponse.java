@@ -7,12 +7,12 @@ import org.apache.coyote.http.cookie.HttpCookie;
 
 public class HttpResponse {
 
-    private final int statusCode;
+    private final ResponseLine responseLine;
     private final Map<String, String> headers;
     private final String body;
 
-    private HttpResponse(int statusCode, Map<String, String> headers, String body) {
-        this.statusCode = statusCode;
+    private HttpResponse(ResponseLine responseLine, Map<String, String> headers, String body) {
+        this.responseLine = responseLine;
         this.headers = headers;
         this.body = body;
     }
@@ -22,7 +22,7 @@ public class HttpResponse {
                 "Content-Type", contentType + ";charset=utf-8",
                 "Content-Length", String.valueOf(body.getBytes().length)
         );
-        return new HttpResponse(200, headers, body);
+        return new HttpResponse(ResponseLine.ok(), headers, body);
     }
 
     public static HttpResponse okWithCookie(String body, String contentType, String cookieName, String cookieValue) {
@@ -31,11 +31,11 @@ public class HttpResponse {
                 "Content-Length", String.valueOf(body.getBytes().length),
                 "Set-Cookie", HttpCookie.createSetCookieHeader(cookieName, cookieValue)
         );
-        return new HttpResponse(200, headers, body);
+        return new HttpResponse(ResponseLine.ok(), headers, body);
     }
     
     public static HttpResponse redirect(String location) {
-        return new HttpResponse(302, Map.of("Location", location), "");
+        return new HttpResponse(ResponseLine.found(), Map.of("Location", location), "");
     }
 
     public static HttpResponse redirectWithCookie(String location, String cookieName, String cookieValue) {
@@ -43,7 +43,7 @@ public class HttpResponse {
                 "Location", location,
                 "Set-Cookie", HttpCookie.createSetCookieHeader(cookieName, cookieValue)
         );
-        return new HttpResponse(302, headers, "");
+        return new HttpResponse(ResponseLine.found(), headers, "");
     }
 
     public static HttpResponse unauthorized(String body) {
@@ -51,12 +51,12 @@ public class HttpResponse {
                 "Content-Type", "text/html;charset=utf-8",
                 "Content-Length", String.valueOf(body.getBytes().length)
         );
-        return new HttpResponse(401, headers, body);
+        return new HttpResponse(ResponseLine.unauthorized(), headers, body);
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {
         StringBuilder response = new StringBuilder();
-        response.append("HTTP/1.1 ").append(statusCode).append(" ").append(getStatusText()).append("\r\n");
+        response.append(responseLine.toString()).append("\r\n");
 
         for (Map.Entry<String, String> header : headers.entrySet()) {
             response.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
@@ -68,12 +68,4 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    private String getStatusText() {
-        return switch (statusCode) {
-            case 200 -> "OK";
-            case 302 -> "Found";
-            case 401 -> "Unauthorized";
-            default -> "Unknown";
-        };
-    }
 }

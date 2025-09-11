@@ -8,9 +8,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.RequestLineInfo;
 
 public class AuthController extends AbstractController {
     
@@ -92,8 +94,11 @@ public class AuthController extends AbstractController {
         if (authService.isLoggedIn(httpCookie)) {
             return buildRedirectResponse("/index.html");
         } else {
-            String requestLine = "GET " + pagePath + " HTTP/1.1";
-            HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), "");
+            HttpRequest request = HttpRequest.from(
+                    RequestLineInfo.of(HttpMethod.GET, pagePath, "HTTP/1.1"),
+                    HttpHeaders.empty(),
+                    ""
+            );
             StaticResourceController staticController = new StaticResourceController();
             return staticController.service(request);
         }

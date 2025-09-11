@@ -25,10 +25,6 @@ public class QueryParameter {
         return queryParameter.get(key);
     }
 
-    public boolean hasAnyParameter() {
-        return !queryParameter.isEmpty();
-    }
-
     public void addParameterFromBody(String body) {
         doParse(body);
     }

@@ -1,5 +1,6 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.util;
 
+import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpMethod;
 import org.apache.coyote.http11.model.QueryParameter;
@@ -12,19 +13,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class HttpRequestParser {
+public class HttpRequestUtil {
 
-    private static final char REQUEST_URI_DELIMITER = '?';
-    private static final String CHUNK_DELIMITER = " ";
-    private static final int VALID_CHUNK_COUNT = 2;
-    private static final int REQUEST_URI_INDEX = 1;
-
-    public static HttpRequest parse(final InputStream inputStream) throws IOException {
+    public static HttpRequest doParse(final InputStream inputStream) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final var requestLine = bufferedReader.readLine();
 
         if (requestLine == null || requestLine.isBlank()) {
-            throw new IllegalArgumentException("Empty request line");
+            throw new BadRequestException("Empty request line");
         }
 
         final var headers = getHeaders(bufferedReader);
@@ -65,17 +61,17 @@ public class HttpRequestParser {
                                                 final Map<String, String> headers,
                                                 final String body
     ) {
-        final var requestLineChunks = requestLine.split(CHUNK_DELIMITER);
+        final var requestLineChunks = requestLine.split(" ");
         
-        if (requestLineChunks.length < VALID_CHUNK_COUNT) {
+        if (requestLineChunks.length < 2) {
             throw new IllegalArgumentException("Invalid request line : " + requestLine);
         }
 
         final var httpMethod = HttpMethod.valueOf(requestLineChunks[0]);
-        final var requestUri = requestLineChunks[REQUEST_URI_INDEX];
+        final var requestUri = requestLineChunks[1];
         final var httpVersion = requestLineChunks[2];
 
-        final var delimiterIndex = requestUri.indexOf(REQUEST_URI_DELIMITER);
+        final var delimiterIndex = requestUri.indexOf("?");
 
         String path = requestUri;
         QueryParameter queryParameter = new QueryParameter();

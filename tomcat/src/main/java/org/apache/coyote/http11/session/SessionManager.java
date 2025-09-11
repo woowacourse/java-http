@@ -24,10 +24,6 @@ public class SessionManager {
         return Optional.ofNullable(sessions.get(id));
     }
 
-    public static void removeSession(String id) {
-        sessions.remove(id);
-    }
-
     public static Session resolveSession(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String jsessionid = httpRequest.getCookies().getCookie("JSESSIONID");
 

@@ -26,12 +26,8 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
+    public HttpMethod getMethod() {
+        return method;
     }
 
     public String getPath() {
@@ -42,8 +38,8 @@ public class HttpRequest {
         return queryParameter.getParameter(key);
     }
 
-    public boolean hasQueryParameter() {
-        return queryParameter.hasAnyParameter();
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public String getHeader(String name) {
@@ -52,5 +48,9 @@ public class HttpRequest {
 
     public Cookie getCookies() {
         return new Cookie(getHeader("Cookie"));
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

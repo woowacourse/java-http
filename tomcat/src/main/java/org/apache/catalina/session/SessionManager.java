@@ -1,8 +1,8 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
@@ -22,7 +22,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(final String id) throws IOException {
+    public Session findSession(final String id) {
         return SESSIONS.get(id);
     }
 

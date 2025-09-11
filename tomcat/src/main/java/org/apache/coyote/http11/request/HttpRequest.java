@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -104,7 +105,23 @@ public class HttpRequest {
         return result;
     }
 
-    public byte[] parsedBody() {
+    public byte[] getBody() {
         return body;
+    }
+
+    public Map<String, String> getBodyMap() {
+        Map<String, String> map = new HashMap<>();
+        String bodyStr = new String(body, StandardCharsets.UTF_8);
+
+        String[] parsedBodies = bodyStr.split("&");
+        for (String parsedBody : parsedBodies) {
+            String[] split = parsedBody.split("=");
+            if (split.length != 2) {
+                throw new IllegalArgumentException("invalid body format like map : " + split.length);
+            }
+            map.put(split[0], split[1]);
+        }
+
+        return map;
     }
 }

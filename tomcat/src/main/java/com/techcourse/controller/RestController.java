@@ -1,11 +1,8 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.Session;
 import com.techcourse.db.SessionManager;
-import com.techcourse.model.User;
 import com.techcourse.service.Service;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
@@ -20,25 +17,6 @@ public class RestController {
     public RestController(Service service, SessionManager sessionManager) {
         this.service = service;
         this.sessionManager = sessionManager;
-    }
-
-    public HttpResponse login(Map<String, String> loginRequest) {
-        try {
-            User user = service.getUser(loginRequest);
-            log.info("{}", user.toString());
-            UUID sessionId = UUID.randomUUID();
-            Session session = new Session(sessionId.toString());
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-
-            Map<String, String> headers = Map.of(
-                    "Location", "/index.html",
-                    "Set-Cookie", "JSESSIONID=" + sessionId
-            );
-            return ResponseEntity.found(headers);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.found(Map.of("Location", "/401.html"));
-        }
     }
 
     public HttpResponse signIn(Map<String, String> signInRequest) {

@@ -41,13 +41,8 @@ public class HttpResponseConfigurator {
         HttpResponseConfigurator.applyToHttpResponse(response, HttpStatusCode.OK, headers, body);
     }
 
-    public static void unauthorized(final HttpResponse response) throws IOException {
-        okWithStaticResource(response, "/401.html");
-        response.setResponseLine(ResponseLine.of(HttpStatusCode.UNAUTHORIZED));
-    }
-
-    public static void notFound(final HttpResponse response) throws IOException {
-        okWithStaticResource(response, "/404.html");
+    public static void errorResponse(final HttpStatusCode statusCode, final HttpResponse response) throws IOException {
+        okWithStaticResource(response, "/" + statusCode.getStatusCode() + ".html");
         response.setResponseLine(ResponseLine.of(HttpStatusCode.NOT_FOUND));
     }
 

@@ -3,8 +3,7 @@ package org.apache.coyote.http11.request.header;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.response.startline.HttpStatusCode;
+import org.apache.coyote.http11.exception.NotFoundException;
 
 public class RequestHeadersParser {
 
@@ -22,7 +21,7 @@ public class RequestHeadersParser {
             final String[] keyAndValue = header.split(HEADER_SEPARATOR);
             final String key = keyAndValue[0];
             if (keyAndValue.length != 2) {
-                throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
+                throw new NotFoundException();
             }
             final String value = keyAndValue[1];
             headers.put(key, value);

@@ -9,10 +9,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.exception.HttpStatusException;
 import org.apache.coyote.http11.request.FormUrlEncodedHttpRequestParser;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseConfigurator;
+import org.apache.coyote.http11.response.startline.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +53,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = HttpRequest.of(new FormUrlEncodedHttpRequestParser(reader));
             final Controller controller = requestMapping.getController(request);
             controller.service(request, response);
+        } catch (HttpStatusException e) {
+            HttpResponseConfigurator.errorResponse(e.getStatusCode(), response);
         } catch (Exception e) {
-            HttpResponseConfigurator.notFound(response);
+            HttpResponseConfigurator.errorResponse(HttpStatusCode.NOT_FOUND, response);
         }
         sendHttpResponse(response, outputStream);
     }

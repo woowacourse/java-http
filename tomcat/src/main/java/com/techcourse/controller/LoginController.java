@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseConfigurator;
@@ -34,8 +35,7 @@ public class LoginController extends AbstractController {
         final Optional<User> user = userService.login(account, password);
 
         if (user.isEmpty()) {
-            HttpResponseConfigurator.unauthorized(response);
-            return;
+            throw new UnauthorizedException();
         }
 
         log.info("user: " + user.get());

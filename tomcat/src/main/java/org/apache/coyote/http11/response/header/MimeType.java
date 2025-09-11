@@ -1,8 +1,7 @@
 package org.apache.coyote.http11.response.header;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.response.startline.HttpStatusCode;
+import org.apache.coyote.http11.exception.InternalServerErrorException;
 
 public enum MimeType {
 
@@ -22,7 +21,7 @@ public enum MimeType {
         return Arrays.stream(MimeType.values())
                 .filter(type -> type.extension.equals(givenExtension))
                 .findFirst()
-                .orElseThrow(() -> new HttpStatusException(HttpStatusCode.INTERNAL_SERVER_ERROR));
+                .orElseThrow(InternalServerErrorException::new);
     }
 
     public String getMimeType() {

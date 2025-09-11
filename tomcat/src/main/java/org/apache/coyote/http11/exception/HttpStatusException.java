@@ -6,8 +6,8 @@ public class HttpStatusException extends RuntimeException {
 
     private final HttpStatusCode statusCode;
 
-    public HttpStatusException(final HttpStatusCode statusCode) {
-        super("http 응답 오류");
+    public HttpStatusException(final HttpStatusCode statusCode, final String message) {
+        super(message);
         this.statusCode = statusCode;
     }
 

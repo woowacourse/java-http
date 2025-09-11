@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.response.startline.HttpStatusCode;
+import org.apache.coyote.http11.exception.NotFoundException;
 
 public class StaticResource {
 
@@ -16,7 +15,7 @@ public class StaticResource {
     public StaticResource(final String path) {
         this.resource = getClass().getClassLoader().getResource("static" + path);
         if (this.resource == null) {
-            throw new HttpStatusException(HttpStatusCode.NOT_FOUND);
+            throw new NotFoundException();
         }
     }
 

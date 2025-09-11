@@ -11,7 +11,6 @@ public class Application {
 
     public static void main(String[] args) {
         final RequestMapping requestMapping = new RequestMapping();
-
         requestMapping.addController("/", new HelloController());
         requestMapping.addController("/login", new LoginController());
         requestMapping.addController("/register", new RegisterController());

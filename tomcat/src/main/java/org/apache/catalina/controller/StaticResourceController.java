@@ -15,20 +15,27 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = request.getPath();
-        loadStaticResource(response, path);
+        byte[] bodyBytes = readStaticResource(path);
+        sendStaticResource(response, path, bodyBytes);
     }
 
-    private void loadStaticResource(HttpResponse response, String path) throws IOException {
+    private byte[] readStaticResource(String path) throws IOException {
         String resourcePath = "static" + path;
         try (InputStream fileInputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (fileInputStream == null) {
-                response.send(HttpStatus.NOT_FOUND);
-                return;
+                return null;
             }
-            String contentType = determineContentType(path);
-            byte[] bodyBytes = fileInputStream.readAllBytes();
-            response.send(HttpStatus.OK, contentType, bodyBytes);
+            return fileInputStream.readAllBytes();
         }
+    }
+
+    private void sendStaticResource(HttpResponse response, String path, byte[] bodyBytes) throws IOException {
+        if (bodyBytes == null) {
+            response.send(HttpStatus.NOT_FOUND);
+            return;
+        }
+        String contentType = determineContentType(path);
+        response.send(HttpStatus.OK, contentType, bodyBytes);
     }
 
     private String determineContentType(String path) {

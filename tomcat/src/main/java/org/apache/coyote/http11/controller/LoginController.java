@@ -11,10 +11,12 @@ import org.apache.coyote.http11.SessionManager;
 
 public class LoginController extends AbstractController {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     @Override
     protected void doGet(Http11Request request, Http11Response response) throws Exception {
         final Http11Cookie cookie = request.getCookie();
-        if (cookie.isContainsSessionId() && SessionManager.getInstance().containsSession(cookie.getSessionId())) {
+        if (cookie.containsKey(JSESSIONID) && SessionManager.getInstance().containsSession(cookie.get(JSESSIONID))) {
             response.sendRedirect("/index.html");
             return;
         }

@@ -7,11 +7,13 @@ import org.apache.coyote.http11.SessionManager;
 
 public class LogoutController extends AbstractController {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     @Override
     protected void doGet(Http11Request request, Http11Response response) throws Exception {
         final Http11Cookie cookie = request.getCookie();
-        if (cookie.isContainsSessionId()) {
-            SessionManager.getInstance().remove(cookie.getSessionId());
+        if (cookie.containsKey(JSESSIONID)) {
+            SessionManager.getInstance().remove(cookie.get(JSESSIONID));
         }
         response.putHeader("Set-Cookie", "JSESSIONID=; Path=/; Max-Age=0");
         response.sendRedirect("/index.html");

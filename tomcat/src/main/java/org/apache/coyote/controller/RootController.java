@@ -4,6 +4,7 @@ import java.util.Objects;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.common.MediaTypes;
 import org.apache.coyote.util.ResourceLoader;
 
 public class RootController extends AbstractController {
@@ -15,8 +16,10 @@ public class RootController extends AbstractController {
 
         if (path.contains(".")) {
             body = ResourceLoader.get(path);
+            response.setHeader("Content-Type", MediaTypes.findMediaType(path));
         } else {
             body = ResourceLoader.get(path + ".html");
+            response.setHeader("Content-Type", MediaTypes.findMediaType(path + ".html"));
         }
         if (Objects.equals(path, "/")) {
             body = ResourceLoader.get("/index.html");

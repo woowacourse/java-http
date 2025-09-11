@@ -56,6 +56,13 @@ public class HttpResponse {
         this.headers = new HashMap<>(headers);
     }
 
+    public void setHeader(final String key, final String value) {
+        if (this.headers == null) {
+            this.headers = new HashMap<>();
+        }
+        this.headers.put(key, value);
+    }
+
     public void setBody(final byte[] body) {
         this.body = new byte[body.length];
         System.arraycopy(body, 0, this.body, 0, body.length);

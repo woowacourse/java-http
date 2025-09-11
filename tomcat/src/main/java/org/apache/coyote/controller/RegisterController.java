@@ -13,6 +13,7 @@ import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.common.MediaTypes;
 import org.apache.coyote.util.ResourceLoader;
 
 public class RegisterController extends AbstractController {
@@ -41,8 +42,10 @@ public class RegisterController extends AbstractController {
 
         if (path.contains(".")) {
             body = ResourceLoader.get(path);
+            response.setHeader("Content-Type", MediaTypes.findMediaType(path));
         } else {
             body = ResourceLoader.get(path + ".html");
+            response.setHeader("Content-Type", MediaTypes.findMediaType(path + ".html"));
         }
 
         if (body == null) {

@@ -29,15 +29,15 @@ public class RegisterController extends AbstractController {
         String email = request.getParameter("email").orElse(null);
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            ResponseHandler.sendStaticFile(response,"static/register.html", BAD_REQUEST);
+            ResponseHandler.sendStaticFile(response,"/register.html", BAD_REQUEST);
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        ResponseHandler.redirect(response,"static/login.html", OK);
+        ResponseHandler.redirect(response,"/login.html", OK);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        ResponseHandler.sendStaticFile(response, "static/register.html", OK);
+        ResponseHandler.sendStaticFile(response, "/register.html", OK);
     }
 }

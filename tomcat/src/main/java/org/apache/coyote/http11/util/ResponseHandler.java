@@ -23,14 +23,22 @@ public class ResponseHandler {
                 .send();
     }
 
-    public static void sendStaticFile(HttpResponse response, String url, HttpStaus statusCode)
-            throws IOException, URISyntaxException {
+    public static void sendStaticFile(
+            HttpResponse response,
+            String url,
+            HttpStaus statusCode
+    ) throws IOException, URISyntaxException {
         final var contentType = ResourceLoader.getResourceContentType(url);
         final byte[] responseBodyBytes = ResourceLoader.getResourceBytes(url);
 
         response.setStatusCode(statusCode.getValue())
                 .setContentType(contentType)
                 .setBody(responseBodyBytes)
+                .send();
+    }
+
+    public static void sendEmptyResponse(HttpResponse response, HttpStaus httpStaus) throws IOException {
+        response.setStatusCode(httpStaus.getValue())
                 .send();
     }
 }

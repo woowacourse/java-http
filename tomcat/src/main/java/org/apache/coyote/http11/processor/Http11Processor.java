@@ -61,6 +61,10 @@ public class Http11Processor implements Runnable, Processor {
             ResponseHandler.sendDefaultResource(response);
             return;
         }
+        if (request.getUrl().equals("/favicon.ico")) {
+            ResponseHandler.sendEmptyResponse(response, HttpStaus.OK);
+            return;
+        }
         try {
             ResponseHandler.sendStaticFile(response, request.getUrl(), HttpStaus.OK);
         } catch (IOException | URISyntaxException e) {

@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
             ResponseHandler.redirect(response,"/index.html", FOUND);
         }
 
-        ResponseHandler.redirect(response,"static/401.html", UNAUTHORIZED);
+        ResponseHandler.redirect(response,"/401.html", UNAUTHORIZED);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class LoginController extends AbstractController {
         if (httpCookie.isPresent() && SESSION_MANAGER.containsKey(httpCookie.get().getValue())) {
             ResponseHandler.redirect(response, "/index.html", FOUND);
         } else {
-            ResponseHandler.sendStaticFile(response, "static/login.html", OK);
+            ResponseHandler.sendStaticFile(response, "/login.html", OK);
         }
     }
 }

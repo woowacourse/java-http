@@ -1,5 +1,7 @@
 package org.apache.coyote;
 
+import java.util.Arrays;
+
 public enum HttpVersion {
 
     HTTP1_1("HTTP/1.1");
@@ -11,12 +13,14 @@ public enum HttpVersion {
     }
 
     public static HttpVersion fromString(String version) {
-        for (HttpVersion httpVersion : values()) {
-            if (httpVersion.name.equals(version)) {
-                return httpVersion;
-            }
+        if (version == null) {
+            throw new IllegalArgumentException("Version cannot be null");
         }
-        throw new IllegalArgumentException("Cannot resolve Http Version from request: " + version);
+        return Arrays.stream(values())
+                .filter(value -> version.equals(value.name))
+                .findFirst()
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Cannot resolve Http Version from request: " + version));
     }
 
     public String getName() {

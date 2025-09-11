@@ -3,8 +3,8 @@ package org.apache.catalina.core;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import org.apache.catalina.Session;
 import org.apache.catalina.mapping.AbstractController;
+import org.apache.coyote.Session;
 import org.apache.coyote.util.StaticResourceHandler;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.response.HttpResponse;
@@ -23,7 +23,6 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/index.html");
             return;
         }
-
         byte[] body = StaticResourceHandler.readResource("static/login.html");
         if (body == null) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -31,7 +30,6 @@ public class LoginController extends AbstractController {
             response.setBody("Login page not found".getBytes());
             return;
         }
-
         response.setStatus(HttpStatus.OK);
         response.addHeader("Content-Type", "text/html;charset=utf-8");
         response.setBody(body);
@@ -44,7 +42,6 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/index.html");
             return;
         }
-
         String account = request.getBody().get("account");
         String password = request.getBody().get("password");
 
@@ -53,11 +50,9 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/401.html");
             return;
         }
-
         User user = userOpt.get();
         final Session session = request.changeSessionId();
         session.setAttribute("user", user);
-
         response.sendRedirect("/index.html");
         response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
         log.info("User: {}", user);

@@ -2,8 +2,8 @@ package org.apache.coyote.util.request;
 
 import java.util.Collections;
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.util.Cookie;
 
 public class HttpRequest {
@@ -12,12 +12,17 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final Map<String, String> body;
     private final Cookie cookie;
+    private SessionManager sessionManager;
 
     public HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> body, Cookie cookie) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
         this.cookie = cookie;
+    }
+
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     public String getMethod() {
@@ -33,32 +38,30 @@ public class HttpRequest {
     }
 
     public Session getSession(boolean create) {
-        SessionManager sessionManager = SessionManager.getInstance();
-        String sessionId = SessionManager.getSessionId(cookie);
+        if (sessionManager == null) {
+            throw new IllegalStateException("No SessionManager is configured.");
+        }
+        String sessionId = sessionManager.getSessionId(cookie);
         if (sessionId != null) {
-            Session session = sessionManager.findCustomSession(sessionId);
+            Session session = sessionManager.findSession(sessionId);
             if (session != null) {
                 return session;
             }
         }
         if (create) {
-            String newSessionId = SessionManager.generateSessionId();
-            Session newSession = new Session(newSessionId);
-            sessionManager.add(newSession);
-            return newSession;
+            return sessionManager.createSession();
         }
         return null;
     }
 
     public Session changeSessionId() {
-        SessionManager sessionManager = SessionManager.getInstance();
-        String sessionId = SessionManager.getSessionId(cookie);
+        if (sessionManager == null) {
+            throw new IllegalStateException("No SessionManager is configured.");
+        }
+        String sessionId = sessionManager.getSessionId(cookie);
         if (sessionId != null) {
             sessionManager.remove(sessionId);
         }
-        String newSessionId = SessionManager.generateSessionId();
-        Session newSession = new Session(newSessionId);
-        sessionManager.add(newSession);
-        return newSession;
+        return sessionManager.createSession();
     }
 }

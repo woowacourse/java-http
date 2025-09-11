@@ -6,76 +6,57 @@ public class Http11Response {
 
     private static final String CRLF = "\r\n";
 
-    private final int statusCode;
-    private final String statusMessage;
-    private final String contentType; //헤더를 이거말고 더 필요하네,, 홀륑..
-    private final String responseBody;
+    private final HttpStatus status;
+    private final Http11ResponseHeaders headers;
+    private final String body;
 
-    private Http11Response(final int statusCode, final String statusMessage, final String contentType, final String responseBody) {
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
+    private Http11Response(final HttpStatus status, final Http11ResponseHeaders headers, final String body) {
+        this.status = status;
+        this.headers = headers;
+        this.body = body;
     }
 
     public static Http11Response ok(final String contentType, final String body) {
-        return new Http11Response(200, "OK", contentType, body);
+        Http11ResponseHeaders headers = new Http11ResponseHeaders();
+        headers.addHeader("Content-Type", contentType);
+        headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        return new Http11Response(HttpStatus.OK, headers, body);
     }
 
-    public static Http11Response notFound(final String contentType, final String responseBody) {
-        return new Http11Response(404, "Not Found", contentType, responseBody);
+    public static Http11Response notFound(final String contentType, final String body) {
+        Http11ResponseHeaders headers = new Http11ResponseHeaders();
+        headers.addHeader("Content-Type", contentType);
+        headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        return new Http11Response(HttpStatus.NOT_FOUND, headers, body);
     }
 
     public static Http11Response redirect(final String location) {
-        return new Http11Response(302, "Found", "text/html;charset=utf-8", "") {
-            @Override
-            public byte[] toBytes() {
-                String response = String.join(CRLF,
-                        "HTTP/1.1 " + 302 + " " + "Found",
-                        "Location: " + location,
-                        "Content-Length: 0",
-                        ""
-                );
-                return response.getBytes(StandardCharsets.UTF_8);
-            }
-        };
+        Http11ResponseHeaders headers = new Http11ResponseHeaders();
+        headers.addHeader("Location", location);
+        headers.addHeader("Content-Length", "0");
+        return new Http11Response(HttpStatus.FOUND, headers, "");
     }
 
     public static Http11Response redirect(final String location, final String cookieHeader) {
-        return new Http11Response(302, "Found", "text/html;charset=utf-8", "") {
-            @Override
-            public byte[] toBytes() {
-                String response = String.join(CRLF,
-                        "HTTP/1.1 302 Found",
-                        "Location: " + location,
-                        "Set-Cookie: " + cookieHeader,
-                        "Content-Length: 0",
-                        ""
-                );
-                return response.getBytes(StandardCharsets.UTF_8);
-            }
-        };
+        Http11ResponseHeaders headers = new Http11ResponseHeaders();
+        headers.addHeader("Location", location);
+        headers.addHeader("Set-Cookie", cookieHeader);
+        headers.addHeader("Content-Length", "0");
+        return new Http11Response(HttpStatus.FOUND, headers, "");
     }
 
     public static Http11Response serverError() {
-        final String body = "Internal Server Error";
-
-        return new Http11Response(
-                500,
-                "Internal Server Error",
-                "text/html;charset=utf-8",
-                body
-        );
+        String body = "Internal Server Error";
+        Http11ResponseHeaders headers = new Http11ResponseHeaders();
+        headers.addHeader("Content-Type", "text/html;charset=utf-8");
+        headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        return new Http11Response(HttpStatus.INTERNAL_SERVER_ERROR, headers, body);
     }
 
     public byte[] toBytes() {
-        String response = String.join(CRLF,
-                "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody
-        );
+        String response = "HTTP/1.1 " + status.getCode() + " " + status.getReason() + " " + CRLF
+                + headers.toHeaderString() + CRLF + CRLF
+                + body;
 
         return response.getBytes(StandardCharsets.UTF_8);
     }

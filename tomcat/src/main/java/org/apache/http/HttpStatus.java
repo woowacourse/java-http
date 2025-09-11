@@ -23,4 +23,3 @@ public enum HttpStatus {
         return code;
     }
 }
-

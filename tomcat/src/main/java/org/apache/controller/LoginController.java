@@ -17,8 +17,9 @@ import org.slf4j.LoggerFactory;
 public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final StaticController staticController = new StaticController();
-    SessionManager sessionManager = SessionManager.getInstance();
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
+
+    private final StaticController staticController = new StaticController();
 
     @Override
     public boolean isProcessable(HttpRequest httpRequest) {
@@ -28,32 +29,38 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse)
             throws URISyntaxException, IOException {
-
-        return login(httpRequest, httpResponse);
+        if (httpRequest.getMethod().equals("GET")) {
+            return getLogin(httpRequest, httpResponse);
+        }
+        return postLogin(httpRequest, httpResponse);
     }
 
-    private HttpResponse login(HttpRequest httpRequest, HttpResponse httpResponse)
-            throws URISyntaxException, IOException {
+    private HttpResponse getLogin(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
+        if (httpRequest.containsCookie()) {
+            HttpCookie httpCookie = httpRequest.getHttpCookie();
 
-        if (httpRequest.getMethod().equals("GET")) {
-            if (httpRequest.containsCookie()) {
-                HttpCookie httpCookie = httpRequest.getHttpCookie();
+            String jsessionID = httpCookie.getJSessionId();
 
-                String jsessionID = httpCookie.getJSessionId();
-                Session session = sessionManager.findSession(jsessionID);
-
-                if (session != null && session.getAttribute("user") != null) {
-                    httpResponse.redirect("/login.html");
-                    return httpResponse;
-                }
+            if (isAlreadyLogin(jsessionID)) {
+                httpResponse.redirect("/login.html");
+                return httpResponse;
             }
-            httpResponse.setResponseBody("/login.html");
-            httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.setHttpCookie(null);
-
-            return staticController.process(httpRequest, httpResponse);
         }
+        httpResponse.setResponseBody("/login.html");
+        httpResponse.setHttpStatus(HttpStatus.OK);
+        httpResponse.setHttpCookie(null);
 
+        return staticController.process(httpRequest, httpResponse);
+    }
+
+    private boolean isAlreadyLogin(String jsessionID) throws IOException {
+        Session session = SESSION_MANAGER.findSession(jsessionID);
+        return session != null && session.getAttribute("user") != null;
+    }
+
+    private HttpResponse postLogin(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws URISyntaxException, IOException {
         String account = httpRequest.getBodyAttribute("account");
         String password = httpRequest.getBodyAttribute("password");
 
@@ -61,28 +68,37 @@ public class LoginController implements Controller {
                 .orElseThrow(IllegalArgumentException::new);
 
         if (!user.checkPassword(password)) {
-            httpResponse.setResponseBody("/401.html");
-            httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
-            httpResponse.setHttpCookie(null);
-            return staticController.process(httpRequest, httpResponse);
+            return postLoginFailed(httpRequest, httpResponse);
         }
 
         if (user.checkPassword(password)) {
-            HttpCookie httpCookie = new HttpCookie();
-            String sessionId = UUID.randomUUID().toString();
-
-            Session session = new Session(sessionId);
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-
-            httpCookie.setjSessionId(sessionId);
-            httpResponse.setHttpCookie(httpCookie);
-            log.info("user: {}", user);
-            httpResponse.redirect("/index.html");
-
-            return httpResponse;
+            return postLoginSuccess(user, httpRequest, httpResponse);
         }
 
         return HttpResponse.notFound(httpRequest);
+    }
+
+    private HttpResponse postLoginFailed(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
+        httpResponse.setResponseBody("/401.html");
+        httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+        httpResponse.setHttpCookie(null);
+        return staticController.process(httpRequest, httpResponse);
+    }
+
+    private HttpResponse postLoginSuccess(User user, HttpRequest httpRequest, HttpResponse httpResponse) {
+        HttpCookie httpCookie = new HttpCookie();
+        String sessionId = UUID.randomUUID().toString();
+
+        Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        SESSION_MANAGER.add(session);
+
+        httpCookie.setjSessionId(sessionId);
+        httpResponse.setHttpCookie(httpCookie);
+        log.info("user: {}", user);
+        httpResponse.redirect("/index.html");
+
+        return httpResponse;
     }
 }

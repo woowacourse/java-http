@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpStatus == HttpStatus.FOUND) {
-            headers.append("Location: /index.html\r\n");
+            headers.append(httpResponse.getLocationHeader());
         }
 
         return String.join("\r\n",

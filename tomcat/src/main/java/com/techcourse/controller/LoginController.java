@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Optional;
 
 public class LoginController extends AbstractController {
@@ -26,7 +25,7 @@ public class LoginController extends AbstractController {
                     .location("/index.html")
                     .build();
         }
-        byte[] body = Files.readAllBytes(getStaticResource("/login.html"));
+        byte[] body = getStaticResource("/login.html");
         return HttpResponse.ok()
                 .contentType(ContentType.TEXT_HTML)
                 .contentLength(body.length)

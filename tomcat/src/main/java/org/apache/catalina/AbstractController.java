@@ -5,9 +5,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.IOException;
 
 public abstract class AbstractController implements Controller {
 
@@ -19,7 +17,7 @@ public abstract class AbstractController implements Controller {
         if (request.equalMethod(HttpMethod.POST)) {
             return doPost(request);
         }
-        byte[] body = Files.readAllBytes(getStaticResource("/405.html"));
+        byte[] body = getStaticResource("/405.html");
         return HttpResponse.methodNotAllowed()
                 .contentType(ContentType.TEXT_HTML)
                 .contentLength(body.length)
@@ -28,7 +26,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected HttpResponse doPost(HttpRequest request) throws Exception {
-        byte[] body = Files.readAllBytes(getStaticResource("/405.html"));
+        byte[] body = getStaticResource("/405.html");
         return HttpResponse.methodNotAllowed()
                 .contentType(ContentType.TEXT_HTML)
                 .contentLength(body.length)
@@ -37,7 +35,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected HttpResponse doGet(HttpRequest request) throws Exception {
-        byte[] body = Files.readAllBytes(getStaticResource("/405.html"));
+        byte[] body = getStaticResource("/405.html");
         return HttpResponse.methodNotAllowed()
                 .contentType(ContentType.TEXT_HTML)
                 .contentLength(body.length)
@@ -45,11 +43,12 @@ public abstract class AbstractController implements Controller {
                 .build();
     }
 
-    protected Path getStaticResource(String url) {
-        URL resourceURL = getClass().getClassLoader().getResource("static" + url);
-        if (resourceURL == null) {
-            return null;
+    protected byte[] getStaticResource(String url) throws IOException {
+        try (var inputStream = getClass().getClassLoader().getResourceAsStream("static" + url)) {
+            if (inputStream == null) {
+                return null;
+            }
+            return inputStream.readAllBytes();
         }
-        return Path.of(resourceURL.getFile());
     }
 }

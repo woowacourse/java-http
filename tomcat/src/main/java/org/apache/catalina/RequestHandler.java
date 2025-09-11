@@ -7,9 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class RequestHandler {
 
@@ -37,8 +34,12 @@ public class RequestHandler {
     }
 
     private byte[] get500Page() throws IOException {
-        URL resourceURL = getClass().getClassLoader().getResource("static/500.html");
-        Path path = Path.of(resourceURL.getFile());
-        return Files.readAllBytes(path);
+        String resourcePath = "static/500.html";
+        try (var inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new IOException("리소스를 찾을 수 없습니다: " + resourcePath);
+            }
+            return inputStream.readAllBytes();
+        }
     }
 }

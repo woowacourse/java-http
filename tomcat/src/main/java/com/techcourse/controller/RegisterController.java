@@ -10,15 +10,12 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
-        Path registerPage = getStaticResource("/register.html");
-        byte[] body = Files.readAllBytes(registerPage);
+        byte[] body = getStaticResource("/register.html");
         return HttpResponse.ok()
                 .contentType(ContentType.TEXT_HTML)
                 .contentLength(body.length)

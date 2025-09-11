@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
                 response = requestHandler.handle(request);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
-                byte[] body = Files.readAllBytes(get400ErrorPage());
+                byte[] body = get400ErrorPage();
                 response = HttpResponse.badRequest()
                         .contentType(ContentType.TEXT_HTML)
                         .contentLength(body.length)
@@ -53,8 +51,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Path get400ErrorPage() {
-        URL resourceURL = getClass().getClassLoader().getResource("static/400.html");
-        return Path.of(resourceURL.getFile());
+    private byte[] get400ErrorPage() throws IOException {
+        String resourcePath = "static/400.html";
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (resourceAsStream == null) {
+                throw new IOException("리소스를 찾을 수 없습니다:" + resourcePath);
+            }
+            return resourceAsStream.readAllBytes();
+        }
     }
 }

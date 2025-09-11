@@ -5,17 +5,15 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class StaticResourceHandler {
 
     public HttpResponse service(HttpRequest request) throws IOException {
         String path = request.getPath();
-        Path staticResource = getStaticResource(path);
-        if (staticResource == null) {
-            byte[] body = Files.readAllBytes(getStaticResource("/404.html"));
+        System.out.println(path);
+        byte[] body = getStaticResource(path);
+        if (body == null) {
+            body = getStaticResource("/404.html");
             return HttpResponse.notFound()
                     .contentType(ContentType.TEXT_HTML)
                     .contentLength(body.length)
@@ -23,7 +21,6 @@ public class StaticResourceHandler {
                     .build();
         }
         String fileExtension = path.split("\\.")[1];
-        byte[] body = Files.readAllBytes(staticResource);
         return HttpResponse.ok()
                 .contentType(ContentType.of(fileExtension))
                 .contentLength(body.length)
@@ -31,11 +28,12 @@ public class StaticResourceHandler {
                 .build();
     }
 
-    private Path getStaticResource(String url) {
-        URL resourceURL = getClass().getClassLoader().getResource("static" + url);
-        if (resourceURL == null) {
-            return null;
+    private byte[] getStaticResource(String url) throws IOException {
+        try (var inputStream = getClass().getClassLoader().getResourceAsStream("static" + url)) {
+            if (inputStream == null) {
+                return null;
+            }
+            return inputStream.readAllBytes();
         }
-        return Path.of(resourceURL.getFile());
     }
 }

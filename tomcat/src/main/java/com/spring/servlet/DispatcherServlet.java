@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.spring.http.request.HttpRequest;
 import com.spring.http.response.HttpResponse;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.catalina.servlet.HttpServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class DispatcherServlet implements HttpServlet {
     private final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public DispatcherServlet() {
-        controllers.put("/login", new LoginController());
+        controllers.put("/login", new LoginController(new SessionManager()));
         controllers.put("/register", new RegisterController());
     }
 

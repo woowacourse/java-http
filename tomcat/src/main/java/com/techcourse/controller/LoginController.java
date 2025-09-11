@@ -21,6 +21,12 @@ public class LoginController extends AbstractController {
     private static final String LOGIN_FILE_NAME = "login.html";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
+    private SessionManager sessionManager;
+
+    public LoginController(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
+
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         handleSessionCookie(request, response);
@@ -63,7 +69,6 @@ public class LoginController extends AbstractController {
             throw new UnAuthorizedException("잘못된 인증입니다.");
         }
 
-        SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.getSessionWithCookie(request, httpResponse, true);
         session.setAttribute("user", user);
         httpResponse.setStatus(HttpStatus.FOUND);

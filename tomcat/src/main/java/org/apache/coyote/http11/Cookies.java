@@ -18,7 +18,9 @@ public class Cookies {
                 .map(String::trim)
                 .toList();
         this.cookies = cookieKeyValues.stream()
-                .map(keyValue -> keyValue.split("="))
+                .filter(String::isBlank)
+                .filter(cookieKeyValue -> !cookieKeyValue.contains("="))
+                .map(keyValue -> keyValue.split("=", 2))
                 .collect(
                         Collectors.toMap(
                                 keyValueSplit -> keyValueSplit[0],

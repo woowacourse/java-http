@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public class LoginHandler extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
     private static final String STATIC_FILE_LOCATION = "static";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
 

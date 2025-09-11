@@ -15,7 +15,6 @@ import java.nio.file.NoSuchFileException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class LoginHandler extends AbstractController {
 
@@ -91,17 +90,10 @@ public class LoginHandler extends AbstractController {
     }
 
     private Session createSession(final User user) {
-        final String sessionId = generateSessionID();
-
-        final Session session = new Session(sessionId);
+        final Session session = new Session();
         session.setAttribute("user", user);
         sessionManager.add(session);
 
         return session;
-    }
-
-    private String generateSessionID() {
-        final UUID uuid = UUID.randomUUID();
-        return uuid.toString();
     }
 }

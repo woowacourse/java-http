@@ -62,9 +62,7 @@ public class RegisterHandler extends AbstractController {
     }
 
     private Session createSession(final User user) {
-        final String sessionId = generateSessionID();
-
-        final Session session = new Session(sessionId);
+        final Session session = new Session();
         session.setAttribute("user", user);
         sessionManager.add(session);
 

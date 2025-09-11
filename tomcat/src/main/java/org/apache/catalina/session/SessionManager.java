@@ -7,7 +7,18 @@ import org.apache.catalina.Manager;
 
 public final class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+
+    private SessionManager() {
+    }
+
+    private static class SingletonHolder {
+        private static final SessionManager INSTANCE = new SessionManager();
+    }
+
+    public static SessionManager getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
 
     @Override
     public void add(final Session session) {

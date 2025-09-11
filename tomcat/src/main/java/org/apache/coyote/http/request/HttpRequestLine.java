@@ -1,19 +1,20 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
-import static org.apache.coyote.http.HttpConstants.HTTP_PROTOCOL_PREFIX;
-import static org.apache.coyote.http.HttpConstants.KEY_VALUE_SEPARATOR;
-import static org.apache.coyote.http.HttpConstants.PARAM_SEPARATOR;
-import static org.apache.coyote.http.HttpConstants.QUERY_STRING;
+import static org.apache.coyote.http.common.HttpConstants.HTTP_PROTOCOL_PREFIX;
+import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static org.apache.coyote.http.common.HttpConstants.PARAM_SEPARATOR;
+import static org.apache.coyote.http.common.HttpConstants.QUERY_STRING;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpRequestLine {
 
     public static final int HTTP_METHOD_INDEX = 0;

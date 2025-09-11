@@ -1,16 +1,19 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
+
+import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static org.apache.coyote.http.common.HttpConstants.PARAM_SEPARATOR;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import static org.apache.coyote.http.HttpConstants.*;
+import org.apache.coyote.http.common.ContentType;
 
 @Getter
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpRequestBody {
 
     private final Map<String, String> params;
@@ -20,37 +23,34 @@ public class HttpRequestBody {
         return new HttpRequestBody(values);
     }
 
+    public static HttpRequestBody empty() {
+        return new HttpRequestBody(new HashMap<>());
+    }
+
     private static Map<String, String> parseBody(final String rawBody, final ContentType contentType) {
         final Map<String, String> map = new HashMap<>();
 
-        if (rawBody == null || rawBody.isEmpty()) {
+        if (rawBody == null || rawBody.trim().isEmpty()) {
             return map;
         }
 
         if (contentType == ContentType.FORM_URLENCODED) {
-            parseQueryString(rawBody, map);
+            parseFormData(rawBody, map);
         }
 
         return map;
     }
 
-    private static void parseQueryString(final String queryString, final Map<String, String> params) {
-        if (queryString == null || queryString.isEmpty()) {
-            return;
-        }
-
-        final String[] pairs = queryString.split(PARAM_SEPARATOR);
+    private static void parseFormData(final String rawBody, final Map<String, String> map) {
+        final String[] pairs = rawBody.split(PARAM_SEPARATOR);
         for (final String pair : pairs) {
-            parseKeyValuePair(pair, params);
-        }
-    }
-
-    private static void parseKeyValuePair(final String pair, final Map<String, String> params) {
-        final int equalIndex = pair.indexOf(KEY_VALUE_SEPARATOR);
-        if (equalIndex != -1) {
+            final int equalIndex = pair.indexOf(KEY_VALUE_SEPARATOR);
+            if (equalIndex <= 0) {
+                continue;
+            }
             final String key = URLDecoder.decode(pair.substring(0, equalIndex), StandardCharsets.UTF_8);
             final String value = URLDecoder.decode(pair.substring(equalIndex + 1), StandardCharsets.UTF_8);
-            params.put(key, value);
+            map.put(key, value);
         }
     }
 
@@ -63,14 +63,12 @@ public class HttpRequestBody {
         if (params.isEmpty()) {
             return "";
         }
-
+        
         final StringBuilder sb = new StringBuilder();
-
-        params.forEach((key, value) ->
-                sb.append(key).append(KEY_VALUE_SEPARATOR).append(value).append(PARAM_SEPARATOR));
-
+        params.forEach((key, value) -> {
+            sb.append(key).append(KEY_VALUE_SEPARATOR).append(value).append(PARAM_SEPARATOR);
+        });
         sb.deleteCharAt(sb.length() - 1);
-
         return sb.toString();
     }
 }

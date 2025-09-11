@@ -5,11 +5,9 @@ import com.techcourse.model.User;
 import com.techcourse.web.session.Session;
 import com.techcourse.web.session.SessionManager;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -19,6 +17,17 @@ import java.nio.file.Paths;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.common.ContentType;
+import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.HttpRequestBody;
+import org.apache.coyote.http.request.HttpRequestHeader;
+import org.apache.coyote.http.request.HttpRequestLine;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.HttpResponseBody;
+import org.apache.coyote.http.response.HttpResponseHeader;
+import org.apache.coyote.http.response.HttpStatus;
+import org.apache.coyote.http.response.HttpStatusLine;
 
 @Slf4j
 public class Http11Processor implements Runnable, Processor {
@@ -55,10 +64,25 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest buildRequest(final InputStream inputStream) throws IOException {
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
+        final HttpRequestLine requestLine = readRequestLine(bufferedInputStream);
         final HttpRequestHeader requestHeader = readRequestHeader(bufferedInputStream);
         final HttpRequestBody requestBody = readRequestBody(bufferedInputStream, requestHeader);
 
-        return HttpRequest.from(requestHeader, requestBody);
+        return HttpRequest.from(requestLine, requestHeader, requestBody);
+    }
+
+    private HttpRequestLine readRequestLine(final BufferedInputStream inputStream) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream(512);
+        int a = -1, b;
+        while ((b = inputStream.read()) != -1) {
+            buffer.write(b);
+            if (a == '\r' && b == '\n') {
+                break;
+            }
+            a = b;
+        }
+        final String rawRequestLine = buffer.toString(StandardCharsets.ISO_8859_1);
+        return HttpRequestLine.from(rawRequestLine);
     }
 
     private HttpRequestHeader readRequestHeader(final BufferedInputStream inputStream) throws IOException {
@@ -111,17 +135,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleGetRequest(final HttpRequest request, final String path) {
         if ("/".equals(path)) {
-            return new HttpResponse(request.getVersion(), HttpStatus.OK, ContentType.HTML, "Hello world!");
+            final ContentType contentType = request.getContentType();
+            final HttpResponseBody responseBody = HttpResponseBody.from("Hello world!");
+            final HttpResponseHeader responseHeader = HttpResponseHeader.withContentType(contentType);
+            responseHeader.add("content-length", String.valueOf(responseBody.getContentLength()));
+
+            return HttpResponse.from(
+                    HttpStatusLine.from(request.getVersion(), HttpStatus.OK),
+                    responseHeader,
+                    responseBody);
         }
         return serveStaticFile(request, path);
-    }
-
-    private HttpResponse handlePostRequest(final HttpRequest request, final String path) {
-        return switch (path) {
-            case "/login" -> handleLoginRequest(request);
-            case "/register" -> handleSignupRequest(request);
-            default -> throw new UnsupportedOperationException("지원하지 않는 POST 경로: " + path);
-        };
     }
 
     private HttpResponse serveStaticFile(final HttpRequest request, final String path) {
@@ -156,29 +180,37 @@ public class Http11Processor implements Runnable, Processor {
             final String fileContent = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
             final ContentType contentType = ContentType.from(resourcePath);
 
-            return new HttpResponse(request.getVersion(), HttpStatus.OK, contentType, fileContent);
+            final HttpStatusLine statusLine = HttpStatusLine.from(request.getVersion(), HttpStatus.OK);
+            final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
+            final HttpResponseBody body = HttpResponseBody.from(fileContent);
+
+            return HttpResponse.from(statusLine, header, body);
         } catch (final Exception e) {
             log.error("정적 파일 서빙 중 오류 발생: {}", resourcePath, e);
             return createServerErrorResponse(request);
         }
     }
 
+    private HttpResponse handlePostRequest(final HttpRequest request, final String path) {
+        return switch (path) {
+            case "/login" -> handleLoginRequest(request);
+            case "/register" -> handleSignupRequest(request);
+            default -> throw new UnsupportedOperationException("지원하지 않는 POST 경로: " + path);
+        };
+    }
+
     private HttpResponse createNotFoundResponse(final HttpRequest request) {
-        final HttpStatus notFound = HttpStatus.NOT_FOUND;
-        return new HttpResponse(
-                request.getVersion(),
-                notFound,
-                ContentType.HTML,
-                notFound.getReasonPhrase());
+        final HttpStatusLine statusLine = HttpStatusLine.from(request.getVersion(), HttpStatus.NOT_FOUND);
+        final HttpResponseHeader header = HttpResponseHeader.empty();
+        final HttpResponseBody body = HttpResponseBody.empty();
+        return HttpResponse.from(statusLine, header, body);
     }
 
     private HttpResponse createServerErrorResponse(final HttpRequest request) {
-        final HttpStatus internalServerError = HttpStatus.INTERNAL_SERVER_ERROR;
-        return new HttpResponse(
-                request.getVersion(),
-                internalServerError,
-                ContentType.HTML,
-                internalServerError.getReasonPhrase());
+        final HttpStatusLine statusLine = HttpStatusLine.from(request.getVersion(), HttpStatus.INTERNAL_SERVER_ERROR);
+        final HttpResponseHeader header = HttpResponseHeader.empty();
+        final HttpResponseBody body = HttpResponseBody.empty();
+        return HttpResponse.from(statusLine, header, body);
     }
 
     private HttpResponse handleLoginRequest(final HttpRequest request) {

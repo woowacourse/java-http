@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.common;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,6 +14,7 @@ public final class HttpConstants {
 
     // Separators
     public static final String KEY_VALUE_SEPARATOR = "=";
+    public static final String VALUE_SEPARATOR = ";";
     public static final String PARAM_SEPARATOR = "&";
     public static final String HEADER_VALUE_SEPARATOR = ":";
 }

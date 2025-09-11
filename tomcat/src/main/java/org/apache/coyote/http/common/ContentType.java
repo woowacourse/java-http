@@ -1,4 +1,7 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.common;
+
+import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static org.apache.coyote.http.common.HttpConstants.VALUE_SEPARATOR;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -55,5 +58,12 @@ public enum ContentType {
         }
 
         return DEFAULT_CONTENT_TYPE;
+    }
+
+    public String getMimeTypeAndCharset() {
+        return "%s%s%s%s%s".formatted(
+                mimeType,
+                VALUE_SEPARATOR,
+                CHARSET_NAME, KEY_VALUE_SEPARATOR, defaultCharset.name());
     }
 }

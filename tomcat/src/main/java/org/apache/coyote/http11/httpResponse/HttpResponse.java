@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.httpRequest.HttpCookie;
 
@@ -73,9 +74,12 @@ public class HttpResponse {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(statusLine.toString()).append(CRLF);
 
-        final Map<String, String> headers = responseHeader.getHeaders();
-        for (String headersName : headers.keySet()) {
-            stringBuilder.append(headersName).append(": ").append(headers.get(headersName)).append(CRLF);
+        final Map<String, List<String>> headers = responseHeader.getHeaders();
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            final String headerName = entry.getKey();
+            for (String value : entry.getValue()) {
+                stringBuilder.append(headerName).append(": ").append(value).append(CRLF);
+            }
         }
         stringBuilder.append(CRLF);
 

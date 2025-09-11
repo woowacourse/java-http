@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 record RequestLine(
         String method,
@@ -16,8 +14,8 @@ record RequestLine(
     private static final int PROTOCOL_INDEX = 2;
     private static final int EXPECTED_PARTS_COUNT = 3;
 
-    public static RequestLine from(InputStream inputStream) throws IOException {
-        String[] parts = parseParts(inputStream);
+    public static RequestLine from(BufferedReader reader) throws IOException {
+        String[] parts = parseParts(reader);
         return new RequestLine(
                 parts[METHOD_INDEX],
                 parts[URI_INDEX],
@@ -25,9 +23,7 @@ record RequestLine(
         );
     }
 
-    private static String[] parseParts(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
+    private static String[] parseParts(BufferedReader reader) throws IOException {
         String requestLine;
         do {
             requestLine = reader.readLine();

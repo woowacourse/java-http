@@ -2,15 +2,17 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Objects;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethodType;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.MimeType;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.MimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,6 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -62,34 +63,92 @@ public class Http11Processor implements Runnable, Processor {
         String requestPath = request.getPath();
         
         if (Objects.equals("/login", requestPath)) {
-            handleLoginRequest(request);
+            if (request.getMethodType() == HttpMethodType.GET) {
+                return handleLoginGetRequest(request);
+            } else if (request.getMethodType() == HttpMethodType.POST) {
+                return handleLoginRequest(request);
+            }
+        }
+        
+        if (Objects.equals("/register", requestPath) && request.getMethodType() == HttpMethodType.POST) {
+            return handleRegisterRequest(request);
         }
         
         String resolvedPath = resolveFilePath(requestPath);
         return generateHttpResponse(resolvedPath);
     }
 
-    private void handleLoginRequest(final HttpRequest request) {
-        if (request.getMethodType() != HttpMethodType.GET) {
-            return;
-        }
-        
+    private HttpResponse handleLoginRequest(final HttpRequest request) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         
-        if (account != null && password != null) {
-            processLoginCredentials(account, password);
+        if (account == null || password == null) {
+            return HttpResponse.redirect("/401.html");
+        }
+        
+        return processLoginCredentials(account, password, request);
+    }
+
+    private HttpResponse processLoginCredentials(final String account, final String password, final HttpRequest request) {
+        return InMemoryUserRepository.findByAccount(account)
+            .filter(user -> user.checkPassword(password))
+            .map(user -> {
+                Session session = request.getSession(true);
+                session.setAttribute("user", user);
+                String setCookieHeader = HttpCookie.createJSessionIdSetCookieHeader(session.getId());
+                HttpResponse response = HttpResponse.redirect("/index.html");
+                response.addHeader("Set-Cookie", setCookieHeader);
+                log.info("로그인 성공: {}", user);
+                return response;
+            })
+            .orElseGet(() -> {
+                log.info("로그인 실패 - account: {}, password: {}", account, password);
+                return HttpResponse.redirect("/401.html");});
+    }
+
+    private HttpResponse handleRegisterRequest(final HttpRequest request) {
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return HttpResponse.redirect("/register.html");
+        }
+        
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        
+        Session session = request.getSession(true);
+        session.setAttribute("user", newUser);
+        String setCookieHeader = HttpCookie.createJSessionIdSetCookieHeader(session.getId());
+        HttpResponse response = HttpResponse.redirect("/index.html");
+        response.addHeader("Set-Cookie", setCookieHeader);
+        return response;
+    }
+
+    private HttpResponse handleLoginGetRequest(final HttpRequest request) {
+        Session session = request.getSession(false);
+        
+        if (session != null) {
+            User user = getUser(session);
+            if (user != null) {
+                return HttpResponse.redirect("/index.html");
+            }
+        }
+        
+        String resolvedPath = resolveFilePath("/login");
+        try {
+            return generateHttpResponse(resolvedPath);
+        } catch (IOException e) {
+            log.error("로그인 페이지 로드 실패", e);
+            return HttpResponse.notFound();
         }
     }
 
-    private void processLoginCredentials(final String account, final String password) {
-        InMemoryUserRepository.findByAccount(account)
-            .filter(user -> user.checkPassword(password))
-            .ifPresentOrElse(
-                user -> log.info("로그인 성공: {}", user),
-                () -> log.info("로그인 실패 - account: {}, password: {}", account, password)
-            );
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
+
 
     private String resolveFilePath(final String requestPath) {
         String htmlPath = requestPath + ".html";

@@ -1,60 +1,68 @@
 package org.apache.coyote.http11;
 
-import java.util.UUID;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
-public record Http11Response(
-        HttpStatusCode statusCode,
-        String contentType,
-        byte[] content,
-        String location,
-        UUID sessionId) {
+public class Http11Response {
 
-    private static final String DELIMITER = "\r\n";
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
-    private static final String CONTENT_TYPE = "Content-Type: ";
-    private static final String CONTENT_LENGTH = "Content-Length: ";
-    private static final String LOCATION = "Location: ";
-    private static final String SET_COOKIE = "Set-Cookie: JSESSIONID=";
+    private static final String CRLF = "\r\n";
+    private static final String PROTOCOL_VERSION = "HTTP/1.1 ";
+
+    private HttpStatus statusCode;
+    private byte[] body;
+    private final Map<String, String> headers = new LinkedHashMap<>();
+
+    public Http11Response() {
+    }
 
     public String getResponseHeader() {
         StringBuilder sb = new StringBuilder();
 
-        // 상태 라인
-        sb.append(HTTP_VERSION)
-                .append(statusCode.getStatus())
-                .append(" ")
+        sb.append(PROTOCOL_VERSION)
                 .append(statusCode.getStatusCode())
-                .append(DELIMITER);
+                .append(" ")
+                .append(statusCode.getStatusMessage())
+                .append(" ")
+                .append(CRLF);
 
-        // Content-Type
-        if (contentType != null) {
-            sb.append(CONTENT_TYPE).append(contentType).append(DELIMITER);
+        for (Map.Entry<String, String> e : headers.entrySet()) {
+            sb.append(e.getKey()).append(": ").append(e.getValue()).append(" ").append(CRLF);
         }
 
-        // Content-Length
-        int contentLength=0;
-        if (content != null) {
-            contentLength = content.length;
-        }
-        sb.append(CONTENT_LENGTH).append(contentLength).append(DELIMITER);
-
-        // Location 헤더
-        if (location != null) {
-            sb.append(LOCATION).append(location).append(DELIMITER);
-        }
-
-        // Cookie 헤더
-        if (sessionId != null) {
-            sb.append(SET_COOKIE).append(sessionId).append(DELIMITER);
-        }
-
-        // 헤더 끝에 CRLF
-        sb.append(DELIMITER);
-
+        sb.append(CRLF);
         return sb.toString();
     }
 
     public byte[] getResponseBody() {
-        return content;
+        return body;
+    }
+
+    public void status(HttpStatus statusCode) {
+        this.statusCode = Objects.requireNonNull(statusCode, "statusCode required");
+    }
+
+    public void body(byte[] body) {
+        this.body = body;
+        int len = (body == null) ? 0 : body.length;
+        this.headers.put("Content-Length", String.valueOf(len));
+    }
+
+    public void contentType(String contentType) {
+        header("Content-Type", contentType);
+    }
+
+    public void location(String location) {
+        header("Location", location);
+    }
+
+    public void cookie(String cookieValue) {
+        header("Set-Cookie", "JSESSIONID=" + cookieValue);
+    }
+
+    public void header(String name, String value) {
+        if (name != null && value != null) {
+            headers.put(name, value);
+        }
     }
 }

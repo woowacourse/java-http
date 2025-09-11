@@ -7,8 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
+@Slf4j
 public class InMemoryUserRepository {
 
     private static final Map<String, User> DATABASE = new ConcurrentHashMap<>();
@@ -20,21 +22,31 @@ public class InMemoryUserRepository {
     }
 
     public static User save(final User user) {
+        final String account = user.getAccount();
+
         if (user.isPersisted()) {
-            DATABASE.put(user.getAccount(), user);
+            DATABASE.put(account, user);
             return user;
         }
 
-        final User persisted = User.withId(
-                ID_GENERATOR.getAndIncrement(),
-                user.getAccount(),
-                user.getPassword(),
-                user.getEmail());
-        DATABASE.put(persisted.getAccount(), persisted);
-        return persisted;
+        return DATABASE.compute(account, (key, existing) -> {
+            if (existing == null) {
+                return User.withId(
+                        ID_GENERATOR.getAndIncrement(),
+                        account,
+                        user.getPassword(),
+                        user.getEmail());
+            }
+
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다");
+        });
     }
 
     public static Optional<User> findByAccount(final String account) {
         return Optional.ofNullable(DATABASE.get(account));
+    }
+
+    public static boolean existsByAccount(final String account) {
+        return DATABASE.containsKey(account);
     }
 }

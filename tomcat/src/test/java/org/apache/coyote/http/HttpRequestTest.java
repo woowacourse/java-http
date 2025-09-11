@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +19,16 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+            softly.assertThat(request.getHeader("host")).isEqualTo("localhost:8080");
+        });
     }
 
     @Test
@@ -38,13 +42,15 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -58,13 +64,15 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -79,13 +87,15 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("POST");
-        assertThat(request.getPath()).isEqualTo("/api/login");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
+            softly.assertThat(request.getPath()).isEqualTo("/api/login");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -99,13 +109,15 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getPath()).isEqualTo("/path");
-        assertThat(request.getVersion()).isEqualTo("1.1");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/path");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+        });
     }
 
     @Test
@@ -119,15 +131,17 @@ class HttpRequestTest {
                 "");
 
         // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNotNull();
-        assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getPath()).isEqualTo("/login");
-        assertThat(request.getVersion()).isEqualTo("1.1");
-        assertThat(request.getQueryParam("account")).isEqualTo("gugu");
-        assertThat(request.getQueryParam("password")).isEqualTo("password");
+        assertSoftly(softly -> {
+            softly.assertThat(request).isNotNull();
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(request.getPath()).isEqualTo("/login");
+            softly.assertThat(request.getVersion()).isEqualTo("1.1");
+            softly.assertThat(request.getQueryParam("account")).isEqualTo("gugu");
+            softly.assertThat(request.getQueryParam("password")).isEqualTo("password");
+        });
     }
 
     @Test
@@ -140,11 +154,10 @@ class HttpRequestTest {
                 "",
                 "");
 
-        // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
-
-        // then
-        assertThat(request).isNull();
+        // when & then
+        assertThatThrownBy(() -> parseRequest(rawRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 요청의 첫 번째 줄은");
     }
 
     @Test
@@ -152,35 +165,128 @@ class HttpRequestTest {
     void parseInvalidRequestLineWithInsufficientTokens() {
         // given
         final String rawRequest = String.join("\r\n",
-                "GET",
+                "GET HTTP/1.1",
                 "Host: localhost:8080",
                 "",
                 "");
 
-        // when
-        final HttpRequest request = HttpRequest.from(rawRequest);
-
-        // then
-        assertThat(request).isNull();
+        // when & then
+        assertThatThrownBy(() -> parseRequest(rawRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 요청의 첫 번째 줄은 3개의 부분으로 이뤄져야 합니다");
     }
 
     @Test
     @DisplayName("빈 요청 문자열")
     void parseEmptyRequest() {
-        // when
-        final HttpRequest request = HttpRequest.from("");
-
-        // then
-        assertThat(request).isNull();
+        // when & then
+        assertThatThrownBy(() -> parseRequest(""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HTTP 헤더는 null이거나 비어있을 수 없습니다");
     }
 
     @Test
     @DisplayName("null 요청 문자열")
     void parseNullRequest() {
+        // when & then
+        assertThatThrownBy(() -> parseRequest(null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("POST 요청 본문 파싱")
+    void parsePostRequestBody() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 52",
+                "",
+                "account=user&password=1234&email=user%40example.com");
+
         // when
-        final HttpRequest request = HttpRequest.from(null);
+        final HttpRequest request = parseRequest(rawRequest);
 
         // then
-        assertThat(request).isNull();
+        assertSoftly(softly -> {
+            softly.assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
+            softly.assertThat(request.getBodyParam("account")).isEqualTo("user");
+            softly.assertThat(request.getBodyParam("password")).isEqualTo("1234");
+            softly.assertThat(request.getBodyParam("email")).isEqualTo("user@example.com");
+        });
+    }
+
+    @Test
+    @DisplayName("쿠키 파싱")
+    void parseCookies() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=ABC123; theme=dark; lang=ko",
+                "",
+                "");
+
+        // when
+        final HttpRequest request = parseRequest(rawRequest);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(request.getCookie("JSESSIONID")).isEqualTo("ABC123");
+            softly.assertThat(request.getCookie("theme")).isEqualTo("dark");
+            softly.assertThat(request.getCookie("lang")).isEqualTo("ko");
+        });
+    }
+
+    @Test
+    @DisplayName("쿠키가 없는 요청")
+    void parseRequestWithoutCookies() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        // when
+        final HttpRequest request = parseRequest(rawRequest);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(request.getCookie("JSESSIONID")).isEmpty();
+            softly.assertThat(request.getCookie("nonexistent")).isEmpty();
+        });
+    }
+
+    @Test
+    @DisplayName("URL 디코딩이 포함된 쿼리 파라미터")
+    void parseQueryParamsWithUrlDecoding() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "GET /search?q=hello%20world&email=test%40example.com HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        // when
+        final HttpRequest request = parseRequest(rawRequest);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(request.getQueryParam("q")).isEqualTo("hello world");
+            softly.assertThat(request.getQueryParam("email")).isEqualTo("test@example.com");
+        });
+    }
+
+    private HttpRequest parseRequest(final String rawRequest) {
+        final String[] parts = rawRequest.split("\r\n\r\n", 2);
+        final String headerPart = parts[0];
+        final String bodyPart = parts.length > 1 ? parts[1] : "";
+
+        final HttpRequestHeader header = HttpRequestHeader.from(headerPart);
+        final HttpRequestBody body = HttpRequestBody.from(bodyPart, header.getContentType());
+
+        return HttpRequest.from(header, body);
     }
 }

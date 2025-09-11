@@ -2,7 +2,11 @@ package org.apache.coyote.http;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.web.session.Session;
+import com.techcourse.web.session.SessionManager;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,19 +17,23 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.NoSuchElementException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Processor;
 
-@RequiredArgsConstructor
 @Slf4j
 public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
+    private final SessionManager sessionManager;
+
+    public Http11Processor(final Socket connection) {
+        this.connection = connection;
+        this.sessionManager = SessionManager.getInstance();
+    }
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        log.info("연결된 호스트: {}, 포트: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -35,103 +43,205 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = buildRequest(inputStream);
-            if (request == null) {
-                return;
-            }
-
             final HttpResponse response = buildResponse(request);
 
             outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
     private HttpRequest buildRequest(final InputStream inputStream) throws IOException {
-        final StringBuilder requestBuilder = new StringBuilder();
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-        String line;
-        while ((line = reader.readLine()) != null) {
-            requestBuilder.append(line).append("\r\n");
-            if (line.isEmpty()) {
+        final HttpRequestHeader requestHeader = readRequestHeader(bufferedInputStream);
+        final HttpRequestBody requestBody = readRequestBody(bufferedInputStream, requestHeader);
+
+        return HttpRequest.from(requestHeader, requestBody);
+    }
+
+    private HttpRequestHeader readRequestHeader(final BufferedInputStream inputStream) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream(512);
+        int a = -1, b = -1, c = -1, d;
+        while ((d = inputStream.read()) != -1) {
+            buffer.write(d);
+            if (a == '\r' && b == '\n' && c == '\r' && d == '\n') {
                 break;
             }
+            a = b;
+            b = c;
+            c = d;
+        }
+        final String rawHeader = buffer.toString(StandardCharsets.ISO_8859_1);
+        return HttpRequestHeader.from(rawHeader);
+    }
+
+    private HttpRequestBody readRequestBody(final InputStream inputStream, final HttpRequestHeader header)
+            throws IOException {
+        final int contentLength = header.getContentLength();
+        final ContentType contentType = header.getContentType();
+
+        if (contentLength <= 0) {
+            return HttpRequestBody.from("", contentType);
         }
 
-        return HttpRequest.from(requestBuilder.toString());
+        final byte[] bodyBytes = inputStream.readNBytes(contentLength);
+        if (bodyBytes.length != contentLength) {
+            throw new IOException(
+                    "Content-Length와 실제 데이터 길이 불일치: 예상=" + contentLength + ", 실제=" + bodyBytes.length);
+        }
+
+        final String bodyString = new String(bodyBytes, contentType.getDefaultCharset()); // TODO client request charset
+
+        return HttpRequestBody.from(bodyString, contentType);
     }
+
 
     private HttpResponse buildResponse(final HttpRequest request) {
-        final String contentType = getContentType(request.getPath());
+        final String path = request.getPath();
+        final HttpMethod method = request.getMethod();
+
+        return switch (method) {
+            case GET -> handleGetRequest(request, path);
+            case POST -> handlePostRequest(request, path);
+            default -> throw new UnsupportedOperationException("지원하지 않는 HTTP 메서드: " + method);
+        };
+    }
+
+    private HttpResponse handleGetRequest(final HttpRequest request, final String path) {
+        if ("/".equals(path)) {
+            return new HttpResponse(request.getVersion(), HttpStatus.OK, ContentType.HTML, "Hello world!");
+        }
+        return serveStaticFile(request, path);
+    }
+
+    private HttpResponse handlePostRequest(final HttpRequest request, final String path) {
+        return switch (path) {
+            case "/login" -> handleLoginRequest(request);
+            case "/register" -> handleSignupRequest(request);
+            default -> throw new UnsupportedOperationException("지원하지 않는 POST 경로: " + path);
+        };
+    }
+
+    private HttpResponse serveStaticFile(final HttpRequest request, final String path) {
+        if (shouldBypassLoginPage(request, path)) {
+            return HttpResponse.redirect(request.getVersion(), "/index.html");
+        }
+
+        final String resourcePath = buildResourcePath(path);
+        return loadAndServeFile(request, resourcePath);
+    }
+
+    private boolean shouldBypassLoginPage(final HttpRequest request, final String path) {
+        return path.startsWith("/login") && isValidSessionInCookie(request);
+    }
+
+    private String buildResourcePath(final String path) {
+        final String resourcePath = "static" + path;
+        if (path.contains(".")) {
+            return resourcePath;
+        }
+        return resourcePath + ContentType.HTML_EXTENSION;
+    }
+
+    private HttpResponse loadAndServeFile(final HttpRequest request, final String resourcePath) {
+        try {
+            final URL resource = getClass().getClassLoader().getResource(resourcePath);
+
+            if (resource == null) {
+                return createNotFoundResponse(request);
+            }
+
+            final String fileContent = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+            final ContentType contentType = ContentType.from(resourcePath);
+
+            return new HttpResponse(request.getVersion(), HttpStatus.OK, contentType, fileContent);
+        } catch (final Exception e) {
+            log.error("정적 파일 서빙 중 오류 발생: {}", resourcePath, e);
+            return createServerErrorResponse(request);
+        }
+    }
+
+    private HttpResponse createNotFoundResponse(final HttpRequest request) {
+        final HttpStatus notFound = HttpStatus.NOT_FOUND;
         return new HttpResponse(
                 request.getVersion(),
-                200,
-                contentType,
-                buildResponseBody(request));
+                notFound,
+                ContentType.HTML,
+                notFound.getReasonPhrase());
     }
 
-    private String getContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript";
-        }
-
-        return "text/html;charset=utf-8";
+    private HttpResponse createServerErrorResponse(final HttpRequest request) {
+        final HttpStatus internalServerError = HttpStatus.INTERNAL_SERVER_ERROR;
+        return new HttpResponse(
+                request.getVersion(),
+                internalServerError,
+                ContentType.HTML,
+                internalServerError.getReasonPhrase());
     }
 
-    private String buildResponseBody(final HttpRequest request) {
-        String path = request.getPath();
-
-        if ("/".equals(path)) {
-            return "Hello world!"; // 1-2 미션 요구사항은 index.html 이지만, 1-1 테스트 요구사항에 맞춤.
-        }
-
-        if ("/login".equals(path)) {
-            handleLogin(request);
-        }
-
-        String fileName = "static" + path;
-
-        if (!path.contains(".")) {
-            fileName += ".html";
-        }
-
-        final URL resource = getClass().getClassLoader().getResource(fileName);
-
-        if (resource == null) {
-            return "Not Found";
-        }
-
+    private HttpResponse handleLoginRequest(final HttpRequest request) {
         try {
-            return new String(Files.readAllBytes(Paths.get(resource.toURI())));
+            final User user = processLogin(request);
+            return createLoginSuccessResponse(request, user);
         } catch (final Exception e) {
-            return "Error reading file";
+            log.debug("로그인 실패: {}", e.getMessage());
+            return HttpResponse.redirect(request.getVersion(), "/401.html");
         }
     }
 
-    private void handleLogin(final HttpRequest request) {
-        final String account = request.getQueryParam("account");
-        final String password = request.getQueryParam("password");
+    private HttpResponse createLoginSuccessResponse(final HttpRequest request, final User user) {
+        final HttpResponse response = HttpResponse.redirect(request.getVersion(), "/index.html");
 
-        if (account.isEmpty() || password.isEmpty()) {
-            return;
+        if (isValidSessionInCookie(request)) {
+            return response;
         }
 
+        createAndSetSession(response, user);
+        return response;
+    }
+
+    private void createAndSetSession(final HttpResponse response, final User user) {
+        final Session session = new Session();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        response.setCookie("JSESSIONID", session.getId());
+    }
+
+    private boolean isValidSessionInCookie(final HttpRequest request) {
+        return sessionManager.isValidSession(
+                request.getCookie("JSESSIONID"));
+    }
+
+    private User processLogin(final HttpRequest request) {
+        final String account = request.getBodyParam("account");
+        final String password = request.getBodyParam("password");
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NoSuchElementException("계정을 찾을 수 없습니다."));
+
+        user.checkPassword(password);
+        return user;
+    }
+
+    private HttpResponse handleSignupRequest(final HttpRequest request) {
         try {
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new NoSuchElementException("계정을 찾을 수 없습니다."));
+            final User user = createUser(request);
 
-            if (user.checkPassword(password)) {
-                log.debug("로그인 성공: {}", account);
-                return;
-            }
-            throw new RuntimeException("비밀번호가 틀렸습니다");
+            log.debug("회원 가입 성공: {}", user);
+            return HttpResponse.redirect(request.getVersion(), "/index.html");
         } catch (final Exception e) {
-            log.debug(e.getMessage(), e);
+            log.debug("회원 가입 실패: {}", e.getMessage());
+            return HttpResponse.redirect(request.getVersion(), "/401.html");
         }
+    }
+
+    private User createUser(final HttpRequest request) {
+        final String account = request.getBodyParam("account");
+        final String password = request.getBodyParam("password");
+        final String email = request.getBodyParam("email");
+        return InMemoryUserRepository.save(
+                User.withoutId(account, password, email));
     }
 }

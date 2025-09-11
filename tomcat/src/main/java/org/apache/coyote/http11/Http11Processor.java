@@ -43,13 +43,13 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 final var httpRequest = HttpRequestParser.parse(inputStream);
                 final var response = getResponse(httpRequest);
-                final var httpResponse = response.toString();
+                final var httpResponse = response.join();
 
                 outputStream.write(httpResponse.getBytes());
                 outputStream.flush();
             } catch (FileNotFoundException | IllegalArgumentException e) {
                 final var responseBody = readNotFoundFile();
-                final var httpResponse = responseBody.toString();
+                final var httpResponse = responseBody.join();
                 outputStream.write(httpResponse.getBytes());
                 outputStream.flush();
             }

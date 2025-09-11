@@ -68,8 +68,7 @@ public class HttpResponse {
         return body;
     }
 
-    @Override
-    public String toString() {
+    public String join() {
         return String.join("\r\n",
                 getStatusLine(),
                 getHeaderString(),

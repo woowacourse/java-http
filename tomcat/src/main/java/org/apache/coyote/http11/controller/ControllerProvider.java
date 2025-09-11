@@ -17,9 +17,13 @@ public enum ControllerProvider {
         this.controllers.addAll(controllers);
     }
 
+    public void register(final Controller controller) {
+        this.controllers.add(controller);
+    }
+
     public Controller findByPath(final String path) {
         return controllers.stream()
-                .filter(controller -> controller.isProvidableUrl(path))
+                .filter(controller -> path.matches(controller.providableUrl()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 path입니다: %s".formatted(path)));
     }

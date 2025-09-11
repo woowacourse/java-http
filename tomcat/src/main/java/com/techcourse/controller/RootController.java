@@ -5,9 +5,10 @@ import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
 public class RootController extends AbstractController {
+
     @Override
-    public boolean isProvidableUrl(final String path) {
-        return "/".equals(path);
+    public String providableUrl() {
+        return "/";
     }
 
     @Override

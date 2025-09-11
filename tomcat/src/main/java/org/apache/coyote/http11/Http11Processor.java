@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.config.DefaultControllerConfig;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerProvider;
 import org.apache.coyote.http11.exception.NotFoundException;
@@ -29,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
         this.sessionManager = SessionManager.INSTANCE;
         this.controllerProvider = ControllerProvider.INSTANCE;
+        DefaultControllerConfig.initialize();
     }
 
     @Override

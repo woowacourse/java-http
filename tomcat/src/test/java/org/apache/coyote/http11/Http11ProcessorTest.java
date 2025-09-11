@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
-import com.techcourse.controller.StaticResourceController;
 import com.techcourse.service.LoginService;
 import com.techcourse.service.RegisterService;
 import java.io.File;
@@ -32,8 +31,7 @@ class Http11ProcessorTest {
         final List<Controller> controllers = List.of(
                 new RootController(),
                 new RegisterController(new RegisterService()),
-                new LoginController(new LoginService()),
-                new StaticResourceController()
+                new LoginController(new LoginService())
         );
 
         ControllerProvider.INSTANCE.register(controllers);

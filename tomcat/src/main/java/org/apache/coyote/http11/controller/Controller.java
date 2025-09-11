@@ -5,7 +5,7 @@ import org.apache.coyote.http11.http.response.HttpResponse;
 
 public interface Controller {
 
-    boolean isProvidableUrl(String path);
+    String providableUrl();
 
     void service(HttpRequest request, HttpResponse response);
 }

@@ -1,7 +1,7 @@
-package com.techcourse.controller;
+package org.apache.coyote.http11.controller;
 
 import java.util.Set;
-import org.apache.coyote.http11.controller.AbstractController;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -15,14 +15,19 @@ public class StaticResourceController extends AbstractController {
             ".html", ".css", ".js", ".ico", ".svg"
     );
 
+    private static final String PROVIDABLE_URL_PATTERN;
+
+    static {
+        String extensionsPattern = SUPPORTED_EXTENSIONS.stream()
+                .map(ext -> ext.substring(1))
+                .collect(Collectors.joining("|"));
+
+        PROVIDABLE_URL_PATTERN = ".*\\.(?:" + extensionsPattern + ")$";
+    }
+
     @Override
-    public boolean isProvidableUrl(final String path) {
-        int lastDotIndex = path.lastIndexOf('.');
-        if (lastDotIndex == -1) {
-            return false;
-        }
-        String extension = path.substring(lastDotIndex);
-        return SUPPORTED_EXTENSIONS.contains(extension);
+    public String providableUrl() {
+        return PROVIDABLE_URL_PATTERN;
     }
 
     @Override

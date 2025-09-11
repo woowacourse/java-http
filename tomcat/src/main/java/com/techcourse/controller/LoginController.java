@@ -21,9 +21,10 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public boolean isProvidableUrl(final String path) {
-        return "/login".equals(path);
+    public String providableUrl() {
+        return "/login";
     }
+
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {

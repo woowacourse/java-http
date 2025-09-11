@@ -14,8 +14,8 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public boolean isProvidableUrl(final String path) {
-        return "/register".equals(path);
+    public String providableUrl() {
+        return "/register";
     }
 
     @Override

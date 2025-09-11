@@ -13,6 +13,7 @@ public class HttpRequest {
     private final String queryString;
     private final Map<String, String> params;
     private final Map<String, String> headers;
+    private HttpCookie cookie;
 
     public HttpRequest(BufferedReader reader) throws IOException {
         String requestLine = readRequestLine(reader);
@@ -22,8 +23,16 @@ public class HttpRequest {
 
         this.path = extractPath(uri);
         this.queryString = extractQueryString(uri);
-
         this.headers = Collections.unmodifiableMap(readHeaders(reader));
+
+        if ("POST".equalsIgnoreCase(this.method) && headers.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            char[] body = new char[contentLength];
+            reader.read(body, 0, contentLength);
+            this.params = Collections.unmodifiableMap(parseParams(new String(body)));
+            return;
+        }
+
         this.params = Collections.unmodifiableMap(parseParams(this.queryString));
     }
 
@@ -36,17 +45,17 @@ public class HttpRequest {
     }
 
     private String extractPath(String uri) {
-        if (uri.contains("?")) {
-            return uri.substring(0, uri.indexOf("?"));
+        if (!uri.contains("?")) {
+            return uri;
         }
-        return uri;
+        return uri.substring(0, uri.indexOf("?"));
     }
 
     private String extractQueryString(String uri) {
-        if (uri.contains("?")) {
-            return uri.substring(uri.indexOf("?") + 1);
+        if (!uri.contains("?")) {
+            return "";
         }
-        return "";
+        return uri.substring(uri.indexOf("?") + 1);
     }
 
     private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
@@ -54,13 +63,29 @@ public class HttpRequest {
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             int sep = line.indexOf(":");
-            if (sep > 0) {
-                String key = line.substring(0, sep).trim();
-                String value = line.substring(sep + 1).trim();
-                headers.put(key, value);
+            if (sep <= 0) {
+                continue;
+            }
+            String key = line.substring(0, sep).trim();
+            String value = line.substring(sep + 1).trim();
+            headers.put(key, value);
+
+            if ("Cookie".equals(key)) {
+                parseCookie(value);
             }
         }
         return headers;
+    }
+
+    private void parseCookie(String cookieHeader) {
+        String[] cookies = cookieHeader.split(";");
+        for (String cookie : cookies) {
+            String[] parts = cookie.trim().split("=");
+            if (parts.length == 2 && "JSESSIONID".equals(parts[0])) {
+                this.cookie = HttpCookie.of(parts[1]);
+                break;
+            }
+        }
     }
 
     private Map<String, String> parseParams(String query) {
@@ -72,18 +97,35 @@ public class HttpRequest {
         String[] pairs = query.split("&");
         for (String pair : pairs) {
             String[] kv = pair.split("=", 2);
-            String key = kv[0];
-            String value = kv.length > 1 ? kv[1] : "";
-            params.put(key, value);
+            if (kv.length < 2) {
+                continue;
+            }
+            params.put(kv[0], kv[1]);
         }
         return params;
+    }
+
+    public boolean hasCookies() {
+        return cookie != null;
     }
 
     public String getPath() {
         return path;
     }
 
+    public String getMethod() {
+        return method;
+    }
+
+    public boolean isParams() {
+        return !params.isEmpty();
+    }
+
     public Map<String, String> getParams() {
         return params;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }

@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
             return response;
         }
         // static file 요청인 경우
-        if (method.equalsIgnoreCase("GET") && isStaticFileUri(path)) {
+        if (method.equalsIgnoreCase("GET") && isStaticFileUri(request.getURI())) {
             // TODO:
             final var response = HttpResponse.of(HttpStatus.OK, readStaticFileByName(path));
             response.setContentType(request.extractMimeType());

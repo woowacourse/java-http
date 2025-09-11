@@ -24,8 +24,8 @@ public class HttpResponse {
         return new HttpResponse(DEFAULT_VERSION, status, new HashMap<>(), body);
     }
 
-    public static HttpResponse of(HttpStatus status) {
-        return new HttpResponse(DEFAULT_VERSION, status, new HashMap<>(), "");
+    public static HttpResponse noContent() {
+        return new HttpResponse(DEFAULT_VERSION, HttpStatus.NO_CONTENT, new HashMap<>(), "");
     }
 
     public void setContentType(final String value) {

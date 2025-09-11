@@ -53,6 +53,10 @@ public class HttpRequest {
         return session;
     }
 
+    public String getURI() {
+        return path.getURI();
+    }
+
     public Map<String, String> getPathParams() {
         return path.getQueryParams();
     }

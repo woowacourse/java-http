@@ -28,8 +28,12 @@ public class Path {
         return Optional.of(extension);
     }
 
-    public String getValue() {
-        return value;
+    public String getURI() {
+        final var queryStartIndex = value.indexOf("?");
+        if (queryStartIndex == -1) {
+            return value;
+        }
+        return value.substring(0, queryStartIndex);
     }
 
     public Map<String, String> getQueryParams() {
@@ -47,5 +51,9 @@ public class Path {
             return "";
         }
         return path.substring(startIndex + 1);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

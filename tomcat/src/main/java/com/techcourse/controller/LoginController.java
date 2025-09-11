@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        HttpResponse actualResponse = HttpResponse.redirect("/index.html");
+        response.redirect("/index.html");
         request.getHttpCookie().getSession().ifPresent(oldId -> {
             Session old = sessionManager.findSession(oldId);
             if (old != null) {
@@ -42,22 +42,19 @@ public class LoginController extends AbstractController {
 
         User user = UserService.login(account, password);
 
-        String sessionId = actualResponse.addSessionIfAbsent();
+        String sessionId = response.addSessionIfAbsent();
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
         sessionManager.add(session);
-        response.setHttpResponse(actualResponse);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         HttpCookie httpCookie = request.getHttpCookie();
         if (!httpCookie.hasSession() || !sessionManager.hasSession(httpCookie.getSessionId())) {
-            HttpResponse resourceLoadResponse = httpResourceLoader.load(request.getPath());
-            response.setHttpResponse(resourceLoadResponse);
+            httpResourceLoader.load(request.getPath(), response);
             return;
         }
-        HttpResponse actualResponse = HttpResponse.redirect("/index.html");
-        response.setHttpResponse(actualResponse);
+        response.redirect("/index.html");
     }
 }

@@ -15,12 +15,19 @@ public class ErrorMapper {
     }
 
     public HttpResponse toHttpResponse(final Exception e) throws IOException {
+        HttpResponse response = HttpResponse.create();
+        findResource(e, response);
+        return response;
+    }
+
+    private void findResource(final Exception e, final HttpResponse response) throws IOException {
         if (e instanceof UnAuthorizedException) {
-            return httpResourceLoader.load("401.html");
+            httpResourceLoader.load("401.html", response);
         }
         if (e instanceof NotFoundException) {
-            return httpResourceLoader.load("404.html");
+            httpResourceLoader.load("404.html", response);
         }
-        return httpResourceLoader.load("500.html");
+
+        httpResourceLoader.load("500.html", response);
     }
 }

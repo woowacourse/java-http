@@ -21,7 +21,6 @@ public class HttpResourceController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         String path = request.getPath();
 
-        HttpResponse actualResponse = httpResourceLoader.load(path);
-        response.setHttpResponse(actualResponse);
+        httpResourceLoader.load(path, response);
     }
 }

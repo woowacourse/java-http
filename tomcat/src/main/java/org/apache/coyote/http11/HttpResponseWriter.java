@@ -7,7 +7,7 @@ public class HttpResponseWriter {
 
     public void write(final OutputStream outputStream, final HttpResponse response) throws IOException {
         outputStream.write(response.asHeaderString().getBytes());
-        outputStream.write(response.body());
+        outputStream.write(response.getBody());
         outputStream.flush();
     }
 }

@@ -22,10 +22,6 @@ public class RestController {
         this.sessionManager = sessionManager;
     }
 
-    public HttpResponse hello() {
-        return ResponseEntity.ok("Hello world!");
-    }
-
     public HttpResponse login(Map<String, String> loginRequest) {
         try {
             User user = service.getUser(loginRequest);

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.request.RequestBody;
 import com.techcourse.http.request.RequestHeader;

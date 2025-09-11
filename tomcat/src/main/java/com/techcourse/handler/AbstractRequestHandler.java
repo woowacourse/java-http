@@ -1,7 +1,7 @@
 package com.techcourse.handler;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.HttpMethod;
+import com.techcourse.http.HttpMethod;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
 

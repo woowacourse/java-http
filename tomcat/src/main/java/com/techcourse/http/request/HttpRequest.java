@@ -1,10 +1,10 @@
 package com.techcourse.http.request;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpMethod;
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.ContentType;
+import com.techcourse.http.HttpCookie;
+import com.techcourse.http.HttpMethod;
+import com.techcourse.http.HttpVersion;
 import java.util.Map;
 import java.util.Objects;
 

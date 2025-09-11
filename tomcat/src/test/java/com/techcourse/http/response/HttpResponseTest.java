@@ -3,9 +3,9 @@ package com.techcourse.http.response;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.ContentType;
+import com.techcourse.http.HttpCookie;
+import com.techcourse.http.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

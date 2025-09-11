@@ -1,9 +1,8 @@
 package com.techcourse.http.response;
 
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpStatus;
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.ContentType;
+import com.techcourse.http.HttpCookie;
+import com.techcourse.http.HttpVersion;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

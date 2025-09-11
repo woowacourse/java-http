@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpMethod;
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.ContentType;
+import com.techcourse.http.HttpMethod;
+import com.techcourse.http.HttpVersion;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

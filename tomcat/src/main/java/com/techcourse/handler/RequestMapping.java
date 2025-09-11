@@ -1,6 +1,6 @@
 package com.techcourse.handler;
 
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 
 public class RequestMapping {

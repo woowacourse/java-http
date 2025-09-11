@@ -1,9 +1,9 @@
 package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.common.ContentType;
-import com.techcourse.http.common.HttpCookie;
-import com.techcourse.http.common.HttpVersion;
+import com.techcourse.http.ContentType;
+import com.techcourse.http.HttpCookie;
+import com.techcourse.http.HttpVersion;
 import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.response.HttpResponse;
 import com.techcourse.http.response.Location;

@@ -1,4 +1,4 @@
-package com.techcourse.http.common;
+package com.techcourse.http;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.util.Map;

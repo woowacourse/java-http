@@ -8,6 +8,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.catalina.ProcessBroker;
+import org.apache.catalina.handler.HttpHandlerMapper;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -17,7 +19,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new ProcessBroker(new HttpHandlerMapper()));
 
         // when
         processor.process(socket);
@@ -54,7 +56,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new ProcessBroker(new HttpHandlerMapper()));
 
         // when
         processor.process(socket);

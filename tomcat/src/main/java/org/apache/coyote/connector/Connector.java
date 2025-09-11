@@ -1,5 +1,7 @@
-package org.apache.catalina.connector;
+package org.apache.coyote.connector;
 
+import org.apache.catalina.ProcessBroker;
+import org.apache.catalina.handler.HttpHandlerMapper;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, new ProcessBroker(new HttpHandlerMapper()));
         new Thread(processor).start();
     }
 

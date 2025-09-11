@@ -31,10 +31,11 @@ public class LoginHandler extends AbstractController {
 
         if (sessionId.isPresent()) {
             final Session session = sessionManager.findSession(sessionId.get());
-            if (session != null) {
-                response.setRedirectResponse("/index.html");
+            if (session == null) {
                 return;
             }
+            response.setRedirectResponse("/index.html");
+            return;
         }
 
         final byte[] fileContent = readFile("/login.html");

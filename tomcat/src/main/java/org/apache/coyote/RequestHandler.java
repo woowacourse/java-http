@@ -2,6 +2,10 @@ package org.apache.coyote;
 
 import com.techcourse.Service;
 import java.io.IOException;
+import org.apache.coyote.common.HttpRequest;
+import org.apache.coyote.common.HttpResponse;
+import org.apache.coyote.common.HttpResponseBuilder;
+import org.apache.coyote.common.HttpStatus;
 
 public class RequestHandler {
 

@@ -1,15 +1,16 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 
     public static SessionManager getInstance() {
         return INSTANCE;

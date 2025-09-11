@@ -12,7 +12,7 @@ public class StaticResourceController extends AbstractController {
     );
 
     @Override
-    public boolean isProvide(final String path) {
+    public boolean isProvidableUrl(final String path) {
         if ("/".equals(path)) {
             return true;
         }

@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import com.techcourse.service.LoginService;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
@@ -23,7 +22,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public boolean isProvide(final String path) {
+    public boolean isProvidableUrl(final String path) {
         return "/login".equals(path);
     }
 
@@ -58,9 +57,7 @@ public class LoginController extends AbstractController {
         try {
             final User user = loginService.login(account, password);
             response.setFound("index.html");
-            String sessionId = UUID.randomUUID().toString();
-            response.setCookie("JSESSIONID", sessionId);
-            response.addAttribute("session_user", user);
+            response.addAttribute("user", user);
         } catch (UnauthorizedException e) {
             response.setUnauthorized();
         }

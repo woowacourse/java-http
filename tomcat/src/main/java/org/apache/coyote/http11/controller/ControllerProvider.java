@@ -19,7 +19,7 @@ public enum ControllerProvider {
 
     public Controller findByPath(final String path) {
         return CONTROLLERS.stream()
-                .filter(controller -> controller.isProvide(path))
+                .filter(controller -> controller.isProvidableUrl(path))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 path입니다: %s".formatted(path)));
     }

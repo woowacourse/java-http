@@ -5,10 +5,10 @@ import com.techcourse.service.UserService;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.cookie.HttpCookie;
-import org.apache.coyote.http11.cookie.SessionCookieFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseConfigurator;
+import org.apache.coyote.http11.session.CookieSession;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.session.SessionParser;
@@ -38,16 +38,17 @@ public class LoginController extends AbstractController {
         }
 
         log.info("user: " + user.get());
-        final Session session = sessionManager.createAndSaveSession(Map.of("user", user.get()));
-        final HttpCookie sessionCookie = SessionCookieFactory.createSessionCookie(session);
+        final CookieSession session = CookieSession.fromValues(Map.of("user", user.get()));
+        sessionManager.add(session);
+        final HttpCookie cookie = session.createCookie();
 
         HttpResponseConfigurator.redirect(response, "/index.html");
-        response.setCookie(sessionCookie);
+        response.setCookie(cookie);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Optional<Session> session = SessionParser.extractSessionFromRequest(request);
+        final Optional<Session> session = SessionParser.extractCookieSessionFromRequest(request);
         if (session.isPresent()) {
             final User loginUser = (User) session.get().getAttribute("user");
             if (loginUser != null) {

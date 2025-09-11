@@ -1,15 +1,16 @@
 package org.apache.coyote.util;
 
-import org.apache.coyote.dto.RequestInfo;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.dto.RequestLine;
 
 public class RequestLineParser {
-    public static RequestInfo parse(final String requestLine) {
+    public static RequestLine parse(final String requestLine) {
+        System.out.println("requestLine : "  + requestLine);
         final String[] parts = requestLine.split(" ");
         final String method = parts[0].toUpperCase();
-        final String fullPath = parts.length >= 2 ? parts[1] : "/";
+        final String fullPath = parts[1];
+        final String version = parts[2];
 
         String path = fullPath;
         Map<String,String> queryParams = new HashMap<>();
@@ -19,7 +20,7 @@ public class RequestLineParser {
             path = pathParts[0];
             queryParams = FormDataParser.parseFormData(pathParts[1]);
         }
-        return new RequestInfo(method, path, queryParams);
+        return new RequestLine(method, path, queryParams, version);
     }
 
 }

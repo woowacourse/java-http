@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.dto.RequestInfo;
-import org.apache.coyote.router.RequestRouter;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +9,7 @@ import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.config.AppConfig;
 import org.apache.coyote.cookie.HttpCookie;
-import org.apache.coyote.dto.RequestInfo;
+import org.apache.coyote.dto.RequestLine;
 import org.apache.coyote.router.RequestRouter;
 import org.apache.coyote.util.HeaderParser;
 import org.apache.coyote.util.PostBodyParser;
@@ -53,26 +51,26 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final BufferedReader reader) throws IOException {
-        RequestInfo requestInfo = getRequestLine(reader);
+        RequestLine requestLine = getRequestLine(reader);
 
         Map<String, String> header = HeaderParser.parseHeader(reader);
 
         String cookieHeader = header.get("Cookie");
         HttpCookie httpCookie = new HttpCookie(cookieHeader);
 
-        if (requestInfo.method().equals("POST")) {
-            requestInfo = getPostRequestInfo(reader, header, requestInfo);
+        if (requestLine.method().equals("POST")) {
+            requestLine = getPostRequestInfo(reader, header, requestLine);
         }
 
         return requestRouter.handleRoute(
-                requestInfo.method(),
-                requestInfo.path(),
-                requestInfo.queryParams(),
+                requestLine.method(),
+                requestLine.path(),
+                requestLine.queryParams(),
                 httpCookie
         );
     }
 
-    private RequestInfo getRequestLine(BufferedReader reader) throws IOException {
+    private RequestLine getRequestLine(BufferedReader reader) throws IOException {
         final String requestLine = reader.readLine();
         if (requestLine == null || requestLine.isEmpty()) {
             return null;
@@ -81,11 +79,11 @@ public class Http11Processor implements Runnable, Processor {
         return RequestLineParser.parse(requestLine);
     }
 
-    private RequestInfo getPostRequestInfo(BufferedReader reader, Map<String, String> header, RequestInfo requestInfo)
+    private RequestLine getPostRequestInfo(BufferedReader reader, Map<String, String> header, RequestLine requestInfo)
             throws IOException {
         int contentLength = Integer.parseInt(header.get("Content-Length"));
         Map<String, String> postParams = PostBodyParser.parse(reader, contentLength);
-        requestInfo = new RequestInfo(requestInfo.method(), requestInfo.path(), postParams);
+        requestInfo = new RequestLine(requestInfo.method(), requestInfo.path(), postParams,requestInfo.version());
         return requestInfo;
     }
 }

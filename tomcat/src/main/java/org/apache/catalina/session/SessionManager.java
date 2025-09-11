@@ -1,13 +1,13 @@
 package org.apache.catalina.session;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.HttpCookie;
 
 public class SessionManager implements Manager {
 
-    private final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
 
     public static SessionManager getInstance() {

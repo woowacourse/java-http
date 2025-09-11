@@ -45,6 +45,7 @@ public class RegisterController extends AbstractController {
         String body = request.getBody();
         Map<String, String> map = Arrays.stream(body.split("&", 2))
                 .map(set -> set.split("=", 2))
+                .filter(arr -> arr.length == 2)
                 .collect(Collectors.toMap(
                         arr -> arr[0],
                         arr -> arr[1]

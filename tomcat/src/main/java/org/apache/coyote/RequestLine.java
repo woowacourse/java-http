@@ -53,9 +53,10 @@ public class RequestLine {
 
             this.queryParams = Arrays.stream(queryString.split("&"))
                     .map(param -> param.split("=", 2))
+                    .filter(arr -> arr.length == 2)
                     .collect(Collectors.toMap(
                             arr -> arr[0],
-                            arr -> arr[1] //TODO: 쿼리 파라미터에서 "query" 처럼 "="을 아예 쓰지 않는 경우 추후에 고려
+                            arr -> arr[1]
                     ));
 
         } else {

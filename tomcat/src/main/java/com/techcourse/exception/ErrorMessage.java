@@ -6,6 +6,7 @@ public enum ErrorMessage {
     INVALID_REQUEST_LINE("요청 라인이 없다."),
     INVALID_HTTP_REQUEST_FORMAT("HTTP 요청 포맷이 아니다."),
     INVALID_QUERY_STRING("? 가 없잖아."),
+    INVALID_LOGIN_REQUEST("로그인 정보가 부족하다."),
     ;
 
     private final String message;

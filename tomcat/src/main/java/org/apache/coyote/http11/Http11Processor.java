@@ -5,8 +5,10 @@ import static com.techcourse.exception.ErrorMessage.INVALID_PASSWORD;
 import static com.techcourse.exception.ErrorMessage.INVALID_QUERY_STRING;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.ErrorMessage;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import org.apache.coyote.CookieManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
@@ -40,7 +43,6 @@ public class Http11Processor implements Runnable, Processor {
     private SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
-        response = new Response();
         response.setProtocolVersion("HTTP/1.1");
         sessionManager = new SessionManager();
         this.connection = connection;
@@ -59,6 +61,8 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         ) {
             request = new Request(br);
+            response = new Response();
+
             String httpMethod = request.getHttpMethod();
             String uri = request.getUrl();
             Path path = parsePath(uri);
@@ -69,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
                         // 세션 아이디 로그인 후 리다이엑트
                         String jsessionid = request.getCookieValue("JSESSIONID");
                         Session session = sessionManager.findSession(jsessionid);
-                        if(session!=null){
+                        if (session != null) {
                             log.info(session.getUser().toString());
                             redirectToIndexPage(path, outputStream);
                             return;
@@ -168,19 +172,22 @@ public class Http11Processor implements Runnable, Processor {
     private boolean login(Map<String, String> params) {
         String account = params.get("account");
         String password = params.get("password");
+        if (account == null || password == null) {
+            throw new IllegalArgumentException(ErrorMessage.INVALID_LOGIN_REQUEST.getMessage());
+        }
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException(ACCOUNT_NOT_FOUND.getMessage()));
         user.logUserInfo(password, log);
         if (user.checkPassword(password)) {   // 로그인 성공
-                String sessionId = UUID.randomUUID().toString();    // 세션 ID 생성
-                Session session = new Session(sessionId);   // 새 세션 생성
-                session.setAttribute("user", user); // 세션에 user 정보에 user 저장
-                sessionManager.addSession(sessionId, session);  // 세션 맵에 새 세션 등록
-                CookieManager cookieManager = new CookieManager();
-                cookieManager.addCookie("JSESSIONID", sessionId);  // 쿠키에 세션 아이디 매핑
-                for (Map.Entry<String, String> entry : cookieManager.getCookieMap().entrySet()) {
-                    response.addCookie(entry.getKey(), entry.getValue());
-                }
+            String sessionId = UUID.randomUUID().toString();    // 세션 ID 생성
+            Session session = new Session(sessionId);   // 새 세션 생성
+            session.setAttribute("user", user); // 세션에 user 정보에 user 저장
+            sessionManager.addSession(sessionId, session);  // 세션 맵에 새 세션 등록
+            CookieManager cookieManager = new CookieManager();
+            cookieManager.addCookie("JSESSIONID", sessionId);  // 쿠키에 세션 아이디 매핑
+            for (Map.Entry<String, String> entry : cookieManager.getCookieMap().entrySet()) {
+                response.addCookie(entry.getKey(), entry.getValue());
+            }
         }
         return user.checkPassword(password);
     }

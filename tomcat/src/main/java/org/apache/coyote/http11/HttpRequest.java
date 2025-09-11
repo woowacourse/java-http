@@ -53,7 +53,7 @@ public class HttpRequest {
     
     public Map<String, String> getFormData() {
         if (body == null || body.isBlank()) {
-            return Map.of();
+            throw new IllegalArgumentException("폼 데이터가 비어있습니다.");
         }
         return FormDataParser.parse(body);
     }

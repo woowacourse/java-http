@@ -25,6 +25,10 @@ public class RequestUri {
         return this.requestPath;
     }
 
+    public boolean isStaticResource() {
+        return this.requestPath.contains(".");
+    }
+
     private RequestUri(final String requestPath, final Map<String, String> queryParameters) {
         this.requestPath = requestPath;
         this.queryParameters = new HashMap<>(queryParameters);

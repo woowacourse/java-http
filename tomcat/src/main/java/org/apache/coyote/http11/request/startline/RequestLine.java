@@ -28,6 +28,10 @@ public class RequestLine {
         return this.httpMethod == httpMethod;
     }
 
+    public boolean isStaticResource() {
+        return this.requestUri.isStaticResource();
+    }
+
     private RequestLine(final HttpMethod httpMethod, final RequestUri requestUri, final String httpVersion) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;

@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -57,5 +58,10 @@ public class LoginController extends AbstractController {
             }
         }
         HttpResponseConfigurator.okWithStaticResource(response, "/login.html");
+    }
+
+    @Override
+    public boolean support(final HttpRequest request) {
+        return request.isPathEqualsTo("/login");
     }
 }

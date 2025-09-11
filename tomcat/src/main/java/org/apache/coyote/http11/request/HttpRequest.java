@@ -25,6 +25,10 @@ public class HttpRequest {
         return this.requestLine.isPathEqualsTo(path);
     }
 
+    public boolean isStaticResource() {
+        return this.requestLine.isStaticResource();
+    }
+
     public String getBodyParameter(final String key) {
         return this.httpRequestBody.getParameter(key);
     }

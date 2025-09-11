@@ -67,8 +67,14 @@ public class ResourceHandler {
             }
         }
         if (!request.hasQueryParameter()) {
-            response.setStatusCode(StatusCode.OK);
-            response.setBodyAndContentLength(getContent(request.getResourcePath()));
+            String body = getContent(request.getResourcePath());
+            if (body == null) {
+                response.setStatusCode(StatusCode.NOT_FOUND);
+                body = getContent("/404.html");
+            } else {
+                response.setStatusCode(StatusCode.OK);
+            }
+            response.setBodyAndContentLength(body);
         }
     }
 
@@ -78,7 +84,8 @@ public class ResourceHandler {
 
         if (account == null || account.isBlank()) {
             response.setStatusCode(StatusCode.UNAUTHORIZED);
-            response.setBodyAndContentLength(getContent("/401.html"));
+            var body = getContent("/401.html");
+            response.setBodyAndContentLength(body);
             return;
         }
         final var user = InMemoryUserRepository.findByAccount(account);
@@ -94,7 +101,8 @@ public class ResourceHandler {
             return;
         }
         response.setStatusCode(StatusCode.UNAUTHORIZED);
-        response.setBodyAndContentLength(getContent("/401.html"));
+        var body = getContent("/401.html");
+        response.setBodyAndContentLength(body);
     }
 
     private void saveUser(HttpRequest request, HttpResponse response) {
@@ -113,9 +121,8 @@ public class ResourceHandler {
     private String getContent(final String resourcePath) {
         final var wholeResourcePath = getWholeResourcePath(resourcePath);
         try (final var inputStream = getClass().getClassLoader().getResourceAsStream(wholeResourcePath)) {
-
             if (inputStream == null) {
-                return "Not found: " + resourcePath;
+                return null;
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {

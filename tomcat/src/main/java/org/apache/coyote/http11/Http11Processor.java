@@ -57,6 +57,9 @@ public class Http11Processor implements Runnable, Processor {
                     staticResource = StaticResourceProvider.getStaticResource("/index.html");
                     responseStatusCode = "302 Found";
                     responseHeaders.put("Location", "/index.html");
+
+                    final String sessionId = createSessionId();
+                    responseHeaders.put("Set-Cookie", ("JSESSIONID=" + sessionId));
                 } else {
                     staticResource = StaticResourceProvider.getStaticResource("/401.html");
                     responseStatusCode = "401 Unauthorized";
@@ -115,5 +118,9 @@ public class Http11Processor implements Runnable, Processor {
         return userOptional
                 .map(user -> user.checkPassword(password))
                 .orElse(false);
+    }
+
+    private String createSessionId() {
+        return java.util.UUID.randomUUID().toString();
     }
 }

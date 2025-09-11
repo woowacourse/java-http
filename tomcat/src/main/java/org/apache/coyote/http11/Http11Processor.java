@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.controller.LoginController;
-import org.apache.catalina.controller.RegisterController;
-import org.apache.catalina.controller.RootController;
-import org.apache.catalina.controller.StaticController;
+import org.apache.catalina.Controller;
+import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
 
     private final Socket connection;
 
@@ -35,28 +34,11 @@ public class Http11Processor implements Runnable, Processor {
                 final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final RootController rootController = new RootController();
-            final LoginController loginController = new LoginController();
-            final RegisterController registerController = new RegisterController();
-            final StaticController staticController = new StaticController();
-
             final Request request = new Request(inputStream);
             final Response response = new Response(outputStream);
+            final Controller controller = REQUEST_MAPPING.getController(request);
 
-            final String requestURI = request.getRequestURI();
-            if (requestURI.equals("/")) {
-                rootController.service(request, response);
-                return;
-            }
-            if (requestURI.equals("/login")) {
-                loginController.service(request, response);
-                return;
-            }
-            if (requestURI.equals("/register")) {
-                registerController.service(request, response);
-                return;
-            }
-            staticController.service(request, response);
+            controller.service(request, response);
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (final Exception e) {

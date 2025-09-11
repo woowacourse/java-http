@@ -26,8 +26,14 @@ public class HttpRequest {
         this.cookies = new HttpCookie(headers.get("Cookie"));
     }
 
-    public void setSession(Session session) {
-        this.session = session;
+    public Session getSession() throws IOException {
+        if (this.session != null) {
+            return this.session;
+        }
+        Manager sessionManager = SessionManager.getInstance();
+        String sessionId = cookies.getSessionId();
+        this.session = sessionManager.findSession(sessionId);
+        return this.session;
     }
 
     public boolean isGetMethod() {
@@ -68,15 +74,5 @@ public class HttpRequest {
 
     public String getBody() {
         return requestBody.getRawBody();
-    }
-
-    public Session getSession() throws IOException {
-        if (this.session != null) {
-            return this.session;
-        }
-        Manager sessionManager = SessionManager.getInstance();
-        String sessionId = cookies.getSessionId();
-        this.session = sessionManager.findSession(sessionId);
-        return this.session;
     }
 }

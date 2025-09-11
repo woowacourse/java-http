@@ -6,8 +6,16 @@ import java.util.Map;
 import org.apache.catalina.Manager;
 
 public class HttpSessionManager implements Manager {
+    private static final HttpSessionManager INSTANCE = new HttpSessionManager();
 
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private final Map<String, HttpSession> SESSIONS = new HashMap<>();
+
+    private HttpSessionManager() {
+    }
+
+    public static HttpSessionManager getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public void add(HttpSession session) {

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

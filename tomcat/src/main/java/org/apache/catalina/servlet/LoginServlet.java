@@ -39,7 +39,11 @@ public class LoginServlet extends AbstractServlet {
         int statusCode = 200;
         String statusMessage = "OK";
         if (validSession(request.getCookie("JSESSIONID"))) {
-            responseBody = StaticResourceUtils.readResourceContent("/index.html");
+            log.info("리다이렉트");
+            statusCode = 302;
+            statusMessage = "Found";
+            responseBody = "";
+            response.putHeader("Location", "/index.html");
         }
         response.putHeader("Content-Type", StaticResourceUtils.getContentType(request.getRequestPath()) + ";charset=utf-8");
         response.putHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
@@ -58,10 +62,11 @@ public class LoginServlet extends AbstractServlet {
             log.info(user.toString());
             statusCode = 302;
             statusMessage = "Found";
-            responseBody = StaticResourceUtils.readResourceContent("/index.html");
+            responseBody = "";
             UUID jSessionId = UUID.randomUUID();
             httpSessionManager.add(new HttpSession(jSessionId, user.get()));
             response.putHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+            response.putHeader("Location", "/index.html");
         }
         response.putHeader("Content-Type", getContentType(request.getRequestPath()) + ";charset=utf-8");
         response.putHeader("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));

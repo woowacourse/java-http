@@ -34,7 +34,8 @@ public class UserController extends AbstractController {
         final String email = requestBody.getOrDefault("email", "");
         
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
-            response.sendRedirect(ResponseStatus.FOUND, "/401.html");
+            response.setResponseStatus(ResponseStatus.FOUND);
+            response.setLocation("/401.html");
             return;
         }
         
@@ -43,7 +44,8 @@ public class UserController extends AbstractController {
         
         final var session = sessionManager.createSession();
         response.setSession(session);
-        response.sendRedirect(ResponseStatus.FOUND, "/index.html");
+        response.setResponseStatus(ResponseStatus.FOUND);
+        response.setLocation("/index.html");
     }
 
     private void handleLogin(HttpRequest request, HttpResponse response) throws Exception {
@@ -52,7 +54,8 @@ public class UserController extends AbstractController {
         final String password = requestBody.getOrDefault("password", "");
         
         if (account.isBlank() || password.isBlank()) {
-            response.sendRedirect(ResponseStatus.FOUND, "/index.html");
+            response.setResponseStatus(ResponseStatus.FOUND);
+            response.setLocation("/index.html");
             return;
         }
         
@@ -65,6 +68,7 @@ public class UserController extends AbstractController {
         
         final var session = sessionManager.createSession();
         response.setSession(session);
-        response.sendRedirect(ResponseStatus.FOUND, "/index.html");
+        response.setResponseStatus(ResponseStatus.FOUND);
+        response.setLocation("/index.html");
     }
 }

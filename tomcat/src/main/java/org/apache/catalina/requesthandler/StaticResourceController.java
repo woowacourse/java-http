@@ -20,7 +20,8 @@ public class StaticResourceController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (request.getPath().equals("/index") || request.getPath().equals("/index.html")) {
             if (sessionManager.getSession(request.getSessionId()) == null) {
-                response.sendRedirect(ResponseStatus.FOUND, "/login.html");
+                response.setResponseStatus(ResponseStatus.FOUND);
+                response.setLocation("/login.html");
                 return;
             }
         }
@@ -30,7 +31,8 @@ public class StaticResourceController extends AbstractController {
             if (sessionManager.getSession(request.getSessionId()) != null) {
                 final var session = sessionManager.getSession(request.getSessionId());
                 User user = (User) session.getAttribute("user");
-                response.sendRedirect(ResponseStatus.FOUND, "/index.html");
+                response.setResponseStatus(ResponseStatus.FOUND);
+                response.setLocation("/index.html");
                 return;
             }
         }
@@ -39,7 +41,9 @@ public class StaticResourceController extends AbstractController {
         final byte[] body = readFile(staticFilePath);
         final var contentType = ContentType.fromFileName(staticFilePath);
 
-        response.setDefaultResponse(ResponseStatus.OK, contentType, body);
+        response.setResponseStatus(ResponseStatus.OK);
+        response.setContentType(contentType);
+        response.setBody(body);
     }
 
     private String getStaticFilePath(HttpRequest httpRequest) {

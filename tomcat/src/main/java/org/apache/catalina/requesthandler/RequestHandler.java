@@ -26,12 +26,18 @@ public class RequestHandler {
             final var controller = requestMappings.getSupportController(request);
             controller.service(request, response);
         } catch (UnauthorizedException e) {
-            response.setDefaultResponse(ResponseStatus.UNAUTHORIZED, ContentType.HTML, readUnauthorizedView());
+            response.setResponseStatus(ResponseStatus.UNAUTHORIZED);
+            response.setContentType(ContentType.HTML);
+            response.setBody(readUnauthorizedView());
         } catch (NotFoundException e) {
-            response.setDefaultResponse(ResponseStatus.NOT_FOUND, ContentType.HTML, readNotFoundView());
+            response.setResponseStatus(ResponseStatus.NOT_FOUND);
+            response.setContentType(ContentType.HTML);
+            response.setBody(readNotFoundView());
         } catch (Exception e) {
             log.error("요청 처리 중 오류 발생", e);
-            response.setDefaultResponse(ResponseStatus.INTERNAL_SERVER_ERROR, ContentType.HTML, readSeverErrorView());
+            response.setResponseStatus(ResponseStatus.INTERNAL_SERVER_ERROR);
+            response.setContentType(ContentType.HTML);
+            response.setBody(readSeverErrorView());
         }
     }
 

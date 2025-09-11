@@ -6,6 +6,7 @@ public enum ResponseStatus {
     FOUND(302, "FOUND"),
     UNAUTHORIZED(401, "UNAUTHORIZED"),
     NOT_FOUND(404, "NOT FOUND"),
+    INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR")
     ;
 
     private final int statusCode;

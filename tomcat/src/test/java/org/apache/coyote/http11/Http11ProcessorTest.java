@@ -2,14 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.RequestHandler;
+import org.apache.catalina.requesthandler.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

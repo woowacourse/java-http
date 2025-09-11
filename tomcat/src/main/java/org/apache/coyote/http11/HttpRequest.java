@@ -5,9 +5,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final Method method;
-    private final String path;
-    private final HttpVersion httpVersion;
+    private final RequestLine requestLine;
     private final ContentType contentType;
     private final int contentLength;
     private final List<HttpCookie> cookies;
@@ -16,14 +14,12 @@ public class HttpRequest {
 
     public HttpRequest(Method method,
                        String path,
-                       HttpVersion httpVersion,
+                       ProtocolVersion protocolVersion,
                        ContentType contentType,
                        int contentLength, List<HttpCookie> httpCookie,
                        Map<String, String> queryParameter,
                        Map<String, String> body) {
-        this.method = method;
-        this.path = path;
-        this.httpVersion = httpVersion;
+        this.requestLine = new RequestLine(method, path, protocolVersion);
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.cookies = httpCookie;
@@ -36,11 +32,11 @@ public class HttpRequest {
     }
 
     public Method getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public ContentType getContentType() {
@@ -71,11 +67,10 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "method=" + method +
-                ", path='" + path + '\'' +
-                ", httpVersion=" + httpVersion +
+                "requestLine=" + requestLine +
                 ", contentType=" + contentType +
                 ", contentLength=" + contentLength +
+                ", cookies=" + cookies +
                 ", queryParameter=" + queryParameter +
                 ", body=" + body +
                 '}';

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.Session;
 
 public class HttpRequestParser {
 
@@ -17,10 +16,12 @@ public class HttpRequestParser {
 
         final List<String> httpRequestMessages = getHttpRequestHeaders(reader);
         final String[] requestLine = httpRequestMessages.getFirst().split(" ");
+
         final var method = parseMethod(requestLine);
         final var path = parsePath(requestLine);
+        final var protocolVersion = parseProtocolVersion(requestLine);
         final var queryParameter = parseQuaryParameter(requestLine);
-        final var httpVersion = parseHttpVersion(requestLine);
+
         final var contentType = parseAccept(httpRequestMessages);
         final var cookies = parseCookies(httpRequestMessages);
         final var contentLength = parseContentLength(httpRequestMessages);
@@ -33,7 +34,7 @@ public class HttpRequestParser {
         return new HttpRequest(
                 method,
                 path,
-                httpVersion,
+                protocolVersion,
                 contentType,
                 contentLength,
                 cookies,
@@ -125,8 +126,8 @@ public class HttpRequestParser {
         return queryParameterPair;
     }
 
-    private HttpVersion parseHttpVersion(String[] requestLine) {
-        return HttpVersion.fromHeaderValue(requestLine[2].trim());
+    private ProtocolVersion parseProtocolVersion(String[] requestLine) {
+        return ProtocolVersion.fromHeaderValue(requestLine[2].trim());
     }
 
     private ContentType parseAccept(List<String> httpRequestMessages) {

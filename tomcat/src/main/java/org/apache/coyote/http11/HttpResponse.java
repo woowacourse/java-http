@@ -9,22 +9,20 @@ public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
-    private final HttpVersion httpVersion;
-    private final ResponseStatus responseStatus;
-    private final ContentType contentType;
-    private final String location;
-    private final List<HttpCookie> httpCookies;
-    private final long contentLength;
-    private final byte[] body;
+    private StatusLine statusLine;
+    private ContentType contentType;
+    private String location;
+    private List<HttpCookie> httpCookies;
+    private long contentLength;
+    private byte[] body;
 
-    public HttpResponse(HttpVersion httpVersion,
+    private HttpResponse(ProtocolVersion protocolVersion,
                         ResponseStatus responseStatus,
                         ContentType contentType,
                         String location,
                         long contentLength,
                         byte[] body) {
-        this.httpVersion = httpVersion;
-        this.responseStatus = responseStatus;
+        this.statusLine = new StatusLine(protocolVersion, responseStatus);
         this.contentType = contentType;
         this.location = location;
         this.httpCookies = new ArrayList<>();
@@ -32,24 +30,23 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
-        return new HttpResponse(
-                HttpVersion.HTTP11,
-                responseStatus,
-                contentType,
-                null,
-                body.length,
-                body);
+    public static HttpResponse empty() {
+        return new HttpResponse(null, null, null, null, 0, new byte[0]);
     }
 
-    public static HttpResponse forRedirect(ResponseStatus responseStatus, String location) {
-        return new HttpResponse(
-                HttpVersion.HTTP11,
-                responseStatus,
-                ContentType.HTML,
-                location,
-                0L,
-                new byte[0]);
+    public void setDefaultResponse(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
+        this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
+        this.contentType = contentType;
+        this.body = body;
+        this.contentLength = body.length;
+    }
+
+    public void sendRedirect(ResponseStatus responseStatus, String location) {
+        this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
+        this.location = location;
+        this.contentType = ContentType.HTML;
+        this.contentLength = 0;
+        this.body = new byte[0];
     }
 
     public void setCookie(String key, String value) {
@@ -69,7 +66,7 @@ public class HttpResponse {
 
     private String buildHeaders() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getStatusLine()).append(CRLF);
+        sb.append(statusLine.convertToResponseLine()).append(CRLF);
         if (location != null && !location.isBlank()) {
             sb.append("Location: ").append(location).append(CRLF);
         }
@@ -86,10 +83,6 @@ public class HttpResponse {
         sb.append("Content-Length: ").append(contentLength).append(CRLF);
         sb.append(CRLF);
         return sb.toString();
-    }
-
-    private String getStatusLine() {
-        return httpVersion.getResponseHeader() + " " + responseStatus.getResponseHeader();
     }
 
     private String buildContentTypeHeader() {

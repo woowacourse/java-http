@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -77,11 +78,32 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
+
+        // 1. 새로운 요청을 받지 않도록 소켓 닫기
         try {
             serverSocket.close();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to close server socket", e);
         }
+
+        // 2. ExecutorService에게 더 이상 새 작업을 받지 말라고 알림
+        executorService.shutdown();
+
+        // 3. 현재 진행 중인 작업이 완료될 때까지 대기
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                // 타임아웃 발생 시 강제 종료
+                executorService.shutdownNow();
+                log.warn("ExecutorService did not terminate in 60 seconds. Forcing shutdown.");
+            }
+        } catch (InterruptedException e) {
+            // 대기 중 인터럽트 발생 시 강제 종료
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+            log.error("Shutdown was interrupted. Forcing shutdown.", e);
+        }
+
+        log.info("Web Application Server stopped.");
     }
 
     private int checkPort(final int port) {

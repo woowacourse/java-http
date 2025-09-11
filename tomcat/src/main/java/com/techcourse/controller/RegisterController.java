@@ -12,28 +12,18 @@ import org.apache.coyote.http11.util.ResponseHandler;
 public class RegisterController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            doGet(request, response);
-        }
-        if (method.equals("POST")) {
-            doPost(request, response);
-        }
-    }
-
-    @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         String account = request.getParameter("account").orElse(null);
         String password = request.getParameter("password").orElse(null);
         String email = request.getParameter("email").orElse(null);
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            ResponseHandler.sendStaticFile(response,"/register.html", BAD_REQUEST);
+            ResponseHandler.sendStaticFile(response, "/register.html", BAD_REQUEST);
+            return;
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        ResponseHandler.redirect(response,"/login.html", OK);
+        ResponseHandler.redirect(response, "/login.html", OK);
     }
 
     @Override

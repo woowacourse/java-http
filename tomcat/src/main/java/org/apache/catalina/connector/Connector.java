@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,17 +17,44 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_CORE_THREAD_COUNT = 3;
+    private static final int DEFAULT_MAX_THREAD_COUNT = 10;
+    private static final int DEFAULT_KEEP_ALIVE_SECONDS = 60;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ThreadPoolExecutor threadPoolExecutor;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(
+                DEFAULT_PORT,
+                DEFAULT_ACCEPT_COUNT,
+                DEFAULT_CORE_THREAD_COUNT,
+                DEFAULT_MAX_THREAD_COUNT,
+                DEFAULT_KEEP_ALIVE_SECONDS
+        );
     }
 
     public Connector(final int port, final int acceptCount) {
+        this(port, acceptCount, DEFAULT_CORE_THREAD_COUNT, DEFAULT_MAX_THREAD_COUNT, DEFAULT_KEEP_ALIVE_SECONDS);
+    }
+
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int coreThreads,
+            final int maxThreads,
+            final int keepAliveSeconds
+    ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.threadPoolExecutor = new ThreadPoolExecutor(
+                coreThreads,
+                maxThreads,
+                keepAliveSeconds,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingDeque<>()
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -66,7 +96,13 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        log.info("before submit - poolSize={}, queueSize={}", threadPoolExecutor.getPoolSize(),
+                threadPoolExecutor.getQueue().size());
+
+        threadPoolExecutor.submit(processor);
+
+        log.info("after submit - poolSize={}, queueSize={}", threadPoolExecutor.getPoolSize(),
+                threadPoolExecutor.getQueue().size());
     }
 
     public void stop() {

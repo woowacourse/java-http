@@ -19,10 +19,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        String account = request.getQueryParam("account");
-        String password = request.getQueryParam("password");
-        String email = request.getQueryParam("email");
-
+        String account = request.getBodyParam("account");
+        String password = request.getBodyParam("password");
+        String email = request.getBodyParam("email");
         if (account != null && password != null && email != null) {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);

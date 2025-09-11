@@ -56,7 +56,7 @@ class HttpResponseTest {
         HttpCookie httpCookie = HttpCookie.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, httpCookie);
+        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, ContentType.APPLICATION_JSON, httpCookie);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -113,7 +113,7 @@ class HttpResponseTest {
         HttpCookie httpCookie = HttpCookie.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, httpCookie);
+        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, ContentType.APPLICATION_JSON, httpCookie);
 
         // then
         String responseString = new String(httpResponse.toBytes());

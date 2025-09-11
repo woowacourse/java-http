@@ -50,7 +50,8 @@ public class LoginRequestHandler {
         Optional<Session> session = SessionRepository.findById(httpRequest.getJSessionId());
 
         if (session.isPresent()) {
-            return HttpResponse.found(httpVersion, new Location("/index.html"), HttpCookie.empty());
+            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
+                    HttpCookie.empty());
         }
         return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, HttpCookie.empty(),
                 ResponseBody.createBy(httpRequest));
@@ -75,8 +76,9 @@ public class LoginRequestHandler {
             session.setAttribute("user", user);
             SessionRepository.save(session);
             httpCookie.addSessionId(session.getId());
-            return HttpResponse.found(httpVersion, new Location("/index.html"), httpCookie);
+            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
+                    httpCookie);
         }
-        return HttpResponse.found(httpVersion, new Location("/401.html"), httpCookie);
+        return HttpResponse.found(httpVersion, new Location("/401.html"), ContentType.APPLICATION_JSON, httpCookie);
     }
 }

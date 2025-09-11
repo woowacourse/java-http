@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.handler.LoginRequestHandler;
 import com.techcourse.handler.RegisterRequestHandler;
@@ -10,6 +11,7 @@ import com.techcourse.http.request.HttpRequest;
 import com.techcourse.http.request.RequestBody;
 import com.techcourse.http.request.RequestHeader;
 import com.techcourse.http.response.HttpResponse;
+import com.techcourse.http.response.Location;
 import com.techcourse.http.response.ResponseBody;
 import com.techcourse.util.FileUtil;
 import java.io.BufferedReader;
@@ -50,16 +52,21 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()
         ) {
-            String requestLine = bufferedReader.readLine();
-            RequestHeader requestHeader = RequestHeader.from(parseRequestHeader(bufferedReader));
-            RequestBody requestBody = parseRequestBody(bufferedReader, requestHeader);
+            try {
+                String requestLine = bufferedReader.readLine();
+                RequestHeader requestHeader = RequestHeader.from(parseRequestHeader(bufferedReader));
+                RequestBody requestBody = parseRequestBody(bufferedReader, requestHeader);
 
-            HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
-            HttpResponse httpResponse = handleHttpRequest(httpRequest);
+                HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                HttpResponse httpResponse = handleHttpRequest(httpRequest);
 
-            outputStream.write(httpResponse.toBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+                outputStream.write(httpResponse.toBytes());
+                outputStream.flush();
+            } catch (IOException | UncheckedServletException e) {
+                log.error(e.getMessage(), e);
+                sendErrorResponse(outputStream);
+            }
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -94,13 +101,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
-        if (httpRequest.getFilePath().equals("/login.html")) {
-            return loginRequestHandler.handleLoginRequest(httpRequest);
+        try {
+            if (httpRequest.getFilePath().equals("/login.html")) {
+                return loginRequestHandler.handleLoginRequest(httpRequest);
+            }
+            if (httpRequest.getFilePath().equals("/register.html")) {
+                return registerRequestHandler.handleRegisterRequest(httpRequest);
+            }
+            return createResponse(httpRequest);
+        } catch (NotFoundException e) {
+            log.warn("File not found: {}", e.getMessage());
+            return HttpResponse.found(HttpVersion.HTTP_1_1, new Location("/404.html"), ContentType.TEXT_HTML,
+                    HttpCookie.empty());
         }
-        if (httpRequest.getFilePath().equals("/register.html")) {
-            return registerRequestHandler.handleRegisterRequest(httpRequest);
-        }
-        return createResponse(httpRequest);
     }
 
     private HttpResponse createResponse(final HttpRequest httpRequest) {
@@ -123,5 +136,12 @@ public class Http11Processor implements Runnable, Processor {
 
         return HttpResponse.ok(httpVersion, httpRequest.getContentType(), HttpCookie.empty(),
                 ResponseBody.createBy(httpRequest));
+    }
+
+    private void sendErrorResponse(final OutputStream outputStream) throws IOException {
+        HttpResponse errorResponse = HttpResponse.found(HttpVersion.HTTP_1_1,
+                new Location("/500.html"), ContentType.TEXT_HTML, HttpCookie.empty());
+        outputStream.write(errorResponse.toBytes());
+        outputStream.flush();
     }
 }

@@ -48,9 +48,10 @@ public class HttpResponse {
     }
 
     public static HttpResponse found(
-            final HttpVersion httpVersion, final Location location, final HttpCookie httpCookie
+            final HttpVersion httpVersion, final Location location, final ContentType contentType,
+            final HttpCookie httpCookie
     ) {
-        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, ContentType.APPLICATION_JSON, httpCookie,
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, contentType, httpCookie,
                 ResponseBody.empty());
     }
 

@@ -47,8 +47,8 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        executorService.submit(this);
         stopped = false;
+        executorService.submit(this);
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 

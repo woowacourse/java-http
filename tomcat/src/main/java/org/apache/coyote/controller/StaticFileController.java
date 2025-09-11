@@ -7,7 +7,7 @@ import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.session.SessionManager;
 
-public class StaticFileHandler extends AbstractController {
+public class StaticFileController extends AbstractController {
 
     private final static String STATIC_ROOT = "static";
     private final static SessionManager sessionManger = SessionManager.getInstance();

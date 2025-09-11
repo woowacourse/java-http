@@ -8,7 +8,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
-import org.apache.coyote.controller.StaticFileHandler;
+import org.apache.coyote.controller.StaticFileController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             String path = request.getPath();
             AbstractController loginHandler = new LoginController();
             AbstractController registerHandler = new RegisterController();
-            AbstractController staticFileConroller = new StaticFileHandler();
+            AbstractController staticFileConroller = new StaticFileController();
 
             Http11Response response = new Http11Response();
             if (path.startsWith("/login")) {

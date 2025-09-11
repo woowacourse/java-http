@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -15,13 +16,12 @@ public class StaticFileController extends AbstractController {
             requestPath = "/index.html";
         }
 
-        final var responseBody = StaticResourceResolver.read(requestPath);
-        if (responseBody == null) {
+        final Optional<String> responseBody = StaticResourceResolver.read(requestPath);
+        if (responseBody.isEmpty()) {
             response.sendNotFound();
             return;
         }
-
         final var mimeType = ContentType.from(requestPath).getMimeType();
-        response.sendOk(mimeType, responseBody);
+        response.sendOk(mimeType, responseBody.get());
     }
 }

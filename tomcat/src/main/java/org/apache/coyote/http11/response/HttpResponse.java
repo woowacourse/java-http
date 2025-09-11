@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.apache.coyote.http11.util.StaticResourceResolver;
 
 public class HttpResponse {
@@ -20,7 +21,7 @@ public class HttpResponse {
     }
 
     public void sendOk(final String mimeType, final String body) throws IOException {
-        if(body == null) {
+        if (body == null) {
             final var response = buildResponse("200 OK", "", this.headers);
             write(response);
             return;
@@ -41,17 +42,18 @@ public class HttpResponse {
     }
 
     public void sendNotFound() throws IOException {
-        var body = StaticResourceResolver.read("/404.html");
-        if (body == null) {
+        final Optional<String> optionalBody = StaticResourceResolver.read("/404.html");
+        if (optionalBody.isEmpty()) {
             sendRawNotFoundError();
             return;
         }
-        final byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+        String notFoundErrorBody = optionalBody.get();
+        final byte[] bodyBytes = notFoundErrorBody.getBytes(StandardCharsets.UTF_8);
 
         this.headers.addHeader("Content-Type", "text/html;charset=utf-8");
         this.headers.addHeader("Content-Length", String.valueOf(bodyBytes.length));
 
-        final var response = buildResponse("404 Not Found", body, this.headers);
+        final var response = buildResponse("404 Not Found", notFoundErrorBody, this.headers);
         write(response);
     }
 
@@ -61,17 +63,18 @@ public class HttpResponse {
     }
 
     public void sendServerError() throws IOException {
-        final var body = StaticResourceResolver.read("/500.html");
-        if (body == null) {
+        final Optional<String> optionalBody = StaticResourceResolver.read("/500.html");
+        if (optionalBody.isEmpty()) {
             sendRawServerError();
             return;
         }
-        final byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+        String serverErrorBody = optionalBody.get();
+        final byte[] bodyBytes = serverErrorBody.getBytes(StandardCharsets.UTF_8);
 
         this.headers.addHeader("Content-Type", "text/html;charset=utf-8");
         this.headers.addHeader("Content-Length", String.valueOf(bodyBytes.length));
 
-        final var response = buildResponse("500 Internal Server Error", body, this.headers);
+        final var response = buildResponse("500 Internal Server Error", serverErrorBody, this.headers);
         write(response);
     }
 

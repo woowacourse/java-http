@@ -4,21 +4,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public final class StaticResourceResolver {
 
     private static final String STATIC_DIRECTORY = "static/";
 
-    private StaticResourceResolver() {}
+    private StaticResourceResolver() {
+    }
 
-    public static String read(final String path) throws IOException {
+    public static Optional<String> read(final String path) throws IOException {
         final URL resourceUrl = findResource(path);
         if (resourceUrl == null) {
-            return null;
+            return Optional.empty();
         }
 
         try (final InputStream inputStream = resourceUrl.openStream()) {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            final var readResult = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            return Optional.of(readResult);
         }
     }
 

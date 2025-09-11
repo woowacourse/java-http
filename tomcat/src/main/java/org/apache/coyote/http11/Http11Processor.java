@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Adapter;
@@ -33,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         HttpResponse response = new HttpResponse();
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
             HttpRequest request = HttpRequestParser.parse(inputStream);
             adapter.service(request, response);

@@ -4,7 +4,7 @@ import com.techcourse.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ControllerHandlerAdapter implements HandlerAdapter1 {
+public class ControllerHandlerAdapter implements HandlerAdapter {
 
     @Override
     public boolean supports(Object handler) {

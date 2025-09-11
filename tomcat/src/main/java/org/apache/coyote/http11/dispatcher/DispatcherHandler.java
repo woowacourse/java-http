@@ -6,14 +6,14 @@ import org.apache.coyote.http11.dispatcher.handlerAdapter.ControllerHandlerAdapt
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class DispatcherHandler1 {
+public class DispatcherHandler {
 
     private final ControllerHandlerAdapter controllerHandlerAdapter;
     private final HandlerMapping handlerMapping;
     private final ViewController viewController;
 
-    public DispatcherHandler1(ControllerHandlerAdapter controllerHandlerAdapter, HandlerMapping handlerMapping,
-                              ViewController viewController) {
+    public DispatcherHandler(ControllerHandlerAdapter controllerHandlerAdapter, HandlerMapping handlerMapping,
+                             ViewController viewController) {
         this.controllerHandlerAdapter = controllerHandlerAdapter;
         this.handlerMapping = handlerMapping;
         this.viewController = viewController;

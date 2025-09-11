@@ -5,7 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.dispatcher.DispatcherHandler1;
+import org.apache.coyote.http11.dispatcher.DispatcherHandler;
 import org.apache.coyote.http11.dispatcher.HandlerMapping;
 import org.apache.coyote.http11.dispatcher.handlerAdapter.ControllerHandlerAdapter;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -36,9 +36,9 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequest.from(inputStream);
 
-            DispatcherHandler1 dispatcherHandler1 = new DispatcherHandler1(new ControllerHandlerAdapter(),
+            DispatcherHandler dispatcherHandler = new DispatcherHandler(new ControllerHandlerAdapter(),
                     new HandlerMapping(), new ViewController());
-            HttpResponse httpResponse = dispatcherHandler1.doService(httpRequest);
+            HttpResponse httpResponse = dispatcherHandler.doService(httpRequest);
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();

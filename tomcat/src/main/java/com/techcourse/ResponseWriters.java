@@ -27,6 +27,12 @@ public class ResponseWriters {
         httpResponse.addHeader(contentType, bytes);
     }
 
+    public static void ok(HttpResponse httpResponse, byte[] bytes) {
+        httpResponse.setStatus(HttpStatus.OK);
+        httpResponse.setBody(bytes);
+        httpResponse.addHeader(bytes);
+    }
+
     public static void ok(HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.OK);
         httpResponse.addHeader(); // TODO 2025. 9. 12. 04:21: defaultheader의 책임 분리 : ResponseWriters vs HttpResponse

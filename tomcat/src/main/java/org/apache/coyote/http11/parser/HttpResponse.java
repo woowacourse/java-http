@@ -29,6 +29,7 @@ public class HttpResponse {
     public void setContent(byte[] content) {
         if (content == null) {
             this.contentLength = 0;
+            return;
         }
         this.contentLength = content.length;
         this.parsedContent = content;

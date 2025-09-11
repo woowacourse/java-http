@@ -26,7 +26,7 @@ public class ResourceHandler {
         setBody(request, response);
     }
 
-    private static void setContentType(final HttpRequest request, final HttpResponse response) {
+    private void setContentType(final HttpRequest request, final HttpResponse response) {
         if (request.getResourcePath().endsWith(".html")) {
             response.setContentType(TEXT_HTML_CHARSET_UTF_8);
             return;

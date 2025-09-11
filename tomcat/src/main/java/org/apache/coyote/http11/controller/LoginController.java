@@ -14,13 +14,12 @@ public class LoginController extends AbstractController {
 
     private final Manager manager;
 
-    public LoginController(final Manager manager) {
+    public LoginController(Manager manager) {
         this.manager = manager;
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final HttpSession session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
+    protected void doGet(final HttpRequest request, final HttpResponse response, HttpSession session) throws Exception {
         if (session.getAttribute("user") != null) {
             response.sendRedirect("/index.html");
             return;
@@ -31,11 +30,10 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response, HttpSession session) throws Exception {
         final var account = request.getParameter("account");
         final var password = request.getParameter("password");
         final Optional<User> optionalUser = findUserByAccount(account);
-        final HttpSession session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
 
         if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
             SessionSupport.rotateSessionAfterLogin(manager, session, optionalUser.get(), response);

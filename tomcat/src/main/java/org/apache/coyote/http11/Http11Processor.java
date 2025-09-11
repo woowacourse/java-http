@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
@@ -47,8 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             final var request = HttpRequest.from(inputStream);
             final var response = new HttpResponse(outputStream);
 
-            final HttpSession session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
-
+            final var session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
             final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
             controller.service(request, response, session);
 

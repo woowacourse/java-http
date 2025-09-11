@@ -17,6 +17,7 @@ public class SimpleHttpSession implements HttpSession {
     private final String id;
     private final Map<String, Object> attributes;
     private final AtomicBoolean valid = new AtomicBoolean(true);
+    private final AtomicBoolean isNew = new AtomicBoolean(true);
 
     public SimpleHttpSession(final String id, final Map<String, Object> attributes) {
         Objects.requireNonNull(id, "id must not be null");
@@ -72,6 +73,22 @@ public class SimpleHttpSession implements HttpSession {
     }
 
     @Override
+    public boolean isNew() {
+        checkValid();
+        return isNew.get();
+    }
+
+    void setNew(final boolean value) {
+        this.isNew.set(value);
+    }
+    
+    private void checkValid() {
+        if (!valid.get()) {
+            throw new IllegalStateException("세션이 이미 무효화되었습니다.");
+        }
+    }
+
+    @Override
     public long getCreationTime() {
         throw new UnsupportedOperationException();
     }
@@ -119,16 +136,5 @@ public class SimpleHttpSession implements HttpSession {
     @Override
     public void removeValue(final String name) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isNew() {
-        throw new UnsupportedOperationException();
-    }
-
-    private void checkValid() {
-        if (!valid.get()) {
-            throw new IllegalStateException("세션이 이미 무효화되었습니다.");
-        }
     }
 }

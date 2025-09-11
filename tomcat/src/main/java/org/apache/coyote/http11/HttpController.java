@@ -40,7 +40,7 @@ public class HttpController {
         }
 
         if (!isExistHttpService(httpService, httpResponse)) {
-            httpResponse.setStatusLine("HTTP/1.1 302 FOUND");
+            httpResponse.setStatusLine("HTTP/1.1 404 FOUND");
             httpResponse.setLocation("/404.html");
             return httpResponse;
         }

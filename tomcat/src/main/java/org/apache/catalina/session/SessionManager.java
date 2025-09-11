@@ -29,4 +29,10 @@ public class SessionManager implements Manager {
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
     }
+
+    public Session create() {
+        final Session newSession = new Session();
+        SESSIONS.put(newSession.getId(), newSession);
+        return newSession;
+    }
 }

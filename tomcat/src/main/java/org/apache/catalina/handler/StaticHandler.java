@@ -27,12 +27,12 @@ public class StaticHandler extends AbstractController {
         final byte[] fileContent = readFile(path);
         final String contentType = HttpContentType.fromExtension(path).getValue();
 
-        response.setStaticResponse(HttpStatus.OK, fileContent, contentType);
+        response.setResponse(HttpStatus.OK, fileContent, contentType);
     }
 
     @Override
     void doPost(final Http11Request request, final Http11Response response) throws Exception {
-        response.setRedirectResponse("/404.html"); // 405 Method Not Allowed를 응답하는 게 더 자연스러우나 일단 404 처리
+        response.setResponse(HttpStatus.METHOD_NOT_ALLOWED, new byte[0], "");
     }
 
     private byte[] readFile(final String location) throws IOException {

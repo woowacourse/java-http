@@ -28,7 +28,7 @@ public class RegisterHandler extends AbstractController {
     void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final byte[] fileContent = readFile("/register.html");
 
-        response.setStaticResponse(HttpStatus.OK, fileContent, HttpContentType.HTML.getValue());
+        response.setResponse(HttpStatus.OK, fileContent, HttpContentType.HTML.getValue());
     }
 
     @Override

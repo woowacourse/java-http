@@ -44,7 +44,7 @@ public class LoginHandler extends AbstractController {
 
         final byte[] fileContent = readFile("/login.html");
 
-        response.setStaticResponse(HttpStatus.OK, fileContent, HTML_CONTENT_TYPE);
+        response.setResponse(HttpStatus.OK, fileContent, HTML_CONTENT_TYPE);
     }
 
     @Override

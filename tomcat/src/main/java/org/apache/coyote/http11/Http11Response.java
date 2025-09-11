@@ -23,7 +23,7 @@ public class Http11Response {
         this(null, 0, null, null, null);
     }
 
-    public void setStaticResponse(
+    public void setResponse(
             final HttpStatus httpStatus,
             final byte[] body,
             final String contentType

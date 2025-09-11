@@ -3,13 +3,13 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.ContentType;
-import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +17,13 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String CONTENT_LENGTH = "Content-Length";
-    public static final String CONTENT_TYPE = "Content-Type";
 
     private final Socket connection;
     private final Adapter adapter;
-    private final HttpRequestParser httpRequestParser;
 
     public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
         this.adapter = adapter;
-        this.httpRequestParser = new HttpRequestParser();
     }
 
     @Override
@@ -38,32 +34,26 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            final var httpRequest = httpRequestParser.getHttpRequest(bufferedReader);
-            if (httpRequest == null) {
-                return;
-            }
-            final var resourcePath = httpRequest.parseResourcePath();
-            final var httpResponse = new Http11Response(resourcePath);
-            setContentType(httpResponse.getResourcePath(), httpResponse);
+        try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final Http11Request httpRequest = Http11Request.from(bufferedReader);
+            final Http11Response httpResponse = new Http11Response();
+            httpResponse.setContentType(httpRequest.parseResourcePath());
 
             adapter.service(httpRequest, httpResponse);
-            httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(httpResponse.getBody().length));
+
+            httpResponse.setContentLength();
             writeResponse(httpResponse);
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static void setContentType(final String resourcePath, final Http11Response httpResponse) {
-        final var contentType = ContentType.fromPath(resourcePath);
-        httpResponse.addHeader(CONTENT_TYPE, contentType.getValue());
-    }
 
-    private void writeResponse(final Http11Response httpResponse) throws IOException, URISyntaxException {
-        try (final var outputStream = connection.getOutputStream()) {
+    private void writeResponse(final Http11Response httpResponse)
+            throws IOException {
+        try (final OutputStream outputStream = connection.getOutputStream()) {
             outputStream.write(httpResponse.getResponseLine());
             outputStream.write(httpResponse.getHeader());
             outputStream.write(httpResponse.getBody());

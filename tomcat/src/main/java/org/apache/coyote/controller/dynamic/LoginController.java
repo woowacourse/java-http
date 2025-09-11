@@ -66,13 +66,12 @@ public class LoginController implements Controller {
             final HttpRequest request,
             final HttpResponse response
     ) {
-        if (processLogin(request, response)) {
-            response.updateStatusLine("HTTP/1.1", StatusCode.FOUND);
-            response.addHeader("Content-Length", "0");
-            response.addHeader("Location", "/index.html");
-            return;
-        }
-        throw new HttpException(ErrorCode.NOT_EXISTS_MEMBER);
+        final User loginUser = processLogin(request);
+        final String sessionId = createSessionForLogin(loginUser);
+        response.addCookie(new Cookie("JSESSIONID", sessionId));
+        response.updateStatusLine("HTTP/1.1", StatusCode.FOUND);
+        response.addHeader("Content-Length", "0");
+        response.addHeader("Location", "/index.html");
     }
 
     private void responseLoginHtml(final HttpResponse httpResponse) throws IOException {
@@ -96,29 +95,30 @@ public class LoginController implements Controller {
         }
     }
 
-    private boolean processLogin(
-            final HttpRequest httpRequest,
-            final HttpResponse httpResponse
+    private User processLogin(
+            final HttpRequest httpRequest
     ) {
         final HttpBody httpBody = httpRequest.getHttpBody();
         final String account = httpBody.getData("account");
         final String password = httpBody.getData("password");
         if (account == null || password == null) {
-            return false;
+            throw new HttpException(ErrorCode.NOT_EXISTS_MEMBER);
         }
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
-        if (user != null && user.checkPassword(password)) {
-            final String sessionId = UUID.randomUUID().toString();
-            final Session session = new Session(sessionId);
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            httpResponse.addCookie(new Cookie("JSESSIONID", sessionId));
-            log.info("로그인 성공 user : {}", user);
+        if (user == null || !user.checkPassword(password)) {
+            throw new HttpException(ErrorCode.NOT_EXISTS_MEMBER);
 
-            return true;
         }
+        log.info("로그인 성공 user : {}", user);
+        return user;
+    }
 
-        return false;
+    private String createSessionForLogin(final User loginUser) {
+        final String sessionId = UUID.randomUUID().toString();
+        final Session session = new Session(sessionId);
+        session.setAttribute("user", loginUser);
+        sessionManager.add(session);
+        return sessionId;
     }
 }

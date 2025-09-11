@@ -21,6 +21,7 @@ public class SessionManager {
     }
 
     public Session getSession(String key) {
+        if(key == null) return null;
         return SESSIONS.getOrDefault(key, null);
     }
 

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.constant.HttpCookie;
 import org.apache.coyote.http11.constant.RequestLine;
 
 public class HttpRequest {
@@ -21,6 +22,17 @@ public class HttpRequest {
 
     public Map<String, String> getHeader() {
         return header;
+    }
+
+    public boolean containsCookie() {
+        return header.containsKey("Cookie");
+    }
+
+    public HttpCookie getCookie() {
+        if (!header.containsKey("Cookie")) {
+            throw new IllegalStateException("요청에 쿠키가 존재하지 않습니다.");
+        }
+        return new HttpCookie(header.get("Cookie"));
     }
 
     public String getBody() {

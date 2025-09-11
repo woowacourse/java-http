@@ -17,7 +17,7 @@ public class HttpResponse {
     }
 
     public boolean isStaticPage() {
-        return contentType.isText() && !status.is3xx();
+        return contentType.isText();
     }
 
     public String buildResponse() {

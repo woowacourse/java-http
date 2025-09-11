@@ -1,14 +1,14 @@
 package org.apache.catalina.manager;
 
+import com.spring.http.cookie.HttpCookie;
+import com.spring.http.cookie.HttpCookies;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 import org.apache.catalina.domain.Session;
-import com.spring.http.cookie.HttpCookie;
-import com.spring.http.cookie.HttpCookies;
-import com.spring.http.request.HttpRequest;
-import com.spring.http.response.HttpResponse;
 
 public class SessionManager implements Manager {
 
@@ -53,13 +53,7 @@ public class SessionManager implements Manager {
 
         if (cookies.hasCookie(SESSION_COOKIE_NAME)) {
             processExistSession(request, httpResponse, cookies);
-            return;
         }
-
-        // 쿠키가 없는 경우 새로운 세션 생성
-        SessionManager sessionManager = new SessionManager();
-        Session session = sessionManager.getSession(request, true);
-        httpResponse.addSetCookie(new HttpCookie(SESSION_COOKIE_NAME, session.getId()));
     }
 
     private static void processExistSession(HttpRequest request, HttpResponse httpResponse, HttpCookies cookies) {
@@ -71,9 +65,8 @@ public class SessionManager implements Manager {
             return;
         }
 
-        // 유효하지 않은 세션 ID이므로 새로운 세션 생성하고 쿠키 덮어쓰기
-        Session newSession = sessionManager.getSession(request, true);
-        httpResponse.addSetCookie(new HttpCookie(SESSION_COOKIE_NAME, newSession.getId()));
+        // 유효하지 않은 세션 ID이므로 쿠키 제거
+        httpResponse.addSetCookie(new HttpCookie(SESSION_COOKIE_NAME, ""));
     }
 
     private static boolean isStaticResource(String path) {
@@ -111,6 +104,17 @@ public class SessionManager implements Manager {
         }
 
         return createIfRequested(create);
+    }
+
+    public Session getSessionWithCookie(HttpRequest request, HttpResponse response, boolean create) {
+        String existingSessionId = extractSessionIdFromCookie(request.header().getCookies());
+        Session session = getSession(request, create);
+
+        if (session != null && !session.getId().equals(existingSessionId)) {
+            response.addSetCookie(new HttpCookie(SESSION_COOKIE_NAME, session.getId()));
+        }
+
+        return session;
     }
 
     private Session createIfRequested(boolean create) {

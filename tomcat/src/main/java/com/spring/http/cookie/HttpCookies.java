@@ -39,9 +39,6 @@ public final class HttpCookies {
             if (kv.length == 2) {
                 cookies.add(new HttpCookie(kv[0].trim(), kv[1].trim()));
             }
-            if (kv.length == 1) {
-                cookies.add(new HttpCookie(kv[0].trim(), ""));
-            }
         }
     }
 

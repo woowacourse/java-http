@@ -75,21 +75,6 @@ class HttpCookiesTest {
         assertThat(cookies.toString()).isEmpty();
     }
 
-    @DisplayName("from 메서드: 값이 없는 쿠키를 처리한다")
-    @Test
-    void from_cookieWithoutValue() {
-        // given
-        String cookieHeader = "sessionId=abc123; emptyValue=; noValue";
-
-        // when
-        HttpCookies cookies = HttpCookies.from(cookieHeader);
-
-        // then
-        assertThat(cookies.getCookie("sessionId").value()).isEqualTo("abc123");
-        assertThat(cookies.getCookie("emptyValue").value()).isEmpty();
-        assertThat(cookies.getCookie("noValue").value()).isEmpty();
-    }
-
     @DisplayName("toString 메서드: HttpCookies를 쿠키 헤더 형식 문자열로 변환한다")
     @Test
     void toString_convertToHeaderString() {

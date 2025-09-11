@@ -1,10 +1,13 @@
 package org.apache.catalina.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.spring.http.cookie.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class HttpCookieTest {
 
@@ -20,7 +23,6 @@ class HttpCookieTest {
         // then
         assertThat(result).isEqualTo("sessionId=abc123");
     }
-
 
     @DisplayName("sameName 메서드: 동일한 이름의 쿠키인지 확인한다")
     @Test
@@ -66,4 +68,24 @@ class HttpCookieTest {
         // when & then
         assertThat(cookie.toString()).hasToString("specialCookie=value=with&special%chars");
     }
+
+    @DisplayName("쿠키 이름이 null인 경우 예외 발생")
+    @ParameterizedTest
+    @NullAndEmptySource
+    void cookieNameNull(String name) {
+        // when & then
+        assertThatThrownBy(() -> new HttpCookie(name, "value"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cookie name cannot be null or empty");
+    }
+
+    @DisplayName("쿠키 값이 null인 경우 예외 발생")
+    @Test
+    void cookieValueNull() {
+        // when & then
+        assertThatThrownBy(() -> new HttpCookie("name", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cookie value cannot be null");
+    }
+
 }

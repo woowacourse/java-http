@@ -14,4 +14,9 @@ public class HttpStatusException extends RuntimeException {
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
+
+    public HttpStatusException(Throwable cause, HttpStatus httpStatus) {
+        super(cause);
+        this.httpStatus = httpStatus;
+    }
 }

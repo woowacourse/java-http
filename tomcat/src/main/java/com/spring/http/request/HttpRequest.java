@@ -1,9 +1,9 @@
 package com.spring.http.request;
 
+import com.spring.http.HttpHeader;
 import com.spring.http.enums.HttpStatus;
 import com.techcourse.exception.HttpStatusException;
 import java.util.Map;
-import com.spring.http.HttpHeader;
 import org.apache.catalina.domain.Session;
 import org.apache.catalina.manager.SessionManager;
 
@@ -21,8 +21,8 @@ public record HttpRequest(
     }
 
     public Map<String, String> parseBody() {
+        validateParsingBody();
         final String contentType = header.getContentType();
-        validateParsingBody(contentType);
 
         if (contentType.startsWith(URL_ENCODED)) {
             return body.parseFormData();
@@ -31,7 +31,9 @@ public record HttpRequest(
         throw new HttpStatusException("Unsupported Content-Type: " + contentType, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    private void validateParsingBody(String contentType) {
+    private void validateParsingBody() {
+        final String contentType = header.getContentType();
+
         if (contentType == null) {
             throw new HttpStatusException("Content-Type header is missing",
                     HttpStatus.UNSUPPORTED_MEDIA_TYPE);

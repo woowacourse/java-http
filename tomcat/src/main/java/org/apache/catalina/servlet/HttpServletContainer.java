@@ -1,14 +1,14 @@
 package org.apache.catalina.servlet;
 
-import com.spring.servlet.DispatcherServlet;
 import com.spring.http.enums.HttpStatus;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
+import com.spring.servlet.DispatcherServlet;
 import com.techcourse.exception.HttpStatusException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import com.spring.http.request.HttpRequest;
-import com.spring.http.response.HttpResponse;
 import org.apache.catalina.servlet.impl.DefaultServlet;
 import org.apache.coyote.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -35,15 +35,8 @@ public final class HttpServletContainer {
 
         try {
             handlers.getOrDefault(path, defaultServlet).service(request, response);
-        } catch (HttpStatusException e) {
-            throw e;
         } catch (FileNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND);
-        } catch (IllegalArgumentException e) {
-            response.setStatus(HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            log.error("서버 오류 발생 = {}", e.getMessage(), e);
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpStatusException(e, HttpStatus.NOT_FOUND);
         }
 
         processResponse(request, response);

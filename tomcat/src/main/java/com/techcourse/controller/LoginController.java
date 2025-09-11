@@ -1,22 +1,22 @@
 package com.techcourse.controller;
 
+import com.spring.controller.AbstractController;
 import com.spring.http.enums.HttpStatus;
+import com.spring.http.request.HttpRequest;
+import com.spring.http.response.HttpResponse;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.HttpStatusException;
 import com.techcourse.exception.UnAuthorizedException;
 import com.techcourse.model.User;
-import com.spring.controller.Controller;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.catalina.domain.Session;
-import com.spring.http.request.HttpRequest;
-import com.spring.http.response.HttpResponse;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.catalina.util.FileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String LOGIN_FILE_NAME = "login.html";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
@@ -63,7 +63,8 @@ public class LoginController implements Controller {
             throw new UnAuthorizedException("잘못된 인증입니다.");
         }
 
-        Session session = request.getSession(true);
+        SessionManager sessionManager = new SessionManager();
+        Session session = sessionManager.getSessionWithCookie(request, httpResponse, true);
         session.setAttribute("user", user);
         httpResponse.setStatus(HttpStatus.FOUND);
         httpResponse.addHeader("Location", "/index.html");

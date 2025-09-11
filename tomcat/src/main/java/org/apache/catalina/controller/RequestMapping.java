@@ -1,6 +1,5 @@
 package org.apache.catalina.controller;
 
-import com.techcourse.controller.StaticResourceController;
 import java.util.HashMap;
 import java.util.Map;
 

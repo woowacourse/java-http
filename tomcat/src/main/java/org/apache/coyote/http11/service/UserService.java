@@ -22,10 +22,12 @@ public class UserService implements HttpService {
 
         if (session.getAttribute("user") != null) {
             httpResponse.setContent(getRedirectHtml());
-        } else {
-            httpResponse.setContent(getLoginHtml());
+            httpResponse.setLocation("/index.html");
+            httpResponse.setStatusLine("HTTP/1.1 302 FOUND");
+            httpResponse.setContentType("text/html;charset=utf-8");
+            return;
         }
-
+        httpResponse.setContent(getLoginHtml());
         httpResponse.setStatusLine("HTTP/1.1 200 OK");
         httpResponse.setContentType("text/html;charset=utf-8");
     }
@@ -49,6 +51,7 @@ public class UserService implements HttpService {
                 httpResponse.setContent(getRedirectHtml());
                 httpResponse.setContentType("text/html;charset=utf-8");
                 httpResponse.setStatusLine("HTTP/1.1 302 Found");
+                httpResponse.setLocation("/index.html");
                 return;
             }
 

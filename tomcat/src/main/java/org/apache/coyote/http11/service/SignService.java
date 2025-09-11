@@ -61,7 +61,8 @@ public class SignService implements HttpService {
 
         httpResponse.setContent(getRedirectHtml());
         httpResponse.setContentType("text/html;charset=utf-8");
-        httpResponse.setStatusLine("HTTP/1.1 200 OK");
+        httpResponse.setStatusLine("HTTP/1.1 302 FOUND");
+        httpResponse.setLocation("/index.html");
     }
 
     @Override

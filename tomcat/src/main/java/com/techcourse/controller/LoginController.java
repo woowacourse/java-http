@@ -16,8 +16,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         HttpParameters parameters = request.getParameters();
-        String account = getFirst(parameters, "account");
-        String password = getFirst(parameters, "password");
+        String account = parameters.getFirst("account");
+        String password = parameters.getFirst("password");
 
         if (account == null || password == null) {
             response.redirect("/login.html");
@@ -52,10 +52,6 @@ public class LoginController extends AbstractController {
             return;
         }
         response.redirect("/login.html");
-    }
-
-    private String getFirst(final HttpParameters map, final String key) {
-        return map.getFirst(key);
     }
 
     private boolean isLoggedIn(final HttpRequest request) {

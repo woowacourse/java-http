@@ -7,7 +7,9 @@ import org.apache.coyote.http11.model.StatusCode;
 import java.util.Objects;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 
-public class StaticResourceHandler {
+public class StaticResourceController {
+
+    public static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
 
     public void execute(HttpRequest request, HttpResponse response) {
         setContentType(request, response);
@@ -27,7 +29,7 @@ public class StaticResourceHandler {
             response.setContentType("application/javascript;charset=utf-8");
             return;
         }
-        response.setContentType("text/html;charset=utf-8");
+        response.setContentType(DEFAULT_CONTENT_TYPE);
     }
 
     private void setBody(final HttpRequest request, final HttpResponse response) {

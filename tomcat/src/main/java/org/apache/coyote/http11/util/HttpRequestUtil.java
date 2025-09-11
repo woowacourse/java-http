@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.util;
 
-import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpMethod;
 import org.apache.coyote.http11.model.QueryParameter;
@@ -20,7 +19,7 @@ public class HttpRequestUtil {
         final var requestLine = bufferedReader.readLine();
 
         if (requestLine == null || requestLine.isBlank()) {
-            throw new BadRequestException("Empty request line");
+            throw new IllegalArgumentException("Empty request line");
         }
 
         final var headers = getHeaders(bufferedReader);
@@ -62,7 +61,7 @@ public class HttpRequestUtil {
                                                 final String body
     ) {
         final var requestLineChunks = requestLine.split(" ");
-        
+
         if (requestLineChunks.length < 2) {
             throw new IllegalArgumentException("Invalid request line : " + requestLine);
         }

@@ -73,6 +73,39 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void getLoginPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String actualOutput = socket.output();
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+
+        final byte[] fileContentBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final String fileContent = new String(fileContentBytes);
+
+        final String[] responseParts = actualOutput.split("\r\n\r\n", 2);
+        final String headers = responseParts[0];
+        final String body = responseParts[1];
+
+        assertThat(headers).startsWith("HTTP/1.1 200 OK");
+        assertThat(body).isEqualTo(fileContent);
+    }
+
+
+    @Test
     void loginSuccess() {
         // given
         String body = "account=gugu&password=password";

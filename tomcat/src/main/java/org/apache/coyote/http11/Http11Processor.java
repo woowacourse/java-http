@@ -132,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
                 headers.put("Location", List.of("/index.html"));
                 final String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", "JSESSIONID", session.getId());
                 headers.put("Set-Cookie", List.of(cookieValue));
-                return new Http11Response(302, headers, new byte[0]);
+                return new Http11Response(StatusLine.from(302), headers, new byte[0]);
             }
             return Http11Response.redirect("/401.html");
         }

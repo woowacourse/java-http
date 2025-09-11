@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Http11Response {
+public final class Http11Response {
 
-    private final int statusCode;
+    private final StatusLine statusLine;
     private final Map<String, List<String>> headers;
     private final byte[] body;
 
@@ -18,7 +18,7 @@ public class Http11Response {
             final String contentType,
             final String body
     ) {
-        this(statusCode, Map.of("Content-Type", List.of(contentType)), body.getBytes(StandardCharsets.UTF_8));
+        this(StatusLine.from(statusCode), Map.of("Content-Type", List.of(contentType)), body.getBytes(StandardCharsets.UTF_8));
     }
 
     public Http11Response(
@@ -26,26 +26,25 @@ public class Http11Response {
             final String contentType,
             final byte[] body
     ) {
-        this(statusCode, Map.of("Content-Type", List.of(contentType)), body);
+        this(StatusLine.from(statusCode), Map.of("Content-Type", List.of(contentType)), body);
     }
 
     public Http11Response(
-            final int statusCode,
+            final StatusLine statusLine,
             final Map<String, List<String>> headers,
             final byte[] body
     ) {
-        this.statusCode = statusCode;
+        this.statusLine = statusLine;
         this.headers = new HashMap<>(headers);
         this.body = body;
     }
 
     public static Http11Response redirect(final String location) {
-        return new Http11Response(302, Map.of("Location", List.of(location)), new byte[0]);
+        return new Http11Response(StatusLine.from(302), Map.of("Location", List.of(location)), new byte[0]);
     }
 
     public byte[] getResponseBytes() {
-        final String statusText = getStatusText(this.statusCode);
-        final String responseLine = "HTTP/1.1 " + this.statusCode + " " + statusText;
+        final String responseLine = statusLine.toLineString();
         final var responseHeaders = new HashMap<>(this.headers);
         responseHeaders.put("Content-Length", List.of(String.valueOf(this.body.length)));
         try (final var outputStream = new ByteArrayOutputStream()) {
@@ -65,14 +64,5 @@ public class Http11Response {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getStatusText(int code) {
-        return switch (code) {
-            case 200 -> "OK";
-            case 302 -> "Found";
-            case 404 -> "Not Found";
-            default -> "OK";
-        };
     }
 }

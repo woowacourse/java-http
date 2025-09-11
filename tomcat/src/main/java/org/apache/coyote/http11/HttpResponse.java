@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,7 +37,7 @@ public class HttpResponse {
         response.addHeader(CONTENT_LENGTH_HEADER, "0");
         return response;
     }
-    
+
     public void initHeaders() {
         if (mimeType != null) {
             headers.put(CONTENT_TYPE_HEADER, mimeType.getType() + ";charset=utf-8");
@@ -48,7 +50,7 @@ public class HttpResponse {
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
-
+    
     public String toHttpResponseString() {
         StringBuilder sb = new StringBuilder();
         buildHeaders(sb);
@@ -76,5 +78,10 @@ public class HttpResponse {
         if (!body.isEmpty()) {
             sb.append(this.body);
         }
+    }
+
+    public void sendResponse(OutputStream outputStream) throws IOException {
+        outputStream.write(toHttpResponseString().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

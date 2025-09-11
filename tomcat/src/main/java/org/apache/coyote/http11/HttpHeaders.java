@@ -55,6 +55,14 @@ public final class HttpHeaders {
         return buffer.toString(StandardCharsets.US_ASCII);
     }
 
+    public String getHeader(final String name) {
+        final var values = headers.get(name);
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.getFirst();
+    }
+
     public HttpCookies getCookies() {
         final List<String> cookieHeaders = headers.getOrDefault("Cookie", List.of());
         final String combinedCookieHeader = String.join(";", cookieHeaders);

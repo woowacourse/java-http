@@ -47,8 +47,8 @@ public final class Http11Request {
         return requestLine.getVersion();
     }
 
-    public Map<String, List<String>> getHeaders() {
-        return headers.getHeaders();
+    public HttpHeaders getHeaders() {
+        return this.headers;
     }
 
     public HttpCookies getCookies() {

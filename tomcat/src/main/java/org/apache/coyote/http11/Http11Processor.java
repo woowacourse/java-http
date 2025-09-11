@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.catalina.controller.resource.StaticResourceController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -28,10 +29,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Manager manager;
+    private final StaticResourceController staticResourceController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.manager = SessionManager.getInstance();
+        this.staticResourceController = new StaticResourceController();
     }
 
     @Override
@@ -42,16 +45,25 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+        Http11Response response = new Http11Response();
         try (
                 final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()
         ) {
             final var httpRequest = parseRequest(inputStream);
-            final var response = dispatch(httpRequest);
+            dispatch(httpRequest, response);
             outputStream.write(response.getResponseBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+            response.setStatus(500);
+            response.setBody("Server Error", "text/plain;charset=utf-8");
+            try {
+                connection.getOutputStream().write(response.getResponseBytes());
+                connection.getOutputStream().flush();
+            } catch (IOException ioException) {
+                log.error(ioException.getMessage(), ioException);
+            }
         }
     }
 
@@ -101,25 +113,24 @@ public class Http11Processor implements Runnable, Processor {
         return new String(bodyBytes, StandardCharsets.UTF_8);
     }
 
-    private Http11Response dispatch(final Http11Request httpRequest) {
-        return getResponse(httpRequest);
-    }
-
-    private Http11Response getResponse(final Http11Request httpRequest) {
+    private void dispatch(final Http11Request httpRequest, final Http11Response httpResponse) throws Exception {
         final var path = httpRequest.getPath();
         if ("/".equals(path)) {
-            return new Http11Response(200, "text/html;charset=utf-8", "Hello world!");
+            httpResponse.setBody("Hello world!", "text/html;charset=utf-8");
+            return;
         }
         if ("/login".equals(path)) {
-            return handleLoginRequest(httpRequest);
+            handleLoginRequest(httpRequest, httpResponse);
+            return;
         }
         if ("/register".equals(path)) {
-            return handleRegisterRequest(httpRequest);
+            handleRegisterRequest(httpRequest, httpResponse);
+            return;
         }
-        return serveStaticFile(path);
+        staticResourceController.service(httpRequest, httpResponse);
     }
 
-    private Http11Response handleLoginRequest(final Http11Request httpRequest) {
+    private void handleLoginRequest(final Http11Request httpRequest, final Http11Response httpResponse) {
         if (httpRequest.isPost()) {
             final var params = extractFirstParamValues(RequestLine.parseUrlEncodedParams(httpRequest.getBody()));
             final Optional<User> userOptional = isLoginSuccessful(params);
@@ -128,19 +139,48 @@ public class Http11Processor implements Runnable, Processor {
                 final var session = getSession(httpRequest, true)
                         .orElseThrow(() -> new IllegalStateException("세션 생성에 실패했습니다."));
                 session.setAttribute("user", user);
-                final Map<String, List<String>> headers = new HashMap<>();
-                headers.put("Location", List.of("/index.html"));
+                httpResponse.setStatus(302);
+                httpResponse.setHeader("Location", "/index.html");
                 final String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", "JSESSIONID", session.getId());
-                headers.put("Set-Cookie", List.of(cookieValue));
-                return new Http11Response(StatusLine.from(302), headers, new byte[0]);
+                httpResponse.addHeader("Set-Cookie", cookieValue);
+                return;
             }
-            return Http11Response.redirect("/401.html");
+            httpResponse.setStatus(302);
+            httpResponse.setHeader("Location", "/401.html");
+            return;
         }
         final Optional<Session> sessionOptional = getSession(httpRequest, false);
         if (sessionOptional.isPresent() && sessionOptional.get().getAttribute("user") != null) {
-            return Http11Response.redirect("/index.html");
+            httpResponse.setStatus(302);
+            httpResponse.setHeader("Location", "/index.html");
+            return;
         }
-        return serveStaticFile("/login.html");
+        try {
+            staticResourceController.service(httpRequest, httpResponse);
+        } catch (Exception e) {
+            throw new UncheckedServletException(e);
+        }
+    }
+
+    private void handleRegisterRequest(final Http11Request httpRequest, final Http11Response httpResponse) {
+        if (httpRequest.isPost()) {
+            final var params = extractFirstParamValues(RequestLine.parseUrlEncodedParams(httpRequest.getBody()));
+            final var user = new User(
+                    params.get("account"),
+                    params.get("password"),
+                    params.get("email")
+            );
+            InMemoryUserRepository.save(user);
+            log.info("user created: {}", user);
+            httpResponse.setStatus(302);
+            httpResponse.setHeader("Location", "/index.html");
+            return;
+        }
+        try {
+            staticResourceController.service(httpRequest, httpResponse);
+        } catch (Exception e) {
+            throw new UncheckedServletException(e);
+        }
     }
 
     private Optional<Session> getSession(
@@ -183,21 +223,6 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.of(user);
     }
 
-    private Http11Response handleRegisterRequest(final Http11Request httpRequest) {
-        if (httpRequest.isPost()) {
-            final var params = extractFirstParamValues(RequestLine.parseUrlEncodedParams(httpRequest.getBody()));
-            final var user = new User(
-                    params.get("account"),
-                    params.get("password"),
-                    params.get("email")
-            );
-            InMemoryUserRepository.save(user);
-            log.info("user created: {}", user);
-            return Http11Response.redirect("/index.html");
-        }
-        return serveStaticFile("/register.html");
-    }
-
     private Map<String, String> extractFirstParamValues(final Map<String, List<String>> params) {
         final Map<String, String> result = new HashMap<>();
         for (var entry : params.entrySet()) {
@@ -206,39 +231,5 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return result;
-    }
-
-    private Http11Response serveStaticFile(final String path) {
-        return readStaticResource(path)
-                .map(body -> new Http11Response(200, getContentType(path), body))
-                .orElseGet(this::serveNotFoundPage);
-    }
-
-    private Http11Response serveNotFoundPage() {
-        return readStaticResource("/404.html")
-                .map(body -> new Http11Response(404, "text/html;charset=utf-8", body))
-                .orElse(new Http11Response(404, "text/html;charset=utf-8", "404 Not Found"));
-    }
-
-    private Optional<byte[]> readStaticResource(final String path) {
-        final String resourcePath = "static" + path;
-        try (final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (resourceStream == null) {
-                return Optional.empty();
-            }
-            return Optional.of(resourceStream.readAllBytes());
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
-        }
-    }
-
-    private String getContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
     }
 }

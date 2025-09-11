@@ -1,13 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.CssRequestController;
 import com.techcourse.controller.HomeController;
-import com.techcourse.controller.HtmlRequestController;
-import com.techcourse.controller.JsRequestController;
-import com.techcourse.controller.LoginPostRequestController;
-import com.techcourse.controller.LoginRequestController;
-import com.techcourse.controller.RegisterGetRequestController;
-import com.techcourse.controller.RegisterPostRequestController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticFileController;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.catalina.Controller;
 import org.apache.coyote.Processor;
@@ -29,13 +25,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private final List<Controller> controllers = List.of(
             new HomeController(),
-            new HtmlRequestController(),
-            new CssRequestController(),
-            new JsRequestController(),
-            new LoginRequestController(),
-            new LoginPostRequestController(),
-            new RegisterGetRequestController(),
-            new RegisterPostRequestController()
+            new StaticFileController(),
+            new LoginController(),
+            new RegisterController()
     );
 
     private final Socket connection;

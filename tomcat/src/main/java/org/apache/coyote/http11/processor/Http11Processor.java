@@ -3,15 +3,10 @@ package org.apache.coyote.http11.processor;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
                 Optional<HttpCookie> httpCookie = request.get().getCookie("JSESSIONID");
 
                 if (httpCookie.isPresent() && SESSION_MANAGER.containsKey(httpCookie.get().getValue())) {
-                    sendRedirectResponse(httpResponse, "/index.html", FOUND, null);
+                    sendRedirectResponse(httpResponse, "/index.html", FOUND);
                 } else {
                     sendStaticFile(httpResponse, "static/login.html", OK);
                 }
@@ -123,13 +118,9 @@ public class Http11Processor implements Runnable, Processor {
                 .send();
     }
 
-    private void sendRedirectResponse(HttpResponse response, String location, String statusCode, String setCookie) throws IOException {
+    private void sendRedirectResponse(HttpResponse response, String location, String statusCode) throws IOException {
         response.setStatusCode(statusCode)
                 .setLocation(location);
-
-        if (setCookie != null && !setCookie.isBlank()) {
-            response.addHeader("Set-Cookie", setCookie);
-        }
 
         response.send();
     }
@@ -150,13 +141,12 @@ public class Http11Processor implements Runnable, Processor {
             HttpSession session = new HttpSession(jsessionid);
             session.setAttribute("user", user);
             SESSION_MANAGER.add(session);
+            httpResponse.setCookie(new HttpCookie("JSESSIONID", jsessionid));
 
-            String cookieHeaderValue = "JSESSIONID=" + jsessionid;
-
-            sendRedirectResponse(httpResponse,"/index.html", FOUND, cookieHeaderValue);
+            sendRedirectResponse(httpResponse,"/index.html", FOUND);
         }
 
-        sendRedirectResponse(httpResponse,"static/401.html", UNAUTHORIZED, null);
+        sendRedirectResponse(httpResponse,"static/401.html", UNAUTHORIZED);
     }
 
     private void sendRegisterUserResponse(HttpRequest request, HttpResponse httpResponse) throws IOException, URISyntaxException {

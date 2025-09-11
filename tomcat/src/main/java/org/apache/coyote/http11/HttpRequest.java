@@ -105,7 +105,7 @@ public class HttpRequest {
         return params;
     }
 
-    public boolean isCookies() {
+    public boolean hasCookies() {
         return cookie != null;
     }
 

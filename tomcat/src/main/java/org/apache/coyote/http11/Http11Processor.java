@@ -65,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLoginRequest(HttpRequest request, HttpResponse response) throws IOException {
-        if (request.isCookies()) {
+        if (request.hasCookies()) {
             User user = (User) session.getStore(request.getCookie().getValue());
 
             log.info(user.toString());

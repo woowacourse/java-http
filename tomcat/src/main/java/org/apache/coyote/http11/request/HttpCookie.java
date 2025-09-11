@@ -7,7 +7,7 @@ public class HttpCookie {
     private final Map<String, String> cookies;
 
     public HttpCookie(String cookieHeader) {
-        this.cookies = HttpParamParser.parseKeyValuePairs(cookieHeader, "; ");
+        this.cookies = HttpParamParser.parseKeyValuePairs(cookieHeader, ";");
     }
 
     public String get(String name) {

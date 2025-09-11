@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +13,7 @@ public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
+    private final String protocol;
     private final int statusCode;
     private final String statusMessage;
     private final String contentType;
@@ -20,15 +21,18 @@ public class HttpResponse {
     private final Map<String, List<String>> headers;
 
     private HttpResponse(
+            final String protocol,
             final int statusCode,
             final String statusMessage,
             final String contentType,
             final byte[] body,
             final Map<String, List<String>> headers
     ) {
+        Objects.requireNonNull(protocol, "protocol must not be null");
         Objects.requireNonNull(statusMessage, "statusMessage must not be null");
         Objects.requireNonNull(contentType, "contentType must not be null");
         Objects.requireNonNull(headers, "headers must not be null");
+        this.protocol = protocol;
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
         this.contentType = contentType;
@@ -41,7 +45,8 @@ public class HttpResponse {
     public void writeTo(final OutputStream outputStream) throws IOException {
         final var response = new StringBuilder();
 
-        response.append("HTTP/1.1 ")
+        response.append(protocol)
+                .append(" ")
                 .append(statusCode)
                 .append(" ")
                 .append(statusMessage)
@@ -84,6 +89,7 @@ public class HttpResponse {
 
     public Builder toBuilder() {
         return new Builder()
+                .protocol(protocol)
                 .status(statusCode, statusMessage)
                 .contentType(contentType)
                 .body(body)
@@ -92,11 +98,17 @@ public class HttpResponse {
 
     public static final class Builder {
 
+        private String protocol;
         private int statusCode;
         private String statusMessage;
         private String contentType = "text/plain; charset=utf-8";
         private byte[] body;
         private final Map<String, List<String>> headers = new LinkedHashMap<>();
+
+        public Builder protocol(final String protocol) {
+            this.protocol = protocol;
+            return this;
+        }
 
         public Builder status(final int statusCode, final String statusMessage) {
             this.statusCode = statusCode;
@@ -120,22 +132,13 @@ public class HttpResponse {
         }
 
         public Builder header(final String name, final String value) {
-            headers.computeIfAbsent(
-                            name, k ->
-                                    new ArrayList<>()
-                    )
+            headers.computeIfAbsent(name, k -> new ArrayList<>())
                     .add(value);
             return this;
         }
 
-        public Builder setCookie(final String name, final String value) {
-            final var cookie = name + "=" + value + "; Path=/";
-
-            return header("Set-Cookie", cookie);
-        }
-
         public HttpResponse build() {
-            return new HttpResponse(statusCode, statusMessage, contentType, body, headers);
+            return new HttpResponse(protocol, statusCode, statusMessage, contentType, body, headers);
         }
     }
 }

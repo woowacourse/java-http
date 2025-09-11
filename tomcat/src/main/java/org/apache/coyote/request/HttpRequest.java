@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.request;
 
 import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.session.SimpleHttpSession;
@@ -95,6 +95,10 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public String getProtocol() {
+        return requestLine.getProtocol();
     }
 
     public String getHeader(final String name) {

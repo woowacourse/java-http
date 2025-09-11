@@ -2,8 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.model.RegisterService;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,6 +23,7 @@ public class RegisterController extends AbstractController {
         final var bodyBytes = readStaticFile("static/register.html");
 
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(200, "OK")
                 .contentType("text/html;charset=utf-8")
                 .body(bodyBytes)
@@ -38,6 +39,7 @@ public class RegisterController extends AbstractController {
         registerService.register(account, password, email);
 
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(302, "Found")
                 .header("Location", "/index.html")
                 .contentType("text/html;charset=utf-8")

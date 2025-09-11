@@ -2,8 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.model.LoginService;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,6 +24,7 @@ public class LoginController extends AbstractController {
 
         if (session.getAttribute("user") != null) {
             return HttpResponse.builder()
+                    .protocol(request.getProtocol())
                     .status(302, "Found")
                     .header("Location", "/index.html")
                     .contentType("text/html;charset=utf-8")
@@ -47,6 +48,7 @@ public class LoginController extends AbstractController {
 
         if (loginService.login(account, password, session)) {
             return HttpResponse.builder()
+                    .protocol(request.getProtocol())
                     .status(302, "Found")
                     .header("Location", "/index.html")
                     .contentType("text/html;charset=utf-8")
@@ -54,6 +56,7 @@ public class LoginController extends AbstractController {
         }
 
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(302, "Found")
                 .header("Location", "/401.html")
                 .contentType("text/html;charset=utf-8")

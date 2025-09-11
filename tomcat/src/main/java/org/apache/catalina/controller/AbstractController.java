@@ -1,7 +1,7 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
@@ -16,6 +16,7 @@ public abstract class AbstractController implements Controller {
         }
 
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(405, "Method Not Allowed")
                 .contentType("text/plain;charset=utf-8")
                 .body("Method Not Allowed".getBytes())
@@ -24,6 +25,7 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(405, "Method Not Allowed")
                 .contentType("text/plain;charset=utf-8")
                 .body("Method Not Allowed".getBytes())
@@ -32,6 +34,7 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
         return HttpResponse.builder()
+                .protocol(request.getProtocol())
                 .status(405, "Method Not Allowed")
                 .contentType("text/plain;charset=utf-8")
                 .body("Method Not Allowed".getBytes())

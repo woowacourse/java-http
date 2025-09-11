@@ -1,6 +1,10 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,9 +13,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -62,7 +63,8 @@ public class Http11Processor implements Runnable, Processor {
             headerLines.add(line);
         }
         int contentLength = headerLines.stream()
-                .filter(l -> l.toLowerCase().startsWith("content-length"))
+                .filter(l -> l.toLowerCase()
+                        .startsWith("content-length"))
                 .map(l -> Integer.parseInt(l.split(":")[1].trim()))
                 .findFirst()
                 .orElse(0);
@@ -77,12 +79,23 @@ public class Http11Processor implements Runnable, Processor {
                 + new String(body);
     }
 
-    private void handle(final HttpRequest httpRequest, final OutputStream outputStream) throws IOException {
+    private void handle(final HttpRequest httpRequest, final OutputStream outputStream) {
         for (HttpRequestHandler handler : httpRequestHandlers) {
             if (handler.support(httpRequest)) {
-                String response = handler.response(httpRequest);
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                HttpResponse httpResponse = HttpResponse.defaultHttpResponse(HttpVersion.ONE_ONE);
+
+                try {
+                    handler.response(httpRequest, httpResponse);
+
+                    byte[] responseBytes = httpResponse.buildHttpResponse()
+                            .getBytes(StandardCharsets.UTF_8);
+
+                    outputStream.write(responseBytes);
+                    outputStream.flush();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+
                 return;
             }
         }

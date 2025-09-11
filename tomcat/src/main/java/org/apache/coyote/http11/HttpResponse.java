@@ -22,14 +22,24 @@ public class HttpResponse {
         return new HttpResponse(version, HttpStatus.OK, new ResponseHeader(), "");
     }
 
-    public void redirect(String location) {
+    public HttpResponse ok() {
+        status = HttpStatus.OK;
+
+        return this;
+    }
+
+    public HttpResponse redirect(String location) {
         status = HttpStatus.REDIRECT;
 
         responseHeader.addHeader("Location", location);
+
+        return this;
     }
 
-    public void addHeader(String name, String value) {
+    public HttpResponse addHeader(String name, String value) {
         responseHeader.addHeader(name, value);
+
+        return this;
     }
 
     public void writeStaticResource(Path resourcePath) throws IOException {
@@ -40,13 +50,20 @@ public class HttpResponse {
             contentType = "application/octet-stream"; // fallback
         }
 
-        responseHeader.addHeader("Content-Length", Integer.toString(bytes.length));
-        responseHeader.addHeader("Content-Type", contentType);
+        responseHeader.addHeader("Content-Type", contentType + ";charset=utf-8");
 
         body = new String(bytes);
     }
 
+    public void write(String value) throws IOException {
+        body += value;
+
+        responseHeader.addHeader("Content-Type", body.getBytes().length + ";charset=utf-8");
+    }
+
     public String buildHttpResponse() {
+        responseHeader.addHeader("Content-Length", Integer.toString(body.getBytes().length));
+
         StringBuilder sb = new StringBuilder();
 
         appendStartLine(sb);

@@ -4,5 +4,5 @@ public interface HttpRequestHandler {
 
     boolean support(HttpRequest httpRequest);
 
-    String response(HttpRequest httpRequest);
+    void response(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception;
 }

@@ -1,15 +1,17 @@
 package org.apache.coyote.session;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        SESSIONS.putIfAbsent(session.getId(), session);
     }
 
     @Override
@@ -27,6 +29,6 @@ public class SessionManager implements Manager {
     }
 
     public Map<String, Session> getSessions() {
-        return SESSIONS;
+        return Collections.unmodifiableMap(SESSIONS);
     }
 }

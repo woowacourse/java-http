@@ -106,8 +106,20 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            executorService.shutdown();
+
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT, TimeUnit.SECONDS)) {
+                log.warn("Forcing shutdown - some requests did not finish in time");
+                executorService.shutdownNow();
+            }
+            log.info("Connector stopped gracefully");
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("Error closing server socket", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread()
+                    .interrupt();
+            log.warn("Shutdown interrupted, forcing shutdown now");
+            executorService.shutdownNow();
         }
     }
 

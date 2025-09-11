@@ -1,12 +1,21 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootController;
+import com.techcourse.service.LoginService;
+import com.techcourse.service.RegisterService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.ControllerProvider;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import support.StubSocket;
@@ -16,6 +25,17 @@ class Http11ProcessorTest {
 
     @InjectSoftAssertions
     private SoftAssertions softly;
+
+    @BeforeEach
+    void setUp() {
+        final List<Controller> controllers = List.of(
+                new RootController(),
+                new RegisterController(new RegisterService()),
+                new LoginController(new LoginService())
+        );
+
+        ControllerProvider.INSTANCE.register(controllers);
+    }
 
     @Test
     void process() {

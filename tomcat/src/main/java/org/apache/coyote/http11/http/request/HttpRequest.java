@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http.request;
 
+import http.HttpHeaderKey;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +9,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.http.common.HttpCookie;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
@@ -45,11 +45,19 @@ public class HttpRequest {
 
         List<String> headerLines = readHeaderLines(bufferedReader);
         final HttpHeader httpHeader = HttpHeader.from(headerLines);
+
+        final HttpRequestBody httpRequestBody = readRequestBody(bufferedReader, httpHeader);
+
         final HttpCookie httpCookie = HttpCookie.from(httpHeader);
-        final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, httpHeader);
         final HttpSession session = sessionManager.findSession(httpCookie.getByName("JSESSIONID"));
 
         return new HttpRequest(httpStartLine, httpHeader, httpCookie, httpRequestBody, session);
+    }
+
+    private static void validateNotNull(final InputStream inputStream) {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("inputStream은 null일 수 없습니다.");
+        }
     }
 
     private static List<String> readHeaderLines(final BufferedReader bufferedReader) throws IOException {
@@ -61,9 +69,32 @@ public class HttpRequest {
         return headerLines;
     }
 
-    private static void validateNotNull(final InputStream inputStream) {
-        if (inputStream == null) {
-            throw new IllegalArgumentException("inputStream은 null일 수 없습니다.");
+    private static HttpRequestBody readRequestBody(
+            final BufferedReader bufferedReader,
+            final HttpHeader httpHeader
+    ) throws IOException {
+        int contentLength = httpHeader.getFirstValue(HttpHeaderKey.CONTENT_LENGTH.getValue().toLowerCase())
+                .map(Integer::parseInt)
+                .orElse(0);
+
+        if (contentLength <= 0) {
+            return HttpRequestBody.from(new byte[0]);
+        }
+
+        char[] rawBody = new char[contentLength];
+        int readLength = bufferedReader.read(rawBody, 0, contentLength);
+
+        if (readLength <= 0) {
+            return HttpRequestBody.from(new byte[0]);
+        }
+
+        byte[] bodyBytes = new String(rawBody, 0, readLength).getBytes(StandardCharsets.UTF_8);
+        return HttpRequestBody.from(bodyBytes);
+    }
+
+    public void invalidateExistSession() {
+        if (this.httpSession != null) {
+            this.httpSession.invalidate();
         }
     }
 
@@ -93,8 +124,8 @@ public class HttpRequest {
         return httpStartLine.getTargetQueryParameter(cleanTarget);
     }
 
-    public Map<String, String> getBodyElement() {
-        return httpRequestBody.getBodyElement();
+    public String getBodyElement(final String target) {
+        return httpRequestBody.getBodyElement().get(target);
     }
 
     public HttpCookie getCookie() {

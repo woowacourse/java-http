@@ -2,11 +2,10 @@ package org.apache.coyote.http11.http.response;
 
 import http.ContentTypeValue;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -34,14 +33,15 @@ public class HttpResponseBody {
 
         if (url == null) {
             return withString(resourceName);
-
         }
 
-        try {
-            final Path path = Paths.get(url.toURI());
-            return new HttpResponseBody(Files.readAllBytes(path),
-                    ContentTypeValue.findByTarget(Files.probeContentType(path)));
-        } catch (IOException | URISyntaxException e) {
+        try (InputStream inputStream = url.openStream()) {
+            final byte[] body = inputStream.readAllBytes();
+
+            String contentType = Files.probeContentType(Paths.get(resourceName));
+
+            return new HttpResponseBody(body, ContentTypeValue.findByTarget(contentType));
+        } catch (IOException e) {
             throw new IllegalArgumentException("response 구성 중 문제가 발생하였습니다", e);
         }
     }

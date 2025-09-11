@@ -44,36 +44,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
-            }
 
-            final String[] requestInfo = parseRequestLine(requestLine);
-            if (requestInfo == null) {
-                return;
-            }
+            final HttpRequest request = new HttpRequest(reader);
 
-            final Map<String, String> requestHeaders = new HashMap<>();
-            String line;
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                final String[] headerParts = line.split(": ", 2);
-                if (headerParts.length == 2) {
-                    String key = URLDecoder.decode(headerParts[0], StandardCharsets.UTF_8);
-                    String value = URLDecoder.decode(headerParts[1], StandardCharsets.UTF_8);
-                    requestHeaders.put(key, value);
-                }
-            }
-
-            String requestBody = "";
-            if ("POST".equals(requestInfo[0]) && requestHeaders.containsKey("Content-Length")) {
-                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                reader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
-            }
-
-            final String response = handleRequest(requestInfo, requestHeaders, requestBody);
+            final String response = handleRequest(request);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -82,24 +56,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String[] parseRequestLine(final String requestLine) {
-        final String[] requestLineArray = requestLine.split(" ");
-        if (requestLineArray.length < 2) {
-            return null;
-        }
+    private String handleRequest(final HttpRequest request) throws IOException, URISyntaxException {
+        final String method = request.getMethod();
+        final String path = request.getPath();
 
-        final String method = requestLineArray[0];
-        final String uri = requestLineArray[1];
-
-        return new String[]{method, uri};
-    }
-
-    private String handleRequest(final String[] requestInfo, final Map<String, String> requestHeaders,
-                                 final String requestBody) throws IOException, URISyntaxException {
-        final String method = requestInfo[0];
-        final String path = requestInfo[1];
-
-        final HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
+        final HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
         final String existingJSessionId = cookie.getJSessionId();
 
         final Session session = (existingJSessionId != null) ? sessionManager.findSession(existingJSessionId) : null;
@@ -109,10 +70,10 @@ public class Http11Processor implements Runnable, Processor {
             if (user != null && "GET".equals(method)) {
                 return generateRedirectResponse("/index.html", existingJSessionId);
             }
-            return handleLogin(method, requestBody);
+            return handleLogin(method, request.getRequestBody());
         }
         if ("/register".equals(path)) {
-            return handleRegister(method, requestBody);
+            return handleRegister(method, request.getRequestBody());
         }
 
         return serveStaticFile(path, existingJSessionId);

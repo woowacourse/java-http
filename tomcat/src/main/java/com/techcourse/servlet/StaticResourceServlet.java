@@ -20,6 +20,4 @@ public class StaticResourceServlet extends HttpServlet {
             ServletExceptionHandler.getInstance().handle(response, e);
         }
     }
-
-
 }

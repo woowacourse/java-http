@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class ServletExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ServletExceptionHandler.class);
-    public static ServletExceptionHandler INSTANCE = new ServletExceptionHandler();
-
+    private static final ServletExceptionHandler INSTANCE = new ServletExceptionHandler();
     private static final String NOT_FOUND_PAGE = "static/404.html";
     private static final String INTERNAL_SERVER_ERROR_PAGE = "static/500.html";
 

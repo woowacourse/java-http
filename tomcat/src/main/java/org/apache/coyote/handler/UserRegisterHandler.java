@@ -3,7 +3,7 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.dto.HttpRequest;
 import org.apache.coyote.render.HttpStatus;
 import org.apache.coyote.render.MethodType;
 import org.apache.coyote.render.PageRenderer;
@@ -16,21 +16,22 @@ public class UserRegisterHandler implements RequestHandler{
 
 
     @Override
-    public String handle(final String method, final String path, final Map<String, String> queryParams, HttpCookie cookie) {
-        if (method.equals(MethodType.GET.getMethod())) {
-            return handleRegisterGet();
+    public String handle(final HttpRequest httpRequest) {
+
+        if (httpRequest.method().equals(MethodType.GET.getMethod())) {
+            return handleRegisterGet(httpRequest);
         }
-        if (method.equals(MethodType.POST.getMethod())) {
-            return handleRegisterPost(method, queryParams);
+        if (httpRequest.method().equals(MethodType.POST.getMethod())) {
+            return handleRegisterPost(httpRequest.version(), httpRequest.method(), httpRequest.queryParams());
         }
         throw new IllegalArgumentException("회원가입중 문제가 발생했습니다.");
     }
 
-    private String handleRegisterGet() {
-        return PageRenderer.createStaticFileResponse(HttpStatus.OK.getStatusCode(), "/register.html");
+    private String handleRegisterGet(HttpRequest httpRequest) {
+        return PageRenderer.createStaticFileResponse(httpRequest.version(),HttpStatus.OK.getStatusCode(),httpRequest.path());
     }
 
-    private String handleRegisterPost(String method, Map<String, String> queryParams) {
+    private String handleRegisterPost(String version, String method, Map<String, String> queryParams) {
         try {
             if (method.equals(MethodType.POST.getMethod())) {
                 validateAccountDuplicated(queryParams);
@@ -43,9 +44,9 @@ public class UserRegisterHandler implements RequestHandler{
                 InMemoryUserRepository.save(beforeSaveUser);
             }
         } catch (IllegalArgumentException e) {
-            return PageRenderer.createStaticFileResponse(HttpStatus.UNAUTHORIZED.getStatusCode(), "/401.html");
+            return PageRenderer.createStaticFileResponse(version, HttpStatus.UNAUTHORIZED.getStatusCode(), "/401.html");
         }
-        return PageRenderer.sendRedirect(HttpStatus.FOUND.getStatusCode(),
+        return PageRenderer.sendRedirect(version, HttpStatus.FOUND.getStatusCode(),
                 HeaderParser.createRedirectHeaders("/", null,null));
     }
 

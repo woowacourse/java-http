@@ -1,7 +1,6 @@
 package org.apache.coyote.router;
 
-import java.util.Map;
-import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.dto.HttpRequest;
 import org.apache.coyote.handler.UserLoginHandler;
 import org.apache.coyote.handler.UserRegisterHandler;
 import org.apache.coyote.render.PageRenderer;
@@ -25,16 +24,11 @@ public class RequestRouter {
         this.pageRenderer = pageRenderer;
     }
 
-    public String handleRoute(
-            final String method,
-            final  String path,
-            final Map<String, String> formData,
-            final HttpCookie httpCookie
-    ) {
-        return switch (path) {
-            case LOGIN_REQUEST -> userLoginHandler.handle(method, path, formData, httpCookie);
-            case REGISTER_REQUEST -> userRegisterHandler.handle(method, path, formData, httpCookie);
-            default -> pageRenderer.handle(method, path, httpCookie);
+    public String handleRoute(final HttpRequest httpRequest) {
+        return switch (httpRequest.path()) {
+            case LOGIN_REQUEST -> userLoginHandler.handle(httpRequest);
+            case REGISTER_REQUEST -> userRegisterHandler.handle(httpRequest);
+            default -> pageRenderer.handle(httpRequest);
         };
     }
 }

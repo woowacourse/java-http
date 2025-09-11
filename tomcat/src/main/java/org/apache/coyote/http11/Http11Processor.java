@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.config.AppConfig;
 import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.dto.HttpRequest;
 import org.apache.coyote.dto.RequestLine;
 import org.apache.coyote.router.RequestRouter;
 import org.apache.coyote.util.HeaderParser;
@@ -51,22 +52,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final BufferedReader reader) throws IOException {
-        RequestLine requestLine = getRequestLine(reader);
+         RequestLine requestLine = getRequestLine(reader);
 
-        Map<String, String> header = HeaderParser.parseHeader(reader);
+        final Map<String, String> header = HeaderParser.parseHeader(reader);
 
-        String cookieHeader = header.get("Cookie");
-        HttpCookie httpCookie = new HttpCookie(cookieHeader);
+        final String cookieHeader = header.get("Cookie");
+        final HttpCookie httpCookie = new HttpCookie(cookieHeader);
 
         if (requestLine.method().equals("POST")) {
             requestLine = getPostRequestInfo(reader, header, requestLine);
         }
 
+        final HttpRequest httpRequest = new HttpRequest(requestLine, httpCookie);
+
         return requestRouter.handleRoute(
-                requestLine.method(),
-                requestLine.path(),
-                requestLine.queryParams(),
-                httpCookie
+                httpRequest
         );
     }
 
@@ -75,7 +75,6 @@ public class Http11Processor implements Runnable, Processor {
         if (requestLine == null || requestLine.isEmpty()) {
             return null;
         }
-
         return RequestLineParser.parse(requestLine);
     }
 

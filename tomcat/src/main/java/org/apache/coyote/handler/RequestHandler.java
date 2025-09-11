@@ -1,8 +1,7 @@
 package org.apache.coyote.handler;
 
-import java.util.Map;
-import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.dto.HttpRequest;
 
 public interface RequestHandler {
-    String handle(String method, String path, Map<String, String> queryParams, HttpCookie cookie);
+    String handle(HttpRequest httpRequest);
 }

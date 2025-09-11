@@ -21,8 +21,8 @@ public abstract class AbstractController implements Controller {
         }
         byte[] body = Files.readAllBytes(getStaticResource("/405.html"));
         return HttpResponse.methodNotAllowed()
-                .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.TEXT_HTML)
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }
@@ -30,8 +30,8 @@ public abstract class AbstractController implements Controller {
     protected HttpResponse doPost(HttpRequest request) throws Exception {
         byte[] body = Files.readAllBytes(getStaticResource("/405.html"));
         return HttpResponse.methodNotAllowed()
-                .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.TEXT_HTML)
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }
@@ -39,8 +39,8 @@ public abstract class AbstractController implements Controller {
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         byte[] body = Files.readAllBytes(getStaticResource("/405.html"));
         return HttpResponse.methodNotAllowed()
-                .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.TEXT_HTML)
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }

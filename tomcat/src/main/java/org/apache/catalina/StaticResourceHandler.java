@@ -17,16 +17,16 @@ public class StaticResourceHandler {
         if (staticResource == null) {
             byte[] body = Files.readAllBytes(getStaticResource("/404.html"));
             return HttpResponse.notFound()
-                    .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                    .header("Content-Length", String.valueOf(body.length))
+                    .contentType(ContentType.TEXT_HTML)
+                    .contentLength(body.length)
                     .body(body)
                     .build();
         }
         String fileExtension = path.split("\\.")[1];
         byte[] body = Files.readAllBytes(staticResource);
         return HttpResponse.ok()
-                .header("Content-Type", ContentType.of(fileExtension).getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.of(fileExtension))
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }

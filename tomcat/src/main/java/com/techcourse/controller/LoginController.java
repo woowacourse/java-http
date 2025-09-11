@@ -23,13 +23,13 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) throws IOException {
         if (request.getSession() != null) {
             return HttpResponse.found()
-                    .header("Location", "/index.html")
+                    .location("/index.html")
                     .build();
         }
         byte[] body = Files.readAllBytes(getStaticResource("/login.html"));
         return HttpResponse.ok()
-                .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.TEXT_HTML)
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }
@@ -40,26 +40,26 @@ public class LoginController extends AbstractController {
         if (optionalUser.isEmpty()) {
             log.info("존재하지 않는 유저입니다.");
             return HttpResponse.found()
-                    .header("Location", "/401.html")
+                    .location("/401.html")
                     .build();
         }
         User user = optionalUser.get();
         if (!user.checkPassword(request.getBody("password"))) {
             log.info("비밀번호가 일치하지 않습니다.");
             return HttpResponse.found()
-                    .header("Location", "/401.html")
+                    .location("/401.html")
                     .build();
         }
         log.info(user.toString());
         if (request.getSession() == null) {
             Session session = createSession(user);
             return HttpResponse.found()
-                    .header("Location", "/index.html")
-                    .header("Set-Cookie", "JSESSIONID=" + session.getId())
+                    .location("/index.html")
+                    .setCookie("JSESSIONID=" + session.getId())
                     .build();
         }
         return HttpResponse.found()
-                .header("Location", "/index.html")
+                .location("/index.html")
                 .build();
     }
 

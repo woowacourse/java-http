@@ -20,8 +20,8 @@ public class RegisterController extends AbstractController {
         Path registerPage = getStaticResource("/register.html");
         byte[] body = Files.readAllBytes(registerPage);
         return HttpResponse.ok()
-                .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.TEXT_HTML)
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }
@@ -32,8 +32,8 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
         Session session = createSession(user);
         return HttpResponse.found()
-                .header("Location", "/index.html")
-                .header("Set-Cookie", "JSESSIONID=" + session.getId())
+                .location("/index.html")
+                .setCookie("JSESSIONID=" + session.getId())
                 .build();
     }
 

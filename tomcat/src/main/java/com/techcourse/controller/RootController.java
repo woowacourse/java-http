@@ -11,8 +11,8 @@ public class RootController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) {
         byte[] body = "Hello world!".getBytes();
         return HttpResponse.ok()
-                .header("Content-Type", ContentType.TEXT_PLAIN.getMimeType())
-                .header("Content-Length", String.valueOf(body.length))
+                .contentType(ContentType.TEXT_PLAIN)
+                .contentLength(body.length)
                 .body(body)
                 .build();
     }

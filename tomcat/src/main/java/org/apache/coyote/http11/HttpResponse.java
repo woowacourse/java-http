@@ -79,6 +79,22 @@ public class HttpResponse {
             return this;
         }
 
+        public Builder contentType(ContentType contentType) {
+            return header("Content-Type", contentType.getMimeType());
+        }
+
+        public Builder contentLength(int contentLength) {
+            return header("Content-Length", String.valueOf(contentLength));
+        }
+
+        public Builder setCookie(String value) {
+            return header("Set-Cookie", value);
+        }
+
+        public Builder location(String value) {
+            return header("Location", value);
+        }
+
         public Builder body(byte[] body) {
             this.body = body;
             return this;

@@ -41,8 +41,8 @@ public class Http11Processor implements Runnable, Processor {
                 log.error(e.getMessage(), e);
                 byte[] body = Files.readAllBytes(get400ErrorPage());
                 response = HttpResponse.badRequest()
-                        .header("Content-Type", ContentType.TEXT_HTML.getMimeType())
-                        .header("Content-Length", String.valueOf(body.length))
+                        .contentType(ContentType.TEXT_HTML)
+                        .contentLength(body.length)
                         .body(body)
                         .build();
             }

@@ -6,7 +6,6 @@ import org.apache.coyote.dto.RequestLine;
 
 public class RequestLineParser {
     public static RequestLine parse(final String requestLine) {
-        System.out.println("requestLine : "  + requestLine);
         final String[] parts = requestLine.split(" ");
         final String method = parts[0].toUpperCase();
         final String fullPath = parts[1];

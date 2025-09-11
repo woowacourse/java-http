@@ -40,7 +40,7 @@ public class Connector implements Runnable {
          * IO 바운드 작업: 크게 설정. corePoolSize = 코어 수 * 2
          * Tomcat 기본 값: corePoolSize = 10
          * */
-        int corePoolSize = Math.max(2, 10);
+        int corePoolSize = 10;
         return new ThreadPoolExecutor(
                 corePoolSize,       // 코어 스레드 수: 풀에서 항상 유지되는 최소 스레드 수
                 maxThreads,         // 최대 스레드 수

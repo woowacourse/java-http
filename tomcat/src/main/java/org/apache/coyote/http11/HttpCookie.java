@@ -1,0 +1,42 @@
+package org.apache.coyote.http11;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+public final class HttpCookie {
+
+    private final Map<String, String> cookies;
+
+    public HttpCookie(final String cookieHeader) {
+        this.cookies = parse(cookieHeader);
+    }
+
+    private Map<String, String> parse(final String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.isBlank()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> cookies = new HashMap<>();
+        final String[] cookiePairs = cookieHeader.split(";");
+        for (final String cookiePair : cookiePairs) {
+            final String trimmedPair = cookiePair.trim();
+            if (trimmedPair.isEmpty()) {
+                continue;
+            }
+            final String[] keyValue = trimmedPair.split("=", 2);
+            if (keyValue.length == 2) {
+                cookies.put(keyValue[0].trim(), keyValue[1]);
+            }
+        }
+        return Collections.unmodifiableMap(cookies);
+    }
+
+    public Optional<String> getCookie(final String name) {
+        return Optional.ofNullable(cookies.get(name));
+    }
+
+    public boolean hasCookie(final String name) {
+        return cookies.containsKey(name);
+    }
+}

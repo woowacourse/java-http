@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
     private static final String LOGIN_FILE_NAME = "login.html";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private SessionManager sessionManager;
+    private final SessionManager sessionManager;
 
     public LoginController(SessionManager sessionManager) {
         this.sessionManager = sessionManager;

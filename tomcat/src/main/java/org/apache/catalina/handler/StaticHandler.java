@@ -17,11 +17,6 @@ public class StaticHandler extends AbstractController {
     private static final String WELCOME = "Hello world!";
 
     @Override
-    public void service(final Http11Request request, final Http11Response response) throws Exception {
-        super.service(request, response);
-    }
-
-    @Override
     void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final String path = request.getPath();
         final byte[] fileContent = readFile(path);

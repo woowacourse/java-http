@@ -20,11 +20,6 @@ public class RegisterHandler extends AbstractController {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public void service(final Http11Request request, final Http11Response response) throws Exception {
-        super.service(request, response);
-    }
-
-    @Override
     void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final byte[] fileContent = readFile("/register.html");
 

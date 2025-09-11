@@ -26,11 +26,6 @@ public class LoginHandler extends AbstractController {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public void service(final Http11Request request, final Http11Response response) throws Exception {
-        super.service(request, response);
-    }
-
-    @Override
     void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final Optional<String> sessionId = request.findCookie("JSESSIONID");
 

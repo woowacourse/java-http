@@ -17,7 +17,7 @@ public class SimpleHttpSession implements HttpSession {
     private final String id;
     private final Map<String, Object> attributes;
     private final AtomicBoolean valid = new AtomicBoolean(true);
-    private final AtomicBoolean isNew = new AtomicBoolean(true);
+    private volatile boolean isNew = true;
 
     public SimpleHttpSession(final String id, final Map<String, Object> attributes) {
         Objects.requireNonNull(id, "id must not be null");
@@ -75,13 +75,13 @@ public class SimpleHttpSession implements HttpSession {
     @Override
     public boolean isNew() {
         checkValid();
-        return isNew.get();
+        return isNew;
     }
 
     void setNew(final boolean value) {
-        this.isNew.set(value);
+        this.isNew = value;
     }
-    
+
     private void checkValid() {
         if (!valid.get()) {
             throw new IllegalStateException("세션이 이미 무효화되었습니다.");

@@ -2,10 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.catalina.exception.Http4xxException;
 import org.apache.coyote.http11.domain.HttpCookies;
 import org.apache.coyote.http11.domain.HttpMethod;
 
@@ -15,26 +13,37 @@ public record Http11Request(
         RequestBody body
 ) {
 
-    public static Http11Request from(final InputStream inputStream, final BufferedReader bufferedReader)
+    public static Http11Request from(final BufferedReader bufferedReader)
             throws IOException {
         final String line = bufferedReader.readLine();
-        if (line == null || line.isBlank()) {
-            throw new Http4xxException();
-        }
         final RequestLine requestLine = RequestLine.parse(line);
 
         final List<String> headers = extractHeaderLines(bufferedReader);
         final RequestHeaders requestHeaders = RequestHeaders.parse(headers);
 
         final int contentLength = requestHeaders.getContentLength();
-        final String body = readBody(inputStream, contentLength);
+        final String body = readBody(bufferedReader, contentLength);
         final RequestBody requestBody = RequestBody.parse(body);
         return new Http11Request(requestLine, requestHeaders, requestBody);
     }
 
-    private static String readBody(final InputStream inputStream, final int contentLength) throws IOException {
-        byte[] bytes = inputStream.readNBytes(contentLength);
-        return new String(bytes);
+    private static String readBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        if (contentLength <= 0) {
+            return "";
+        }
+
+        char[] buffer = new char[contentLength];
+        int totalRead = 0;
+
+        while (totalRead < contentLength) {
+            int read = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
+            if (read == -1) {
+                break; // EOF 도달
+            }
+            totalRead += read;
+        }
+
+        return new String(buffer, 0, totalRead);
     }
 
     private static List<String> extractHeaderLines(final BufferedReader bufferedReader) {

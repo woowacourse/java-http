@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
@@ -36,28 +35,29 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final Http11Request httpRequest = Http11Request.from(inputStream, bufferedReader);
+            final Http11Request httpRequest = Http11Request.from(bufferedReader);
             final Http11Response httpResponse = new Http11Response();
             httpResponse.setContentType(httpRequest.parseResourcePath());
 
             adapter.service(httpRequest, httpResponse);
 
             httpResponse.setContentLength();
-            writeResponse(outputStream, httpResponse);
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+            writeResponse(httpResponse);
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
 
-    private void writeResponse(final OutputStream outputStream, final Http11Response httpResponse)
-            throws IOException, URISyntaxException {
-        outputStream.write(httpResponse.getResponseLine());
-        outputStream.write(httpResponse.getHeader());
-        outputStream.write(httpResponse.getBody());
-        outputStream.flush();
+    private void writeResponse(final Http11Response httpResponse)
+            throws IOException {
+        try (final OutputStream outputStream = connection.getOutputStream()) {
+            outputStream.write(httpResponse.getResponseLine());
+            outputStream.write(httpResponse.getHeader());
+            outputStream.write(httpResponse.getBody());
+            outputStream.flush();
+        }
     }
 }

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -54,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Request parseRequest(final InputStream inputStream) throws IOException {
-        final String requestLineString = readLine(inputStream);
+        final String requestLineString = HttpParser.readLine(inputStream);
         if (requestLineString.isBlank()) {
             return Http11Request.createInvalid();
         }
@@ -66,25 +65,6 @@ public class Http11Processor implements Runnable, Processor {
                 headers,
                 body
         );
-    }
-
-    private String readLine(final InputStream inputStream) throws IOException {
-        final var buffer = new ByteArrayOutputStream();
-        int nextByte;
-        while ((nextByte = inputStream.read()) != -1) {
-            if (buffer.size() >= MAX_LINE_LENGTH) {
-                throw new IOException("요청 라인/헤더가 최대 길이 " + MAX_LINE_LENGTH + "를 초과합니다.");
-            }
-            if (nextByte == '\n') {
-                break;
-            }
-            if (nextByte == '\r') {
-                inputStream.read();
-                break;
-            }
-            buffer.write(nextByte);
-        }
-        return buffer.toString(StandardCharsets.US_ASCII);
     }
 
     private String parseBody(

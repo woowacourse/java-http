@@ -1,5 +1,8 @@
 package org.apache.catalina.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpMethod;
@@ -13,7 +16,9 @@ public abstract class AbstractController implements Controller {
     ) throws Exception {
         if (request.getMethod() == HttpMethod.GET) {
             doGet(request, response);
-        } else if (request.getMethod() == HttpMethod.POST) {
+            return;
+        }
+        if (request.getMethod() == HttpMethod.POST) {
             doPost(request, response);
         }
     }
@@ -22,13 +27,23 @@ public abstract class AbstractController implements Controller {
             final Http11Request request,
             final Http11Response response
     ) throws Exception {
-        // 405 Method Not Allowed
+        response.setStatus(405);
     }
 
     protected void doGet(
             final Http11Request request,
             final Http11Response response
     ) throws Exception {
-        // 405 Method Not Allowed
+        response.setStatus(405);
+    }
+
+    protected Map<String, String> extractFirstParamValues(final Map<String, List<String>> params) {
+        final Map<String, String> result = new HashMap<>();
+        for (var entry : params.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                result.put(entry.getKey(), entry.getValue().getFirst());
+            }
+        }
+        return result;
     }
 }

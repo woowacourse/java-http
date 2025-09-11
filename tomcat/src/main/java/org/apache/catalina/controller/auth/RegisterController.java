@@ -3,9 +3,6 @@ package org.apache.catalina.controller.auth;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.resource.StaticResourceController;
 import org.apache.coyote.http11.Http11Request;
@@ -51,15 +48,5 @@ public class RegisterController extends AbstractController {
         log.info("user created: {}", user);
         httpResponse.setStatus(302);
         httpResponse.setHeader("Location", "/index.html");
-    }
-
-    private Map<String, String> extractFirstParamValues(final Map<String, List<String>> params) {
-        final Map<String, String> result = new HashMap<>();
-        for (var entry : params.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
-                result.put(entry.getKey(), entry.getValue().get(0));
-            }
-        }
-        return result;
     }
 }

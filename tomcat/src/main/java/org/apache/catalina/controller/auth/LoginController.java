@@ -4,8 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.net.HttpCookie;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -111,15 +109,5 @@ public class LoginController extends AbstractController {
         }
         log.info("login success: {}", user);
         return Optional.of(user);
-    }
-
-    private Map<String, String> extractFirstParamValues(final Map<String, List<String>> params) {
-        final Map<String, String> result = new HashMap<>();
-        for (var entry : params.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
-                result.put(entry.getKey(), entry.getValue().get(0));
-            }
-        }
-        return result;
     }
 }

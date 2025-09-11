@@ -1,11 +1,12 @@
 package org.apache.coyote.http11.model;
 
-import org.apache.coyote.http11.processor.ResourceHandler;
+import org.apache.coyote.http11.controller.StaticResourceHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
+
     private String version;
     private StatusCode statusCode;
     private final Map<String, String> headers;
@@ -15,7 +16,7 @@ public class HttpResponse {
         this.version = "HTTP/1.1";
         this.statusCode = StatusCode.INTERNAL_SERVER_ERROR;
         this.headers = new HashMap<>();
-        setHeader("Content-Type", ResourceHandler.TEXT_HTML_CHARSET_UTF_8);
+        setHeader("Content-Type", "text/html;charset=utf-8");
         setHeader("Content-Length", "0");
         this.body = "";
     }
@@ -34,8 +35,8 @@ public class HttpResponse {
         return sb.toString().getBytes();
     }
 
-    public void setHeader(String name, String value) {
-        headers.put(name, value);
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public void addCookie(String setCookie) {
@@ -51,11 +52,11 @@ public class HttpResponse {
         setHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
-    public void setStatusCode(StatusCode statusCode) {
-        this.statusCode = statusCode;
-    }
-
     public void sendRedirect(String location) {
         setHeader("Location", location);
+    }
+
+    private void setHeader(String name, String value) {
+        headers.put(name, value);
     }
 }

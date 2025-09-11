@@ -6,8 +6,6 @@ import java.util.stream.Stream;
 
 public class Cookie {
 
-    private static final String KEY_VALUE_DELIMITER = "=";
-
     private final Map<String, String> cookie;
 
     public Cookie(String cookieHeader) {
@@ -24,7 +22,7 @@ public class Cookie {
         }
         return Stream.of(cookieHeader.split(";"))
                 .map(String::trim)
-                .map(cookie -> cookie.split(KEY_VALUE_DELIMITER, 2))
+                .map(cookie -> cookie.split("=", 2))
                 .filter(parts -> parts.length == 2)
                 .collect(Collectors.toMap(
                         parts -> parts[0].trim(),

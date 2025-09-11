@@ -10,4 +10,12 @@ public enum HttpMethod {
     HttpMethod(String method) {
         this.method = method;
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
 }

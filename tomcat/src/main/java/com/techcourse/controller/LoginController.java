@@ -19,25 +19,31 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
-        if (httpRequest.hasCookie()) {
-            final String cookie = httpRequest.findCookie().get();
-            final HttpCookie httpCookie = HttpCookie.parse(cookie);
-            final String sessionId = httpCookie.getCookies().get("JSESSIONID");
-
-            if (sessionId != null) {
-                final Session session = SessionManager.findSession(sessionId);
-
-                final User user = (User) session.getAttribute("user");
-                if (user != null) {
-                    return HttpResponse.status(HttpStatus.FOUND)
-                            .location(Page.INDEX.getPath())
-                            .setCookie(httpCookie);
-                }
-            }
+        if (httpRequest.findCookie().isEmpty()) {
+            return redirectToLogin();
         }
 
-        return HttpResponse.status(HttpStatus.OK)
-                .build(Page.LOGIN.getPath(), ResourceParser.parse(Page.LOGIN.getPath()));
+        final String cookie = httpRequest.findCookie().get();
+        final HttpCookie httpCookie = HttpCookie.parse(cookie);
+
+        final String sessionId = httpCookie.getCookies().get("JSESSIONID");
+        if (sessionId == null) {
+            return redirectToLogin();
+        }
+
+        final Session session = SessionManager.findSession(sessionId);
+        if (session == null) {
+            return redirectToLogin();
+        }
+
+        final User user = (User) session.getAttribute("user");
+        if (user != null) {
+            return HttpResponse.status(HttpStatus.FOUND)
+                    .location(Page.INDEX.getPath())
+                    .setCookie(httpCookie);
+        }
+
+        return redirectToLogin();
     }
 
     @Override
@@ -80,5 +86,10 @@ public class LoginController extends AbstractController {
     ) {
         return httpRequest.findParamsValueFromBody(name)
                 .orElseThrow(() -> new IllegalArgumentException("파라미터의 키 값이 존재하지 않습니다: " + name));
+    }
+
+    private HttpResponse redirectToLogin() throws Exception {
+        return HttpResponse.status(HttpStatus.OK)
+                .build(Page.LOGIN.getPath(), ResourceParser.parse(Page.LOGIN.getPath()));
     }
 }

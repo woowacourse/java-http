@@ -2,6 +2,7 @@ package com.techcourse;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootController;
 import com.techcourse.controller.StaticResourceController;
 import com.techcourse.service.LoginService;
 import com.techcourse.service.RegisterService;
@@ -21,6 +22,7 @@ public class Application {
 
     private static void registerControllers() {
         final List<Controller> controllers = List.of(
+                new RootController(),
                 new RegisterController(new RegisterService()),
                 new LoginController(new LoginService()),
                 new StaticResourceController()

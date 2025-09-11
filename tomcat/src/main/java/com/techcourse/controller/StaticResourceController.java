@@ -13,10 +13,6 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     public boolean isProvidableUrl(final String path) {
-        if ("/".equals(path)) {
-            return true;
-        }
-
         int lastDotIndex = path.lastIndexOf('.');
         if (lastDotIndex == -1) {
             return false;
@@ -31,10 +27,6 @@ public class StaticResourceController extends AbstractController {
 
         if (path.contains("..")) {
             response.setNotFound();
-            return;
-        }
-        if ("/".equals(path)) {
-            response.setOk("Hello world!");
             return;
         }
 

@@ -49,8 +49,16 @@ public class Http11Processor implements Runnable, Processor {
                 responseStatusCode = "200 OK";
             } else if (request.getMethod().equals("GET") && request.getPath().startsWith("/login")) {
                 // GET 요청 로그인 페이지
-                staticResource = StaticResourceProvider.getStaticResource("/login.html");
-                responseStatusCode = "200 OK";
+
+                // header의 Cookie에서 JSESSIONID 값을 확인하여 세션이 존재하는지 확인
+                if (hasSession(request)) {
+                    staticResource = StaticResourceProvider.getStaticResource("/index.html");
+                    responseStatusCode = "302 Found";
+                    responseHeaders.put("Location", "/index.html");
+                } else {
+                    staticResource = StaticResourceProvider.getStaticResource("/login.html");
+                    responseStatusCode = "200 OK";
+                }
             } else if (request.getMethod().equals("POST") && request.getPath().startsWith("/login")) {
                 // POST 요청 로그인 처리
                 if (isLoginSuccess(request.getBodyParam("account"), request.getBodyParam("password"))) {
@@ -60,6 +68,9 @@ public class Http11Processor implements Runnable, Processor {
 
                     final String sessionId = createSessionId();
                     responseHeaders.put("Set-Cookie", ("JSESSIONID=" + sessionId));
+                    final Session session = new Session(sessionId);
+                    session.setAttribute("user", request.getBodyParam("account"));
+                    SessionManager.add(session);
                 } else {
                     staticResource = StaticResourceProvider.getStaticResource("/401.html");
                     responseStatusCode = "401 Unauthorized";
@@ -122,5 +133,26 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createSessionId() {
         return java.util.UUID.randomUUID().toString();
+    }
+
+    // 요청 헤더에 담긴 JSESSIONID 값이 서버 세션에 존재하는지 확인
+    private boolean hasSession(final Http11Request request) {
+        final String cookie = request.getHeader("Cookie");
+        if (cookie == null) {
+            return false;
+        }
+
+        final String[] cookies = cookie.split(";");
+        for (String c : cookies) {
+            final String[] pair = c.trim().split("=", 2);
+            if ((pair.length == 2) && (pair[0].startsWith("JSESSIONID"))) {
+                final String sessionId = pair[1];
+                final Session session = SessionManager.findSession(sessionId);
+                if (session != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -1,9 +1,9 @@
-package com.techcourse.handler;
+package com.techcourse.handler.core;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.HttpMethod;
-import com.techcourse.http.request.HttpRequest;
-import com.techcourse.http.response.HttpResponse;
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
 public abstract class AbstractRequestHandler implements RequestHandler {
 

@@ -3,9 +3,12 @@ package com.techcourse.http.response;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.http.ContentType;
-import com.techcourse.http.HttpCookie;
-import com.techcourse.http.HttpVersion;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.Location;
+import org.apache.coyote.http.response.ResponseBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

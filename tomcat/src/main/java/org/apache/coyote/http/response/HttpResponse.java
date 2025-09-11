@@ -1,8 +1,8 @@
-package com.techcourse.http.response;
+package org.apache.coyote.http.response;
 
-import com.techcourse.http.ContentType;
-import com.techcourse.http.HttpCookie;
-import com.techcourse.http.HttpVersion;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpVersion;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

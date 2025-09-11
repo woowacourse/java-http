@@ -2,18 +2,19 @@ package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.NotFoundException;
-import com.techcourse.http.ContentType;
-import com.techcourse.http.HttpCookie;
-import com.techcourse.http.HttpVersion;
-import com.techcourse.http.request.HttpRequest;
-import com.techcourse.http.response.HttpResponse;
-import com.techcourse.http.response.Location;
-import com.techcourse.http.response.ResponseBody;
-import com.techcourse.http.session.Session;
-import com.techcourse.http.session.SessionRepository;
+import com.techcourse.handler.core.AbstractRequestHandler;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.Location;
+import org.apache.coyote.http.response.ResponseBody;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionRepository;
 
 public class LoginRequestHandler extends AbstractRequestHandler {
 

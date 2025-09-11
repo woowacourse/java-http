@@ -1,4 +1,4 @@
-package com.techcourse.http.response;
+package org.apache.coyote.http.response;
 
 
 public enum HttpStatus {

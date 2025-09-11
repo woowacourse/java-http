@@ -1,7 +1,8 @@
 package com.techcourse.handler;
 
-import com.techcourse.http.HttpVersion;
-import com.techcourse.http.request.HttpRequest;
+import com.techcourse.handler.core.RequestHandler;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 
@@ -19,6 +20,7 @@ public class RequestMapping {
         if (httpRequest.getFilePath().equals("/login.html")) {
             return new LoginRequestHandler(httpVersion);
         }
+
         if (httpRequest.getFilePath().equals("/register.html")) {
             return new RegisterRequestHandler(httpVersion);
         }

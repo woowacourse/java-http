@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.http.HttpVersion;
-import com.techcourse.http.request.HttpRequest;
-import com.techcourse.http.request.RequestBody;
-import com.techcourse.http.request.RequestHeader;
-import com.techcourse.http.response.HttpResponse;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.response.HttpResponse;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

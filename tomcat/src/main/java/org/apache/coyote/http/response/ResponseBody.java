@@ -1,6 +1,6 @@
-package com.techcourse.http.response;
+package org.apache.coyote.http.response;
 
-import com.techcourse.http.request.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 import com.techcourse.util.FileUtil;
 
 public record ResponseBody(

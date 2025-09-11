@@ -1,11 +1,12 @@
 package com.techcourse.handler;
 
-import com.techcourse.http.ContentType;
-import com.techcourse.http.HttpCookie;
-import com.techcourse.http.HttpVersion;
-import com.techcourse.http.request.HttpRequest;
-import com.techcourse.http.response.HttpResponse;
-import com.techcourse.http.response.ResponseBody;
+import com.techcourse.handler.core.AbstractRequestHandler;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.ResponseBody;
 
 public class RootRequestHandler extends AbstractRequestHandler {
 

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,12 +37,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = RequestParser.parse(bufferedReader);
-            final HttpResponse httpResponse = HttpResponse.build(httpRequest);
+            final Controller controller = RequestMapping.getController(httpRequest);
+            final HttpResponse httpResponse = controller.service(httpRequest);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

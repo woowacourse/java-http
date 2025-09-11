@@ -18,12 +18,20 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
+    public RequestMethod getRequestMethod() {
+        return this.requestLine.getRequestMethod();
+    }
+
     public String getPath() {
         return this.requestLine.getPath();
     }
 
     public Optional<String> findParamsValueFromUri(final String name) {
         return this.requestLine.findParamsValue(name);
+    }
+
+    public ProtocolVersion getProtocolVersion() {
+        return this.requestLine.getProtocolVersion();
     }
 
     public Optional<String> findParamsValueFromBody(final String name) {

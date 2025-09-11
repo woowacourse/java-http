@@ -19,7 +19,7 @@ public class MappingLine { // GET /endPoint HTTP/1.1
         this.method = parsedRequestLine[0];
         String fullUrl = parsedRequestLine[1];
         int idx = fullUrl.indexOf("?");
-        if (idx != -1) { // TODO 2025. 9. 7. 22:42: if-else 리펙터링 하기
+        if (idx != -1) {
             this.path = fullUrl.substring(0, idx);
             this.parameters = parseParameters(fullUrl.substring(idx + 1));
         }  else {

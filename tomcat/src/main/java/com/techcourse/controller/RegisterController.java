@@ -22,7 +22,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> signInRequest = request.getBodyMap();
+        Map<String, String> signInRequest = request.parseForBody();
         service.create(signInRequest);
         ResponseWriters.found(response, "/index.html");
     }

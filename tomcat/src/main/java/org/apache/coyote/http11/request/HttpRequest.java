@@ -109,19 +109,19 @@ public class HttpRequest {
         return body;
     }
 
-    public Map<String, String> getBodyMap() {
-        Map<String, String> map = new HashMap<>();
-        String bodyStr = new String(body, StandardCharsets.UTF_8);
+    public Map<String, String> parseForBody() {
+        Map<String, String> formData = new HashMap<>();
+        String bodyString = new String(body, StandardCharsets.UTF_8);
 
-        String[] parsedBodies = bodyStr.split("&");
-        for (String parsedBody : parsedBodies) {
-            String[] split = parsedBody.split("=");
-            if (split.length != 2) {
-                throw new IllegalArgumentException("invalid body format like map : " + split.length);
+        String[] pairs = bodyString.split("&");
+        for (String pair : pairs) {
+            String[] kv = pair.split("=");
+            if (kv.length != 2) {
+                throw new IllegalArgumentException("invalid body format like map : " + kv.length);
             }
-            map.put(split[0], split[1]);
+            formData.put(kv[0], kv[1]);
         }
 
-        return map;
+        return formData;
     }
 }

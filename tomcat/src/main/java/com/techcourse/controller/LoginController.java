@@ -36,7 +36,7 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> loginRequest = request.getBodyMap();
+        Map<String, String> loginRequest = request.parseForBody();
         try {
             User user = service.getUser(loginRequest);
             log.info("{}", user.toString());

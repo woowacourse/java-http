@@ -26,11 +26,11 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
-        this.executorService = createExecutorService(DEFAULT_MAX_THREADS);
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this.executorService = createExecutorService(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }

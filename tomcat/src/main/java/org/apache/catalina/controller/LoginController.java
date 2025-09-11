@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.cookie.ResponseCookie;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpResponseHeader;
-import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.response.StatusLine;
 
 public class LoginController implements Controller {
@@ -31,22 +31,33 @@ public class LoginController implements Controller {
         HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
 
         if (foundUser.isPresent() && foundUser.get().checkPassword(parsedRequestBody.get("password"))) {
-            ResponseCookie responseCookie = createResponseCookie(request, foundUser.get());
-            httpResponseHeader.add("Location", "index.html");
-            httpResponseHeader.addCookie(responseCookie);
-
-            StatusLine statusLine = new StatusLine(HttpStatus.FOUND, request);
-
-            response.setStatusLine(statusLine);
-            response.setHttpResponseHeader(httpResponseHeader);
+            handleForSuccess(request, response, foundUser, httpResponseHeader);
             return;
         }
 
+        handleForFailed(request, response, httpResponseHeader);
+    }
+
+    private void handleForFailed(HttpRequest request, HttpResponse response,
+                                 HttpResponseHeader httpResponseHeader) {
         httpResponseHeader.add("Location", "401.html");
 
         StatusLine statusLine = new StatusLine(HttpStatus.UNAUTHORIZED, request);
         response.setStatusLine(statusLine);
         response.setHttpResponseHeader(httpResponseHeader);
+    }
+
+    private void handleForSuccess(HttpRequest request, HttpResponse response, Optional<User> foundUser,
+                                  HttpResponseHeader httpResponseHeader) {
+        ResponseCookie responseCookie = createResponseCookie(request, foundUser.get());
+        httpResponseHeader.add("Location", "index.html");
+        httpResponseHeader.addCookie(responseCookie);
+
+        StatusLine statusLine = new StatusLine(HttpStatus.FOUND, request);
+
+        response.setStatusLine(statusLine);
+        response.setHttpResponseHeader(httpResponseHeader);
+        return;
     }
 
     private ResponseCookie createResponseCookie(HttpRequest httpRequest, User user) {

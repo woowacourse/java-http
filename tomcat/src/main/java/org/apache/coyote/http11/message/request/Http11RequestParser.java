@@ -10,7 +10,7 @@ import org.apache.coyote.http11.message.HttpMethod;
 
 public class Http11RequestParser {
 
-    private static final String INVALID_HTTP_VERSION = "HTTP/1.1";
+    private static final String VALID_HTTP_VERSION = "HTTP/1.1";
 
     private final Http11InputBuffer inputBuffer;
     private final Charset defaultHeaderCharset;
@@ -107,7 +107,7 @@ public class Http11RequestParser {
     }
 
     private void checkHttpVersion(RequestLine requestLine) {
-        if (!requestLine.httpVersion().equals(INVALID_HTTP_VERSION)) {
+        if (!requestLine.httpVersion().equals(VALID_HTTP_VERSION)) {
             throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
         }
     }

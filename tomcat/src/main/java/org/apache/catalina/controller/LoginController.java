@@ -29,6 +29,10 @@ public class LoginController extends AbstractController {
         final Map<String, String> formData = UrlEncodedFormParser.parse(request.getMessageBody());
         final String account = formData.get("account");
         final String password = formData.get("password");
+        if (account == null || password == null) {
+            response.sendRedirection("/401.html");
+            return;
+        }
 
         final boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
                 .map(user -> user.checkPassword(password))

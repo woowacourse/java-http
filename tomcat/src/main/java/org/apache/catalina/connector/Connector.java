@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.coyote.http11.Http11Processor;
@@ -20,7 +20,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
-    private final Executor executor;
+    private final ExecutorService threadPool;
 
     private boolean stopped;
 
@@ -31,7 +31,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        executor = Executors.newFixedThreadPool(maxThreads);
+        threadPool = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -72,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executor.execute(processor);
+        threadPool.execute(processor);
     }
 
     public void stop() {

@@ -13,11 +13,16 @@ public class ThreadContainer {
 
     public ThreadContainer(int queueSize, int maxThreads) {
         final int coreCount = Runtime.getRuntime().availableProcessors();
+        final int corePoolSize = coreCount * 2;
+        if (corePoolSize > maxThreads) {
+            maxThreads = corePoolSize;
+        }
+
         this.executorService = new ThreadPoolExecutor(
                 coreCount * 2,
                 maxThreads,
                 DEFAULT_TIMEOUT,
-                TimeUnit.MILLISECONDS,
+                TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(queueSize),
                 new AbortPolicy()
         );

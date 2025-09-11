@@ -34,17 +34,7 @@ public class ResponseWriters {
 
     public static void ok(HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.addHeader(); // TODO 2025. 9. 12. 04:21: defaultheader의 책임 분리 : ResponseWriters vs HttpResponse
-    }
-
-    public static void found(HttpResponse httpResponse, String redirectUrl, String sessionId) {
-        httpResponse.setStatus(HttpStatus.FOUND);
-        Map<String, String> headers = Map.of(
-                "Location", redirectUrl,
-                "Set-Cookie", "JSESSIONID=" + sessionId
-        );
-
-        httpResponse.addHeader(headers);
+        httpResponse.addHeader();
     }
 
     public static void found(HttpResponse httpResponse, String redirectUrl) {

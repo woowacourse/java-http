@@ -45,7 +45,7 @@ public class LoginController extends AbstractController {
             session.setAttribute("user", user);
             sessionManager.add(session);
 
-            ResponseWriters.found(response, "/index.html"); // TODO 2025. 9. 12. 04:39: 그냥 fileNmae으로 path 찾도록 내부로직 수정하기
+            ResponseWriters.found(response, "/index.html");
         } catch (IllegalArgumentException e) {
             ResponseWriters.found(response, "/401.html");
         }

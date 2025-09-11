@@ -1,58 +1,47 @@
 package org.apache.coyote.controller;
 
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.ContentTypeSearcher;
 import org.apache.coyote.FileManager;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.session.SessionManager;
 
-public class StaticFileHandler {
+public class StaticFileHandler extends AbstractController {
 
     private final static String STATIC_ROOT = "static";
+    private final static SessionManager sessionManger = SessionManager.getInstance();
 
-    public static Http11Response getResponse(Http11Request reader, SessionManager sessionManager) {
+    @Override
+    public void service(Http11Request reader, Http11Response response) {
         String path = reader.getPath();
-        HttpStatusCode statusCode;
+        HttpStatus statusCode;
 
         FileManager fileManager;
         try {
             fileManager = new FileManager(STATIC_ROOT + path, path);
         } catch (IllegalArgumentException e) {
-            statusCode = HttpStatusCode.NOTFOUND;
+            statusCode = HttpStatus.NOTFOUND;
             String body = "404 Not Found";
-            Http11Response response = new Http11Response(
-                    statusCode,
-                    "text/html; charset=utf-8",
-                    body.getBytes(StandardCharsets.UTF_8),
-                    null,
-                    null
-            );
+            response.status(statusCode);
+            response.contentType("text/html; charset=utf-8");
+            response.body(body.getBytes());
 
-            return response;
+            return;
         } catch (Exception e) {
-            statusCode = HttpStatusCode.INTERNAL_SERVER_ERROR;
+            statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
             String body = "500 Internal Server Error";
-            Http11Response response = new Http11Response(
-                    statusCode,
-                    "text/html; charset=utf-8",
-                    body.getBytes(StandardCharsets.UTF_8),
-                    null,
-                    null
-            );
+            response.status(statusCode);
+            response.contentType("text/html; charset=utf-8");
+            response.body(body.getBytes());
 
-            return response;
+            return;
         }
 
         String contentType = ContentTypeSearcher.getContentTypeBy(path);
-        statusCode = HttpStatusCode.OK;
-        Http11Response response = new Http11Response(statusCode,
-                contentType,
-                fileManager.getContent(),
-                null,
-                null);
-
-        return response;
+        statusCode = HttpStatus.OK;
+        response.status(statusCode);
+        response.contentType(contentType);
+        response.body(fileManager.getContent());
     }
 }

@@ -7,13 +7,12 @@ import org.apache.coyote.http11.constant.ContentType;
 import org.apache.coyote.http11.constant.HttpStatus;
 
 public class HttpResponse {
-    private final HttpStatus statusCode;
-    private final ContentType contentType;
-    private final Map<String, String> headers;
-    private final String body;
+    private HttpStatus statusCode;
+    private ContentType contentType;
+    private Map<String, String> headers = new HashMap<>();
+    private String body;
 
-    public HttpResponse(HttpStatus statusCode, ContentType contentType) {
-        this(statusCode, contentType, new HashMap<>(), null);
+    public HttpResponse() {
     }
 
     public HttpResponse(HttpStatus statusCode, ContentType contentType, String body) {
@@ -38,6 +37,48 @@ public class HttpResponse {
 
     public byte[] convertByteArray() {
         return convertString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public void setStatusCode(HttpStatus statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public void setResponse(HttpStatus status, ContentType contentType, String body) {
+        this.statusCode = status;
+        this.contentType = contentType;
+        this.body = body;
+    }
+
+    public void setResponse(HttpStatus status, ContentType contentType) {
+        this.statusCode = status;
+        this.contentType = contentType;
+    }
+
+    public void setRedirect(String location) {
+        appendHeader("Location", location);
+    }
+
+    public void setCookie(Map<String, Object> cookies) {
+        if (cookies == null || cookies.isEmpty()) {
+            return;
+        }
+
+        cookies.entrySet().stream()
+                .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                .map(entry -> entry.getKey() + "=" + entry.getValue().toString() + "; Path=/; HttpOnly")
+                .forEach(cookieString -> appendHeader("Set-Cookie", cookieString));
     }
 
     private String convertString() {
@@ -71,4 +112,6 @@ public class HttpResponse {
         response.append(body);
         return response.toString();
     }
+
+
 }

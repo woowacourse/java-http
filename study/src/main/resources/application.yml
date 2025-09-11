@@ -3,8 +3,8 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 5 # 커넥션 레디큐 크기 max: 100
+    max-connections: 5 # 서버가 받을 수 있는 최대 연결 수 max: 8192
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 2 # 최소 워커스레드 개수 max: 10 (가상스레드 영향 X)
+      max: 5 # 최대 워커스레드 개수 max: 200 (가상스레드 영향 X)

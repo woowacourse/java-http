@@ -14,6 +14,10 @@ public class HttpCookie {
         }
     }
 
+    public boolean contains(String key) {
+        return cookies.containsKey(key);
+    }
+
     public String get(String key) {
         return cookies.get(key);
     }

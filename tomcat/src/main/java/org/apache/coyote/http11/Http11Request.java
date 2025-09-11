@@ -1,53 +1,61 @@
 package org.apache.coyote.http11;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public final class Http11Request {
 
-    private final String method;
-    private final String path;
-    private final Map<String, String> queryParams;
-    private final Map<String, String> headers;
+    private final RequestLine requestLine;
+    private final HttpHeaders headers;
     private final String body;
-    private final HttpCookie httpCookie;
 
     public Http11Request(
-            final String method,
-            final String path,
-            final Map<String, String> queryParams,
-            final Map<String, String> headers,
+            final RequestLine requestLine,
+            final HttpHeaders headers,
             final String body
     ) {
-        this.method = method;
-        this.path = path;
-        this.queryParams = queryParams;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.httpCookie = new HttpCookie(headers.get("Cookie"));
     }
 
     public static Http11Request createInvalid() {
-        return new Http11Request("", "/", Collections.emptyMap(), Collections.emptyMap(), "");
+        return new Http11Request(
+                RequestLine.createInvalid(),
+                new HttpHeaders(Map.of()),
+                ""
+        );
     }
 
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
+    public boolean isPost() {
+        return getMethod() == HttpMethod.POST;
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams;
+    public Map<String, List<String>> getQueryParams() {
+        return requestLine.getQueryParams();
+    }
+
+    public HttpVersion getVersion() {
+        return requestLine.getVersion();
+    }
+
+    public Map<String, List<String>> getHeaders() {
+        return headers.getHeaders();
+    }
+
+    public HttpCookies getCookies() {
+        return headers.getCookies();
     }
 
     public String getBody() {
         return body;
-    }
-
-    public boolean isPost() {
-        return "POST".equalsIgnoreCase(method);
     }
 }

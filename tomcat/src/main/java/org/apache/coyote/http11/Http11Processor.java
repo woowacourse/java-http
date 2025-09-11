@@ -6,11 +6,11 @@ import com.techcourse.model.User;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpCookie;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,13 +60,11 @@ public class Http11Processor implements Runnable, Processor {
         if (requestLineString.isBlank()) {
             return Http11Request.createInvalid();
         }
-        final var requestLine = parseRequestLine(requestLineString);
-        final var headers = parseHeaders(inputStream);
+        final var requestLine = RequestLine.from(requestLineString);
+        final var headers = HttpHeaders.from(inputStream);
         final String body = parseBody(inputStream, headers);
         return new Http11Request(
-                requestLine.method(),
-                requestLine.path(),
-                requestLine.queryParams(),
+                requestLine,
                 headers,
                 body
         );
@@ -91,58 +89,16 @@ public class Http11Processor implements Runnable, Processor {
         return buffer.toString(StandardCharsets.US_ASCII);
     }
 
-    private RequestLine parseRequestLine(final String line) {
-        final var parts = line.split(" ");
-        final String method = parts[0];
-        final String requestTarget = parts[1];
-        String path = requestTarget;
-        String queryString = "";
-        if (requestTarget.contains("?")) {
-            final int queryIndex = requestTarget.indexOf("?");
-            path = requestTarget.substring(0, queryIndex);
-            queryString = requestTarget.substring(queryIndex + 1);
-        }
-        final var queryParams = parseUrlEncodedParams(queryString);
-        return new RequestLine(method, path, queryParams);
-    }
-
-    private Map<String, String> parseHeaders(final InputStream inputStream) throws IOException {
-        final var headers = new HashMap<String, String>();
-        String headerLine;
-        while (!(headerLine = readLine(inputStream)).isBlank()) {
-            final var header = headerLine.split(": ", 2);
-            headers.put(header[0].trim(), header[1].trim());
-        }
-        return headers;
-    }
-
     private String parseBody(
             final InputStream inputStream,
-            final Map<String, String> headers
+            final HttpHeaders headers
     ) throws IOException {
-        if (!headers.containsKey("Content-Length")) {
+        final int contentLength = headers.getContentLength();
+        if (contentLength == 0) {
             return "";
         }
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
         final var bodyBytes = inputStream.readNBytes(contentLength);
         return new String(bodyBytes, StandardCharsets.UTF_8);
-    }
-
-    private Map<String, String> parseUrlEncodedParams(final String data) {
-        if (data == null || data.isBlank()) {
-            return Collections.emptyMap();
-        }
-        final Map<String, String> params = new HashMap<>();
-        final String[] pairs = data.split("&");
-        for (final String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                params.put(key, value);
-            }
-        }
-        return params;
     }
 
     private Http11Response dispatch(final Http11Request httpRequest) {
@@ -165,7 +121,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response handleLoginRequest(final Http11Request httpRequest) {
         if (httpRequest.isPost()) {
-            final var params = parseUrlEncodedParams(httpRequest.getBody());
+            final var params = extractFirstParamValues(RequestLine.parseUrlEncodedParams(httpRequest.getBody()));
             final Optional<User> userOptional = isLoginSuccessful(params);
             if (userOptional.isPresent()) {
                 final var user = userOptional.get();
@@ -189,9 +145,10 @@ public class Http11Processor implements Runnable, Processor {
             final Http11Request request,
             final boolean create
     ) {
-        return request.getHttpCookie()
+        final Optional<String> jSessionId = request.getCookies()
                 .getCookie("JSESSIONID")
-                .flatMap(manager::findSession)
+                .map(HttpCookie::getValue);
+        return jSessionId.flatMap(manager::findSession)
                 .or(() -> {
                     if (create) {
                         return Optional.of(createNewSession());
@@ -226,7 +183,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response handleRegisterRequest(final Http11Request httpRequest) {
         if (httpRequest.isPost()) {
-            final var params = parseUrlEncodedParams(httpRequest.getBody());
+            final var params = extractFirstParamValues(RequestLine.parseUrlEncodedParams(httpRequest.getBody()));
             final var user = new User(
                     params.get("account"),
                     params.get("password"),
@@ -237,6 +194,16 @@ public class Http11Processor implements Runnable, Processor {
             return Http11Response.redirect("/index.html");
         }
         return serveStaticFile("/register.html");
+    }
+
+    private Map<String, String> extractFirstParamValues(final Map<String, List<String>> params) {
+        final Map<String, String> result = new HashMap<>();
+        for (var entry : params.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                result.put(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+        return result;
     }
 
     private Http11Response serveStaticFile(final String path) {

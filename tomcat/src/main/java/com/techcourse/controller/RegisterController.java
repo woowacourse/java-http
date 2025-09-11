@@ -1,4 +1,4 @@
-package org.apache.catalina.controller.auth;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -11,7 +11,7 @@ import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterController extends AbstractController {
+public final class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 

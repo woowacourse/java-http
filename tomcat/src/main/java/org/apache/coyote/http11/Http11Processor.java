@@ -12,14 +12,16 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int MAX_LINE_LENGTH = 8192;
 
     private final Socket connection;
     private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(
+            final Socket connection,
+            final RequestMapping requestMapping
+    ) {
         this.connection = connection;
-        this.requestMapping = new RequestMapping();
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -88,3 +90,4 @@ public class Http11Processor implements Runnable, Processor {
         controller.service(httpRequest, httpResponse);
     }
 }
+

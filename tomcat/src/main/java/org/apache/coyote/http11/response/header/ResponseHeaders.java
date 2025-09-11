@@ -22,7 +22,7 @@ public class ResponseHeaders {
     public String toResponseText() {
         final StringBuilder sb = new StringBuilder();
         headers.forEach(header -> {
-            sb.append(header.toResponseTest())
+            sb.append(header.toResponseText())
                     .append(" \r\n");
         });
 

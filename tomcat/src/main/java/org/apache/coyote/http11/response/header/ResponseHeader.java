@@ -23,7 +23,7 @@ public class ResponseHeader {
         return new ResponseHeader("Set-Cookie", cookie);
     }
 
-    public String toResponseTest() {
+    public String toResponseText() {
         return key + ": " + value;
     }
 

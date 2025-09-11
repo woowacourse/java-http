@@ -1,15 +1,16 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.StaticResourceHandler;
 
 public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        StaticController.handleStaticResource("/register.html", response);
+        StaticResourceHandler.handleStaticResource("/register.html", response);
     }
 
     @Override

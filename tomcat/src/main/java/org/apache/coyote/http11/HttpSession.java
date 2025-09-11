@@ -3,13 +3,13 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Session {
+public class HttpSession {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
     private boolean invalidated = false;
 
-    public Session(final String id) {
+    public HttpSession(final String id) {
         this.id = id;
     }
 

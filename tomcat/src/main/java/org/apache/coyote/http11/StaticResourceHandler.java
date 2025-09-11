@@ -1,12 +1,11 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.coyote.http11.HttpResponse;
 
-public class StaticController {
+public class StaticResourceHandler {
 
     public static void handleStaticResource(String requestPath, HttpResponse response) throws IOException {
         URL resourceUrl = ClassLoader.getSystemResource("static" + requestPath);

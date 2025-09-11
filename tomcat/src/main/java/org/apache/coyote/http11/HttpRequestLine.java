@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
-public class RequestLine {
+public class HttpRequestLine {
 
     private final String method;
     private final String fullPath;
     private final String protocolVersion;
 
-    public RequestLine(String method, String fullPath, String protocolVersion) {
+    public HttpRequestLine(String method, String fullPath, String protocolVersion) {
         this.method = method;
         this.fullPath = fullPath;
         this.protocolVersion = protocolVersion;
@@ -32,7 +32,7 @@ public class RequestLine {
         return fullPath;
     }
 
-    public static RequestLine parse(String requestLine) {
+    public static HttpRequestLine parse(String requestLine) {
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IllegalArgumentException("Request Line은 비어있을 수 없습니다.");
         }
@@ -40,7 +40,7 @@ public class RequestLine {
         if (tokens.length < 3) {
             throw new IllegalArgumentException("유효하지 않은 Request Line 형식입니다.");
         }
-        return new RequestLine(tokens[0], tokens[1], tokens[2]);
+        return new HttpRequestLine(tokens[0], tokens[1], tokens[2]);
     }
 
     @Override

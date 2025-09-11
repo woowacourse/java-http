@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.HttpRequest;

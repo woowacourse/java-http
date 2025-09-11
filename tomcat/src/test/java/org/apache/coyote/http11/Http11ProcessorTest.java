@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -57,5 +58,51 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("올바른 id, password 입력 시 리다이렉션")
+    @Test
+    void success_login() {
+        // given
+        final var body = "account=gugu&password=password";
+        final String request = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK");
+    }
+
+    @DisplayName("유효하지 않은 id, password 입력 시 401")
+    @Test
+    void error_login() {
+        // given
+        final var body = "account=&password=";
+        final String request = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 401 Unauthorized");
     }
 }

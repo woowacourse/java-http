@@ -3,65 +3,73 @@ package org.apache.coyote.http11;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class Http11Response {
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final Map<String, List<String>> headers;
-    private final byte[] body;
+    private byte[] body;
 
-    public Http11Response(
-            final int statusCode,
-            final String contentType,
-            final String body
-    ) {
-        this(StatusLine.from(statusCode), Map.of("Content-Type", List.of(contentType)), body.getBytes(StandardCharsets.UTF_8));
+    public Http11Response() {
+        this.statusLine = StatusLine.from(200);
+        this.headers = new HashMap<>();
+        this.body = new byte[0];
     }
 
-    public Http11Response(
-            final int statusCode,
-            final String contentType,
-            final byte[] body
-    ) {
-        this(StatusLine.from(statusCode), Map.of("Content-Type", List.of(contentType)), body);
+    public void setStatus(final int statusCode) {
+        this.statusLine = StatusLine.from(statusCode);
     }
 
-    public Http11Response(
-            final StatusLine statusLine,
-            final Map<String, List<String>> headers,
-            final byte[] body
+    public void setHeader(
+            final String name,
+            final String value
     ) {
-        this.statusLine = statusLine;
-        this.headers = new HashMap<>(headers);
+        this.headers.put(name, List.of(value));
+    }
+
+    public void addHeader(
+            final String name,
+            final String value
+    ) {
+        this.headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+    }
+
+    public void setBody(
+            final String body,
+            final String contentType
+    ) {
+        this.body = body.getBytes(StandardCharsets.UTF_8);
+        setHeader("Content-Type", contentType);
+    }
+
+    public void setBody(
+            final byte[] body,
+            final String contentType
+    ) {
         this.body = body;
-    }
-
-    public static Http11Response redirect(final String location) {
-        return new Http11Response(StatusLine.from(302), Map.of("Location", List.of(location)), new byte[0]);
+        setHeader("Content-Type", contentType);
     }
 
     public byte[] getResponseBytes() {
-        final String responseLine = statusLine.toLineString();
         final var responseHeaders = new HashMap<>(this.headers);
         responseHeaders.put("Content-Length", List.of(String.valueOf(this.body.length)));
-        try (final var outputStream = new ByteArrayOutputStream()) {
-            outputStream.write(responseLine.getBytes(StandardCharsets.UTF_8));
+        try (var outputStream = new ByteArrayOutputStream()) {
+            outputStream.write(statusLine.toLineString().getBytes(StandardCharsets.UTF_8));
             outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
-            for (final var headerEntry : responseHeaders.entrySet()) {
-                final String headerKey = headerEntry.getKey();
-                for (final String headerValue : headerEntry.getValue()) {
-                    final String headerLine = headerKey + ": " + headerValue;
-                    outputStream.write(headerLine.getBytes(StandardCharsets.UTF_8));
-                    outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            for (var headerEntry : responseHeaders.entrySet()) {
+                for (var value : headerEntry.getValue()) {
+                    outputStream.write((headerEntry.getKey() + ": " + value + "\r\n")
+                            .getBytes(StandardCharsets.UTF_8));
                 }
             }
             outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
             outputStream.write(this.body);
             return outputStream.toByteArray();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

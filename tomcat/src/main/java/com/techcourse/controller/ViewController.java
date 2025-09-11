@@ -1,49 +1,43 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.Session;
-import com.techcourse.db.SessionManager;
-import java.util.Map;
+import com.techcourse.ResponseWriters;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import org.apache.coyote.http11.dispatcher.handlerAdapter.ViewResolver;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.resource.ResourceUtil;
+import org.apache.coyote.http11.response.HttpResponse;
 
-public class ViewController {
+public class ViewController extends AbstractController {
 
-    private final SessionManager sessionManager;
-
-    public ViewController(SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
-    }
-
-    public String getLoginPage(Map<String, String> headers) {
-        if (existsSession(headers)) {
-            return "index.html";
-        }
-        return "login.html";
-    }
-
-    private boolean existsSession(Map<String, String> headers) {
-        String cookie = headers.get("Cookie");
-
-        if (cookie == null) {
-            return false;
+    @Override
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        String resourcePath = httpRequest.getMappingLine().getPath();
+        URL url = ViewResolver.resolve(resourcePath);
+        byte[] body;
+        try {
+            body = ResourceUtil.readAll(url);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        String[] parsedCookie = cookie.split("; "); // Idea-1f980704=d1410481-d266-4764-a4dd-47a3d9d19f64; Pycharm-edf2faa0=91c6849a-33b8-4d86-a27b-bd16d51f090a; Webstorm-b369078d=8a15b985-71c2-42b0-96b4-eb3e64f0dfe5; JSESSIONID=d4d9915e-323d-43af-beb0-a60ac9e7c6b7
-        for (String parsedValue : parsedCookie) {
-            String[] splits = parsedValue.split("=", 2);
-            String name = splits[0];
-            String value = splits[1];
-
-            if (name.equals("JSESSIONID")) {
-                Session session = sessionManager.findSession(value);
-                if (session == null) {
-                    return false;
-                }
-                return true;
-            }
+        String contentType = URLConnection.guessContentTypeFromName(url.toString());
+        if (contentType == null) {
+            contentType = "application/octet-stream";
         }
-        return false;
+
+        int idx = contentType.indexOf("/");
+        if (idx == -1) {
+            contentType = "application/octet-stream";
+        }
+        ResponseWriters.ok(httpResponse, body, contentType);
     }
 
-    public String getRegisterPage() {
-        return "register.html";
+    private String normalize(String url) {
+        if (url.startsWith("/")) {
+            return url.substring(1);
+        }
+        return url;
     }
 }

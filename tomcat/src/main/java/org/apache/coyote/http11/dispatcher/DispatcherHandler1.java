@@ -1,18 +1,22 @@
 package org.apache.coyote.http11.dispatcher;
 
+import com.techcourse.ResponseWriters;
+import com.techcourse.controller.ViewController;
 import org.apache.coyote.http11.dispatcher.handlerAdapter.ControllerHandlerAdapter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseEntity;
 
 public class DispatcherHandler1 {
 
     private final ControllerHandlerAdapter controllerHandlerAdapter;
     private final HandlerMapping handlerMapping;
+    private final ViewController viewController;
 
-    public DispatcherHandler1(ControllerHandlerAdapter controllerHandlerAdapter, HandlerMapping handlerMapping) {
+    public DispatcherHandler1(ControllerHandlerAdapter controllerHandlerAdapter, HandlerMapping handlerMapping,
+                              ViewController viewController) {
         this.controllerHandlerAdapter = controllerHandlerAdapter;
         this.handlerMapping = handlerMapping;
+        this.viewController = viewController;
     }
 
     public HttpResponse doService(HttpRequest httpRequest) throws Exception {
@@ -20,7 +24,12 @@ public class DispatcherHandler1 {
         if (controllerHandlerAdapter.supports(mappingHandler)) {
             return controllerHandlerAdapter.handle(httpRequest, mappingHandler);
         }
+        HttpResponse httpResponse = new HttpResponse();
+        viewController.doGet(httpRequest, httpResponse);
 
-        return ResponseEntity.notFound();
+        if (httpResponse.getStatus() == null) {
+            ResponseWriters.notFound(httpResponse);
+        }
+        return httpResponse;
     }
 }

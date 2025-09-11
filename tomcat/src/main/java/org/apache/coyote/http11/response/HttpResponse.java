@@ -34,6 +34,10 @@ public class HttpResponse {
         this(new StatusLine(httpStatus), headers, body);
     }
 
+    public HttpStatus getStatus() {
+        return this.statusLine.getHttpStatus();
+    }
+
     public void setStatus(HttpStatus httpStatus) {
         this.statusLine.setHttpStatus(httpStatus);
     }

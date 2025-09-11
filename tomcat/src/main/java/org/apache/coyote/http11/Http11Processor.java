@@ -37,6 +37,8 @@ public class Http11Processor implements Runnable, Processor {
             dispatcher.dispatch(httpRequest, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import com.techcourse.model.Session;
+import org.apache.coyote.http11.Session;
 
 import java.io.IOException;
 

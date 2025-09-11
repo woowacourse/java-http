@@ -1,6 +1,4 @@
-package com.techcourse.db;
-
-import com.techcourse.model.Session;
+package org.apache.coyote.http11;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,5 +22,17 @@ public class SessionManager {
 
     public static void removeSession(String id) {
         sessions.remove(id);
+    }
+
+    public static Session resolveSession(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final String jsessionid = httpRequest.getCookies().getCookie("JSESSIONID");
+
+        return Optional.ofNullable(jsessionid)
+                .flatMap(SessionManager::findSession)
+                .orElseGet(() -> {
+                    Session newSession = createSession();
+                    httpResponse.addCookie(Cookie.ofJSessionId(newSession.getId()));
+                    return newSession;
+                });
     }
 }

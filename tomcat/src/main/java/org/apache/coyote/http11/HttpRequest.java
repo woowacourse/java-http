@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.model.Session;
-
 import java.util.Map;
 
 public class HttpRequest {

@@ -21,35 +21,30 @@ public class RequestHandler {
         this.requestMappings = new RequestMappings();
     }
 
-    public HttpResponse handleRequest(HttpRequest request) {
+    public void handleRequest(HttpRequest request, HttpResponse response) {
         try {
             final var controller = requestMappings.getSupportController(request);
-            final var response = HttpResponse.empty();
             controller.service(request, response);
-            return response;
         } catch (UnauthorizedException e) {
-            return responseUnauthorizedView();
+            response.setDefaultResponse(ResponseStatus.UNAUTHORIZED, ContentType.HTML, readUnauthorizedView());
         } catch (NotFoundException e) {
-            return responseNotFoundView();
+            response.setDefaultResponse(ResponseStatus.NOT_FOUND, ContentType.HTML, readNotFoundView());
         } catch (Exception e) {
             log.error("요청 처리 중 오류 발생", e);
-            return responseSeverErrorView();
+            response.setDefaultResponse(ResponseStatus.INTERNAL_SERVER_ERROR, ContentType.HTML, readSeverErrorView());
         }
     }
 
-    private HttpResponse responseNotFoundView() {
-        final byte[] body = readFile(Path.of("static", "404.html").toString());
-        return HttpResponse.of(ResponseStatus.NOT_FOUND, ContentType.HTML, body);
+    private byte[] readNotFoundView() {
+        return readFile(Path.of("static", "404.html").toString());
     }
 
-    private HttpResponse responseUnauthorizedView() {
-        final byte[] body = readFile(Path.of("static", "401.html").toString());
-        return HttpResponse.of(ResponseStatus.UNAUTHORIZED, ContentType.HTML, body);
+    private byte[] readUnauthorizedView() {
+        return readFile(Path.of("static", "401.html").toString());
     }
 
-    private HttpResponse responseSeverErrorView() {
-        final byte[] body = readFile(Path.of("static", "500.html").toString());
-        return HttpResponse.of(ResponseStatus.INTERNAL_SERVER_ERROR, ContentType.HTML, body);
+    private byte[] readSeverErrorView() {
+        return readFile(Path.of("static", "500.html").toString());
     }
 
     private byte[] readFile(String staticFilePath) {

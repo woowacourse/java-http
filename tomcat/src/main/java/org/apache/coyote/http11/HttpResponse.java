@@ -16,7 +16,7 @@ public class HttpResponse {
     private long contentLength;
     private byte[] body;
 
-    public HttpResponse(ProtocolVersion protocolVersion,
+    private HttpResponse(ProtocolVersion protocolVersion,
                         ResponseStatus responseStatus,
                         ContentType contentType,
                         String location,
@@ -32,16 +32,6 @@ public class HttpResponse {
 
     public static HttpResponse empty() {
         return new HttpResponse(null, null, null, null, 0, new byte[0]);
-    }
-
-    public static HttpResponse of(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
-        return new HttpResponse(
-                ProtocolVersion.HTTP11,
-                responseStatus,
-                contentType,
-                null,
-                body.length,
-                body);
     }
 
     public void setDefaultResponse(ResponseStatus responseStatus, ContentType contentType, byte[] body) {

@@ -1,5 +1,5 @@
 // RequestBody.java (신규 파일)
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -3,9 +3,9 @@ package com.techcourse.controller;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class HelloController extends AbstractController {
     @Override

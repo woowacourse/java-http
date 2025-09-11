@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ public class HttpHeaders {
     private static final String HEADER_SEPARATOR = ":";
 
     private final Map<String, String> headers = new HashMap<>();
-    
+
     public HttpHeaders(BufferedReader reader) throws IOException {
         parse(reader);
     }

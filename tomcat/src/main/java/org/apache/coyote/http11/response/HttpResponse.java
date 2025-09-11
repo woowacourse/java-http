@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {
 
@@ -36,12 +37,7 @@ public class HttpResponse {
     public void send(HttpStatus status) throws IOException {
         String defaultBody = status.getStatusCode() + " " + status.getReasonPhrase();
         byte[] bodyBytes = defaultBody.getBytes(StandardCharsets.UTF_8);
-
         String contentType = "text/plain;charset=utf-8";
-        if (status == HttpStatus.BAD_REQUEST || status == HttpStatus.INTERNAL_SERVER_ERROR) {
-            contentType = "text/html;charset=utf-8";
-        }
-
         send(status, contentType, bodyBytes);
     }
 

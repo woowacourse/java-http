@@ -12,6 +12,8 @@ public class UserServlet {
     }
 
     private void join(final User user) {
+        // 두 스레드가 중복 체크를 수행한 시점에서 users 리스트가 모두 비어있었다는 점
+        // "읽기-확인-쓰기" 패턴에서 발생하는 전형적인 race condition의 메커니즘
         if (!users.contains(user)) {
             users.add(user);
         }

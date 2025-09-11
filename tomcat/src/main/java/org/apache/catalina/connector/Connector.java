@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.catalina.servlet.ServletContainer;
@@ -95,9 +96,18 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, container);
-        // new Thread()가 아닌 스레드풀의 스레드를 재사용
-        threadPool.execute(processor);
+        try {
+            threadPool.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("Thread pool saturated, rejecting request: {}", e.getMessage());
+            try {
+                connection.close(); // 소켓 누수 방지
+            } catch (IOException ex) {
+                log.error("Failed to close rejected socket", ex);
+            }
+        }
     }
+
 
     public void stop() {
         stopped = true;

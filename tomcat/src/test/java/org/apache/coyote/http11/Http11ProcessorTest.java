@@ -3,10 +3,8 @@ package org.apache.coyote.http11;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,8 +22,8 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/plain;charset=utf-8 ",
                 "Content-Length: 12 ",
+                "Content-Type: text/plain;charset=utf-8 ",
                 "",
                 "Hello world!");
 
@@ -49,12 +47,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final byte[] body;
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+            body = resourceAsStream.readAllBytes();
+        }
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(body);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -76,12 +77,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final byte[] body;
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
+            body = resourceAsStream.readAllBytes();
+        }
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 3797 \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(body);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -103,12 +107,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+        final byte[] body;
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("static/404.html")) {
+            body = resourceAsStream.readAllBytes();
+        }
+        var expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Length: 2430 \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(body);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

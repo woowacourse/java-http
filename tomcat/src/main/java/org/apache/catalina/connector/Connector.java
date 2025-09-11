@@ -81,7 +81,7 @@ public class Connector implements Runnable {
             // 새로운 작업 제출을 막고 기존 작업 종료 대기 시작
             executorService.shutdown();
             // 작업 종료 대기 (실제 작업 모두 완료되지 않을 수 있음)
-            if(executorService.awaitTermination(60, TimeUnit.SECONDS)){ // 보통 30초~1분 대기
+            if (executorService.awaitTermination(60, TimeUnit.SECONDS)) { // 보통 30초~1분 대기
                 executorService.shutdownNow(); // 대기해도 종료 안되면 강제 셧다운
             }
 

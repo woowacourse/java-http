@@ -31,7 +31,7 @@ public class HttpResponse {
     public HttpResponse redirect(String location) {
         status = HttpStatus.REDIRECT;
 
-        responseHeader.addHeader("Location", location);
+        responseHeader.addHeader("Location", "http://localhost:8080/" + location);
 
         return this;
     }
@@ -58,7 +58,7 @@ public class HttpResponse {
     public void write(String value) throws IOException {
         body += value;
 
-        responseHeader.addHeader("Content-Type", body.getBytes().length + ";charset=utf-8");
+        responseHeader.addHeader("Content-Length", body.getBytes().length + ";charset=utf-8");
     }
 
     public String buildHttpResponse() {

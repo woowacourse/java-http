@@ -33,6 +33,6 @@ public class RegisterController extends AbstractController {
         String email = request.getParameter("email");
         InMemoryUserRepository.save(new User(account, password, email));
 
-        response.redirect("http://localhost:8080/index.html");
+        response.redirect("index.html");
     }
 }

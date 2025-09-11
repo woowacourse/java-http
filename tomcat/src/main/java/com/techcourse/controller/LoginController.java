@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Session session = request.getSession(false);
         if (session != null && session.getAttribute("loginUser") != null) {
-            response.redirect("http://localhost:8080/index.html");
+            response.redirect("index.html");
             return;
         }
 
@@ -43,14 +43,14 @@ public class LoginController extends AbstractController {
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(request.getParameter("account"));
         if (foundUser.isEmpty()) {
             log.info("존재하지 않는 user입니다.");
-            response.redirect("http://localhost:8080/401.html");
+            response.redirect("401.html");
             return;
         }
 
         User user = foundUser.get();
         if (!user.checkPassword(request.getParameter("password"))) {
             log.info("비밀번호 틀림");
-            response.redirect("http://localhost:8080/401.html");
+            response.redirect("401.html");
             return;
         }
 
@@ -58,7 +58,7 @@ public class LoginController extends AbstractController {
         Session session = request.getSession(true);
         session.setAttribute("loginUser", user);
 
-        response.redirect("http://localhost:8080/index.html")
+        response.redirect("index.html")
                 .addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 }

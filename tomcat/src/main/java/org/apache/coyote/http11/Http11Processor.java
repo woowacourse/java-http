@@ -16,8 +16,11 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final Map<Integer, String> HTTP_STATUS_CODES = Map.ofEntries(
             Map.entry(200, "200 OK"),
+            Map.entry(302, "302 Found"),
             Map.entry(400, "400 Bad Request"),
             Map.entry(401, "401 Unauthorized"),
             Map.entry(404, "404 Not Found")
@@ -56,13 +60,17 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String[] request = bufferedReader.readLine().split(" ");
+            final List<String> headers = getHeaders(bufferedReader);
+
+            final String[] request = headers.getFirst().split(" ");
+            final String method = request[0];
             final String requestUri = request[1];
-            final Map<String, String> queryMap = extractQueryParams(requestUri);
+            log.debug("request : {} {}", method, requestUri);
+
+            final int contentLength = getContentLengthFromHeaders(headers);
+            final String body = readRequestBody(bufferedReader, contentLength);
 
             final String path = parsePath(requestUri);
-            log.debug("resource : {}", path);
-
             final URL resource = getResourceUrl(path);
 
             if (resource == null) {
@@ -70,39 +78,61 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            handleLogin(path, queryMap);
+            final Map<String, String> queryParams = mergeParameters(
+                    extractQueryParams(requestUri),
+                    parseQueryString(body)
+            );
+
+            final HttpCookie httpCookie = parseCookieFromHeader(headers);
+
+            if ("POST".equals(method) && !queryParams.isEmpty()) {
+                if ("/login.html".equals(path)) {
+                    handleLogin(queryParams, httpCookie, outputStream);
+                    return;
+                }
+
+                if ("/register.html".equals(path)) {
+                    handleRegister(queryParams, httpCookie, outputStream);
+                    return;
+                }
+            }
+
+            if ("GET".equals(method) && "/login.html".equals(path) && httpCookie.contains("JSESSIONID")) {
+                final String sessionId = httpCookie.getValue("JSESSIONID");
+                if (SessionManager.getInstance().findSession(sessionId).isPresent()) {
+                    sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
+                    return;
+                }
+            }
+
             sendResponse(generateResponse(200, resource), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> extractQueryParams(final String uri) {
-        if (!uri.contains("?")) {
-            return Map.of();
-        }
-        final String[] split = uri.split("\\?");
-        final String queryString = split.length > 1 ? split[1] : "";
-        return parseQueryString(queryString);
+    private List<String> getHeaders(final BufferedReader bufferedReader) {
+        return bufferedReader.lines()
+                .takeWhile(line -> !line.isBlank())
+                .toList();
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> queryMap = new HashMap<>();
-        if (queryString == null || queryString.isBlank()) {
-            return queryMap;
-        }
+    private int getContentLengthFromHeaders(final List<String> headers) {
+        return headers.stream()
+                .filter(h -> h.startsWith("Content-Length"))
+                .map(h -> h.split(":")[1].trim())
+                .mapToInt(Integer::parseInt)
+                .findFirst()
+                .orElse(0);
+    }
 
-        final String[] pairs = queryString.split("&");
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=");
-            final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-            String value = "";
-            if (keyValue.length > 1) {
-                value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-            }
-            queryMap.put(key, value);
+    private String readRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        if (contentLength <= 0) {
+            return "";
         }
-        return queryMap;
+        char[] bodyChars = new char[contentLength];
+        bufferedReader.read(bodyChars);
+        return new String(bodyChars);
     }
 
     private String parsePath(final String requestUri) {
@@ -125,6 +155,57 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + path);
     }
 
+    private void sendResponse(final String response, final OutputStream outputStream) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private HttpCookie parseCookieFromHeader(final List<String> headers) {
+        return headers.stream()
+                .filter(h -> h.startsWith("Cookie"))
+                .map(h -> h.substring("Cookie:".length()).trim())
+                .map(HttpCookie::fromHeader)
+                .findFirst()
+                .orElse(HttpCookie.fromHeader(null));
+    }
+
+    private Map<String, String> mergeParameters(
+            Map<String, String> queryParams,
+            Map<String, String> bodyParams
+    ) {
+        Map<String, String> result = new HashMap<>(queryParams);
+        result.putAll(bodyParams);
+        return result;
+    }
+
+    private Map<String, String> extractQueryParams(final String uri) {
+        if (!uri.contains("?")) {
+            return Map.of();
+        }
+        final String[] split = uri.split("\\?");
+        final String queryString = split.length > 1 ? split[1] : "";
+        return parseQueryString(queryString);
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> queryMap = new HashMap<>();
+        if (queryString == null || queryString.isBlank()) {
+            return queryMap;
+        }
+
+        final String[] pairs = queryString.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+            String value = "";
+            if (keyValue.length > 1) {
+                value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            }
+            queryMap.put(key, value);
+        }
+        return queryMap;
+    }
+
     private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
         final String resourceName = resource.getFile();
         final String extension = extractExtension(resourceName);
@@ -134,24 +215,32 @@ public class Http11Processor implements Runnable, Processor {
         return parseResponse(httpStatusCode, contentType, responseBody);
     }
 
+    private String generateRedirectResponse(final int httpStatusCode, final String location) {
+        return parseResponse(httpStatusCode, location);
+    }
+
+    private String generateRedirectResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
+        return parseResponse(httpStatusCode, location, httpCookie);
+    }
+
     private String generateErrorResponse(final int httpStatusCode) {
         try {
             if (!HTTP_STATUS_CODES.containsKey(httpStatusCode)) {
                 throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
             }
             final String extension = "html";
-            final URL resource = getResourceUrl("/" + httpStatusCode + "." +extension);
+            final URL resource = getResourceUrl("/" + httpStatusCode + "." + extension);
             final String responseBody = Files.readString(new File(resource.getFile()).toPath());
             final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
 
             return parseResponse(httpStatusCode, contentType, responseBody);
         } catch (IOException | NullPointerException e) {
             final String responseBody = String.format("""
-                <html>
-                    <head><title>Error</title></head>
-                    <body><h1>%d %s</h1></body>
-                </html>
-            """, httpStatusCode, HTTP_STATUS_CODES.get(httpStatusCode));
+                        <html>
+                            <head><title>Error</title></head>
+                            <body><h1>%s</h1></body>
+                        </html>
+                    """, HTTP_STATUS_CODES.get(httpStatusCode));
 
             return parseResponse(httpStatusCode, "text/html", responseBody);
         }
@@ -166,6 +255,27 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
+    private String parseResponse(final int httpStatusCode, final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "");
+    }
+
+    private String parseResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
+        final List<String> cookieHeaders = httpCookie.getAll().entrySet().stream()
+                .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + " ")
+                .toList();
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
+                "Location: " + location + " ",
+                String.join("\r\n", cookieHeaders),
+                "Content-Length: 0 ",
+                "");
+    }
+
     private String extractExtension(final String resourceName) {
         int dotIndex = resourceName.lastIndexOf(".");
         if (dotIndex == -1) {
@@ -174,22 +284,62 @@ public class Http11Processor implements Runnable, Processor {
         return resourceName.substring(dotIndex + 1);
     }
 
-    private void handleLogin(final String path, final Map<String, String> queryMap) {
-        if (!"/login.html".equals(path) || queryMap.isEmpty()) {
-            return;
-        }
+    private void handleLogin(
+            final Map<String, String> queryMap,
+            final HttpCookie httpCookie,
+            final OutputStream outputStream
+    ) throws IOException {
         final String account = queryMap.get("account");
         final String password = queryMap.get("password");
+
+        if (account == null || password == null || account.isBlank() || password.isBlank()) {
+            sendResponse(generateErrorResponse(400), outputStream);
+            return;
+        }
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : {}", user.get());
+            final Session session = Session.create();
+            session.setAttribute("user", user.get());
+            SessionManager.getInstance().add(session);
+            httpCookie.add("JSESSIONID", session.getId());
+            sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
+            return;
         }
+
+        sendResponse(generateRedirectResponse(302, "/401.html"), outputStream);
     }
 
-    private void sendResponse(final String response, final OutputStream outputStream) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private void handleRegister(
+            final Map<String, String> queryMap,
+            final HttpCookie httpCookie,
+            final OutputStream outputStream
+    ) throws IOException {
+        final String account = queryMap.get("account");
+        final String email = queryMap.get("email");
+        final String password = queryMap.get("password");
+
+        if (account == null || email == null || password == null
+                || account.isBlank() || password.isBlank() || email.isBlank()) {
+            sendResponse(generateErrorResponse(400), outputStream);
+            return;
+        }
+
+        final Optional<User> existingUser = InMemoryUserRepository.findByAccount(account);
+        if (existingUser.isPresent()) {
+            sendResponse(generateRedirectResponse(302, "/400.html"), outputStream);
+            return;
+        }
+
+        final User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        log.info("new user : {}", newUser);
+        final Session session = Session.create();
+        session.setAttribute("user", newUser);
+        SessionManager.getInstance().add(session);
+        httpCookie.add("JSESSIONID", session.getId());
+        sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
     }
 }

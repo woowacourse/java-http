@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import org.apache.coyote.http11.controller.exception.ResourceNotFoundException;
 
 public final class StaticResourceResolver {
 
@@ -13,15 +13,14 @@ public final class StaticResourceResolver {
     private StaticResourceResolver() {
     }
 
-    public static Optional<String> read(final String path) throws IOException {
+    public static String read(final String path) throws IOException {
         final URL resourceUrl = findResource(path);
         if (resourceUrl == null) {
-            return Optional.empty();
+            throw new ResourceNotFoundException(path);
         }
 
         try (final InputStream inputStream = resourceUrl.openStream()) {
-            final var readResult = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            return Optional.of(readResult);
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 

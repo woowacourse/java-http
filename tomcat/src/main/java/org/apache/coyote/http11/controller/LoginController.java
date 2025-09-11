@@ -25,12 +25,8 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        final Optional<String> responseBody = StaticResourceResolver.read(request.getPath());
-        if (responseBody.isEmpty()) {
-            response.sendNotFound();
-            return;
-        }
-        response.sendOk("text/html", responseBody.get());
+        final var responseBody = StaticResourceResolver.read(request.getPath());
+        response.sendOk("text/html", responseBody);
     }
 
     @Override

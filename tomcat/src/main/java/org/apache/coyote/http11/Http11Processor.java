@@ -10,6 +10,7 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.StaticFileController;
+import org.apache.coyote.http11.controller.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.SessionSupport;
@@ -43,19 +44,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
         ) {
+            final var request = HttpRequest.from(inputStream);
+            final var response = new HttpResponse(outputStream);
+            final var session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
+            final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
             try {
-                final var request = HttpRequest.from(inputStream);
-                final var response = new HttpResponse(outputStream);
-                final var session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
-                final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
                 controller.service(request, response, session);
+            } catch (ResourceNotFoundException e) {
+                log.warn(e.getMessage(), e);
+                response.sendNotFound();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                final var response = new HttpResponse(outputStream);
                 response.sendServerError();
             }
         } catch (IOException e) {
-            log.error("I/O error during processing: {}", e.getMessage(), e);
+            log.error("500 에러 전송 실패: {}", e.getMessage(), e);
         }
     }
 }

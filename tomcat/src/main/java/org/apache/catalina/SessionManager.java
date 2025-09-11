@@ -2,19 +2,15 @@ package org.apache.catalina;
 
 import org.apache.catalina.vo.Cookie;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private final Map<String, Session> sessions = new HashMap<>();
-    private static SessionManager INSTANCE;
+    private static final SessionManager INSTANCE = new SessionManager();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public static SessionManager getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SessionManager();
-        }
         return INSTANCE;
     }
 

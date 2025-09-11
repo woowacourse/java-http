@@ -30,19 +30,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<Integer, String> HTTP_STATUS_CODES = Map.ofEntries(
-            Map.entry(200, "200 OK"),
-            Map.entry(302, "302 Found"),
-            Map.entry(400, "400 Bad Request"),
-            Map.entry(401, "401 Unauthorized"),
-            Map.entry(404, "404 Not Found")
-    );
-    private static final Map<String, String> MIME_TYPES = Map.ofEntries(
-            Map.entry("html", "text/html;charset=UTF-8"),
-            Map.entry("css", "text/css;charset=UTF-8"),
-            Map.entry("js", "application/javascript;charset=UTF-8"),
-            Map.entry("ico", "image/x-icon")
-    );
 
     private final Socket connection;
 
@@ -68,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             final URL resource = getResourceUrl(path);
 
             if (resource == null) {
-                sendResponse(generateErrorResponse(404), outputStream);
+                sendResponse(generateErrorResponse(HttpStatus.NOT_FOUND), outputStream);
                 return;
             }
 
@@ -94,12 +81,12 @@ public class Http11Processor implements Runnable, Processor {
             if (HttpMethod.GET == request.getMethod() && "/login.html".equals(path) && httpCookie.contains("JSESSIONID")) {
                 final String sessionId = httpCookie.getValue("JSESSIONID");
                 if (SessionManager.getInstance().findSession(sessionId).isPresent()) {
-                    sendResponse(generateRedirectResponse(302, "/index.html"), outputStream);
+                    sendResponse(generateRedirectResponse("/index.html"), outputStream);
                     return;
                 }
             }
 
-            sendResponse(generateResponse(200, resource), outputStream);
+            sendResponse(generateResponse(HttpStatus.OK, resource), outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -181,8 +168,8 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + path);
     }
 
-    private void sendResponse(final String response, final OutputStream outputStream) throws IOException {
-        outputStream.write(response.getBytes());
+    private void sendResponse(final HttpResponse response, final OutputStream outputStream) throws IOException {
+        outputStream.write(response.toBytes());
         outputStream.flush();
     }
 
@@ -227,75 +214,46 @@ public class Http11Processor implements Runnable, Processor {
         return queryMap;
     }
 
-
-    private String generateResponse(final int httpStatusCode, final URL resource) throws IOException {
+    private HttpResponse generateResponse(final HttpStatus httpStatus, final URL resource) throws IOException {
         final String resourceName = resource.getFile();
         final String extension = extractExtension(resourceName);
-        final String responseBody = Files.readString(new File(resourceName).toPath());
-        final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
+        final byte[] responseBody = Files.readAllBytes(new File(resourceName).toPath());
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setHeader("Content-Type", MimeType.getOrDefault(extension).getType());
 
-        return parseResponse(httpStatusCode, contentType, responseBody);
+        return HttpResponse.of(httpStatus, httpHeaders, responseBody);
     }
 
-    private String generateRedirectResponse(final int httpStatusCode, final String location) {
-        return parseResponse(httpStatusCode, location);
+    private HttpResponse generateRedirectResponse(final String location) {
+        return HttpResponse.redirect(location);
     }
 
-    private String generateRedirectResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
-        return parseResponse(httpStatusCode, location, httpCookie);
+    private HttpResponse generateRedirectResponse(final String location, final HttpCookie httpCookie) {
+        final HttpResponse httpResponse = HttpResponse.redirect(location);
+        httpCookie.getAll().forEach((name, value) -> httpResponse.setHeader("Set-Cookie", name + "=" + value));
+        return httpResponse;
     }
 
-    private String generateErrorResponse(final int httpStatusCode) {
+    private HttpResponse generateErrorResponse(final HttpStatus httpStatus) {
         try {
-            if (!HTTP_STATUS_CODES.containsKey(httpStatusCode)) {
-                throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
-            }
             final String extension = "html";
-            final URL resource = getResourceUrl("/" + httpStatusCode + "." + extension);
-            final String responseBody = Files.readString(new File(resource.getFile()).toPath());
-            final String contentType = MIME_TYPES.getOrDefault(extension, "text/plain");
-
-            return parseResponse(httpStatusCode, contentType, responseBody);
+            final URL resource = getResourceUrl("/" + httpStatus.getCode() + "." + extension);
+            final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+            final MimeType contentType = MimeType.getOrDefault(extension);
+            final HttpResponse httpResponse = HttpResponse.error(httpStatus, responseBody);
+            httpResponse.setHeader("Content-Type", contentType.getType());
+            return httpResponse;
         } catch (IOException | NullPointerException e) {
             final String responseBody = String.format("""
                         <html>
                             <head><title>Error</title></head>
                             <body><h1>%s</h1></body>
                         </html>
-                    """, HTTP_STATUS_CODES.get(httpStatusCode));
-
-            return parseResponse(httpStatusCode, "text/html", responseBody);
+                    """, httpStatus.getCode() + " " + httpStatus.getReasonPhrase());
+            final HttpResponse httpResponse = HttpResponse.error(httpStatus, responseBody.getBytes(StandardCharsets.UTF_8));
+            httpResponse.setHeader("Content-Type", MimeType.HTML.getType());
+            return httpResponse;
         }
-    }
-
-    private String parseResponse(final int httpStatusCode, final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String parseResponse(final int httpStatusCode, final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "");
-    }
-
-    private String parseResponse(final int httpStatusCode, final String location, final HttpCookie httpCookie) {
-        final List<String> cookieHeaders = httpCookie.getAll().entrySet().stream()
-                .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + " ")
-                .toList();
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS_CODES.get(httpStatusCode) + " ",
-                "Location: " + location + " ",
-                String.join("\r\n", cookieHeaders),
-                "Content-Length: 0 ",
-                "");
     }
 
     private String extractExtension(final String resourceName) {
@@ -315,7 +273,7 @@ public class Http11Processor implements Runnable, Processor {
         final String password = queryMap.get("password");
 
         if (account == null || password == null || account.isBlank() || password.isBlank()) {
-            sendResponse(generateErrorResponse(400), outputStream);
+            sendResponse(generateErrorResponse(HttpStatus.BAD_REQUEST), outputStream);
             return;
         }
 
@@ -327,11 +285,11 @@ public class Http11Processor implements Runnable, Processor {
             session.setAttribute("user", user.get());
             SessionManager.getInstance().add(session);
             httpCookie.add("JSESSIONID", session.getId());
-            sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
+            sendResponse(generateRedirectResponse("/index.html", httpCookie), outputStream);
             return;
         }
 
-        sendResponse(generateRedirectResponse(302, "/401.html"), outputStream);
+        sendResponse(generateRedirectResponse("/401.html"), outputStream);
     }
 
     private void handleRegister(
@@ -345,13 +303,13 @@ public class Http11Processor implements Runnable, Processor {
 
         if (account == null || email == null || password == null
                 || account.isBlank() || password.isBlank() || email.isBlank()) {
-            sendResponse(generateErrorResponse(400), outputStream);
+            sendResponse(generateErrorResponse(HttpStatus.BAD_REQUEST), outputStream);
             return;
         }
 
         final Optional<User> existingUser = InMemoryUserRepository.findByAccount(account);
         if (existingUser.isPresent()) {
-            sendResponse(generateRedirectResponse(302, "/400.html"), outputStream);
+            sendResponse(generateRedirectResponse("/400.html"), outputStream);
             return;
         }
 
@@ -362,6 +320,6 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute("user", newUser);
         SessionManager.getInstance().add(session);
         httpCookie.add("JSESSIONID", session.getId());
-        sendResponse(generateRedirectResponse(302, "/index.html", httpCookie), outputStream);
+        sendResponse(generateRedirectResponse("/index.html", httpCookie), outputStream);
     }
 }

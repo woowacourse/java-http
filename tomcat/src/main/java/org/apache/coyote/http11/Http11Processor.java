@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -57,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Request parseRequest(final InputStream inputStream) throws IOException {
         final String requestLineString = readLine(inputStream);
         if (requestLineString.isBlank()) {
-            return Http11Request.createInvalid(manager);
+            return Http11Request.createInvalid();
         }
         final var requestLine = parseRequestLine(requestLineString);
         final var headers = parseHeaders(inputStream);
@@ -67,8 +68,7 @@ public class Http11Processor implements Runnable, Processor {
                 requestLine.path(),
                 requestLine.queryParams(),
                 headers,
-                body,
-                manager
+                body
         );
     }
 
@@ -169,7 +169,7 @@ public class Http11Processor implements Runnable, Processor {
             final Optional<User> userOptional = isLoginSuccessful(params);
             if (userOptional.isPresent()) {
                 final var user = userOptional.get();
-                final var session = httpRequest.getSession(true)
+                final var session = getSession(httpRequest, true)
                         .orElseThrow(() -> new IllegalStateException("세션 생성에 실패했습니다."));
                 session.setAttribute("user", user);
                 final var response = Http11Response.redirect("/index.html");
@@ -178,11 +178,32 @@ public class Http11Processor implements Runnable, Processor {
             }
             return Http11Response.redirect("/401.html");
         }
-        final Optional<Session> sessionOptional = httpRequest.getSession(false);
+        final Optional<Session> sessionOptional = getSession(httpRequest, false);
         if (sessionOptional.isPresent() && sessionOptional.get().getAttribute("user") != null) {
             return Http11Response.redirect("/index.html");
         }
         return serveStaticFile("/login.html");
+    }
+
+    private Optional<Session> getSession(
+            final Http11Request request,
+            final boolean create
+    ) {
+        return request.getHttpCookie()
+                .getCookie("JSESSIONID")
+                .flatMap(manager::findSession)
+                .or(() -> {
+                    if (create) {
+                        return Optional.of(createNewSession());
+                    }
+                    return Optional.empty();
+                });
+    }
+
+    private Session createNewSession() {
+        final var newSession = new Session(UUID.randomUUID().toString());
+        manager.add(newSession);
+        return newSession;
     }
 
     private Optional<User> isLoginSuccessful(final Map<String, String> params) {

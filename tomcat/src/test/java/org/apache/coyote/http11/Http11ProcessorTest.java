@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -266,7 +267,7 @@ class Http11ProcessorTest {
         final var user = com.techcourse.db.InMemoryUserRepository.findByAccount("gugu").get();
         final var session = new org.apache.catalina.session.Session("1234");
         session.setAttribute("user", user);
-        final var sessionManager = new org.apache.catalina.session.SessionManager();
+        final var sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
 
         final var httpRequest = """

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
     OK(200, "OK"),
     REDIRECT(302, "Found"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     ;
 
     private final int code;

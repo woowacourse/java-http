@@ -11,7 +11,7 @@ import java.util.List;
 public class StaticFileController extends AbstractController {
 
     private static final List<String> SUPPORT_EXTENSIONS = List.of(
-            "html", "css", "js"
+            ".html", ".css", ".js"
     );
 
     @Override

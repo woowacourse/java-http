@@ -74,6 +74,10 @@ public class HttpResponse {
         return sb.toString();
     }
 
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
     private void appendStartLine(StringBuilder sb) {
         sb.append(version.getVersion())
                 .append(" ")

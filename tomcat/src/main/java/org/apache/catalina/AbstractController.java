@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestMethod;
 
 public abstract class AbstractController implements Controller {
@@ -18,14 +19,14 @@ public abstract class AbstractController implements Controller {
             return;
         }
 
-        throw new IllegalArgumentException("Unsupported HTTP method");
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        throw new UnsupportedOperationException("Unsupported HTTP method");
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        throw new UnsupportedOperationException("Unsupported HTTP method");
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

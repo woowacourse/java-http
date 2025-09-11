@@ -1,6 +1,6 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
-import com.techcourse.handler.core.AbstractRequestHandler;
+import com.techcourse.controller.core.AbstractRequestController;
 import com.techcourse.util.FileUtil;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpCookie;
@@ -9,10 +9,10 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.ResponseBody;
 
-public class StaticResourceRequestHandler extends AbstractRequestHandler {
+public class StaticResourceRequestController extends AbstractRequestController {
     private final HttpVersion httpVersion;
 
-    public StaticResourceRequestHandler(final HttpVersion httpVersion) {
+    public StaticResourceRequestController(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
     }
 

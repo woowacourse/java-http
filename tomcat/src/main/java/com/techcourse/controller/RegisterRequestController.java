@@ -1,7 +1,7 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
+import com.techcourse.controller.core.AbstractRequestController;
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.handler.core.AbstractRequestHandler;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.UUID;
@@ -13,11 +13,11 @@ import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.Location;
 import org.apache.coyote.http.response.ResponseBody;
 
-public class RegisterRequestHandler extends AbstractRequestHandler {
+public class RegisterRequestController extends AbstractRequestController {
 
     private final HttpVersion httpVersion;
 
-    public RegisterRequestHandler(final HttpVersion httpVersion) {
+    public RegisterRequestController(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
     }
 

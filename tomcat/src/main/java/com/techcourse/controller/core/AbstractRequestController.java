@@ -1,11 +1,11 @@
-package com.techcourse.handler.core;
+package com.techcourse.controller.core;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public abstract class AbstractRequestHandler implements RequestHandler {
+public abstract class AbstractRequestController implements RequestController {
 
     @Override
     public HttpResponse service(HttpRequest httpRequest) {

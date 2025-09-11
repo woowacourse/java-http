@@ -1,6 +1,6 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
-import com.techcourse.handler.core.AbstractRequestHandler;
+import com.techcourse.controller.core.AbstractRequestController;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpVersion;
@@ -8,11 +8,11 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.ResponseBody;
 
-public class RootRequestHandler extends AbstractRequestHandler {
+public class RootRequestController extends AbstractRequestController {
 
     private final HttpVersion httpVersion;
 
-    public RootRequestHandler(final HttpVersion httpVersion) {
+    public RootRequestController(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
     }
 

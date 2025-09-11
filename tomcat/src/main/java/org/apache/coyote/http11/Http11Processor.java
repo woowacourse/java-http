@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RequestMapping;
+import com.techcourse.controller.core.RequestController;
 import com.techcourse.exception.NotFoundException;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.handler.RequestMapping;
-import com.techcourse.handler.core.RequestHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,9 +55,9 @@ public class Http11Processor implements Runnable, Processor {
                 RequestBody requestBody = parseRequestBody(bufferedReader, requestHeader);
 
                 HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
-                RequestHandler requestHandler = requestMapping.getRequestHandler(httpRequest);
+                RequestController requestController = requestMapping.getRequestController(httpRequest);
 
-                HttpResponse httpResponse = requestHandler.service(httpRequest);
+                HttpResponse httpResponse = requestController.service(httpRequest);
                 outputStream.write(httpResponse.toBytes());
                 outputStream.flush();
             } catch (NotFoundException e) {

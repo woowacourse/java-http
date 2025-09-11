@@ -1,8 +1,8 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
+import com.techcourse.controller.core.AbstractRequestController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.NotFoundException;
-import com.techcourse.handler.core.AbstractRequestHandler;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
@@ -16,11 +16,11 @@ import org.apache.coyote.http.response.ResponseBody;
 import org.apache.coyote.http.session.Session;
 import org.apache.coyote.http.session.SessionRepository;
 
-public class LoginRequestHandler extends AbstractRequestHandler {
+public class LoginRequestController extends AbstractRequestController {
 
     private final HttpVersion httpVersion;
 
-    public LoginRequestHandler(final HttpVersion httpVersion) {
+    public LoginRequestController(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
     }
 

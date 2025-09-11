@@ -1,6 +1,6 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
-import com.techcourse.handler.core.RequestHandler;
+import com.techcourse.controller.core.RequestController;
 import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 
@@ -12,19 +12,19 @@ public class RequestMapping {
         this.httpVersion = httpVersion;
     }
 
-    public RequestHandler getRequestHandler(final HttpRequest httpRequest) {
+    public RequestController getRequestController(final HttpRequest httpRequest) {
         if (httpRequest.isRootPath()) {
-            return new RootRequestHandler(httpVersion);
+            return new RootRequestController(httpVersion);
         }
 
         if (httpRequest.getFilePath().equals("/login.html")) {
-            return new LoginRequestHandler(httpVersion);
+            return new LoginRequestController(httpVersion);
         }
 
         if (httpRequest.getFilePath().equals("/register.html")) {
-            return new RegisterRequestHandler(httpVersion);
+            return new RegisterRequestController(httpVersion);
         }
 
-        return new StaticResourceRequestHandler(httpVersion);
+        return new StaticResourceRequestController(httpVersion);
     }
 }

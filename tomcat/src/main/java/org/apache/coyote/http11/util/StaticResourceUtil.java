@@ -3,7 +3,6 @@ package org.apache.coyote.http11.util;
 import ch.qos.logback.core.util.FileUtil;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.exception.BadRequestException;
 
 public class StaticResourceUtil {
 
@@ -16,7 +15,7 @@ public class StaticResourceUtil {
 
         try (final var inputStream = FileUtil.class.getClassLoader().getResourceAsStream(wholeResourcePath)) {
             if (inputStream == null) {
-                throw new BadRequestException("Resource not found: " + wholeResourcePath);
+                return null;
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.processor.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -24,20 +25,19 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String actualOutput = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(actualOutput).contains("HTTP/1.1 200 OK ");
+        assertThat(actualOutput).contains("Hello world!");
+
+        assertThat(actualOutput).contains("Content-Type: text/html;charset=utf-8 ");
+        assertThat(actualOutput).contains("Content-Length: 12 ");
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -51,14 +51,25 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        final String actualOutput = socket.output();
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        // 파일의 실제 바이트와 문자열 내용을 모두 준비.
+        final byte[] fileContentBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final String fileContent = new String(fileContentBytes);
+
+        final String[] responseParts = actualOutput.split("\r\n\r\n", 2);
+        final String headers = responseParts[0];
+        final String body = responseParts[1];
+
+        assertThat(headers).startsWith("HTTP/1.1 200 OK");
+
+        // 헤더들이 응답에 포함되었는지 순서에 관계없이 확인합니다.
+        assertThat(headers).contains("Content-Type: text/html;charset=utf-8");
+        assertThat(headers).contains("Content-Length: " + fileContentBytes.length);
+
+        // 바디 내용이 파일의 실제 내용과 일치하는지 확인합니다.
+        assertThat(body).isEqualTo(fileContent);
     }
 
     @Test

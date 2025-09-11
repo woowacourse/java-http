@@ -1,11 +1,18 @@
 package org.apache.coyote.http11;
 
+import static java.net.URLDecoder.decode;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11RequestParser {
+
+    private static final Logger log = LoggerFactory.getLogger(Http11RequestParser.class);
 
     public static Http11Request parse(final BufferedReader reader) throws IOException {
         final RequestLine requestLine = new RequestLine(reader.readLine());
@@ -35,7 +42,17 @@ public class Http11RequestParser {
             for (String param : params) {
                 String[] pair = param.split("=", 2);
                 if (pair.length == 2) {
-                    bodyParams.put(pair[0], pair[1]);
+                    try {
+                        // URL 디코딩 후 삽입
+                        final String decodedKey = decode(pair[0], StandardCharsets.UTF_8);
+                        final String decodedValue = decode(pair[1], StandardCharsets.UTF_8);
+                        log.debug("Decoded body param: {}={}", decodedKey, decodedValue);
+                        bodyParams.put(decodedKey, decodedValue);
+                    } catch (IllegalArgumentException e) {
+                        // URL 디코딩 실패 시 원본 삽입
+                        log.debug("Body param: {}={}", pair[0], pair[1]);
+                        bodyParams.put(pair[0], pair[1]);
+                    }
                 }
             }
         }

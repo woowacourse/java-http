@@ -5,7 +5,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.catalina.FrontController;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.processor.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

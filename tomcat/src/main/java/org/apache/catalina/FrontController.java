@@ -1,11 +1,11 @@
 package org.apache.catalina;
 
-import com.controller.Controller;
+import org.apache.catalina.controller.Controller;
 import org.apache.catalina.mapping.DynamicControllerMapping;
 import org.apache.catalina.mapping.StaticControllerMapping;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.response.Http11Response;
 
 public class FrontController {
 

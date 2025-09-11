@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import com.techcourse.model.User;
 import java.util.HashMap;

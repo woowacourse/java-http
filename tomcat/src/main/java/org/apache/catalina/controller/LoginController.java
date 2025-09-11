@@ -1,7 +1,5 @@
-package com.controller;
+package org.apache.catalina.controller;
 
-import com.resolver.StaticResourceResolver;
-import com.resolver.StaticResourceResolver.ResolvedResource;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.Account;
 import com.techcourse.model.Password;
@@ -10,10 +8,12 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.resolver.StaticResourceResolver;
+import org.apache.catalina.resolver.StaticResourceResolver.ResolvedResource;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

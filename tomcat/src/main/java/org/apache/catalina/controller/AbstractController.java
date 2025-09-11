@@ -1,8 +1,8 @@
-package com.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.response.Http11Response;
 
 public abstract class AbstractController implements Controller {
 

@@ -27,7 +27,7 @@ public class RegisterController extends AbstractController {
 
         Http11Session session = SessionManager.createSession();
         session.setAttribute("user", user);
-
+        response.putHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
         response.sendRedirect("/index.html");
     }
 }

@@ -5,7 +5,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse response);
+    HttpResponse service(HttpRequest request);
 
     String getPath();
 }

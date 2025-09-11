@@ -3,6 +3,7 @@ package org.apache.catalina.dispatcher;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.util.ResourceUtil;
 
 public class ControllerHandler implements RequestHandler {
@@ -25,7 +26,10 @@ public class ControllerHandler implements RequestHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        requestMapping.getController(httpRequest)
-                .ifPresent(controller -> controller.service(httpRequest, httpResponse));
+        HttpResponse response = requestMapping.getController(httpRequest)
+                .map(controller -> controller.service(httpRequest))
+                .orElse(ResponseEntity.notFound(""));
+
+        httpResponse.setHttpResponse(response);
     }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.MimeType;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.util.ResourceUtil;
 
@@ -17,18 +18,17 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         String body = ResourceUtil.readStaticResource("/register.html", this.getClass());
-        httpResponse.setHttpResponse(ResponseEntity.ok(body, "text/html;charset=utf-8"));
+        return ResponseEntity.ok(body, MimeType.HTML);
     }
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> bodyParams = httpRequest.getBodyParams();
 
         if (!isValidParams(bodyParams)) {
-            httpResponse.setHttpResponse(ResponseEntity.badRequest("account or password is missing."));
-            return;
+            return ResponseEntity.badRequest("account or password is missing.");
         }
 
         String account = bodyParams.get("account");
@@ -37,14 +37,13 @@ public class RegisterController extends AbstractController {
         if (registerService.isExistAccount(account)) {
             // account가 중복되어 회원가입에 실패한 경우
             String body = ResourceUtil.readStaticResource("/register.html", this.getClass());
-            httpResponse.setHttpResponse(ResponseEntity.conflict(body, "text/html;charset=utf-8"));
-            return;
+            return ResponseEntity.conflict(body, MimeType.HTML);
         }
 
         registerService.register(account, password, email);
         // 회원가입에 성공한 경우
         String body = ResourceUtil.readStaticResource("/index.html", this.getClass());
-        httpResponse.setHttpResponse(ResponseEntity.ok(body, "text/html;charset=utf-8"));
+        return ResponseEntity.ok(body, MimeType.HTML);
     }
 
     private boolean isValidParams(Map<String, String> params) {

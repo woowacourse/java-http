@@ -10,66 +10,68 @@ public class ResponseEntity {
     }
 
     public static HttpResponse ok(String body) {
-        return ok(body, "text/plain;charset=utf-8");
+        return ok(body, MimeType.TXT);
     }
 
-    public static HttpResponse ok(String body, String contentType) {
+    public static HttpResponse ok(String body, MimeType contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.OK);
     }
 
     public static HttpResponse found(String body) {
-        return found(body, "text/plain;charset=utf-8");
+        return found(body, MimeType.TXT, "/index.html");
     }
 
-    public static HttpResponse found(String body, String contentType) {
-        return buildHttpResponse(body, contentType, HttpStatus.FOUND);
+    public static HttpResponse found(String body, MimeType contentType, String redirectPath) {
+        HttpResponse response = buildHttpResponse(body, contentType, HttpStatus.FOUND);
+        response.setHeader("Location", redirectPath);
+        return response;
     }
 
     public static HttpResponse badRequest(String body) {
-        return badRequest(body, "text/plain;charset=utf-8");
+        return badRequest(body, MimeType.TXT);
     }
 
-    public static HttpResponse badRequest(String body, String contentType) {
+    public static HttpResponse badRequest(String body, MimeType contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.BAD_REQUEST);
     }
 
     public static HttpResponse unauthorized(String body) {
-        return unauthorized(body, "text/plain;charset=utf-8");
+        return unauthorized(body, MimeType.TXT);
     }
 
-    public static HttpResponse unauthorized(String body, String contentType) {
+    public static HttpResponse unauthorized(String body, MimeType contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.UNAUTHORIZED);
     }
 
     public static HttpResponse notFound(String body) {
-        return notFound(body, "text/plain;charset=utf-8");
+        return notFound(body, MimeType.TXT);
     }
 
-    public static HttpResponse notFound(String body, String contentType) {
+    public static HttpResponse notFound(String body, MimeType contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.NOT_FOUND);
     }
 
     public static HttpResponse conflict(String body) {
-        return conflict(body, "text/plain;charset=utf-8");
+        return conflict(body, MimeType.TXT);
     }
 
-    public static HttpResponse conflict(String body, String contentType) {
+    public static HttpResponse conflict(String body, MimeType contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.CONFLICT);
     }
 
     public static HttpResponse internalServerError(String body) {
-        return internalServerError(body, "text/plain;charset=utf-8");
+        return internalServerError(body, MimeType.TXT);
     }
 
-    public static HttpResponse internalServerError(String body, String contentType) {
+    public static HttpResponse internalServerError(String body, MimeType contentType) {
         return buildHttpResponse(body, contentType, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private static HttpResponse buildHttpResponse(String body, String contentType, HttpStatus status) {
+    private static HttpResponse buildHttpResponse(String body, MimeType contentType, HttpStatus status) {
         byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
 
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType);
+        headers.put("Content-Type", contentType.getValue());
         headers.put("Content-Length", String.valueOf(bodyBytes.length));
 
         return new HttpResponse(

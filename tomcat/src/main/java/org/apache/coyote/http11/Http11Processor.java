@@ -17,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HandlerDispatcher handlerDispatcher;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.handlerDispatcher = new HandlerDispatcher(HandlerDispatcherConfig.getRequestHandlers());
     }
 
     @Override
@@ -42,10 +44,6 @@ public class Http11Processor implements Runnable, Processor {
             log.debug("request line: {}", request.getRequestLine());
             log.debug("request headers: {}", request.getHeaders());
             log.debug("request body: {}", request.getBody());
-
-            HandlerDispatcher handlerDispatcher = new HandlerDispatcher(
-                    HandlerDispatcherConfig.getRequestHandlers()
-            );
 
             HttpResponse response = ResponseEntity.notFound("");
             handlerDispatcher.handle(request, response);

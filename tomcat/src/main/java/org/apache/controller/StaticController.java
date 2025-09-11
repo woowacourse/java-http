@@ -6,11 +6,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 
 public class StaticController implements Controller {
@@ -20,28 +19,26 @@ public class StaticController implements Controller {
     @Override
     public boolean isProcessable(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
-        return ALLOWED_EXTENSIONS.stream().anyMatch(path::contains);
+        return ALLOWED_EXTENSIONS.stream().anyMatch(path::endsWith);
     }
 
     @Override
-    public Map<String, Object> process(HttpRequest httpRequest) throws IOException, URISyntaxException {
-        HttpStatus httpStatus = HttpStatus.OK;
-        Map<String, Object> response = new HashMap<>();
-
+    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
         final ClassLoader classLoader = getClass().getClassLoader();
         System.out.println(httpRequest.getStaticFilePath());
         final URL url = classLoader.getResource(httpRequest.getStaticFilePath());
 
         if (url == null) {
-            throw new IOException("파일이 존재하지 않습니다.");
+            return HttpResponse.notFound(httpRequest);
         }
 
         final File resourceFile = new File(Objects.requireNonNull(url).toURI());
         final Path path = resourceFile.toPath();
 
-        response.put("responseBody", new String(Files.readAllBytes(path)));
-        response.put("status", httpStatus);
+        httpResponse.setResponseBody(new String(Files.readAllBytes(path)));
+        httpResponse.setHttpStatus(HttpStatus.OK);
 
-        return response;
+        return httpResponse;
     }
 }

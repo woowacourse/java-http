@@ -2,19 +2,14 @@ package org.apache.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpStatus;
+import org.apache.http.HttpResponse;
 
 public class RegisterController implements Controller {
+
+    private final StaticController staticController = new StaticController();
 
     @Override
     public boolean isProcessable(HttpRequest httpRequest) {
@@ -22,33 +17,22 @@ public class RegisterController implements Controller {
     }
 
     @Override
-    public Map<String, Object> process(HttpRequest httpRequest) throws URISyntaxException, IOException {
-        Map<String, Object> response = new HashMap<>();
+    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws URISyntaxException, IOException {
         String method = httpRequest.getMethod();
 
         if (method.equals("POST")) {
-            response = postRegister(httpRequest);
+            httpResponse = postRegister(httpRequest, httpResponse);
         }
 
         if (method.equals("GET")) {
-            response = getRegister(httpRequest);
+            httpResponse = getRegister(httpRequest, httpResponse);
         }
-        return response;
+        return httpResponse;
     }
 
-    public Map<String, Object> postRegister(HttpRequest httpRequest) throws IOException, URISyntaxException {
-        Map<String, Object> response = new HashMap<>();
-        String filePath = "/index.html";
-        final ClassLoader classLoader = getClass().getClassLoader();
-        final URL url = classLoader.getResource("static" + filePath);
-
-        if (url == null) {
-            throw new IOException("파일이 존재하지 않습니다.");
-        }
-
-        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
-        final Path path = resourceFile.toPath();
-
+    public HttpResponse postRegister(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
         try {
             String account = httpRequest.getBodyAttribute("account");
             String password = httpRequest.getBodyAttribute("password");
@@ -56,32 +40,18 @@ public class RegisterController implements Controller {
 
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
+            httpResponse.redirect("/login.html");
 
-            response.put("responseBody", new String(Files.readAllBytes(path)));
-            response.put("status", HttpStatus.FOUND);
+            return httpResponse;
         } catch (Exception e) {
             // TODO: 회원가입 실패 시 예외처리
         }
 
-        return response;
+        return httpResponse;
     }
 
-    public Map<String, Object> getRegister(HttpRequest httpRequest) throws IOException, URISyntaxException {
-        Map<String, Object> response = new HashMap<>();
-
-        final ClassLoader classLoader = getClass().getClassLoader();
-        final URL url = classLoader.getResource(httpRequest.getStaticFilePath());
-
-        if (url == null) {
-            throw new IOException("파일이 존재하지 않습니다.");
-        }
-
-        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
-        final Path path = resourceFile.toPath();
-
-        response.put("responseBody", new String(Files.readAllBytes(path)));
-        response.put("status", HttpStatus.OK);
-
-        return response;
+    public HttpResponse getRegister(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
+        return staticController.process(httpRequest, httpResponse);
     }
 }

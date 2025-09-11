@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import org.apache.controller.BasicController;
 import org.apache.controller.Controller;
 import org.apache.controller.LoginController;
@@ -16,6 +15,7 @@ import org.apache.controller.StaticController;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,26 +48,18 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
-
-            final String path = httpRequest.getPath();
+            HttpResponse emptyHttpResponse = new HttpResponse(httpRequest.getProtocol());
 
             Controller processorableController = controllers.stream()
                     .filter(controller -> controller.isProcessable(httpRequest))
                     .findFirst()
                     .orElseThrow(() -> new IOException("처리할 수 있는 컨트롤러가 없습니다."));
 
-            Map<String, Object> responseBody = processorableController.process(httpRequest);
+            HttpResponse httpResponse = processorableController.process(httpRequest, emptyHttpResponse);
 
-            HttpCookie cookieToSet = (HttpCookie) responseBody.getOrDefault("cookie", null);
-
-            String response = makeResponse(
-                    String.valueOf(responseBody.get("responseBody")),
-                    httpRequest,
-                    (HttpStatus) responseBody.get("status"),
-                    cookieToSet
-            );
+            String response = makeResponse(httpRequest, httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -76,14 +68,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(String responseBody,
-                                HttpRequest httpRequest,
-                                HttpStatus httpStatus,
-                                HttpCookie httpCookie) throws IOException {
+    public String makeResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 
         final String contentType = httpRequest.getMineType() + ";charset=utf-8";
         final String protocol = httpRequest.getProtocol();
-
+        final HttpStatus httpStatus = httpResponse.getHttpStatus();
+        final String responseBody = httpResponse.getResponseBody();
+        final HttpCookie httpCookie = httpResponse.getHttpCookie();
         final String statusLine = protocol + " " + httpStatus.getCode() + " " + httpStatus.getCodeName() + " ";
 
         StringBuilder headers = new StringBuilder();

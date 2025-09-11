@@ -1,8 +1,7 @@
 package org.apache.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 
 public class BasicController implements Controller {
@@ -13,12 +12,10 @@ public class BasicController implements Controller {
     }
 
     @Override
-    public Map<String, Object> process(HttpRequest httpRequest) {
-        Map<String, Object> response = new HashMap<>();
+    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.setResponseBody("Hello world!");
+        httpResponse.setHttpStatus(HttpStatus.OK);
 
-        response.put("responseBody", "Hello world!");
-        response.put("status", HttpStatus.OK);
-
-        return response;
+        return httpResponse;
     }
 }

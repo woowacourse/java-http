@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -20,9 +19,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        HttpCookie httpCookie = request.getCookies();
-        String sessionId = httpCookie.getSessionId();
-        if (httpCookie.hasSession() && sessionManager.findSession(sessionId) != null) {
+        Session session = request.getSession();
+        if (session != null && session.getAttribute("user") != null) {
             response.sendRedirect("/index.html");
             return;
         }
@@ -41,7 +39,7 @@ public class LoginController extends AbstractController {
         }
         User user = userOptional.get();
         log.info("로그인 성공: {}", user);
-        Session session = response.addSession(sessionManager);
+        Session session = response.addSession();
         session.setAttribute("user", user);
         response.sendRedirect("/index.html");
     }

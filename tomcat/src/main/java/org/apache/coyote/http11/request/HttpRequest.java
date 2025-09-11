@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.apache.catalina.Manager;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -68,7 +70,13 @@ public class HttpRequest {
         return requestBody.getRawBody();
     }
 
-    public Session getSession() {
-        return session;
+    public Session getSession() throws IOException {
+        if (this.session != null) {
+            return this.session;
+        }
+        Manager sessionManager = SessionManager.getInstance();
+        String sessionId = cookies.getSessionId();
+        this.session = sessionManager.findSession(sessionId);
+        return this.session;
     }
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpResponse {
 
@@ -62,7 +63,8 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    public Session addSession(Manager sessionManager) {
+    public Session addSession() {
+        Manager sessionManager = SessionManager.getInstance();
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);
         sessionManager.add(session);

@@ -8,7 +8,7 @@ import org.apache.coyote.controller.RootController;
 
 public class RequestMapping {
 
-    public Controller getController(HttpRequest request) {
+    public Controller getController(final HttpRequest request) {
         if (request.getPath().startsWith("/login")) {
             return new LoginController();
         }

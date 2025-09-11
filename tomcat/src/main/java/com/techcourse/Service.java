@@ -11,7 +11,7 @@ public class Service {
 
     private static final Logger log = LoggerFactory.getLogger(Service.class);
 
-    public User getLoggedInUser(Map<String, String> params) {
+    public User getLoggedInUser(final Map<String, String> params) {
         User user = findUserByAccount(params.get("account"));
 
         if (user.checkPassword(params.get("password"))) {

@@ -1,9 +1,10 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.ResourceLoader;
+import java.util.Objects;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.util.ResourceLoader;
 
 public class RootController extends AbstractController {
 
@@ -16,6 +17,9 @@ public class RootController extends AbstractController {
             body = ResourceLoader.get(path);
         } else {
             body = ResourceLoader.get(path + ".html");
+        }
+        if (Objects.equals(path, "/")) {
+            body = ResourceLoader.get("/index.html");
         }
 
         if (body == null) {

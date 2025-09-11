@@ -9,11 +9,11 @@ import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.ResourceLoader;
 import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.util.ResourceLoader;
 
 public class LoginController extends AbstractController {
 

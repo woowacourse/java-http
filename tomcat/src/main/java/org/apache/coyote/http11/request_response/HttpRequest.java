@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request_response;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class HttpRequest {
         return body;
     }
 
-    public String getRequestUriPath() {
+    public String getUriPath() {
         return requestLine.getUriPath();
     }
 

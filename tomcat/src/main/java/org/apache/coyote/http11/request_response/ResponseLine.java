@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request_response;
+
+import org.apache.coyote.http11.HttpStatus;
 
 public class ResponseLine {
 

@@ -1,60 +1,72 @@
 package org.apache.coyote.http11;
 
-import java.util.Map;
-
 public class HttpRequest {
 
-    private final HttpStartLine startLine;
+    private final HttpMethod method;
+    private final HttpUri uri;
+    private final HttpProtocol protocol;
     private final HttpRequestHeader header;
-    private final HttpRequestBody body;
-    private final HttpQueryParameter queryParameter;
     private final HttpCookie cookie;
+    private final HttpRequestBody body;
+    private final HttpQueryParameter parameter;
 
-    public HttpRequest(HttpStartLine startLine, HttpRequestHeader header, HttpRequestBody body, HttpQueryParameter queryParameter) {
-        this.startLine = startLine;
+    public HttpRequest(HttpMethod method,
+                       HttpUri uri,
+                       HttpProtocol protocol,
+                       HttpRequestHeader header,
+                       HttpCookie cookie,
+                       HttpRequestBody body,
+                       HttpQueryParameter parameter) {
+        this.method = method;
+        this.uri = uri;
+        this.protocol = protocol;
         this.header = header;
+        this.cookie = cookie;
         this.body = body;
-        this.queryParameter = queryParameter;
-        this.cookie = header.getCookie();
+        this.parameter = parameter;
     }
 
-    public HttpMethod getHttpMethod() {
-        return startLine.getHttpMethod();
+    public void addHeader(String name, String value) {
+        header.addHeader(name, value);
     }
 
-    public HttpUri getUri() {
-        return startLine.getUri();
-    }
-
-    public boolean hasQueryParameter() {
-        return !queryParameter.isEmpty();
+    public void addCookie(String name, String value) {
+        cookie.addCookie(name, value);
     }
 
     public String getResourcePath() {
-        return startLine.getResourcePath();
-    }
-
-    public HttpProtocol getHttpProtocol() {
-        return startLine.getProtocol();
+        return uri.getPath();
     }
 
     public String getQueryParameter(String name) {
-        return queryParameter.getValue(name);
+        return parameter.getValue(name);
+    }
+
+    public String getCookie(String name) {
+        return cookie.getCookie(name);
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public HttpUri getUri() {
+        return uri;
+    }
+
+    public HttpProtocol getHttpProtocol() {
+        return protocol;
+    }
+
+    public HttpRequestHeader getHeader() {
+        return header;
     }
 
     public HttpRequestBody getBody() {
         return body;
     }
 
-    public HttpRequestHeader getHeader() {
-        return  header;
-    }
-
     public HttpCookie getCookies() {
         return cookie;
-    }
-
-    public String getCookie(String name) {
-        return cookie.getCookie(name);
     }
 }

@@ -1,37 +1,66 @@
 package org.apache.coyote.http11;
 
-public class HttpResponse {
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
+public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String RESPONSE_LINE = "%s %s %s" + CRLF;
     private static final String END_OF_HEADER = CRLF;
 
-    private final HttpProtocol protocol;
-    private final HttpStatusCode statusCode;
+    private final OutputStream outputStream;
+
+    private HttpProtocol protocol;
+    private HttpStatusCode statusCode;
     private final HttpResponseHeader responseHeader;
     private final HttpResponseBody body;
+    private MimeType mimeType;
     private final HttpCookie cookie;
 
-    public HttpResponse(
-            HttpProtocol protocol,
-            HttpStatusCode statusCode,
-            HttpResponseBody body
-    ) {
-        this.protocol = protocol;
-        this.statusCode = statusCode;
-        this.responseHeader = setHeader(body);
-        this.body = body;
+
+    public HttpResponse(OutputStream outputStream) {
+        this.outputStream = outputStream;
+        this.responseHeader = new HttpResponseHeader();
+        this.body = new HttpResponseBody();
         this.cookie = new HttpCookie();
     }
 
-    private HttpResponseHeader setHeader(HttpResponseBody body) {
-        HttpResponseHeader responseHeader = new HttpResponseHeader();
-        responseHeader.addHeader("Content-Type", body.getContentType());
-        responseHeader.addHeader("Content-Length", String.valueOf(body.getLength()));
-        return  responseHeader;
+    public void addCookie(String cookieName, String cookieValue) {
+        cookie.addCookie(cookieName, cookieValue);
     }
 
-    public String asString() {
+    public void addHeader(String name, String value) {
+        responseHeader.addHeader(name, value);
+    }
+
+    public void write(byte[] data) throws IOException {
+        body.write(new String(data, StandardCharsets.UTF_8));
+    }
+
+    public void sendRedirect(String location) throws IOException {
+        setLocation(location);
+        send();
+    }
+
+    public void send() throws IOException {
+        if (body.isNotEmpty()) {
+            setContentHeader();
+        }
+        outputStream.write(asString().getBytes());
+        outputStream.flush();
+    }
+
+    private void setContentHeader() {
+        responseHeader.addHeader("Content-Type", mimeType.getContentType());
+        responseHeader.addHeader("Content-Length", String.valueOf(body.getLength()));
+    }
+
+    private void setLocation(String location) {
+        responseHeader.addHeader("Location", location);
+    }
+
+    private String asString() {
         StringBuilder builder =  new StringBuilder();
         builder.append(String.format(RESPONSE_LINE, protocol.getVersion(), statusCode.getCode(), statusCode.getReasonPhrase()));
         builder.append(responseHeader.asString());
@@ -44,15 +73,23 @@ public class HttpResponse {
         return builder.toString();
     }
 
-    public void setLocation(String location) {
-        responseHeader.addHeader("Location", location);
+    public HttpProtocol getProtocol() {
+        return protocol;
     }
 
-    public HttpResponseBody getBody() {
-        return body;
+    public HttpStatusCode getStatusCode() {
+        return statusCode;
     }
 
-    public void addCookie(String cookieName, String cookieValue) {
-        cookie.setCookie(cookieName, cookieValue);
+    public void setProtocol(HttpProtocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setMimeType(MimeType mimeType) {
+        this.mimeType = mimeType;
     }
 }

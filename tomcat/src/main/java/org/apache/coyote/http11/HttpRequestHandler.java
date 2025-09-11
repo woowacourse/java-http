@@ -12,15 +12,7 @@ public class HttpRequestHandler {
     public HttpRequest handleRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        HttpStartLine startLine = readRequestLine(reader);
-        HttpRequestHeader header = readHeader(reader);
-        HttpRequestBody body = readBody(header,reader);
-        HttpQueryParameter queryParameter = readQueryString(startLine.getUri());
-        return new HttpRequest(startLine, header, body,queryParameter);
-    }
-
-    private HttpStartLine readRequestLine(BufferedReader br) throws IOException {
-        String requestLine = br.readLine();
+        String requestLine = reader.readLine();
         if (requestLine == null || requestLine.isBlank()) {
             throw new IllegalArgumentException();
         }
@@ -30,17 +22,21 @@ public class HttpRequestHandler {
         HttpMethod method = HttpMethod.getMethod(methodSegment);
 
         String uriSegment = requestLineSegments[1];
-        HttpUri httpUri = new HttpUri(uriSegment);
+        HttpUri uri = new HttpUri(uriSegment);
 
         String versionSegment = requestLineSegments[2];
         HttpProtocol protocol = HttpProtocol.getHttpProtocol(versionSegment);
 
-        return new HttpStartLine(method, httpUri, protocol);
+        HttpRequestHeader header = setHeader(reader);
+        HttpCookie cookie = setCookie(header);
+        HttpRequestBody body = setBody(reader, header);
+        HttpQueryParameter parameter = setQueryParameter(uri);
+
+        return new HttpRequest(method, uri, protocol, header, cookie, body, parameter);
     }
 
-    private HttpRequestHeader readHeader(BufferedReader br) throws IOException {
+    private HttpRequestHeader setHeader(BufferedReader br) throws IOException {
         HttpRequestHeader requestHeader = new HttpRequestHeader();
-      
         String line;
         while(!"".equals((line = br.readLine()))) {
             if (line == null) {
@@ -54,12 +50,15 @@ public class HttpRequestHandler {
         return requestHeader;
     }
 
-    private HttpRequestBody readBody(HttpRequestHeader header, BufferedReader br) throws IOException {
+    private HttpCookie setCookie(HttpRequestHeader header) {
+        return header.getCookie();
+    }
+
+    private HttpRequestBody setBody(BufferedReader br, HttpRequestHeader header) throws IOException {
         int bodyLength = header.getBodyLength();
 
         char[] buffer = new char[bodyLength];
         int read = br.read(buffer, 0, buffer.length);
-
         if  (bodyLength == 0 || read < 0) {
             return new HttpRequestBody();
         }
@@ -68,7 +67,7 @@ public class HttpRequestHandler {
         return new HttpRequestBody(body);
     }
 
-    private HttpQueryParameter readQueryString(HttpUri uri) {
+    private HttpQueryParameter setQueryParameter(HttpUri uri) {
         Map<String, String> queryParameters = new HashMap<>();
 
         String queryString = uri.getQueryString();

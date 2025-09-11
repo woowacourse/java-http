@@ -21,7 +21,7 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public void setCookie(String name, String value) {
+    public void addCookie(String name, String value) {
         cookies.put(name, value);
     }
 

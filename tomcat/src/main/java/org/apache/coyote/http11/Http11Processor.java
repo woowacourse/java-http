@@ -128,9 +128,11 @@ public class Http11Processor implements Runnable, Processor {
                 final var session = getSession(httpRequest, true)
                         .orElseThrow(() -> new IllegalStateException("세션 생성에 실패했습니다."));
                 session.setAttribute("user", user);
-                final var response = Http11Response.redirect("/index.html");
-                response.addCookie("JSESSIONID", session.getId());
-                return response;
+                final Map<String, List<String>> headers = new HashMap<>();
+                headers.put("Location", List.of("/index.html"));
+                final String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", "JSESSIONID", session.getId());
+                headers.put("Set-Cookie", List.of(cookieValue));
+                return new Http11Response(302, headers, new byte[0]);
             }
             return Http11Response.redirect("/401.html");
         }

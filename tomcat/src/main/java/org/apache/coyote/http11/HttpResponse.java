@@ -35,7 +35,7 @@ public class HttpResponse {
                 headerBuilder.append(key)
                         .append(": ")
                         .append(value)
-                        .append("\r\n")
+                        .append(" \r\n")
         );
         headerBuilder.append("\r\n");
         return headerBuilder.toString().getBytes();

@@ -8,12 +8,11 @@ import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Http11Session;
 import org.apache.coyote.http11.MediaType;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.exception.Http11ParseException;
 
 public class LoginController extends AbstractController {
 
     @Override
-    protected void doGet(Http11Request request, Http11Response response) throws Http11ParseException {
+    protected void doGet(Http11Request request, Http11Response response) throws Exception {
         final Http11Cookie cookie = request.getCookie();
         if (cookie.isContainsSessionId() && SessionManager.getInstance().containsSession(cookie.getSessionId())) {
             response.sendRedirect("/index.html");
@@ -24,7 +23,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(Http11Request request, Http11Response response) throws Http11ParseException {
+    protected void doPost(Http11Request request, Http11Response response) throws Exception {
         try {
             final User user = InMemoryUserRepository.findByAccount(request.getParam("account"))
                     .orElseThrow(() -> new IllegalArgumentException("[ERROR] 회원을 찾을 수 없습니다."));

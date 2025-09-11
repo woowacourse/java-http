@@ -4,21 +4,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class RequestLineTest {
 
-    @DisplayName("쿼리 파라미터가 없는 요청 라인을 파싱할 수 있다.")
     @Test
-    void from_noQueryParams() {
+    @DisplayName("RequestLine을 파싱한다.")
+    void from() {
         // given
-        final String requestLineString = "GET /index.html HTTP/1.1";
+        final String line = "GET /index.html?name=gugu&age=10 HTTP/1.1";
 
         // when
-        final RequestLine requestLine = RequestLine.from(requestLineString);
+        final RequestLine requestLine = RequestLine.from(line);
+
+        // then
+        assertAll(
+                () -> assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(requestLine.getPath()).isEqualTo("/index.html"),
+                () -> assertThat(requestLine.getQueryParams()).hasSize(2),
+                () -> assertThat(requestLine.getVersion()).isEqualTo(HttpVersion.HTTP_1_1)
+        );
+    }
+
+    @Test
+    @DisplayName("쿼리 파라미터가 없는 RequestLine을 파싱한다.")
+    void from_no_query_params() {
+        // given
+        final String line = "GET /index.html HTTP/1.1";
+
+        // when
+        final RequestLine requestLine = RequestLine.from(line);
 
         // then
         assertAll(
@@ -29,69 +46,73 @@ class RequestLineTest {
         );
     }
 
-    @DisplayName("여러 쿼리 파라미터를 파싱할 수 있다.")
     @Test
-    void from_multipleQueryParams() {
+    @DisplayName("URL 인코딩된 쿼리 파라미터를 파싱한다.")
+    void parseUrlEncodedParams() {
         // given
-        final String requestLineString = "POST /users?account=gugu&name=hkkang HTTP/1.1";
+        final String data = "name=gugu&age=10&country=korea&hobby=programming&hobby=reading";
 
         // when
-        final RequestLine requestLine = RequestLine.from(requestLineString);
+        final Map<String, List<String>> params = RequestLine.parseUrlEncodedParams(data);
 
         // then
         assertAll(
-                () -> assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.POST),
-                () -> assertThat(requestLine.getPath()).isEqualTo("/users"),
-                () -> assertThat(requestLine.getQueryParams()).hasSize(2),
-                () -> assertThat(requestLine.getQueryParams().get("account")).containsExactly("gugu"),
-                () -> assertThat(requestLine.getQueryParams().get("name")).containsExactly("hkkang")
+                () -> assertThat(params).hasSize(4),
+                () -> assertThat(params.get("name")).containsOnly("gugu"),
+                () -> assertThat(params.get("age")).containsOnly("10"),
+                () -> assertThat(params.get("country")).containsOnly("korea"),
+                () -> assertThat(params.get("hobby")).containsExactly("programming", "reading")
         );
     }
 
-    @DisplayName("중복된 키를 가진 쿼리 파라미터를 리스트로 파싱한다.")
     @Test
-    void from_duplicateQueryParamKeys() {
+    @DisplayName("값이 없는 쿼리 파라미터를 파싱한다.")
+    void parseUrlEncodedParams_no_value() {
         // given
-        final String requestLineString = "GET /select?option=A&option=B&option=C HTTP/1.1";
+        final String data = "name=&age=10";
 
         // when
-        final RequestLine requestLine = RequestLine.from(requestLineString);
-
-        // then
-        final List<String> options = requestLine.getQueryParams().get("option");
-        assertThat(options).containsExactly("A", "B", "C");
-    }
-
-    @DisplayName("URL 인코딩된 쿼리 파라미터를 디코딩하여 파싱한다.")
-    @Test
-    void from_urlEncodedParams() {
-        // given
-        final String requestLineString = "GET /search?query=%ED%95%9C%EA%B8%80&sort=desc HTTP/1.1";
-
-        // when
-        final RequestLine requestLine = RequestLine.from(requestLineString);
+        final Map<String, List<String>> params = RequestLine.parseUrlEncodedParams(data);
 
         // then
         assertAll(
-                () -> assertThat(requestLine.getQueryParams().get("query")).containsExactly("한글"),
-                () -> assertThat(requestLine.getQueryParams().get("sort")).containsExactly("desc")
+                () -> assertThat(params).hasSize(2),
+                () -> assertThat(params.get("name")).containsOnly(""),
+                () -> assertThat(params.get("age")).containsOnly("10")
         );
     }
 
-    @DisplayName("비어있거나 null인 요청 라인은 INVALID 객체를 반환한다.")
-    @ParameterizedTest
-    @NullAndEmptySource
-    void from_invalidLine(final String invalidRequestLineString) {
+    @Test
+    @DisplayName("값이 =를 포함하는 쿼리 파라미터를 파싱한다.")
+    void parseUrlEncodedParams_contains_equals() {
+        // given
+        final String data = "a=b=c&d=e";
+
         // when
-        final RequestLine requestLine = RequestLine.from(invalidRequestLineString);
-        final RequestLine invalid = RequestLine.createInvalid();
+        final Map<String, List<String>> params = RequestLine.parseUrlEncodedParams(data);
 
         // then
         assertAll(
-                () -> assertThat(requestLine.getMethod()).isEqualTo(invalid.getMethod()),
-                () -> assertThat(requestLine.getPath()).isEqualTo(invalid.getPath()),
-                () -> assertThat(requestLine.getQueryParams()).isEqualTo(invalid.getQueryParams()),
-                () -> assertThat(requestLine.getVersion()).isEqualTo(invalid.getVersion())
+                () -> assertThat(params).hasSize(2),
+                () -> assertThat(params.get("a")).containsOnly("b=c"),
+                () -> assertThat(params.get("d")).containsOnly("e")
+        );
+    }
+
+    @Test
+    @DisplayName("잘못된 인코딩을 포함하는 쿼리 파라미터를 파싱한다.")
+    void parseUrlEncodedParams_invalid_encoding() {
+        // given
+        final String data = "a=1&b=%invalid&c=3";
+
+        // when
+        final Map<String, List<String>> params = RequestLine.parseUrlEncodedParams(data);
+
+        // then
+        assertAll(
+                () -> assertThat(params).hasSize(2),
+                () -> assertThat(params.get("a")).containsOnly("1"),
+                () -> assertThat(params.get("c")).containsOnly("3")
         );
     }
 }

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class RequestLine {
 
@@ -51,21 +52,38 @@ public final class RequestLine {
         return new RequestLine(HttpMethod.UNKNOWN, "/", Map.of(), HttpVersion.HTTP_1_1);
     }
 
-    public static Map<String, List<String>> parseUrlEncodedParams(final String data) {
-        if (data == null || data.isBlank()) {
+    public static Map<String, List<String>> parseUrlEncodedParams(final String queryString) {
+        if (queryString == null || queryString.isBlank()) {
             return Collections.emptyMap();
         }
-        final Map<String, List<String>> params = new HashMap<>();
-        final String[] pairs = data.split("&");
-        for (final String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                params.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
-            }
+        final Map<String, List<String>> queryParameters = new HashMap<>();
+        final String[] keyValuePairs = queryString.split("&");
+        for (final String keyValuePair : keyValuePairs) {
+            parseSingleParameter(keyValuePair)
+                    .ifPresent(parameter -> queryParameters.computeIfAbsent(parameter.key(), k -> new ArrayList<>())
+                            .add(parameter.value()));
         }
-        return params;
+        return queryParameters;
+    }
+
+    private static Optional<QueryParameter> parseSingleParameter(final String keyValuePair) {
+        if (keyValuePair == null || keyValuePair.isBlank() || keyValuePair.startsWith("=")) {
+            return Optional.empty();
+        }
+        try {
+            final int equalsIndex = keyValuePair.indexOf("=");
+            if (equalsIndex == -1) {
+                final String decodedKey = URLDecoder.decode(keyValuePair, StandardCharsets.UTF_8);
+                return Optional.of(new QueryParameter(decodedKey, ""));
+            }
+            final String keyPart = keyValuePair.substring(0, equalsIndex);
+            final String valuePart = keyValuePair.substring(equalsIndex + 1);
+            final String decodedKey = URLDecoder.decode(keyPart, StandardCharsets.UTF_8);
+            final String decodedValue = URLDecoder.decode(valuePart, StandardCharsets.UTF_8);
+            return Optional.of(new QueryParameter(decodedKey, decodedValue));
+        } catch (final IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     public HttpMethod getMethod() {

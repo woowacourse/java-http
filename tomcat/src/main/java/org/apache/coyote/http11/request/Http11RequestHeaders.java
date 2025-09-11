@@ -35,7 +35,7 @@ public class Http11RequestHeaders {
 
     public String getSessionId() {
         return headers.stream()
-                .filter(Header::isCookeHeader)
+                .filter(Header::isCookieHeader)
                 .findFirst()
                 .map(Header::getValue)
                 .map(Http11Cookie::new)

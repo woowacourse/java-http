@@ -13,7 +13,7 @@ public class Header {
         return header.equals("Content-Length");
     }
 
-    public boolean isCookeHeader() {
+    public boolean isCookieHeader() {
         return header.equals("Cookie");
     }
 

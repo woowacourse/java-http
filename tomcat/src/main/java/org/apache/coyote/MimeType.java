@@ -2,7 +2,7 @@ package org.apache.coyote;
 
 public enum MimeType {
 
-    ANY("*/*"),
+    ANY("application/octet-stream"),
     APPLICATION_JSON("application/json"),
     APPLICATION_FORM_URLENCODED("application/x-www-form-urlencoded"),
     TEXT_HTML("text/html;charset=utf-8"),

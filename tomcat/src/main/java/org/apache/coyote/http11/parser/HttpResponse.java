@@ -1,15 +1,18 @@
 package org.apache.coyote.http11.parser;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class HttpResponse {
 
     private static final String CONTENT_TYPE_HEADER = "ContentType : ";
     private static final String LOCATION_PREFIX = "Location: http://localhost:8080";
 
-    private byte[] parsedContent;
-    private String httpResponseStatus;
-    private String contentType;
-    private int contentLength;
-    private String location;
+    private byte[] parsedContent = "".getBytes();
+    private String httpResponseStatus = "";
+    private String contentType = "";
+    private int contentLength = 0;
+    private String location = "";
 
     public HttpResponse() {
 
@@ -24,6 +27,9 @@ public class HttpResponse {
     }
 
     public void setContent(byte[] content) {
+        if (content == null) {
+            this.contentLength = 0;
+        }
         this.contentLength = content.length;
         this.parsedContent = content;
     }
@@ -37,15 +43,22 @@ public class HttpResponse {
     }
 
     public String getResult() {
-        return String.join(
-                "\r\n",
-                httpResponseStatus,
-                contentType,
-                getContentLength(),
-                location,
-                "",
-                new String(parsedContent)
-        );
+        String headers = Stream.of(
+                        httpResponseStatus,
+                        contentType,
+                        getContentLength(),
+                        location
+                )
+                .filter(header -> header != null && !header.isBlank())
+                .collect(Collectors.joining("\r\n"));
+
+        String body = new String(parsedContent);
+
+        if (body.isEmpty()) {
+            return headers;
+        }
+
+        return headers + "\r\n\r\n" + body;
     }
 
     private String getContentLength() {

@@ -39,7 +39,11 @@ public class HttpController {
             return httpResponse;
         }
 
-        validateExistHttpService(httpService);
+        if (!isExistHttpService(httpService, httpResponse)) {
+            httpResponse.setStatusLine("HTTP/1.1 302 FOUND");
+            httpResponse.setLocation("/404.html");
+            return httpResponse;
+        }
 
         String method = httpRequests.getMethod();
         if (AcceptableRequest.isPost(method)) {
@@ -48,8 +52,6 @@ public class HttpController {
             httpService.doGet(httpRequests, httpResponse);
         } else if (AcceptableRequest.isDelete(method)) {
             httpService.doDelete(httpRequests, httpResponse);
-        } else if (AcceptableRequest.isUpdate(method)) {
-            httpService.doUpdate(httpRequests, httpResponse);
         }
         return httpResponse;
     }
@@ -64,9 +66,10 @@ public class HttpController {
         return false;
     }
 
-    private void validateExistHttpService(HttpService httpService) {
+    private boolean isExistHttpService(HttpService httpService, HttpResponse httpResponse) {
         if (httpService == null) {
-            throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
+            return false;
         }
+        return true;
     }
 }

@@ -59,8 +59,6 @@ public class SignService implements HttpService {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        httpResponse.setContent(getRedirectHtml());
-        httpResponse.setContentType("text/html;charset=utf-8");
         httpResponse.setStatusLine("HTTP/1.1 302 FOUND");
         httpResponse.setLocation("/index.html");
     }

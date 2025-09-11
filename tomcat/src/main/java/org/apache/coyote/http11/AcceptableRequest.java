@@ -4,7 +4,7 @@ import java.util.List;
 
 public class AcceptableRequest {
 
-    private static final List<String> requests = List.of("GET", "POST", "DELETE", "UPDATE");
+    private static final List<String> requests = List.of("GET", "POST", "DELETE");
 
     public static boolean isGet(String method) {
         return method.equals("GET");
@@ -12,10 +12,6 @@ public class AcceptableRequest {
 
     public static boolean isPost(String method) {
         return method.equals("POST");
-    }
-
-    public static boolean isUpdate(String method) {
-        return method.equals("UPDATE");
     }
 
     public static boolean isDelete(String method) {

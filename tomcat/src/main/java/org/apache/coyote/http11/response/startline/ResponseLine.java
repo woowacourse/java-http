@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpresponse;
+package org.apache.coyote.http11.response.startline;
 
 public class ResponseLine {
 
@@ -8,6 +8,10 @@ public class ResponseLine {
     public ResponseLine(final String httpVersion, final HttpStatusCode statusCode) {
         this.httpVersion = httpVersion;
         this.statusCode = statusCode;
+    }
+
+    public static ResponseLine of(final HttpStatusCode statusCode) {
+        return new ResponseLine("HTTP/1.1", statusCode);
     }
 
     public String toResponseText() {

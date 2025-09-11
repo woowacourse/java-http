@@ -1,15 +1,13 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.session;
 
 import java.util.Optional;
-import org.apache.coyote.http11.httprequest.HttpRequest;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionParser {
 
     private static final String COOKIE_SESSION_KEY = "JSESSIONID";
 
-    public static Optional<Session> extractSessionFromRequest(final HttpRequest request) {
+    public static Optional<Session> extractCookieSessionFromRequest(final HttpRequest request) {
         final Optional<String> sessionId = request.getCookie().get(COOKIE_SESSION_KEY);
         if (sessionId.isEmpty()) {
             return Optional.empty();

@@ -1,16 +1,19 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request.body;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestBody {
+public class RequestBodyParser {
 
+    private static final RequestBodyParser INSTANCE = new RequestBodyParser();
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_KEY_VALUE_SEPARATOR = "=";
 
-    private final Map<String, String> parameters;
+    public static RequestBodyParser getInstance() {
+        return INSTANCE;
+    }
 
-    public static RequestBody from(final String rawRequestBody) {
+    public Map<String, String> parseBodyParameters(final String rawRequestBody) {
         final String[] parameters = rawRequestBody.split(QUERY_PARAMETER_SEPARATOR);
         final Map<String, String> bodyParameters = new HashMap<>();
         for (String parameter : parameters) {
@@ -22,19 +25,9 @@ public class RequestBody {
             }
             bodyParameters.put(key, value);
         }
-
-        return new RequestBody(bodyParameters);
+        return bodyParameters;
     }
 
-    public static RequestBody createEmptyBody() {
-        return new RequestBody(new HashMap<>());
-    }
-
-    public String getParameter(final String key) {
-        return parameters.get(key);
-    }
-
-    private RequestBody(final Map<String, String> parameters) {
-        this.parameters = new HashMap<>(parameters);
+    private RequestBodyParser() {
     }
 }

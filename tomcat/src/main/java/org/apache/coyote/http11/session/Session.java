@@ -1,35 +1,14 @@
 package org.apache.coyote.http11.session;
 
-import java.util.HashMap;
-import java.util.Map;
+public interface Session {
 
-public class Session {
+    String getId();
 
-    private final String id;
-    private final Map<String, Object> values;
+    Object getAttribute(final String name);
 
-    public Session(final String id, final Map<String, Object> values) {
-        this.id = id;
-        this.values = new HashMap<>(values);
-    }
+    void setAttribute(final String name, final Object value);
 
-    public String getId() {
-        return this.id;
-    }
+    void removeAttribute(final String name);
 
-    public Object getAttribute(final String name) {
-        return this.values.get(name);
-    }
-
-    public void setAttribute(final String name, final Object value) {
-        this.values.put(name, value);
-    }
-
-    public void removeAttribute(final String name) {
-        this.values.remove(name);
-    }
-
-    public void invalidate() {
-        this.values.clear();
-    }
+    void invalidate();
 }

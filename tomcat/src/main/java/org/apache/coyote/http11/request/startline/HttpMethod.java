@@ -1,8 +1,7 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request.startline;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.httpresponse.HttpStatusCode;
+import org.apache.coyote.http11.exception.InternalServerErrorException;
 
 public enum HttpMethod {
 
@@ -13,6 +12,6 @@ public enum HttpMethod {
         return Arrays.stream(HttpMethod.values())
                 .filter(httpMethod -> httpMethod.name().equals(method))
                 .findFirst()
-                .orElseThrow(() -> new HttpStatusException(HttpStatusCode.INTERNAL_SERVER_ERROR));
+                .orElseThrow(InternalServerErrorException::new);
     }
 }

@@ -2,10 +2,14 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +17,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @BeforeAll
+    static void setUp() {
+        final RequestMapping requestMapping = RequestMapping.getInstance();
+        requestMapping.addApplicationController(new HomeController())
+                .addApplicationController(new LoginController())
+                .addApplicationController(new RegisterController());
+    }
 
     @Test
     void process() {

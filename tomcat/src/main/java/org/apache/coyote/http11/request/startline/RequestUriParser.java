@@ -1,27 +1,31 @@
-package org.apache.coyote.http11.httprequest;
+package org.apache.coyote.http11.request.startline;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestUri {
+public class RequestUriParser {
 
     private static final String QUERY_STRING_SEPARATOR = "?";
     private static final String QUERY_STRING_REGEX = "\\?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_KEY_VALUE_SEPARATOR = "=";
 
-    private final String requestPath;
-    private final Map<String, String> queryParameters;
+    private static final RequestUriParser INSTANCE = new RequestUriParser();
 
-    public static RequestUri from(final String rawRequestUri) {
-        final String[] requestUri = rawRequestUri.split(QUERY_STRING_REGEX);
-        final String requestPath = requestUri[0];
+    public static RequestUriParser getInstance() {
+        return INSTANCE;
+    }
 
+    public String parsePath(final String rawRequestUri) {
+        return rawRequestUri.split(QUERY_STRING_REGEX)[0];
+    }
+
+    public Map<String, String> parseQueryParameters(final String rawRequestUri) {
         if (!rawRequestUri.contains(QUERY_STRING_SEPARATOR)) {
-            return new RequestUri(requestPath, new HashMap<>());
+            return new HashMap<>();
         }
 
-        final String queryString = requestUri[1];
+        final String queryString = rawRequestUri.split(QUERY_STRING_REGEX)[1];
         final String[] queryParameters = queryString.split(QUERY_PARAMETER_SEPARATOR);
         final Map<String, String> parameters = new HashMap<>();
         for (String parameter : queryParameters) {
@@ -34,19 +38,9 @@ public class RequestUri {
             parameters.put(key, value);
         }
 
-        return new RequestUri(requestPath, parameters);
+        return parameters;
     }
 
-    public boolean isPathEqualsTo(final String requestPath) {
-        return this.requestPath.equals(requestPath);
-    }
-
-    public String getRequestPath() {
-        return this.requestPath;
-    }
-
-    private RequestUri(final String requestPath, final Map<String, String> queryParameters) {
-        this.requestPath = requestPath;
-        this.queryParameters = new HashMap<>(queryParameters);
+    private RequestUriParser() {
     }
 }

@@ -1,27 +1,20 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.exception.HttpStatusException;
-import org.apache.coyote.http11.httprequest.HttpMethod;
-import org.apache.coyote.http11.httprequest.HttpRequest;
-import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.httpresponse.HttpStatusCode;
-import org.apache.coyote.http11.parser.HttpResponseParser;
-import org.apache.coyote.http11.parser.SessionParser;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.http11.request.FormUrlEncodedHttpRequestParser;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseConfigurator;
+import org.apache.coyote.http11.response.startline.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final UserService userService;
-    private final SessionManager sessionManager;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.userService = new UserService();
-        this.sessionManager = SessionManager.getInstance();
+        this.requestMapping = RequestMapping.getInstance();
     }
 
     @Override
@@ -57,79 +48,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRequest(final BufferedReader reader, final OutputStream outputStream) throws IOException {
+        final HttpResponse response = HttpResponse.createEmptyResponse();
         try {
-            final HttpRequest httpRequest = HttpRequest.of(reader);
-            HttpResponse response;
-
-            if (httpRequest.matches(HttpMethod.GET, "/")) {
-                response = handleWelcomePage();
-            } else if (httpRequest.matches(HttpMethod.GET, "/register")) {
-                response = handleRegisterGetRequest();
-            } else if (httpRequest.matches(HttpMethod.POST, "/register")) {
-                response = handleRegisterPostRequest(httpRequest);
-            } else if (httpRequest.matches(HttpMethod.GET, "/login")) {
-                response = handleLoginGetRequest(httpRequest);
-            } else if (httpRequest.matches(HttpMethod.POST, "/login")) {
-                response = handleLoginPostRequest(httpRequest);
-            } else {
-                response = handleStaticResourceGetRequest(httpRequest);
-            }
-
-            sendHttpResponse(response, outputStream);
+            final HttpRequest request = HttpRequest.of(new FormUrlEncodedHttpRequestParser(reader));
+            final Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
         } catch (HttpStatusException e) {
-            final HttpStatusCode statusCode = e.getStatusCode();
-            final HttpResponse errorResponse = HttpResponseParser.parseToErrorResponse(statusCode);
-            sendHttpResponse(errorResponse, outputStream);
+            HttpResponseConfigurator.errorResponse(e.getStatusCode(), response);
+        } catch (Exception e) {
+            HttpResponseConfigurator.errorResponse(HttpStatusCode.NOT_FOUND, response);
         }
-    }
-
-    private HttpResponse handleWelcomePage() {
-        return HttpResponseParser.createWelcomeHttpResponse();
-    }
-
-    private HttpResponse handleRegisterGetRequest() throws IOException {
-        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/register.html");
-    }
-
-    private HttpResponse handleRegisterPostRequest(final HttpRequest httpRequest) {
-        final String account = httpRequest.getBodyParameter("account");
-        final String password = httpRequest.getBodyParameter("password");
-        final String email = httpRequest.getBodyParameter("email");
-        userService.signup(account, password, email);
-        return HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-    }
-
-    private HttpResponse handleStaticResourceGetRequest(final HttpRequest httpRequest) throws IOException {
-        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, httpRequest.getStaticResourcePath());
-    }
-
-    private HttpResponse handleLoginGetRequest(final HttpRequest httpRequest) throws IOException {
-        final Optional<Session> session = SessionParser.extractSessionFromRequest(httpRequest);
-        if (session.isPresent()) {
-            final User loginUser = (User) session.get().getAttribute("user");
-            if (loginUser != null) {
-                return HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-            }
-        }
-
-        return HttpResponseParser.parseToHttpResponse(HttpStatusCode.OK, "/login.html");
-    }
-
-    private HttpResponse handleLoginPostRequest(final HttpRequest httpRequest) throws IOException {
-        final String account = httpRequest.getBodyParameter("account");
-        final String password = httpRequest.getBodyParameter("password");
-        final Optional<User> user = userService.login(account, password);
-
-        if (user.isEmpty()) {
-            return HttpResponseParser.parseToErrorResponse(HttpStatusCode.UNAUTHORIZED);
-        }
-
-        log.info("user: " + user.get());
-        final Session session = sessionManager.createAndSaveSession(Map.of("user", user.get()));
-        final HttpCookie sessionCookie = sessionManager.createSessionCookie(session);
-        final HttpResponse response = HttpResponseParser.parseToRedirectHttpResponse("/index.html");
-        response.setCookie(sessionCookie);
-        return response;
+        sendHttpResponse(response, outputStream);
     }
 
     private void sendHttpResponse(final HttpResponse response, final OutputStream outputStream) throws IOException {

@@ -1,19 +1,19 @@
-package org.apache.coyote.http11.parser;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.httprequest.RequestBody;
-import org.apache.coyote.http11.httprequest.RequestHeaders;
-import org.apache.coyote.http11.httprequest.RequestLine;
+import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.header.RequestHeaders;
+import org.apache.coyote.http11.request.startline.RequestLine;
 
-public class HttpRequestParser {
+public abstract class HttpRequestParser {
 
     private static final String HEADER_SEPARATOR = ": ";
     private final BufferedReader reader;
 
-    public HttpRequestParser(final BufferedReader reader) {
+    protected HttpRequestParser(final BufferedReader reader) {
         this.reader = reader;
     }
 
@@ -35,14 +35,9 @@ public class HttpRequestParser {
         return RequestHeaders.from(rawHeaders);
     }
 
-    public RequestBody parseRequestBody(final RequestHeaders requestHeaders) throws IOException {
-        final int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
-        if (contentLength == 0) {
-            return RequestBody.createEmptyBody();
-        }
-        final char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        final String rawHttpRequestBody = new String(buffer);
-        return RequestBody.from(rawHttpRequestBody);
+    public abstract RequestBody parseRequestBody(final RequestHeaders requestHeaders) throws IOException;
+
+    protected void readIntoBuffer(char[] buffer, int length) throws IOException {
+        reader.read(buffer, 0, length);
     }
 }

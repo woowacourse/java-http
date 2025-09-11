@@ -45,7 +45,6 @@ public class HttpResponse {
             addHeader("Content-Type", "text/html;charset=utf-8");
         }
         addHeader("Content-Length", String.valueOf(body.length));
-
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             builder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }

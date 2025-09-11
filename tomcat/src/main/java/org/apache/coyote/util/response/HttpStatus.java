@@ -1,6 +1,7 @@
 package org.apache.coyote.util.response;
 
 public enum HttpStatus {
+
     OK(200, "OK"),
     FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized"),

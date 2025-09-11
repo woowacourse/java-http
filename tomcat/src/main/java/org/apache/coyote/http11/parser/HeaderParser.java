@@ -7,28 +7,28 @@ import java.util.Map;
 
 public class HeaderParser {
 
-    public static final String HEADER_DELIMITER = ":";
-    public static final String MEDIA_TYPE_DELIMITER = ",";
-    public static final String ACCEPT_HEADER = "Accept";
-    public static final String TYPE_SUBTYPE_DELIMITER = "/";
+    private static final String HEADER_DELIMITER = ":";
+    private static final String MEDIA_TYPE_DELIMITER = ",";
+    private static final String ACCEPT_HEADER = "Accept";
 
     public static Map<String, String> parse(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
         String line;
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] split = line.split(HEADER_DELIMITER, 2);
-            header.put(split[0], split[1]);
+            String key = split[0].trim();
+            String value = split[1].trim();
+            headers.put(key, value);
         }
-        return header;
+        return headers;
     }
 
-    public static String extractPrimaryContentType(Map<String, String> headers) {
+    public static String extractPrimaryMimeType(Map<String, String> headers) {
         if (!headers.containsKey(ACCEPT_HEADER)) {
             return "";
         }
         String acceptHeaderValue = headers.get(ACCEPT_HEADER);
-        String primaryMediaType = acceptHeaderValue.split(MEDIA_TYPE_DELIMITER)[0];
-        return primaryMediaType.split(TYPE_SUBTYPE_DELIMITER)[1];
+        return acceptHeaderValue.split(MEDIA_TYPE_DELIMITER)[0];
     }
 }

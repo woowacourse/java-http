@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.regex.Pattern;
 public record HttpRequest(
         HttpMethod method,
         String url,
+        Map<String, String> queryParams,
         HttpVersion version,
         Map<String, String> headers,
         String body
@@ -60,10 +62,34 @@ public record HttpRequest(
         HttpMethod method = null;
         String url = null;
         HttpVersion version = null;
+        Map<String, String> queryParams = new HashMap<>();
         if (matcher.find()) {
             method = HttpMethod.valueOf(matcher.group(1));
-            url = matcher.group(2);
             version = HttpVersion.fromString(matcher.group(3));
+            String fullUriString = matcher.group(2);
+            URI uri;
+            try {
+                uri = new URI(fullUriString);
+            } catch (Exception e) {
+                return null;
+            }
+
+            url = uri.getPath();
+            String query = uri.getQuery();
+            if (query != null) {
+                String[] pairs = query.split("&");
+                for (String pair : pairs) {
+                    int idx = pair.indexOf("=");
+                    if (idx > 0) {
+                        String key = pair.substring(0, idx);
+                        String value = pair.substring(idx + 1);
+                        queryParams.put(
+                                URLDecoder.decode(key, StandardCharsets.UTF_8),
+                                URLDecoder.decode(value, StandardCharsets.UTF_8)
+                        );
+                    }
+                }
+            }
         }
 
         Map<String, String> headers = new HashMap<>();
@@ -104,7 +130,7 @@ public record HttpRequest(
             }
         }
 
-        return new HttpRequest(method, url, version, Collections.unmodifiableMap(headers), body);
+        return new HttpRequest(method, url, queryParams, version, Collections.unmodifiableMap(headers), body);
     }
 
     public String getCookie(String key) {

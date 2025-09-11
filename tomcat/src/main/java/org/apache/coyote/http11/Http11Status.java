@@ -7,8 +7,9 @@ import org.apache.coyote.http11.exception.ParseError;
 public enum Http11Status {
 
     OK(200, "HTTP/1.1 200 OK"),
+    FOUND(302, "HTTP/1.1 302 Found"),
     BAD_REQUEST(400, "HTTP/1.1 400 Bad Request"),
-    UNAUTHORIZED(401,"HTTP/1.1 401 Unauthorized"),
+    UNAUTHORIZED(401, "HTTP/1.1 401 Unauthorized"),
     NOT_FOUND(404, "HTTP/1.1 404 Not Found"),
     INTERNAL_SERVER_ERROR(500, "HTTP/1.1 500 Internal Server Error");
 

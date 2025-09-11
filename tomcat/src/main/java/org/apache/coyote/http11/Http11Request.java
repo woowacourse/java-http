@@ -23,12 +23,24 @@ public class Http11Request {
     private Map<String, String> headers;
     private String body;
     private Http11Cookie cookie;
+    private Http11Session session;
 
     public Http11Request(final InputStream inputStream) throws IOException, Http11ParseException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String requestLine = reader.readLine();
-        String[] requestLineParts = requestLine.split(" ");
+        parseRequestLine(reader);
+        this.headers = parseHeaders(reader);
+        this.body = parseBody(reader);
+        this.params = parseParams();
+        this.cookie = parseCookies();
+    }
 
+    private void parseRequestLine(final BufferedReader reader) throws IOException, Http11ParseException {
+        final String requestLine = reader.readLine();
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new Http11ParseException(ParseError.INVALID_REQUEST_LINE);
+        }
+
+        final String[] requestLineParts = requestLine.split(" ");
         if (requestLineParts.length != 3) {
             throw new Http11ParseException(ParseError.INVALID_REQUEST_LINE);
         }
@@ -36,50 +48,74 @@ public class Http11Request {
         this.method = Http11Method.from(requestLineParts[0]);
         this.uri = requestLineParts[1];
         this.version = requestLineParts[2];
+        this.path = extractPath(uri);
+    }
 
+    private String extractPath(final String uri) {
         int queryIndex = uri.indexOf("?");
         if (queryIndex != -1) {
-            this.path = uri.substring(0, queryIndex);
-        } else {
-            this.path = uri;
+            return uri.substring(0, queryIndex);
         }
+        return uri;
+    }
 
-        Map<String, String> map = new LinkedHashMap<>();
+    private Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new LinkedHashMap<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] parts = line.split(":", 2);
+            final String[] parts = line.split(":", 2);
             if (parts.length == 2) {
-                map.put(parts[0].trim(), parts[1].trim());
+                headers.put(parts[0].trim(), parts[1].trim());
             }
         }
-        this.headers = map;
+        return headers;
+    }
 
-        if (map.containsKey("Content-Length")) { // TODO: Body 파싱 최적화
-            int contentLength = Integer.parseInt(map.get("Content-Length"));
+    private String parseBody(final BufferedReader reader) throws IOException {
+        if (headers.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(headers.get("Content-Length"));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
-            this.body = new String(buffer);
-        } else {
-            this.body = "";
+            return new String(buffer);
         }
+        return "";
+    }
 
-        if (this.body.isEmpty()) {
-            this.params = Collections.emptyMap();
-        } else {
-            final Map<String, String> params = new HashMap<>();
-            final String[] pairs = body.split("&");
-            for (String pair : pairs) {
-                final String[] keyValue = pair.split("=", 2);
-                if (keyValue.length == 2) {
-                    final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                    final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                    params.put(key, value);
-                }
+    private Map<String, String> parseParams() {
+        final Map<String, String> params = new HashMap<>();
+        addParamsFromQueryString(params);
+        addParamsFromBody(params);
+        return Collections.unmodifiableMap(params);
+    }
+
+    private void addParamsFromQueryString(final Map<String, String> params) {
+        int queryIndex = uri.indexOf("?");
+        if (queryIndex != -1) {
+            final String queryString = uri.substring(queryIndex + 1);
+            parseQueryString(queryString, params);
+        }
+    }
+
+    private void addParamsFromBody(final Map<String, String> params) {
+        if (isPost() && body != null && !body.isEmpty()) {
+            parseQueryString(body, params);
+        }
+    }
+
+    private void parseQueryString(final String queryString, final Map<String, String> params) {
+        final String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                final String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                params.put(key, value);
             }
-            this.params = params;
         }
+    }
 
-        this.cookie = new Http11Cookie(map.getOrDefault("Cookie", null));
+    private Http11Cookie parseCookies() {
+        return new Http11Cookie(headers.getOrDefault("Cookie", ""));
     }
 
     public boolean isGet() {
@@ -90,32 +126,12 @@ public class Http11Request {
         return method == Http11Method.POST;
     }
 
-    public Http11Method getMethod() {
-        return method;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
     public String getPath() {
         return path;
     }
 
-    public Map<String, String> getParams() {
-        return params;
-    }
-
     public String getParam(String name) {
         return params.get(name);
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
     }
 
     public String getBody() {

@@ -18,6 +18,15 @@ public class HttpRequest {
         this.body = body;
     }
 
+    public String getQueryString() {
+        final String uri = requestLine.getPath();
+        if (!uri.contains("?")) {
+            return "";
+        }
+        final String[] split = uri.split("\\?");
+        return split.length > 1 ? split[1] : "";
+    }
+
     public String getBodyAsString() {
         return new String(body, StandardCharsets.UTF_8);
     }

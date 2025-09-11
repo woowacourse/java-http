@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.utils.UriUtils.extractExtension;
+import static org.apache.coyote.http11.utils.UriUtils.getParameters;
+import static org.apache.coyote.http11.utils.UriUtils.parsePath;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -12,10 +16,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest request = parseRequest(inputStream, bufferedReader);
+            final HttpRequest request = parseRequest(bufferedReader);
 
             final String path = parsePath(request.getPath());
             final URL resource = getResourceUrl(path);
@@ -59,9 +61,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final Map<String, String> queryParams = mergeParameters(
-                    extractQueryParams(request.getRequestLine().getPath()),
-                    parseQueryString(request.getBodyAsString())
+            final Map<String, String> queryParams = getParameters(
+                    request.getQueryString(),
+                    request.getBodyAsString()
             );
 
             final HttpCookie httpCookie = parseCookieFromHeader(request.getHeaders());
@@ -92,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest parseRequest(final InputStream inputStream, final BufferedReader bufferedReader) throws IOException {
+    private HttpRequest parseRequest(final BufferedReader bufferedReader) throws IOException {
         final String[] request = bufferedReader.readLine().split(" ");
         final RequestLine requestLine = new RequestLine(HttpMethod.valueOf(request[0]), request[1], request[2]);
         final List<String> lines = getHeaders(bufferedReader);
@@ -147,21 +149,6 @@ public class Http11Processor implements Runnable, Processor {
         return new String(bodyChars, 0, read).getBytes(StandardCharsets.UTF_8);
     }
 
-
-    private String parsePath(final String requestUri) {
-        String path = requestUri;
-        if ("/".equals(requestUri)) {
-            return path + "index.html";
-        }
-        if (path.contains("?")) {
-            path = path.split("\\?")[0];
-        }
-        if (!requestUri.contains(".")) {
-            path = path + ".html";
-        }
-        return path;
-    }
-
     private URL getResourceUrl(String path) throws FileNotFoundException {
         return getClass()
                 .getClassLoader()
@@ -177,41 +164,6 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> cookieHeader = headers.get("Cookie");
         return cookieHeader.map(HttpCookie::fromHeader)
                 .orElseGet(() -> HttpCookie.fromHeader(null));
-    }
-
-    private Map<String, String> mergeParameters(
-            Map<String, String> queryParams,
-            Map<String, String> bodyParams
-    ) {
-        Map<String, String> result = new HashMap<>(queryParams);
-        result.putAll(bodyParams);
-        return result;
-    }
-
-    private Map<String, String> extractQueryParams(final String uri) {
-        if (!uri.contains("?")) {
-            return Map.of();
-        }
-        final String[] split = uri.split("\\?");
-        final String queryString = split.length > 1 ? split[1] : "";
-        return parseQueryString(queryString);
-    }
-
-    private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> queryMap = new HashMap<>();
-        if (queryString == null || queryString.isBlank()) {
-            return queryMap;
-        }
-
-        final String[] pairs = queryString.split("&");
-
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=", 2);
-            final String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-            String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8) : "";
-            queryMap.put(key, value);
-        }
-        return queryMap;
     }
 
     private HttpResponse generateResponse(final HttpStatus httpStatus, final URL resource) throws IOException {
@@ -254,14 +206,6 @@ public class Http11Processor implements Runnable, Processor {
             httpResponse.setHeader("Content-Type", MimeType.HTML.getType());
             return httpResponse;
         }
-    }
-
-    private String extractExtension(final String resourceName) {
-        int dotIndex = resourceName.lastIndexOf(".");
-        if (dotIndex == -1) {
-            return "";
-        }
-        return resourceName.substring(dotIndex + 1);
     }
 
     private void handleLogin(

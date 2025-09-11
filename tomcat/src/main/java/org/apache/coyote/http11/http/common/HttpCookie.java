@@ -1,9 +1,10 @@
 package org.apache.coyote.http11.http.common;
 
 import http.HttpHeaderKey;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 
 public class HttpCookie {
@@ -22,30 +23,16 @@ public class HttpCookie {
     }
 
     private static Map<String, String> parseCookies(final String rawCookie) {
-        Map<String, String> values = new HashMap<>();
-        final String[] cookieElements = rawCookie.trim().split(HttpSplitFormat.COOKIE.getValue());
-
-        for (String cookieElement : cookieElements) {
-            if (cookieElement.isBlank()) {
-                continue;
-            }
-
-            final String[] splits = cookieElement.split(HttpSplitFormat.COOKIE_ELEMENT.getValue(), 2);
-            if (splits.length != 2) {
-                continue;
-            }
-
-            final String cookieName = splits[0].trim();
-            final String cookieValue = splits[1].trim();
-            if (cookieName.isEmpty()) {
-                continue;
-            }
-
-            values.put(cookieName, cookieValue);
-        }
-        return values;
+        return Arrays.stream(rawCookie.trim().split(HttpSplitFormat.COOKIE.getValue()))
+                .filter(rawCookieElement -> !rawCookieElement.isBlank())
+                .map(rawCookieElement -> rawCookieElement.split(HttpSplitFormat.COOKIE_ELEMENT.getValue(), 2))
+                .filter(cookieElement -> cookieElement.length != 2)
+                .filter(cookieElement -> cookieElement[0].isBlank())
+                .collect(Collectors.toMap(
+                        cookieElement -> cookieElement[0],
+                        cookieElement -> cookieElement[1]
+                ));
     }
-
 
     public void addCookie(final String name, final String value) {
         values.put(name, value);

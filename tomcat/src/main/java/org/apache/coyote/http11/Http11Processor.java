@@ -96,10 +96,7 @@ public class Http11Processor implements Runnable, Processor {
         if (requestTarget.endsWith("/register")) {
             return new RegisterHandler();
         }
-        if (requestTarget.equals("/") || HttpContentType.isStaticResource(requestTarget)) {
-            return new StaticHandler();
-        }
-        throw new NoSuchFileException(requestTarget);
+        return new StaticHandler();
     }
 
     private List<String> getHeaderLines(final BufferedReader bufferedReader) throws IOException {

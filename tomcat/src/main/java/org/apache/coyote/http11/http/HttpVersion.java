@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.http;
 
+import java.util.Arrays;
+import org.apache.catalina.exception.HttpVersionNotSupported;
+
 public enum HttpVersion {
     HTTP_1_0("HTTP/1.0"),
     HTTP_1_1("HTTP/1.1"),
@@ -13,12 +16,10 @@ public enum HttpVersion {
     }
 
     public static HttpVersion from(String value) {
-        for (HttpVersion v : values()) {
-            if (v.text.equalsIgnoreCase(value)) {
-                return v;
-            }
-        }
-        throw new IllegalArgumentException("지원하지 않는 HTTP 버전: " + value);
+        Arrays.stream(HttpVersion.values())
+                .filter(v -> v.text.equalsIgnoreCase(value))
+                .findFirst()
+                .orElseThrow(() -> new HttpVersionNotSupported("지원하지 않는 HTTP 버전: " + value));
     }
 
     @Override

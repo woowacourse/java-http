@@ -25,6 +25,9 @@ public class GlobalExceptionHandler {
         if (e instanceof HttpRequestMethodNotSupportedException) {
             return new ErrorPage("static/404.html", HttpStatus.METHOD_NOT_ALLOWED);
         }
+        if (e instanceof HttpVersionNotSupported) {
+            return new ErrorPage("static/404.html", HttpStatus.HTTP_VERSION_NOT_SUPPORTED);
+        }
 
         return new ErrorPage("static/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
     }

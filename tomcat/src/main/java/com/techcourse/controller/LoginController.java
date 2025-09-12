@@ -29,6 +29,11 @@ public class LoginController extends AbstractController {
         String password = request.getParameter("password").orElse(null);
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
+        if (account == null || password == null) {
+            ResponseHandler.sendStaticFile(response, "/400.html", BAD_REQUEST);
+            return;
+        }
+
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             ResponseHandler.sendStaticFile(response,"/401.html", UNAUTHORIZED);
             return;

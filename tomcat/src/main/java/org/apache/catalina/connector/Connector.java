@@ -40,7 +40,8 @@ public class Connector implements Runnable {
                 maxThreads,
                 0L,
                 TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(acceptCount)
+                new ArrayBlockingQueue<>(acceptCount),
+                new ThreadPoolExecutor.CallerRunsPolicy()
         );
         this.stopped = false;
     }
@@ -70,10 +71,22 @@ public class Connector implements Runnable {
             try {
                 final Socket connection = serverSocket.accept();
                 log.info("Accept connection: {}", connection);
-                executorService.execute(() -> process(connection));
+                executorService.execute(() -> {
+                    try {
+                        process(connection);
+                    } finally {
+                        try {
+                            connection.close();
+                        } catch (IOException e) {
+                            log.error("Failed to close socket", e);
+                        }
+                    }
+                });
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 break;
+            } catch (Exception e) {
+                log.error("Unexpected error during connection handling", e);
             }
         }
     }

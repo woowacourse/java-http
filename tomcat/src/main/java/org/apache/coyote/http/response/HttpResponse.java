@@ -1,7 +1,5 @@
 package org.apache.coyote.http.response;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
 import org.apache.coyote.http.cookie.HttpCookie;
 
@@ -54,18 +52,16 @@ public class HttpResponse {
         return new HttpResponse(ResponseLine.unauthorized(), headers, body);
     }
 
-    public void writeTo(OutputStream outputStream) throws IOException {
-        StringBuilder response = new StringBuilder();
-        response.append(responseLine.toString()).append("\r\n");
+    public ResponseLine getResponseLine() {
+        return responseLine;
+    }
 
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            response.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
-        }
-        response.append("\r\n");
-        response.append(body);
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 
-        outputStream.write(response.toString().getBytes());
-        outputStream.flush();
+    public String getBody() {
+        return body;
     }
 
 }

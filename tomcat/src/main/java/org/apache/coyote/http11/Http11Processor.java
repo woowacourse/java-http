@@ -9,6 +9,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.handler.RequestHandler;
 import org.apache.coyote.http.request.HttpRequestParser;
+import org.apache.coyote.http.response.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +19,13 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestHandler requestHandler;
     private final HttpRequestParser requestParser;
+    private final HttpResponseWriter responseWriter;
 
     public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
         this.requestHandler = new RequestHandler();
         this.requestParser = new HttpRequestParser(sessionManager);
+        this.responseWriter = new HttpResponseWriter();
     }
 
     @Override
@@ -39,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final var request = requestParser.parse(bufferedReader);
             final var response = requestHandler.handleRequest(request);
-            response.writeTo(outputStream);
+            responseWriter.write(response, outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

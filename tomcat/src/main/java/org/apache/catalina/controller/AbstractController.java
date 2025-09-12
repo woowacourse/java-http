@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.Controller;
 import org.apache.catalina.loader.ResourceLoader;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -21,10 +20,10 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         switch (request.getRequestLine().getMethod()) {
-            case HttpMethod.GET:
+            case GET:
                 doGet(request, response);
                 break;
-            case HttpMethod.POST:
+            case POST:
                 doPost(request, response);
                 break;
             default:

@@ -29,13 +29,9 @@ public class Session {
         values.remove(name);
     }
 
-    public void validateSessionUser(String sessionId, Object user) {
+    public boolean isSessionUserEqual(Object user) {
         Object sessionUser = values.get("user");
-        if (this.id.equals(sessionId) && sessionUser != null && sessionUser.equals(user)) {
-            return;
-        }
-        throw new IllegalArgumentException("[ERROR] cookie & user matching error");
-
+        return sessionUser.equals(user);
     }
 
     public void invalidate() {

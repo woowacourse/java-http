@@ -3,27 +3,37 @@ package org.apache.coyote.http11.controller;
 import java.util.Map;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.request_response.HttpMethod;
 import org.apache.coyote.http11.request_response.HttpStatus;
 import org.apache.coyote.http11.request_response.request.HttpRequest;
 import org.apache.coyote.http11.request_response.response.HttpResponse;
+import org.apache.coyote.http11.util.StaticFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class RegisterController implements Controller {
+public class RegisterController extends ServletController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @Override
     public boolean supports(HttpRequest request) {
-        return request.getRequestMethod().equals(HttpMethod.POST) && request.getUriPath().equals("/register");
+        return request.getUriPath().equals("/register");
     }
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    protected HttpResponse doGet(HttpRequest request) {
+        String responseBody = new StaticFileReader().readStaticFile("/register.html");
+        return HttpResponse.builder()
+            .status(HttpStatus.OK)
+            .contentType("text/html;charset=utf-8")
+            .body(responseBody)
+            .build();
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest request) {
         try {
             Map<String, String> formData = request.getFormData();
             register(formData);

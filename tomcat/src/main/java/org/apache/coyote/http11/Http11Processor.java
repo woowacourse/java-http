@@ -13,9 +13,7 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.LoginPageController;
 import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.RegisterPageController;
 import org.apache.coyote.http11.controller.StaticResourceController;
 import org.apache.coyote.http11.controller.WelcomePageController;
 import org.apache.coyote.http11.request_response.request.HttpRequest;
@@ -32,9 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final List<Controller> controllers = List.of(
         new LoginController(),
-        new LoginPageController(),
         new RegisterController(),
-        new RegisterPageController(),
         new WelcomePageController(),
         new StaticResourceController()
     );

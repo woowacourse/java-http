@@ -1,8 +1,8 @@
 package com.techcourse.controller;
 
-import com.techcourse.ResourceLoader;
 import com.techcourse.model.User;
 import com.techcourse.service.AuthService;
+import com.techcourse.util.ResourceLoader;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
         String path = request.getPath();
-        return Optional.ofNullable(request.getHeaders().get("Cookie"))
+        return Optional.ofNullable(request.getHeaders().get("cookie"))
                 .flatMap(HttpCookie::getSessionId)
                 .map(SessionManager.getInstance()::findSession)
                 .filter(session -> session.getAttribute("user") != null)

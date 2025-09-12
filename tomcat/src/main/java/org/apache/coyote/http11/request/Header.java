@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class Header {
     private final String header;
@@ -9,7 +9,11 @@ public class Header {
         this.value = value;
     }
 
-    public boolean isCookeHeader() {
+    public boolean isContentLength() {
+        return header.equals("Content-Length");
+    }
+
+    public boolean isCookieHeader() {
         return header.equals("Cookie");
     }
 

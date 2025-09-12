@@ -1,4 +1,4 @@
-package org.apache.web;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.Account;
@@ -8,10 +8,13 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Session;
-import org.apache.web.StaticResourceResolver.ResolvedResource;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.resolver.StaticResourceResolver;
+import org.apache.catalina.resolver.StaticResourceResolver.ResolvedResource;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,8 @@ public class LoginController extends AbstractController {
 
     @Override
     public Http11Response doGet(final Http11Request request) {
-        Session session = request.getSession(false);
+        String sessionId = request.getSessionId();
+        Session session = SessionManager.findSession(sessionId);
         if (session != null && session.getAttribute("user") != null) {
             return Http11Response.redirect("/index.html", COOKIE + session.getId());
         }
@@ -51,10 +55,11 @@ public class LoginController extends AbstractController {
 
         if (loginSuccess.isPresent()) {
             log.info("로그인 성공 - {}", account);
-            Session session = request.getSession(true);
-            session.setAttribute("user", loginSuccess.get());
-            String cookieHeader = COOKIE + session.getId();
-            return Http11Response.redirect("/index.html", cookieHeader);
+            SessionManager.invalidateAllForUser(account);
+            Session newSession = SessionManager.create();
+            newSession.setAttribute("user", loginSuccess.get());
+
+            return Http11Response.redirect("/index.html", COOKIE + newSession.getId());
         }
         log.warn("로그인 실패 - {}", account);
         return Http11Response.redirect("/401.html");

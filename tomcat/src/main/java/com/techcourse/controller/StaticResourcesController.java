@@ -1,12 +1,14 @@
-package org.apache.web;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.web.StaticResourceResolver.ResolvedResource;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.resolver.StaticResourceResolver;
+import org.apache.catalina.resolver.StaticResourceResolver.ResolvedResource;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.apache.web;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.Account;
@@ -10,20 +10,30 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.web.StaticResourceResolver.ResolvedResource;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.resolver.StaticResourceResolver;
+import org.apache.catalina.resolver.StaticResourceResolver.ResolvedResource;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
+    private static final String COOKIE = "JSESSIONID=";
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     private final StaticResourceResolver resolver = new StaticResourceResolver();
 
     @Override
     public Http11Response doGet(final Http11Request request) {
+        String sessionId = request.getSessionId();
+        Session session = SessionManager.findSession(sessionId);
+        if (session != null && session.getAttribute("user") != null) {
+            return Http11Response.redirect("/index.html", COOKIE + session.getId());
+        }
         try {
             String uri = request.getUri();
             ResolvedResource resource = resolver.resolve(uri);
@@ -51,7 +61,7 @@ public class RegisterController extends AbstractController {
 
         if (registerSuccess) {
             log.info("회원가입 성공 - {}", userEntity);
-            return Http11Response.redirect("/index.html");
+            return Http11Response.redirect("/login.html");
         }
         log.info("회원가입 실패  - {}", userEntity);
         return Http11Response.redirect("/401.html");

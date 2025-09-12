@@ -1,4 +1,4 @@
-package org.apache.web;
+package org.apache.catalina.resolver;
 
 import java.net.URL;
 

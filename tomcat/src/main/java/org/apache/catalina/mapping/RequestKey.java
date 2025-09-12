@@ -1,7 +1,7 @@
-package org.apache.web;
+package org.apache.catalina.mapping;
 
 import java.util.Objects;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.request.HttpMethod;
 
 public class RequestKey {
     private final String uri;

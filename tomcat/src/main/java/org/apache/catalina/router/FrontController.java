@@ -15,5 +15,6 @@ public class FrontController {
     public void dispatch(final HttpRequest request, final HttpResponse response) throws Exception {
         final Controller controller = requestMapping.getController(request);
         controller.service(request, response);
+        response.commit();
     }
 }

@@ -5,17 +5,10 @@ import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.*;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.NoSuchFileException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class RegisterHandler extends AbstractController {
-
-    private static final String STATIC_FILE_LOCATION = "static";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -47,14 +40,6 @@ public class RegisterHandler extends AbstractController {
         response.setRedirectResponse("/index.html", headers);
     }
 
-    private byte[] readFile(final String location) throws IOException {
-        try (final InputStream fileInputStream = new FileInputStream(getClass().getClassLoader().getResource(STATIC_FILE_LOCATION + location).getPath())) {
-            return fileInputStream.readAllBytes();
-        } catch (final NullPointerException e) {
-            throw new NoSuchFileException(location);
-        }
-    }
-
     private static void validateExistingSession(final String account) {
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             throw new IllegalArgumentException(String.format("Already signed up : account = %s", account));
@@ -67,10 +52,5 @@ public class RegisterHandler extends AbstractController {
         sessionManager.add(session);
 
         return session;
-    }
-
-    private String generateSessionID() {
-        final UUID uuid = UUID.randomUUID();
-        return uuid.toString();
     }
 }

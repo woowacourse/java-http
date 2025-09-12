@@ -8,10 +8,6 @@ import org.apache.coyote.http11.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.NoSuchFileException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +15,6 @@ import java.util.Optional;
 public class LoginHandler extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-    private static final String STATIC_FILE_LOCATION = "static";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -56,14 +51,6 @@ public class LoginHandler extends AbstractController {
         headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()));
 
         response.setRedirectResponse("/index.html", headers);
-    }
-
-    private byte[] readFile(final String location) throws IOException {
-        try (final InputStream fileInputStream = new FileInputStream(getClass().getClassLoader().getResource(STATIC_FILE_LOCATION + location).getPath())) {
-            return fileInputStream.readAllBytes();
-        } catch (final NullPointerException e) {
-            throw new NoSuchFileException(location);
-        }
     }
 
     private User findUser(final String account, final String password) throws ServletException {

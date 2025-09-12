@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             log.warn("unauthorized : {}", e.getMessage());
             response.setRedirectResponse("/401.html");
         } catch (final NoSuchFileException e) {
-            log.warn("not found : {}", e.getMessage());
+            log.warn("not found : {}", e.getFile());
             response.setRedirectResponse("/404.html");
         } catch (final Exception e) {
             log.error(e.getMessage(), e);

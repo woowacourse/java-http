@@ -88,6 +88,12 @@ public class RegisterController extends AbstractController {
 
     private void handleRedirect(final HttpRequest request, final HttpResponse response) throws Exception {
         HttpCookie cookie = request.getCookie();
+
+        if (cookie == null) {
+            doGet(request, response);
+            return;
+        }
+
         String sessionId = cookie.getValue("JSESSIONID");
 
         if (sessionId == null) {

@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
             return new ErrorPage("static/404.html", HttpStatus.BAD_REQUEST);
         }
 
-        return new ErrorPage("errors/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ErrorPage("static/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public record ErrorPage(String path, HttpStatus status) {}

@@ -39,7 +39,7 @@ public class ThreadPoolManager {
                 checkedCoreThreads,
                 checkedMaxThreads,
                 checkedKeepAliveSeconds,
-                TimeUnit.MILLISECONDS,
+                TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(checkedMaxWaitQueueSize)
         );
     }

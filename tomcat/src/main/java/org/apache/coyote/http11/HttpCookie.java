@@ -37,5 +37,3 @@ public class HttpCookie {
         return cookies.get("JSESSIONID");
     }
 }
-
-

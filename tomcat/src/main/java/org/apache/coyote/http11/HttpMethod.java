@@ -9,4 +9,3 @@ public enum HttpMethod {
         return valueOf(method);
     }
 }
-

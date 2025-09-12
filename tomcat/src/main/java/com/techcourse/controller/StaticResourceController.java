@@ -3,6 +3,8 @@ package com.techcourse.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -37,7 +39,9 @@ public class StaticResourceController extends AbstractController {
                 return send404Page();
             }
             byte[] responseBody = inputStream.readAllBytes();
-            HttpHeaders headers = HttpHeaders.fromFile(finalResourcePath)
+            HttpHeaders headers = new HttpHeaders()
+                .add("Location", finalResourcePath)
+                .add("Content-Type", Files.probeContentType(Path.of(finalResourcePath)))
                 .add("Content-Length", String.valueOf(responseBody.length));
             
             return new HttpResponse("HTTP/1.1", HttpStatus.OK, headers, 
@@ -69,8 +73,9 @@ public class StaticResourceController extends AbstractController {
                 return new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND, HttpHeaders.empty(), "");
             }
             byte[] responseBody = inputStream.readAllBytes();
-            HttpHeaders headers = HttpHeaders.html()
-                .add("Content-Length", String.valueOf(responseBody.length));
+            HttpHeaders headers = new HttpHeaders()
+                    .add("Content-Type", "text/html;charset=utf-8")
+                    .add("Content-Length", String.valueOf(responseBody.length));
             
             return new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND, headers,
                 new String(responseBody, StandardCharsets.UTF_8));

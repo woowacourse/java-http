@@ -63,7 +63,9 @@ public class AuthController extends AbstractController {
     }
     
     private HttpResponse buildAuthRedirectResponse(String location, String sessionId) {
-        HttpHeaders headers = HttpHeaders.redirect(location);
+        HttpHeaders headers = new HttpHeaders()
+                .add("Location", location)
+                .add("Content-Length", "0");
         
         if (sessionId != null) {
             headers.add("Set-Cookie", "JSESSIONID=" + sessionId);
@@ -74,7 +76,8 @@ public class AuthController extends AbstractController {
     private HttpResponse send401Page() throws IOException {
         try (InputStream inputStream = AuthController.class.getClassLoader().getResourceAsStream("static/401.html")) {
             byte[] responseBody = inputStream.readAllBytes();
-            HttpHeaders headers = HttpHeaders.html()
+            HttpHeaders headers = new HttpHeaders()
+                    .add("Content-Type", "text/html;charset=utf-8")
                     .add("Content-Length", String.valueOf(responseBody.length));
             
             return new HttpResponse(
@@ -87,7 +90,13 @@ public class AuthController extends AbstractController {
     }
     
     private HttpResponse buildRedirectResponse(String location) {
-        return new HttpResponse("HTTP/1.1", HttpStatus.FOUND, HttpHeaders.redirect(location), "");
+        return new HttpResponse(
+                "HTTP/1.1",
+                HttpStatus.FOUND,
+                new HttpHeaders()
+                        .add("Location", location)
+                        .add("Content-Length", "0"),
+                "");
     }
     
     private HttpResponse handleAuthPageAccess(String pagePath, HttpCookie httpCookie) throws Exception {

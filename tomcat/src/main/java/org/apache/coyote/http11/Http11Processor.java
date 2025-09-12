@@ -72,6 +72,9 @@ public class Http11Processor implements Runnable, Processor {
         try {
             final Controller controller = mapHandler(request);
             controller.service(request, response);
+        } catch (final IllegalArgumentException e) {
+            log.warn("bad request : {}", e.getMessage());
+            response.setRedirectResponse("/400.html");
         } catch (final ServletException e) {
             log.warn("unauthorized : {}", e.getMessage());
             response.setRedirectResponse("/401.html");

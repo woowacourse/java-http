@@ -14,7 +14,7 @@ public abstract class AbstractController implements Controller {
         if (request.getMethod().equals("POST")) {
             doPost(request, response);
         }
-        response.setResponse(HttpStatus.METHOD_NOT_ALLOWED, new byte[0], "");
+        response.setRedirectResponse("/405.html");
     }
 
     abstract void doGet(Http11Request request, Http11Response response) throws Exception;

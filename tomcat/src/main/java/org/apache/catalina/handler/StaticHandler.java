@@ -27,7 +27,7 @@ public class StaticHandler extends AbstractController {
 
     @Override
     void doPost(final Http11Request request, final Http11Response response) throws Exception {
-        response.setResponse(HttpStatus.METHOD_NOT_ALLOWED, new byte[0], "");
+        response.setRedirectResponse("/405.html");
     }
 
     private byte[] readFile(final String location) throws IOException {

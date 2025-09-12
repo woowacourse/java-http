@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
@@ -17,8 +18,8 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_MAX_THREADS = 10;
+    private static final int DEFAULT_ACCEPT_COUNT = 2;
+    private static final int DEFAULT_MAX_THREADS = 3;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -69,12 +70,16 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
         var processor = new Http11Processor(connection);
-        executorService.submit(processor);
+        try {
+            executorService.submit(processor);
+        } catch (RejectedExecutionException exception) {
+            connection.close();
+        }
     }
 
     public void stop() {

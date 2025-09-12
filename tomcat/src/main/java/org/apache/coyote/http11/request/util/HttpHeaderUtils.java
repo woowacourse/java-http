@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.request.util;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

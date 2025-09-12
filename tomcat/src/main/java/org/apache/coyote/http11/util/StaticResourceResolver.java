@@ -4,17 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.controller.exception.ResourceNotFoundException;
 
 public final class StaticResourceResolver {
 
     private static final String STATIC_DIRECTORY = "static/";
 
-    private StaticResourceResolver() {}
+    private StaticResourceResolver() {
+    }
 
     public static String read(final String path) throws IOException {
         final URL resourceUrl = findResource(path);
         if (resourceUrl == null) {
-            return null;
+            throw new ResourceNotFoundException(path);
         }
 
         try (final InputStream inputStream = resourceUrl.openStream()) {

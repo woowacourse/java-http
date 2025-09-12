@@ -1,19 +1,19 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.util.ErrorResponder;
-import org.apache.coyote.http11.util.HttpRequestIO;
-import org.apache.coyote.http11.util.HttpResponseWriter;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticFileController;
+import org.apache.coyote.http11.controller.exception.ResourceNotFoundException;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.SessionSupport;
-import org.apache.coyote.http11.util.StaticResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +23,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Manager manager;
+    private final Map<String, Controller> controllerMap = new HashMap<>();
+    private final Controller staticFileController = new StaticFileController();
 
-    public Http11Processor(final Socket connection, Manager manager) {
+    public Http11Processor(final Socket connection, final Manager manager) {
         this.connection = connection;
         this.manager = manager;
+        controllerMap.put("/login", new LoginController(manager));
+        controllerMap.put("/register", new RegisterController());
     }
 
     @Override
@@ -40,83 +44,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
         ) {
-            final var headerReader = HttpRequestIO.createHeaderReader(inputStream);
-            final var requestLine = RequestLine.from(headerReader.readLine());
-            final var requestHeaders = RequestHeaders.from(headerReader);
-            final var requestCookies = RequestCookies.from(requestHeaders.getHeader("Cookie"));
-            final Map<String, String> responseHeaders = new HashMap<>();
-
-            var session = SessionSupport.findSessionOrCreate(manager, requestCookies, responseHeaders);
-
-            //=========== POST 요청 처리 ============
-            if (requestLine.getMethod() == HttpMethod.POST) {
-                final var requestBody = HttpRequestIO.readRequestBody(requestHeaders, inputStream);
-                final Map<String, String> parameters = RequestBodyUtils.parseFormUrlEncoded(requestBody);
-                String redirectUrl = "/index.html";
-
-                if ("/login".equals(requestLine.getPath())) {
-                    final var account = parameters.get("account");
-                    final var password = parameters.get("password");
-                    final Optional<User> optionalUser = findUserByAccount(account);
-                    if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-                        SessionSupport.rotateSessionAfterLogin(manager, session, optionalUser.get(), responseHeaders);
-                        log.info("로그인 성공 account: {}", account);
-                    } else {
-                        redirectUrl = "/401.html";
-                        log.info("로그인 실패 account: {}", account);
-                    }
-                }
-
-                if ("/register".equals(requestLine.getPath())) {
-                    final var newUser = new User(
-                            parameters.get("account"),
-                            parameters.get("password"),
-                            parameters.get("email")
-                    );
-                    InMemoryUserRepository.save(newUser);
-                    log.info("Registered new user: {}", newUser.getAccount());
-                }
-
-                final var response = HttpResponseWriter.redirect(redirectUrl, responseHeaders);
-                HttpResponseWriter.write(outputStream, response);
-                return;
+            final var request = HttpRequest.from(inputStream);
+            final var response = new HttpResponse(outputStream);
+            final var session = SessionSupport.findSessionOrCreate(manager, request.getRequestCookies(), response);
+            final var controller = controllerMap.getOrDefault(request.getPath(), staticFileController);
+            try {
+                controller.service(request, response, session);
+            } catch (ResourceNotFoundException e) {
+                log.warn(e.getMessage(), e);
+                response.sendNotFound();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                response.sendServerError();
             }
-
-            //=========== GET 요청 처리 ============
-            var requestPath = requestLine.getPath();
-
-            if ("/login".equals(requestPath) && session.getAttribute("user") != null) {
-                final var response = HttpResponseWriter.redirect("/index.html", responseHeaders);
-                HttpResponseWriter.write(outputStream, response);
-                return;
-            }
-
-            if (requestPath.isBlank() || "/".equals(requestPath)) {
-                requestPath = "index.html";
-            }
-
-            final var responseBody = StaticResourceResolver.read(requestPath);
-            if (responseBody == null) {
-                ErrorResponder.send404(outputStream);
-                return;
-            }
-            final var mimeType = ContentType.from(requestPath).getMimeType();
-            final var response = HttpResponseWriter.ok(mimeType, responseBody, responseHeaders);
-            HttpResponseWriter.write(outputStream, response);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            try (final var outputStream = connection.getOutputStream()) {
-                ErrorResponder.send500(outputStream);
-            } catch (IOException ioEx) {
-                log.error("500 에러 전송 실패: {}", ioEx.getMessage(), ioEx);
-            }
+        } catch (IOException e) {
+            log.error("500 에러 전송 실패: {}", e.getMessage(), e);
         }
-    }
-
-    public Optional<User> findUserByAccount(String account) {
-        if (account == null || account.isBlank()) {
-            return Optional.empty();
-        }
-        return InMemoryUserRepository.findByAccount(account);
     }
 }

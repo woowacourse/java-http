@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -37,7 +39,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -46,19 +48,21 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final var sessionManager = new SessionManager();
-        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+        final var processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: 5564\r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expectedBody = Files.readString(new File(resource.getFile()).toPath());
 
-        assertThat(socket.output()).isEqualTo(expected);
+        final String responseResult = socket.output();
+        assertThat(responseResult).startsWith("HTTP/1.1 200 OK");
+        assertThat(responseResult).contains("Content-Type: text/html;charset=utf-8");
+        assertThat(responseResult).contains("Content-Length: " + expectedBody.getBytes(StandardCharsets.UTF_8).length);
+        assertThat(responseResult).contains("Set-Cookie: JSESSIONID=");
+
+        assertThat(responseResult).endsWith(expectedBody);
     }
 }

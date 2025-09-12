@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.request.util;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http11.RequestHeaders;
+import org.apache.coyote.http11.request.RequestHeaders;
 
 public final class HttpRequestIO {
     private HttpRequestIO() {

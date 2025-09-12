@@ -10,7 +10,6 @@ public class StaticResourceHandler {
 
     public HttpResponse service(HttpRequest request) throws IOException {
         String path = request.getPath();
-        System.out.println(path);
         byte[] body = getStaticResource(path);
         if (body == null) {
             body = getStaticResource("/404.html");

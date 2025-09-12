@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.StaticRequestController;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.StaticRequestController;
 import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 

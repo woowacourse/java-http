@@ -3,8 +3,10 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.StaticResourceHandler;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.exception.CommonException;
-import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

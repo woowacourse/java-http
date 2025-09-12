@@ -16,7 +16,7 @@ public class SessionManager {
     }
 
     public static Session findSession(String id) {
-        if(SESSIONS.containsKey(id)) {
+        if (SESSIONS.containsKey(id)) {
             return SESSIONS.get(id);
         }
         return createNew();

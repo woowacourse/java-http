@@ -1,16 +1,17 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
-import org.apache.coyote.http11.controller.AbstractController;
+import org.apache.coyote.http11.controller.AbstractApiController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseConfigurator;
 
-public class RegisterController extends AbstractController {
+public class RegisterController extends AbstractApiController {
 
     private final UserService userService;
 
     public RegisterController() {
+        super("/register");
         this.userService = new UserService();
     }
 
@@ -27,10 +28,5 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         HttpResponseConfigurator.okWithStaticResource(response, "/register.html");
-    }
-
-    @Override
-    public boolean support(final HttpRequest request) {
-        return request.isPathEqualsTo("/register");
     }
 }

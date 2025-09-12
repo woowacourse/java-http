@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 
 public record HttpRequest(
@@ -35,7 +33,7 @@ public record HttpRequest(
             body = RequestBodyParser.parse(reader, headers);
         }
 
-        final HttpCookie cookies = new HttpCookie(headers.get("cookie"));
+        final HttpCookie cookies = HttpCookie.from(headers.get("cookie"));
 
         return new HttpRequest(
                 httpMethod,
@@ -53,6 +51,10 @@ public record HttpRequest(
 
     public String getPath() {
         return requestUri.path();
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
     public String getParameter(String key) {
@@ -76,8 +78,4 @@ public record HttpRequest(
         return null;
     }
 
-    public Session getSession(boolean create) {
-        String sessionId = cookies.getJSessionId();
-        return SessionManager.getInstance().getSession(sessionId, create);
-    }
 }

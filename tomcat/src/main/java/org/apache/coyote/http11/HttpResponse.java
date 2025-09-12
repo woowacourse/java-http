@@ -1,48 +1,27 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
+    public static final String LOCATION_HEADER = "Location";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
+    private final Map<String, String> headers = new LinkedHashMap<>();
+    private String protocolVersion = DEFAULT_HTTP_VERSION;
+    private HttpStatus status = HttpStatus.OK;
+    private MimeType mimeType = null;
+    private String body = "";
 
-    private final String protocolVersion;
-    private final HttpStatus status;
-    private final MimeType mimeType;
-    private final Map<String, String> headers;
-    private final String body;
-
-    public HttpResponse(String protocolVersion, HttpStatus status, MimeType mimeType, String body) {
-        this.protocolVersion = protocolVersion;
-        this.status = status;
-        this.mimeType = mimeType;
-        this.headers = new LinkedHashMap<>();
-        this.body = body;
-    }
-
-    public static HttpResponse of(HttpStatus status, MimeType contentType, String body) {
-        HttpResponse response = new HttpResponse("HTTP/1.1", status, contentType, body);
-        response.initHeaders();
-        return response;
-    }
-
-    public static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse("HTTP/1.1", HttpStatus.FOUND, null, "");
-        response.addHeader("Location", location);
-        response.addHeader(CONTENT_LENGTH_HEADER, "0");
-        return response;
-    }
-    
-    public void initHeaders() {
-        if (mimeType != null) {
-            headers.put(CONTENT_TYPE_HEADER, mimeType.getType() + ";charset=utf-8");
-        }
-        if (!body.isEmpty()) {
-            headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.getBytes(StandardCharsets.UTF_8).length));
-        }
+    public void redirect(String location) {
+        setStatus(HttpStatus.FOUND);
+        addHeader(LOCATION_HEADER, location);
+        addHeader(CONTENT_LENGTH_HEADER, String.valueOf(this.body.getBytes(StandardCharsets.UTF_8).length));
     }
 
     public void addHeader(String key, String value) {
@@ -76,5 +55,26 @@ public class HttpResponse {
         if (!body.isEmpty()) {
             sb.append(this.body);
         }
+    }
+
+    public void setResponse(HttpStatus status, MimeType mimeType, String body) {
+        this.mimeType = mimeType;
+        this.status = status;
+        this.body = body;
+        if (mimeType != null) {
+            headers.put(CONTENT_TYPE_HEADER, mimeType.getType() + ";charset=utf-8");
+        }
+        if (!body.isEmpty()) {
+            headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.getBytes(StandardCharsets.UTF_8).length));
+        }
+    }
+
+    public void sendResponse(OutputStream outputStream) throws IOException {
+        outputStream.write(toHttpResponseString().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 }

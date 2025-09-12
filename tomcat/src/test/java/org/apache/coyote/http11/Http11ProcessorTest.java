@@ -20,7 +20,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
+        final var processor = new Http11Processor(socket, FrontControllerFactory.getInstance());
 
         // when
         processor.process(socket);
@@ -47,7 +47,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.getInstance());
 
         // when
         processor.process(socket);
@@ -86,7 +86,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.getInstance());
 
         // when
         processor.process(socket);
@@ -112,7 +112,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.getInstance());
 
         // when
         processor.process(socket);
@@ -139,7 +139,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.getInstance());
 
         // when
         processor.process(socket);

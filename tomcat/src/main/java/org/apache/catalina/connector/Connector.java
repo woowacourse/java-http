@@ -66,7 +66,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var frontController = FrontControllerFactory.createFrontController();
+        var frontController = FrontControllerFactory.getInstance();
         var processor = new Http11Processor(connection, frontController);
         new Thread(processor).start();
     }

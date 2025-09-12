@@ -8,7 +8,9 @@ import org.apache.catalina.loader.ResourceLoader;
 
 public class FrontControllerFactory {
 
-    public static FrontController createFrontController() {
+    private static final FrontController FRONT_CONTROLLER = create();
+
+    private static FrontController create() {
         final ResourceLoader resourceLoader = new ResourceLoader();
         final RequestMapping requestMapping = new RequestMapping();
         requestMapping.addMapping("", new StaticResourceController(resourceLoader));
@@ -16,5 +18,9 @@ public class FrontControllerFactory {
         requestMapping.addMapping("/login", new LoginController(resourceLoader));
         requestMapping.addMapping("/register", new RegisterController(resourceLoader));
         return new FrontController(requestMapping);
+    }
+
+    public static FrontController getInstance() {
+        return FRONT_CONTROLLER;
     }
 }

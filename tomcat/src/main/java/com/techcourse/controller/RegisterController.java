@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import org.apache.catalina.exception.Http4xxException;
 import org.apache.catalina.web.controller.AbstractController;
 import org.apache.commons.lang3.StringUtils;
@@ -9,15 +8,18 @@ import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
     public static final String ENDPOINT = "/register";
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String REDIRECTION_PATH = "/index.html";
+
+    public final UserService userService;
+
+    public RegisterController(final UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     protected void registerCommands() {
@@ -37,8 +39,8 @@ public class RegisterController extends AbstractController {
         if (!isRequestBodyValid(account, password, email)) {
             throw new Http4xxException("잘못된 요청입니다.", response, HttpStatus.BAD_REQUEST);
         }
-        checkDuplication(response, account);
-        saveUser(account, password, email);
+        userService.saveUser(response, account, password, email);
+
         response.setState(HttpStatus.Found);
         return REDIRECTION_PATH;
     }
@@ -47,17 +49,5 @@ public class RegisterController extends AbstractController {
         return StringUtils.isNotBlank(account)
                 && StringUtils.isNotBlank(password)
                 && StringUtils.isNotBlank(email);
-    }
-
-    private void checkDuplication(Http11Response response, String account) {
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new Http4xxException("이미 가입한 사용자입니다.", response, HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    private static void saveUser(String account, String password, String email) {
-        final User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        log.info("User created: {}", user);
     }
 }

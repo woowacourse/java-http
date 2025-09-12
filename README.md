@@ -4,15 +4,14 @@
 
 이 프로젝트는 Spring Boot의 내장 톰캣 서버에서 HTTP 요청이 어떻게 처리되는지 이해하기 위해 톰캣의 핵심 구조를 간소화하여 구현한 버전입니다.
 
-**주요 관심사**: 톰캣의 HTTP 요청 처리 메커니즘을 학습하는 것이 목적이므로, 운영 환경에서 필요한 고급 기능들(필터 체인, 보안 처리, 클러스터링 등)은 학습 목적상 의도적으로 배제하고 순수 톰캣 구조에
-집중하여 구현했습니다.
+**주요 관심사**: 톰캣의 HTTP 요청 처리 메커니즘을 학습하는 것이 목적이므로, 구체적인 내부 구현이 목표가 아닙니다.
+운영 환경에서 필요한 고급 기능들(필터 체인, 보안 처리, 클러스터링 등)은 학습 목적상 의도적으로 배제하고 HTTP 흐름 이해에 집중하여 구현했습니다.
 
 ### 학습목표
 
 - 웹 서버 구현을 통해 HTTP 이해도를 높인다.
 - HTTP의 이해도를 높여 성능 개선할 부분을 찾고 적용할 역량을 쌓는다.
-- 서블릿에 대한 이해도
-- 높인다.
+- 서블릿에 대한 이해도를 높인다.
 - 스레드, 스레드풀을 적용해보고 동시성 처리를 경험한다.
 
 ### 구현 구조
@@ -24,33 +23,35 @@
 ## 전체 아키텍처
 
 ```
-HTTP 요청
-    ↓
+         HTTP 요청
+            ↓
 ┌─────────────────────────────────┐
 │ [Tomcat]                        │ - 웹 애플리케이션 서버 시작점
 │ org.apache.catalina.startup     │
 └─────────────────────────────────┘
-    ↓
+            ↓
 ┌─────────────────────────────────┐
 │ [Connector]                     │ - HTTP 커넥터 (클라이언트 연결 수락)
 │ org.apache.catalina.connector   │ - ServerSocket + ExecutorService
 └─────────────────────────────────┘
-    ↓
+            ↓
 ┌─────────────────────────────────┐
 │ [Http11Processor]               │ - HTTP/1.1 프로토콜 처리 (Coyote 엔진)
 │ org.apache.coyote.http11        │ - RequestLine, Headers 파싱
 └─────────────────────────────────┘
-    ↓
+            ↓
 ┌─────────────────────────────────┐
 │ [CoyoteAdapter]                 │ - 프로토콜 엔진과 Servlet 컨테이너 연결 어댑터
 │ org.apache.catalina.connector   │ - HTTP 요청/응답 변환
 └─────────────────────────────────┘
-    ↓
+            ↓
 ┌─────────────────────────────────┐
 │ [CatalinaContainer]             │ - 적절한 핸들러로 요청 전달 (Catalina)
-│ org.apache.catalina.core        │ - 정적/동적 요청 분기
+│ org.apache.catalina.core        │ - 단일 환경 실습 위해 Engine/Host/Context/Wrapper 통합
 └─────────────────────────────────┘
-    ↓
+            ↓
+    - 정적/동적 요청 분기
+    ↓                     ↓
 ┌──────────────────┬──────────────────┐
 │ 정적 파일 요청    │ 비즈니스 요청     │
 │ (.css, .js 등)   │ (동적 처리)       │
@@ -68,6 +69,23 @@ HTTP 요청
                     [ViewResolver] - Controller 응답 후 HTML 파일 로드
                           ↓
                     HTTP 응답
+```
+
+## 요청 처리 플로우
+
+### 1. 정적 파일 요청 예시 (`/static/style.css`)
+
+```
+HTTP 요청 → Tomcat → Connector → Http11Processor → CoyoteAdapter 
+→ CatalinaContainer → StaticResourceRequestHandler → HTTP 응답
+```
+
+### 2. 동적 요청 예시 (`/login`)
+
+```
+HTTP 요청 → Tomcat → Connector → Http11Processor → CoyoteAdapter 
+→ CatalinaContainer → ControllerHandler → RequestHandlerMapper 
+→ LoginController → ViewResolver → HTTP 응답
 ```
 
 ## 핵심 컴포넌트 설명
@@ -134,20 +152,3 @@ HTTP 요청
 
 - **파일**: `org.apache.catalina.session.SessionManager`
 - **역할**: JSESSIONID 쿠키를 통한 세션 추적 및 관리
-
-## 요청 처리 플로우
-
-### 1. 정적 파일 요청 예시 (`/static/style.css`)
-
-```
-HTTP 요청 → Tomcat → Connector → Http11Processor → CoyoteAdapter 
-→ CatalinaContainer → StaticResourceRequestHandler → HTTP 응답
-```
-
-### 2. 동적 요청 예시 (`/login`)
-
-```
-HTTP 요청 → Tomcat → Connector → Http11Processor → CoyoteAdapter 
-→ CatalinaContainer → ControllerHandler → RequestHandlerMapper 
-→ LoginController → ViewResolver → HTTP 응답
-```

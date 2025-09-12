@@ -4,13 +4,13 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.catalina.container.controller.AbstractController;
-import org.apache.catalina.container.exception.InvalidRequestException;
-import org.apache.catalina.container.http.Cookie;
-import org.apache.catalina.container.http.request.HttpRequest;
-import org.apache.catalina.container.http.response.HttpResponse;
-import org.apache.catalina.container.session.Session;
-import org.apache.catalina.container.session.SessionManager;
+import org.apache.catalina.core.controller.AbstractController;
+import org.apache.catalina.core.exception.InvalidRequestException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.tomcat.util.http.Cookie;
+import org.apache.tomcat.util.http.request.HttpRequest;
+import org.apache.tomcat.util.http.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 

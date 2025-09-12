@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.net.Socket;
-import org.apache.catalina.container.http.request.HttpRequest;
-import org.apache.catalina.container.http.response.HttpResponse;
+import org.apache.catalina.core.controller.FrontController;
 import org.apache.coyote.Processor;
+import org.apache.tomcat.util.http.request.HttpRequest;
+import org.apache.tomcat.util.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,10 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.container.controller.AbstractController;
-import org.apache.catalina.container.http.request.HttpRequest;
-import org.apache.catalina.container.http.response.HttpResponse;
-import org.apache.catalina.container.http.value.HttpHeader;
-import org.apache.catalina.container.http.value.StatusCode;
+import org.apache.catalina.core.controller.AbstractController;
+import org.apache.tomcat.util.http.request.HttpRequest;
+import org.apache.tomcat.util.http.response.HttpResponse;
+import org.apache.tomcat.util.http.value.HttpHeader;
+import org.apache.tomcat.util.http.value.StatusCode;
 
 public class RootController extends AbstractController {
 

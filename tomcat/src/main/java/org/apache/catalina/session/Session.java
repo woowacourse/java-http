@@ -1,18 +1,18 @@
 package org.apache.catalina.session;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String id;
     private final Map<String, Object> values;
-    private boolean isNew;
+    private volatile boolean isNew;
 
     public Session() {
         this.id = UUID.randomUUID().toString();
-        this.values = new ConcurrentHashMap<>();
+        this.values = new HashMap<>();
         this.isNew = true;
     }
 
@@ -32,7 +32,7 @@ public class Session {
         return isNew;
     }
 
-    public void setNew(boolean isNew) {
-        this.isNew = isNew;
+    public void activate() {
+        this.isNew = false;
     }
 }

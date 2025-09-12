@@ -49,7 +49,7 @@ public class ServletRequest {
         if (sessionId != null) {
             final Session existingSession = SessionManager.getInstance().findSession(sessionId);
             if (existingSession != null) {
-                existingSession.setNew(false);
+                existingSession.activate();
                 return existingSession;
             }
         }

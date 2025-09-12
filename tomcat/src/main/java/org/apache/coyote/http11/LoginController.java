@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.exception.CommonException;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 
 public class LoginController {
 

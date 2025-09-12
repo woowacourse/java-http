@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import com.techcourse.exception.BadRequestException;
 import java.util.HashMap;
@@ -53,5 +53,13 @@ public class RequestLine {
 
     public String getQueryParam(String key) {
         return queryParams.get(key);
+    }
+
+    public boolean isGet() {
+        return "GET".equalsIgnoreCase(method);
+    }
+
+    public boolean isPost() {
+        return "POST".equalsIgnoreCase(method);
     }
 }

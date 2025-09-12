@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,32 +11,34 @@ public class HttpHeaders {
 
     private final Map<String, String> headers = new HashMap<>();
 
-    public void put(String key, String value) {
-        headers.put(key, value);
+    public HttpHeaders(BufferedReader reader) throws IOException {
+        parse(reader);
     }
 
-    public String get(String key) {
-        return headers.get(key);
-    }
-
-    public static HttpHeaders parse(BufferedReader reader) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
+    private void parse(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            parseHeaderLine(line, headers);
+            parseHeaderLine(line);
         }
-        return headers;
     }
 
-    private static void parseHeaderLine(String line, HttpHeaders headers) {
+    private void parseHeaderLine(String line) {
         int colonIndex = line.indexOf(HEADER_SEPARATOR);
         if (colonIndex <= 0) {
             return;
         }
         String key = line.substring(0, colonIndex).trim();
         String value = line.substring(colonIndex + 1).trim();
-        if (!key.isEmpty() && !value.isEmpty()) {
-            headers.put(key, value);
+        if (!key.isEmpty()) {
+            this.put(key, value);
         }
+    }
+
+    public void put(String key, String value) {
+        headers.put(key, value);
+    }
+
+    public String get(String key) {
+        return headers.get(key);
     }
 }

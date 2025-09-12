@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Connector implements Runnable {
 
@@ -16,23 +19,30 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_THREAD = 100;
 
+    private final ExecutorService executor;
     private final ServerSocket serverSocket;
+    private final SessionManager sessionManager;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.sessionManager = new SessionManager();
+
+        executor = Executors.newFixedThreadPool(maxThread);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
+
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -67,8 +77,9 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, new SessionManager());
-        new Thread(processor).start();
+        var processor = new Http11Processor(connection, sessionManager);
+        Thread thread = new Thread(processor);
+        Future<?> submit = executor.submit(thread);
     }
 
     public void stop() {

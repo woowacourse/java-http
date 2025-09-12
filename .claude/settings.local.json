@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Read(/C:\\java_project\\java-http\\tomcat\\src\\main\\java\\org\\apache\\catalina\\servlet/**)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "WebSearch",
+      "WebFetch(domain:dev.to)"
     ],
     "deny": [],
     "ask": []

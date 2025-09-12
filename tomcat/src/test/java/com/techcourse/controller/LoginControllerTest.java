@@ -6,20 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.spring.controller.Controller;
+import com.spring.http.HttpHeader;
 import com.spring.http.enums.HttpMethod;
 import com.spring.http.enums.HttpStatus;
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UnAuthorizedException;
-import com.techcourse.model.User;
-import com.spring.controller.Controller;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import com.spring.http.HttpHeader;
 import com.spring.http.request.HttpRequest;
 import com.spring.http.request.HttpRequestBody;
 import com.spring.http.request.RequestStartLine;
 import com.spring.http.response.HttpResponse;
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UnAuthorizedException;
+import com.techcourse.model.User;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import org.apache.catalina.manager.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class LoginControllerTest {
 
     @BeforeEach
     void setUp() {
-        loginController = new LoginController();
+        loginController = new LoginController(new SessionManager());
 
         // 테스트용 사용자 데이터 초기화
         User testUser = new User(1L, "admin", "password123", "admin@test.com");

@@ -1,4 +1,4 @@
-package com.techcourse;
+package com.techcourse.util;
 
 import org.apache.coyote.http11.StaticFileHandler;
 import org.apache.coyote.http11.response.MimeType;
@@ -22,7 +22,11 @@ public class ResourceLoader {
     }
 
     public static MimeType getMimeType(String path) {
-        return staticFileHandler.getContentType(path);
+        try {
+            return staticFileHandler.getContentType(path);
+        } catch (IllegalArgumentException e) {
+            return MimeType.TEXT_HTML;
+        }
     }
 
     private ResourceLoader() {

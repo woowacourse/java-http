@@ -20,10 +20,6 @@ public class HttpRequest {
         this.cookies = HttpCookie.fromHeader(headers.getCookieHeader());
     }
 
-    public void addCookie(String name, String value) {
-        this.cookies.add(name, value);
-    }
-
     public String getQueryString() {
         final String uri = requestLine.getPath();
         if (!uri.contains("?")) {

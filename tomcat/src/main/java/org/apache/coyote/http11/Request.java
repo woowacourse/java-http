@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 import static com.techcourse.exception.ErrorMessage.INVALID_HTTP_REQUEST_FORMAT;
 import static com.techcourse.exception.ErrorMessage.INVALID_REQUEST_LINE;
@@ -7,6 +7,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.apache.coyote.CookieManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +18,7 @@ public class Request {
     private static final Logger log = LoggerFactory.getLogger(Request.class);
     private String httpMethod = "";
 
-    private String url = "";
+    private String resourcePath = "";
 
     private String protocolVersion = "";
 
@@ -28,10 +31,10 @@ public class Request {
         try {
             String[] requestLineTokens = parseRequestLine(br);
             httpMethod = requestLineTokens[0];
-            url = requestLineTokens[1];
+            resourcePath = requestLineTokens[1];
             protocolVersion = requestLineTokens[2];
             parseRequestHeaders(br);
-            if (httpMethod.equalsIgnoreCase("post")){
+            if (httpMethod.equalsIgnoreCase(HttpMethod.POST.name())){
                parseBody(br);
             }
         } catch (IOException e) {
@@ -76,8 +79,8 @@ public class Request {
         return httpMethod;
     }
 
-    public String getUrl() {
-        return url;
+    public String getResourcePath() {
+        return resourcePath;
     }
 
     public String getProtocolVersion() {

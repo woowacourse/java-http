@@ -1,10 +1,16 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpStatusCode;
+import java.util.stream.Collectors;
+
+import org.apache.coyote.CookieManager;
 
 public class Response {
+
+    private OutputStream outputStream;
 
     private String protocolVersion;
 
@@ -16,8 +22,9 @@ public class Response {
 
     private HttpStatusCode httpStatusCode;
 
-    public Response() {
+    public Response(OutputStream outputStream) {
         headers = new LinkedHashMap<>();
+        this.outputStream = outputStream;
     }
 
     public void setProtocolVersion(String protocolVersion) {
@@ -36,7 +43,7 @@ public class Response {
         return cookieManager.getCookieMap();
     }
 
-    public int getCookieMapSize(){
+    public int getCookieMapSize() {
         return cookieManager.getCookieMap().size();
     }
 
@@ -46,6 +53,10 @@ public class Response {
 
     public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
+    }
+
+    public HttpStatusCode getHttpStatusCode(){
+        return httpStatusCode;
     }
 
     public String getStatusCode() {
@@ -72,4 +83,29 @@ public class Response {
         return String.valueOf(body.getBytes().length);
     }
 
+    public void send() throws IOException {
+        String httpFormatResponse = formatHttpResponse();
+        outputStream.write(httpFormatResponse.getBytes());
+        outputStream.flush();
+    }
+
+    private String formatHttpResponse() {
+        String ret = String.join("\r\n",
+                protocolVersion + " " +
+                        httpStatusCode.getCode() + " " +
+                        getStatusMessage() + " ",
+                headers.entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                        .collect(Collectors.joining("\r\n")));
+        if (getCookieMapSize() != 0) {
+            ret += "\r\n" + getCookieMap()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue() + " ")
+                    .collect(Collectors.joining("\r\n"));
+        }
+        ret += "\r\n\r\n" + body;
+        return ret;
+    }
 }

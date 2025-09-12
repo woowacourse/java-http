@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.coyote.CookieManager;
+import org.apache.coyote.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class Request {
             resourcePath = requestLineTokens[1];
             protocolVersion = requestLineTokens[2];
             parseRequestHeaders(br);
-            if (httpMethod.equalsIgnoreCase("post")){
+            if (httpMethod.equalsIgnoreCase(HttpMethod.POST.name())){
                parseBody(br);
             }
         } catch (IOException e) {

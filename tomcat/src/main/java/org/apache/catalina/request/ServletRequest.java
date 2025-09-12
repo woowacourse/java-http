@@ -1,6 +1,5 @@
 package org.apache.catalina.request;
 
-import java.util.Objects;
 import org.apache.catalina.cookie.HttpCookie;
 import org.apache.catalina.cookie.HttpCookieName;
 import org.apache.catalina.session.Session;
@@ -41,6 +40,7 @@ public class ServletRequest {
     }
 
     public Session getSession(boolean create) {
+
         if (session != null) {
             return session;
         }
@@ -49,12 +49,14 @@ public class ServletRequest {
         if (sessionId != null) {
             final Session existingSession = SessionManager.getInstance().findSession(sessionId);
             if (existingSession != null) {
+                existingSession.activate();
                 return existingSession;
             }
         }
 
         if (create) {
-            return createNewSession();
+            this.session = SessionManager.getInstance().create();
+            return session;
         }
         return null;
     }
@@ -68,15 +70,6 @@ public class ServletRequest {
             return false;
         }
 
-        return !Objects.equals(getCookie(HttpCookieName.JSESSIONID.getValue()), session.getId());
-    }
-
-    private Session createNewSession() {
-        final Session newSession = new Session();
-        SessionManager.getInstance().add(newSession);
-
-        this.session = newSession;
-
-        return newSession;
+        return session.isNew();
     }
 }

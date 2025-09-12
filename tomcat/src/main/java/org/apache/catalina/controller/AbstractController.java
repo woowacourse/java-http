@@ -15,7 +15,11 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected abstract void doGet(ServletRequest request, ServletResponse response);
+    protected void doGet(ServletRequest request, ServletResponse response){
+        throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());
+    }
 
-    protected abstract void doPost(ServletRequest request, ServletResponse response);
+    protected void doPost(ServletRequest request, ServletResponse response){
+        throw new UnsupportedOperationException("지원하지 않는 요청 방식입니다: " + request.getMethod());
+    }
 }

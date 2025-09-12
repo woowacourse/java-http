@@ -8,7 +8,7 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        HttpMethod method  = request.getMethod();
+        HttpMethod method = request.getMethod();
         if (method == HttpMethod.GET) {
             doGet(request, response);
         }
@@ -17,6 +17,11 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {};
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {};
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        throw new UnsupportedOperationException("GET method not supported");
+    }
+
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        throw new UnsupportedOperationException("POST method not supported");
+    }
 }

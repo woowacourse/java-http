@@ -4,22 +4,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.MimeType;
 
 public class UriUtils {
-
-    public static String parsePath(final String requestUri) {
-        String path = requestUri;
-        if ("/".equals(requestUri)) {
-            return path + "index.html";
-        }
-        if (path.contains("?")) {
-            path = path.split("\\?")[0];
-        }
-        if (!requestUri.contains(".")) {
-            path = path + ".html";
-        }
-        return path;
-    }
 
     public static Map<String, String> getParameters(
             final String uri,
@@ -62,5 +49,9 @@ public class UriUtils {
             return "";
         }
         return resourceName.substring(dotIndex + 1);
+    }
+
+    public static MimeType getMimeType(final String resourceName) {
+        return MimeType.getOrDefault(extractExtension(resourceName));
     }
 }

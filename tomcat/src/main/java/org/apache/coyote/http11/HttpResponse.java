@@ -11,49 +11,50 @@ public class HttpResponse {
     private StatusLine statusLine;
     private HttpHeaders headers;
     private byte[] body;
+    private boolean committed = false;
 
-    private HttpResponse() {
+    public HttpResponse() {
+        this.headers = new HttpHeaders();
         this.body = new byte[0];
     }
 
-    private HttpResponse(final StatusLine statusLine, final HttpHeaders headers, final byte[] body) {
-        this.statusLine = statusLine;
+    public HttpResponse(final HttpStatus status, final HttpHeaders headers, final byte[] body) {
+        this.statusLine = new StatusLine("HTTP/1.1", status);
         this.headers = headers;
         this.body = body;
+        this.committed = false;
     }
 
-    public static HttpResponse of(final HttpStatus status, final HttpHeaders headers, final byte[] body) {
-        HttpResponse response = new HttpResponse();
-        response.setStatusLine(new StatusLine("HTTP/1.1", status));
-        response.setHeaders(headers);
-        response.setBody(body);
-        return response;
+    public void ok(final byte[] body, final MimeType mimeType) {
+        setStatusLine(new StatusLine("HTTP/1.1", HttpStatus.OK));
+        setBody(body, mimeType);
     }
 
-    public static HttpResponse ok(final String contentType, final byte[] body) {
-        HttpResponse response = new HttpResponse();
-        response.setStatusLine(new StatusLine("HTTP/1.1", HttpStatus.OK));
-        response.setHeader("Content-Type", contentType);
-        response.setBody(body);
-        response.setHeader("Content-Length", String.valueOf(body.length));
-        return response;
+    public void redirect(final String location) {
+        setStatusLine(new StatusLine("HTTP/1.1", HttpStatus.FOUND));
+        setHeader("Location", location);
+        setHeader("Content-Length", "0");
+        setBody(new byte[0]);
     }
 
-    public static HttpResponse redirect(final String location) {
-        HttpResponse response = new HttpResponse();
-        response.setStatusLine(new StatusLine("HTTP/1.1", HttpStatus.FOUND));
-        response.setHeader("Location", location);
-        response.setHeader("Content-Length", "0");
-        response.setBody(new byte[0]);
-        return response;
+    public void redirect(final String location, final HttpCookie httpCookie) {
+        setStatusLine(new StatusLine("HTTP/1.1", HttpStatus.FOUND));
+        setHeader("Location", location);
+        setHeader("Content-Length", "0");
+        setCookies(httpCookie);
+        setBody(new byte[0]);
     }
 
-    public static HttpResponse error(final HttpStatus status, final byte[] body) {
-        HttpResponse response = new HttpResponse();
-        response.setStatusLine(new StatusLine("HTTP/1.1", status));
-        response.setHeader("Content-Length", String.valueOf(body.length));
-        response.setBody(body);
-        return response;
+    public void error(final HttpStatus status, final byte[] body) {
+        setStatusLine(new StatusLine("HTTP/1.1", status));
+        setHeader("Content-Length", String.valueOf(body.length));
+        setBody(body);
+    }
+
+    public void error(final HttpStatus status, final byte[] body, final MimeType mimeType) {
+        setStatusLine(new StatusLine("HTTP/1.1", status));
+        setHeader("Content-Length", String.valueOf(body.length));
+        setBody(body, mimeType);
     }
 
     public byte[] toBytes() {
@@ -89,26 +90,68 @@ public class HttpResponse {
     }
 
     public void setStatusLine(final StatusLine statusLine) {
+        if (committed) {
+            return;
+        }
         this.statusLine = statusLine;
     }
 
     public void setHeaders(final HttpHeaders headers) {
+        if (committed) {
+            return;
+        }
         this.headers = headers;
     }
 
     public void setBody(final byte[] body) {
+        if (committed) {
+            return;
+        }
         this.body = body;
         setContentLength(body.length);
     }
 
+    public void setBody(final byte[] body, final MimeType mimeType) {
+        if (committed) {
+            return;
+        }
+        this.body = body;
+        setContentType(mimeType);
+        setContentLength(body.length);
+    }
+
     public void setHeader(final String name, final String value) {
+        if (committed) {
+            return;
+        }
         if (this.headers == null) {
             this.headers = new HttpHeaders();
         }
         this.headers.setHeader(name, value);
     }
 
-    public void setContentLength(int length) {
+    public void commit() {
+        this.committed = true;
+    }
+
+    public void setCookies(final HttpCookie httpCookie) {
+        if (committed) {
+            return;
+        }
+        httpCookie.getAll().forEach((name, value) -> setHeader("Set-Cookie", name + "=" + value));
+    }
+
+    private void setContentLength(int length) {
+        if (committed) {
+            return;
+        }
         headers.setContentLength(length);
+    }
+
+    private void setContentType(final MimeType contentType) {
+        if (committed) {
+            return;
+        }
+        headers.setContentType(contentType);
     }
 }

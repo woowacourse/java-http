@@ -32,6 +32,10 @@ public class HttpHeaders {
         return new LinkedHashMap<>(headers);
     }
 
+    public String getCookieHeader() {
+        return get("Cookie").orElse("");
+    }
+
     public void setHeader(final String name, final String value) {
         if (headers.containsKey(name)) {
             List<String> values = new LinkedList<>(headers.get(name));
@@ -46,4 +50,7 @@ public class HttpHeaders {
         headers.put("Content-Length", List.of(String.valueOf(length)));
     }
 
+    public void setContentType(final MimeType contentType) {
+        headers.put("Content-Type", List.of(contentType.getType()));
+    }
 }

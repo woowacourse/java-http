@@ -7,6 +7,7 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final byte[] body;
+    private final HttpCookie cookies;
 
     public HttpRequest(
             final RequestLine requestLine,
@@ -16,6 +17,11 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.cookies = HttpCookie.fromHeader(headers.getCookieHeader());
+    }
+
+    public void addCookie(String name, String value) {
+        this.cookies.add(name, value);
     }
 
     public String getQueryString() {
@@ -41,6 +47,10 @@ public class HttpRequest {
 
     public byte[] getBody() {
         return body;
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
     }
 
     public HttpMethod getMethod() {

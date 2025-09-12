@@ -1,5 +1,8 @@
 package com.techcourse;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import org.apache.catalina.router.RequestMapping;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {

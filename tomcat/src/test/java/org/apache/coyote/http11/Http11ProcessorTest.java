@@ -1,17 +1,17 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.catalina.router.FrontControllerFactory;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -20,7 +20,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
 
         // when
         processor.process(socket);
@@ -47,7 +47,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
 
         // when
         processor.process(socket);
@@ -77,7 +77,7 @@ class Http11ProcessorTest {
         // given
         final String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login.html HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.length() + " ",
@@ -86,7 +86,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
 
         // when
         processor.process(socket);
@@ -103,7 +103,7 @@ class Http11ProcessorTest {
         // given
         final String requestBody = "account=gugu&password=1";
         final String httpRequest = String.join("\r\n",
-                "POST /login.html HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.length() + " ",
@@ -112,7 +112,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
 
         // when
         processor.process(socket);
@@ -131,7 +131,7 @@ class Http11ProcessorTest {
         final String sessionId = session.getId();
 
         final String httpRequest = String.join("\r\n",
-                "GET /login.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=" + sessionId + " ",
@@ -139,7 +139,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontControllerFactory.createFrontController());
 
         // when
         processor.process(socket);

@@ -33,7 +33,7 @@ public class LoginController implements Controller {
             Map<String, String> formData = request.getFormData();
             User loginUser = login(formData);
             session.addAttribute("user", loginUser);
-        } catch (UnAuthorizedException e) {
+        } catch (UnauthorizedException e) {
             return HttpResponse.builder()
                 .status(HttpStatus.Found)
                 .header("Location", "/401.html")
@@ -52,12 +52,12 @@ public class LoginController implements Controller {
         String account = queryParameters.get("account");
         String password = queryParameters.get("password");
         if (account == null || password == null) {
-            throw new UnAuthorizedException("account or password should be not null");
+            throw new UnauthorizedException("account or password should be not null");
         }
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-        User user = findUser.orElseThrow(() -> new UnAuthorizedException("Invalid account " + account));
+        User user = findUser.orElseThrow(() -> new UnauthorizedException("Invalid account " + account));
         if (!user.checkPassword(password)) {
-            throw new UnAuthorizedException("Invalid password");
+            throw new UnauthorizedException("Invalid password");
         }
         log.atInfo().log("user: {}", user);
         return user;

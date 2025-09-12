@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
-import org.apache.coyote.http11.controller.AbstractApiController;
+import org.apache.catalina.controller.AbstractApiController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseConfigurator;

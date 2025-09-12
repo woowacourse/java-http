@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.coyote.http11.StaticResource;
+import org.apache.catalina.StaticResource;
 import org.apache.coyote.http11.response.body.ResponseBody;
 import org.apache.coyote.http11.response.header.ResponseHeader;
 import org.apache.coyote.http11.response.startline.HttpStatusCode;

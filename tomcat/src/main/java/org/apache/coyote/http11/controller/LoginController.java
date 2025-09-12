@@ -8,17 +8,16 @@ import org.apache.catalina.session.HttpSessionImpl;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.cookie.CookieUtils;
-import org.apache.coyote.http11.handler.dynamic.LoginHandler;
 import org.apache.coyote.http11.handler.statics.util.StaticResourceUtils;
 import org.apache.coyote.http11.http.HttpStatus;
-import org.apache.coyote.http11.request.dto.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.http.request.dto.HttpRequest;
+import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController{
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String JSESSIONID = "JSESSIONID";
 
     @Override
@@ -27,16 +26,14 @@ public class LoginController extends AbstractController{
         String password = request.getParam("password");
 
         if (account == null || password == null) {
-            StaticResourceUtils.serve(response, "401.html", HttpStatus.UNAUTHORIZED);
-            return;
+            throw new IllegalArgumentException();
         }
 
         try {
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + account));
             if (!user.checkPassword(password)) {
-                StaticResourceUtils.serve(response, "401.html", HttpStatus.UNAUTHORIZED);
-                return;
+                throw new IllegalArgumentException();
             }
 
             HttpSessionImpl session = SessionManager.getInstance().createSession(null);

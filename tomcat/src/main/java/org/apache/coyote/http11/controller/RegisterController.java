@@ -1,43 +1,28 @@
-package org.apache.coyote.http11.handler.dynamic;
+package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.statics.util.StaticResourceUtils;
-import org.apache.coyote.http11.request.dto.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
+import org.apache.coyote.http11.http.request.dto.HttpRequest;
+import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterHandler implements Handler {
+public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private final AtomicLong sequence = new AtomicLong(2);
 
     @Override
-    public boolean canHandle(HttpRequest request) {
-        return request.path().equals("/register");
-    }
-
-    @Override
-    public void handle(HttpRequest request, HttpResponse response) throws IOException {
-        switch (request.method().toUpperCase()) {
-            case "POST" -> handlePost(request, response);
-            default     -> StaticResourceUtils.serve(response, "404.html", HttpStatus.METHOD_NOT_ALLOWED);
-        }
-    }
-
-    private void handlePost(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         String account = request.getParam("account");
         String email = request.getParam("email");
         String password = request.getParam("password");
 
         if (account == null || password == null || email == null) {
-            StaticResourceUtils.serve(response, "401.html", HttpStatus.UNAUTHORIZED);
-            return;
+            throw new IllegalArgumentException();
         }
 
         try {
@@ -53,7 +38,12 @@ public class RegisterHandler implements Handler {
             response.sendRedirect("/index.html");
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 실패 - {}", e.getMessage());
-            StaticResourceUtils.serve(response, "401.html", HttpStatus.UNAUTHORIZED);
+            throw e;
         }
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        StaticResourceUtils.serve(response, "register.html", HttpStatus.OK);
     }
 }

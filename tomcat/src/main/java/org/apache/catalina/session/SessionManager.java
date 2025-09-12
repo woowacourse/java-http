@@ -1,14 +1,14 @@
 package org.apache.catalina.session;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
     private static final SessionManager instance = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

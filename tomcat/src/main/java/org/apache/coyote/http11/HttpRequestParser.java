@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.session.HttpCookie;
+import org.apache.catalina.session.HttpCookie;
 
 public final class HttpRequestParser {
 

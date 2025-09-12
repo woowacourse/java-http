@@ -3,9 +3,9 @@ package org.apache.coyote.http11;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Map;
-import org.apache.coyote.http11.session.HttpCookie;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.session.HttpCookie;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 

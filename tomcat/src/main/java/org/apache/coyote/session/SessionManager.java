@@ -5,29 +5,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    public void add(Session session) {
-        if (session == null || session.getId() == null) {
-            throw new IllegalArgumentException("Session cannot be null");
-        }
-        sessions.put(session.getId(), session);
+    public void add(final Session session) {
+        SESSIONS.put(session.getId(), session);
     }
 
-    public Session findSession(String id) {
+    public Session findSession(final String id) {
         if (id == null) {
             return null;
         }
-        return sessions.get(id);
+        return SESSIONS.getOrDefault(id, null);
     }
 
-    public void remove(Session session) {
-        if (session != null) {
-            sessions.remove(session.getId());
-        }
+    public void remove(final Session session) {
+        SESSIONS.remove(session.getId());
     }
 
-    public int getSessionCount() {
-        return sessions.size();
+    private static final SessionManager INSTANCE = new SessionManager();
+
+    private SessionManager() {
+    }
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
     }
 }

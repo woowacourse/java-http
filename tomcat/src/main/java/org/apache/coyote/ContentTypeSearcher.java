@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 public enum ContentTypeSearcher {
 
-    HTML("html", "text/html;charset=utf-8 "),
-    CSS("css", "text/css;charset=utf-8 "),
-    JS("js", "application/javascript;charset=utf-8 "),
-    JSON("json", "application/json;charset=utf-8 "),
+    HTML("html", "text/html;charset=utf-8"),
+    CSS("css", "text/css;charset=utf-8"),
+    JS("js", "application/javascript;charset=utf-8"),
+    JSON("json", "application/json;charset=utf-8"),
     TXT("txt", "text/plain;charset=utf-8 "),
     PNG("png", "image/png"),
     JPG("jpg", "image/jpeg"),
@@ -17,7 +17,7 @@ public enum ContentTypeSearcher {
     ICO("ico", "image/x-icon"),
 
     // 기본값
-    NOTHING("", "text/html;charset=utf-8 ");
+    NOTHING("", "text/html;charset=utf-8");
 
     private final String extension;
     private final String contentType;

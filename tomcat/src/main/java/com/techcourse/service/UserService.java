@@ -9,16 +9,25 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public static User findUser(String account, String password) {
+    public static User login(String account, String password) {
+        User user = findUser(account, password);
+        checkPassword(user, password);
+        log.info(user.toString());
+
+        return user;
+    }
+
+    private static void checkPassword(User user, String password) {
+        if (!user.checkPassword(password)) {
+            log.info("password does not match account : {} password : {}", user.getAccount(), password);
+            throw new IllegalArgumentException("password does not match");
+        }
+    }
+
+    private static User findUser(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() ->
                         new IllegalArgumentException("user not found"));
-
-        if (!user.checkPassword(password)) {
-            log.info("password does not match account : {} password : {}", account, password);
-            throw new IllegalArgumentException("user not found");
-        }
-        log.info(user.toString());
 
         return user;
     }

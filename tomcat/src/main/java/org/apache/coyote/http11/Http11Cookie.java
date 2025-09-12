@@ -9,6 +9,7 @@ public class Http11Cookie {
     private Map<String, String> cookies;
 
     public Http11Cookie(String cookies) {
+
         parseCookies(cookies);
     }
 
@@ -26,10 +27,12 @@ public class Http11Cookie {
 
             return;
         }
-        this.cookies = Arrays.stream(cookies.split(";", 2))
+        this.cookies = Arrays.stream(cookies.split(";"))
                 .map(cookie -> cookie.split("=", 2))
+                .filter(arr -> arr.length == 2) // = 없는 쿠키는 무시
                 .collect(Collectors.toMap(
-                        arr -> arr[0].trim(), arr -> arr[1].trim()
+                        arr -> arr[0].trim(),
+                        arr -> arr[1].trim()
                 ));
     }
 }

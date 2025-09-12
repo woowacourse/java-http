@@ -11,7 +11,9 @@ public class RootController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-        response.setDefaultResponse(ResponseStatus.OK, ContentType.HTML, body);
+        response.setResponseStatus(ResponseStatus.OK);
+        response.setContentType(ContentType.HTML);
+        response.setBody(body);
     }
 }
 

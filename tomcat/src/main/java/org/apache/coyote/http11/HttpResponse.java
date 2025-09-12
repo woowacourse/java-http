@@ -17,11 +17,11 @@ public class HttpResponse {
     private byte[] body;
 
     private HttpResponse(ProtocolVersion protocolVersion,
-                        ResponseStatus responseStatus,
-                        ContentType contentType,
-                        String location,
-                        long contentLength,
-                        byte[] body) {
+                         ResponseStatus responseStatus,
+                         ContentType contentType,
+                         String location,
+                         long contentLength,
+                         byte[] body) {
         this.statusLine = new StatusLine(protocolVersion, responseStatus);
         this.contentType = contentType;
         this.location = location;
@@ -34,19 +34,21 @@ public class HttpResponse {
         return new HttpResponse(null, null, null, null, 0, new byte[0]);
     }
 
-    public void setDefaultResponse(ResponseStatus responseStatus, ContentType contentType, byte[] body) {
+    public void setResponseStatus(ResponseStatus responseStatus) {
         this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
+    }
+
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
+    }
+
+    public void setBody(byte[] body) {
         this.body = body;
         this.contentLength = body.length;
     }
 
-    public void sendRedirect(ResponseStatus responseStatus, String location) {
-        this.statusLine = new StatusLine(ProtocolVersion.HTTP11, responseStatus);
+    public void setLocation(String location) {
         this.location = location;
-        this.contentType = ContentType.HTML;
-        this.contentLength = 0;
-        this.body = new byte[0];
     }
 
     public void setCookie(String key, String value) {

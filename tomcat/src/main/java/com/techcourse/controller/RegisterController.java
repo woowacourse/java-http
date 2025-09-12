@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.core.controller.AbstractController;
 import org.apache.catalina.core.exception.InvalidRequestException;
 import org.apache.catalina.session.Session;
@@ -49,7 +48,8 @@ public class RegisterController extends AbstractController {
             return;
         }
 
-        if (!isValidUser(session.getUser())) {
+        User user = (User) session.getAttribute("user");
+        if (!isValidUser(user)) {
             response.setRedirection("/register.html");
             return;
         }
@@ -71,9 +71,10 @@ public class RegisterController extends AbstractController {
     }
 
     private String makeSession(User user) {
-        String sessionId = UUID.randomUUID().toString();
-        SessionManager.add(new Session(sessionId, user));
-        return sessionId;
+        Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        return session.getId();
     }
 
     private void validateRequestBody(HttpRequest request) {

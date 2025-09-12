@@ -7,53 +7,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 import org.apache.coyote.http11.http.common.startline.HttpVersion;
 
 public class HttpResponse {
 
-    private final HttpStatusLine responseLine;
-    private final HttpHeader header;
-    private final HttpResponseBody responseBody;
     private final Map<String, Object> sessionAttributes;
+    private HttpStatusLine responseLine;
+    private HttpHeader header;
+    private HttpResponseBody responseBody;
 
-    private HttpResponse(final HttpStatusLine responseLine,
-                         final HttpHeader header,
-                         final HttpResponseBody responseBody) {
-        this.responseLine = responseLine;
-        this.header = header;
-        this.responseBody = responseBody;
-        this.sessionAttributes = new HashMap<>();
+    private HttpResponse() {
+        sessionAttributes = new HashMap<>();
     }
 
-    public static HttpResponse ok() {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, null);
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
+    public static HttpResponse createEmptyResponse() {
+        final HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setDefaultStatus();
+        return httpResponse;
     }
 
-    public static HttpResponse ok(final String responseBodyValue) {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName(responseBodyValue);
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, responseBodyValue);
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
+    public void addAttribute(final String key, final Object value) {
+        sessionAttributes.put(key, value);
     }
 
-    public static HttpResponse found(final String targetPath) {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.FOUND);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.emptyBody();
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, null);
-        httpHeader.addHeader(HttpHeaderKey.LOCATION.getValue(), targetPath);
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
+    public Object getAttribute(String key) {
+        return this.sessionAttributes.get(key);
     }
 
-    public static HttpResponse unauthorized() {
-        final HttpStatusLine httpStatusLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.UNAUTHORIZED);
-        final HttpResponseBody httpResponseBody = HttpResponseBody.withStaticResourceName("401.html");
-        final HttpHeader httpHeader = HttpHeader.createByResponseBody(httpResponseBody, "401.html");
-        return new HttpResponse(httpStatusLine, httpHeader, httpResponseBody);
+    public Set<String> getAllAttributeKeys() {
+        return sessionAttributes.keySet();
     }
+
 
     public String getResponseFormat() {
         final List<String> responseLines = getResponseLines();
@@ -75,12 +61,40 @@ public class HttpResponse {
         return formatLine;
     }
 
-    public void addAttribute(final String key, final Object value) {
-        sessionAttributes.put(key, value);
+    public void setDefaultStatus() {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public Object getAttribute(String key) {
-        return this.sessionAttributes.get(key);
+    public void setOk(final String bodyValue) {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.OK);
+        this.responseBody = HttpResponseBody.withStaticResourceName(bodyValue);
+        this.header = HttpHeader.createByResponseBody(this.responseBody, bodyValue);
+    }
+
+
+    public void setFound(final String targetPath) {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.FOUND);
+        this.responseBody = HttpResponseBody.emptyBody();
+        this.header = HttpHeader.createByResponseBody(this.responseBody, null);
+        this.header.addHeader(HttpHeaderKey.LOCATION.getValue(), targetPath);
+    }
+
+    public void setUnauthorized() {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.UNAUTHORIZED);
+        this.responseBody = HttpResponseBody.withStaticResourceName("401.html");
+        this.header = HttpHeader.createByResponseBody(this.responseBody, "401.html");
+    }
+
+    public void setNotFound() {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.NOT_FOUND);
+        this.responseBody = HttpResponseBody.withStaticResourceName("404.html");
+        this.header = HttpHeader.createByResponseBody(this.responseBody, "404.html");
+    }
+
+    public void setInternalServerError() {
+        this.responseLine = HttpStatusLine.of(HttpVersion.HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
+        this.responseBody = HttpResponseBody.withStaticResourceName("500.html");
+        this.header = HttpHeader.createByResponseBody(this.responseBody, "500.html");
     }
 
     public void setCookie(final String cookieName, final String cookieValue) {

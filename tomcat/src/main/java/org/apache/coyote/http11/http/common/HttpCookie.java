@@ -1,60 +1,42 @@
 package org.apache.coyote.http11.http.common;
 
 import http.HttpHeaderKey;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.http.common.header.HttpHeader;
 
 public class HttpCookie {
 
     private final Map<String, String> values;
 
-    public HttpCookie() {
-        this.values = new HashMap<>();
+    private HttpCookie(final Map<String, String> values) {
+        this.values = values;
     }
 
     public static HttpCookie from(final HttpHeader httpHeader) {
-        final Optional<String> cookieOptional = httpHeader.getFirstValue(HttpHeaderKey.COOKIE.getValue());
-        return cookieOptional
-                .map(HttpCookie::parse)
-                .orElseGet(HttpCookie::new);
+        return httpHeader.getFirstValue(HttpHeaderKey.COOKIE.getValue())
+                .map(HttpCookie::parseCookies)
+                .map(HttpCookie::new)
+                .orElseGet(() -> new HttpCookie(Collections.emptyMap()));
     }
 
-    private static HttpCookie parse(final String rawCookie) {
-        final HttpCookie httpCookie = new HttpCookie();
-        final String[] cookies = rawCookie.trim().split(HttpSplitFormat.COOKIE.getValue());
-        for (final String cookie : cookies) {
-            parseAndAddCookieElement(cookie, httpCookie);
-        }
-        return httpCookie;
-    }
-
-    private static void parseAndAddCookieElement(final String cookieElementLine, final HttpCookie httpCookie) {
-        if (cookieElementLine == null || cookieElementLine.isBlank()) {
-            return;
-        }
-        final String[] cookieElement = cookieElementLine.split(HttpSplitFormat.COOKIE_ELEMENT.getValue(), 2);
-
-        if (cookieElement.length != 2) {
-            return;
-        }
-
-        final String cookieName = cookieElement[0].trim();
-        final String cookieValue = cookieElement[1].trim();
-
-        if (cookieName.isEmpty()) {
-            return;
-        }
-        httpCookie.addCookie(cookieName, cookieValue);
+    private static Map<String, String> parseCookies(final String rawCookie) {
+        return Arrays.stream(rawCookie.trim().split(HttpSplitFormat.COOKIE.getValue()))
+                .map(String::trim)
+                .filter(rawCookieElement -> !rawCookieElement.isBlank())
+                .map(rawCookieElement -> rawCookieElement.split(HttpSplitFormat.COOKIE_ELEMENT.getValue(), 2))
+                .filter(cookieElement -> cookieElement.length == 2)
+                .filter(cookieElement -> !cookieElement[0].trim().isEmpty())
+                .collect(Collectors.toMap(
+                        cookieElement -> cookieElement[0].trim(),
+                        cookieElement -> cookieElement[1].trim()
+                ));
     }
 
     public void addCookie(final String name, final String value) {
         values.put(name, value);
-    }
-
-    public boolean containsName(final String name) {
-        return values.containsKey(name);
     }
 
     public String getByName(final String name) {

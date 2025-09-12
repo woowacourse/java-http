@@ -35,11 +35,13 @@ public class Http11Processor implements Runnable, Processor {
             response.setProtocol(request.getHttpProtocol());
 
             RequestMapping requestMapping = new RequestMapping();
-            Controller controller = requestMapping.getController(request);
-            controller.service(request, response);
-
-            HttpResponse httpResponse = new HttpResponse(outputStream);
-            httpResponse.setProtocol(request.getHttpProtocol());
+            try {
+                Controller controller = requestMapping.getController(request);
+                controller.service(request, response);
+            } catch (Exception e) {
+                response.setStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
+                response.send();
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

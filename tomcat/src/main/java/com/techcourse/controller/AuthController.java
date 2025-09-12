@@ -15,7 +15,9 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestLineInfo;
 
 public class AuthController extends AbstractController {
-    
+
+    private static final String HTTP_1_1 = "HTTP/1.1";
+
     private final AuthService authService = new AuthService();
     
     @Override
@@ -37,7 +39,7 @@ public class AuthController extends AbstractController {
         } else if (requestUri.equals("/login")) {
             return handleLogin(formData, request.getHttpCookie());
         }
-        return new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND, HttpHeaders.empty(), "");
+        return new HttpResponse(HTTP_1_1, HttpStatus.NOT_FOUND, HttpHeaders.empty(), "");
     }
     
     private HttpResponse handleRegister(Map<String, String> formData, HttpCookie httpCookie) throws IOException {
@@ -70,7 +72,7 @@ public class AuthController extends AbstractController {
         if (sessionId != null) {
             headers.add("Set-Cookie", "JSESSIONID=" + sessionId);
         }
-        return new HttpResponse("HTTP/1.1", HttpStatus.FOUND, headers, "");
+        return new HttpResponse(HTTP_1_1, HttpStatus.FOUND, headers, "");
     }
     
     private HttpResponse send401Page() throws IOException {
@@ -81,7 +83,7 @@ public class AuthController extends AbstractController {
                     .add("Content-Length", String.valueOf(responseBody.length));
             
             return new HttpResponse(
-                    "HTTP/1.1",
+                    HTTP_1_1,
                     HttpStatus.UNAUTHORIZED,
                     headers,
                     new String(responseBody, StandardCharsets.UTF_8)
@@ -91,7 +93,7 @@ public class AuthController extends AbstractController {
     
     private HttpResponse buildRedirectResponse(String location) {
         return new HttpResponse(
-                "HTTP/1.1",
+                HTTP_1_1,
                 HttpStatus.FOUND,
                 new HttpHeaders()
                         .add("Location", location)
@@ -104,7 +106,7 @@ public class AuthController extends AbstractController {
             return buildRedirectResponse("/index.html");
         } else {
             HttpRequest request = HttpRequest.from(
-                    RequestLineInfo.of(HttpMethod.GET, pagePath, "HTTP/1.1"),
+                    RequestLineInfo.of(HttpMethod.GET, pagePath, HTTP_1_1),
                     HttpHeaders.empty(),
                     ""
             );

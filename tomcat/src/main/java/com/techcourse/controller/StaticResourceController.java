@@ -11,9 +11,10 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
 public class StaticResourceController extends AbstractController {
-    
+
     private static final String STATIC_RESOURCE_PATH = "static";
-    
+    private static final String HTTP_1_1 = "HTTP/1.1";
+
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         return process(request);
@@ -22,7 +23,7 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected HttpResponse doPost(HttpRequest request) {
         return new HttpResponse(
-                "HTTP/1.1",
+                HTTP_1_1,
                 HttpStatus.METHOD_NOT_ALLOWED,
                 HttpHeaders.empty(),
                 ""
@@ -44,7 +45,7 @@ public class StaticResourceController extends AbstractController {
                 .add("Content-Type", Files.probeContentType(Path.of(finalResourcePath)))
                 .add("Content-Length", String.valueOf(responseBody.length));
             
-            return new HttpResponse("HTTP/1.1", HttpStatus.OK, headers, 
+            return new HttpResponse(HTTP_1_1, HttpStatus.OK, headers,
                 new String(responseBody, StandardCharsets.UTF_8));
         }
     }
@@ -70,14 +71,14 @@ public class StaticResourceController extends AbstractController {
     private HttpResponse send404Page() throws IOException {
         try (InputStream inputStream = StaticResourceController.class.getClassLoader().getResourceAsStream("static/404.html")) {
             if (inputStream == null) {
-                return new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND, HttpHeaders.empty(), "");
+                return new HttpResponse(HTTP_1_1, HttpStatus.NOT_FOUND, HttpHeaders.empty(), "");
             }
             byte[] responseBody = inputStream.readAllBytes();
             HttpHeaders headers = new HttpHeaders()
                     .add("Content-Type", "text/html;charset=utf-8")
                     .add("Content-Length", String.valueOf(responseBody.length));
             
-            return new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND, headers,
+            return new HttpResponse(HTTP_1_1, HttpStatus.NOT_FOUND, headers,
                 new String(responseBody, StandardCharsets.UTF_8));
         }
     }

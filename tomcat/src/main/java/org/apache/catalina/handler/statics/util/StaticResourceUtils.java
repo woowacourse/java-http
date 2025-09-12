@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.handler.statics.util;
+package org.apache.catalina.handler.statics.util;
 
 import java.io.IOException;
-import org.apache.coyote.http11.controller.util.StaticResourceReader;
+import org.apache.catalina.controller.util.StaticResourceReader;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.response.HttpResponse;
 

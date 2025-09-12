@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.exception;
+package org.apache.catalina.exception;
 
 import java.io.IOException;
-import org.apache.coyote.http11.controller.util.StaticResourceReader;
-import org.apache.coyote.http11.exception.GlobalExceptionHandler.ErrorPage;
+import org.apache.catalina.controller.util.StaticResourceReader;
+import org.apache.catalina.exception.GlobalExceptionHandler.ErrorPage;
 import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.response.HttpResponse;

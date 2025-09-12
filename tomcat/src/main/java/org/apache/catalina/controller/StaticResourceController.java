@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.controller.util.StaticResourceReader;
+import org.apache.catalina.controller.util.StaticResourceReader;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;

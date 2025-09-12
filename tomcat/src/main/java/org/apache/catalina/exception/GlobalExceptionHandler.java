@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception;
+package org.apache.catalina.exception;
 
 import java.rmi.ServerException;
 import javassist.NotFoundException;

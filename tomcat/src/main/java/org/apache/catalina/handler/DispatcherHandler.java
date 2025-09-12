@@ -1,14 +1,14 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.handler;
 
 import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import javassist.NotFoundException;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.exception.ExceptionRenderer;
-import org.apache.coyote.http11.exception.GlobalExceptionHandler;
-import org.apache.coyote.http11.exception.GlobalExceptionHandler.ErrorPage;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.exception.ExceptionRenderer;
+import org.apache.catalina.exception.GlobalExceptionHandler;
+import org.apache.catalina.exception.GlobalExceptionHandler.ErrorPage;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;

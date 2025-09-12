@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.handler;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.controller.Controller;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 
 public class RequestMappingHandlerMapping implements HandlerMapping {

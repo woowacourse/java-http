@@ -1,15 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.List;
-import org.apache.coyote.http11.handler.DispatcherHandler;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {

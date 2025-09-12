@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.handler.statics;
+package org.apache.catalina.handler.statics;
 
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.StaticResourceController;
-import org.apache.coyote.http11.handler.HandlerMapping;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.handler.HandlerMapping;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 
 public class StaticResourceHandlerMapping implements HandlerMapping {

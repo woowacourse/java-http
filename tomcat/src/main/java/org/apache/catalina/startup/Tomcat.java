@@ -3,12 +3,12 @@ package org.apache.catalina.startup;
 import java.io.IOException;
 import java.util.List;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.handler.DispatcherHandler;
-import org.apache.coyote.http11.handler.HandlerMapping;
-import org.apache.coyote.http11.handler.RequestMappingHandlerMapping;
-import org.apache.coyote.http11.handler.statics.StaticResourceHandlerMapping;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.handler.DispatcherHandler;
+import org.apache.catalina.handler.HandlerMapping;
+import org.apache.catalina.handler.RequestMappingHandlerMapping;
+import org.apache.catalina.handler.statics.StaticResourceHandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

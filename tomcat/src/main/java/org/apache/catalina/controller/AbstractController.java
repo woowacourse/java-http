@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.exception.HttpRequestMethodNotSupportedException;
+import org.apache.catalina.exception.HttpRequestMethodNotSupportedException;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 

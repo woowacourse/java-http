@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -8,7 +8,7 @@ import org.apache.catalina.session.HttpSessionImpl;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.cookie.CookieUtils;
-import org.apache.coyote.http11.handler.statics.util.StaticResourceUtils;
+import org.apache.catalina.handler.statics.util.StaticResourceUtils;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;

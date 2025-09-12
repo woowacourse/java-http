@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.coyote.http11.handler.statics.util.StaticResourceUtils;
+import org.apache.catalina.handler.statics.util.StaticResourceUtils;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.request.dto.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;

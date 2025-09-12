@@ -49,7 +49,6 @@ public class LoginController extends AbstractController {
         return handleLoginSuccess(response);
     }
 
-
     private String handleLoginSuccess(final Http11Response response) {
         response.setState(HttpStatus.Found);
         return REDIRECTION_PATH;

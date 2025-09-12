@@ -19,15 +19,6 @@ public enum HttpStatus {
         this.resourcePath = resourcePath;
     }
 
-    public static HttpStatus fromCode(int code) {
-        for (HttpStatus status : values()) {
-            if (status.getStatusCode() == code) {
-                return status;
-            }
-        }
-        throw new IllegalArgumentException("Unknown status code: " + code);
-    }
-
     public int getStatusCode() {
         return statusCode;
     }

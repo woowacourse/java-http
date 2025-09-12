@@ -35,7 +35,6 @@ public class Http11Response {
         this.addHeader(CONTENT_LENGTH, String.valueOf(length));
     }
 
-
     public byte[] getResponseLine() {
         return statusLine.getBytes();
     }

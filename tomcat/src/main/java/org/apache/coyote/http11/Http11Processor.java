@@ -51,7 +51,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-
     private void writeResponse(final OutputStream outputStream, final Http11Response httpResponse)
             throws IOException {
         outputStream.write(httpResponse.getResponseLine());

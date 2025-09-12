@@ -7,5 +7,4 @@ public interface Manager {
     void add(Session session);
 
     Session findSession(String id);
-
 }

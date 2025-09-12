@@ -8,5 +8,5 @@ public enum HttpMethod {
     HEAD,
     OPTIONS,
     PATCH,
-    TRACE;
+    TRACE
 }

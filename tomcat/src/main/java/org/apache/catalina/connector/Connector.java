@@ -18,8 +18,8 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 2;
-    private static final int DEFAULT_MAX_THREADS = 3;
+    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 10;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;

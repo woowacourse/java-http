@@ -1,15 +1,14 @@
-package org.apache.catalina.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.Account;
-import com.techcourse.model.Email;
 import com.techcourse.model.Password;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.resolver.StaticResourceResolver;
 import org.apache.catalina.resolver.StaticResourceResolver.ResolvedResource;
 import org.apache.coyote.http11.request.Http11Request;
@@ -19,10 +18,10 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterController extends AbstractController {
+public class LoginController extends AbstractController {
 
     private static final String COOKIE = "JSESSIONID=";
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private final StaticResourceResolver resolver = new StaticResourceResolver();
 
@@ -40,7 +39,7 @@ public class RegisterController extends AbstractController {
 
             return Http11Response.ok("text/html;charset=utf-8", body);
         } catch (IOException | URISyntaxException e) {
-            log.error("회원가입 페이지 읽기 실패", e);
+            log.error("로그인 페이지 읽기 실패", e);
             return Http11Response.serverError();
         }
     }
@@ -50,19 +49,19 @@ public class RegisterController extends AbstractController {
         final Map<String, String> params = request.extractRequestBodyParams();
         final Account account = new Account(params.get("account"));
         final Password password = new Password(params.get("password"));
-        final Email email = new Email(params.get("email"));
-        final User userEntity = new User(account, password, email);
-        InMemoryUserRepository.save(userEntity);
 
-        boolean registerSuccess = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkAccount(account) && user.checkPassword(password))
-                .isPresent();
+        final var loginSuccess = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
 
-        if (registerSuccess) {
-            log.info("회원가입 성공 - {}", userEntity);
-            return Http11Response.redirect("/login.html");
+        if (loginSuccess.isPresent()) {
+            log.info("로그인 성공 - {}", account);
+            SessionManager.invalidateAllForUser(account);
+            Session newSession = SessionManager.create();
+            newSession.setAttribute("user", loginSuccess.get());
+
+            return Http11Response.redirect("/index.html", COOKIE + newSession.getId());
         }
-        log.info("회원가입 실패  - {}", userEntity);
+        log.warn("로그인 실패 - {}", account);
         return Http11Response.redirect("/401.html");
     }
 }

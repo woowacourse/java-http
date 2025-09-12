@@ -1,11 +1,11 @@
 package org.apache.catalina.mapping;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootController;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.controller.Controller;
-import org.apache.catalina.controller.LoginController;
-import org.apache.catalina.controller.RegisterController;
-import org.apache.catalina.controller.RootController;
 import org.apache.coyote.http11.request.HttpMethod;
 
 public class DynamicControllerMapping {

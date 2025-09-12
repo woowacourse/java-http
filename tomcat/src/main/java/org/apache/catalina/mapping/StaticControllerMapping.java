@@ -1,9 +1,9 @@
 package org.apache.catalina.mapping;
 
+import com.techcourse.controller.StaticResourcesController;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.catalina.controller.Controller;
-import org.apache.catalina.controller.StaticResourcesController;
 
 public class StaticControllerMapping {
 

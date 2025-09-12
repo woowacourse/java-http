@@ -22,12 +22,12 @@ public class HttpRequestReader {
         String method = parts[0];
 
         String uri = parts[1];
-        String path = getPathByUri(uri);
+        String path = extractPathByUri(uri);
         String httpVersion = parts[2];
-        Map<String, String> queryString = getQueryStringByUri(uri);
-        Map<String, String> httpRequestHeaders = getHttpRequestHeaders(bufferedReader);
+        Map<String, String> queryString = parseQueryStringByUri(uri);
+        Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
         Map<String, String> requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
-        HttpCookie httpCookie = readHttpCookie(httpRequestHeaders);
+        HttpCookie httpCookie = parseHttpCookie(httpRequestHeaders);
 
         return new HttpRequest(
                 method,
@@ -56,7 +56,7 @@ public class HttpRequestReader {
         return parseUrlEncoded(requestBodyEncoded);
     }
 
-    private static Map<String, String> getHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+    private static Map<String, String> readHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         Map<String, String> httpRequestHeaders = new HashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null) {
@@ -73,7 +73,7 @@ public class HttpRequestReader {
         return httpRequestHeaders;
     }
 
-    private static HttpCookie readHttpCookie(Map<String, String> httpRequestHeaders) {
+    private static HttpCookie parseHttpCookie(Map<String, String> httpRequestHeaders) {
         String cookieHeader = httpRequestHeaders.get("Cookie");
         HttpCookie httpCookie = new HttpCookie();
 
@@ -88,7 +88,7 @@ public class HttpRequestReader {
         return httpCookie;
     }
 
-    private static String getPathByUri(final String uri) {
+    private static String extractPathByUri(final String uri) {
         int index = uri.indexOf("?");
         if (index == -1) {
             return uri;
@@ -96,16 +96,16 @@ public class HttpRequestReader {
         return uri.substring(0, index);
     }
 
-    private static Map<String, String> getQueryStringByUri(final String uri) {
+    private static Map<String, String> parseQueryStringByUri(final String uri) {
         int index = uri.indexOf("?");
         if (index == -1) {
             return Map.of();
         }
         String queryString = uri.substring(index + 1);
-        return getQueryString(queryString);
+        return parseQueryString(queryString);
     }
 
-    private static Map<String, String> getQueryString(final String querystring) {
+    private static Map<String, String> parseQueryString(final String querystring) {
         return parseUrlEncoded(querystring);
     }
 

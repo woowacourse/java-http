@@ -1,7 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.ErrorPage;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 public class StaticResourceHandler {
 

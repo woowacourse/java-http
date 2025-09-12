@@ -59,6 +59,7 @@ public class RegisterController extends AbstractController {
         if (account == null || email == null || password == null
                 || account.isBlank() || password.isBlank() || email.isBlank()) {
             handleError(response, HttpStatus.BAD_REQUEST);
+            return;
         }
 
         final Optional<User> existingUser = InMemoryUserRepository.findByAccount(account);

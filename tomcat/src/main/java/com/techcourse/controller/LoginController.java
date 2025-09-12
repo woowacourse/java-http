@@ -57,6 +57,7 @@ public class LoginController extends AbstractController {
 
         if (account == null || password == null || account.isBlank() || password.isBlank()) {
             handleError(response, HttpStatus.BAD_REQUEST);
+            return;
         }
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);

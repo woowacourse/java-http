@@ -43,7 +43,6 @@ public abstract class AbstractController implements Controller {
         } catch (IOException e) {
             body = resourceLoader.getDefaultErrorPage(status).getBytes(StandardCharsets.UTF_8);
         }
-
         response.error(status, body);
         response.setHeader("Content-Type", MimeType.HTML.getType());
     }

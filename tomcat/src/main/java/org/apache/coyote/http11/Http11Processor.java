@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.dto.HttpRequest;
+import org.apache.coyote.http11.http.request.dto.HttpRequest;
 import org.apache.coyote.http11.handler.DispatcherHandler;
-import org.apache.coyote.http11.request.util.HttpRequestParser;
+import org.apache.coyote.http11.http.request.util.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

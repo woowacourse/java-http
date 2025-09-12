@@ -7,10 +7,13 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.controller.ControllerMapper;
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,207 +43,17 @@ public class Http11Processor implements Runnable, Processor {
                 final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
                 final var writer = connection.getOutputStream()) {
             Http11Request http11Request = new Http11Request(bufferedReader);
-            String resourcePath = http11Request.getUri().substring(1);
+            String path = http11Request.getPath();
 
-            if (resourcePath.startsWith("login") && http11Request.getMethod().equals("GET")) {
-                Optional<Session> jsessionid = http11Request.getSession("JSESSIONID");
+            Http11Response http11Response = ControllerMapper.getInstance()
+                    .getController(path)
+                    .service(http11Request);
 
-                if(jsessionid.isPresent()) {
-                    Session session = jsessionid.get();
-                    log.info("JSESSIONID: {}", session.getId());
-
-                    User user = (User) session.getAttribute("user");
-                    log.info("user: {}", user);
-
-                    byte[] body = readFromResourcePath("/index.html");
-                    byte[] redirectHeader = createRedirectHeader(body);
-
-                    writer.write(redirectHeader);
-                    writer.write(body);
-                    writer.flush();
-                    return;
-                }
-            }
-
-            if(resourcePath.startsWith("login") && http11Request.getMethod().equals("POST")) {
-                Map<String, String> parseQuery = parseQuery(http11Request.getBody());
-
-                String account = parseQuery.get("account");
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-
-                if(!optionalUser.isEmpty() && optionalUser.get().checkPassword(parseQuery.get("password"))) {
-                    User user = optionalUser.get();
-                    log.info("user: {}", user);
-
-                    Session session = http11Request.createSession();
-                    session.setAttribute("user", user);
-
-                    HttpCookie httpCookie = new HttpCookie("JSESSIONID", session.getId());
-
-                    byte[] body = readFromResourcePath("/index.html");
-                    byte[] redirectHeader = createRedirectHeaderWithCookie(body, httpCookie);
-
-                    writer.write(redirectHeader);
-                    writer.write(body);
-                    writer.flush();
-                    return;
-                }
-
-                byte[] body = readFromResourcePath("/401.html");
-                byte[] redirectHeader = createRedirectHeader(body);
-
-                writer.write(redirectHeader);
-                writer.write(body);
-                writer.flush();
-                return;
-            }
-
-            if(resourcePath.startsWith("register") && http11Request.getMethod().equals("POST")) {
-                Map<String, String> parseQuery = parseQuery(http11Request.getBody());
-
-                String account = parseQuery.get("account");
-                String email = parseQuery.get("email");
-                String password = parseQuery.get("password");
-
-                User user = new User(account, password, email);
-                InMemoryUserRepository.save(user);
-
-                byte[] body = readFromResourcePath("/index.html");
-                byte[] redirectHeader = createRedirectHeader(body);
-
-                writer.write(redirectHeader);
-                writer.write(body);
-                writer.flush();
-                return;
-            }
-
-            byte[] body = readFromResourcePath(resourcePath);
-
-            if(body == null) {
-                String notFoundBody = "<h1>404 Not Found</h1>";
-                byte[] responseHeader = createNotFoundHeader(notFoundBody.getBytes(StandardCharsets.UTF_8));
-
-                writer.write(responseHeader);
-                writer.write(notFoundBody.getBytes(StandardCharsets.UTF_8));
-                writer.flush();
-                return;
-            }
-
-            byte[] responseHeader = createResponseHeader(http11Request, body);
-
-            writer.write(responseHeader);
-            writer.write(body);
+            writer.write(http11Response.getResponseHeader());
+            writer.write(http11Response.getBody());
             writer.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private Map<String, String> parseQuery(final String uri) {
-        HashMap<String, String> queryMap = new HashMap<>();
-
-        String queryString = uri;
-        if(uri.startsWith("?")) {
-            queryString = uri.substring(uri.indexOf('?') + 1);
-        }
-
-        String[] split = queryString.split("&");
-        for (String query : split) {
-            String[] splitQuery = query.split("=");
-            queryMap.put(splitQuery[0], splitQuery[1]);
-        }
-
-        return queryMap;
-    }
-
-    private byte[] createRedirectHeader(final byte[] redirectBody) {
-        String responseHeader =
-                "HTTP/1.1 302 Found\r\n" +
-                        "Content-Type: text/html; charset=utf-8\r\n" +
-                        "Content-Length: " + redirectBody.length + "\r\n" +
-                        "\r\n";
-
-        return responseHeader.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private byte[] createRedirectHeaderWithCookie(final byte[] redirectBody, final HttpCookie httpCookie) {
-        String responseHeader =
-                "HTTP/1.1 302 Found\r\n" +
-                        "Content-Type: text/html; charset=utf-8\r\n" +
-                        "Content-Length: " + redirectBody.length + "\r\n";
-
-        String name = httpCookie.getName();
-        String httpCookieValue = httpCookie.getValue();
-        responseHeader += "Set-Cookie: "+ name + "=" + httpCookieValue + ";" +"\r\n";
-
-        responseHeader += "\r\n";
-
-        return responseHeader.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private byte[] createNotFoundHeader(final byte[] notFoundBody) {
-        String responseHeader =
-                "HTTP/1.1 404 Not Found\r\n" +
-                        "Content-Type: text/html; charset=utf-8\r\n" +
-                        "Content-Length: " + notFoundBody.length + "\r\n" +
-                        "\r\n";
-
-        return responseHeader.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private byte[] createResponseHeader(final Http11Request http11Request, final byte[] body) {
-        String contentType = guessByFileExtension(http11Request.getUri());
-
-        String header = "HTTP/1.1 200 OK" + " \r\n" +
-        "Content-Type: " + contentType + ";charset=utf-8" + " \r\n" +
-        "Content-Length: " + body.length + " \r\n" +
-        "\r\n";
-
-        return header.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private String guessByFileExtension(String path) {
-        if (path.endsWith(".html") || path.equals("/")) return "text/html";
-        if (path.endsWith(".css")) return "text/css";
-        if (path.endsWith(".js")) return "application/javascript";
-        if (path.endsWith(".json")) return "application/json";
-        if (path.endsWith(".png")) return "image/png";
-        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
-
-        return "text/html";
-    }
-
-    private byte[] readFromResourcePath(final String resourcePath) throws IOException {
-        if(resourcePath.isEmpty()) {
-            String response = "Hello world!";
-
-            return response.getBytes();
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("static/");
-
-        if(resourcePath.contains("?")) {
-            stringBuilder.append(resourcePath, 0, resourcePath.indexOf("?"));
-            stringBuilder.append(".html");
-        }
-        else if(!resourcePath.contains(".")){
-            stringBuilder.append(resourcePath);
-            stringBuilder.append(".html");
-        }
-        else {
-            stringBuilder.append(resourcePath);
-        }
-
-        String classPath = stringBuilder.toString();
-        try (InputStream resourceAsStream = getClass().
-                getClassLoader().
-                getResourceAsStream(classPath)) {
-            if(resourceAsStream == null) {
-                return null;
-            }
-
-            return resourceAsStream.readAllBytes();
         }
     }
 }

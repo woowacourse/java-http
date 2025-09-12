@@ -1,9 +1,8 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.catalina.Manager;
 
 public class SessionManager {
 
@@ -14,8 +13,12 @@ public class SessionManager {
         return INSTANCE;
     }
 
-    public void add(final Session session) {
+    public Session createSession() {
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+
         SESSIONS.put(session.getId(), session);
+        return session;
     }
 
     public Session findSession(final String id) {

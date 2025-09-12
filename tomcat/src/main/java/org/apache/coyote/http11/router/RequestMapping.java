@@ -2,6 +2,7 @@ package org.apache.coyote.http11.router;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.ViewController;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,7 @@ public final class RequestMapping {
     private RequestMapping() {
         controllerMap.put("/login", new LoginController());
         controllerMap.put("/register", new RegisterController());
+        controllerMap.put("/", new ViewController());
     }
 
     public static RequestMapping getInstance() {

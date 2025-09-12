@@ -24,46 +24,38 @@ public class LoginController extends AbstractController {
     private static final HttpSessionManager SESSION_MANAGER = HttpSessionManager.getInstance();
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        String method = request.getMethod();
-        if (method.equals("GET")) {
-            doGet(request, response);
-        }
-        if (method.equals("POST")) {
-            doPost(request, response);
-        }
-    }
-
-    @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         String account = request.getParameter("account").orElse(null);
         String password = request.getParameter("password").orElse(null);
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if (user.isEmpty()) {
-            ResponseHandler.sendStaticFile(response,"static/401.html", UNAUTHORIZED);
-        }
-        if (user.get().checkPassword(password)) {
-            log.info(user.toString());
-
-            Optional<HttpCookie> httpCookie = request.getCookie("JSESSIONID");
-            String jsessionid = httpCookie.map(HttpCookie::getValue).orElseGet(() -> UUID.randomUUID().toString());
-            HttpSession session = new HttpSession(jsessionid);
-            session.setAttribute("user", user);
-            SESSION_MANAGER.add(session);
-            response.setCookie(new HttpCookie("JSESSIONID", jsessionid));
-
-            ResponseHandler.redirect(response,"/index.html", FOUND);
+        if (account == null || password == null) {
+            ResponseHandler.sendStaticFile(response, "/400.html", BAD_REQUEST);
+            return;
         }
 
-        ResponseHandler.redirect(response,"/401.html", UNAUTHORIZED);
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            ResponseHandler.sendStaticFile(response,"/401.html", UNAUTHORIZED);
+            return;
+        }
+
+        log.info(user.toString());
+
+        Optional<HttpCookie> httpCookie = request.getCookie("JSESSIONID");
+        String jsessionid = httpCookie.map(HttpCookie::getValue).orElseGet(() -> UUID.randomUUID().toString());
+        HttpSession session = new HttpSession(jsessionid);
+        session.setAttribute("user", user);
+        SESSION_MANAGER.add(session);
+        response.setCookie(new HttpCookie("JSESSIONID", jsessionid));
+
+        ResponseHandler.redirect(response,"/index.html", FOUND);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        Optional<HttpCookie> httpCookie = request.getCookie("JSESSIONID");
+        Optional<String> sessionId = request.getCookieValue("JSESSIONID");
 
-        if (httpCookie.isPresent() && SESSION_MANAGER.containsKey(httpCookie.get().getValue())) {
+        if (sessionId.isPresent() && SESSION_MANAGER.containsKey(sessionId.get())) {
             ResponseHandler.redirect(response, "/index.html", FOUND);
         } else {
             ResponseHandler.sendStaticFile(response, "/login.html", OK);

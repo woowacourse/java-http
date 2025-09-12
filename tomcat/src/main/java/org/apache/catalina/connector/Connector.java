@@ -1,5 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.processor.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector() {
@@ -24,7 +30,19 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount) {
+        this(port, acceptCount, 200);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(acceptCount),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
         this.stopped = false;
     }
 
@@ -50,15 +68,26 @@ public class Connector implements Runnable {
     public void run() {
         // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
-            connect();
-        }
-    }
-
-    private void connect() {
-        try {
-            process(serverSocket.accept());
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            try {
+                final Socket connection = serverSocket.accept();
+                log.info("Accept connection: {}", connection);
+                executorService.execute(() -> {
+                    try {
+                        process(connection);
+                    } finally {
+                        try {
+                            connection.close();
+                        } catch (IOException e) {
+                            log.error("Failed to close socket", e);
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                break;
+            } catch (Exception e) {
+                log.error("Unexpected error during connection handling", e);
+            }
         }
     }
 
@@ -67,13 +96,14 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        processor.run();
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            executorService.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

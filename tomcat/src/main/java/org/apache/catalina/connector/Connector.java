@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,20 +14,23 @@ import java.net.Socket;
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private static final int MAX_THREAD_POOL_SIZE = 250;
+
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ExecutorService executor;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_POOL_SIZE);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executor = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -67,13 +72,15 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executor.execute(processor);
+        //new Thread(processor).start();
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            executor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import java.io.IOException;
-import java.io.InputStream;
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.FrontController;
 import java.net.Socket;
-import com.techcourse.web.WebApplication;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -16,15 +14,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final WebApplication webApplication;
 
-    public Http11Processor(final Socket connection, final WebApplication webApplication) {
+    public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.webApplication = webApplication;
     }
 
     @Override
     public void run() {
+        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -33,30 +30,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = parseRequest(inputStream);
-            if (request == null) {
-                return;
-            }
+            HttpRequest request = HttpRequest.from(inputStream);
+            Controller controller = FrontController.getController(request.getPath());
+            HttpResponse response = controller.service(request);
 
-            HttpResponse response = webApplication.service(request);
-            sendResponse(outputStream, response);
-            
-        } catch (IOException | UncheckedServletException e) {
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
-        try {
-            return HttpRequest.from(inputStream);
-        } catch (IllegalArgumentException e) {
-            log.warn("잘못된 HTTP 요청: {}", e.getMessage());
-            return null;
-        }
-    }
-
-    private void sendResponse(final java.io.OutputStream outputStream, final HttpResponse response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 }

@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
     
     private final HttpStatus status;
     private final String body;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpResponse(HttpStatus status, String body) {
         this.status = status;
@@ -40,14 +40,20 @@ public class HttpResponse {
 
     public String toHttpResponse() {
         StringBuilder response = new StringBuilder();
-        response.append(status.getStatusLine()).append("\r\n");
-        
+        response.append(status.getStatusLine()).append(" \r\n");
+
         for (Map.Entry<String, String> header : headers.entrySet()) {
-            response.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
+            response.append(header.getKey())
+                    .append(": ")
+                    .append(header.getValue())
+                    .append(" \r\n");
         }
-        
-        response.append("\r\n").append(body);
+
+        response.append("\r\n");
+        response.append(body);
+
         return response.toString();
+
     }
 
     public byte[] getBytes() {

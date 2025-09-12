@@ -1,9 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.web.WebApplication;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.MimeType;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -20,13 +16,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var webApp = new WebApplication() {
-            @Override
-            public HttpResponse service(HttpRequest request) {
-                return HttpResponse.ok("", MimeType.TEXT_HTML);
-            }
-        };
-        final var processor = new Http11Processor(socket, webApp);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -53,13 +43,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var webApp = new WebApplication() {
-            @Override
-            public HttpResponse service(HttpRequest request) {
-                return HttpResponse.ok("", MimeType.TEXT_HTML);
-            }
-        };
-        final Http11Processor processor = new Http11Processor(socket, webApp);
+        final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);

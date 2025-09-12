@@ -9,21 +9,12 @@ import org.apache.coyote.http11.MimeType;
 public class UriUtils {
 
     public static Map<String, String> getParameters(
-            final String uri,
-            final String queryString
+            final String queryString,
+            final String body
     ) {
-        Map<String, String> result = new HashMap<>(extractQueryString(uri));
-        result.putAll(parseQueryString(queryString));
+        Map<String, String> result = new HashMap<>(parseQueryString(queryString));
+        result.putAll(parseQueryString(body));
         return result;
-    }
-
-    public static Map<String, String> extractQueryString(final String uri) {
-        if (!uri.contains("?")) {
-            return Map.of();
-        }
-        final String[] split = uri.split("\\?");
-        final String queryString = split.length > 1 ? split[1] : "";
-        return parseQueryString(queryString);
     }
 
     public static Map<String, String> parseQueryString(final String queryString) {

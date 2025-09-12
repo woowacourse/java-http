@@ -1,9 +1,6 @@
-package org.apache.catalina.vo;
+package org.apache.catalina.storage;
 
-import static org.apache.catalina.vo.Cookie.SESSION_COOKIE_ID;
-
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import static org.apache.catalina.storage.Cookie.SESSION_COOKIE_ID;
 
 import java.util.Arrays;
 import java.util.HashMap;

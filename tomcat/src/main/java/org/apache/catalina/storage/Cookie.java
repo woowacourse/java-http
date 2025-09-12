@@ -1,6 +1,4 @@
-package org.apache.catalina.vo;
-
-import org.apache.catalina.Session;
+package org.apache.catalina.storage;
 
 public class Cookie {
 

@@ -1,7 +1,10 @@
-package org.apache.catalina.vo;
+package org.apache.catalina.http;
 
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.storage.Session;
+import org.apache.catalina.storage.SessionManager;
+import org.apache.catalina.storage.Cookies;
+import org.apache.catalina.http.vo.FileExtension;
+import org.apache.catalina.http.vo.Mime;
 
 import java.util.Collections;
 import java.util.Map;

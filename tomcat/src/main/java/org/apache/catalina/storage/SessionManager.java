@@ -1,6 +1,4 @@
-package org.apache.catalina;
-
-import org.apache.catalina.vo.Cookie;
+package org.apache.catalina.storage;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

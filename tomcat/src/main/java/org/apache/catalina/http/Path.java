@@ -1,5 +1,6 @@
-package org.apache.catalina.vo;
+package org.apache.catalina.http;
 
+import org.apache.catalina.http.vo.FileExtension;
 import org.apache.coyote.http11.util.HttpRequestParser;
 
 import java.util.Map;

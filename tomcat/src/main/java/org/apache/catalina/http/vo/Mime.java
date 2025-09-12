@@ -1,4 +1,4 @@
-package org.apache.catalina.vo;
+package org.apache.catalina.http.vo;
 
 import java.util.Collections;
 import java.util.HashMap;

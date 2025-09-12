@@ -18,6 +18,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int MIN_MAX_THREADS = 10;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -29,7 +30,7 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
         this.stopped = false;
         log.info("Connector configured with port: {}, acceptCount: {}, maxThreads: {}",
                 serverSocket.getLocalPort(), acceptCount, maxThreads);
@@ -41,7 +42,7 @@ public class Connector implements Runnable {
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (final IOException e) {
-            log.error("Could not create server socker on port {}", port, e);
+            log.error("Could not create server socket on port {}", port, e);
             throw new UncheckedIOException(e);
         }
     }
@@ -56,7 +57,6 @@ public class Connector implements Runnable {
 
     @Override
     public void run() {
-        // 클라이언트가 연결될때까지 대기한다.
         log.info("Ready to accept connections...");
         while (!stopped) {
             connect();
@@ -70,6 +70,10 @@ public class Connector implements Runnable {
             log.debug("Accepted connection from: {}", connection.getRemoteSocketAddress());
             process(connection);
         } catch (final IOException e) {
+            if (stopped) {
+                log.debug("Server socket closed, accepting no more connections.");
+                return;
+            }
             log.error("Error accepting connection", e);
         }
     }
@@ -83,6 +87,7 @@ public class Connector implements Runnable {
         final var processor = new Http11Processor(connection);
         executorService.execute(processor);
     }
+
     public void stop() {
         log.info("Stopping connector...");
         stopped = true;
@@ -124,9 +129,24 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         if (acceptCount <= 0) {
-            log.warn("Invalid acceptCount: {}. Using default value: {}", acceptCount, DEFAULT_ACCEPT_COUNT);
+            log.warn("Invalid acceptCount: {}. Must be positive. Using default value: {}", acceptCount,
+                    DEFAULT_ACCEPT_COUNT);
             return DEFAULT_ACCEPT_COUNT;
         }
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+        if (acceptCount < DEFAULT_ACCEPT_COUNT) {
+            log.warn("Provided acceptCount: {} is less than the default: {}. Using default value.", acceptCount,
+                    DEFAULT_ACCEPT_COUNT);
+            return DEFAULT_ACCEPT_COUNT;
+        }
+        return acceptCount;
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        if (maxThreads < MIN_MAX_THREADS) {
+            log.warn("maxThreads value: {} is too low. Must be at least {}. Using default value: {}", maxThreads,
+                    MIN_MAX_THREADS, DEFAULT_MAX_THREADS);
+            return DEFAULT_MAX_THREADS;
+        }
+        return maxThreads;
     }
 }

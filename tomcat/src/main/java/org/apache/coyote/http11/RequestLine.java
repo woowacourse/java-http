@@ -8,7 +8,7 @@ public class RequestLine {
 
     public RequestLine(final HttpMethod method, final String path, final String protocolVersion) {
         this.method = method;
-        this.path = path;
+        this.path = parsedPath(path);
         this.protocolVersion = protocolVersion;
     }
 
@@ -22,5 +22,12 @@ public class RequestLine {
 
     public String getProtocolVersion() {
         return protocolVersion;
+    }
+
+    public String parsedPath(final String path) {
+        if (path.contains("?")) {
+            return path.split("\\?")[0];
+        }
+        return path;
     }
 }

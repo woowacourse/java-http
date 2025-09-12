@@ -3,8 +3,12 @@ package org.apache.catalina.connector;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThreadPoolManager {
+
+    private static final Logger log = LoggerFactory.getLogger(ThreadPoolManager.class);
 
     private static final int DEFAULT_CORE_THREAD_COUNT = 32;
     private static final int DEFAULT_MAX_THREAD_COUNT = 64;
@@ -15,12 +19,11 @@ public class ThreadPoolManager {
     }
 
     public static ThreadPoolExecutor createDefaultThreadPoolExecutor() {
-        return new ThreadPoolExecutor(
+        return createThreadPoolExecutor(
                 DEFAULT_CORE_THREAD_COUNT,
                 DEFAULT_MAX_THREAD_COUNT,
                 DEFAULT_KEEP_ALIVE_SECONDS,
-                TimeUnit.SECONDS,
-                new LinkedBlockingDeque<>(DEFAULT_MAX_WAIT_QUEUE_SIZE)
+                DEFAULT_MAX_WAIT_QUEUE_SIZE
         );
     }
 
@@ -31,7 +34,7 @@ public class ThreadPoolManager {
             final int maxWaitQueueSize
     ) {
         final int checkedCoreThreads = checkCoreThreadCount(coreThreads);
-        final int checkedMaxThreads = checkMaxThreadCount(maxThreads);
+        final int checkedMaxThreads = checkMaxThreadCount(maxThreads, checkedCoreThreads);
         final long checkedKeepAliveSeconds = checkKeepAliveSeconds(keepAliveSeconds);
         final int checkedMaxWaitQueueSize = checkMaxWaitQueueSize(maxWaitQueueSize);
 
@@ -48,7 +51,13 @@ public class ThreadPoolManager {
         return Math.max(coreThreads, DEFAULT_CORE_THREAD_COUNT);
     }
 
-    private static int checkMaxThreadCount(final int maxThreads) {
+    private static int checkMaxThreadCount(final int maxThreads, final int coreThreads) {
+        if (coreThreads > maxThreads) {
+            log.warn(
+                    "detected core counts bigger than max count: change max count to bigger value between maxCount={} and coreCount={}",
+                    maxThreads, coreThreads);
+            return Math.max(coreThreads, DEFAULT_CORE_THREAD_COUNT);
+        }
         return Math.max(maxThreads, DEFAULT_MAX_THREAD_COUNT);
     }
 

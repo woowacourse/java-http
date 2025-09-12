@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class StaticRenderer {
 
-    public void redirectToIndexPage(Response response) throws IOException, URISyntaxException {
+    public void redirectToIndexPage(Response response) throws IOException {
         response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.addHeader("Location", "/index.html");
         response.addHeader("Content-Type", "text/html;charset=utf-8");
@@ -23,7 +23,6 @@ public class StaticRenderer {
     public void renderStaticPage(Request request, Response response) throws Exception {
         // 필요 시 로그인 HTML 페이지 반환
         Path path = Paths.get(request.getResourcePath());
-        response.setHttpStatusCode(HttpStatusCode.OK);
         response.addHeader("Content-Type", getContentType(path));
         response.setBody(getStaticResource(path));
         response.addHeader("Content-Length", response.getContentLength());

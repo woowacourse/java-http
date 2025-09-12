@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.coyote.CookieManager;
-import org.apache.coyote.HttpMethod;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

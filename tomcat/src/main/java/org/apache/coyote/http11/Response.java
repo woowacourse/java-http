@@ -55,6 +55,10 @@ public class Response {
         this.httpStatusCode = httpStatusCode;
     }
 
+    public HttpStatusCode getHttpStatusCode(){
+        return httpStatusCode;
+    }
+
     public String getStatusCode() {
         return String.valueOf(httpStatusCode.getCode());
     }

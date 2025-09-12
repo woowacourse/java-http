@@ -4,10 +4,11 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Request;
 import org.apache.coyote.http11.Response;
 
-import static org.apache.coyote.HttpMethod.GET;
-import static org.apache.coyote.HttpMethod.POST;
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
 
-public abstract class AbstractController implements Controller{
+
+public abstract class AbstractController implements Controller {
 
     @Override
     public void service(Request request, Response response) throws Exception {
@@ -22,6 +23,6 @@ public abstract class AbstractController implements Controller{
         }
     }
 
-    protected void doPost(Request request, Response response) throws Exception{};
-    protected void doGet(Request request, Response response) throws Exception{};
+    protected void doPost(Request request, Response response) throws Exception{}
+    protected void doGet(Request request, Response response) throws Exception{}
 }

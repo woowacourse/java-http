@@ -50,15 +50,18 @@ public class Http11Processor implements Runnable, Processor {
             if(uri.startsWith("/login")){
                 LoginController loginController = new LoginController(sessionManager);
                 loginController.service(request, response);
+                return;
             }
 
             // 회원 가입 처리
             if (uri.startsWith("/register")) {
                 RegisterController registerController = new RegisterController();
                 registerController.service(request, response);
+                return;
             }
 
             StaticRenderer staticRenderer = new StaticRenderer();
+            response.setHttpStatusCode(HttpStatusCode.OK);
             staticRenderer.renderStaticPage(request, response);
 
         } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {

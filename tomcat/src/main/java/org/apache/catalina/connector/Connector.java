@@ -16,28 +16,28 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_BACKLOG_SIZE = 100;
-    public static final int DEFAULT_MAX_THREADS = 20;
+    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    public static final int DEFAULT_MAX_THREADS = 200;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
     private final ExecutorService executorService;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_BACKLOG_SIZE, DEFAULT_MAX_THREADS);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int backlogSize, final int maxThreads) {
-        this.serverSocket = createServerSocket(port, backlogSize);
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
-    private ServerSocket createServerSocket(final int port, final int backlogSize) {
+    private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedBacklogSize = checkBacklogSize(backlogSize);
-            return new ServerSocket(checkedPort, checkedBacklogSize);
+            final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -94,7 +94,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkBacklogSize(final int backlogSize) {
-        return Math.max(backlogSize, DEFAULT_BACKLOG_SIZE);
+    private int checkAcceptCount(final int acceptCount) {
+        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

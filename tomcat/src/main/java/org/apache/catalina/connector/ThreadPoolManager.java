@@ -19,7 +19,7 @@ public class ThreadPoolManager {
                 DEFAULT_CORE_THREAD_COUNT,
                 DEFAULT_MAX_THREAD_COUNT,
                 DEFAULT_KEEP_ALIVE_SECONDS,
-                TimeUnit.MILLISECONDS,
+                TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(DEFAULT_MAX_WAIT_QUEUE_SIZE)
         );
     }

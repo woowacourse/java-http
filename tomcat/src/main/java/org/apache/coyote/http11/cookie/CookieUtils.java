@@ -2,7 +2,7 @@ package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
 import java.util.Optional;
-import org.apache.coyote.http11.request.dto.HttpRequest;
+import org.apache.coyote.http11.http.request.dto.HttpRequest;
 
 public final class CookieUtils {
 

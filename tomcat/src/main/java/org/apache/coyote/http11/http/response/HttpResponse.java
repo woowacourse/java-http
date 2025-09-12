@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.http.response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.http.HttpStatus;
+import org.apache.coyote.http11.http.HttpVersion;
 
 public class HttpResponse {
 
@@ -18,19 +19,19 @@ public class HttpResponse {
     private final Map<String, String> headers = new LinkedHashMap<>();
     private final ByteArrayOutputStream body = new ByteArrayOutputStream();
     private boolean committed = false;
-    private String reason = "OK";
+    private String message = "OK";
     private int status = 200;
     private boolean redirected = false;
 
-    public HttpResponse(String version) {
-        this.version = version;
+    public HttpResponse(HttpVersion version) {
+        this.version = version.toString();
         headers.put("Connection", "close");
     }
 
-    public HttpResponse status(int code, String reason) {
+    public HttpResponse status(HttpStatus httpStatus) {
         ensureNotCommitted();
-        this.status = code;
-        this.reason = reason;
+        this.status = httpStatus.getCode();
+        this.message = httpStatus.getMessage();
         return this;
     }
 
@@ -67,7 +68,7 @@ public class HttpResponse {
 
     public void sendRedirect(String location) {
         this.redirected = true;
-        status(HttpStatus.FOUND.getCode(), HttpStatus.FOUND.getReason());
+        status(HttpStatus.FOUND);
         header("Location", location);
         headers.put("Content-Length", "0");
     }
@@ -82,7 +83,7 @@ public class HttpResponse {
         headers.putIfAbsent("Content-Length", String.valueOf(bodyBytes.length));
 
         StringBuilder sb = new StringBuilder();
-        sb.append(version).append(" ").append(status).append(SP).append(reason).append(CRLF);
+        sb.append(version).append(" ").append(status).append(SP).append(message).append(CRLF);
         for (var entry : headers.entrySet()) {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(CRLF);
         }

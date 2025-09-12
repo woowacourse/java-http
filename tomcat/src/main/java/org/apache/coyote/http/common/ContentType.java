@@ -16,6 +16,7 @@ public enum ContentType {
     HTML("text/html", StandardCharsets.UTF_8),
     CSS("text/css", StandardCharsets.UTF_8),
     JAVASCRIPT("application/javascript", StandardCharsets.UTF_8),
+    JSON("application/json", StandardCharsets.UTF_8),
     FORM_URLENCODED("application/x-www-form-urlencoded", StandardCharsets.UTF_8),
     ;
 

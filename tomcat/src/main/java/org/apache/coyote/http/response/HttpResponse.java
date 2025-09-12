@@ -1,6 +1,8 @@
 package org.apache.coyote.http.response;
 
+import static org.apache.coyote.http.common.HttpConstants.CONTENT_LENGTH_HEADER_NAME;
 import static org.apache.coyote.http.common.HttpConstants.CRLF;
+import static org.apache.coyote.http.common.HttpConstants.HEADER_VALUE_SEPARATOR;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,6 @@ public class HttpResponse {
             final HttpResponseHeader header,
             final HttpResponseBody body
     ) {
-        header.setContentLength(body.getContentLength());
         return new HttpResponse(statusLine, header, body);
     }
 
@@ -28,7 +29,6 @@ public class HttpResponse {
         final HttpStatusLine statusLine = HttpStatusLine.from(version, HttpStatus.FOUND);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
         header.add(LOCATION_HEADER_NAME, location);
-        header.setContentLength(0);
         final HttpResponseBody body = HttpResponseBody.empty();
 
         return new HttpResponse(statusLine, header, body);
@@ -44,6 +44,8 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return "%s%s%s%s".formatted(statusLine, header, CRLF, body);
+        final String contentLengthHeader =
+                CONTENT_LENGTH_HEADER_NAME + HEADER_VALUE_SEPARATOR + " " + getContentLength() + CRLF;
+        return "%s%s%s%s%s".formatted(statusLine, header, contentLengthHeader, CRLF, body);
     }
 }

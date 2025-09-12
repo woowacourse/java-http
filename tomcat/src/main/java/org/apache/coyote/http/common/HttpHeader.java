@@ -61,7 +61,7 @@ public class HttpHeader {
     }
 
     public int getContentLength() {
-        final String contentLengthValue = headers.get(HttpConstants.CONTENT_LENGTH_HEADER_NAME);
+        final String contentLengthValue = get(HttpConstants.CONTENT_LENGTH_HEADER_NAME);
         if (contentLengthValue == null) {
             return 0;
         }

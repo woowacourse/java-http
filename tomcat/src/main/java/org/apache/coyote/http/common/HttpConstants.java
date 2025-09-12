@@ -8,7 +8,7 @@ public final class HttpConstants {
 
     // Protocol
     public static final String HTTP_PROTOCOL_PREFIX = "HTTP/";
-    public static final String CONTENT_LENGTH_HEADER_NAME = "content-length";
+    public static final String CONTENT_LENGTH_HEADER_NAME = "Content-Length";
     public static final String CRLF = "\r\n";
     public static final String QUERY_STRING = "?";
 

@@ -1,12 +1,10 @@
 package org.apache.coyote.http.response;
 
-import static org.apache.coyote.http.common.HttpConstants.CONTENT_LENGTH_HEADER_NAME;
 import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.http.common.ContentType;
-import org.apache.coyote.http.common.HttpConstants;
 import org.apache.coyote.http.common.HttpHeader;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,10 +32,6 @@ public class HttpResponseHeader {
         validateCookieName(name);
         validateCookieValue(value);
         header.add(SET_COOKIE_HEADER_NAME, name + KEY_VALUE_SEPARATOR + value);
-    }
-
-    public void setContentLength(final int contentLength) {
-        header.add(HttpConstants.CONTENT_LENGTH_HEADER_NAME, String.valueOf(contentLength));
     }
 
     private void validateCookieName(final String name) {

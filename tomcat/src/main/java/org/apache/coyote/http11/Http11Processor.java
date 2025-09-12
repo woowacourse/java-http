@@ -18,8 +18,8 @@ import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.RegisterPageController;
 import org.apache.coyote.http11.controller.StaticResourceController;
 import org.apache.coyote.http11.controller.WelcomePageController;
-import org.apache.coyote.http11.request_response.HttpRequest;
-import org.apache.coyote.http11.request_response.HttpResponse;
+import org.apache.coyote.http11.request_response.request.HttpRequest;
+import org.apache.coyote.http11.request_response.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

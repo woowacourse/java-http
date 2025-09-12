@@ -1,14 +1,12 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.request_response.HttpRequest;
-import org.apache.coyote.http11.request_response.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request_response.HttpMethod;
+import org.apache.coyote.http11.request_response.HttpStatus;
+import org.apache.coyote.http11.request_response.request.HttpRequest;
+import org.apache.coyote.http11.request_response.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,13 +19,13 @@ public class RegisterController implements Controller {
 
     @Override
     public boolean supports(HttpRequest request) {
-        return request.getRequestMethod().equals("POST") && request.getUriPath().equals("/register");
+        return request.getRequestMethod().equals(HttpMethod.POST) && request.getUriPath().equals("/register");
     }
 
     @Override
     public HttpResponse service(HttpRequest request) {
         try {
-            Map<String, String> formData = parseQueryParameters(request.getBody());
+            Map<String, String> formData = request.getFormData();
             register(formData);
         } catch (IllegalArgumentException e) {
             throw e;
@@ -37,14 +35,6 @@ public class RegisterController implements Controller {
             .header("Location", "/index.html")
             .body("")
             .build();
-    }
-
-    private Map<String, String> parseQueryParameters(String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
-        Arrays.stream(queryString.split("&"))
-            .map(parameter -> parameter.split("="))
-            .forEach(keyValue -> queryParameters.put(keyValue[0], keyValue.length == 2 ? keyValue[1] : null));
-        return Collections.unmodifiableMap(queryParameters);
     }
 
     private void register(Map<String, String> queryParameters) {

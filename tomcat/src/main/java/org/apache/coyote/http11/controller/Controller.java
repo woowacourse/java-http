@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.request_response.HttpRequest;
-import org.apache.coyote.http11.request_response.HttpResponse;
+import org.apache.coyote.http11.request_response.request.HttpRequest;
+import org.apache.coyote.http11.request_response.response.HttpResponse;
 
 public interface Controller {
 

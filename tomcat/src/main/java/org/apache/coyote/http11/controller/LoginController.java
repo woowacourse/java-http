@@ -1,19 +1,15 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.request_response.HttpCookie;
-import org.apache.coyote.http11.request_response.HttpRequest;
-import org.apache.coyote.http11.request_response.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.UnAuthorizedException;
+import org.apache.coyote.http11.request_response.HttpMethod;
+import org.apache.coyote.http11.request_response.HttpStatus;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.http11.request_response.request.HttpRequest;
+import org.apache.coyote.http11.request_response.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,25 +22,16 @@ public class LoginController implements Controller {
 
     @Override
     public boolean supports(HttpRequest request) {
-        return request.getRequestMethod().equals("POST") && request.getUriPath().equals("/login");
+        return request.getRequestMethod().equals(HttpMethod.POST) && request.getUriPath().equals("/login");
     }
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        Session session = getSession(request.getHttpCookie());
-        String body = request.getBody();
+        Session session = request.getSession(true);
+        SessionManager.getInstance().changeSessionId(session);
         try {
-            Map<String, String> formData = parseQueryParameters(body);
+            Map<String, String> formData = request.getFormData();
             User loginUser = login(formData);
-            if (session == null) {
-                session = new Session();
-                SessionManager.getInstance().add(session);
-            } else {
-                SessionManager sessionManager = SessionManager.getInstance();
-                sessionManager.remove(session);
-                session.changeId();
-                sessionManager.add(session);
-            }
             session.addAttribute("user", loginUser);
         } catch (UnAuthorizedException e) {
             return HttpResponse.builder()
@@ -59,26 +46,6 @@ public class LoginController implements Controller {
             .body("")
             .cookie("JSESSIONID", session.getId())
             .build();
-    }
-
-    private Map<String, String> parseQueryParameters(String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
-        Arrays.stream(queryString.split("&"))
-            .map(parameter -> parameter.split("="))
-            .forEach(keyValue -> queryParameters.put(keyValue[0], keyValue.length == 2 ? keyValue[1] : null));
-        return Collections.unmodifiableMap(queryParameters);
-    }
-
-    private Session getSession(HttpCookie httpCookie) {
-        if (httpCookie == null) {
-            return null;
-        }
-        if (httpCookie.getCookie("JSESSIONID") == null) {
-            return null;
-        }
-        String jsessionid = httpCookie.getCookie("JSESSIONID");
-        SessionManager sessionManager = SessionManager.getInstance();
-        return sessionManager.findSession(jsessionid);
     }
 
     private User login(Map<String, String> queryParameters) {

@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.request_response;
 
-public class HttpHeader {
+import java.util.Objects;
 
+public final class HttpHeader {
     private final String name;
     private final String value;
 
@@ -11,14 +12,14 @@ public class HttpHeader {
     }
 
     public boolean nameEquals(String other) {
-        return name.toLowerCase().equals(other.toLowerCase());
+        return name.equalsIgnoreCase(other);
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public String getName() {
+    public String name() {
         return name;
+    }
+
+    public String value() {
+        return value;
     }
 }

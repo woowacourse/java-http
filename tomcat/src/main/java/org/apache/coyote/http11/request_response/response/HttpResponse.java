@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.request_response;
+package org.apache.coyote.http11.request_response.response;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request_response.HttpStatus;
+import org.apache.coyote.http11.request_response.HttpHeader;
 
 public class HttpResponse {
 
@@ -13,12 +14,6 @@ public class HttpResponse {
 
     public HttpResponse(HttpStatus httpStatus, List<HttpHeader> headers, String body) {
         this.responseLine = new ResponseLine("HTTP/1.1", httpStatus);
-        this.headers = new ArrayList<>(headers);
-        this.body = body;
-    }
-
-    public HttpResponse(String protocolVersion, HttpStatus httpStatus, List<HttpHeader> headers, String body) {
-        this.responseLine = new ResponseLine(protocolVersion, httpStatus);
         this.headers = new ArrayList<>(headers);
         this.body = body;
     }
@@ -35,7 +30,7 @@ public class HttpResponse {
         StringBuilder sb = new StringBuilder();
         sb.append("%s %d %s ".formatted(protocolVersion, statusCode, statusMessage)).append("\r\n");
         for (HttpHeader httpHeader : headers) {
-            sb.append("%s: %s ".formatted(httpHeader.getName(), httpHeader.getValue())).append("\r\n");
+            sb.append("%s: %s ".formatted(httpHeader.name(), httpHeader.value())).append("\r\n");
         }
         sb.append("").append("\r\n");
         sb.append(body);

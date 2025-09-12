@@ -1,13 +1,15 @@
-package org.apache.coyote.http11.request_response;
+package org.apache.coyote.http11.request_response.request;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.coyote.http11.request_response.HttpMethod;
 
 public class RequestLine {
 
     private static final String QUERY_STRING_START_DELIMITER = "?";
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String uriPath;
     private final List<QueryParameter> queryParameters;
@@ -16,7 +18,7 @@ public class RequestLine {
     public RequestLine(String requestLine) {
         try {
             String[] splitRequestLine = requestLine.split(" ");
-            method = splitRequestLine[0];
+            method = HttpMethod.getByName(splitRequestLine[0]);
             uri = splitRequestLine[1];
             protocolVersion = splitRequestLine[2];
             uriPath = parseRequestUriPath(uri);
@@ -46,7 +48,7 @@ public class RequestLine {
             .toList();
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

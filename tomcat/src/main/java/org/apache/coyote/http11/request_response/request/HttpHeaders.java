@@ -1,11 +1,13 @@
-package org.apache.coyote.http11.request_response;
+package org.apache.coyote.http11.request_response.request;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.coyote.http11.request_response.HttpHeader;
+
 public class HttpHeaders {
 
-    private List<HttpHeader> headers = new ArrayList<>();
+    private final List<HttpHeader> headers = new ArrayList<>();
 
     public HttpHeaders(List<String> headerStrings) {
         for (String headerString : headerStrings) {
@@ -31,7 +33,7 @@ public class HttpHeaders {
         if (headers.isEmpty()) {
             return 0;
         }
-        return Integer.parseInt(headers.getFirst().getValue());
+        return Integer.parseInt(headers.getFirst().value());
     }
 
     public List<HttpHeader> findHeaderByName(String name) {

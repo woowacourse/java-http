@@ -25,7 +25,7 @@ public class StaticResource {
         if (isEmpty()) {
             return "Hello world!".getBytes().length;
         }
-        return new String(content).replaceAll("\r\n", "\n").getBytes().length;
+        return content.length;
     }
 
     private boolean isEmpty() {

@@ -1,12 +1,12 @@
 package org.apache.coyote.http.handler;
 
+import com.techcourse.controller.Controllers;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.coyote.http.controller.Controller;
-import org.apache.coyote.http.controller.Controllers;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.HttpResponse;

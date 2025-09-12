@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.coyote.http11.exception.NotFoundException;
 
 public enum ControllerProvider {
@@ -10,7 +10,7 @@ public enum ControllerProvider {
     private final List<Controller> controllers;
 
     ControllerProvider() {
-        this.controllers = new CopyOnWriteArrayList<>();
+        this.controllers = new ArrayList<>();
     }
 
     public void register(final List<Controller> controllers) {

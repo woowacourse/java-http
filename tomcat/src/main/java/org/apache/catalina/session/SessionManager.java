@@ -1,19 +1,19 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.HttpCookie;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap();
+    private final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
 
     public static SessionManager getInstance() {
         return INSTANCE;
     }
-    
+
     private SessionManager() {
     }
 

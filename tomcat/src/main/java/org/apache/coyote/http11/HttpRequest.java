@@ -2,10 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
@@ -14,16 +10,21 @@ public class HttpRequest {
     private final HttpRequestStartLine startLine;
     private final HttpHeaders headers;
     private final String body;
-
-    private Map<String, List<String>> queryParameters;
-    private Map<String, List<String>> formParameters;
-    private Map<String, List<String>> allParameters;
+    private HttpParameters parameters;
     private HttpCookie cookies;
 
-    public HttpRequest(final HttpRequestStartLine startLine, final HttpHeaders headers, final String body) {
+    public HttpRequest(
+            final HttpRequestStartLine startLine,
+            final HttpHeaders headers,
+            final String body,
+            final HttpParameters parameters,
+            final HttpCookie cookies
+    ) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+        this.parameters = parameters;
+        this.cookies = cookies;
     }
 
     public static HttpRequest from(final BufferedReader br) throws IOException {
@@ -31,12 +32,19 @@ public class HttpRequest {
         if (line == null) {
             return null;
         }
+        HttpRequestStartLine startLine = HttpRequestStartLine.from(line);
+        HttpHeaders headers = HttpHeaders.from(br);
+        String body = readBody(br, headers);
+        HttpParameters params = HttpParameters.getAllParameters(startLine, headers, body);
+        HttpCookie cookies = HttpCookie.parse(headers.getCookieHeader());
 
-        HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(line);
-        HttpHeaders httpHeaders = HttpHeaders.from(br);
-        String body = readBody(br, httpHeaders);
-
-        return new HttpRequest(httpRequestStartLine, httpHeaders, body);
+        return new HttpRequest(
+                startLine,
+                headers,
+                body,
+                params,
+                cookies
+        );
     }
 
     private static String readBody(final BufferedReader br, final HttpHeaders headers) throws IOException {
@@ -45,11 +53,15 @@ public class HttpRequest {
             return "";
         }
 
-        final int contentLength = Integer.parseInt(contentLengthHeader);
-        final char[] body = new char[contentLength];
+        int contentLength = Integer.parseInt(contentLengthHeader);
+        char[] body = new char[contentLength];
         br.read(body, 0, contentLength);
 
         return new String(body);
+    }
+
+    public HttpParameters getParameters() {
+        return parameters;
     }
 
     public HttpRequestStartLine getStartLine() {
@@ -64,62 +76,7 @@ public class HttpRequest {
         return startLine.getPath();
     }
 
-    public Map<String, List<String>> getQueryParameters() {
-        if (this.queryParameters != null) {
-            return this.queryParameters;
-        }
-        final String queryString = startLine.getQueryString();
-        this.queryParameters = parseQueryString(queryString);
-        return this.queryParameters;
-    }
-
-    public Map<String, List<String>> getFormParameters() {
-        if (this.formParameters != null) {
-            return this.formParameters;
-        }
-
-        this.formParameters = new LinkedHashMap<>();
-
-        final String method = getMethod();
-        final String contentType = headers.get("Content-Type");
-
-        if (!"POST".equalsIgnoreCase(method)) {
-            return this.formParameters;
-        }
-        if (contentType == null) {
-            return this.formParameters;
-        }
-        if (!contentType.startsWith("application/x-www-form-urlencoded")) {
-            return this.formParameters;
-        }
-        if (body == null || body.isEmpty()) {
-            return this.formParameters;
-        }
-
-        this.formParameters.putAll(parseQueryString(body));
-        return this.formParameters;
-    }
-
-    public Map<String, List<String>> getParameters() {
-        if (allParameters == null) {
-            allParameters = new LinkedHashMap<>();
-            addInto(allParameters, getQueryParameters());
-            addInto(allParameters, getFormParameters());
-        }
-        return allParameters;
-    }
-
-    private static void addInto(
-            final Map<String, List<String>> base,
-            final Map<String, List<String>> add
-    ) {
-        if (add != null) {
-            add.forEach((k, vs) -> base.computeIfAbsent(k, v -> new ArrayList<>()).addAll(vs));
-        }
-    }
-
     public String getCookie(final String name) {
-        cookies = HttpCookie.parse(headers.getCookieHeader());
         return cookies.get(name);
     }
 
@@ -129,24 +86,5 @@ public class HttpRequest {
         }
         String jsessionId = getCookie("JSESSIONID");
         return SessionManager.getInstance().findSession(jsessionId);
-    }
-
-    private static Map<String, List<String>> parseQueryString(final String qs) {
-        Map<String, List<String>> out = new LinkedHashMap<>();
-        if (qs == null || qs.isEmpty()) {
-            return out;
-        }
-
-        String[] pairs = qs.split("&");
-        for (String pair : pairs) {
-            if (pair.isEmpty()) {
-                continue;
-            }
-            int eq = pair.indexOf('=');
-            String key = (eq >= 0) ? pair.substring(0, eq) : pair;
-            String val = (eq >= 0) ? pair.substring(eq + 1) : "";
-            out.computeIfAbsent(key, k -> new ArrayList<>()).add(val);
-        }
-        return out;
     }
 }

@@ -4,11 +4,10 @@ import static org.reflections.Reflections.log;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.List;
-import java.util.Map;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpParameters;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -16,9 +15,9 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        Map<String, List<String>> parameters = request.getParameters();
-        String account = getFirst(parameters, "account");
-        String password = getFirst(parameters, "password");
+        HttpParameters parameters = request.getParameters();
+        String account = parameters.getFirst("account");
+        String password = parameters.getFirst("password");
 
         if (account == null || password == null) {
             response.redirect("/login.html");
@@ -53,14 +52,6 @@ public class LoginController extends AbstractController {
             return;
         }
         response.redirect("/login.html");
-    }
-
-    private String getFirst(final Map<String, List<String>> map, final String key) {
-        List<String> list = map.get(key);
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
-        return list.getFirst();
     }
 
     private boolean isLoggedIn(final HttpRequest request) {

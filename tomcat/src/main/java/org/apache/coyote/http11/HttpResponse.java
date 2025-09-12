@@ -36,9 +36,7 @@ public class HttpResponse {
             return;
         }
         body = new String(Files.readAllBytes(Paths.get(url.toURI())));
-        status = HttpStatus.OK;
-        headers.put("Content-Type", getContentType(path));
-        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        ok(body, getContentType(path));
     }
 
     public void ok(final String body, final String contentType) {

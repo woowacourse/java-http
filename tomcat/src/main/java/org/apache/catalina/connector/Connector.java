@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,25 +16,28 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_BACKLOG_SIZE = 100;
+    public static final int DEFAULT_MAX_THREADS = 20;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ExecutorService executorService;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_BACKLOG_SIZE, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(final int port, final int backlogSize, final int maxThreads) {
+        this.serverSocket = createServerSocket(port, backlogSize);
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private ServerSocket createServerSocket(final int port, final int backlogSize) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            final int checkedBacklogSize = checkBacklogSize(backlogSize);
+            return new ServerSocket(checkedPort, checkedBacklogSize);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -67,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {
@@ -89,7 +94,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    private int checkBacklogSize(final int backlogSize) {
+        return Math.max(backlogSize, DEFAULT_BACKLOG_SIZE);
     }
 }

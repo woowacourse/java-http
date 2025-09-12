@@ -22,6 +22,9 @@ public class GlobalExceptionHandler {
         if (e instanceof NotFoundException) {
             return new ErrorPage("static/404.html", HttpStatus.BAD_REQUEST);
         }
+        if (e instanceof HttpRequestMethodNotSupportedException) {
+            return new ErrorPage("static/404.html", HttpStatus.METHOD_NOT_ALLOWED);
+        }
 
         return new ErrorPage("static/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
     }

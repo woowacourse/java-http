@@ -65,8 +65,7 @@ public class ExecutorService implements Runnable {
 
 ### 현재 구현을 선택한 이유
 
-- 위 방식보다 더욱 나은 방법이 있는지 조사하던 중에 ExecutorService를 직접 구현하는 것이 아님을 알게됨
-- 또한 ThreadPoolExecutor를 통해 위에서 직접 구현한 동작을 이미 제공하고 있다는 것을 알게됨
+- 위 방식보다 더욱 나은 방법이 있는지 조사하던 중에 위에서 직접 구현한 동작을 ThreadPoolExecutor에서 이미 제공하고 있다는 것을 알게됨
 
 ```java
 ExecutorService executor = new ThreadPoolExecutor(

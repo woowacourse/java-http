@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.coyote.http11.StaticResource;
+import org.apache.catalina.StaticResource;
 import org.apache.coyote.http11.response.body.ResponseBody;
 import org.apache.coyote.http11.response.header.ResponseHeader;
 import org.apache.coyote.http11.response.startline.HttpStatusCode;
@@ -32,18 +32,26 @@ public class HttpResponseConfigurator {
     }
 
     public static void okWithPlainText(final HttpResponse response, final String content) {
+        plainText(response, HttpStatusCode.OK, content);
+    }
+
+    public static void errorResponse(final HttpStatusCode statusCode, final HttpResponse response) throws IOException {
+        if (statusCode == HttpStatusCode.METHOD_NOT_ALLOWED) {
+            plainText(response, statusCode, "method not allowed");
+            return;
+        }
+        okWithStaticResource(response, "/" + statusCode.getStatusCode() + ".html");
+        response.setResponseLine(ResponseLine.of(HttpStatusCode.NOT_FOUND));
+    }
+
+    private static void plainText(final HttpResponse response, final HttpStatusCode statusCode, final String content) {
         final ResponseBody body = ResponseBody.createPlainTextResponseBody(content);
         final List<ResponseHeader> headers = List.of(
                 ResponseHeader.createContentTypeHeader(body),
                 ResponseHeader.createContentLength(body)
         );
 
-        HttpResponseConfigurator.applyToHttpResponse(response, HttpStatusCode.OK, headers, body);
-    }
-
-    public static void errorResponse(final HttpStatusCode statusCode, final HttpResponse response) throws IOException {
-        okWithStaticResource(response, "/" + statusCode.getStatusCode() + ".html");
-        response.setResponseLine(ResponseLine.of(HttpStatusCode.NOT_FOUND));
+        HttpResponseConfigurator.applyToHttpResponse(response, statusCode, headers, body);
     }
 
     private static void applyToHttpResponse(

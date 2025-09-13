@@ -6,14 +6,8 @@ import org.apache.coyote.http11.message.StatusLine;
 
 public class HttpResponse {
     private StatusLine statusLine;
-    private HttpHeaders headers;
+    private HttpHeaders headers = new HttpHeaders();
     private byte[] body;
-
-    public HttpResponse(StatusLine statusLine, HttpHeaders headers, byte[] body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.body = body;
-    }
 
     public StatusLine getStatusLine() {
         return statusLine;

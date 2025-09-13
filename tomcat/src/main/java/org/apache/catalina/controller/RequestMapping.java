@@ -14,4 +14,8 @@ public class RequestMapping {
     public Controller getController(final String path) {
         return mappings.get(path);
     }
+
+    public boolean contains(final String path) {
+        return mappings.containsKey(path);
+    }
 }

@@ -8,14 +8,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.NotFoundHandler;
-import org.apache.coyote.http11.handler.RegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.router.HttpRequestRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +23,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<Handler> handlers = List.of(
-            new LoginHandler(),
             new StaticResourceHandler(),
-            new RegisterHandler(),
             new NotFoundHandler()
     );
 
@@ -48,19 +46,22 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = HttpRequest.from(reader);
+            final HttpResponse response = new HttpResponse();
 
-            HttpResponse httpResponse = null;
+            final HttpRequestRouter router = new HttpRequestRouter(new RequestMapping());
+            router.initialize();
+            router.route(request, response);
+
             for (Handler handler : handlers) {
                 if (handler.canHandle(request)) {
-                    httpResponse = handler.handle(request);
+                    handler.handle(request, response);
                     break;
                 }
             }
 
-            if (httpResponse != null) {
-                outputStream.write(httpResponse.toString().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-            }
+            outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

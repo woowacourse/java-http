@@ -14,6 +14,19 @@ public class TestHttpUtils {
             .connectTimeout(Duration.ofSeconds(1))
             .build();
 
+    public static HttpResponse<String> sendGet(final String path) {
+        final var request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080" + path))
+                .timeout(Duration.ofSeconds(1))
+                .build();
+
+        try {
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static HttpResponse<Void> sendPost(final String path, final String contentType, final String body) {
         final var request = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8080" + path))

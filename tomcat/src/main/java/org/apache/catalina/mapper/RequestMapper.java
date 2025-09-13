@@ -1,9 +1,10 @@
-package org.apache.catalina.http;
+package org.apache.catalina.mapper;
 
-import com.techcourse.controller.Controller;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.StaticResourceController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.StaticResourceController;
+import org.apache.coyote.http11.HttpRequest;
 
 import java.util.Map;
 

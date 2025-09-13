@@ -1,9 +1,8 @@
-package org.apache.catalina.http;
+package org.apache.coyote.http11;
 
-import static org.apache.catalina.http.vo.Mime.HTML;
-import static org.apache.catalina.http.vo.Mime.JSON;
+import static org.apache.coyote.http11.Mime.HTML;
+import static org.apache.coyote.http11.Mime.JSON;
 
-import org.apache.catalina.http.vo.HttpStatus;
 import org.apache.catalina.storage.Cookie;
 import org.apache.coyote.http11.util.FileReader;
 

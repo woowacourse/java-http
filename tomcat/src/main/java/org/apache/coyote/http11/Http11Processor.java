@@ -1,15 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import org.apache.catalina.http.HttpRequest;
-import org.apache.catalina.http.HttpResponse;
-import org.apache.catalina.http.RequestMapper;
+import org.apache.catalina.mapper.RequestMapper;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.util.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {

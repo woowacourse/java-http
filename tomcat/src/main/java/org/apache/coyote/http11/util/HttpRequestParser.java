@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.util;
 
-import org.apache.catalina.http.HttpRequest;
+import org.apache.coyote.http11.HttpRequest;
 
 import java.io.BufferedReader;
 import java.io.EOFException;

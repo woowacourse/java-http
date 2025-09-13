@@ -1,7 +1,7 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
-import org.apache.catalina.http.HttpRequest;
-import org.apache.catalina.http.HttpResponse;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 

@@ -1,13 +1,13 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
-import static org.apache.catalina.http.vo.Mime.HTML;
-import static org.apache.catalina.http.vo.Mime.JSON;
+import static org.apache.coyote.http11.Mime.HTML;
+import static org.apache.coyote.http11.Mime.JSON;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.http.HttpRequest;
-import org.apache.catalina.http.HttpResponse;
-import org.apache.catalina.http.vo.HttpStatus;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.util.FileReader;
 import org.apache.coyote.http11.util.HttpRequestParser;
 

@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            httpResponse.sendResponse(httpResponse.getResponse(requestLine.getPath()));
+            httpResponse.sendResponse(httpResponse.getResponseHeader(requestLine.getPath()));
             httpResponse.sendFile(requestLine.getPath());
 
         } catch (IOException | UncheckedServletException e) {

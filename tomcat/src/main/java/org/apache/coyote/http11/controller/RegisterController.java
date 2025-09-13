@@ -9,7 +9,7 @@ public class RegisterController extends AbstractController{
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response, RequestLine requestLine) throws Exception {
-        response.sendResponse(response.getResponse(requestLine.getPath()));
+        response.sendResponse(response.getResponseHeader(requestLine.getPath()));
         response.sendFile(requestLine.getPath());
     }
 

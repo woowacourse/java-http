@@ -52,7 +52,7 @@ public class HttpResponse {
                 + "\r\n";
     }
 
-    public String getResponse(Path path) throws IOException {
+    public String getResponseHeader(Path path) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",

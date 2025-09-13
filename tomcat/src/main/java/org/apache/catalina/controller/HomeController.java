@@ -15,11 +15,7 @@ public class HomeController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        final String path = request.getPath();
-
-        if (path.equals("/") || path.equals("")) {
-            renderDefaultPage(request, response);
-        }
+        renderDefaultPage(request, response);
     }
 
     private void renderDefaultPage(final HttpRequest request, final HttpResponse response) {

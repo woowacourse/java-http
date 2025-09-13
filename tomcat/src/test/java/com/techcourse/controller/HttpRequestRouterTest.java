@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import org.apache.coyote.message.HttpHeader;
 import org.apache.coyote.message.HttpMethod;
@@ -31,9 +33,11 @@ class HttpRequestRouterTest {
         final var result = handler.route(request);
 
         // then
+        final var resource = getClass().getClassLoader().getResource("static/404.html");
+        final var content = Files.readString(Path.of(resource.getPath()));
         assertAll(
                 () -> assertThat(result.getStatusLine().statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND),
-                () -> assertThat(result.getBody()).isEmpty()
+                () -> assertThat(result.getBody()).isEqualTo(content)
         );
     }
 }

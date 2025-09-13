@@ -19,4 +19,9 @@ public class Session {
     public String getId() {
         return id;
     }
+
+    public Object getAttribute(final String attributeName) {
+        return values.get(attributeName);
+    }
+
 }

@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
         final Cookie cookie = request.getCookie();
         final Session session = SessionManager.find(cookie.getValue());
-        if (session != null) {
+        if (validateSession(session)) {
             return HttpResponse.redirection("/index.html", TEXT_HTML_CHARSET_UTF_8);
         }
 
@@ -42,6 +42,10 @@ public class LoginController extends AbstractController {
             throw new RuntimeException(e);
         }
         return HttpResponse.ok(responseBody, TEXT_HTML_CHARSET_UTF_8);
+    }
+
+    private boolean validateSession(final Session session) {
+        return session != null && session.getAttribute("user") != null;
     }
 
     @Override

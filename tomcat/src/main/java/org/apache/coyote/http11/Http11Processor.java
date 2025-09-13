@@ -114,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private int getContentLength(final List<String> headerLines) {
         return headerLines.stream()
-                .filter(l -> l.startsWith("Content-Length:"))
+                .filter(l -> l.toLowerCase().startsWith("content-length:"))
                 .map(l -> Integer.parseInt(l.split(":")[1].trim()))
                 .findFirst()
                 .orElse(0);

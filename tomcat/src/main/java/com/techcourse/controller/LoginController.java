@@ -53,16 +53,13 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws URISyntaxException, IOException {
+    protected HttpResponse doPost(final HttpRequest request) {
         final String account = request.getBody().get("account");
         final String password = request.getBody().get("password");
 
         final User user = getUserByAccount(account);
         if (isLoginFailed(user, password)) {
-            final URL resource = resourceResolver.resolver(request.getRequestLine().getUrl());
-            final String responseBody = Files.readString(Paths.get(resource.toURI()));
-
-            return HttpResponse.unAuthentication(responseBody, TEXT_HTML_CHARSET_UTF_8); //리다이렉트
+            return HttpResponse.redirection("401.html", TEXT_HTML_CHARSET_UTF_8);
         }
 
         log.info("user: {}", user);

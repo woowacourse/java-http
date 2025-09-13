@@ -3,80 +3,74 @@ package org.apache.coyote.http11;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class Http11Response {
+public final class Http11Response {
 
-    private final int statusCode;
-    private final Map<String, String> headers;
-    private final byte[] body;
+    private StatusLine statusLine;
+    private final Map<String, List<String>> headers;
+    private byte[] body;
 
-    public Http11Response(
-            final int statusCode,
-            final String contentType,
-            final String body
-    ) {
-        this(statusCode, Map.of("Content-Type", contentType), body.getBytes(StandardCharsets.UTF_8));
+    public Http11Response() {
+        this.statusLine = StatusLine.from(200);
+        this.headers = new HashMap<>();
+        this.body = new byte[0];
     }
 
-    public Http11Response(
-            final int statusCode,
-            final String contentType,
-            final byte[] body
-    ) {
-        this(statusCode, Map.of("Content-Type", contentType), body);
+    public void setStatus(final int statusCode) {
+        this.statusLine = StatusLine.from(statusCode);
     }
 
-    public Http11Response(
-            final int statusCode,
-            final Map<String, String> headers,
-            final byte[] body
-    ) {
-        this.statusCode = statusCode;
-        this.headers = new HashMap<>(headers);
-        this.body = body;
-    }
-
-    public static Http11Response redirect(final String location) {
-        return new Http11Response(302, Map.of("Location", location), new byte[0]);
-    }
-
-    public void addCookie(
+    public void setHeader(
             final String name,
             final String value
     ) {
-        final String cookieValue = String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax", name, value);
-        headers.put("Set-Cookie", cookieValue);
+        this.headers.put(name, new ArrayList<>(List.of(value)));
+    }
+
+    public void addHeader(
+            final String name,
+            final String value
+    ) {
+        this.headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+    }
+
+    public void setBody(
+            final String body,
+            final String contentType
+    ) {
+        this.body = body.getBytes(StandardCharsets.UTF_8);
+        setHeader("Content-Type", contentType);
+    }
+
+    public void setBody(
+            final byte[] body,
+            final String contentType
+    ) {
+        this.body = body;
+        setHeader("Content-Type", contentType);
     }
 
     public byte[] getResponseBytes() {
-        final String statusText = getStatusText(this.statusCode);
-        final String responseLine = "HTTP/1.1 " + this.statusCode + " " + statusText;
         final var responseHeaders = new HashMap<>(this.headers);
-        responseHeaders.put("Content-Length", String.valueOf(this.body.length));
-        try (final var outputStream = new ByteArrayOutputStream()) {
-            outputStream.write(responseLine.getBytes(StandardCharsets.UTF_8));
+        responseHeaders.put("Content-Length", List.of(String.valueOf(this.body.length)));
+        try (var outputStream = new ByteArrayOutputStream()) {
+            outputStream.write(statusLine.toLineString().getBytes(StandardCharsets.UTF_8));
             outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
-            for (final var header : responseHeaders.entrySet()) {
-                final String headerLine = header.getKey() + ": " + header.getValue();
-                outputStream.write(headerLine.getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            for (var headerEntry : responseHeaders.entrySet()) {
+                for (var value : headerEntry.getValue()) {
+                    outputStream.write((headerEntry.getKey() + ": " + value + "\r\n")
+                            .getBytes(StandardCharsets.UTF_8));
+                }
             }
             outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
             outputStream.write(this.body);
             return outputStream.toByteArray();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getStatusText(int code) {
-        return switch (code) {
-            case 200 -> "OK";
-            case 302 -> "Found";
-            case 404 -> "Not Found";
-            default -> "OK";
-        };
     }
 }

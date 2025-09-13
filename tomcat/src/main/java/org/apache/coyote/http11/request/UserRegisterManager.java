@@ -36,7 +36,8 @@ public class UserRegisterManager {
     }
 
     public User getUser() {
-        return InMemoryUserRepository.findByAccount(userInformation.get(LoginParam.ACCOUNT)).get();
+        return InMemoryUserRepository.findByAccount(userInformation.get(LoginParam.ACCOUNT)).
+                orElseThrow(() -> new IllegalArgumentException("[ERROR] no such user"));
     }
 
     public boolean isExistsUser() {

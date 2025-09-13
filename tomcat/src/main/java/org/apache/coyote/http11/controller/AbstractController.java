@@ -10,10 +10,12 @@ public abstract class AbstractController implements Controller{
     public void service(RequestLine requestLine, HttpRequest request, HttpResponse response) throws Exception {
         if (requestLine.isGetMethod()) {
             doGet(request, response, requestLine);
+            return;
         }
 
         if (requestLine.isPostMethod()) {
             doPost(request, response);
+            return;
         }
 
         throw new IllegalArgumentException("[ERROR] invalid method type");

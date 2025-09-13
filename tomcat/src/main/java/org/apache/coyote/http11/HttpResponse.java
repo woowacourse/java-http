@@ -1,27 +1,48 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpResponse {
 
-    private int status = 200;
+    private int statusCode = 200;
     private String reason = "OK";
     private final Map<String, String> headers = new LinkedHashMap<>();
     private byte[] body = new byte[0];
     private boolean committed = false;
+    private final List<ResponseCookie> cookies = new ArrayList<>();
 
     public static byte[] bytes(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }
 
-    public void setStatus(
-            int status,
-            String reason
+    public void setStatusCode(
+            HttpStatus httpStatus
     ) {
-        this.status = status;
-        this.reason = reason;
+        this.statusCode = httpStatus.getStatusCode();
+        this.reason = httpStatus.getReasonPhrase();
+    }
+
+    public void addCookie(String name, String value) {
+        cookies.add(new ResponseCookie(name, value));
+        updateSetCookieHeaders();
+    }
+
+    public void addCookie(ResponseCookie cookie) {
+        cookies.add(cookie);
+        updateSetCookieHeaders();
+    }
+
+    private void updateSetCookieHeaders() {
+        headers.entrySet().removeIf(entry ->
+                entry.getKey().equalsIgnoreCase("Set-Cookie"));
+        for (int i = 0; i < cookies.size(); i++) {
+            String headerName = i == 0 ? "Set-Cookie" : "Set-Cookie-" + i;
+            headers.put(headerName, cookies.get(i).toSetCookieHeader());
+        }
     }
 
     public void setHeader(
@@ -35,8 +56,8 @@ public class HttpResponse {
         this.body = body != null ? body : new byte[0];
     }
 
-    public int getStatus() {
-        return status;
+    public int getStatusCode() {
+        return statusCode;
     }
 
     public String getReason() {
@@ -55,7 +76,7 @@ public class HttpResponse {
         return committed;
     }
 
-    void markCommitted() {
+    public void markCommitted() {
         committed = true;
     }
 }

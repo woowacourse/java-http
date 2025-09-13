@@ -22,7 +22,7 @@ public class Http11OutputBuffer implements AutoCloseable {
 
         byte[] body = httpResponse.getBody();
         writeContentLength(httpResponse, body);
-        writeLine("HTTP/1.1 " + httpResponse.getStatus() + " " + httpResponse.getReason() + " ");
+        writeLine("HTTP/1.1 " + httpResponse.getStatusCode() + " " + httpResponse.getReason() + " ");
         for (Entry<String, String> h : httpResponse.getHeaders().entrySet()) {
             writeLine(h.getKey() + ": " + h.getValue() + " ");
         }

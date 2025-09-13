@@ -1,15 +1,18 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.catalina.session.HttpCookie;
 
 public final class HttpRequestParser {
 
     public HttpRequest parse(Http11InputBuffer http11InputBuffer) throws IOException {
         String requestLine = http11InputBuffer.readLine();
+
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IOException("빈 요청입니다.");
         }
@@ -22,6 +25,7 @@ public final class HttpRequestParser {
         final String target = parts[1];
         final String version = parts[2];
         Map<String, String> headers = new LinkedHashMap<>();
+
         while (true) {
             String line = http11InputBuffer.readLine();
             if (line == null || line.isEmpty()) {
@@ -35,7 +39,8 @@ public final class HttpRequestParser {
             String value = line.substring(idx + 1).trim();
             headers.put(name.toLowerCase(), value);
         }
-
+        String cookieHeader = headers.get("cookie");
+        HttpCookie httpCookie = new HttpCookie(cookieHeader);
         String uri, queryString = "";
         int q = target.indexOf('?');
         if (q >= 0) {
@@ -51,8 +56,8 @@ public final class HttpRequestParser {
         if (contentLength > 0) {
             body = http11InputBuffer.readBytes(contentLength);
         }
-
-        return new HttpRequest(method, uri, version, headers, query, body);
+        return new HttpRequest(method, uri, version, headers, query, body, parseQuery(new String(body, UTF_8)),
+                httpCookie);
     }
 
     private Map<String, String> parseQuery(String queryString) {
@@ -72,8 +77,8 @@ public final class HttpRequestParser {
         return map;
     }
 
-    private static String urlDecode(String string) {
-        return URLDecoder.decode(string, StandardCharsets.UTF_8);
+    private String urlDecode(String string) {
+        return URLDecoder.decode(string, UTF_8);
     }
 }
 

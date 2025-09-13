@@ -57,8 +57,4 @@ public class HttpResponse {
 
         return responseBuilder.toString();
     }
-
-    public String getBody() {
-        return body;
-    }
 }

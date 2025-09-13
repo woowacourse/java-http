@@ -24,6 +24,10 @@ public class HttpResponse {
         headers.put(key, value);
     }
 
+    public void addHeader(String key, Object value) {
+        addHeader(key, String.valueOf(value));
+    }
+
     public void setBody(byte[] body) {
         this.body = body;
     }
@@ -44,9 +48,12 @@ public class HttpResponse {
         if (body.length > 0 && !headers.containsKey("Content-Type")) {
             addHeader("Content-Type", "text/html;charset=utf-8");
         }
-        addHeader("Content-Length", String.valueOf(body.length));
+        addHeader("Content-Length", body.length);
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
+            builder.append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append(" \r\n");
         }
         builder.append("\r\n");
         return builder.toString();

@@ -50,4 +50,13 @@ public class HttpSessionImpl extends AbstractHttpSession {
         super.invalidate();
         attributes.clear();
     }
+
+    public boolean isValid() {
+        try {
+            checkValid();
+            return true;
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
 }

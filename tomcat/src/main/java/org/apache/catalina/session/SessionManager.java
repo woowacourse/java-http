@@ -38,7 +38,7 @@ public class SessionManager implements Manager {
         }
 
         return SESSIONS.computeIfPresent(id, (k, session) -> {
-            if (session.isExpired()) {
+            if (!session.isValid() || session.isExpired()) {
                 session.invalidate();
                 return null;
             }

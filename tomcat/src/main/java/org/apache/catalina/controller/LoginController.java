@@ -38,11 +38,6 @@ public class LoginController extends AbstractController {
         final String account = params.get("account");
         final String password = params.get("password");
 
-        if (account == null || password == null) {
-            renderPage(request, response, "/login.html");
-            return;
-        }
-
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .ifPresentOrElse(

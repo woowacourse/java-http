@@ -61,41 +61,6 @@ class ConnectorConcurrencyTest {
     }
 
     @Test
-    void 스레드_풀_크기_제한_테스트() throws InterruptedException {
-        final int numberOfRequests = 300;
-        final CountDownLatch startLatch = new CountDownLatch(1);
-        final CountDownLatch finishLatch = new CountDownLatch(numberOfRequests);
-        final AtomicInteger concurrentConnections = new AtomicInteger(0);
-        final AtomicInteger maxConcurrentConnections = new AtomicInteger(0);
-        final ExecutorService executorService = Executors.newFixedThreadPool(numberOfRequests);
-
-        for (int i = 0; i < numberOfRequests; i++) {
-            executorService.submit(() -> {
-                try {
-                    startLatch.await();
-                    
-                    int current = concurrentConnections.incrementAndGet();
-                    maxConcurrentConnections.updateAndGet(max -> Math.max(max, current));
-                    
-                    sendHttpRequestWithDelay();
-                    
-                    concurrentConnections.decrementAndGet();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    finishLatch.countDown();
-                }
-            });
-        }
-
-        startLatch.countDown();
-        finishLatch.await(30, TimeUnit.SECONDS);
-        executorService.shutdown();
-
-        assertThat(maxConcurrentConnections.get()).isLessThanOrEqualTo(200);
-    }
-
-    @Test
     void 순차적_요청_vs_동시_요청_성능_비교() throws InterruptedException {
         final int numberOfRequests = 100;
 

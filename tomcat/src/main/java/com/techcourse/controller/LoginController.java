@@ -54,7 +54,7 @@ public final class LoginController extends AbstractController {
             final Http11Response httpResponse
     ) {
         final var params = extractFirstParamValues(RequestLine.parseUrlEncodedParams(httpRequest.getBody()));
-        final var userOptional = isLoginSuccessful(params);
+        final var userOptional = authenticate(params);
         if (userOptional.isPresent()) {
             final var user = userOptional.get();
             final var session = getSession(httpRequest, true)
@@ -93,7 +93,7 @@ public final class LoginController extends AbstractController {
         return newSession;
     }
 
-    private Optional<User> isLoginSuccessful(final Map<String, String> params) {
+    private Optional<User> authenticate(final Map<String, String> params) {
         if (!params.containsKey("account") || !params.containsKey("password")) {
             return Optional.empty();
         }

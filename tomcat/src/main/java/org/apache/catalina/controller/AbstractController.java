@@ -18,10 +18,10 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) throws IOException {
         if (request.equalMethod("GET")) {
             doGet(request, response);
-        }
-
-        if (request.equalMethod("POST")) {
+        } else if (request.equalMethod("POST")) {
             doPost(request, response);
+        } else {
+            response.setStatusLine(new StatusLine(request.getVersion(), StatusCode.METHOD_NOT_ALLOWED));
         }
     }
 

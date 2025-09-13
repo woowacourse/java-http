@@ -1,8 +1,11 @@
-package org.apache.coyote;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.ErrorMessage;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.renderer.StaticRenderer;
 import org.apache.coyote.http11.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

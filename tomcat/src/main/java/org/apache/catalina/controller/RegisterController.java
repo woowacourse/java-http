@@ -1,8 +1,9 @@
-package org.apache.coyote;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.ErrorMessage;
 import com.techcourse.model.User;
+import org.apache.catalina.renderer.StaticRenderer;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Request;
 import org.apache.coyote.http11.Response;

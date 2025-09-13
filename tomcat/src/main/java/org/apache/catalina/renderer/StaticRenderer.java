@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina.renderer;
 
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Request;

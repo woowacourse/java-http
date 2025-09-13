@@ -30,13 +30,8 @@ public class RegisterController extends AbstractController {
         final String password = request.getBody().get("password");
         final String email = request.getBody().get("email");
 
-        final User user = createUser(account, password, email);
+        final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return HttpResponse.redirection("index.html", TEXT_HTML_CHARSET_UTF_8);
-    }
-
-    private User createUser(String account, String password, String email) {
-        Long id = 1L;
-        return new User(++id, account, password, email);
     }
 }

@@ -1,10 +1,9 @@
-package com.techcourse.controller;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
-import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
@@ -13,8 +12,11 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private final SessionManager sessionManager = new SessionManager();
 
     @Override
@@ -44,7 +46,10 @@ public class LoginController extends AbstractController {
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .ifPresentOrElse(
-                        user -> loginUser(request, response, user),
+                        user -> {
+                            loginUser(request, response, user);
+                            log.info("user: %s", user);
+                        },
                         () -> redirect(request, response, "/401.html")
                 );
     }

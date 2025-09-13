@@ -25,14 +25,10 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {}
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {}
-
-    protected String readResource(final String resourcePath) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
-        if (resource == null) return "";
-        return Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
     }
 
     protected void redirect(
@@ -54,14 +50,24 @@ public abstract class AbstractController implements Controller {
             final HttpResponse response,
             final String resourcePath
     ) throws IOException {
-        final String body = readResource(resourcePath);
+        final byte[] body = readStaticResource(resourcePath);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.addHeader("Content-Type", ContentType.HTML.getMimeType());
-        headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        headers.addHeader("Content-Length", String.valueOf(body.length));
 
         response.setStatusLine(new StatusLine(request.getVersion(), StatusCode.OK));
         response.setHeaders(headers);
-        response.setBody(body.getBytes(StandardCharsets.UTF_8));
+        response.setBody(body);
+    }
+
+    protected byte[] readStaticResource(final String resourcePath) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
+        if (ContentType.isBinary(resourcePath)) {
+            return Files.readAllBytes(new File(resource.getPath()).toPath());
+        }
+
+        return Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8)
+                .getBytes(StandardCharsets.UTF_8);
     }
 }

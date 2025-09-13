@@ -1,67 +1,67 @@
 package org.apache.coyote.util.request;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.util.Cookie;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
-    private final String version;
-    private final Map<String, String> queries;
+    private final RequestLine requestLine;
+    private final Map<String, String> headers;
+    private final Map<String, String> body;
     private final Cookie cookie;
+    private SessionManager sessionManager;
 
-    public HttpRequest(String method, String path, String version, Map<String, String> queries, Cookie cookie) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
-        this.queries = queries != null ? queries : new HashMap<>();
-        this.cookie = cookie != null ? cookie : Cookie.parse(null);
+    public HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> body, Cookie cookie) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
+        this.cookie = cookie;
+    }
+
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
-    public Optional<String> getQueryValue(String key) {
-        return Optional.ofNullable(queries.get(key));
+    public Map<String, String> getBody() {
+        return Collections.unmodifiableMap(body);
     }
 
     public Session getSession(boolean create) {
-        SessionManager sessionManager = SessionManager.getInstance();
-        String sessionId = SessionManager.getSessionId(cookie);
+        if (sessionManager == null) {
+            throw new IllegalStateException("No SessionManager is configured.");
+        }
+        String sessionId = sessionManager.getSessionId(cookie);
         if (sessionId != null) {
-            Session session = sessionManager.findCustomSession(sessionId);
+            Session session = sessionManager.findSession(sessionId);
             if (session != null) {
                 return session;
             }
         }
         if (create) {
-            String newSessionId = SessionManager.generateSessionId();
-            Session newSession = new Session(newSessionId);
-            sessionManager.add(newSession);
-            return newSession;
+            return sessionManager.createSession();
         }
         return null;
     }
 
     public Session changeSessionId() {
-        SessionManager sessionManager = SessionManager.getInstance();
-        String sessionId = SessionManager.getSessionId(cookie);
+        if (sessionManager == null) {
+            throw new IllegalStateException("No SessionManager is configured.");
+        }
+        String sessionId = sessionManager.getSessionId(cookie);
         if (sessionId != null) {
             sessionManager.remove(sessionId);
         }
-        String newSessionId = SessionManager.generateSessionId();
-        Session newSession = new Session(newSessionId);
-        sessionManager.add(newSession);
-        return newSession;
+        return sessionManager.createSession();
     }
 }

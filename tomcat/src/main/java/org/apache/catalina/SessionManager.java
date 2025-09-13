@@ -5,36 +5,45 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.util.Cookie;
 
-public class SessionManager {
+public class SessionManager implements org.apache.coyote.SessionManager {
 
     public static final String JSESSIONID = "JSESSIONID";
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
-    private static final SessionManager INSTANCE = new SessionManager();
+    private final Map<String, org.apache.coyote.Session> SESSIONS = new HashMap<>();
 
-    private SessionManager() {
+    public SessionManager() {
     }
 
-    public static SessionManager getInstance() {
-        return INSTANCE;
-    }
-
-    public static String generateSessionId() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String getSessionId(Cookie cookie) {
-        return cookie.get(JSESSIONID).orElse(null);
-    }
-
-    public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
-    }
-
-    public Session findCustomSession(final String id) {
+    @Override
+    public org.apache.coyote.Session findSession(final String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 
+    @Override
+    public org.apache.coyote.Session createSession() {
+        String sessionId = UUID.randomUUID().toString();
+        org.apache.coyote.Session session = new Session(sessionId);
+        add(session);
+        return session;
+    }
+
+    @Override
+    public void add(final org.apache.coyote.Session session) {
+        SESSIONS.put(session.getId(), session);
+    }
+
+    @Override
     public void remove(final String id) {
         SESSIONS.remove(id);
+    }
+
+    @Override
+    public String getSessionId(final Cookie cookie) {
+        if (cookie == null) {
+            return null;
+        }
+        return cookie.get(JSESSIONID).orElse(null);
     }
 }

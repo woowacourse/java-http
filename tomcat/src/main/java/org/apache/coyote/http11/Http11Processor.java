@@ -1,17 +1,14 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.core.ApplicationProcessor;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.StaticResourcePathGenerator;
 import org.apache.coyote.util.request.HttpRequest;
 import org.apache.coyote.util.request.HttpRequestParser;
-import org.apache.coyote.util.response.HttpContentTypeResolver;
 import org.apache.coyote.util.response.HttpResponse;
+import org.apache.coyote.util.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Adapter adapter;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
+        this.adapter = adapter;
     }
 
     @Override
@@ -33,80 +32,21 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        OutputStream outputStream = null;
-        try (final var inputStream = connection.getInputStream()) {
-            outputStream = connection.getOutputStream();
+        HttpResponse response = new HttpResponse();
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
+
             HttpRequest request = HttpRequestParser.parse(inputStream);
-            if (request == null) {
-                respond(HttpResponse.notFound(), outputStream);
-                return;
+            adapter.service(request, response);
+            response.send(outputStream);
+        } catch (Exception e) {
+            log.error("process error: {}", e.getMessage(), e);
+            adapter.handleError(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            try {
+                response.send(connection.getOutputStream());
+            } catch (IOException ex) {
+                log.error("process send error: {}", ex.getMessage(), ex);
             }
-            if (handleApiRequest(request, outputStream)) {
-                return;
-            }
-            if (handleStaticResourceRequest(request.getPath(), outputStream)) {
-                return;
-            }
-            respond(HttpResponse.notFound(), outputStream);
-        } catch (IOException | UncheckedServletException e) {
-            handleError(outputStream, e);
         }
-    }
-
-    private void handleError(OutputStream outputStream, Exception e) {
-        if (outputStream == null) {
-            return;
-        }
-        try {
-            respond(HttpResponse.internalServerError(), outputStream);
-        } catch (IOException ex) {
-            log.error("응답 실패! : {}", ex.getMessage(), ex);
-        }
-    }
-
-    private boolean handleApiRequest(HttpRequest request, OutputStream outputStream) throws IOException {
-        if ("/login".equals(request.getPath())) {
-            HttpResponse loginResponse = ApplicationProcessor.processLogin(request);
-            respond(loginResponse, outputStream);
-            return true;
-        }
-        if ("/register".equals(request.getPath()) && "POST".equals(request.getMethod())) {
-            HttpResponse registerResponse = ApplicationProcessor.processRegister(request);
-            respond(registerResponse, outputStream);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean handleStaticResourceRequest(String requestPath, OutputStream outputStream) throws IOException {
-        String resourcePath = StaticResourcePathGenerator.generate(requestPath);
-        if (resourcePath == null) {
-            return false;
-        }
-        byte[] resourceBody = readPathFile(resourcePath);
-        if (resourceBody == null) {
-            return false;
-        }
-        respond(HttpResponse.of(
-                "HTTP/1.1 200 OK",
-                HttpContentTypeResolver.resolve(resourcePath),
-                resourceBody
-        ), outputStream);
-        return true;
-    }
-
-    private byte[] readPathFile(String requestPath) throws IOException {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(requestPath)) {
-            if (inputStream == null) {
-                return null;
-            }
-            return inputStream.readAllBytes();
-        }
-    }
-
-    private void respond(HttpResponse httpResponse, OutputStream outputStream) throws IOException {
-        outputStream.write(httpResponse.createHeader().getBytes());
-        outputStream.write(httpResponse.getBody());
-        outputStream.flush();
     }
 }

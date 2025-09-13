@@ -41,4 +41,48 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void method_not_allowed_test() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "PUT /index HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        // Expect 405 Method Not Allowed without body
+        var expectedStart = "HTTP/1.1 405 Method Not Allowed\r\n";
+        assertThat(socket.output()).startsWith(expectedStart);
+    }
+
+    @Test
+    void post_to_index_is_method_not_allowed() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /index HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 0",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expectedStart = "HTTP/1.1 405 Method Not Allowed\r\n";
+        assertThat(socket.output()).startsWith(expectedStart);
+    }
 }

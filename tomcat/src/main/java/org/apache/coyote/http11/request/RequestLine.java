@@ -55,6 +55,14 @@ public class RequestLine {
         return path.startsWith("/login");
     }
 
+    public boolean startsWithRegister(){
+        return path.startsWith("/register");
+    }
+
+    public boolean startsWithIndexHtml() {
+        return path.startsWith("index/html");
+    }
+
     public boolean isGetMethod() {
         return methodType == GET;
     }

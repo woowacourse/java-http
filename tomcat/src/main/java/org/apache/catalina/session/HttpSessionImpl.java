@@ -5,12 +5,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpSessionImpl extends AbstractHttpSession {
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
-    private final AtomicBoolean invalidated = new AtomicBoolean(false);
 
     public HttpSessionImpl(ServletContext servletContext) {
         super(servletContext);

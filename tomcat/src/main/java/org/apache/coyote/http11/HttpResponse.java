@@ -71,7 +71,7 @@ public class HttpResponse {
     }
 
     private String getStatusLine() {
-        return String.format("%s %d %s ", version, status.value(), status.message());
+        return String.format("%s %d %s ", version, status.code(), status.message());
     }
 
     private String getHeaderString() {

@@ -96,7 +96,7 @@ public enum HttpStatus {
         this.message = message;
     }
 
-    public int value() {
+    public int code() {
         return code;
     }
 

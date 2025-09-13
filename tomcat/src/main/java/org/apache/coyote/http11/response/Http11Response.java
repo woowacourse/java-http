@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.StaticResource;
 
 public class Http11Response {
 
@@ -29,6 +30,12 @@ public class Http11Response {
 
     public void addCookie(final String cookieName, final String cookieValue) {
         responseCookies.addCookie(cookieName, cookieValue);
+    }
+
+    public void setStaticResource(final StaticResource staticResource) {
+        addHeader("Content-Type", staticResource.getMimeType());
+        addHeader("Content-Length", String.valueOf(staticResource.getContentLength()));
+        setBody(staticResource.getContent());
     }
 
     public void setBody(final byte[] body) {

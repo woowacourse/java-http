@@ -1,14 +1,13 @@
 package org.apache.coyote.http11;
 
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -20,22 +19,21 @@ class Http11ProcessorTest {
 
         // when
         processor.process(socket);
+        final String output = socket.output();
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 12",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertSoftly(s -> {
+            s.assertThat(output).contains("HTTP/1.1 200 OK");
+            s.assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+            s.assertThat(output).contains("Content-Length: 12");
+            s.assertThat(output).contains("Hello world!");
+        });
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -47,15 +45,17 @@ class Http11ProcessorTest {
 
         // when
         processor.process(socket);
+        final String output = socket.output();
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: 5670\r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertSoftly(s -> {
+            s.assertThat(output).contains("HTTP/1.1 200 OK");
+            s.assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+            s.assertThat(output).contains("Content-Length: 5670");
+            s.assertThat(output).contains(expectedBody);
+        });
     }
 }

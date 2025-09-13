@@ -3,7 +3,7 @@ package org.apache.catalina.controller;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public abstract class FrontController implements Controller {
+public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse service(final HttpRequest httpRequest) throws Exception {

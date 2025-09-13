@@ -5,11 +5,11 @@ import com.techcourse.model.User;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.catalina.controller.FrontController;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public class RegisterController extends FrontController {
+public class RegisterController extends AbstractController {
 
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
 

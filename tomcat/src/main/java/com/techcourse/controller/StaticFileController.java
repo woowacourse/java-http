@@ -5,11 +5,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.catalina.controller.FrontController;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public class StaticFileController extends FrontController {
+public class StaticFileController extends AbstractController {
 
     private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8 ";
 

@@ -1,7 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +32,14 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                DEFAULT_MAX_THREADS / 2,
+                DEFAULT_MAX_THREADS,
+                60, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_ACCEPT_COUNT),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
         this.stopped = false;
     }
 

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 class RequestLineTest {

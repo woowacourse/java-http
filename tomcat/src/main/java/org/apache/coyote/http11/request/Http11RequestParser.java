@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static java.net.URLDecoder.decode;
 
@@ -21,15 +21,15 @@ public class Http11RequestParser {
         final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
 
         // Header 파싱
-        final Headers headers = new Headers();
+        final RequestHeaders requestHeaders = new RequestHeaders();
         String headerLine;
         while (!(headerLine = bufferedReader.readLine()).isBlank()) {
-            headers.addHeader(headerLine);
+            requestHeaders.addHeader(headerLine);
         }
 
         // Request Body 파싱
-        final String contentType = headers.getHeader("Content-Type");
-        final String contentLengthStr = headers.getHeader("Content-Length");
+        final String contentType = requestHeaders.getHeader("Content-Type");
+        final String contentLengthStr = requestHeaders.getHeader("Content-Length");
         RequestBodyParams requestBodyParams = new RequestBodyParams();
         if ((contentLengthStr != null)
                 && (contentType != null)
@@ -42,6 +42,6 @@ public class Http11RequestParser {
             final String decodedBody = decode(body, StandardCharsets.UTF_8);
             requestBodyParams.parseRequestBodyParams(decodedBody);
         }
-        return new Http11Request(requestLine, headers, requestBodyParams);
+        return new Http11Request(requestLine, requestHeaders, requestBodyParams);
     }
 }

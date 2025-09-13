@@ -1,9 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cookies {
+public class RequestCookies {
 
     private final Map<String, String> cookies = new HashMap<>();
 

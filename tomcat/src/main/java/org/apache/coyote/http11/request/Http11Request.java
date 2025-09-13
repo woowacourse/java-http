@@ -1,21 +1,21 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class Http11Request {
 
     private final RequestLine requestLine;
-    private final Headers headers;
-    private final Cookies cookies;
+    private final RequestHeaders requestHeaders;
+    private final RequestCookies requestCookies;
     private final RequestBodyParams requestBodyParams;
 
     public Http11Request(
             final RequestLine requestLine,
-            final Headers headers,
+            final RequestHeaders requestHeaders,
             final RequestBodyParams requestBodyParams
     ) {
         this.requestLine = requestLine;
-        this.headers = headers;
-        this.cookies = new Cookies();
-        this.cookies.parseCookies(headers.getHeader("cookie"));
+        this.requestHeaders = requestHeaders;
+        this.requestCookies = new RequestCookies();
+        this.requestCookies.parseCookies(requestHeaders.getHeader("cookie"));
         this.requestBodyParams = requestBodyParams;
     }
 
@@ -36,7 +36,7 @@ public class Http11Request {
     }
 
     public String getHeader(String headerName) {
-        return headers.getHeader(headerName);
+        return requestHeaders.getHeader(headerName);
     }
 
     public String getBodyParam(String bodyParamName) {
@@ -44,6 +44,6 @@ public class Http11Request {
     }
 
     public String getCookie(String cookieName) {
-        return cookies.getCookie(cookieName);
+        return requestCookies.getCookie(cookieName);
     }
 }

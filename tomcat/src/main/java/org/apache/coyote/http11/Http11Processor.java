@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.Http11RequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

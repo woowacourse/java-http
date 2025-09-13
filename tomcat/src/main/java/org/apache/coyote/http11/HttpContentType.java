@@ -28,11 +28,6 @@ public enum HttpContentType {
                 .orElse(DEFAULT);
     }
 
-    public static boolean isStaticResource(final String path) {
-        return STATIC_RESOURCE_TYPES.stream()
-                .anyMatch(httpContentType -> path.endsWith(httpContentType.extension));
-    }
-
     public String getValue() {
         return value;
     }

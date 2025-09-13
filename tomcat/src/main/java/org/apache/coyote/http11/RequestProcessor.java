@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class RequestProcessor {
 
@@ -42,30 +41,15 @@ public class RequestProcessor {
         );
     }
 
-    public String process(final List<String> headers, final String body) {
-        final HttpRequest request = HttpRequestParser.parseHttpRequest(headers, body);
-
+    public String process(final HttpRequest request) {
         final Controller responsibleController = priority.stream()
                 .map(controllers::get)
-                .filter(controller -> controller.isResponsible(request.path()))
+                .filter(controller -> controller.isResponsible(request.requestLine().getUri()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청 경로: " + request.path()));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청 경로: " + request.requestLine().getUri()));
 
         final HttpResponse response = responsibleController.getResource(request);
 
-        return createResponseMessage(response);
-    }
-
-    private String createResponseMessage(final HttpResponse response) {
-        final Map<String, String> headers = response.headers();
-        final String header = headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.joining("\r\n"));
-
-        return String.join("\r\n",
-                response.protocol() + " " + response.statusCode() + " ",
-                header,
-                "",
-                response.body());
+        return response.toMessage();
     }
 }

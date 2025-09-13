@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.presentation.HttpRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,29 +35,33 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final List<String> headers = new ArrayList<>();
+            String line = bufferedReader.readLine();
+            if (line == null) {
+                return;
+            }
 
-            String line;
+            final RequestLine requestLine = new RequestLine(line);
+
+            final List<String> headers = new ArrayList<>();
             while (!"".equals(line = bufferedReader.readLine())) {
                 headers.add(line);
             }
 
-            int contentLength = 0;
-            for (String header : headers) {
-                if (header.toLowerCase().startsWith("content-length")) {
-                    contentLength = Integer.parseInt(header.split(":")[1].trim());
-                }
-            }
+            final HttpRequest requestForHeader = HttpRequest.builder().requestLine(requestLine).headers(headers)
+                    .build();
+            final int contentLength = requestForHeader.getContentLength();
 
             final char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             final String body = new String(buffer);
 
-            if (headers.getFirst() == null) {
-                return;
-            }
+            final HttpRequest request = HttpRequest.builder()
+                    .requestLine(requestLine)
+                    .headers(headers)
+                    .params(body)
+                    .build();
 
-            final var response = new RequestProcessor().process(headers, body);
+            final var response = new RequestProcessor().process(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

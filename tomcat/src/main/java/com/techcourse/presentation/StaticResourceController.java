@@ -64,31 +64,33 @@ public class StaticResourceController implements Controller {
 
     @Override
     public HttpResponse getResource(final HttpRequest request) {
-        if (!isResponsible(request.path())) {
+        final String uri = request.requestLine().getUri();
+
+        if (!isResponsible(uri)) {
             throw new IllegalArgumentException("요청 경로에 해당하는 자원이 없습니다.");
         }
 
-        if ("/".equals(request.path())) {
+        if ("/".equals(uri)) {
             final String body = "Hello world!";
 
             return HttpResponse.builder()
-                    .protocol(request.protocol())
-                    .statusCode("200 OK")
+                    .protocol(request.requestLine().getProtocol())
+                    .statusCode(getStatusCode(uri))
                     .contentType("text/html;charset=utf-8")
                     .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
                     .body(body)
                     .build();
         }
 
-        final Path filePath = RESOURCE_PATHS.get(request.path());
-        final String statusCode = getStatusCode(request.path());
+        final Path filePath = RESOURCE_PATHS.get(uri);
+        final String statusCode = getStatusCode(uri);
 
         try {
             final String contentType = Files.probeContentType(filePath);
             final String body = new String(Files.readAllBytes(filePath));
 
             return HttpResponse.builder()
-                    .protocol(request.protocol())
+                    .protocol(request.requestLine().getProtocol())
                     .statusCode(statusCode)
                     .contentType(contentType + ";charset=utf-8")
                     .contentLength(body.getBytes(StandardCharsets.UTF_8).length)

@@ -4,9 +4,11 @@ import com.techcourse.application.LoginService;
 import com.techcourse.model.User;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,7 @@ public class RegisterController implements Controller {
 
     public HttpResponse register(final String protocol) {
         return staticResourceController.getResource(
-                new HttpRequest("GET", BASE_URL + ".html", protocol, new HashMap<>(), new HashMap<>())
+                new HttpRequest(new RequestLine("GET", BASE_URL + ".html", new HashMap<>(), protocol), new LinkedHashMap<>(), new HashMap<>())
         );
     }
 
@@ -55,9 +57,9 @@ public class RegisterController implements Controller {
 
                 final String body = "회원가입이 완료되었습니다.";
                 return HttpResponse.builder()
-                        .protocol(request.protocol())
+                        .protocol(request.requestLine().getProtocol())
                         .seeOther()
-                        .header("Location", "http://localhost:8080/index.html")
+                        .location("http://localhost:8080/index.html")
                         .addCookie("JSESSIONID" + "=" + session.getId())
                         .contentType("text/html;charset=utf-8")
                         .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
@@ -68,7 +70,7 @@ public class RegisterController implements Controller {
             final String errorMessage = e.getMessage();
 
             return HttpResponse.builder()
-                    .protocol(request.protocol())
+                    .protocol(request.requestLine().getProtocol())
                     .badRequest()
                     .contentType("text/plain;charset=utf-8")
                     .contentLength(errorMessage.getBytes(StandardCharsets.UTF_8).length)
@@ -76,7 +78,7 @@ public class RegisterController implements Controller {
                     .build();
         }
 
-        return register(request.protocol());
+        return register(request.requestLine().getProtocol());
     }
 
     @Override
@@ -86,15 +88,15 @@ public class RegisterController implements Controller {
 
     @Override
     public HttpResponse getResource(final HttpRequest request) {
-        if (!BASE_URL.equals(request.path())) {
-            log.debug("요청 경로: {}", request.path());
+        if (!BASE_URL.equals(request.requestLine().getUri())) {
+            log.debug("요청 경로: {}", request.requestLine().getUri());
             throw new IllegalArgumentException("요청 경로와 일치하는 API가 존재하지 않습니다.");
         }
 
-        if ("GET".equals(request.method())) {
-            return register(request.protocol());
+        if ("GET".equals(request.requestLine().getMethod())) {
+            return register(request.requestLine().getProtocol());
         }
-        if ("POST".equals(request.method())) {
+        if ("POST".equals(request.requestLine().getMethod())) {
             return register(request);
         }
         throw new IllegalArgumentException("요청 경로에 일치하는 메서드가 없습니다.");

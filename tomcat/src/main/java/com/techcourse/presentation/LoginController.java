@@ -3,9 +3,11 @@ package com.techcourse.presentation;
 import com.techcourse.application.LoginService;
 import com.techcourse.model.User;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +31,13 @@ public class LoginController implements Controller {
         final Session session = request.getSession(false);
         if (session != null) {
             return HttpResponse.builder()
-                    .protocol(request.protocol())
+                    .protocol(request.requestLine().getProtocol())
                     .found()
-                    .header("Location", "http://localhost:8080/index.html")
+                    .location("http://localhost:8080/index.html")
                     .build();
         }
 
-        return staticResourceController.getResource(createStaticRequest("/login.html", request.protocol()));
+        return staticResourceController.getResource(createStaticRequest("/login.html", request.requestLine().getProtocol()));
     }
 
     public HttpResponse login(final HttpRequest request) {
@@ -57,17 +59,17 @@ public class LoginController implements Controller {
                 SessionManager.getInstance().add(session);
 
                 return HttpResponse.builder()
-                        .protocol(request.protocol())
+                        .protocol(request.requestLine().getProtocol())
                         .found()
-                        .addCookie("JSESSIONID" + "=" + session.getId())
-                        .header("Location", "http://localhost:8080/index.html")
+                        .location("http://localhost:8080/index.html")
+                        .addCookie("JSESSIONID=" + session.getId())
                         .build();
             }
         } catch (IllegalArgumentException e) {
-            return staticResourceController.getResource(createStaticRequest("/401.html", request.protocol()));
+            return staticResourceController.getResource(createStaticRequest("/401.html", request.requestLine().getProtocol()));
         }
 
-        return staticResourceController.getResource(createStaticRequest("/401.html", request.protocol()));
+        return staticResourceController.getResource(createStaticRequest("/401.html", request.requestLine().getProtocol()));
     }
 
     @Override
@@ -77,22 +79,21 @@ public class LoginController implements Controller {
 
     @Override
     public HttpResponse getResource(final HttpRequest request) {
-        if (!BASE_URL.equals(request.path())) {
-            log.debug("요청 경로: {}", request.path());
+        if (!BASE_URL.equals(request.requestLine().getUri())) {
+            log.debug("요청 경로: {}", request.requestLine().getUri());
             throw new IllegalArgumentException("요청 경로와 일치하는 API가 존재하지 않습니다.");
         }
 
-        if ("GET".equals(request.method())) {
+        if ("GET".equals(request.requestLine().getMethod())) {
             return renderLoginPage(request);
         }
-        if ("POST".equals(request.method())) {
+        if ("POST".equals(request.requestLine().getMethod())) {
             return login(request);
         }
         throw new IllegalArgumentException("요청 경로에 일치하는 메서드가 없습니다.");
     }
 
     private HttpRequest createStaticRequest(final String path, final String protocol) {
-        return new HttpRequest("GET", path, protocol, new HashMap<>(), new HashMap<>());
+        return new HttpRequest(new RequestLine("GET", path, new HashMap<>(), protocol), new LinkedHashMap<>(), new HashMap<>());
     }
-
 }

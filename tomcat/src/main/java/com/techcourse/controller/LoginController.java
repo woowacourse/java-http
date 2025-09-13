@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.catalina.ResourceResolver;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.cookie.HttpCookie;
 import org.apache.coyote.http.request.HttpRequest;
@@ -20,26 +21,21 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class); //로깅 클래스 변경
+
+    private final ResourceResolver resourceResolver = new ResourceResolver();
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws Exception {
+    protected HttpResponse doGet(final HttpRequest request) throws URISyntaxException, IOException {
         final Cookie cookie = request.getCookie();
         final Session session = SessionManager.find(cookie.getValue());
-        if (validateSession(session)) {
-            return HttpResponse.redirection("/index.html", TEXT_HTML_CHARSET_UTF_8);
-        }
 
-        final String url = request.getRequestLine().getUrl();
-        final URL resource = getClass().getClassLoader().getResource("static" + url + ".html");
-        validateNullResource(resource);
-        final String responseBody;
-        try {
-            responseBody = Files.readString(Paths.get(resource.toURI()));
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
+        final URL resource = resourceResolver.resolver(request.getRequestLine().getUrl());
+        final String responseBody = Files.readString(Paths.get(resource.toURI()));
+
+        if (validateSession(session)) {
+            return HttpResponse.redirection("index.html", TEXT_HTML_CHARSET_UTF_8);
         }
         return HttpResponse.ok(responseBody, TEXT_HTML_CHARSET_UTF_8);
     }
@@ -49,30 +45,22 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws Exception {
+    protected HttpResponse doPost(final HttpRequest request) throws URISyntaxException, IOException {
         final String account = request.getBody().get("account");
         final String password = request.getBody().get("password");
 
         final User user = getUserByAccount(account);
         if (isLoginFailed(user, password)) {
-            try {
-                final URL resource = getClass().getClassLoader().getResource("static" + "/401" + ".html");
-                validateNullResource(resource);
-                final String responseBody = Files.readString(Paths.get(resource.toURI()));
-                return HttpResponse.unAuthentication(responseBody, TEXT_HTML_CHARSET_UTF_8);
-            } catch (IOException | URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
+            final URL resource = resourceResolver.resolver(request.getRequestLine().getUrl());
+            final String responseBody = Files.readString(Paths.get(resource.toURI()));
+
+            return HttpResponse.unAuthentication(responseBody, TEXT_HTML_CHARSET_UTF_8);
         }
 
         log.info("user: {}", user);
-        final String url = request.getRequestLine().getUrl();
-        final URL resource = getClass().getClassLoader().getResource("static" + url + ".html");
-        validateNullResource(resource);
         final Cookie newCookie = HttpCookie.createCookie();
-        Session session = new Session(newCookie.getValue());
+        final Session session = new Session(newCookie.getValue());
         session.setAttribute("user", user);
-
         SessionManager.add(session);
         return HttpResponse.redirectionWithCookie("/index.html", TEXT_HTML_CHARSET_UTF_8, newCookie);
     }
@@ -89,11 +77,4 @@ public class LoginController extends AbstractController {
     private boolean isNotMatchPassword(final User user, final String password) {
         return !user.checkPassword(password);
     }
-
-    private void validateNullResource(final URL resource) {
-        if (resource == null) {
-            throw new IllegalArgumentException("존재하지 않는 resource 입니다.");
-        }
-    }
-
 }

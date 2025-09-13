@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.catalina.ResourceResolver;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestLine;
@@ -28,8 +29,8 @@ public class RequestHandler {
             final Controller controller = controllers.get(url);
 
             if (controller == null) {
-                final URL resource = getClass().getClassLoader().getResource("static" + url);
-                validateNullResource(resource);
+                ResourceResolver resourceResolver = new ResourceResolver();
+                URL resource = resourceResolver.resolver(url);
                 final String responseBody = Files.readString(Paths.get(resource.toURI()));
                 return HttpResponse.ok(responseBody, TEXT_HTML_CHARSET_UTF_8);
             }
@@ -37,12 +38,6 @@ public class RequestHandler {
             return controller.service(httpRequest);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private void validateNullResource(final URL resource) {
-        if (resource == null) {
-            throw new IllegalArgumentException("존재하지 않는 resource 입니다.");
         }
     }
 }

@@ -9,7 +9,7 @@ public class HomeController extends AbstractController {
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest request) {
         return HttpResponse.ok("Hello world!", TEXT_HTML_CHARSET_UTF_8);
     }
 }

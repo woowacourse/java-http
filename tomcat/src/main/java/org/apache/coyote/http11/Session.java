@@ -17,24 +17,7 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
-    }
-
     public void setAttribute(final String name, final Object value) {
         values.put(name, value);
-    }
-
-    public void removeAttribute(final String name) {
-        values.remove(name);
-    }
-
-    public boolean isSessionUserEqual(Object user) {
-        Object sessionUser = values.get("user");
-        return sessionUser.equals(user);
-    }
-
-    public void invalidate() {
-        
     }
 }

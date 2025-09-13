@@ -13,10 +13,6 @@ public class CookieSessionAuthenticator {
         this.sessionManager = sessionManager;
     }
 
-    public boolean containsCookie() {
-        return httpRequest.containsCookie();
-    }
-
     public void validateUserCookie() throws IOException {
         String cookie = httpRequest.getCookie();
 

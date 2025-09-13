@@ -19,12 +19,4 @@ public enum MethodType {
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] invalid method type"));
     }
-
-    public static boolean isGetMethod(String method) {
-        return GET.type.equals(method);
-    }
-
-    public static boolean isPostMethod(String method) {
-        return POST.type.equals(method);
-    }
 }

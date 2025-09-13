@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.controller;
 
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.UUID;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Session;

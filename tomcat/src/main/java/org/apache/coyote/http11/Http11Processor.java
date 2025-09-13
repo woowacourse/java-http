@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
         handlers.stream()
                 .filter(handler -> handler.canHandle(request))
                 .findFirst()
-                .orElseGet(() -> new NotFoundHandler())  // 처리 가능한 핸들러 없으면 404
+                .orElseGet(() -> new NotFoundHandler())
                 .handle(request, response);
     }
 

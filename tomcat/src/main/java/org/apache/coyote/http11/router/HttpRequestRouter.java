@@ -22,11 +22,13 @@ public class HttpRequestRouter {
         requestMapping.registerMapping("/login", new LoginController());
     }
 
-    public void route(final HttpRequest request, final HttpResponse response) throws IOException {
+    public boolean route(final HttpRequest request, final HttpResponse response) throws IOException {
         final Controller controller = requestMapping.getController(request.getPath());
 
         if (controller != null) {
             controller.service(request, response);
+            return true;
         }
+        return false;
     }
 }

@@ -50,21 +50,29 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequestRouter router = new HttpRequestRouter(new RequestMapping());
             router.initialize();
-            router.route(request, response);
+            boolean routed = router.route(request, response);
 
-            for (Handler handler : handlers) {
-                if (handler.canHandle(request)) {
-                    handler.handle(request, response);
-                    break;
-                }
+            if (!routed) {
+                handleWithHandlers(request, response);
             }
 
-            outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-
+            sendResponse(response, outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handleWithHandlers(HttpRequest request, HttpResponse response) throws IOException {
+        handlers.stream()
+                .filter(handler -> handler.canHandle(request))
+                .findFirst()
+                .orElseGet(() -> new NotFoundHandler())  // 처리 가능한 핸들러 없으면 404
+                .handle(request, response);
+    }
+
+    private void sendResponse(HttpResponse response, OutputStream outputStream) throws IOException {
+        outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

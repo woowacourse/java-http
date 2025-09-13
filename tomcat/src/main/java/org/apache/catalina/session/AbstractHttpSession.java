@@ -6,22 +6,26 @@ import jakarta.servlet.http.HttpSessionContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class AbstractHttpSession implements HttpSession {
 
+    private static final long MILLIS_PER_SECOND = 1000L;
+
     protected final String id;
     protected final long creationTime;
-    protected long lastAccessedTime;
+    protected AtomicLong lastAccessedTime;
     protected int maxInactiveInterval;
-    protected boolean isNew = true;
-    protected boolean valid = true;
+    protected final AtomicBoolean isNew = new AtomicBoolean(true);
+    protected final AtomicBoolean valid = new AtomicBoolean(true);
 
     protected final ServletContext servletContext;
 
     protected AbstractHttpSession(ServletContext servletContext) {
         this.id = UUID.randomUUID().toString();
         this.creationTime = System.currentTimeMillis();
-        this.lastAccessedTime = this.creationTime;
+        this.lastAccessedTime = new AtomicLong(this.creationTime);
         this.servletContext = servletContext;
     }
 
@@ -41,15 +45,15 @@ public abstract class AbstractHttpSession implements HttpSession {
      * 마지막 요청 시각 반환
      */
     @Override
-    public long getLastAccessedTime() { checkValid(); return lastAccessedTime; }
+    public long getLastAccessedTime() { checkValid(); return lastAccessedTime.get(); }
 
     /**
      * 세션에 접근(access)했음을 기록하는 메서드.
      * why? 세션 만료 처리 기준이 lastAccessedTime 기반이므로, 요청이 들어올 때마다 이 값을 갱신해야 세션 유지가 가능
      */
     public void access() {
-        this.lastAccessedTime = System.currentTimeMillis();
-        this.isNew = false;
+        lastAccessedTime.set(System.currentTimeMillis());
+        isNew.set(false);
     }
 
     /**
@@ -75,23 +79,27 @@ public abstract class AbstractHttpSession implements HttpSession {
      * 세션 강제로 무효화
      */
     @Override
-    public void invalidate() { valid = false; }
+    public void invalidate() { valid.set(false); }
 
     /**
      * 세션이 새로 생성된 것인지 여부
      */
     @Override
-    public boolean isNew() { checkValid(); return isNew; }
+    public boolean isNew() { checkValid(); return isNew.get(); }
 
     public void checkValid() {
-        if (!valid) {
-            throw new IllegalStateException("Session is invalidated");
+        if (!valid.get() || isExpired()) {
+            throw new IllegalStateException("세션이 이미 만료되었거나 무효화되었습니다.");
         }
     }
 
     public boolean isExpired() {
-        if (maxInactiveInterval <= 0) return false;
-        return (System.currentTimeMillis() - lastAccessedTime) > (maxInactiveInterval * 1000L);
+        if (maxInactiveInterval <= 0) {
+            return false;
+        }
+        long inactiveDuration = System.currentTimeMillis() - lastAccessedTime.get();
+        long maxInactiveMillis = maxInactiveInterval * MILLIS_PER_SECOND;
+        return inactiveDuration > maxInactiveMillis;
     }
 
     @Deprecated

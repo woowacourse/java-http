@@ -5,16 +5,19 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpSessionImpl extends AbstractHttpSession {
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+    private final AtomicBoolean invalidated = new AtomicBoolean(false);
 
     public HttpSessionImpl(ServletContext servletContext) {
         super(servletContext);
     }
 
-    @Override    public Object getAttribute(String name) {
+    @Override
+    public Object getAttribute(String name) {
         checkValid();
         return attributes.get(name);
     }
@@ -42,5 +45,11 @@ public class HttpSessionImpl extends AbstractHttpSession {
     public void removeAttribute(String name) {
         checkValid();
         attributes.remove(name);
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        attributes.clear();
     }
 }

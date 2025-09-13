@@ -1,15 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.session;
 
 import com.techcourse.exception.ErrorMessage;
 import com.techcourse.model.User;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String id;
 
-    private final Map<String, Object> session = new HashMap<>();
+    private final Map<String, Object> session = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;

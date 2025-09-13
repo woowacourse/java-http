@@ -3,6 +3,8 @@ package org.apache.catalina.controller;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
+import java.nio.charset.StandardCharsets;
+
 public abstract class AbstractController implements Controller {
 
     @Override
@@ -19,7 +21,7 @@ public abstract class AbstractController implements Controller {
                 .protocol(request.getProtocol())
                 .status(405, "Method Not Allowed")
                 .contentType("text/plain;charset=utf-8")
-                .body("Method Not Allowed".getBytes())
+                .body("Method Not Allowed".getBytes(StandardCharsets.UTF_8))
                 .build();
     }
 
@@ -28,7 +30,7 @@ public abstract class AbstractController implements Controller {
                 .protocol(request.getProtocol())
                 .status(405, "Method Not Allowed")
                 .contentType("text/plain;charset=utf-8")
-                .body("Method Not Allowed".getBytes())
+                .body("Method Not Allowed".getBytes(StandardCharsets.UTF_8))
                 .build();
     }
 
@@ -37,7 +39,7 @@ public abstract class AbstractController implements Controller {
                 .protocol(request.getProtocol())
                 .status(405, "Method Not Allowed")
                 .contentType("text/plain;charset=utf-8")
-                .body("Method Not Allowed".getBytes())
+                .body("Method Not Allowed".getBytes(StandardCharsets.UTF_8))
                 .build();
     }
 }

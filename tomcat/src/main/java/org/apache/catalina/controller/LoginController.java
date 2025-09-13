@@ -43,7 +43,9 @@ public class LoginController extends AbstractController {
                 .ifPresentOrElse(
                         user -> {
                             loginUser(request, response, user);
-                            log.info("user: %s", user);
+                            log.info(
+                                    String.format("user: %s", user)
+                            );
                         },
                         () -> redirect(request, response, "/401.html")
                 );

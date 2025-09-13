@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpMethod;
+
 public class Http11Request {
 
     private final RequestLine requestLine;
@@ -19,7 +21,7 @@ public class Http11Request {
         this.requestBodyParams = requestBodyParams;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 

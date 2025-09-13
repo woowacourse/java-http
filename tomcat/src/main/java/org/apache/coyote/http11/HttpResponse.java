@@ -1,9 +1,6 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Mime.HTML;
-
 import org.apache.catalina.storage.Cookie;
-import org.apache.coyote.http11.util.FileReader;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,30 +29,6 @@ public class HttpResponse {
 
     public static HttpResponse empty() {
         return new HttpResponse(DEFAULT_VERSION, null, new HashMap<>(), "");
-    }
-
-    // 2XX
-    public static HttpResponse ok(String body) {
-        return new HttpResponse(DEFAULT_VERSION, HttpStatus.OK, new HashMap<>(), body);
-    }
-
-    // 4XX
-    public static HttpResponse unauthorized() throws IOException {
-        final var response = new HttpResponse(DEFAULT_VERSION, HttpStatus.UNAUTHORIZED, new HashMap<>(), FileReader.readByName("401.html"));
-        response.setContentType(HTML.getType());
-        return response;
-    }
-    public static HttpResponse notFound() throws IOException {
-        final var response = new HttpResponse(DEFAULT_VERSION, HttpStatus.UNAUTHORIZED, new HashMap<>(), FileReader.readByName("404.html"));
-        response.setContentType(HTML.getType());
-        return response;
-    }
-
-    // 5XX
-    public static HttpResponse internalServerError() throws IOException {
-        final var response = new HttpResponse(DEFAULT_VERSION, HttpStatus.UNAUTHORIZED, new HashMap<>(), FileReader.readByName("500.html"));
-        response.setContentType(HTML.getType());
-        return response;
     }
 
     public void send(OutputStream outputStream) throws IOException {
@@ -89,19 +62,19 @@ public class HttpResponse {
         headers.put(name, String.valueOf(value));
     }
 
-    public int getStatusCode() {
-        return status.value();
+    public String join() {
+        return String.join("\r\n",
+                getStatusLine(),
+                getHeaderString(),
+                getBody()
+        );
     }
 
-    public String getStatusReason() {
-        return status.reason();
+    private String getStatusLine() {
+        return String.format("%s %d %s ", version, status.value(), status.message());
     }
 
-    public String getStatusLine() {
-        return String.format("%s %d %s ", version, getStatusCode(), getStatusReason());
-    }
-
-    public String getHeaderString() {
+    private String getHeaderString() {
         if (headers.isEmpty()) {
             return "\r\n";
         }
@@ -113,15 +86,7 @@ public class HttpResponse {
         return result.toString();
     }
 
-    public String getBody() {
+    private String getBody() {
         return body;
-    }
-
-    public String join() {
-        return String.join("\r\n",
-                getStatusLine(),
-                getHeaderString(),
-                getBody()
-        );
     }
 }

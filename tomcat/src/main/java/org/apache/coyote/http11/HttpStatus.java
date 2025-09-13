@@ -89,19 +89,19 @@ public enum HttpStatus {
     }
 
     private final int code;
-    private final String reason;
+    private final String message;
 
-    HttpStatus(int code, String reason) {
+    HttpStatus(int code, String message) {
         this.code = code;
-        this.reason = reason;
+        this.message = message;
     }
 
     public int value() {
         return code;
     }
 
-    public String reason() {
-        return reason;
+    public String message() {
+        return message;
     }
 
     public Series series() {
@@ -137,7 +137,7 @@ public enum HttpStatus {
 
     @Override
     public String toString() {
-        return code + " " + reason;
+        return code + " " + message;
     }
 
     public enum Series {

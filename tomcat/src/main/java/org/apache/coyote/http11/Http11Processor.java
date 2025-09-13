@@ -1,15 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +14,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Session session;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection, final Session session) {
         this.connection = connection;
-        this.session = session;
+        this.requestMapping = new RequestMapping(session);
     }
 
     @Override
@@ -46,135 +41,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processRequest(HttpRequest request, HttpResponse response) throws IOException {
-        if ("/login".equals(request.getPath())) {
-            handleLoginRequest(request, response);
-            return;
-        }
-
-        if ("/register".equals(request.getPath())) {
-            if ("GET".equalsIgnoreCase(request.getMethod())) {
-                handleStaticFileRequest("/register.html", response);
-                return;
-            }
-            handleRegisterRequest(request, response);
-            return;
-        }
-
-        handleStaticFileRequest(request.getPath(), response);
-    }
-
-    private void handleLoginRequest(HttpRequest request, HttpResponse response) throws IOException {
-        if (request.hasCookies()) {
-            User user = (User) session.getStore(request.getCookie().getValue());
-
-            log.info(user.toString());
-            response.sendRedirect("/index");
-            return;
-        }
-
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            handleStaticFileRequest("/login.html", response);
-            return;
-        }
-
-        if (!request.isParams()) {
-            response.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        String account = request.getParams().get("account");
-        String password = request.getParams().get("password");
-
-        if (account == null || password == null) {
-            response.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isEmpty()) {
-            response.sendError(HttpStatus.UNAUTHORIZED);
-            return;
-        }
-
-        User user = optionalUser.get();
-        if (!user.checkPassword(password)) {
-            response.sendError(HttpStatus.UNAUTHORIZED);
-            return;
-        }
-
-        log.info(user.toString());
-
-        HttpCookie cookie = HttpCookie.createSessionId();
-        session.addStore(cookie.getValue(), user);
-
-        response.addCookie(cookie);
-        response.sendRedirect("/index");
-    }
-
-    private void handleRegisterRequest(HttpRequest request, HttpResponse response) throws IOException {
-        if (!request.isParams()) {
-            response.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        String account = request.getParams().get("account");
-        String password = request.getParams().get("password");
-        String email = request.getParams().get("email");
-
-        if (account == null || password == null || email == null) {
-            response.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            response.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        User user = new User(InMemoryUserRepository.generateId(), account, password, email);
-        InMemoryUserRepository.save(user);
-
-        response.sendRedirect("/index");
-    }
-
-    private void handleStaticFileRequest(String path, HttpResponse response) throws IOException {
-        if (checkStaticFile(path, response)) {
-            return;
-        }
-        response.sendError(HttpStatus.NOT_FOUND);
-    }
-
-    private boolean checkStaticFile(String path, HttpResponse response) throws IOException {
-        if (path.equals("/")) {
-            path = "/index.html";
-        }
-
-        InputStream in = getClass().getClassLoader().getResourceAsStream("static" + path);
-        if (in == null && !path.contains(".")) {
-            in = getClass().getClassLoader().getResourceAsStream("static" + path + ".html");
-        }
-
-        if (in == null) {
-            return false;
-        }
-
-        serveStaticFile(response, in, path);
-        return true;
-    }
-
-    private void serveStaticFile(HttpResponse response, InputStream inputStream, String path) throws IOException {
-        try (inputStream) {
-            String ext = "";
-            if (path.contains(".")) {
-                ext = path.substring(path.lastIndexOf(".") + 1);
-            }
-
-            String contentType = MimeTypeResolver.resolve(ext);
-            byte[] body = inputStream.readAllBytes();
-
-            response.send(HttpStatus.OK, contentType, body);
-        }
+    private void processRequest(HttpRequest request, HttpResponse response) throws Exception {
+        Controller controller = requestMapping.getController(request.getPath());
+        controller.service(request, response);
     }
 
     private void handleError(Exception e) {

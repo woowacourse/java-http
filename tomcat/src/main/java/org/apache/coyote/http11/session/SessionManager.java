@@ -1,4 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
+
+import org.apache.coyote.http11.model.Cookie;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,10 +22,6 @@ public class SessionManager {
 
     public static Optional<Session> findSession(String id) {
         return Optional.ofNullable(sessions.get(id));
-    }
-
-    public static void removeSession(String id) {
-        sessions.remove(id);
     }
 
     public static Session resolveSession(final HttpRequest httpRequest, final HttpResponse httpResponse) {

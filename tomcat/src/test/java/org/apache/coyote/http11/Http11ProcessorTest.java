@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.processor.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

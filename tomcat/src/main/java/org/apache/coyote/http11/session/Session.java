@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,9 +22,5 @@ public class Session {
 
     public Object getAttribute(String name) {
         return attributes.get(name);
-    }
-
-    public void removeAttribute(String name) {
-        attributes.remove(name);
     }
 }

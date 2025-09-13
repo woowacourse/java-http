@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Session;
 import org.slf4j.Logger;
@@ -15,18 +17,21 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 200;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private final Session session;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, new Session());
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, new Session(), DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount, Session session) {
+    public Connector(final int port, final int acceptCount, final Session session, final int maxThreads) {
         this.session = session;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -68,12 +73,13 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, session);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            executorService.shutdown();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

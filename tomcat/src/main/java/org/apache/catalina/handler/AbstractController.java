@@ -21,7 +21,8 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        response.setRedirectResponse("/405.html");
+        response.redirect("/405.html")
+                .build();
     }
 
     protected byte[] readFile(final String location) throws IOException {

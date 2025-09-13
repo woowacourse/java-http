@@ -18,12 +18,16 @@ public class StaticHandler extends AbstractController {
         final byte[] fileContent = readFileOrWelcome(path);
         final String contentType = HttpContentType.fromExtension(path).getValue();
 
-        response.setResponse(HttpStatus.OK, fileContent, contentType);
+        response.status(HttpStatus.OK)
+                .contentType(contentType)
+                .body(fileContent)
+                .build();
     }
 
     @Override
     void doPost(final Http11Request request, final Http11Response response) throws Exception {
-        response.setRedirectResponse("/405.html");
+        response.redirect("/405.html")
+                .build();
     }
 
     private byte[] readFileOrWelcome(final String location) throws IOException {

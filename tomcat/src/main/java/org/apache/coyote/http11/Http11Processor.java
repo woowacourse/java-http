@@ -74,16 +74,20 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(request, response);
         } catch (final IllegalArgumentException e) {
             log.warn("bad request : {}", e.getMessage());
-            response.setRedirectResponse("/400.html");
+            response.redirect("/400.html")
+                    .build();
         } catch (final ServletException e) {
             log.warn("unauthorized : {}", e.getMessage());
-            response.setRedirectResponse("/401.html");
+            response.redirect("/401.html")
+                    .build();
         } catch (final NoSuchFileException e) {
             log.warn("not found : {}", e.getFile());
-            response.setRedirectResponse("/404.html");
+            response.redirect("/404.html")
+                    .build();
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            response.setRedirectResponse("/500.html");
+            response.redirect("/500.html")
+                    .build();
         }
     }
 
@@ -96,7 +100,10 @@ public class Http11Processor implements Runnable, Processor {
         if (requestTarget.endsWith("/register")) {
             return new RegisterHandler();
         }
-        return new StaticHandler();
+        if (HttpContentType.isStaticResource(requestTarget) || requestTarget.equals("/")) {
+            return new StaticHandler();
+        }
+        throw new NoSuchFileException(requestTarget);
     }
 
     private List<String> getHeaderLines(final BufferedReader bufferedReader) throws IOException {

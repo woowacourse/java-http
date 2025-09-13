@@ -16,7 +16,10 @@ public class RegisterHandler extends AbstractController {
     void doGet(final Http11Request request, final Http11Response response) throws Exception {
         final byte[] fileContent = readFile("/register.html");
 
-        response.setResponse(HttpStatus.OK, fileContent, HttpContentType.HTML.getValue());
+        response.status(HttpStatus.OK)
+                .contentType(HttpContentType.HTML.getValue())
+                .body(fileContent)
+                .build();
     }
 
     @Override
@@ -34,10 +37,9 @@ public class RegisterHandler extends AbstractController {
 
         final Session session = createSession(user);
 
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()));
-
-        response.setRedirectResponse("/index.html", headers);
+        response.redirect("/index.html")
+                .cookie(String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()))
+                .build();
     }
 
     private static void validateExistingSession(final String account) {

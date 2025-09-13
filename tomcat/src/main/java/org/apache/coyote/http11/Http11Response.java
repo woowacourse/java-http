@@ -9,58 +9,56 @@ import java.util.Map;
 public class Http11Response {
 
     private static final String HTTP11_VERSION = "HTTP/1.1";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String LOCATION = "Location";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String COOKIE_HEADER = "Set-Cookie";
+    private static final String LOCATION_HEADER = "Location";
 
-    private String protocolVersion;
+    private final String protocolVersion;
     private int statusCode;
     private String statusMessage;
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
     private String body;
 
     public Http11Response() {
-        this(null, 0, null, null, null);
+        this(HTTP11_VERSION, HttpStatus.OK.getCode(), HttpStatus.OK.name(), new LinkedHashMap<>(), "");
     }
 
-    public void setResponse(
-            final HttpStatus httpStatus,
-            final byte[] body,
-            final String contentType
-    ) {
-        final LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put(CONTENT_TYPE, contentType);
-        headers.put(CONTENT_LENGTH, String.valueOf(body.length));
-
-        this.protocolVersion = HTTP11_VERSION;
+    public Http11Response status(final HttpStatus httpStatus) {
         this.statusCode = httpStatus.getCode();
         this.statusMessage = httpStatus.name();
-        this.headers = headers;
+
+        return this;
+    }
+
+    public Http11Response contentType(final String value) {
+        this.headers.put(CONTENT_TYPE_HEADER, value);
+
+        return this;
+    }
+
+    public Http11Response cookie(final String value) {
+        this.headers.put(COOKIE_HEADER, value);
+
+        return this;
+    }
+
+    public Http11Response redirect(final String location) {
+        this.statusCode = HttpStatus.FOUND.getCode();
+        this.statusMessage = HttpStatus.FOUND.name();
+        this.headers.put(LOCATION_HEADER, location);
+
+        return this;
+    }
+
+    public Http11Response body(final byte[] body) {
         this.body = new String(body, StandardCharsets.UTF_8);
+
+        return this;
     }
 
-    public void setRedirectResponse(final String redirectTarget) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(LOCATION, redirectTarget);
-        headers.put(CONTENT_LENGTH, "0");
-
-        this.protocolVersion = HTTP11_VERSION;
-        this.statusCode = HttpStatus.FOUND.getCode();
-        this.statusMessage = HttpStatus.FOUND.name();
-        this.headers = headers;
-    }
-
-    public void setRedirectResponse(
-            final String redirectTarget,
-            final Map<String, String> headers
-    ) {
-        headers.put(LOCATION, redirectTarget);
-        headers.put(CONTENT_LENGTH, "0");
-
-        this.protocolVersion = HTTP11_VERSION;
-        this.statusCode = HttpStatus.FOUND.getCode();
-        this.statusMessage = HttpStatus.FOUND.name();
-        this.headers = headers;
+    public void build() {
+        this.headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.length()));
     }
 
     public byte[] toMessage() {

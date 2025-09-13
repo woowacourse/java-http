@@ -8,14 +8,12 @@ import org.apache.coyote.http11.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class LoginHandler extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -25,16 +23,20 @@ public class LoginHandler extends AbstractController {
 
         if (sessionId.isPresent()) {
             final Session session = sessionManager.findSession(sessionId.get());
-            if (session == null) {
+
+            if (session != null) {
+                response.redirect("/index.html")
+                        .build();
                 return;
             }
-            response.setRedirectResponse("/index.html");
-            return;
         }
 
         final byte[] fileContent = readFile("/login.html");
 
-        response.setResponse(HttpStatus.OK, fileContent, HTML_CONTENT_TYPE);
+        response.status(HttpStatus.OK)
+                .contentType(HttpContentType.HTML.getValue())
+                .body(fileContent)
+                .build();
     }
 
     @Override
@@ -47,10 +49,9 @@ public class LoginHandler extends AbstractController {
         final User user = findUser(account, password);
         final Session session = createSession(user);
 
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Set-Cookie", String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()));
-
-        response.setRedirectResponse("/index.html", headers);
+        response.redirect("/index.html")
+                .cookie(String.format("JSESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", session.getId()))
+                .build();
     }
 
     private User findUser(final String account, final String password) throws ServletException {

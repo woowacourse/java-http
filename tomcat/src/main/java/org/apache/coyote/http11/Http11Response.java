@@ -9,106 +9,56 @@ import java.util.Map;
 public class Http11Response {
 
     private static final String HTTP11_VERSION = "HTTP/1.1";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String LOCATION = "Location";
-    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
-    private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
-    private static final String JS_CONTENT_TYPE = "application/javascript;charset=utf-8";
-    private static final String SVG_CONTENT_TYPE = "image/svg+xml;charset=utf-8";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String COOKIE_HEADER = "Set-Cookie";
+    private static final String LOCATION_HEADER = "Location";
 
-    private final String httpVersion;
-    private final int httpStatusCode;
-    private final String httpStatusMessage;
+    private final String protocolVersion;
+    private int statusCode;
+    private String statusMessage;
     private final Map<String, String> headers;
-    private final String body;
+    private byte[] body;
 
-    public static Http11Response createHtmlResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                HTML_CONTENT_TYPE,
-                body
-        );
+    public Http11Response() {
+        this(HTTP11_VERSION, HttpStatus.OK.getCode(), HttpStatus.OK.name(), new LinkedHashMap<>(), new byte[0]);
     }
 
-    public static Http11Response createCssResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                CSS_CONTENT_TYPE,
-                body
-        );
+    public Http11Response status(final HttpStatus httpStatus) {
+        this.statusCode = httpStatus.getCode();
+        this.statusMessage = httpStatus.name();
+
+        return this;
     }
 
-    public static Http11Response createJsResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                JS_CONTENT_TYPE,
-                body
-        );
+    public Http11Response contentType(final String value) {
+        this.headers.put(CONTENT_TYPE_HEADER, value);
+
+        return this;
     }
 
-    public static Http11Response createSvgResponse(final HttpStatus httpStatus, final byte[] body) {
-        return new Http11Response(
-                HTTP11_VERSION,
-                httpStatus,
-                new LinkedHashMap<>(),
-                SVG_CONTENT_TYPE,
-                body
-        );
+    public Http11Response cookie(final String value) {
+        this.headers.put(COOKIE_HEADER, value);
+
+        return this;
     }
 
-    public static Http11Response createRedirectResponse(final String redirectTarget) {
-        return createRedirectResponse(redirectTarget, new LinkedHashMap<>());
+    public Http11Response redirect(final String location) {
+        this.statusCode = HttpStatus.FOUND.getCode();
+        this.statusMessage = HttpStatus.FOUND.name();
+        this.headers.put(LOCATION_HEADER, location);
+
+        return this;
     }
 
-    public static Http11Response createRedirectResponse(final String redirectTarget, final Map<String, String> headers) {
-        headers.put(LOCATION, redirectTarget);
-
-        return new Http11Response(
-                HTTP11_VERSION,
-                HttpStatus.FOUND,
-                headers,
-                HTML_CONTENT_TYPE,
-                new byte[0]
-        );
-    }
-
-    private Http11Response(
-            final String httpVersion,
-            final HttpStatus httpStatus,
-            final Map<String, String> headers,
-            final String contentType,
-            final byte[] body
-    ) {
-        this(
-                httpVersion,
-                httpStatus.getCode(),
-                httpStatus.name(),
-                headers,
-                new String(body, StandardCharsets.UTF_8)
-        );
-        headers.put(CONTENT_TYPE, contentType);
-        headers.put(CONTENT_LENGTH, String.valueOf(body.length));
-    }
-
-    private Http11Response(
-            final String httpVersion,
-            final int httpStatusCode,
-            final String httpStatusMessage,
-            final Map<String, String> headers,
-            final String body
-    ) {
-        this.httpVersion = httpVersion;
-        this.httpStatusCode = httpStatusCode;
-        this.httpStatusMessage = httpStatusMessage;
-        this.headers = headers;
+    public Http11Response body(final byte[] body) {
         this.body = body;
+
+        return this;
+    }
+
+    public void build() {
+        this.headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.length));
     }
 
     public byte[] toMessage() {
@@ -125,16 +75,30 @@ public class Http11Response {
 
         if (body == null) {
             return String.join("\r\n",
-                    String.format("%s %s %s ", httpVersion, httpStatusCode, httpStatusMessage),
+                    String.format("%s %s %s ", protocolVersion, statusCode, statusMessage),
                     headerString,
                     ""
             );
         }
         return String.join("\r\n",
-                String.format("%s %s %s ", httpVersion, httpStatusCode, httpStatusMessage),
+                String.format("%s %s %s ", protocolVersion, statusCode, statusMessage),
                 headerString,
                 "",
-                body
+                new String(body, StandardCharsets.UTF_8)
         );
+    }
+
+    private Http11Response(
+            final String protocolVersion,
+            final int statusCode,
+            final String statusMessage,
+            final Map<String, String> headers,
+            final byte[] body
+    ) {
+        this.protocolVersion = protocolVersion;
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.headers = headers;
+        this.body = body;
     }
 }

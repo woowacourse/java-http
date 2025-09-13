@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.catalina.ResourceResolver;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.cookie.HttpCookie;
@@ -28,20 +29,27 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws URISyntaxException, IOException {
-        final Cookie cookie = request.getCookie();
-        final Session session = SessionManager.find(cookie.getValue());
+        final Optional<Cookie> cookie = request.getCookieByHeaders();
+        if (cookie.isEmpty()) {
+            return renderLoginPage(request);
+        }
 
-        final URL resource = resourceResolver.resolver(request.getRequestLine().getUrl());
-        final String responseBody = Files.readString(Paths.get(resource.toURI()));
-
+        final Session session = SessionManager.find(cookie.get().getValue());
         if (validateSession(session)) {
             return HttpResponse.redirection("index.html", TEXT_HTML_CHARSET_UTF_8);
         }
-        return HttpResponse.ok(responseBody, TEXT_HTML_CHARSET_UTF_8);
+
+        return renderLoginPage(request);
     }
 
     private boolean validateSession(final Session session) {
-        return session != null && session.getAttribute("user") != null;
+        return session != null && session.isValid("user");
+    }
+
+    private HttpResponse renderLoginPage(final HttpRequest request) throws IOException, URISyntaxException {
+        final URL resource = resourceResolver.resolver(request.getRequestLine().getUrl());
+        final String responseBody = Files.readString(Paths.get(resource.toURI()));
+        return HttpResponse.ok(responseBody, TEXT_HTML_CHARSET_UTF_8);
     }
 
     @Override
@@ -54,7 +62,7 @@ public class LoginController extends AbstractController {
             final URL resource = resourceResolver.resolver(request.getRequestLine().getUrl());
             final String responseBody = Files.readString(Paths.get(resource.toURI()));
 
-            return HttpResponse.unAuthentication(responseBody, TEXT_HTML_CHARSET_UTF_8);
+            return HttpResponse.unAuthentication(responseBody, TEXT_HTML_CHARSET_UTF_8); //리다이렉트
         }
 
         log.info("user: {}", user);

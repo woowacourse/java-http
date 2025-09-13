@@ -24,4 +24,7 @@ public class Session {
         return values.get(attributeName);
     }
 
+    public boolean isValid(final String attribute) {
+        return getAttribute(attribute) != null;
+    }
 }

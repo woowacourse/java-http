@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class RequestParser {
 
@@ -27,13 +28,13 @@ public final class RequestParser {
         return headers;
     }
 
-    public static Cookie parseCookie(final Map<String, String> headers) {
+    public static Optional<Cookie> parseCookie(final Map<String, String> headers) {
         if (!headers.containsKey("Cookie")) {
-            return new Cookie("emptyCookie", "");
+            return Optional.empty();
         }
         final String cookie = headers.get("Cookie");
         final String[] cookieParts = cookie.split("=");
-        return new Cookie(cookieParts[0].trim(), cookieParts[1].trim());
+        return Optional.of(new Cookie(cookieParts[0].trim(), cookieParts[1].trim()));
     }
 
     public static Map<String, String> parseBody(final Map<String, String> headers, final BufferedReader bufferedReader)

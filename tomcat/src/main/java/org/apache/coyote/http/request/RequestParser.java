@@ -36,18 +36,25 @@ public final class RequestParser {
         return new Cookie(cookieParts[0].trim(), cookieParts[1].trim());
     }
 
-    public static String parseBody(final Map<String, String> headers, final BufferedReader bufferedReader)
+    public static Map<String, String> parseBody(final Map<String, String> headers, final BufferedReader bufferedReader)
             throws IOException {
         if (!headers.containsKey("Content-Length")) {
-            return "";
+            return Map.copyOf(Map.of());
         }
 
         final int contentLength = Integer.parseInt(headers.get(("Content-Length")));
-        return getRequestBody(contentLength, bufferedReader);
+        final String bodyRaw = getRequestBodyRaw(contentLength, bufferedReader);
+
+        final String[] queryStringParts = bodyRaw.split("&");
+        final Map<String, String> body = new HashMap<>();
+        for (String param : queryStringParts) {
+            String[] kv = param.split("=");
+            body.put(kv[0].trim(), kv[1].trim());
+        }
+        return Map.copyOf(body);
     }
 
-
-    public static String getRequestBody(int contentLength, BufferedReader br) throws IOException {
+    public static String getRequestBodyRaw(int contentLength, BufferedReader br) throws IOException {
         final char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
         return new String(buffer);

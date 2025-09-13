@@ -50,10 +50,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
-        String body = request.getBody();
-        final String[] queryStringParts = body.split("&");
-        final String account = queryStringParts[0].split("=")[1];
-        final String password = queryStringParts[1].split("=")[1];
+        final String account = request.getBody().get("account");
+        final String password = request.getBody().get("password");
 
         final User user = getUserByAccount(account);
         if (isLoginFailed(user, password)) {

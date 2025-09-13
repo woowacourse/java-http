@@ -27,16 +27,6 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    public String getNotFoundResponse(StatusCode statusCode) {
-
-        return String.join("\r\n",
-                statusCode.getMessage(),
-                "Content-Type: text/plain; charset=utf-8",
-                "Content-Length: 0",
-                " "
-        );
-    }
-
     public String getResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",

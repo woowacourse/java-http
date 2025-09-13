@@ -18,11 +18,11 @@ public class AbstractController implements Controller {
             return doPost(http11Request);
         }
 
-        return createRedirect401Response();
+        return createMethodNotAllowedResponse();
     }
 
     protected Http11Response doPost(Http11Request http11Request) throws IOException {
-        return createRedirect401Response();
+        return createMethodNotAllowedResponse();
     }
 
     protected Http11Response doGet(Http11Request http11Request) throws IOException {
@@ -66,11 +66,11 @@ public class AbstractController implements Controller {
         }
     }
 
-    private Http11Response createRedirect401Response() throws IOException {
+    private Http11Response createMethodNotAllowedResponse() throws IOException {
         String failResourceName = "401.html";
         String contentType = guessContentTypeByFileExtension(failResourceName);
         byte[] body = readFromResourcePath(failResourceName);
 
-        return new Http11Response(body, "text/html", Http11Status.NOT_FOUND);
+        return new Http11Response(body, "text/html", Http11Status.METHOD_NOT_ALLOWED);
     }
 }

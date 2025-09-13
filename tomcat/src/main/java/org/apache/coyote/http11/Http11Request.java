@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,10 +14,19 @@ public class Http11Request {
     private Map<String, String> headers = new HashMap<>();
     private final Map<String, Http11Cookie> cookies = new HashMap<>();
 
-    public Http11Request(final BufferedReader bufferedReader) throws IOException {
-        readRequestLine(bufferedReader);
-        readHeaders(bufferedReader);
-        readBody(bufferedReader);
+
+    public Http11Request(String method, String targetResource, String protocol, Map<String, String> headers, String body) {
+        this.method = method;
+        this.targetResource = targetResource;
+        this.protocol = protocol;
+        this.headers = headers;
+        this.body = body;
+        this.path = parsePath(targetResource);
+
+        String cookieHeader = headers.get("Cookie");
+        if (cookieHeader != null) {
+            this.cookies.putAll(Http11Cookie.parse(cookieHeader));
+        }
     }
 
     public Optional<String> getSession(final String sessionId) {
@@ -35,41 +42,19 @@ public class Http11Request {
         return targetResource;
     }
 
-    private void readBody(final BufferedReader bufferedReader) throws IOException {
-        String lenHeader = headers.get("Content-Length");
-        if (lenHeader == null) {
-            body = "";
-            return;
-        }
-        int len;
-        try {
-            len = Integer.parseInt(lenHeader);
-        } catch (NumberFormatException e) {
-            body = "";
-            return;
-        }
-        if (len <= 0) {
-            body = "";
-            return;
-        }
-
-        char[] buf = new char[len];
-        int read = 0;
-        while (read < len) {
-            int r = bufferedReader.read(buf, read, len - read);
-            if (r == -1) break;
-            read += r;
-        }
-        body = new String(buf, 0, read);
-    }
-
     public Map<String, String> parseBody() {
         HashMap<String, String> bodyMap = new HashMap<>();
+
+        if (body == null || body.isEmpty()) {
+            return bodyMap;
+        }
 
         String[] infos = body.split("&");
         for (String info : infos) {
             String[] parsedInfo = info.split("=");
-            bodyMap.put(parsedInfo[0], parsedInfo[1]);
+            if (parsedInfo.length == 2) {
+                bodyMap.put(parsedInfo[0], parsedInfo[1]);
+            }
         }
 
         return bodyMap;
@@ -89,33 +74,6 @@ public class Http11Request {
         return headers.get(headerName);
     }
 
-    private void readHeaders(final BufferedReader bufferedReader) throws IOException {
-        String line;
-        while((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] split = line.split(":");
-            String header = split[0].trim();
-            String value = split[1].trim();
-
-            if ("Cookie".equalsIgnoreCase(header)) {
-                cookies.putAll(Http11Cookie.parse(value));
-                continue;
-            }
-
-            headers.put(header, value);
-        }
-    }
-
-    private void readRequestLine(final BufferedReader bufferedReader) throws IOException {
-        String requestLine = bufferedReader.readLine();
-
-        String[] splitRequestLine = requestLine.split(" ");
-
-        method = splitRequestLine[0];
-        targetResource = splitRequestLine[1];
-        protocol = "HTTP/1.1";
-
-        path = parsePath(targetResource);
-    }
 
     public String getMethod() {
         return method;

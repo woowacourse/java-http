@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Http11Response {
 
@@ -65,7 +64,7 @@ public class Http11Response {
 
         cookies.forEach(cookie ->
                 responseBuilder.append("Set-Cookie: ")
-                        .append(cookie.getName() + " = " + cookie.getValue() + ";")
+                        .append(cookie.getName() + "=" + cookie.getValue() + ";")
                         .append("\r\n")
         );
         responseBuilder.append("\r\n");

@@ -8,13 +8,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.RegisterHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.catalina.handler.Handler;
+import org.apache.catalina.handler.NotFoundHandler;
+import org.apache.catalina.handler.StaticResourceHandler;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.router.HttpRequestRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +23,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<Handler> handlers = List.of(
-            new LoginHandler(),
             new StaticResourceHandler(),
-            new RegisterHandler()
+            new NotFoundHandler()
     );
 
     private final Socket connection;
@@ -46,22 +46,33 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = HttpRequest.from(reader);
+            final HttpResponse response = new HttpResponse();
 
-            HttpResponse httpResponse = null;
-            for (Handler handler : handlers) {
-                if (handler.canHandle(request)) {
-                    httpResponse = handler.handle(request);
-                    break;
-                }
+            final HttpRequestRouter router = new HttpRequestRouter(new RequestMapping());
+            router.initialize();
+            boolean routed = router.route(request, response);
+
+            if (!routed) {
+                handleWithHandlers(request, response);
             }
 
-            if (httpResponse != null) {
-                outputStream.write(httpResponse.toString().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-            }
+            sendResponse(response, outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handleWithHandlers(HttpRequest request, HttpResponse response) throws IOException {
+        handlers.stream()
+                .filter(handler -> handler.canHandle(request))
+                .findFirst()
+                .orElseGet(() -> new NotFoundHandler())
+                .handle(request, response);
+    }
+
+    private void sendResponse(HttpResponse response, OutputStream outputStream) throws IOException {
+        outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

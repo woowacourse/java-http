@@ -83,24 +83,18 @@ public class HttpRequest {
     private static HttpRequest parse(final BufferedReader reader) throws IOException {
         final String requestLine = reader.readLine();
 
-        if (requestLine == null || requestLine.isBlank()) {
-            throw new IllegalArgumentException("Empty request line");
-        }
+        validateRequestLineNotEmpty(requestLine);
 
         final String[] parts = requestLine.split(" ");
 
-        validateRequestLine(parts, requestLine);
+        validateRequestLineLength(parts, requestLine);
 
         final String method = parts[0];
         final String requestUri = parts[1];
         final String version = parts[2];
 
         final HttpHeaders headers = new HttpHeaders();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isBlank()) {
-            String[] headerParts = line.split(": ", 2);
-            headers.addHeader(headerParts[0], headerParts[1]);
-        }
+        parseHeaders(reader, headers);
 
         String path = requestUri;
         if (requestUri.contains("?")) {
@@ -110,23 +104,26 @@ public class HttpRequest {
             return new HttpRequest(method, path, parseUrlEncoded(queryString), headers, version, null);
         }
 
-        String body = null;
-        if ("POST".equals(method)) {
-            int contentLength = Integer.parseInt(headers.getContentLength());
-            if (contentLength > 0) {
-                char[] bodyChars = new char[contentLength];
-                reader.read(bodyChars, 0, contentLength);
-                body = new String(bodyChars);
-            }
-            return new HttpRequest(method, path, Collections.emptyMap(), headers, version, body);
-        }
-
-        return new HttpRequest(method, path, Collections.emptyMap(), headers, version, null);
+        return buildHttpRequest(reader, method, headers, path, version);
     }
 
-    private static void validateRequestLine(String[] parts, String requestLine) {
+    private static void validateRequestLineNotEmpty(final String requestLine) {
+        if (requestLine == null || requestLine.isBlank()) {
+            throw new IllegalArgumentException("Empty request line");
+        }
+    }
+
+    private static void validateRequestLineLength(final String[] parts, final String requestLine) {
         if (parts.length != 3) {
             throw new IllegalArgumentException("Invalid HTTP request line: " + requestLine);
+        }
+    }
+
+    private static void parseHeaders(final BufferedReader reader, final HttpHeaders headers) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null && !line.isBlank()) {
+            String[] headerParts = line.split(": ", 2);
+            headers.addHeader(headerParts[0], headerParts[1]);
         }
     }
 
@@ -141,5 +138,26 @@ public class HttpRequest {
             }
         }
         return params;
+    }
+
+    private static HttpRequest buildHttpRequest(
+            BufferedReader reader,
+            String method,
+            HttpHeaders headers,
+            String path,
+            String version
+    ) throws IOException {
+        String body = null;
+        if ("POST".equals(method)) {
+            int contentLength = Integer.parseInt(headers.getContentLength());
+            if (contentLength > 0) {
+                char[] bodyChars = new char[contentLength];
+                reader.read(bodyChars, 0, contentLength);
+                body = new String(bodyChars);
+            }
+            return new HttpRequest(method, path, Collections.emptyMap(), headers, version, body);
+        }
+
+        return new HttpRequest(method, path, Collections.emptyMap(), headers, version, null);
     }
 }

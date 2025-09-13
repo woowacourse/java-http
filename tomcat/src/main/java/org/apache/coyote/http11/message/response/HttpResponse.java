@@ -5,15 +5,9 @@ import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.StatusLine;
 
 public class HttpResponse {
-    private final StatusLine statusLine;
-    private final HttpHeaders headers;
-    private final byte[] body;
-
-    public HttpResponse(StatusLine statusLine, HttpHeaders headers, byte[] body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.body = body;
-    }
+    private StatusLine statusLine;
+    private HttpHeaders headers = new HttpHeaders();
+    private byte[] body;
 
     public StatusLine getStatusLine() {
         return statusLine;
@@ -42,5 +36,17 @@ public class HttpResponse {
         }
 
         return sb.toString();
+    }
+
+    public void setStatusLine(StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void setHeaders(HttpHeaders headers) {
+        this.headers = headers;
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body;
     }
 }

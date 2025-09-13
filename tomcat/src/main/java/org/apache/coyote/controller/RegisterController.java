@@ -76,15 +76,21 @@ public class RegisterController extends AbstractController {
             body.put(key, value);
         }
 
-        User user = service.registerUser(body.get("account"), body.get("password"), body.get("email"));
-        UUID uuid = createUserSession(user);
+        synchronized (this) {
+            try {
+                User user = service.registerUser(body.get("account"), body.get("password"), body.get("email"));
+                UUID uuid = createUserSession(user);
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Set-Cookie", "JSESSIONID=" + uuid);
-        headers.put("Location", "/index.html");
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Set-Cookie", "JSESSIONID=" + uuid);
+                headers.put("Location", "/index.html");
 
-        response.setStatus(HttpStatus.FOUND);
-        response.setHeaders(headers);
+                response.setStatus(HttpStatus.FOUND);
+                response.setHeaders(headers);
+            } catch (RuntimeException e) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+            }
+        }
     }
 
     private Session getCookieSession(final HttpRequest request) throws IOException {

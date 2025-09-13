@@ -19,7 +19,7 @@ public class NotFoundHandler implements Handler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public void handle(HttpRequest request, HttpResponse response) throws IOException {
         final String resourcePath = "static/404.html";
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
@@ -34,10 +34,8 @@ public class NotFoundHandler implements Handler {
         headers.addHeader("Content-Type", ContentType.HTML.getMimeType());
         headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 
-        return new HttpResponse(
-                new StatusLine(request.getVersion(), StatusCode.NOT_FOUND),
-                headers,
-                body.getBytes()
-        );
+        response.setStatusLine(new StatusLine(request.getVersion(), StatusCode.NOT_FOUND));
+        response.setHeaders(headers);
+        response.setBody(body.getBytes());
     }
 }

@@ -18,10 +18,10 @@ public class Http11Response {
     private int statusCode;
     private String statusMessage;
     private final Map<String, String> headers;
-    private String body;
+    private byte[] body;
 
     public Http11Response() {
-        this(HTTP11_VERSION, HttpStatus.OK.getCode(), HttpStatus.OK.name(), new LinkedHashMap<>(), "");
+        this(HTTP11_VERSION, HttpStatus.OK.getCode(), HttpStatus.OK.name(), new LinkedHashMap<>(), new byte[0]);
     }
 
     public Http11Response status(final HttpStatus httpStatus) {
@@ -52,13 +52,13 @@ public class Http11Response {
     }
 
     public Http11Response body(final byte[] body) {
-        this.body = new String(body, StandardCharsets.UTF_8);
+        this.body = body;
 
         return this;
     }
 
     public void build() {
-        this.headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.length()));
+        this.headers.put(CONTENT_LENGTH_HEADER, String.valueOf(this.body.length));
     }
 
     public byte[] toMessage() {
@@ -84,7 +84,7 @@ public class Http11Response {
                 String.format("%s %s %s ", protocolVersion, statusCode, statusMessage),
                 headerString,
                 "",
-                body
+                new String(body, StandardCharsets.UTF_8)
         );
     }
 
@@ -93,7 +93,7 @@ public class Http11Response {
             final int statusCode,
             final String statusMessage,
             final Map<String, String> headers,
-            final String body
+            final byte[] body
     ) {
         this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;

@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {
+    private void writeAndFlush(final OutputStream outputStream, final String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }

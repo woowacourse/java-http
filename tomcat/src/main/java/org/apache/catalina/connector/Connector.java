@@ -1,5 +1,9 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.catalina.handler.DispatcherHandler;
 import org.slf4j.Logger;
@@ -16,19 +20,29 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 200;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
     private final DispatcherHandler dispatcher;
+    private final ExecutorService executorService;
+    private boolean stopped;
 
     public Connector(DispatcherHandler dispatcher) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, dispatcher);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, dispatcher);
     }
 
-    public Connector(final int port, final int acceptCount, DispatcherHandler dispatcher) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, DispatcherHandler dispatcher) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.dispatcher = dispatcher;
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                60L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(acceptCount),
+                new ThreadPoolExecutor.AbortPolicy()
+
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -70,7 +84,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, dispatcher);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {
@@ -79,6 +93,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

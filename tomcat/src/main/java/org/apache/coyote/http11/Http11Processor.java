@@ -3,9 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +33,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final Http11Request request = Http11RequestParser.parse(reader);
+            final Http11Request request = Http11RequestParser.parse(inputStream);
 
             StaticResource staticResource;
             String responseStatusCode = "";

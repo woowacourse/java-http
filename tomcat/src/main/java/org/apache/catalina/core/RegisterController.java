@@ -19,7 +19,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         Session existingSession = request.getSession(false);
         if (existingSession != null && existingSession.getAttribute("user") != null) {
-            response.sendRedirect("/index.html");
+            response.setRedirect("/index.html");
             return;
         }
         byte[] body = StaticResourceHandler.readResource("static/register.html");
@@ -44,6 +44,6 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
         log.info("User : {}", user);
 
-        response.sendRedirect("/index.html");
+        response.setRedirect("/index.html");
     }
 }

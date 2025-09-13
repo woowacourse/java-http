@@ -52,7 +52,7 @@ public class HttpResponse {
         return builder.toString();
     }
 
-    public void sendRedirect(String location) {
+    public void setRedirect(String location) {
         setStatus(HttpStatus.FOUND);
         addHeader("Location", location);
     }

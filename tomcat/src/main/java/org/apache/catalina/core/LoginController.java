@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         Session existingSession = request.getSession(false);
         if (existingSession != null && existingSession.getAttribute("user") != null) {
-            response.sendRedirect("/index.html");
+            response.setRedirect("/index.html");
             return;
         }
         byte[] body = StaticResourceHandler.readResource("static/login.html");
@@ -39,7 +39,7 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         Session existingSession = request.getSession(false);
         if (existingSession != null && existingSession.getAttribute("user") != null) {
-            response.sendRedirect("/index.html");
+            response.setRedirect("/index.html");
             return;
         }
         String account = request.getBody().get("account");
@@ -47,13 +47,13 @@ public class LoginController extends AbstractController {
 
         Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
         if (userOpt.isEmpty() || !userOpt.get().checkPassword(password)) {
-            response.sendRedirect("/401.html");
+            response.setRedirect("/401.html");
             return;
         }
         User user = userOpt.get();
         final Session session = request.changeSessionId();
         session.setAttribute("user", user);
-        response.sendRedirect("/index.html");
+        response.setRedirect("/index.html");
         response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
         log.info("User: {}", user);
     }

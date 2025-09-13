@@ -35,7 +35,7 @@ public class LoginController extends AbstractController {
 
         final Session session = SessionManager.find(cookie.get().getValue());
         if (validateSession(session)) {
-            return HttpResponse.redirection("index.html", TEXT_HTML_CHARSET_UTF_8);
+            return HttpResponse.redirection("/index.html", TEXT_HTML_CHARSET_UTF_8);
         }
 
         return renderLoginPage(request);

@@ -121,6 +121,9 @@ public final class StaticResourceController extends AbstractController {
         if (path.endsWith(".js")) {
             return "application/javascript;charset=utf-8";
         }
+        if (path.endsWith(".svg")) {
+            return "image/svg+xml";
+        }
         return "text/html;charset=utf-8";
     }
 }

@@ -4,25 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.apache.coyote.dto.ResourceResult;
-import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class HttpResourceLoader {
 
     private static final String ROOT = "/";
     private static final String STATIC = "static/";
 
-    public HttpResponse load(final String path) throws IOException {
+    public void load(final String path, final HttpResponse response) throws IOException {
         String formattedPath = formatPath(path);
         ResourceResult resourceResult = getResourceResult(formattedPath);
         HttpStatus status = findStatus(resourceResult);
 
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", resourceResult.mimeType());
-
-        return new HttpResponse(status, headers, new HttpCookie(), resourceResult.body());
+        response.addHeader("Content-Type", resourceResult.mimeType());
+        response.setBody(resourceResult.body());
+        response.setStatus(status);
     }
 
     private String formatPath(final String path) {

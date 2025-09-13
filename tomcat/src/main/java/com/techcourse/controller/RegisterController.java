@@ -29,13 +29,11 @@ public class RegisterController extends AbstractController {
 
         UserService.register(account, email, password);
 
-        HttpResponse actualResponse = HttpResponse.redirect("/index.html");
-        response.setHttpResponse(actualResponse);
+        response.redirect("/index.html");
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        HttpResponse actualResponse = httpResourceLoader.load(request.getPath());
-        response.setHttpResponse(actualResponse);
+        httpResourceLoader.load(request.getPath(), response);
     }
 }

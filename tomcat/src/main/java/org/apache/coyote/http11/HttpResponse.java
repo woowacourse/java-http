@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -17,31 +16,25 @@ public final class HttpResponse {
 
     private HttpStatus status;
     private Map<String, String> headers;
-    private HttpCookie httpCookie;
     private byte[] body;
 
     public HttpResponse(
             HttpStatus status,
             Map<String, String> headers,
-            HttpCookie httpCookie,
             byte[] body
     ) {
         this.status = status;
         this.headers = headers;
-        this.httpCookie = httpCookie;
         this.body = body;
     }
 
     public static HttpResponse create() {
-        return new HttpResponse(HttpStatus.OK, new HashMap<>(), new HttpCookie(), new byte[0]);
+        return new HttpResponse(HttpStatus.OK, new HashMap<>(), new byte[0]);
     }
 
-    public static HttpResponse redirect(String location) {
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, new LinkedHashMap<>(), new HttpCookie(),
-                new byte[0]);
-        httpResponse.addHeader("Location", location);
-
-        return httpResponse;
+    public void redirect(String location) {
+        this.status = HttpStatus.FOUND;
+        addHeader("Location", location);
     }
 
     public String asHeaderString() {
@@ -51,7 +44,7 @@ public final class HttpResponse {
         String message = status.reason();
         response.append(String.format(RESPONSE_LINE_FORMAT, HttpVersion.HTTP_1_1.getName(), statusCode, message));
 
-        for (Entry<String, String> header : headers().entrySet()) {
+        for (Entry<String, String> header : getHeaders().entrySet()) {
             response.append(header.getKey())
                     .append(": ")
                     .append(header.getValue())
@@ -70,22 +63,28 @@ public final class HttpResponse {
         String uuid = UUID.randomUUID().toString();
         String totalSetCookie = JSESSIONID + EQUAL + uuid;
 
-        addHeader(SET_COOKIE, totalSetCookie);
+        addCookie(SET_COOKIE, totalSetCookie);
+
         return uuid;
     }
 
-    public void setHttpResponse(HttpResponse response) {
-        this.status = response.status;
-        this.headers = response.headers;
-        this.httpCookie = response.httpCookie;
-        this.body = response.body;
+    private void addCookie(final String key, final String value) {
+        headers.put(key, value);
     }
 
-    public Map<String, String> headers() {
+    public void setStatus(final HttpStatus httpStatus) {
+        this.status = httpStatus;
+    }
+
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
-    public byte[] body() {
+    public void setBody(final byte[] body) {
+        this.body = body;
+    }
+
+    public byte[] getBody() {
         return body;
     }
 }

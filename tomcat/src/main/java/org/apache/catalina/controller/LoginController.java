@@ -2,13 +2,46 @@ package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.exception.CommonException;
 
-public class LoginController {
+public class LoginController extends AbstractController {
+
+    StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
+
+    @Override
+    protected void doGet(
+            HttpRequest httpRequest,
+            HttpResponse httpResponse
+    ) throws IOException {
+        String uri = httpRequest.uri();
+
+        if ("/login".equals(uri)) {
+            Session session = httpRequest.getSession();
+            if (session != null && session.getAttribute("user") != null) {
+                httpResponse.setStatusCode(HttpStatus.FOUND);
+                httpResponse.setHeader("Location", "http://localhost:8080");
+                return;
+            }
+            staticResourceHandler.serve(httpRequest, httpResponse);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        String uri = httpRequest.uri();
+
+        if ("/login".equals(uri)) {
+            login(httpRequest, httpResponse);
+        } else if ("/register".equals(uri)) {
+            register(httpRequest, httpResponse);
+        }
+    }
 
     public void login(
             HttpRequest httpRequest,

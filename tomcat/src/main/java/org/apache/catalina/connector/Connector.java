@@ -33,8 +33,8 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = new ThreadPoolExecutor(
-                DEFAULT_MAX_THREADS / 2,
-                DEFAULT_MAX_THREADS,
+                maxThreads / 2,
+                maxThreads,
                 60, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(DEFAULT_ACCEPT_COUNT),
                 Executors.defaultThreadFactory(),

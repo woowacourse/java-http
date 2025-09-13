@@ -19,12 +19,10 @@ public class StaticResourceController extends AbstractController {
             response.setStatus(HttpStatus.OK);
             response.setContentType(HTML.getType());
             response.setBody("Hello world!");
-            response.send();
             return;
         }
         response.setStatus(HttpStatus.OK);
         response.setContentType(request.extractMimeType());
         response.setBody(FileReader.readByName(uri));
-        response.send();
     }
 }

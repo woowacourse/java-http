@@ -27,7 +27,6 @@ public class RegisterController extends AbstractController {
             response.setContentType(JSON.getType());
             response.setStatus(HttpStatus.BAD_REQUEST);
             response.setBody("값이 모두 입력되지 않았습니다.");
-            response.send();
             return;
         }
 
@@ -37,7 +36,6 @@ public class RegisterController extends AbstractController {
         response.setContentType(HTML.getType());
         response.setStatus(HttpStatus.OK);
         response.setBody(FileReader.readByName("index.html"));
-        response.send();
     }
 
     @Override
@@ -45,6 +43,5 @@ public class RegisterController extends AbstractController {
         response.setContentType(HTML.getType());
         response.setStatus(HttpStatus.OK);
         response.setBody(FileReader.readByName("register.html"));
-        response.send();
     }
 }

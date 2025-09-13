@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.Mime.HTML;
-import static org.apache.coyote.http11.Mime.JSON;
 
 import org.apache.catalina.storage.Cookie;
 import org.apache.coyote.http11.util.FileReader;
@@ -15,31 +14,24 @@ public class HttpResponse {
 
     private static final String DEFAULT_VERSION = "HTTP/1.1";
 
-    private OutputStream outputStream;
-
     private final String version;
     private HttpStatus status;
     private final Map<String, String> headers;
     private String body;
 
-    private HttpResponse(OutputStream outputStream, String version, HttpStatus status, Map<String, String> headers, String body) {
-        this.outputStream = outputStream;
+    private HttpResponse(String version, HttpStatus status, Map<String, String> headers, String body) {
         this.version = version;
         this.status = status;
         this.headers = headers;
         this.body = body;
     }
 
-    private HttpResponse(String version, HttpStatus status, Map<String, String> headers, String body) {
-        this(null, version, status, headers, body);
-    }
-
     public static HttpResponse of(HttpStatus status, String body) {
         return new HttpResponse(DEFAULT_VERSION, status, new HashMap<>(), body);
     }
 
-    public static HttpResponse empty(OutputStream outputStream) {
-        return new HttpResponse(outputStream, DEFAULT_VERSION, null, new HashMap<>(), "");
+    public static HttpResponse empty() {
+        return new HttpResponse(DEFAULT_VERSION, null, new HashMap<>(), "");
     }
 
     // 2XX
@@ -66,18 +58,7 @@ public class HttpResponse {
         return response;
     }
 
-    public void sendError(HttpStatus status) throws IOException {
-        setStatus(status);
-        setContentType(JSON.getType());
-        setBody(""); // TODO: exception body format
-        send();
-    }
-
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
-    public void send() throws IOException {
+    public void send(OutputStream outputStream) throws IOException {
         addHeader("Content-Length", body.getBytes().length);
         outputStream.write(join().getBytes());
         outputStream.flush();

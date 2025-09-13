@@ -32,10 +32,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = HttpRequestParser.parse(inputStream);
-            HttpResponse response = HttpResponse.empty(outputStream);
+            HttpResponse response = HttpResponse.empty();
 
             final var controller = requestMapper.getController(request);
             controller.service(request, response);
+            response.send(outputStream);
         } catch (Exception e) {
             // TODO: exception class에 따른 분기 - 에러 상황에 맞는 정적 파일 보내기
             log.error(e.getMessage(), e);

@@ -30,7 +30,6 @@ public class LoginController extends AbstractController {
         final var user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
             response.setStatus(HttpStatus.UNAUTHORIZED);
-            response.send();
             return ;
         }
 
@@ -46,11 +45,9 @@ public class LoginController extends AbstractController {
 
             response.addCookie(sessionCookie);
             response.setRedirect("index.html");
-            response.send();
             return ;
         }
         response.setStatus(HttpStatus.UNAUTHORIZED);
-        response.send();
     }
 
     @Override
@@ -60,10 +57,8 @@ public class LoginController extends AbstractController {
         if (session == null || session.getAttribute("user") == null) {
             response.setStatus(HttpStatus.OK);
             response.setBody(FileReader.readByName("login.html"));
-            response.send();
             return ;
         }
         response.setRedirect("index.html");
-        response.send();
     }
 }

@@ -16,14 +16,13 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.session.Session;
 import org.apache.coyote.http.session.SessionManager;
-import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class); //로깅 클래스 변경
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private final ResourceResolver resourceResolver = new ResourceResolver();
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +18,21 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ThreadPoolExecutor threadPoolExecutor;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
     public Connector(final int port, final int acceptCount) {
+        this(port, acceptCount, ThreadPoolManager.createDefaultThreadPoolExecutor()
+        );
+    }
+
+    public Connector(final int port, final int acceptCount, final ThreadPoolExecutor threadPoolExecutor) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.threadPoolExecutor = threadPoolExecutor;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -66,7 +74,13 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        log.info("before submit - poolSize={}, queueSize={}", threadPoolExecutor.getPoolSize(),
+                threadPoolExecutor.getQueue().size());
+
+        threadPoolExecutor.submit(processor);
+
+        log.info("after submit - poolSize={}, queueSize={}", threadPoolExecutor.getPoolSize(),
+                threadPoolExecutor.getQueue().size());
     }
 
     public void stop() {

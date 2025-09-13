@@ -17,7 +17,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(final Http11Request request) {
-        return request.parseResourcePath().contains(".");
+        return ExtensionHandler.hasFileExtension(request.parseResourcePath());
     }
 
     @Override

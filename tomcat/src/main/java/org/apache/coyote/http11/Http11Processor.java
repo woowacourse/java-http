@@ -40,11 +40,9 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final Http11Request httpRequest = Http11Request.from(bufferedReader);
             final Http11Response httpResponse = new Http11Response();
-            httpResponse.setContentType(httpRequest.parseResourcePath());
 
             adapter.service(httpRequest, httpResponse);
-
-            httpResponse.setContentLength();
+            
             writeResponse(outputStream, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

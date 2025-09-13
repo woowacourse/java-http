@@ -3,6 +3,8 @@ package org.apache.catalina.core;
 import org.apache.catalina.RequestHandler;
 import org.apache.catalina.exception.ExceptionHandler;
 import org.apache.catalina.exception.Http4xxException;
+import org.apache.catalina.handler.ExtensionHandler;
+import org.apache.catalina.handler.FileExtension;
 import org.apache.catalina.handler.RequestHandlerMapper;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -22,6 +24,10 @@ public class CatalinaContainer {
         try {
             final RequestHandler requestHandler = requestHandlerMapper.getRequestHandler(request, response);
             requestHandler.handle(request, response);
+
+            final FileExtension fileExtension = ExtensionHandler.getFileExtension(request.parseResourcePath());
+            response.setContentType(fileExtension.getMimeType());
+            response.setContentLength();
         } catch (Http4xxException e) {
             exceptionHandler.handle(e, request, response);
         } catch (Exception e) {

@@ -11,6 +11,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 public class ViewResolver implements Resolver {
 
     private static final String HEADER_KEY_LOCATION = "Location";
+    private static final String HOME_PATH = "/";
     private final ResourceManager resourceManager;
 
     public ViewResolver(ResourceManager resourceManager) {
@@ -20,6 +21,9 @@ public class ViewResolver implements Resolver {
     public void resolve(String resourcePath, Http11Response response) {
         if (response.getHttpStatus() == HttpStatus.Found) {
             response.addHeader(HEADER_KEY_LOCATION, resourcePath);
+            return;
+        }
+        if (resourcePath.equals(HOME_PATH)) {
             return;
         }
         try {

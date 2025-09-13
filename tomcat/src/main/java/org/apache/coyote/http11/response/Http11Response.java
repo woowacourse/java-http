@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.domain.ContentType;
-
 public class Http11Response {
 
     private static final String CONTENT_LENGTH = "Content-Length";
@@ -25,9 +23,8 @@ public class Http11Response {
         headers.addCookie(key, value);
     }
 
-    public void setContentType(final String resourcePath) {
-        final ContentType contentType = ContentType.fromPath(resourcePath);
-        this.addHeader(CONTENT_TYPE, contentType.getValue());
+    public void setContentType(final String mineType) {
+        this.addHeader(CONTENT_TYPE, mineType);
     }
 
     public void setContentLength() {

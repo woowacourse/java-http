@@ -3,18 +3,22 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 public enum ContentType {
-    HTML("text/html;charset=utf-8", ".html"),
-    CSS("text/css;charset=utf-8", ".css"),
-    JS("application/javascript;charset=utf-8", ".js"),
-    PLAIN("text/plain;charset=utf-8", null),
-    SVG("image/svg+xml", ".svg");
+    HTML("text/html;charset=utf-8", ".html", false),
+    CSS("text/css;charset=utf-8", ".css", false),
+    JS("application/javascript;charset=utf-8", ".js", false),
+    PLAIN("text/plain;charset=utf-8", null, false),
+    SVG("image/svg+xml", ".svg", true),
+    JPG("image/jpeg", ".jpg", true),
+    JPEG("image/jpeg", ".jpeg", true);
 
     private final String mimeType;
     private final String extension;
+    private final boolean binary;
 
-    ContentType(final String mimeType, final String extension) {
+    ContentType(String mimeType, String extension, boolean binary) {
         this.mimeType = mimeType;
         this.extension = extension;
+        this.binary = binary;
     }
 
     public String getMimeType() {
@@ -39,5 +43,13 @@ public enum ContentType {
     private static String getExtension(final String path) {
         final int dotIndex = path.lastIndexOf(".");
         return dotIndex == -1 ? null : path.substring(dotIndex);
+    }
+
+    public static boolean isBinary(final String path) {
+        final String extension = getExtension(path);
+        if (extension == null) return false;
+
+        return Arrays.stream(values())
+                .anyMatch(type -> extension.equals(type.extension) && type.binary);
     }
 }

@@ -14,55 +14,42 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 
 public class StaticResourceHandler implements Handler {
 
-    private static final String DEFAULT_PATH = "/";
-    private static final String DEFAULT_BODY = "Hello world!";
-
     @Override
     public boolean canHandle(final HttpRequest request) {
         final String path = request.getPath();
-        return path.equals(DEFAULT_PATH) || ContentType.supports(path);
+        return ContentType.supports(path);
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) throws IOException {
+    public void handle(final HttpRequest request, final HttpResponse response) throws IOException {
         final String path = request.getPath();
-
-        if (path.equals(DEFAULT_PATH)) {
-            return defaultResponse(request);
-        }
 
         final String resourcePath = "static" + path;
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         if (resource == null) {
-            return notFoundResponse(request);
+            notFoundResponse(request, response);
+            return;
         }
 
-        final String body = Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8);
-        final HttpHeaders headers = new HttpHeaders();
-        headers.addHeader("Content-Type", ContentType.fromPath(path));
-        headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        byte[] body;
+        if (ContentType.isBinary(resourcePath)) {
+            body = Files.readAllBytes(new File(resource.getPath()).toPath());
+        } else {
+            body = Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8)
+                    .getBytes(StandardCharsets.UTF_8);
+        }
 
-        return new HttpResponse(
-                new StatusLine(request.getVersion(), StatusCode.OK),
-                headers,
-                body.getBytes(StandardCharsets.UTF_8)
-        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Content-Type", ContentType.fromPath(resourcePath));
+        headers.addHeader("Content-Length", String.valueOf(body.length));
+
+        response.setStatusLine(new StatusLine(request.getVersion(), StatusCode.OK));
+        response.setHeaders(headers);
+        response.setBody(body);
     }
 
-    private HttpResponse defaultResponse(final HttpRequest request) {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.addHeader("Content-Type", ContentType.HTML.getMimeType());
-        headers.addHeader("Content-Length", String.valueOf(DEFAULT_BODY.getBytes(StandardCharsets.UTF_8).length));
-
-        return new HttpResponse(
-                new StatusLine(request.getVersion(), StatusCode.OK),
-                headers,
-                DEFAULT_BODY.getBytes(StandardCharsets.UTF_8)
-        );
-    }
-
-    private HttpResponse notFoundResponse(final HttpRequest request) throws IOException {
+    private void notFoundResponse(final HttpRequest request, final HttpResponse response) throws IOException {
         final String resourcePath = "static/404.html";
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
@@ -77,10 +64,8 @@ public class StaticResourceHandler implements Handler {
         headers.addHeader("Content-Type", ContentType.HTML.getMimeType());
         headers.addHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 
-        return new HttpResponse(
-                new StatusLine(request.getVersion(), StatusCode.NOT_FOUND),
-                headers,
-                body.getBytes()
-        );
+        response.setStatusLine(new StatusLine(request.getVersion(), StatusCode.NOT_FOUND));
+        response.setHeaders(headers);
+        response.setBody(body.getBytes(StandardCharsets.UTF_8));
     }
 }

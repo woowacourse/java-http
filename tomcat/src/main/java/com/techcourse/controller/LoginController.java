@@ -41,13 +41,11 @@ public class LoginController extends AbstractController {
             final var session = request.getSession(true);
             session.setAttribute("user", savedUser);
 
-            response.setContentType(HTML.getType());
-            response.setBody(FileReader.readByName("index.html"));
-
             final var sessionManager = SessionManager.getInstance();
             final var sessionCookie = sessionManager.generateSessionCookie(session);
-            response.setStatus(HttpStatus.OK);
+
             response.addCookie(sessionCookie);
+            response.setRedirect("index.html");
             response.send();
             return ;
         }
@@ -65,8 +63,7 @@ public class LoginController extends AbstractController {
             response.send();
             return ;
         }
-        response.setStatus(HttpStatus.OK);
-        response.setBody(FileReader.readByName("index.html"));
+        response.setRedirect("index.html");
         response.send();
     }
 }

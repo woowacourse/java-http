@@ -96,6 +96,11 @@ public class HttpResponse {
         addHeader("Content-Type", value + ";charset=utf-8");
     }
 
+    public void setRedirect(final String url) {
+        status = HttpStatus.FOUND;
+        addHeader("Location", url);
+    }
+
     public void addCookie(final Cookie cookie) {
         headers.put("Set-Cookie", cookie.toString());
     }

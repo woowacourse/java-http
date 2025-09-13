@@ -1,11 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.controller.LoginController;
-import org.apache.catalina.controller.StaticResourceHandler;
-import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.exception.CommonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +13,6 @@ public class Router {
 
     private final Map<String, Controller> controllers = new HashMap<>();
     private final StaticResourceController staticController = new StaticResourceController();
-    private final StaticResourceHandler staticHandler = new StaticResourceHandler();
 
     public Router() {
         // 라우트 등록
@@ -29,7 +25,7 @@ public class Router {
             HttpResponse httpResponse
     ) throws Exception {
         try {
-
+    
             String uri = httpRequest.uri();
             Controller controller = findController(uri);
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Http11Cookie {
 
-    private Map<String, String> cookies = new HashMap<>();
+    private final Map<String, String> cookies;
 
     public Http11Cookie(String cookieHeader) {
         Map<String, String> cookies = new HashMap<>();
@@ -25,17 +25,13 @@ public class Http11Cookie {
         this.cookies = cookies;
     }
 
-    public boolean isContainsSessionId() {
-        return cookies.containsKey("JSESSIONID");
+    public boolean containsKey(String key) {
+        return cookies.containsKey(key);
     }
 
-    public boolean isNotContainsSessionId() {
-        return !isContainsSessionId();
-    }
-
-    public String getSessionId() {
-        if (isContainsSessionId()) {
-            return cookies.get("JSESSIONID");
+    public String get(String key) {
+        if (containsKey(key)) {
+            return cookies.get(key);
         } else  {
             return null;
         }

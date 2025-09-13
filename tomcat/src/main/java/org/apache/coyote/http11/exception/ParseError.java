@@ -1,8 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.exception;
 
 public enum ParseError {
 
-    INVALID_REQUEST_LINE(400, "Invalid request line");
+    INVALID_REQUEST_LINE(400, "Invalid request line"),
+    INVALID_HTTP_METHOD(400, "Invalid http method"),
+    INVALID_STATUS_CODE(400, "Invalid status code format");
 
     private final int statusCode;
     private final String message;

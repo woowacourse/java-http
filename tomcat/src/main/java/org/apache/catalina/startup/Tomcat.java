@@ -12,7 +12,7 @@ public class Tomcat {
 
     public void start() {
         var connector = new Connector();
-        connector.start();
+        connector.run();
 
         try {
             // make the application wait until we press any key.

@@ -88,6 +88,9 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            acceptorExecutor.shutdownNow();
+            pollerExecutor.shutdownNow();
+            workerExecutor.shutdownNow();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

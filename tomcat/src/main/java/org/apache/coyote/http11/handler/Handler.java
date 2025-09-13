@@ -5,6 +5,6 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
 public interface Handler {
-    boolean canHandle(HttpRequest request);
-    HttpResponse handle(HttpRequest request) throws IOException;
+    boolean canHandle(final HttpRequest request);
+    void handle(final HttpRequest request, final HttpResponse response) throws IOException;
 }

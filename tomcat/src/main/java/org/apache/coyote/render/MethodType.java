@@ -4,7 +4,7 @@ public enum MethodType {
     GET("GET"),
     POST("POST");
 
-    private String method;
+    private final String method;
 
     MethodType(String method) {
         this.method = method;

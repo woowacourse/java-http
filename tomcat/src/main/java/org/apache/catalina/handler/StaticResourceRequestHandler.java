@@ -1,22 +1,23 @@
 package org.apache.catalina.handler;
 
 import java.io.IOException;
+import org.apache.catalina.RequestHandler;
 import org.apache.catalina.exception.PathNotFoundException;
-import org.apache.catalina.resource.ResourceLoader;
+import org.apache.catalina.resources.ResourceManager;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 
-    private final ResourceLoader resourceLoader;
+    private final ResourceManager resourceLoader;
 
-    public StaticResourceRequestHandler(final ResourceLoader resourceLoader) {
+    public StaticResourceRequestHandler(final ResourceManager resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
     @Override
     public boolean canHandle(final Http11Request request) {
-        return request.parseResourcePath().contains(".");
+        return ExtensionHandler.hasFileExtension(request.parseResourcePath());
     }
 
     @Override

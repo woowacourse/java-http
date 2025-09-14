@@ -8,9 +8,4 @@ public class MethodNotAllowedException extends Http4xxException {
     public MethodNotAllowedException(Http11Response response) {
         super("Method Not Allowed", response, HttpStatus.METHOD_NOT_ALLOWED);
     }
-
-    public MethodNotAllowedException(Exception e, Http11Response response) {
-        super(e.getMessage(), response, HttpStatus.METHOD_NOT_ALLOWED);
-
-    }
 }

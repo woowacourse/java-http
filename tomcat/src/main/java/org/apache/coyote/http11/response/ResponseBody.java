@@ -5,10 +5,6 @@ public class ResponseBody {
 
     private byte[] bytes;
 
-    public ResponseBody(final byte[] bytes) {
-        this.bytes = bytes;
-    }
-
     public ResponseBody(final int size) {
         this.bytes = new byte[size];
     }

@@ -9,9 +9,4 @@ public class UnauthorizedException extends Http4xxException {
     public UnauthorizedException(Http11Response response) {
         super("Unauthorized", response, HttpStatus.UNAUTHORIZED);
     }
-
-    public UnauthorizedException(Exception e, Http11Response response) {
-        super(e.getMessage(), response, HttpStatus.UNAUTHORIZED);
-
-    }
 }

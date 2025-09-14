@@ -1,13 +1,9 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
-import java.util.Optional;
-import org.apache.catalina.Manager;
-import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
+import com.techcourse.service.SessionService;
+import com.techcourse.service.UserService;
+import org.apache.catalina.web.controller.AbstractController;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -17,66 +13,44 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
+    public static final String ENDPOINT = "/login";
+
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String USER_SESSION_KEY = "USER";
-    private static final String JSESSIONID = "JSESSIONID";
+    private static final String REDIRECTION_PATH = "/index.html";
+
+    public final UserService userService;
+    public final SessionService sessionService;
+
+    public LoginController(UserService userService, SessionService sessionService) {
+        this.userService = userService;
+        this.sessionService = sessionService;
+    }
 
     @Override
     protected void registerCommands() {
-        this.addCommand(HttpMethod.GET, this::getToLoginPage);
-        this.addCommand(HttpMethod.POST, this::postToLogin);
+        this.addCommand(HttpMethod.GET, this::doGet);
+        this.addCommand(HttpMethod.POST, this::doPost);
     }
 
-    public String getToLoginPage(final Http11Request request, final Http11Response response) {
-        if (isSessionValid(request)) {
+    public String doGet(final Http11Request request, final Http11Response response) {
+        if (sessionService.isSessionValid(request)) {
             return handleLoginSuccess(response);
         }
-        return "/login";
+        return ENDPOINT;
     }
 
-    public String postToLogin(final Http11Request request, final Http11Response response) {
+    public String doPost(final Http11Request request, final Http11Response response) {
         final String account = request.body().getValueByKey("account");
         final String password = request.body().getValueByKey("password");
 
-        final User user = findUser(account, password, response);
+        final User user = userService.findUser(account, password, response);
         log.info("User authenticated: {}", user);
-        createSession(user, response);
+        sessionService.createSession(user, response);
         return handleLoginSuccess(response);
-    }
-
-    private boolean isSessionValid(final Http11Request request) {
-        final Manager manager = SessionManager.getInstance();
-        if (request.isCookiesEmpty()) {
-            return false;
-        }
-
-        final String sessionId = request.getJsessionid();
-        if (sessionId == null) {
-            return false;
-        }
-
-        final Session session = manager.findSession(sessionId);
-        return session != null && session.getAttribute(USER_SESSION_KEY) != null;
     }
 
     private String handleLoginSuccess(final Http11Response response) {
         response.setState(HttpStatus.Found);
-        return "/index.html";
-    }
-
-    private User findUser(final String account, final String password, final Http11Response response) {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            return user.get();
-        }
-        throw new UnauthorizedException(response);
-    }
-
-    private void createSession(final User user, final Http11Response response) {
-        final Manager manager = SessionManager.getInstance();
-        final Session session = new Session();
-        session.setAttribute(USER_SESSION_KEY, user);
-        manager.add(session);
-        response.addCookie(JSESSIONID, session.getId());
+        return REDIRECTION_PATH;
     }
 }

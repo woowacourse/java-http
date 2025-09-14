@@ -35,29 +35,25 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final OutputStream outputStream = connection.getOutputStream();
         ) {
             final Http11Request httpRequest = Http11Request.from(bufferedReader);
             final Http11Response httpResponse = new Http11Response();
-            httpResponse.setContentType(httpRequest.parseResourcePath());
 
             adapter.service(httpRequest, httpResponse);
-
-            httpResponse.setContentLength();
-            writeResponse(httpResponse);
+            
+            writeResponse(outputStream, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-
-    private void writeResponse(final Http11Response httpResponse)
+    private void writeResponse(final OutputStream outputStream, final Http11Response httpResponse)
             throws IOException {
-        try (final OutputStream outputStream = connection.getOutputStream()) {
-            outputStream.write(httpResponse.getResponseLine());
-            outputStream.write(httpResponse.getHeader());
-            outputStream.write(httpResponse.getBody());
-            outputStream.flush();
-        }
+        outputStream.write(httpResponse.getResponseLine());
+        outputStream.write(httpResponse.getHeader());
+        outputStream.write(httpResponse.getBody());
+        outputStream.flush();
     }
 }

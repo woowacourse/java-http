@@ -24,6 +24,8 @@ public class Connector implements Runnable {
     //이게 내 컴퓨터 상태니까, 이론상 8코어 사용 가능한거네 하이퍼 스레딩 덕분에
     //db가 없고 다 인메모리니까, disk i/o는 없을 것 같은데 그러면 wait time을 0이라고 했을 때
     //8 곱하기 (1 + 0)이니까 그러면 8이네
+    //근데, .css, .html 같은 정적 파일이 있네, 그러면 disk i/o가 발생하겠네
+    //그러면 반,반주고 8 곱하기 (1 + 1) 하면 16
     //Optimal Threads = Number of Cores * (1 + Wait time / Service time)
     private static final int DEFAULT_CORE_POOL_SIZE = 8;
     private static final int DEFAULT_MAX_THREADS = 16;

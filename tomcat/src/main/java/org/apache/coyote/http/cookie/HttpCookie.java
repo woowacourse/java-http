@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http.cookie;
 
 import jakarta.servlet.http.Cookie;
 import java.util.UUID;

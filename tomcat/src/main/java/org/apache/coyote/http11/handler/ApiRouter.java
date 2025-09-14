@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.util.Map.Entry;
 import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.general.HttpProtocolVersion;
+import org.apache.coyote.http11.handler.applicationRequest.ApplicationRequest;
 import org.apache.coyote.http11.handler.applicationResponse.ApplicationResponse;
 import org.apache.coyote.http11.handler.applicationResponse.JsonResponse;
 import org.apache.coyote.http11.httpRequest.HttpRequest;
@@ -22,7 +23,8 @@ public class ApiRouter {
         if (controller == null) {
             return HttpResponse.of(httpRequest.getProtocolVersion(), HttpStatus.NOT_FOUND, ContentType.TEXT_HTML, "존재하지 않는 엔드포인트입니다.");
         }
-        ApplicationResponse applicationResponse = controller.service(httpRequest);
+        ApplicationRequest applicationRequest = ApplicationRequest.from(httpRequest);
+        ApplicationResponse applicationResponse = controller.service(applicationRequest);
         return handleHttpResponse(applicationResponse, httpRequest.getProtocolVersion());
     }
 

@@ -8,11 +8,11 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.Cookies;
+import org.apache.coyote.http11.handler.applicationRequest.ApplicationRequest;
 import org.apache.coyote.http11.handler.applicationResponse.ApplicationResponse;
 import org.apache.coyote.http11.handler.applicationResponse.JsonResponse;
 import org.apache.coyote.http11.handler.applicationResponse.StaticFileResponse;
 import org.apache.coyote.http11.general.CookieParser;
-import org.apache.coyote.http11.httpRequest.HttpRequest;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +26,8 @@ public class UserService {
         this.sessionManager = sessionManager;
     }
 
-    public ApplicationResponse loginPage(HttpRequest httpRequest) {
-        String sessionId = findSessionId(httpRequest);
+    public ApplicationResponse loginPage(ApplicationRequest applicationRequest) {
+        String sessionId = findSessionId(applicationRequest);
         if (sessionId == null || !isValidSession(sessionId)) {
             JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
             response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/login.html");
@@ -38,8 +38,8 @@ public class UserService {
         return response;
     }
 
-    private String findSessionId(HttpRequest httpRequest) {
-        Cookies cookies = CookieParser.parseFromHttpRequest(httpRequest);
+    private String findSessionId(ApplicationRequest applicationRequest) {
+        Cookies cookies = CookieParser.parseFromHeaders(applicationRequest.getHeaders());
         if (cookies.isEmpty()) {
             return null;
         }
@@ -52,9 +52,9 @@ public class UserService {
         return user != null;
     }
 
-    public ApplicationResponse login(HttpRequest httpRequest) {
-        String account = httpRequest.getBodyValueOf("account");
-        String password = httpRequest.getBodyValueOf("password");
+    public ApplicationResponse login(ApplicationRequest applicationRequest) {
+        String account = applicationRequest.getBodyValueOf("account");
+        String password = applicationRequest.getBodyValueOf("password");
         if (account != null && password != null) {
             return handleLoginResult(account, password);
         }
@@ -86,10 +86,10 @@ public class UserService {
         return new StaticFileResponse(HttpStatus.OK, "register");
     }
 
-    public ApplicationResponse register(HttpRequest httpRequest) {
-        String account = httpRequest.getBodyValueOf("account");
-        String email = httpRequest.getBodyValueOf("email");
-        String password = httpRequest.getBodyValueOf("password");
+    public ApplicationResponse register(ApplicationRequest applicationRequest) {
+        String account = applicationRequest.getBodyValueOf("account");
+        String email = applicationRequest.getBodyValueOf("email");
+        String password = applicationRequest.getBodyValueOf("password");
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         Session session = buildSessionOfUser(newUser);

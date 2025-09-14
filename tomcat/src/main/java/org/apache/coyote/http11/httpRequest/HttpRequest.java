@@ -24,19 +24,19 @@ public class HttpRequest {
         return this.requestLine.getProtocolVersion();
     }
 
-    public HttpMethod getMethod() {
-        return this.requestLine.getMethod();
-    }
-
     public String getPath() {
         return this.requestLine.getPath();
     }
 
-    public String getHeaderValueOf(String key) {
-        return this.headers.getHeaderValueOf(key);
+    public HttpMethod getMethod() {
+        return this.requestLine.getMethod();
     }
 
-    public String getBodyValueOf(String key) {
-        return body.get(key);
+    public HttpHeaders getHeaders() {
+        return this.headers;
+    }
+
+    public HttpBody getBody() {
+        return this.body;
     }
 }

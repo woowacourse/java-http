@@ -4,12 +4,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class CookieParser {
 
-    public static Cookies parseFromHttpRequest(HttpRequest httpRequest) {
-        String cookie = httpRequest.getHeaderValueOf(CommonHeaderKeys.COOKIE.getKey());
+    public static Cookies parseFromHeaders(HttpHeaders headers) {
+        String cookie = headers.getHeaderValueOf(CommonHeaderKeys.COOKIE.getKey());
         if (cookie == null) {
             return new Cookies(new HashMap<>());
         }

@@ -2,8 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import org.apache.coyote.http11.handler.AbstractController;
+import org.apache.coyote.http11.handler.applicationRequest.ApplicationRequest;
 import org.apache.coyote.http11.handler.applicationResponse.ApplicationResponse;
-import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class UserLoginController extends AbstractController {
 
@@ -14,12 +14,12 @@ public class UserLoginController extends AbstractController {
     }
 
     @Override
-    protected ApplicationResponse doPost(HttpRequest httpRequest) {
-        return userService.login(httpRequest);
+    protected ApplicationResponse doPost(ApplicationRequest applicationRequest) {
+        return userService.login(applicationRequest);
     }
 
     @Override
-    protected ApplicationResponse doGet(HttpRequest httpRequest) {
-        return userService.loginPage(httpRequest);
+    protected ApplicationResponse doGet(ApplicationRequest applicationRequest) {
+        return userService.loginPage(applicationRequest);
     }
 }

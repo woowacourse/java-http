@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.model;
 
-import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.coyote.http11.controller.StaticResourceHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class HttpResponse {
         this.version = "HTTP/1.1";
         this.statusCode = StatusCode.INTERNAL_SERVER_ERROR;
         this.headers = new HashMap<>();
-        setHeader("Content-Type", StaticResourceController.DEFAULT_CONTENT_TYPE);
+        setHeader("Content-Type", StaticResourceHandler.DEFAULT_CONTENT_TYPE);
         setHeader("Content-Length", "0");
         this.body = "";
     }

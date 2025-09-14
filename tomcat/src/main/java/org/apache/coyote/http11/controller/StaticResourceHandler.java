@@ -7,7 +7,7 @@ import org.apache.coyote.http11.model.StatusCode;
 import java.util.Objects;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 
-public class StaticResourceController {
+public class StaticResourceHandler {
 
     public static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
 

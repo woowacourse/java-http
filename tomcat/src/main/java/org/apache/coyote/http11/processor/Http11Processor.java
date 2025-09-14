@@ -4,7 +4,7 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerMapper;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.coyote.http11.controller.StaticResourceHandler;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 
@@ -19,12 +19,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final StaticResourceController resourceHandler;
+    private final StaticResourceHandler resourceHandler;
     private final ControllerMapper controllerMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.resourceHandler = new StaticResourceController();
+        this.resourceHandler = new StaticResourceHandler();
         this.controllerMapper = new ControllerMapper();
         initializeControllers();
     }

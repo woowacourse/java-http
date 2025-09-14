@@ -4,8 +4,6 @@ import org.apache.coyote.http11.session.Session;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Objects;
 
 public class HttpRequest {
@@ -21,8 +19,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final var requestLineString = bufferedReader.readLine();
 
         if (requestLineString == null || requestLineString.isBlank()) {

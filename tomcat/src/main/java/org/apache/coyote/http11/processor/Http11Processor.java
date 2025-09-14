@@ -12,6 +12,8 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -42,10 +44,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            final var httpRequest = HttpRequest.from(inputStream);
+            final var httpRequest = HttpRequest.from(bufferedReader);
             final var httpResponse = new HttpResponse(httpRequest.getHttpVersion());
 
             final var session = SessionManager.resolveSession(httpRequest, httpResponse);

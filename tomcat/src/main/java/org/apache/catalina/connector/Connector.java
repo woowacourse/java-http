@@ -37,7 +37,7 @@ public class Connector implements Runnable {
         this.threadPool = new ThreadPoolExecutor(
                 Math.min(DEFAULT_CORE_POOL_SIZE, corePoleSize),
                 Math.min(DEFAULT_MAX_THREADS, maxThreads),
-                0L, TimeUnit.MILLISECONDS,
+                60L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(DEFAULT_BLOCKING_QUEUE_SIZE),
                 new ThreadPoolExecutor.AbortPolicy()
         );

@@ -66,6 +66,13 @@ public record HttpResponse(
             return this;
         }
 
+        public Builder header(String name, String value) {
+            ResponseHeader customResponseHeader = new ResponseHeader(name, value) {
+            };
+            this.headers.add(customResponseHeader);
+            return this;
+        }
+
         public Builder headers(Collection<ResponseHeader> headers) {
             this.headers.addAll(headers);
             return this;

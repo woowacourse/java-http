@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.ContextConfig;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -13,24 +17,41 @@ public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
+    private static final int CORE_POOL_SIZE = 10;
+    private static final long KEEP_ALIVE_TIME = 60L;
+
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_FULL = 250;
+    private static final int DEFAULT_QUEUE_SIZE = 100;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private final CoyoteAdapter adapter;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_FULL, DEFAULT_QUEUE_SIZE);
     }
 
-    public Connector(final int port, final int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(final int port, final int acceptCount, final int maxThreads, final int queueSize) {
+        this.executorService = createThreadPool(maxThreads, queueSize);
+        this.serverSocket = createServerSocket(port, acceptCount, maxThreads);
         this.adapter = new CoyoteAdapter(ContextConfig.CATALINA_CONTAINER);
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private static ExecutorService createThreadPool(final int maxThreads, final int queueSize) {
+        return new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                maxThreads,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(queueSize)
+        );
+    }
+
+    private ServerSocket createServerSocket(final int port, final int acceptCount, final int maxThreads) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
@@ -45,7 +66,9 @@ public class Connector implements Runnable {
         thread.setDaemon(true);
         thread.start();
         stopped = false;
-        log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
+        log.info("WAS started PORT: {}, MAX_THREAD: {}",
+                serverSocket.getLocalPort(),
+                ((ThreadPoolExecutor) executorService).getMaximumPoolSize());
     }
 
     @Override
@@ -68,12 +91,26 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, adapter);
-        new Thread(processor).start();
+
+        executorService.submit(() -> {
+            var processor = new Http11Processor(connection, adapter);
+            processor.run();
+        });
     }
 
     public void stop() {
         stopped = true;
+
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
         try {
             serverSocket.close();
         } catch (IOException e) {

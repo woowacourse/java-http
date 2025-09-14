@@ -1,7 +1,7 @@
 package com.techcourse.web.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import com.techcourse.web.controller.common.AbstractController;
 import com.techcourse.web.controller.common.StaticFileResolver;
 import com.techcourse.web.request.AppRequest;
@@ -12,10 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RegisterController extends AbstractController {
 
+    private final UserService userService = UserService.getInstance();
+
     @Override
     protected AppResponse doPost(final AppRequest request) {
         try {
-            final User user = createUser(request);
+            final String account = request.getBodyParam("account");
+            final String password = request.getBodyParam("password");
+            final String email = request.getBodyParam("email");
+
+            final User user = userService.registerUser(account, password, email);
             log.debug("회원 가입 성공: {}", user);
             return StandardResponse.found("/index.html");
         } catch (final Exception e) {
@@ -27,13 +33,5 @@ public class RegisterController extends AbstractController {
     @Override
     protected AppResponse doGet(final AppRequest request) {
         return StaticFileResolver.resolve(request);
-    }
-
-    private User createUser(final AppRequest request) {
-        final String account = request.getBodyParam("account");
-        final String password = request.getBodyParam("password");
-        final String email = request.getBodyParam("email");
-        return InMemoryUserRepository.save(
-                User.withoutId(account, password, email));
     }
 }

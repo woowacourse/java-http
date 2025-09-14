@@ -16,11 +16,13 @@ public class UserLoginHandler extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
-    private final SessionManager sessionManager = SessionManager.getInstance();
+    private final SessionManager sessionManager;
 
-    private static final UserLoginHandler INSTANCE = new UserLoginHandler();
+    private static final UserLoginHandler INSTANCE = new UserLoginHandler(SessionManager.getInstance());
 
-    private UserLoginHandler() {}
+    private UserLoginHandler(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public static UserLoginHandler getInstance() {
         return INSTANCE;

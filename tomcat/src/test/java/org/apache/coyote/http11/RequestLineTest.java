@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 class RequestLineTest {
@@ -17,7 +18,7 @@ class RequestLineTest {
 
         // then
         assertAll(
-                () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
+                () -> assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(requestLine.getPath()).isEqualTo("/index.html"),
                 () -> assertThat(requestLine.getProtocol()).isEqualTo("HTTP/1.1")
         );

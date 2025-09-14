@@ -16,19 +16,21 @@ public class StaticResource {
 
     public byte[] getContent() {
         if (isEmpty()) {
-            return "Hello world!".getBytes();
+            return new byte[0];
         }
+
         return content;
     }
 
     public int getContentLength() {
         if (isEmpty()) {
-            return "Hello world!".getBytes().length;
+            return 0;
         }
+
         return content.length;
     }
 
     private boolean isEmpty() {
-        return content == null || content.length == 0;
+        return (content == null) || (content.length == 0);
     }
 }

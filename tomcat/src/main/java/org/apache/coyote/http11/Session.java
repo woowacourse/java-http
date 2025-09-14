@@ -8,7 +8,15 @@ public class Session {
     private final String sessionId;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id) {
+    public static Session createNewSession() {
+        return new Session(generateSessionId());
+    }
+
+    private static String generateSessionId() {
+        return java.util.UUID.randomUUID().toString();
+    }
+
+    private Session(final String id) {
         this.sessionId = id;
     }
 

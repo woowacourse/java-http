@@ -1,24 +1,25 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
 
-    private final String method;
+    private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
     private final String protocol;
 
     public RequestLine(final String requestLine) {
         final String[] requestLineParts = validateAndParseRequestLine(requestLine);
-        this.method = requestLineParts[0];
+        this.method = HttpMethod.from(requestLineParts[0]);
         this.path = parsePath(requestLineParts[1]);
         this.queryParams = parseQueryParams(requestLineParts[1]);
         this.protocol = requestLineParts[2];
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

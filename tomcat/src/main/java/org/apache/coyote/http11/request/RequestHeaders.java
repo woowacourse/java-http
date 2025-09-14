@@ -1,9 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Headers {
+public class RequestHeaders {
 
     private final Map<String, String> headers = new HashMap<>();
 

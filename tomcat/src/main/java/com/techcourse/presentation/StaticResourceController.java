@@ -1,112 +1,30 @@
 package com.techcourse.presentation;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
+import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(StaticResourceController.class);
-    private static final String BASE_DIRECTORY_NAME = "static";
-    private static final Map<String, Path> RESOURCE_PATHS = new ConcurrentHashMap<>();
-
-    public StaticResourceController() {
-        final URL baseUrl = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(BASE_DIRECTORY_NAME);
-
-        if (baseUrl != null) {
-            final Path basePath = getBasePath(baseUrl);
-            registerResourcePaths(basePath);
-        }
-    }
-
-    private Path getBasePath(final URL baseUrl) {
-        final Path basePath;
-        try {
-            basePath = Paths.get(baseUrl.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        log.debug("정적 자원 디렉토리 경로: {}", basePath);
-        return basePath;
-    }
-
-    private void registerResourcePaths(final Path basePath) {
-        try (final Stream<Path> files = Files.walk(basePath)) {
-            files.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        final String pathName = "/" + basePath.relativize(path);
-                        RESOURCE_PATHS.computeIfAbsent(pathName, key -> path);
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        log.debug("정적 자원 경로 등록 완료: {}", RESOURCE_PATHS.keySet());
-    }
 
     @Override
-    public boolean isResponsible(final String path) {
-        if ("/".equals(path)) {
-            return true;
-        }
-        return RESOURCE_PATHS.containsKey(path);
-    }
-
-    @Override
-    public HttpResponse getResource(final HttpRequest request) {
+    protected void validateRequest(HttpRequest request) {
         final String uri = request.requestLine().getUri();
-
-        if (!isResponsible(uri)) {
-            throw new IllegalArgumentException("요청 경로에 해당하는 자원이 없습니다.");
-        }
-
-        if ("/".equals(uri)) {
-            final String body = "Hello world!";
-
-            return HttpResponse.builder()
-                    .protocol(request.requestLine().getProtocol())
-                    .statusCode(getStatusCode(uri))
-                    .contentType("text/html;charset=utf-8")
-                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                    .body(body)
-                    .build();
-        }
-
-        final Path filePath = RESOURCE_PATHS.get(uri);
-        final String statusCode = getStatusCode(uri);
-
-        try {
-            final String contentType = Files.probeContentType(filePath);
-            final String body = new String(Files.readAllBytes(filePath));
-
-            return HttpResponse.builder()
-                    .protocol(request.requestLine().getProtocol())
-                    .statusCode(statusCode)
-                    .contentType(contentType + ";charset=utf-8")
-                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                    .body(body)
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (!isStaticResource(uri)) {
+            log.debug("요청 경로: {}", uri);
+            throw new IllegalArgumentException("요청 경로에 해당하는 정적 자원이 없습니다.");
         }
     }
 
-    private String getStatusCode(final String pathName) {
-        return switch (pathName) {
-            case "/401.html" -> "401 Unauthorized";
-            case "/404.html" -> "404 Not Found";
-            case "/500.html" -> "500 Internal Server Error";
-            default -> "200 OK";
-        };
+    @Override
+    protected HttpResponse doGet(HttpRequest request) {
+        final RequestLine requestLine = request.requestLine();
+        return renderStaticPage(requestLine.getUri(), requestLine.getProtocol());
+    }
+
+    @Override
+    protected String getBasePath() {
+        return "";
     }
 }

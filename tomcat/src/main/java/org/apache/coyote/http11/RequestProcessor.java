@@ -7,49 +7,33 @@ import com.techcourse.presentation.HttpResponse;
 import com.techcourse.presentation.LoginController;
 import com.techcourse.presentation.RegisterController;
 import com.techcourse.presentation.StaticResourceController;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestProcessor {
 
-    private static final List<String> priority = new ArrayList<>();
-    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
+    private final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public RequestProcessor() {
-        controllers.computeIfAbsent("StaticResourceController", key -> {
-            priority.add(key);
-            return new StaticResourceController();
-        });
-
-        final var staticResourceController = (StaticResourceController) controllers.get("StaticResourceController");
-
-        controllers.computeIfAbsent(
-                "LoginController",
-                key -> {
-                    priority.add(key);
-                    return new LoginController(new LoginService(), staticResourceController);
-                }
-        );
-        controllers.computeIfAbsent(
-                "RegisterController",
-                key -> {
-                    priority.add(key);
-                    return new RegisterController(new LoginService(), staticResourceController);
-                }
-        );
+        controllers.computeIfAbsent("LoginController", key -> new LoginController(new LoginService()));
+        controllers.computeIfAbsent("RegisterController", key -> new RegisterController(new LoginService()));
+        controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());
     }
 
     public String process(final HttpRequest request) {
-        final Controller responsibleController = priority.stream()
-                .map(controllers::get)
-                .filter(controller -> controller.isResponsible(request.requestLine().getUri()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청 경로: " + request.requestLine().getUri()));
-
-        final HttpResponse response = responsibleController.getResource(request);
-
+        final String uri = request.requestLine().getUri();
+        final Controller controller = getController(uri);
+        final HttpResponse response = controller.service(request);
         return response.toMessage();
+    }
+
+    private Controller getController(final String uri) {
+        if ("/login".equals(uri)) {
+            return controllers.get("LoginController");
+        }
+        if ("/register".equals(uri)) {
+            return controllers.get("RegisterController");
+        }
+        return controllers.get("StaticResourceController");
     }
 }

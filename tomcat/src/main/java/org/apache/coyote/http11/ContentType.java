@@ -44,12 +44,4 @@ public enum ContentType {
         final int dotIndex = path.lastIndexOf(".");
         return dotIndex == -1 ? null : path.substring(dotIndex);
     }
-
-    public static boolean isBinary(final String path) {
-        final String extension = getExtension(path);
-        if (extension == null) return false;
-
-        return Arrays.stream(values())
-                .anyMatch(type -> extension.equals(type.extension) && type.binary);
-    }
 }

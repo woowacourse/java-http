@@ -3,7 +3,6 @@ package org.apache.catalina.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.StatusCode;
@@ -63,11 +62,6 @@ public abstract class AbstractController implements Controller {
 
     protected byte[] readStaticResource(final String resourcePath) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
-        if (ContentType.isBinary(resourcePath)) {
-            return Files.readAllBytes(new File(resource.getPath()).toPath());
-        }
-
-        return Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8)
-                .getBytes(StandardCharsets.UTF_8);
+        return Files.readAllBytes(new File(resource.getPath()).toPath());
     }
 }

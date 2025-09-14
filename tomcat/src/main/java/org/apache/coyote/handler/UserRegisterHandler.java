@@ -14,6 +14,14 @@ public class UserRegisterHandler extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
 
+    private static final UserRegisterHandler INSTANCE = new UserRegisterHandler();
+
+    private UserRegisterHandler() {}
+
+    public static UserRegisterHandler getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         PageRenderer.createStaticFileResponse(request.version(), HttpStatus.OK.getStatusCode(), request.path(),

@@ -11,10 +11,10 @@ public enum RequestMapping {
         String path = request.path();
 
         if (PageEndpoint.LOGIN.getEndPoint().equals(path)) {
-            return new UserLoginHandler();
+            return UserLoginHandler.getInstance();
         }
         if (PageEndpoint.REGISTER.getEndPoint().equals(path)) {
-            return new UserRegisterHandler();
+            return UserRegisterHandler.getInstance();
         }
         return new PageRenderer();
     }

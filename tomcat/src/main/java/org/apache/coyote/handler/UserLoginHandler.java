@@ -18,6 +18,14 @@ public class UserLoginHandler extends AbstractController {
     private static final String PASSWORD = "password";
     private final SessionManager sessionManager = SessionManager.getInstance();
 
+    private static final UserLoginHandler INSTANCE = new UserLoginHandler();
+
+    private UserLoginHandler() {}
+
+    public static UserLoginHandler getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response){
         HttpCookie httpCookie = request.getCookie();

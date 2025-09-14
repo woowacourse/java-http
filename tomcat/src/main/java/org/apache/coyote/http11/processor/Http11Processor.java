@@ -4,7 +4,7 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerMapper;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.StaticResourceHandler;
+import org.apache.coyote.http11.Handler.StaticResourceHandler;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 

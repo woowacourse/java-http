@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.model;
 
-import org.apache.coyote.http11.controller.StaticResourceHandler;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Objects;
+import org.apache.coyote.http11.Handler.StaticResourceHandler;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 import org.apache.coyote.http11.model.StatusCode;

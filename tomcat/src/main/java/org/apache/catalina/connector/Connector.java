@@ -21,6 +21,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_BLOCKING_QUEUE_SIZE = 100;
     private static final int DEFAULT_CORE_POOL_SIZE = 20;
     private static final int DEFAULT_MAX_THREADS = 200;
+    private static final int DEFAULT_KEEP_ALIVE_TIME = 60;
 
     private final ServerSocket serverSocket;
     private final ExecutorService threadPool;
@@ -37,7 +38,7 @@ public class Connector implements Runnable {
         this.threadPool = new ThreadPoolExecutor(
                 Math.min(DEFAULT_CORE_POOL_SIZE, corePoleSize),
                 Math.min(DEFAULT_MAX_THREADS, maxThreads),
-                60L, TimeUnit.MILLISECONDS,
+                DEFAULT_KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(DEFAULT_BLOCKING_QUEUE_SIZE),
                 new ThreadPoolExecutor.AbortPolicy()
         );

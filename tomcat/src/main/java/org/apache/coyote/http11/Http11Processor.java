@@ -1,14 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.ViewController;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.LinkedList;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.dispatcher.DispatcherHandler;
-import org.apache.coyote.http11.dispatcher.handlerAdapter.HandlerAdapter;
-import org.apache.coyote.http11.dispatcher.handlerAdapter.MethodHandlerAdapter;
-import org.apache.coyote.http11.dispatcher.handlerAdapter.StaticResourceHandlerAdapter;
+import org.apache.coyote.http11.dispatcher.HandlerMapping;
+import org.apache.coyote.http11.dispatcher.handlerAdapter.ControllerHandlerAdapter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -37,17 +36,16 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequest.from(inputStream);
 
-            LinkedList<HandlerAdapter> handlerAdapters = new LinkedList<>();
-            handlerAdapters.add(new MethodHandlerAdapter());
-            handlerAdapters.add(new StaticResourceHandlerAdapter());
-
-            DispatcherHandler dispatcherHandler = new DispatcherHandler(handlerAdapters);
+            DispatcherHandler dispatcherHandler = new DispatcherHandler(new ControllerHandlerAdapter(),
+                    new HandlerMapping(), new ViewController());
             HttpResponse httpResponse = dispatcherHandler.doService(httpRequest);
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("not supported exception : " + e.getMessage());
         }
     }
 }

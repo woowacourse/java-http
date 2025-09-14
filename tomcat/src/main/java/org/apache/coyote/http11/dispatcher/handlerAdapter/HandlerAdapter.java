@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.dispatcher.handlerAdapter;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface HandlerAdapter {
 
-    boolean canHandle(HttpRequest httpRequest);
+    boolean supports(Object handler);
 
-    Object handle(HttpRequest httpRequest);
+    HttpResponse handle(HttpRequest httpRequest, Object handler) throws Exception;
 }

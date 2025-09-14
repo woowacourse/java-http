@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class MappingLine { // GET /endPoint HTTP/1.1
 
     private final String method; // GET //-
-    private final String url; // /endPoint
+    private final String path; // /endPoint
     private final Map<String, String> parameters;
     private final String protocol; // HTTP/1.1
 
@@ -19,11 +19,11 @@ public class MappingLine { // GET /endPoint HTTP/1.1
         this.method = parsedRequestLine[0];
         String fullUrl = parsedRequestLine[1];
         int idx = fullUrl.indexOf("?");
-        if (idx != -1) { // TODO 2025. 9. 7. 22:42: if-else 리펙터링 하기
-            this.url = fullUrl.substring(0, idx);
+        if (idx != -1) {
+            this.path = fullUrl.substring(0, idx);
             this.parameters = parseParameters(fullUrl.substring(idx + 1));
         }  else {
-            this.url = fullUrl;
+            this.path = fullUrl;
             this.parameters = Map.of();
         }
 
@@ -60,7 +60,7 @@ public class MappingLine { // GET /endPoint HTTP/1.1
         return method;
     }
 
-    public String getUrl() {
-        return url;
+    public String getPath() {
+        return path;
     }
 }

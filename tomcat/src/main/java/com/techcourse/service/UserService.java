@@ -8,6 +8,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.Cookies;
+import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.handler.applicationRequest.ApplicationRequest;
 import org.apache.coyote.http11.handler.applicationResponse.ApplicationResponse;
 import org.apache.coyote.http11.handler.applicationResponse.JsonResponse;
@@ -29,13 +30,13 @@ public class UserService {
     public ApplicationResponse loginPage(ApplicationRequest applicationRequest) {
         String sessionId = findSessionId(applicationRequest);
         if (sessionId == null || !isValidSession(sessionId)) {
-            JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-            response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/login.html");
-            return response;
+            HttpHeaders headers = HttpHeaders.empty();
+            headers.add(CommonHeaderKeys.LOCATION.getKey(), "/login.html");
+            return new JsonResponse(HttpStatus.FOUND, headers, "");
         }
-        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
-        return response;
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
+        return new JsonResponse(HttpStatus.FOUND, headers, "");
     }
 
     private String findSessionId(ApplicationRequest applicationRequest) {
@@ -69,10 +70,10 @@ public class UserService {
         }
         logger.info(user.toString());
         Session session = buildSessionOfUser(user);
-        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
-        response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
-        return response;
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
+        headers.add(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
+        return new JsonResponse(HttpStatus.FOUND, headers, "");
     }
 
     private Session buildSessionOfUser(User user) {
@@ -93,9 +94,9 @@ public class UserService {
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         Session session = buildSessionOfUser(newUser);
-        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
-        response.addHeader(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
-        return response;
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
+        headers.add(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
+        return new JsonResponse(HttpStatus.FOUND, headers, "");
     }
 }

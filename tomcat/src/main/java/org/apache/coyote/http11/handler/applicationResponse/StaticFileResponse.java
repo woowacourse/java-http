@@ -9,9 +9,4 @@ public record StaticFileResponse(HttpStatus status, HttpHeaders headers, String 
     public StaticFileResponse(HttpStatus status, String content) {
         this(status, new HttpHeaders(new HashMap<>()), content);
     }
-
-    @Override
-    public void addHeader(String key, String value) {
-        headers.add(key, value);
-    }
 }

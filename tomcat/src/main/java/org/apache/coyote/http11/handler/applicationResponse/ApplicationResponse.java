@@ -8,6 +8,4 @@ public interface ApplicationResponse {
     HttpStatus status();
     HttpHeaders headers();
     String content();
-
-    void addHeader(String key, String value);
 }

@@ -1,35 +1,20 @@
 package org.apache.coyote.util;
 
-import java.util.Map;
 import org.apache.coyote.dto.HttpHeader;
 import org.apache.coyote.dto.HttpResponse;
 
 public class HttpResponseBuilder {
 
-    public static void staticResponse(
+    public static void initResponse(
             String version,
             int statusCode,
-            String contentType,
+            HttpHeader httpHeader,
             String content,
             HttpResponse response
     ) {
         response.setVersion(version);
         response.setStatusCode(statusCode);
-        response.setHeaders(null);
-        response.setContentType(contentType);
+        response.setHeaders(httpHeader);
         response.setBody(content);
-    }
-
-    public static void redirectResponse(
-            String version,
-            int statusCode,
-            HttpHeader headers,
-            HttpResponse response
-    ) {
-        response.setVersion(version);
-        response.setStatusCode(statusCode);
-        response.setHeaders(headers);
-        response.setContentType(null);
-        response.setBody("");
     }
 }

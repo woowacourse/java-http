@@ -29,6 +29,7 @@ public class HeaderParser {
     public static HttpHeader createRedirectHeaders(String location, HttpCookie cookie, String sessionId) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Location", location);
+        headers.put("Content-Length", "0");
         if (cookie != null && sessionId != null) {
             headers.put("Set-Cookie", cookie.createSessionCookie(sessionId));
         }

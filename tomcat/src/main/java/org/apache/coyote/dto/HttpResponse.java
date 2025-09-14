@@ -6,7 +6,6 @@ public class HttpResponse{
     private String version;
     private int statusCode;
     private HttpHeader headers;
-    private String contentType;
     private String body;
 
     public HttpResponse() {
@@ -25,11 +24,6 @@ public class HttpResponse{
                     response.append(key).append(": ").append(value).append("\r\n"));
         }
 
-        if (contentType != null && !contentType.isEmpty()) {
-            response.append("Content-Type: ").append(contentType).append(";charset=utf-8").append("\r\n");
-        }
-
-        response.append("Content-Length: ").append(body.getBytes().length).append("\r\n");
         response.append("\r\n").append(body);
         return response.toString();
     }
@@ -44,10 +38,6 @@ public class HttpResponse{
 
     public void setHeaders(HttpHeader headers) {
         this.headers = headers;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
     }
 
     public void setBody(String body) {

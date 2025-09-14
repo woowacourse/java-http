@@ -19,12 +19,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final StaticResourceHandler resourceHandler;
+    private final StaticResourceHandler staticResourceHandler;
     private final ControllerMapper controllerMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.resourceHandler = new StaticResourceHandler();
+        this.staticResourceHandler = new StaticResourceHandler();
         this.controllerMapper = new ControllerMapper();
         initializeControllers();
     }
@@ -69,6 +69,6 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(httpRequest, httpResponse);
             return;
         }
-        resourceHandler.execute(httpRequest, httpResponse);
+        staticResourceHandler.execute(httpRequest, httpResponse);
     }
 }

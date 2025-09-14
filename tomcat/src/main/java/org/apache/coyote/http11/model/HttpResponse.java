@@ -7,13 +7,13 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private String version;
+    private final String httpVersion;
     private StatusCode statusCode;
     private final Map<String, String> headers;
     private String body;
 
     public HttpResponse() {
-        this.version = "HTTP/1.1";
+        this.httpVersion = "HTTP/1.1";
         this.statusCode = StatusCode.INTERNAL_SERVER_ERROR;
         this.headers = new HashMap<>();
         setHeader("Content-Type", StaticResourceHandler.DEFAULT_CONTENT_TYPE);

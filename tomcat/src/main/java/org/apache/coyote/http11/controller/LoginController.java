@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import java.util.Objects;
 import org.apache.coyote.http11.model.Cookie;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 import org.apache.coyote.http11.model.StatusCode;
-import org.apache.coyote.http11.util.StaticResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,8 @@ public class LoginController extends AbstractController {
             return;
         }
         response.setStatusCode(StatusCode.OK);
-        response.setBodyAndContentLength(StaticResourceUtil.getStaticResource(request.getPath()));
+        response.setBodyAndContentLength(Objects.requireNonNull(
+                StaticResourceHandler.getStaticResource(request.getPath())));
     }
 
     @Override
@@ -45,6 +46,7 @@ public class LoginController extends AbstractController {
         }
 
         response.setStatusCode(StatusCode.UNAUTHORIZED);
-        response.setBodyAndContentLength(StaticResourceUtil.getStaticResource("/401.html"));
+        response.setBodyAndContentLength(Objects.requireNonNull(
+                StaticResourceHandler.getStaticResource("/401.html")));
     }
 }

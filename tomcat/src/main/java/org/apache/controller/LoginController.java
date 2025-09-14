@@ -11,6 +11,7 @@ import org.apache.http.HttpCookie;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.view.ViewUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +19,6 @@ public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
-
-    private final StaticController staticController = new StaticController();
 
     @Override
     public boolean isProcessable(HttpRequest httpRequest) {
@@ -43,15 +42,15 @@ public class LoginController implements Controller {
             String jsessionID = httpCookie.getJSessionId();
 
             if (isAlreadyLogin(jsessionID)) {
-                httpResponse.redirect("/login.html");
+                httpResponse.redirect("/index.html");
                 return httpResponse;
             }
         }
-        httpResponse.setResponseBody("/login.html");
+
         httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setHttpCookie(null);
 
-        return staticController.process(httpRequest, httpResponse);
+        return ViewUtils.render(httpResponse, "/login.html");
     }
 
     private boolean isAlreadyLogin(String jsessionID) throws IOException {
@@ -68,34 +67,33 @@ public class LoginController implements Controller {
                 .orElseThrow(IllegalArgumentException::new);
 
         if (!user.checkPassword(password)) {
-            return postLoginFailed(httpRequest, httpResponse);
+            return postLoginFailed(httpResponse);
         }
 
         if (user.checkPassword(password)) {
-            return postLoginSuccess(user, httpRequest, httpResponse);
+            return postLoginSuccess(user, httpResponse);
         }
 
-        return HttpResponse.notFound(httpRequest);
+        return HttpResponse.notFound();
     }
 
-    private HttpResponse postLoginFailed(HttpRequest httpRequest, HttpResponse httpResponse)
+    private HttpResponse postLoginFailed(HttpResponse httpResponse)
             throws IOException, URISyntaxException {
-        httpResponse.setResponseBody("/401.html");
         httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
         httpResponse.setHttpCookie(null);
-        return staticController.process(httpRequest, httpResponse);
+        return ViewUtils.render(httpResponse, "/401.html");
     }
 
-    private HttpResponse postLoginSuccess(User user, HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpCookie httpCookie = new HttpCookie();
+    private HttpResponse postLoginSuccess(User user, HttpResponse httpResponse) {
         String sessionId = UUID.randomUUID().toString();
-
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
         SESSION_MANAGER.add(session);
 
+        HttpCookie httpCookie = new HttpCookie();
         httpCookie.setjSessionId(sessionId);
         httpResponse.setHttpCookie(httpCookie);
+
         log.info("user: {}", user);
         httpResponse.redirect("/index.html");
 

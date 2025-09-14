@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.view.ViewUtils;
 
 public class RegisterController implements Controller {
 
@@ -21,13 +22,14 @@ public class RegisterController implements Controller {
             throws URISyntaxException, IOException {
         String method = httpRequest.getMethod();
 
+        if (method.equals("GET")) {
+            httpResponse = getRegister(httpResponse);
+        }
+
         if (method.equals("POST")) {
             httpResponse = postRegister(httpRequest, httpResponse);
         }
 
-        if (method.equals("GET")) {
-            httpResponse = getRegister(httpRequest, httpResponse);
-        }
         return httpResponse;
     }
 
@@ -50,8 +52,8 @@ public class RegisterController implements Controller {
         return httpResponse;
     }
 
-    public HttpResponse getRegister(HttpRequest httpRequest, HttpResponse httpResponse)
+    public HttpResponse getRegister(HttpResponse httpResponse)
             throws IOException, URISyntaxException {
-        return staticController.process(httpRequest, httpResponse);
+        return ViewUtils.render(httpResponse, "/register.html");
     }
 }

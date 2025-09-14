@@ -14,8 +14,8 @@ public class HttpResponse {
         this.protocol = protocol;
     }
 
-    public static HttpResponse notFound(HttpRequest httpRequest) {
-        HttpResponse response = new HttpResponse(httpRequest.getProtocol());
+    public static HttpResponse notFound() {
+        HttpResponse response = new HttpResponse("HTTP/1.1");
         response.setHttpStatus(HttpStatus.NOT_FOUND);
         return response;
     }

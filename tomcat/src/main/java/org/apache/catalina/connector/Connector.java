@@ -21,7 +21,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int MIN_PORT = 1;
     private static final int MAX_PORT = 65535;
-    
+
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_CORE_POOL_SIZE = 50;
     private static final int DEFAULT_MAX_THREADS = 250;
@@ -96,10 +96,10 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
-            executor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executor.shutdown();
     }
 
     private int checkPort(final int port) {

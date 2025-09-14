@@ -6,8 +6,11 @@ import com.techcourse.web.request.AppRequest;
 import common.session.Session;
 import common.session.SessionManager;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.coyote.http.request.HttpRequest;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class RequestConverter {
 
     private static final RequestConverter INSTANCE = new RequestConverter();

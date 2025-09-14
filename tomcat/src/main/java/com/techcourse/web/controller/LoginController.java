@@ -15,12 +15,20 @@ import com.techcourse.web.view.StandardResponse;
 import common.session.Session;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 @Slf4j
 public class LoginController extends AbstractController {
 
+    private static final LoginController INSTANCE = new LoginController();
     private final UserService userService = UserService.getInstance();
+
+    public static LoginController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     protected AppResponse doPost(final AppRequest request) {

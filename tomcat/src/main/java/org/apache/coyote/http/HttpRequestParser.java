@@ -5,14 +5,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import common.ContentType;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeader;
 import org.apache.coyote.http.request.HttpRequestLine;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class HttpRequestParser {
 
     private static final HttpRequestParser INSTANCE = new HttpRequestParser();

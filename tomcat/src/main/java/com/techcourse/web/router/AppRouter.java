@@ -9,11 +9,14 @@ import com.techcourse.web.request.AppRequest;
 import com.techcourse.web.view.AppResponse;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class AppRouter {
 
     private static final AppRouter INSTANCE = new AppRouter();
-    
+
     private final Map<String, Controller> routes = new HashMap<>();
 
     public AppRouter() {
@@ -25,9 +28,9 @@ public class AppRouter {
     }
     
     private void initializeRoutes() {
-        routes.put("/", new HomeController());
-        routes.put("/login", new LoginController());
-        routes.put("/register", new RegisterController());
+        routes.put("/", HomeController.getInstance());
+        routes.put("/login", LoginController.getInstance());
+        routes.put("/register", RegisterController.getInstance());
     }
 
     public AppResponse route(final AppRequest request) throws Exception {

@@ -7,12 +7,20 @@ import com.techcourse.web.controller.common.StaticFileResolver;
 import com.techcourse.web.request.AppRequest;
 import com.techcourse.web.view.AppResponse;
 import com.techcourse.web.view.StandardResponse;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 @Slf4j
 public class RegisterController extends AbstractController {
 
+    private static final RegisterController INSTANCE = new RegisterController();
     private final UserService userService = UserService.getInstance();
+
+    public static RegisterController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     protected AppResponse doPost(final AppRequest request) {

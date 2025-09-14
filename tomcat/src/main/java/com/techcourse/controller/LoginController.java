@@ -43,7 +43,7 @@ public class LoginController extends AbstractController {
             UUID sessionId = UUID.randomUUID();
             Session session = new Session(sessionId.toString());
             session.setAttribute("user", user);
-            sessionManager.add(session);
+            sessionManager.addIfAbsent(session);
 
             ResponseWriters.found(response, "/index.html");
         } catch (IllegalArgumentException e) {

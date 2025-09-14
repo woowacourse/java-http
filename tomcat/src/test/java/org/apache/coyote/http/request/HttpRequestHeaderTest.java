@@ -113,7 +113,7 @@ class HttpRequestHeaderTest {
             "Content-Length: invalid,0"
     })
     @DisplayName("Content-Length 헤더 파싱")
-    void parseContentLengthHeader(String contentLengthLine, int expected) {
+    void parseContentLengthHeader(final String contentLengthLine, final int expected) {
         final String rawHeader = String.join("\r\n",
                 "Host: localhost:8080",
                 contentLengthLine);
@@ -124,7 +124,7 @@ class HttpRequestHeaderTest {
     @ParameterizedTest(name = "잘못된 헤더: '{0}'")
     @MethodSource("invalidHeaders")
     @DisplayName("빈/Null 헤더 문자열 예외")
-    void parseInvalidHeader(String raw) {
+    void parseInvalidHeader(final String raw) {
         assertThatThrownBy(() -> HttpRequestHeader.from(raw))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("HTTP 요청 헤더는 null이거나 비어있을 수 없습니다");

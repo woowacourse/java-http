@@ -2,12 +2,12 @@ package org.apache.coyote.http.request;
 
 import static common.HttpConstants.CRLF;
 
+import common.ContentType;
 import common.HttpMethod;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import common.ContentType;
-import java.util.Map;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter

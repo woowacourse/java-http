@@ -1,10 +1,10 @@
 package org.apache.coyote.http.response;
 
+import common.HttpConstants;
 import common.HttpStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import common.HttpConstants;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

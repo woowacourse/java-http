@@ -287,13 +287,8 @@ class Http11ProcessorTest {
     @DisplayName("매우 긴 URL 요청")
     void requestWithVeryLongUrl() {
         // given
-        final StringBuilder longPath = new StringBuilder("/");
-        for (int i = 0; i < 100; i++) {
-            longPath.append("very-long-path-segment-");
-        }
-
         final String request = String.join("\r\n",
-                "GET " + longPath + " HTTP/1.1",
+                "GET " + "/" + "very-long-path-segment-".repeat(100) + " HTTP/1.1",
                 "Host: localhost:8080",
                 "",
                 "");

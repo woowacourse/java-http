@@ -35,7 +35,7 @@ class HttpRequestLineTest {
     @ParameterizedTest(name = "요청 라인 파싱: {0}")
     @MethodSource("validRequestLines")
     @DisplayName("여러 형태의 요청 라인 파싱")
-    void parseRequestLineVariants(String raw, HttpMethod method, String path, String version) {
+    void parseRequestLineVariants(final String raw, final HttpMethod method, final String path, final String version) {
         final HttpRequestLine requestLine = HttpRequestLine.from(raw);
         assertSoftly(softly -> {
             softly.assertThat(requestLine.getMethod()).isEqualTo(method);
@@ -85,7 +85,7 @@ class HttpRequestLineTest {
     @ParameterizedTest(name = "잘못된 요청 라인: {0}")
     @MethodSource("invalidRequestLines")
     @DisplayName("잘못된 요청 라인 예외")
-    void parseInvalidRequestLine(String raw, Class<? extends Throwable> expected, String contains) {
+    void parseInvalidRequestLine(final String raw, final Class<? extends Throwable> expected, final String contains) {
         assertThatThrownBy(() -> HttpRequestLine.from(raw))
                 .isInstanceOf(expected)
                 .satisfies(e -> {

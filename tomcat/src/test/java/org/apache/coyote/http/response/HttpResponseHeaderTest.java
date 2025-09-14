@@ -18,7 +18,7 @@ class HttpResponseHeaderTest {
             "TEXT_CSS,Content-Type: text/css"
     })
     @DisplayName("ContentType으로 ResponseHeader 생성")
-    void createWithContentType(ContentType contentType, String expected) {
+    void createWithContentType(final ContentType contentType, final String expected) {
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
         assertThat(header.toString()).contains(expected);
     }

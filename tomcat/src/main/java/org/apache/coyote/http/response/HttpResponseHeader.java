@@ -3,9 +3,9 @@ package org.apache.coyote.http.response;
 import static common.HttpConstants.KEY_VALUE_SEPARATOR;
 import static common.HttpConstants.SET_COOKIE_HEADER_NAME;
 
+import common.ContentType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import common.ContentType;
 import org.apache.coyote.http.HttpHeader;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

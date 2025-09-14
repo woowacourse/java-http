@@ -1,5 +1,6 @@
 package org.apache.coyote.http;
 
+import common.ContentType;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,7 +8,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import common.ContentType;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeader;

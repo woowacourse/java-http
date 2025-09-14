@@ -15,7 +15,7 @@ import org.apache.coyote.http.response.HttpResponse;
 public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
-    
+
     @Override
     public void run() {
         log.info("연결된 호스트: {}, 포트: {}", connection.getInetAddress(), connection.getPort());

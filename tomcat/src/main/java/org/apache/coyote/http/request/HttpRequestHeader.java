@@ -2,10 +2,10 @@ package org.apache.coyote.http.request;
 
 import static common.HttpConstants.COOKIE_HEADER_NAME;
 
+import common.ContentType;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import common.ContentType;
 import org.apache.coyote.http.HttpHeader;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

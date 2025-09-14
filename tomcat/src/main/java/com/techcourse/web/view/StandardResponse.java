@@ -21,7 +21,7 @@ public record StandardResponse(
     public static StandardResponse ok(final ContentType contentType, final String body) {
         final Map<String, String> header = new LinkedHashMap<>();
         header.put(ContentType.HEADER_NAME, contentType.getMimeTypeAndCharset());
-        return new StandardResponse(HttpStatus.OK, header, body.getBytes());
+        return ok(header, body);
     }
 
     public static StandardResponse found(final Map<String, String> header) {

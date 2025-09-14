@@ -57,7 +57,7 @@ class HttpResponseTest {
     @ParameterizedTest(name = "{0} 응답, 길이={2}")
     @MethodSource("okResponses")
     @DisplayName("OK 응답 - 다양한 본문/타입")
-    void createOkResponses(ContentType contentType, String body, int expectedLength) {
+    void createOkResponses(final ContentType contentType, final String body, final int expectedLength) {
         final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
         final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
@@ -70,16 +70,14 @@ class HttpResponseTest {
                     contentType == ContentType.APPLICATION_JAVASCRIPT ? "Content-Type: application/javascript" :
                             "Content-Type: text/html;charset=UTF-8");
             softly.assertThat(responseString).contains("Content-Length: " + expectedLength);
-            if (body != null) {
-                softly.assertThat(responseString).contains(body);
-            }
+            softly.assertThat(responseString).contains(body);
         });
     }
 
     @ParameterizedTest(name = "204 No Content 바디: {0}")
     @MethodSource("emptyBodies")
     @DisplayName("빈/null 본문으로 HTTP 응답 생성")
-    void createResponseWithEmptyOrNullBody(String body) {
+    void createResponseWithEmptyOrNullBody(final String body) {
         final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.NO_CONTENT);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
         final HttpResponseBody responseBody = HttpResponseBody.from(
@@ -97,7 +95,8 @@ class HttpResponseTest {
     @ParameterizedTest(name = "에러 응답: {0}")
     @MethodSource("errorResponses")
     @DisplayName("에러 응답 생성")
-    void createErrorResponses(HttpStatus status, String body, String expectedStatusLine, int expectedLength) {
+    void createErrorResponses(final HttpStatus status, final String body, final String expectedStatusLine,
+                              final int expectedLength) {
         final HttpStatusLine statusLine = HttpStatusLine.from("1.1", status);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
         final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));

@@ -57,11 +57,7 @@ class HttpResponseBodyTest {
     @DisplayName("큰 내용으로 ResponseBody 생성")
     void createWithLargeContent() {
         // given
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
-            sb.append("테스트 내용 ");
-        }
-        final String largeContent = sb.toString();
+        final String largeContent = "테스트 내용 ".repeat(1000);
 
         // when
         final HttpResponseBody body = HttpResponseBody.from(largeContent.getBytes(StandardCharsets.UTF_8));

@@ -1,9 +1,9 @@
 package com.techcourse.web.controller;
 
 import com.techcourse.web.controller.common.AbstractController;
+import com.techcourse.web.request.AppRequest;
 import com.techcourse.web.view.AppResponse;
 import com.techcourse.web.view.StandardResponse;
-import com.techcourse.web.request.AppRequest;
 import common.ContentType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

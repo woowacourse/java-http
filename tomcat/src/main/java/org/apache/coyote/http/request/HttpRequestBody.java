@@ -3,6 +3,7 @@ package org.apache.coyote.http.request;
 import static common.HttpConstants.KEY_VALUE_SEPARATOR;
 import static common.HttpConstants.PARAM_SEPARATOR;
 
+import common.ContentType;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import common.ContentType;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -63,11 +63,10 @@ public class HttpRequestBody {
         if (params.isEmpty()) {
             return "";
         }
-        
+
         final StringBuilder sb = new StringBuilder();
-        params.forEach((key, value) -> {
-            sb.append(key).append(KEY_VALUE_SEPARATOR).append(value).append(PARAM_SEPARATOR);
-        });
+        params.forEach(
+                (key, value) -> sb.append(key).append(KEY_VALUE_SEPARATOR).append(value).append(PARAM_SEPARATOR));
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }

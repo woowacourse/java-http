@@ -16,7 +16,7 @@ public class StaticFileResolver {
     public static AppResponse resolve(final AppRequest request) {
         final String path = request.getPath();
         final String resourcePath = toResourcePath(path);
-        
+
         return load(resourcePath);
     }
 

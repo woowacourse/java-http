@@ -1,9 +1,9 @@
 package com.techcourse.web.router;
 
-import com.techcourse.web.controller.common.Controller;
 import com.techcourse.web.controller.HomeController;
 import com.techcourse.web.controller.LoginController;
 import com.techcourse.web.controller.RegisterController;
+import com.techcourse.web.controller.common.Controller;
 import com.techcourse.web.controller.common.StaticFileResolver;
 import com.techcourse.web.request.AppRequest;
 import com.techcourse.web.view.AppResponse;
@@ -26,7 +26,7 @@ public class AppRouter {
     public static AppRouter getInstance() {
         return INSTANCE;
     }
-    
+
     private void initializeRoutes() {
         routes.put("/", HomeController.getInstance());
         routes.put("/login", LoginController.getInstance());

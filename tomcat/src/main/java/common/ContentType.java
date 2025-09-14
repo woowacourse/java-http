@@ -17,8 +17,7 @@ public enum ContentType {
     TEXT_CSS("text/css"),
     APPLICATION_JAVASCRIPT("application/javascript"),
     APPLICATION_JSON("application/json"),
-    APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded")
-    ;
+    APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded");
 
     public static final String HEADER_NAME = "Content-Type";
     public static final String CHARSET_NAME = "charset";
@@ -26,10 +25,8 @@ public enum ContentType {
     public static final String CSS_EXTENSION = ".css";
     public static final String JS_EXTENSION = ".js";
     public static final String CONTENT_TYPE_SEPARATOR = ";";
-
-    private static final ContentType DEFAULT_REQUEST_CONTENT_TYPE = ContentType.TEXT_PLAIN;
     public static final ContentType DEFAULT_RESPONSE_CONTENT_TYPE = ContentType.TEXT_HTML;
-
+    private static final ContentType DEFAULT_REQUEST_CONTENT_TYPE = ContentType.TEXT_PLAIN;
     private final String mimeType;
     private final Charset defaultCharset = StandardCharsets.UTF_8;
 

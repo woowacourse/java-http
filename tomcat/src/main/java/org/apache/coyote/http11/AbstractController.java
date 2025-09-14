@@ -12,13 +12,13 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        response.sendError(HttpStatus.BAD_REQUEST);
+        response.sendError(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         response.sendError(HttpStatus.BAD_REQUEST);
     }
-    
+
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.sendError(HttpStatus.BAD_REQUEST);
     }

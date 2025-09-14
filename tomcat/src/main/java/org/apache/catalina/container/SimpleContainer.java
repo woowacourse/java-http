@@ -19,6 +19,7 @@ import static com.java.http.request_response.StatusCode.NOT_FOUND;
 public class SimpleContainer implements Container {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleContainer.class);
+    // 동시 접근은 가능하지만, 수정되지 않으므로 기본 컬렉션을 사용한다.
     private static final List<Servlet> servlets = scan("com.techcourse");
 
     private static List<Servlet> scan(String packageName) {

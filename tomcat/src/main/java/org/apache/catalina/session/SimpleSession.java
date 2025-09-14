@@ -8,9 +8,10 @@ import java.util.UUID;
 
 public class SimpleSession implements Session {
 
-    private String id = createId();
-
+    // 동시 접근의 유스케이스가 존재하지 않으므로 기본 컬렉션을 사용한다.
     private final Map<String, Object> attributes = new HashMap<>();
+
+    private String id = createId();
 
     @Override
     public String id() {

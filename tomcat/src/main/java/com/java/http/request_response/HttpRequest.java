@@ -3,7 +3,6 @@ package com.java.http.request_response;
 import com.java.http.session.Session;
 import com.java.http.session.SessionManager;
 import com.java.http.session.SessionStore;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,7 +89,7 @@ public record HttpRequest(
             return sessionStore.create();
         }
         String sessionId = cookie("JSESSIONID");
-        return sessionStore.get(sessionId);
+        return sessionId == null ? null : sessionStore.get(sessionId);
     }
 
     public void changeSessionId() {

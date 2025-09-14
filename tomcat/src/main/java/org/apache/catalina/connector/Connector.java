@@ -1,9 +1,12 @@
 package org.apache.catalina.connector;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -20,6 +23,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 10;
+    private static final int DEFAULT_TCP_CONNECTION_COUNT = (DEFAULT_ACCEPT_COUNT + DEFAULT_MAX_THREADS) * 2;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -30,16 +34,16 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+        this.serverSocket = createServerSocket(port, (acceptCount + maxThreads) * 2);
         this.executorService = new ThreadPoolExecutor(
                 0, maxThreads, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(acceptCount));
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private ServerSocket createServerSocket(final int port, final int tcpConnectionCount) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            final int checkedAcceptCount = checkTcpConnectionCount(tcpConnectionCount);
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -78,7 +82,26 @@ public class Connector implements Runnable {
         try {
             executorService.submit(processor);
         } catch (RejectedExecutionException exception) {
-            connection.close();
+            handleRejectedExecutionException(connection);
+        }
+    }
+
+    private void handleRejectedExecutionException(Socket connection) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
+            String body = """
+                    {
+                        "message": "서버가 현재 요청을 처리할 수 없습니다. 잠시 후 다시 시도해주세요."
+                    }
+                    """;
+            writer.write("HTTP/1.1 429 Too Many Requests\r\n");
+            writer.write("Content-Type: application/json\r\n");
+            writer.write("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n");
+            writer.write("\r\n");
+            writer.write(body);
+            writer.flush();
+            writer.close();
+
+            log.warn("Task rejected from ThreadPoolExecutor: maximum pool size reached");
         }
     }
 
@@ -101,7 +124,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    private int checkTcpConnectionCount(final int tcpConnectionCount) {
+        return Math.max(tcpConnectionCount, DEFAULT_TCP_CONNECTION_COUNT);
     }
 }

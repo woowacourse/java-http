@@ -25,6 +25,7 @@ public class LoginController extends AbstractController {
             final Session session = sessionManager.findSession(request.getJsessionId());
             if (session != null && session.getAttribute("user") != null) {
                 redirect(request, response, "/index.html");
+                return;
             }
         }
 

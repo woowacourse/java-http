@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.controller.BasicController;
 import org.apache.controller.Controller;
 import org.apache.controller.LoginController;
+import org.apache.controller.NotFoundController;
 import org.apache.controller.RegisterController;
 import org.apache.controller.StaticController;
 import org.apache.coyote.Processor;
@@ -55,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             Controller processorableController = controllers.stream()
                     .filter(controller -> controller.isProcessable(httpRequest))
                     .findFirst()
-                    .orElseThrow(() -> new IOException("처리할 수 있는 컨트롤러가 없습니다."));
+                    .orElse(new NotFoundController());
 
             HttpResponse httpResponse = processorableController.process(httpRequest, emptyHttpResponse);
 
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public String makeResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private String makeResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 
         final String contentType = httpRequest.getMineType() + ";charset=utf-8";
         final String protocol = httpRequest.getProtocol();

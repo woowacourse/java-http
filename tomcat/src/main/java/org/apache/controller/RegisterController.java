@@ -10,8 +10,6 @@ import org.apache.view.ViewUtils;
 
 public class RegisterController implements Controller {
 
-    private final StaticController staticController = new StaticController();
-
     @Override
     public boolean isProcessable(HttpRequest httpRequest) {
         return httpRequest.pathEquals("/register");

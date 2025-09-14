@@ -1,5 +1,12 @@
 package org.apache.catalina.connector;
 
+import java.io.PrintWriter;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +22,26 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 20;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads / 2,
+                maxThreads,
+                60, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_ACCEPT_COUNT),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
         this.stopped = false;
     }
 
@@ -72,11 +89,30 @@ public class Connector implements Runnable {
     }
 
     private void process(final Socket connection) {
-        if (connection == null) {
-            return;
+        if (connection == null) return;
+        final var processor = new Http11Processor(connection);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException ex) {
+            handleRejectedConnection(connection, ex);
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+    }
+
+    private void handleRejectedConnection(Socket connection, RejectedExecutionException ex) {
+        try (connection;
+             var out = new PrintWriter(connection.getOutputStream())) {
+
+            out.println("HTTP/1.1 503 Service Unavailable");
+            out.println("Content-Type: text/plain; charset=UTF-8");
+            out.println("Connection: close");
+            out.println();
+            out.println("Server is overloaded. Please try again later.");
+            out.flush();
+
+            log.warn("Connection rejected: {}", ex.getMessage());
+        } catch (IOException ioe) {
+            log.error("Failed to send rejection response", ioe);
+        }
     }
 
     private int checkPort(final int port) {
@@ -88,6 +124,7 @@ public class Connector implements Runnable {
         }
         return port;
     }
+
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);

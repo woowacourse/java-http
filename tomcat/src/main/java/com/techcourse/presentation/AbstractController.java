@@ -1,63 +1,12 @@
 package com.techcourse.presentation;
 
+import com.techcourse.util.StaticResourceManager;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
-    private static final String STATIC_DIRECTORY_NAME = "static";
-
-    private final Map<String, Path> staticResources = new ConcurrentHashMap<>();
-
-    protected AbstractController() {
-        loadStaticResources();
-    }
-
-    private void loadStaticResources() {
-        final URL baseUrl = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(STATIC_DIRECTORY_NAME);
-
-        if (baseUrl != null) {
-            final Path basePath = getStaticBasePath(baseUrl);
-            registerResourcePaths(basePath);
-        }
-    }
-
-    private Path getStaticBasePath(final URL baseUrl) {
-        final Path basePath;
-        try {
-            basePath = Paths.get(baseUrl.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        log.debug("정적 자원 디렉토리 경로: {}", basePath);
-        return basePath;
-    }
-
-    private void registerResourcePaths(final Path basePath) {
-        try (final Stream<Path> files = Files.walk(basePath)) {
-            files.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        final String pathName = "/" + basePath.relativize(path);
-                        staticResources.computeIfAbsent(pathName, key -> path);
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        log.debug("정적 자원 경로 등록 완료: {}", staticResources.keySet());
-    }
 
     protected abstract String getBasePath();
 
@@ -93,16 +42,9 @@ public abstract class AbstractController implements Controller {
         throw new IllegalArgumentException("POST 메서드는 지원되지 않습니다.");
     }
 
-    protected boolean isStaticResource(final String path) {
-        if ("/".equals(path)) {
-            return true;
-        }
-        return staticResources.containsKey(path);
-    }
-
     protected HttpResponse renderStaticPage(final String path, final String protocol) {
-        if (!isStaticResource(path)) {
-            throw new IllegalArgumentException("요청 경로에 해당하는 자원이 없습니다.");
+        if (!StaticResourceManager.isStaticResource(path)) {
+            throw new IllegalArgumentException("정적 자원이 존재하지 않는 요청 경로: " + path);
         }
 
         if ("/".equals(path)) {
@@ -118,7 +60,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private HttpResponse createFileResponse(final String path, final String protocol) {
-        final Path filePath = staticResources.get(path);
+        final Path filePath = StaticResourceManager.getResourcePath(path);
         final String statusCode = getStatusCode(path);
 
         try {

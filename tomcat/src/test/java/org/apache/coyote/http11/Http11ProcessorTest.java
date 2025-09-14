@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.util.StaticResourceManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -11,6 +13,11 @@ import java.nio.file.Files;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        StaticResourceManager.initialize();
+    }
 
     @Test
     void process() {

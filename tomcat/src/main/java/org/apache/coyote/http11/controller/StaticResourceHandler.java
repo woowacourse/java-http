@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import ch.qos.logback.core.util.FileUtil;
+import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 import org.apache.coyote.http11.model.StatusCode;
@@ -14,7 +15,7 @@ public class StaticResourceHandler {
     private static final String STATIC_PREFIX = "static";
     private static final String DEFAULT_EXTENSION = ".html";
     private static final String EXTENSION_DELIMITER = ".";
-    public static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+    public static final String IMAGE_PATH = "/assets/img";
 
     public void execute(HttpRequest request, HttpResponse response) {
         setContentType(request, response);
@@ -22,19 +23,8 @@ public class StaticResourceHandler {
     }
 
     private void setContentType(final HttpRequest request, final HttpResponse response) {
-        if (request.getPath().endsWith(".html")) {
-            response.setContentType("text/html;charset=utf-8");
-            return;
-        }
-        if (request.getPath().endsWith(".css")) {
-            response.setContentType("text/css;charset=utf-8");
-            return;
-        }
-        if (request.getPath().endsWith(".js")) {
-            response.setContentType("application/javascript;charset=utf-8");
-            return;
-        }
-        response.setContentType(DEFAULT_CONTENT_TYPE);
+        final ContentType contentType = ContentType.from(request.getPath());
+        response.setContentType(contentType.getValue());
     }
 
     private void setBody(final HttpRequest request, final HttpResponse response) {
@@ -69,6 +59,9 @@ public class StaticResourceHandler {
 
     private static String getWholeResourcePath(final String resourcePathPart) {
         if (resourcePathPart.contains(EXTENSION_DELIMITER)) {
+            if(resourcePathPart.endsWith(ContentType.SVG.getValue())) {
+                return STATIC_PREFIX + IMAGE_PATH + resourcePathPart;
+            }
             return STATIC_PREFIX + resourcePathPart;
         }
         return STATIC_PREFIX + resourcePathPart + DEFAULT_EXTENSION;

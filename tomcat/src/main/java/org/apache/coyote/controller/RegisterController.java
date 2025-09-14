@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.Service;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -75,34 +76,40 @@ public class RegisterController extends AbstractController {
             body.put(key, value);
         }
 
-        User user = service.registerUser(body.get("account"), body.get("password"), body.get("email"));
-        UUID uuid = createSession(user);
+        synchronized (this) {
+            try {
+                User user = service.registerUser(body.get("account"), body.get("password"), body.get("email"));
+                UUID uuid = createUserSession(user);
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Set-Cookie", "JSESSIONID=" + uuid);
-        headers.put("Location", "/index.html");
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Set-Cookie", "JSESSIONID=" + uuid);
+                headers.put("Location", "/index.html");
 
-        response.setStatus(HttpStatus.FOUND);
-        response.setHeaders(headers);
+                response.setStatus(HttpStatus.FOUND);
+                response.setHeaders(headers);
+            } catch (RuntimeException e) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+            }
+        }
     }
 
-    private void handleRedirect(final HttpRequest request, final HttpResponse response) throws Exception {
+    private Session getCookieSession(final HttpRequest request) throws IOException {
         HttpCookie cookie = request.getCookie();
-
         if (cookie == null) {
-            doGet(request, response);
-            return;
+            return null;
         }
 
         String sessionId = cookie.getValue("JSESSIONID");
-
         if (sessionId == null) {
-            doGet(request, response);
-            return;
+            return null;
         }
 
         Manager sessionManager = SessionManager.getInstance();
-        Session session = sessionManager.findSession(sessionId);
+        return sessionManager.findSession(sessionId);
+    }
+
+    private void handleRedirect(final HttpRequest request, final HttpResponse response) throws Exception {
+        Session session = getCookieSession(request);
         if (session == null) {
             doGet(request, response);
             return;
@@ -115,7 +122,7 @@ public class RegisterController extends AbstractController {
         response.setProtocol(request.getProtocol());
     }
 
-    private UUID createSession(final User user) {
+    private UUID createUserSession(final User user) {
         UUID uuid = UUID.randomUUID();
         SessionManager sessionManager = SessionManager.getInstance();
         Session loginSession = new Session(uuid.toString());

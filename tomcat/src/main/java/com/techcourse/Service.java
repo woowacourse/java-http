@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,14 @@ public class Service {
     }
 
     public User registerUser(final String account, final String password, final String email) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent()) {
+            throw new IllegalArgumentException("이미 가입한 사용자입니다.");
+        }
         InMemoryUserRepository.save(new User(account, password, email));
+
+        log.info("Registered account [{}]", account);
+
         return findUserByAccount(account);
     }
 }

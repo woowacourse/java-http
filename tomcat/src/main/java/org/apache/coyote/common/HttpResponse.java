@@ -29,12 +29,13 @@ public class HttpResponse {
     private String getMessage() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append(protocol).append(" ").append(status.getCode()).append(" ").append(status.getMessage()).append(" \r\n");
+        builder.append(protocol).append(" ").append(status.getCode()).append(" ").append(status.getMessage()).append("\r\n");
 
         if (headers != null) {
-            headers.forEach((key, value) -> builder.append(key).append(": ").append(value).append(" \r\n"));
+            headers.forEach((key, value) -> builder.append(key).append(": ").append(value).append("\r\n"));
         }
         if (body == null) {
+            builder.append("\r\n");
             return builder.toString();
         }
 

@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.Service;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -59,7 +60,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         response.setProtocol(request.getProtocol());
         if (request.getBody() == null) {
             response.setStatus(HttpStatus.BAD_REQUEST);
@@ -75,9 +76,15 @@ public class LoginController extends AbstractController {
             body.put(key, value);
         }
 
+        Session session = getCookieSession(request);
+        if (session != null) {
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
         try {
             User user = service.getLoggedInUser(body);
-            UUID uuid = createSession(user);
+            UUID uuid = createUserSession(user);
 
             final Map<String, String> headers = new HashMap<>();
             headers.put("Set-Cookie", "JSESSIONID=" + uuid);
@@ -95,26 +102,12 @@ public class LoginController extends AbstractController {
     }
 
     private void handleRedirect(final HttpRequest request, final HttpResponse response) throws Exception {
-        HttpCookie cookie = request.getCookie();
-
-        if (cookie == null) {
-            doGet(request, response);
-            return;
-        }
-
-        String sessionId = cookie.getValue("JSESSIONID");
-
-        if (sessionId == null) {
-            doGet(request, response);
-            return;
-        }
-
-        Manager sessionManager = SessionManager.getInstance();
-        Session session = sessionManager.findSession(sessionId);
+        Session session = getCookieSession(request);
         if (session == null) {
             doGet(request, response);
             return;
         }
+
         Map<String, String> headers = new HashMap<>();
         headers.put("Location", "/index.html");
         response.setHeaders(headers);
@@ -122,7 +115,22 @@ public class LoginController extends AbstractController {
         response.setProtocol(request.getProtocol());
     }
 
-    private UUID createSession(final User user) {
+    private Session getCookieSession(final HttpRequest request) throws IOException {
+        HttpCookie cookie = request.getCookie();
+        if (cookie == null) {
+            return null;
+        }
+
+        String sessionId = cookie.getValue("JSESSIONID");
+        if (sessionId == null) {
+            return null;
+        }
+
+        Manager sessionManager = SessionManager.getInstance();
+        return sessionManager.findSession(sessionId);
+    }
+
+    private UUID createUserSession(final User user) {
         UUID uuid = UUID.randomUUID();
         SessionManager sessionManager = SessionManager.getInstance();
         Session loginSession = new Session(uuid.toString());

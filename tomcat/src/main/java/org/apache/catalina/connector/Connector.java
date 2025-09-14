@@ -17,11 +17,11 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    public static final int DEFAULT_MAX_THREADS = 200;
+    public static final int DEFAULT_MAX_THREADS = 200; // step4: 최대 스레드 수 기본값 추가
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final ExecutorService executorService;
+    private final ExecutorService executorService; // step4: 스레드 풀 변수 설정
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
@@ -30,7 +30,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = Executors.newFixedThreadPool(maxThreads); // maxThreads 수가 고정된 스레드 풀 생성
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -72,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executorService.submit(processor);
+        executorService.submit(processor); // step4: 스레드 풀을 활용하여 Http11Processor 실행
     }
 
     public void stop() {

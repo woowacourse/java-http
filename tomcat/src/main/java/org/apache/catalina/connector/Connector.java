@@ -9,7 +9,9 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -30,7 +32,11 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(maxThreads, maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(acceptCount),
+                new ThreadPoolExecutor.CallerRunsPolicy() // 스레드 제한 수 초과시 refuse 하지 않고 caller 에서 처리
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

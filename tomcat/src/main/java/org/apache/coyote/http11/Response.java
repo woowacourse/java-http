@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.coyote.CookieManager;
+import org.apache.catalina.session.CookieManager;
 
 public class Response {
 

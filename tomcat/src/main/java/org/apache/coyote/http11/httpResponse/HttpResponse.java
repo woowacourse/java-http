@@ -1,45 +1,51 @@
 package org.apache.coyote.http11.httpResponse;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.ContentType;
+import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.general.HttpProtocolVersion;
 
 public class HttpResponse {
 
-    private final Map<String, String> headers;
-    private final HttpStatus httpStatus;
+    private final StatusLine statusLine;
+    private final HttpHeaders headers;
     private final byte[] body;
 
-    public HttpResponse(HttpStatus httpStatus, ContentType contentType, String body) {
-        this.httpStatus = httpStatus;
-        if (body == null) {
-            this.body = new byte[0];
-        } else {
-            this.body = body.getBytes(StandardCharsets.UTF_8);
+    private HttpResponse(StatusLine statusLine, HttpHeaders headers, byte[] body) {
+        this.statusLine = statusLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
+    public static HttpResponse of(HttpProtocolVersion protocolVersion, HttpStatus status, ContentType contentType, String bodyText) {
+        validateFields(protocolVersion, status, contentType, bodyText);
+        StatusLine statusLine = new StatusLine(protocolVersion, status);
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.CONTENT_TYPE.getKey(), contentType.getValueWithUtf8Charset());
+        byte[] body = bodyText.getBytes(StandardCharsets.UTF_8);
+        headers.add(CommonHeaderKeys.CONTENT_LENGTH.getKey(), String.valueOf(body.length));
+        return new HttpResponse(statusLine, headers, body);
+    }
+
+    private static void validateFields(HttpProtocolVersion protocolVersion, HttpStatus status, ContentType contentType, String bodyText) {
+        if (protocolVersion == null || status == null || contentType == null || bodyText == null) {
+            throw new IllegalArgumentException("응답을 만드는 과정에서 오류가 발생했습니다.");
         }
-        this.headers = new HashMap<>();
-        this.headers.put("Content-Length", String.valueOf(this.body.length));
-        this.headers.put("Content-Type", contentType.getValueWithUtf8Charset());
     }
 
     public void addHeader(String key, String value) {
-        this.headers.put(key, value);
+        this.headers.add(key, value);
     }
 
     public String toString() {
         return String.join("\r\n",
-            "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getMessage(),
+            statusLine.getProtocolVersion().getVersion() + " " + statusLine.getStatusCode() + " " + statusLine.getStatusMessage(),
             buildHeaderMessage(),
             new String(body, StandardCharsets.UTF_8));
     }
 
     private String buildHeaderMessage() {
-        StringBuilder result = new StringBuilder();
-        for (Entry<String, String> header : headers.entrySet()) {
-            result.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
-        }
-        return result.toString();
+        return this.headers.buildHeaderMessage();
     }
 }

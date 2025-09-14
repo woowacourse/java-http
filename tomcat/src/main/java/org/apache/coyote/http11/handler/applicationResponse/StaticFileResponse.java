@@ -1,0 +1,12 @@
+package org.apache.coyote.http11.handler.applicationResponse;
+
+import java.util.HashMap;
+import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.httpResponse.HttpStatus;
+
+public record StaticFileResponse(HttpStatus status, HttpHeaders headers, String content) implements ApplicationResponse {
+
+    public StaticFileResponse(HttpStatus status, String content) {
+        this(status, new HttpHeaders(new HashMap<>()), content);
+    }
+}

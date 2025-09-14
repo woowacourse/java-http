@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Session implements HttpSession {
 
     private final String id;
-    private final Map<String, Object> values = new ConcurrentHashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>(); // step4: ConcurrentHashMap으로 변경
 
     public Session(String id) {
         this.id = id;

@@ -26,7 +26,7 @@ public class HttpRequest {
         this.path = requestLines.get("Path");
         this.protocol = requestLines.get("Protocol");
         this.requestHeaders = parseHeader(reader);
-        this.requestBodies = parseBody(reader, requestHeaders);
+        this.requestBodies = readBody(reader, requestHeaders);
         this.httpCookie = parseCookie(requestHeaders);
     }
 
@@ -116,7 +116,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private Map<String, String> parseBody(BufferedReader reader, Map<String, String> requestHeaders)
+    private Map<String, String> readBody(BufferedReader reader, Map<String, String> requestHeaders)
             throws IOException {
         Map<String, String> bodies = new HashMap<>();
         if (requestHeaders.containsKey("Content-Length")) {
@@ -125,13 +125,13 @@ public class HttpRequest {
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
-                parseBody(requestBody, bodies);
+                parseUrlEncodedParameters(requestBody, bodies);
             }
         }
         return bodies;
     }
 
-    private void parseBody(String requestBody, Map<String, String> bodies) {
+    private void parseUrlEncodedParameters(String requestBody, Map<String, String> bodies) {
         String[] requests = requestBody.split("&");
         for (String request : requests) {
             String[] requestParts = request.split("=");

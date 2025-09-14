@@ -50,7 +50,7 @@ public class Connector implements Runnable {
         따라서 직접 new ThreadPoolExecutor를 통해 생성하여 대기큐 사이즈 제한과 스레드 종료시간을 설정해줌
          */
         this.threadPool = new ThreadPoolExecutor(
-                maxThreads,               // corePoolSize
+                10,               // corePoolSize
                 maxThreads,               // maximumPoolSize
                 60L, TimeUnit.SECONDS,    // 스레드 종료 시간
                 new ArrayBlockingQueue<>(queueCapacity),  // 큐 크기를 제한하여 요청 큐 생성

@@ -4,11 +4,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class HttpRequestHeaderTest {
+
+    static Stream<Arguments> invalidHeaders() {
+        return Stream.of(
+                Arguments.of(""),
+                Arguments.of((String) null)
+        );
+    }
 
     @Test
     @DisplayName("기본 헤더 파싱")
@@ -75,8 +87,8 @@ class HttpRequestHeaderTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(header.getCookie("JSESSIONID")).isNull();
-            softly.assertThat(header.getCookie("nonexistent")).isNull();
+            softly.assertThat(header.getCookie("JSESSIONID")).isEqualTo("");
+            softly.assertThat(header.getCookie("nonexistent")).isEqualTo("");
         });
     }
 
@@ -92,53 +104,28 @@ class HttpRequestHeaderTest {
         final HttpRequestHeader header = HttpRequestHeader.from(rawHeader);
 
         // then
-        assertThat(header.getContentType()).isEqualTo(ContentType.FORM_URLENCODED);
+        assertThat(header.getContentType()).isEqualTo(ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
     }
 
-    @Test
+    @ParameterizedTest(name = "Content-Length 파싱: {0} -> {1}")
+    @CsvSource({
+            "Content-Length: 52,52",
+            "Content-Length: invalid,0"
+    })
     @DisplayName("Content-Length 헤더 파싱")
-    void parseContentLengthHeader() {
-        // given
+    void parseContentLengthHeader(String contentLengthLine, int expected) {
         final String rawHeader = String.join("\r\n",
                 "Host: localhost:8080",
-                "Content-Length: 52");
-
-        // when
+                contentLengthLine);
         final HttpRequestHeader header = HttpRequestHeader.from(rawHeader);
-
-        // then
-        assertThat(header.getContentLength()).isEqualTo(52);
+        assertThat(header.getContentLength()).isEqualTo(expected);
     }
 
-    @Test
-    @DisplayName("잘못된 Content-Length 헤더")
-    void parseInvalidContentLengthHeader() {
-        // given
-        final String rawHeader = String.join("\r\n",
-                "Host: localhost:8080",
-                "Content-Length: invalid");
-
-        // when
-        final HttpRequestHeader header = HttpRequestHeader.from(rawHeader);
-
-        // then
-        assertThat(header.getContentLength()).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("빈 헤더 문자열")
-    void parseEmptyHeader() {
-        // when & then
-        assertThatThrownBy(() -> HttpRequestHeader.from(""))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("HTTP 요청 헤더는 null이거나 비어있을 수 없습니다");
-    }
-
-    @Test
-    @DisplayName("null 헤더 문자열")
-    void parseNullHeader() {
-        // when & then
-        assertThatThrownBy(() -> HttpRequestHeader.from(null))
+    @ParameterizedTest(name = "잘못된 헤더: '{0}'")
+    @MethodSource("invalidHeaders")
+    @DisplayName("빈/Null 헤더 문자열 예외")
+    void parseInvalidHeader(String raw) {
+        assertThatThrownBy(() -> HttpRequestHeader.from(raw))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("HTTP 요청 헤더는 null이거나 비어있을 수 없습니다");
     }
@@ -172,7 +159,8 @@ class HttpRequestHeaderTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(header.get("Host")).isEqualTo("localhost:8080");
-            softly.assertThat(header.get("Accept")).isEqualTo("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            softly.assertThat(header.get("Accept"))
+                    .isEqualTo("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
             softly.assertThat(header.get("Accept-Language")).isEqualTo("en-US,en;q=0.5");
             softly.assertThat(header.get("Accept-Encoding")).isEqualTo("gzip, deflate");
         });
@@ -213,7 +201,7 @@ class HttpRequestHeaderTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(header.get("Host")).isEqualTo("localhost:8080");
-            softly.assertThat(header.getContentType()).isEqualTo(ContentType.JSON);
+            softly.assertThat(header.getContentType()).isEqualTo(ContentType.APPLICATION_JSON);
         });
     }
 

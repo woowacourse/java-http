@@ -2,7 +2,8 @@ package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
+import common.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,8 @@ class HttpRequestTest {
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: 27"));
-        final HttpRequestBody requestBody = HttpRequestBody.from("account=user&password=1234", ContentType.FORM_URLENCODED);
+        final HttpRequestBody requestBody = HttpRequestBody.from("account=user&password=1234",
+                ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // when
         final HttpRequest request = HttpRequest.from(requestLine, requestHeader, requestBody);
@@ -48,7 +50,7 @@ class HttpRequestTest {
             softly.assertThat(request.getPath()).isEqualTo("/api/login");
             softly.assertThat(request.getVersion()).isEqualTo("1.1");
             softly.assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
-            softly.assertThat(request.getContentType()).isEqualTo(ContentType.FORM_URLENCODED);
+            softly.assertThat(request.getContentType()).isEqualTo(ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
             softly.assertThat(request.getBodyParam("account")).isEqualTo("user");
             softly.assertThat(request.getBodyParam("password")).isEqualTo("1234");
         });

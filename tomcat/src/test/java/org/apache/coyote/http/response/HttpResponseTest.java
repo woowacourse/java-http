@@ -3,77 +3,89 @@ package org.apache.coyote.http.response;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
+import common.HttpStatus;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class HttpResponseTest {
 
-    @Test
-    @DisplayName("기본 HTTP 응답 생성")
-    void createBasicHttpResponse() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
-        final String body = "Hello World!";
+    static Stream<Arguments> emptyBodies() {
+        return Stream.of(Arguments.of(""), Arguments.of((String) null));
+    }
 
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
+    static Stream<Arguments> okResponses() {
+        return Stream.of(
+                Arguments.of(ContentType.TEXT_HTML, "Hello World!",
+                        "Hello World!".getBytes(StandardCharsets.UTF_8).length),
+                Arguments.of(ContentType.TEXT_HTML, "{\"message\":\"success\"}",
+                        "{\"message\":\"success\"}".getBytes(StandardCharsets.UTF_8).length),
+                Arguments.of(ContentType.TEXT_CSS, "body { margin: 0; }",
+                        "body { margin: 0; }".getBytes(StandardCharsets.UTF_8).length),
+                Arguments.of(ContentType.APPLICATION_JAVASCRIPT, "console.log('Hello');",
+                        "console.log('Hello');".getBytes(StandardCharsets.UTF_8).length)
+        );
+    }
+
+    static Stream<Arguments> errorResponses() {
+        return Stream.of(
+                Arguments.of(HttpStatus.NOT_FOUND, "404 - Page Not Found", "HTTP/1.1 404 Not Found",
+                        "404 - Page Not Found".getBytes(StandardCharsets.UTF_8).length),
+                Arguments.of(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error",
+                        "HTTP/1.1 500 Internal Server Error",
+                        "Internal Server Error".getBytes(StandardCharsets.UTF_8).length)
+        );
+    }
+
+    static Stream<Arguments> invalidCookieCases() {
+        return Stream.of(
+                Arguments.of("session\r\nSet-Cookie: admin=true", "value", "쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다"),
+                Arguments.of("session\u0000", "value", "쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다"),
+                Arguments.of(null, "value", "쿠키 이름은 null이거나 비어있을 수 없습니다"),
+                Arguments.of("", "value", "쿠키 이름은 null이거나 비어있을 수 없습니다"),
+                Arguments.of("session", "abc123\r\nSet-Cookie: admin=true", "쿠키 값에 유효하지 않은 문자가 포함되어 있습니다"),
+                Arguments.of("session", "value;path=/", "쿠키 값에 유효하지 않은 문자가 포함되어 있습니다"),
+                Arguments.of("session", null, "쿠키 값은 null일 수 없습니다")
+        );
+    }
+
+    @ParameterizedTest(name = "{0} 응답, 길이={2}")
+    @MethodSource("okResponses")
+    @DisplayName("OK 응답 - 다양한 본문/타입")
+    void createOkResponses(ContentType contentType, String body, int expectedLength) {
+        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
-        // then
         final String responseString = response.toString();
         assertSoftly(softly -> {
             softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
-            softly.assertThat(responseString).contains("Content-Type: text/html;charset=UTF-8");
-            softly.assertThat(responseString).contains("Content-Length: 12");
-            softly.assertThat(responseString).contains("Hello World!");
+            softly.assertThat(responseString).contains(contentType == ContentType.TEXT_CSS ? "Content-Type: text/css" :
+                    contentType == ContentType.APPLICATION_JAVASCRIPT ? "Content-Type: application/javascript" :
+                            "Content-Type: text/html;charset=UTF-8");
+            softly.assertThat(responseString).contains("Content-Length: " + expectedLength);
+            if (body != null) {
+                softly.assertThat(responseString).contains(body);
+            }
         });
     }
 
-    @Test
-    @DisplayName("JSON 응답 생성")
-    void createJsonResponse() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
-        final String jsonBody = "{\"message\":\"success\"}";
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(jsonBody);
+    @ParameterizedTest(name = "204 No Content 바디: {0}")
+    @MethodSource("emptyBodies")
+    @DisplayName("빈/null 본문으로 HTTP 응답 생성")
+    void createResponseWithEmptyOrNullBody(String body) {
+        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.NO_CONTENT);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
+        final HttpResponseBody responseBody = HttpResponseBody.from(
+                body == null ? null : body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
-        // then
-        final String responseString = response.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
-            softly.assertThat(responseString).contains("Content-Length: 21");
-            softly.assertThat(responseString).contains(jsonBody);
-        });
-    }
-
-    @Test
-    @DisplayName("빈 본문으로 HTTP 응답 생성")
-    void createResponseWithEmptyBody() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.NO_CONTENT;
-        final ContentType contentType = ContentType.HTML;
-        final String body = "";
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // then
         final String responseString = response.toString();
         assertSoftly(softly -> {
             softly.assertThat(responseString).contains("HTTP/1.1 204 No Content");
@@ -82,127 +94,21 @@ class HttpResponseTest {
         });
     }
 
-    @Test
-    @DisplayName("null 본문으로 HTTP 응답 생성")
-    void createResponseWithNullBody() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.NO_CONTENT;
-        final ContentType contentType = ContentType.HTML;
-        final String body = null;
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // then
-        final String responseString = response.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(responseString).contains("HTTP/1.1 204 No Content");
-            softly.assertThat(responseString).contains("Content-Length: 0");
-            softly.assertThat(responseString).endsWith("\r\n");
-        });
-    }
-
-    @Test
-    @DisplayName("CSS 파일 응답 생성")
-    void createCssResponse() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.CSS;
-        final String cssBody = "body { margin: 0; }";
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(cssBody);
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // then
-        final String responseString = response.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
-            softly.assertThat(responseString).contains("Content-Type: text/css");
-            softly.assertThat(responseString).contains("Content-Length: 19");
-            softly.assertThat(responseString).contains(cssBody);
-        });
-    }
-
-    @Test
-    @DisplayName("JavaScript 파일 응답 생성")
-    void createJavaScriptResponse() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.JAVASCRIPT;
-        final String jsBody = "console.log('Hello');";
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(jsBody);
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // then
-        final String responseString = response.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(responseString).contains("HTTP/1.1 200 OK");
-            softly.assertThat(responseString).contains("Content-Type: application/javascript");
-            softly.assertThat(responseString).contains("Content-Length: 21");
-            softly.assertThat(responseString).contains(jsBody);
-        });
-    }
-
-    @Test
+    @ParameterizedTest(name = "에러 응답: {0}")
+    @MethodSource("errorResponses")
     @DisplayName("에러 응답 생성")
-    void createErrorResponse() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.NOT_FOUND;
-        final ContentType contentType = ContentType.HTML;
-        final String errorBody = "404 - Page Not Found";
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(errorBody);
+    void createErrorResponses(HttpStatus status, String body, String expectedStatusLine, int expectedLength) {
+        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", status);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
+        final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
-        // then
         final String responseString = response.toString();
         assertSoftly(softly -> {
-            softly.assertThat(responseString).contains("HTTP/1.1 404 Not Found");
+            softly.assertThat(responseString).contains(expectedStatusLine);
             softly.assertThat(responseString).contains("Content-Type: text/html;charset=UTF-8");
-            softly.assertThat(responseString).contains("Content-Length: 20");
-            softly.assertThat(responseString).contains(errorBody);
-        });
-    }
-
-    @Test
-    @DisplayName("서버 에러 응답 생성")
-    void createServerErrorResponse() {
-        // given
-        final String version = "1.1";
-        final HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        final ContentType contentType = ContentType.HTML;
-        final String errorBody = "Internal Server Error";
-
-        // when
-        final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(errorBody);
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // then
-        final String responseString = response.toString();
-        assertSoftly(softly -> {
-            softly.assertThat(responseString).contains("HTTP/1.1 500 Internal Server Error");
-            softly.assertThat(responseString).contains("Content-Type: text/html;charset=UTF-8");
-            softly.assertThat(responseString).contains("Content-Length: 21");
-            softly.assertThat(responseString).contains(errorBody);
+            softly.assertThat(responseString).contains("Content-Length: " + expectedLength);
+            softly.assertThat(responseString).contains(body);
         });
     }
 
@@ -211,18 +117,18 @@ class HttpResponseTest {
     void createResponseWithDifferentHttpVersions() {
         // given
         final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
+        final ContentType contentType = ContentType.TEXT_HTML;
         final String body = "Hello";
 
         // when & then
         final HttpStatusLine statusLine10 = HttpStatusLine.from("1.0", status);
         final HttpResponseHeader header10 = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody10 = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody10 = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response10 = HttpResponse.from(statusLine10, header10, responseBody10);
-        
+
         final HttpStatusLine statusLine11 = HttpStatusLine.from("1.1", status);
         final HttpResponseHeader header11 = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody11 = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody11 = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response11 = HttpResponse.from(statusLine11, header11, responseBody11);
         assertSoftly(softly -> {
             softly.assertThat(response10.toString()).contains("HTTP/1.0 200 OK");
@@ -236,13 +142,13 @@ class HttpResponseTest {
         // given
         final String version = "1.1";
         final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
+        final ContentType contentType = ContentType.TEXT_HTML;
         final String koreanBody = "안녕하세요!";
 
         // when
         final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(koreanBody);
+        final HttpResponseBody responseBody = HttpResponseBody.from(koreanBody.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
         // then
@@ -261,13 +167,13 @@ class HttpResponseTest {
         // given
         final String version = "1.1";
         final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
+        final ContentType contentType = ContentType.TEXT_HTML;
         final String body = "Test";
 
         // when
         final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
         final String responseString = response.toString();
 
@@ -286,13 +192,13 @@ class HttpResponseTest {
         // given
         final String version = "1.1";
         final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
+        final ContentType contentType = ContentType.TEXT_HTML;
         final String body = "Hello";
 
         // when
         final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
         response.setCookie("JSESSIONID", "ABC123");
         response.setCookie("theme", "dark");
@@ -313,13 +219,13 @@ class HttpResponseTest {
         // given
         final String version = "1.1";
         final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
+        final ContentType contentType = ContentType.TEXT_HTML;
         final String body = "Welcome";
 
         // when
         final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
         response.setCookie("username", "gugu");
 
@@ -339,13 +245,13 @@ class HttpResponseTest {
         // given
         final String version = "1.1";
         final HttpStatus status = HttpStatus.OK;
-        final ContentType contentType = ContentType.HTML;
+        final ContentType contentType = ContentType.TEXT_HTML;
         final String body = "No cookies";
 
         // when
         final HttpStatusLine statusLine = HttpStatusLine.from(version, status);
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-        final HttpResponseBody responseBody = HttpResponseBody.from(body);
+        final HttpResponseBody responseBody = HttpResponseBody.from(body.getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
         // then
@@ -366,14 +272,17 @@ class HttpResponseTest {
         final String location = "/dashboard";
 
         // when
-        final HttpResponse response = HttpResponse.redirect(version, location);
+        final HttpStatusLine statusLine = HttpStatusLine.from(version, HttpStatus.FOUND);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
+        header.add("Location", location);
+        final HttpResponseBody responseBody = HttpResponseBody.empty();
+        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
         // then
         final String responseString = response.toString();
         assertSoftly(softly -> {
             softly.assertThat(responseString).contains("HTTP/1.1 302 Found");
             softly.assertThat(responseString).contains("Location: /dashboard");
-            softly.assertThat(responseString).contains("Content-Type: text/html;charset=UTF-8");
             softly.assertThat(responseString).contains("Content-Length: 0");
         });
     }
@@ -386,14 +295,17 @@ class HttpResponseTest {
         final String location = "https://www.example.com/login";
 
         // when
-        final HttpResponse response = HttpResponse.redirect(version, location);
+        final HttpStatusLine statusLine = HttpStatusLine.from(version, HttpStatus.FOUND);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
+        header.add("Location", location);
+        final HttpResponseBody responseBody = HttpResponseBody.empty();
+        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
         // then
         final String responseString = response.toString();
         assertSoftly(softly -> {
             softly.assertThat(responseString).contains("HTTP/1.1 302 Found");
             softly.assertThat(responseString).contains("Location: https://www.example.com/login");
-            softly.assertThat(responseString).contains("Content-Type: text/html;charset=UTF-8");
             softly.assertThat(responseString).contains("Content-Length: 0");
         });
     }
@@ -406,7 +318,11 @@ class HttpResponseTest {
         final String location = "/index";
 
         // when
-        final HttpResponse response = HttpResponse.redirect(version, location);
+        final HttpStatusLine statusLine = HttpStatusLine.from(version, HttpStatus.FOUND);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
+        header.add("Location", location);
+        final HttpResponseBody responseBody = HttpResponseBody.empty();
+        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
         response.setCookie("session", "new_session_id");
 
         // then
@@ -419,108 +335,17 @@ class HttpResponseTest {
         });
     }
 
-    @Test
-    @DisplayName("쿠키 이름에 CRLF 주입 시 예외 발생")
-    void rejectCookieNameWithCRLF() {
-        // given
+    @ParameterizedTest(name = "쿠키 유효성 실패 #{index}")
+    @MethodSource("invalidCookieCases")
+    @DisplayName("쿠키 유효성 검사 예외")
+    void cookieValidationErrors(final String name, final String value, final String expectedMessageContains) {
         final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
+        final HttpResponseBody responseBody = HttpResponseBody.from("test".getBytes(StandardCharsets.UTF_8));
         final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
 
-        // when & then
-        assertThatThrownBy(() -> response.setCookie("session\r\nSet-Cookie: admin=true", "value"))
+        assertThatThrownBy(() -> response.setCookie(name, value))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다");
-    }
-
-    @Test
-    @DisplayName("쿠키 값에 CRLF 주입 시 예외 발생")
-    void rejectCookieValueWithCRLF() {
-        // given
-        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // when & then
-        assertThatThrownBy(() -> response.setCookie("session", "abc123\r\nSet-Cookie: admin=true"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 값에 유효하지 않은 문자가 포함되어 있습니다");
-    }
-
-    @Test
-    @DisplayName("쿠키 이름에 제어문자 주입 시 예외 발생")
-    void rejectCookieNameWithControlCharacters() {
-        // given
-        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // when & then
-        assertThatThrownBy(() -> response.setCookie("session\u0000", "value"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 이름에 유효하지 않은 문자가 포함되어 있습니다");
-    }
-
-    @Test
-    @DisplayName("쿠키 값에 구분자 주입 시 예외 발생")
-    void rejectCookieValueWithSeparators() {
-        // given
-        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // when & then
-        assertThatThrownBy(() -> response.setCookie("session", "value;path=/"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 값에 유효하지 않은 문자가 포함되어 있습니다");
-    }
-
-    @Test
-    @DisplayName("null 쿠키 이름으로 예외 발생")
-    void rejectNullCookieName() {
-        // given
-        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // when & then
-        assertThatThrownBy(() -> response.setCookie(null, "value"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 이름은 null이거나 비어있을 수 없습니다");
-    }
-
-    @Test
-    @DisplayName("빈 쿠키 이름으로 예외 발생")
-    void rejectEmptyCookieName() {
-        // given
-        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // when & then
-        assertThatThrownBy(() -> response.setCookie("", "value"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 이름은 null이거나 비어있을 수 없습니다");
-    }
-
-    @Test
-    @DisplayName("null 쿠키 값으로 예외 발생")
-    void rejectNullCookieValue() {
-        // given
-        final HttpStatusLine statusLine = HttpStatusLine.from("1.1", HttpStatus.OK);
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
-        final HttpResponseBody responseBody = HttpResponseBody.from("test");
-        final HttpResponse response = HttpResponse.from(statusLine, header, responseBody);
-
-        // when & then
-        assertThatThrownBy(() -> response.setCookie("session", null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("쿠키 값은 null일 수 없습니다");
+                .hasMessageContaining(expectedMessageContains);
     }
 }

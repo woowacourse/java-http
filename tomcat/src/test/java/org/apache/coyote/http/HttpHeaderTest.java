@@ -1,9 +1,11 @@
-package org.apache.coyote.http.common;
+package org.apache.coyote.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import common.ContentType;
+import common.HttpConstants;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +61,7 @@ class HttpHeaderTest {
         final String raw = String.join(HttpConstants.CRLF,
                 "content-type: application/x-www-form-urlencoded");
         assertThat(HttpHeader.from(raw).getContentType())
-                .isEqualTo(ContentType.FORM_URLENCODED);
+                .isEqualTo(ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
     }
 
     @Test

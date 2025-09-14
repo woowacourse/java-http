@@ -291,7 +291,7 @@ class Http11ProcessorTest {
         for (int i = 0; i < 100; i++) {
             longPath.append("very-long-path-segment-");
         }
-        
+
         final String request = String.join("\r\n",
                 "GET " + longPath + " HTTP/1.1",
                 "Host: localhost:8080",

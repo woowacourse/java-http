@@ -3,8 +3,8 @@ package org.apache.coyote.http.request;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import common.HttpConstants;
 import java.util.Arrays;
-import org.apache.coyote.http.common.HttpConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +53,7 @@ class HttpCookieTest {
 
         // when
         final String s = cookie.toString();
-        final String payload = s.substring((HttpCookie.HEADER_NAME + ": ").length());
+        final String payload = s.substring((HttpConstants.COOKIE_HEADER_NAME + ": ").length());
         final String[] parts = payload.split(";");
         for (int i = 0; i < parts.length; i++) {
             parts[i] = parts[i].trim();
@@ -61,7 +61,8 @@ class HttpCookieTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(s).startsWith(HttpCookie.HEADER_NAME + HttpConstants.HEADER_VALUE_SEPARATOR + " ");
+            softly.assertThat(s)
+                    .startsWith(HttpConstants.COOKIE_HEADER_NAME + HttpConstants.HEADER_VALUE_SEPARATOR + " ");
             softly.assertThat(Arrays.asList(parts)).containsExactlyInAnyOrder("a=1", "b=2");
         });
     }

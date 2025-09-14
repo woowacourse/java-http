@@ -3,7 +3,7 @@ package org.apache.coyote.http.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ class HttpRequestBodyTest {
         final String rawBody = "account=user&password=1234&email=user%40example.com";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertSoftly(softly -> {
@@ -33,7 +33,7 @@ class HttpRequestBodyTest {
         final String rawBody = "name=John%20Doe&message=Hello%20World%21&email=test%40example.com";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertSoftly(softly -> {
@@ -50,7 +50,7 @@ class HttpRequestBodyTest {
         final String rawBody = "";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertThat(body.getValue("nonexistent")).isEmpty();
@@ -60,7 +60,7 @@ class HttpRequestBodyTest {
     @DisplayName("null 바디")
     void parseNullBody() {
         // when
-        final HttpRequestBody body = HttpRequestBody.from(null, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(null, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertThat(body.getValue("nonexistent")).isEmpty();
@@ -73,7 +73,7 @@ class HttpRequestBodyTest {
         final String rawBody = "account=user&password=1234";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertThat(body.getValue("nonexistent")).isEmpty();
@@ -86,7 +86,7 @@ class HttpRequestBodyTest {
         final String rawBody = "account=user&password=&email=test@example.com";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertSoftly(softly -> {
@@ -103,7 +103,7 @@ class HttpRequestBodyTest {
         final String rawBody = "account=user&invalidparam&password=1234";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertSoftly(softly -> {
@@ -120,7 +120,7 @@ class HttpRequestBodyTest {
         final String rawBody = "token=abc123";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
 
         // then
         assertThat(body.getValue("token")).isEqualTo("abc123");
@@ -133,7 +133,7 @@ class HttpRequestBodyTest {
         final String rawBody = "account=user&password=1234";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.HTML);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.TEXT_HTML);
 
         // then
         assertSoftly(softly -> {
@@ -149,7 +149,7 @@ class HttpRequestBodyTest {
         final String rawBody = "account=user&password=1234&email=test@example.com";
 
         // when
-        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.FORM_URLENCODED);
+        final HttpRequestBody body = HttpRequestBody.from(rawBody, ContentType.APPLICATION_X_WWW_FORM_URLENCODED);
         final String result = body.toString();
 
         // then

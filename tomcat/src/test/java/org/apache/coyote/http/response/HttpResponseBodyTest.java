@@ -2,6 +2,7 @@ package org.apache.coyote.http.response;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class HttpResponseBodyTest {
         final String content = "Hello World!";
 
         // when
-        final HttpResponseBody body = HttpResponseBody.from(content);
+        final HttpResponseBody body = HttpResponseBody.from(content.getBytes(StandardCharsets.UTF_8));
 
         // then
         assertSoftly(softly -> {
@@ -43,7 +44,7 @@ class HttpResponseBodyTest {
         final String koreanContent = "안녕하세요!";
 
         // when
-        final HttpResponseBody body = HttpResponseBody.from(koreanContent);
+        final HttpResponseBody body = HttpResponseBody.from(koreanContent.getBytes(StandardCharsets.UTF_8));
 
         // then
         assertSoftly(softly -> {
@@ -63,7 +64,7 @@ class HttpResponseBodyTest {
         final String largeContent = sb.toString();
 
         // when
-        final HttpResponseBody body = HttpResponseBody.from(largeContent);
+        final HttpResponseBody body = HttpResponseBody.from(largeContent.getBytes(StandardCharsets.UTF_8));
 
         // then
         assertSoftly(softly -> {

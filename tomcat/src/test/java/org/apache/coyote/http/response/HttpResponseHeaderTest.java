@@ -3,30 +3,31 @@ package org.apache.coyote.http.response;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpResponseHeaderTest {
 
-    @Test
+    @ParameterizedTest(name = "ContentType {0} -> {1}")
+    @CsvSource({
+            "TEXT_HTML,Content-Type: text/html;charset=UTF-8",
+            "APPLICATION_JAVASCRIPT,Content-Type: application/javascript;charset=UTF-8",
+            "TEXT_CSS,Content-Type: text/css"
+    })
     @DisplayName("ContentType으로 ResponseHeader 생성")
-    void createWithContentType() {
-        // given
-        final ContentType contentType = ContentType.HTML;
-
-        // when
+    void createWithContentType(ContentType contentType, String expected) {
         final HttpResponseHeader header = HttpResponseHeader.withContentType(contentType);
-
-        // then
-        assertThat(header.toString()).contains("Content-Type: text/html;charset=UTF-8");
+        assertThat(header.toString()).contains(expected);
     }
 
     @Test
     @DisplayName("일반 헤더 추가")
     void addHeader() {
         // given
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
 
         // when
         header.add("Custom-Header", "custom-value");
@@ -39,7 +40,7 @@ class HttpResponseHeaderTest {
     @DisplayName("Set-Cookie 헤더 추가")
     void addSetCookie() {
         // given
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
 
         // when
         header.addSetCookie("sessionId", "ABC123");
@@ -52,7 +53,7 @@ class HttpResponseHeaderTest {
     @DisplayName("여러 쿠키 추가시 마지막 쿠키만 유지")
     void addMultipleCookies() {
         // given
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.HTML);
+        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.TEXT_HTML);
 
         // when
         header.addSetCookie("first", "value1");
@@ -66,23 +67,5 @@ class HttpResponseHeaderTest {
         });
     }
 
-    @Test
-    @DisplayName("JavaScript ContentType으로 ResponseHeader 생성")
-    void createWithJavaScriptContentType() {
-        // when
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.JAVASCRIPT);
 
-        // then
-        assertThat(header.toString()).contains("Content-Type: application/javascript;charset=UTF-8");
-    }
-
-    @Test
-    @DisplayName("CSS ContentType으로 ResponseHeader 생성")
-    void createWithCssContentType() {
-        // when
-        final HttpResponseHeader header = HttpResponseHeader.withContentType(ContentType.CSS);
-
-        // then
-        assertThat(header.toString()).contains("Content-Type: text/css");
-    }
 }

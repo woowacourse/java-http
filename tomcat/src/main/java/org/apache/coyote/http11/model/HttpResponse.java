@@ -12,8 +12,8 @@ public class HttpResponse {
     private final Map<String, String> headers;
     private String body;
 
-    public HttpResponse() {
-        this.httpVersion = "HTTP/1.1";
+    public HttpResponse(String httpVersion) {
+        this.httpVersion = httpVersion;
         this.statusCode = StatusCode.INTERNAL_SERVER_ERROR;
         this.headers = new HashMap<>();
         setHeader("Content-Type", ContentType.DEFAULT.getValue());

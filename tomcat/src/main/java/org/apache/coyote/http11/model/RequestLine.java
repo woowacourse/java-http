@@ -50,6 +50,10 @@ public class RequestLine {
         return path;
     }
 
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
     public String getQueryParameterValue(String key) {
         return queryParameter.getValue(key);
     }

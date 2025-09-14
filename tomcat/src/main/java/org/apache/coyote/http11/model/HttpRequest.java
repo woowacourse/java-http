@@ -60,6 +60,10 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
+    public String getHttpVersion() {
+        return requestLine.getHttpVersion();
+    }
+
     public String getQueryParameter(String key) {
         return requestLine.getQueryParameterValue(key);
     }

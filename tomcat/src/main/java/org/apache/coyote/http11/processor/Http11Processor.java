@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var httpRequest = HttpRequest.from(inputStream);
-            final var httpResponse = new HttpResponse();
+            final var httpResponse = new HttpResponse(httpRequest.getHttpVersion());
 
             final var session = SessionManager.resolveSession(httpRequest, httpResponse);
 

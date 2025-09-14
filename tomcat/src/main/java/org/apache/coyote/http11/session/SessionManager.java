@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,8 +7,9 @@ import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
+
+    private final Map<String, Session> SESSIONS = new HashMap<>();
 
     public static SessionManager getInstance() {
         return INSTANCE;
@@ -29,5 +30,14 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public void changeSessionId(Session session) {
+        if (session == null) {
+            throw new IllegalArgumentException("session should not be null");
+        }
+        SESSIONS.remove(session.getId());
+        session.changeId();
+        SESSIONS.put(session.getId(), session);
     }
 }

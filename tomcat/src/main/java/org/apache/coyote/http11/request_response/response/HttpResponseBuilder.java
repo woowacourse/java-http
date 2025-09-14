@@ -1,8 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request_response.response;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.coyote.http11.request_response.HttpStatus;
+import org.apache.coyote.http11.request_response.HttpHeader;
 
 public class HttpResponseBuilder {
     private HttpStatus httpStatus;

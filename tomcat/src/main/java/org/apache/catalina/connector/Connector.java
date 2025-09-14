@@ -29,7 +29,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.stopped = false;
         this.serverSocket = createServerSocket(port, acceptCount);
-        executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

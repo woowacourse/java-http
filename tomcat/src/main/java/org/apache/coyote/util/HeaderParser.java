@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.dto.HttpHeader;
 
 public class HeaderParser {
 
-    public static Map<String, String> parseHeader(BufferedReader reader) throws IOException {
+    public static HttpHeader parseHeader(BufferedReader reader) throws IOException {
         Map<String, String> header = new HashMap<>();
         String line;
 
@@ -22,16 +23,16 @@ public class HeaderParser {
 
             header.put(key, value);
         }
-        return header;
+        return new HttpHeader(header);
     }
 
-    public static Map<String, String> createRedirectHeaders(String location, HttpCookie cookie, String sessionId) {
+    public static HttpHeader createRedirectHeaders(String location, HttpCookie cookie, String sessionId) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Location", location);
         if (cookie != null && sessionId != null) {
             headers.put("Set-Cookie", cookie.createSessionCookie(sessionId));
         }
-        return headers;
+        return new HttpHeader(headers);
     }
 
 }

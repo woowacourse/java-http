@@ -1,12 +1,11 @@
 package org.apache.coyote.dto;
 
-import java.util.Map;
 import org.apache.coyote.render.HttpStatus;
 
 public class HttpResponse{
     private String version;
     private int statusCode;
-    private Map<String,String> headers;
+    private HttpHeader headers;
     private String contentType;
     private String body;
 
@@ -22,7 +21,7 @@ public class HttpResponse{
                 .append("\r\n");
 
         if (headers != null) {
-            headers.forEach((key, value) ->
+            headers.getHeaders().forEach((key, value) ->
                     response.append(key).append(": ").append(value).append("\r\n"));
         }
 
@@ -43,7 +42,7 @@ public class HttpResponse{
         this.statusCode = statusCode;
     }
 
-    public void setHeaders(Map<String, String> headers) {
+    public void setHeaders(HttpHeader headers) {
         this.headers = headers;
     }
 

@@ -1,6 +1,7 @@
 package org.apache.coyote.util;
 
 import java.util.Map;
+import org.apache.coyote.dto.HttpHeader;
 import org.apache.coyote.dto.HttpResponse;
 
 public class HttpResponseBuilder {
@@ -22,7 +23,7 @@ public class HttpResponseBuilder {
     public static void redirectResponse(
             String version,
             int statusCode,
-            Map<String, String> headers,
+            HttpHeader headers,
             HttpResponse response
     ) {
         response.setVersion(version);

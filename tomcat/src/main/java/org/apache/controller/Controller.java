@@ -2,11 +2,12 @@ package org.apache.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Map;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 
 public interface Controller {
 
-    boolean isProcessable(String path);
+    boolean isProcessable(HttpRequest httpRequest);
 
-    Map<String, Object> process(Map<String, String> requests) throws URISyntaxException, IOException;
+    HttpResponse process(HttpRequest httpRequest) throws URISyntaxException, IOException;
 }

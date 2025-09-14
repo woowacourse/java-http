@@ -1,23 +1,22 @@
 package org.apache.controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 
 public class BasicController implements Controller {
 
     @Override
-    public boolean isProcessable(final String path) {
-        return path.equals("/");
+    public boolean isProcessable(HttpRequest httpRequest) {
+        return httpRequest.pathEquals("/");
     }
 
     @Override
-    public Map<String, Object> process(final Map<String, String> requests) {
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("responseBody", "Hello world!");
-        response.put("status", HttpStatus.OK);
+    public HttpResponse process(HttpRequest httpRequest) {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
+        httpResponse.setResponseBody("Hello world!");
+        httpResponse.setHttpStatus(HttpStatus.OK);
 
-        return response;
+        return httpResponse;
     }
 }

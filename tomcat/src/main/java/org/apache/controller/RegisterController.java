@@ -2,86 +2,53 @@ package org.apache.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.view.ViewUtils;
 
 public class RegisterController implements Controller {
 
     @Override
-    public boolean isProcessable(final String path) {
-        return path.contains("/register");
+    public boolean isProcessable(HttpRequest httpRequest) {
+        return httpRequest.pathEquals("/register");
     }
 
     @Override
-    public Map<String, Object> process(final Map<String, String> requests) throws URISyntaxException, IOException {
-        Map<String, Object> response = new HashMap<>();
-        String method = requests.get("Method");
-
-        if (method.equals("POST")) {
-            response = postRegister(requests);
-        }
+    public HttpResponse process(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
+        String method = httpRequest.getMethod();
 
         if (method.equals("GET")) {
-            response = getRegister(requests);
+            return doGet(httpResponse);
         }
-        return response;
+        return doPost(httpRequest, httpResponse);
     }
 
-    public Map<String, Object> postRegister(final Map<String, String> requests) throws IOException, URISyntaxException {
-        Map<String, Object> response = new HashMap<>();
-        String filePath = "/index.html";
-        final ClassLoader classLoader = getClass().getClassLoader();
-        final URL url = classLoader.getResource("static" + filePath);
-
-        if (url == null) {
-            throw new IOException("파일이 존재하지 않습니다.");
-        }
-
-        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
-        final Path path = resourceFile.toPath();
-
+    public HttpResponse doPost(HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
         try {
-            String account = requests.get("account");
-            String password = requests.get("password");
-            String email = requests.get("email");
+            String account = httpRequest.getBodyAttribute("account");
+            String password = httpRequest.getBodyAttribute("password");
+            String email = httpRequest.getBodyAttribute("email");
 
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
+            httpResponse.redirect("/login.html");
 
-            response.put("responseBody", new String(Files.readAllBytes(path)));
-            response.put("status", HttpStatus.FOUND);
+            return httpResponse;
         } catch (Exception e) {
-            // TODO: 회원가입 실패 시 예외처
+            // TODO: 회원가입 실패 시 예외처리
         }
 
-        return response;
+        return httpResponse;
     }
 
-    public Map<String, Object> getRegister(final Map<String, String> requests) throws IOException, URISyntaxException {
-        Map<String, Object> response = new HashMap<>();
-
-        String filePath = requests.get("Path") + ".html";
-        final ClassLoader classLoader = getClass().getClassLoader();
-        final URL url = classLoader.getResource("static" + filePath);
-
-        if (url == null) {
-            throw new IOException("파일이 존재하지 않습니다.");
-        }
-
-        final File resourceFile = new File(Objects.requireNonNull(url).toURI());
-        final Path path = resourceFile.toPath();
-
-        response.put("responseBody", new String(Files.readAllBytes(path)));
-        response.put("status", HttpStatus.OK);
-
-        return response;
+    public HttpResponse doGet(HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
+        httpResponse.setHttpStatus(HttpStatus.OK);
+        return ViewUtils.render(httpResponse, "/register.html");
     }
 }

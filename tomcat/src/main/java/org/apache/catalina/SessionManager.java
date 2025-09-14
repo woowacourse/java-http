@@ -1,14 +1,14 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.util.Cookie;
 
 public class SessionManager implements org.apache.coyote.SessionManager {
 
     public static final String JSESSIONID = "JSESSIONID";
-    private final Map<String, org.apache.coyote.Session> SESSIONS = new HashMap<>();
+    private final Map<String, org.apache.coyote.Session> SESSIONS = new ConcurrentHashMap<>();
 
     public SessionManager() {
     }
@@ -31,7 +31,7 @@ public class SessionManager implements org.apache.coyote.SessionManager {
 
     @Override
     public void add(final org.apache.coyote.Session session) {
-        SESSIONS.put(session.getId(), session);
+        SESSIONS.putIfAbsent(session.getId(), session);
     }
 
     @Override

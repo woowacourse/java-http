@@ -19,6 +19,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 200;
+    private static final int SHUTDOWN_TIMEOUT_SECONDS = 30;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
@@ -76,7 +77,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {  // 새로 추가된 조건
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -93,7 +96,26 @@ public class Connector implements Runnable {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("서버 소켓 닫는 중 이상 발생: {}", e.getMessage(), e);
+        }
+        shutdownExecutor();
+    }
+
+    private void shutdownExecutor() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.warn("강제 셧다운 진행");
+                executor.shutdownNow();
+
+                if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    log.error("강제 셧다운 실패");
+                }
+            }
+        } catch (InterruptedException e) {
+            log.warn("ExecutorService 종료 중 이상 발생");
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

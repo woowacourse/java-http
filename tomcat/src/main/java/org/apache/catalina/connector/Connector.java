@@ -1,15 +1,16 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -17,6 +18,8 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_BLOCKING_QUEUE_SIZE = 100;
+    private static final int DEFAULT_CORE_POOL_SIZE = 20;
     private static final int DEFAULT_MAX_THREADS = 200;
 
     private final ServerSocket serverSocket;
@@ -24,15 +27,20 @@ public class Connector implements Runnable {
 
     private boolean stopped;
 
-
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(final int port, final int acceptCount, final int corePoleSize, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.threadPool = Executors.newFixedThreadPool(Math.min(DEFAULT_MAX_THREADS, maxThreads));
+        this.threadPool = new ThreadPoolExecutor(
+                Math.min(DEFAULT_CORE_POOL_SIZE, corePoleSize),
+                Math.min(DEFAULT_MAX_THREADS, maxThreads),
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_BLOCKING_QUEUE_SIZE),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

@@ -1,10 +1,11 @@
 package org.apache.coyote.http.request;
 
-import static org.apache.coyote.http.common.HttpConstants.HTTP_PROTOCOL_PREFIX;
-import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
-import static org.apache.coyote.http.common.HttpConstants.PARAM_SEPARATOR;
-import static org.apache.coyote.http.common.HttpConstants.QUERY_STRING;
+import static common.HttpConstants.HTTP_PROTOCOL_PREFIX;
+import static common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static common.HttpConstants.PARAM_SEPARATOR;
+import static common.HttpConstants.QUERY_STRING;
 
+import common.HttpMethod;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

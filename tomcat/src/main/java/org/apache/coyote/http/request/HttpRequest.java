@@ -1,11 +1,13 @@
 package org.apache.coyote.http.request;
 
-import static org.apache.coyote.http.common.HttpConstants.CRLF;
+import static common.HttpConstants.CRLF;
 
+import common.HttpMethod;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
+import java.util.Map;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
@@ -41,6 +43,10 @@ public class HttpRequest {
 
     public String getHeader(final String name) {
         return header.get(name);
+    }
+
+    public Map<String, String> getHeaders() {
+        return header.asMap();
     }
 
     public String getCookie(final String name) {

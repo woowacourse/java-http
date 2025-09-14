@@ -1,7 +1,7 @@
 package org.apache.coyote.http.request;
 
-import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
-import static org.apache.coyote.http.common.HttpConstants.PARAM_SEPARATOR;
+import static common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static common.HttpConstants.PARAM_SEPARATOR;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -10,7 +10,7 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.http.common.ContentType;
+import common.ContentType;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,7 +34,7 @@ public class HttpRequestBody {
             return map;
         }
 
-        if (contentType == ContentType.FORM_URLENCODED) {
+        if (contentType == ContentType.APPLICATION_X_WWW_FORM_URLENCODED) {
             parseFormData(rawBody, map);
         }
 

@@ -7,29 +7,28 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpResponseBody {
 
-    private final String content;
+    private final byte[] data;
 
-    public static HttpResponseBody from(final String content) {
-        if (content == null) {
+    public static HttpResponseBody from(final byte[] data) {
+        if (data == null) {
             return HttpResponseBody.empty();
         }
-        return new HttpResponseBody(content);
+        return new HttpResponseBody(data);
     }
 
     public static HttpResponseBody empty() {
-        return new HttpResponseBody("");
+        return new HttpResponseBody(new byte[0]);
     }
 
     public int getContentLength() {
-        if (content == null) {
+        if (data == null) {
             return 0;
         }
-        return content.getBytes(StandardCharsets.UTF_8).length;
-
+        return data.length;
     }
 
     @Override
     public String toString() {
-        return content;
+        return new String(data, StandardCharsets.UTF_8);
     }
 }

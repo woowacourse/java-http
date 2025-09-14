@@ -1,15 +1,15 @@
-package com.techcourse.web.session;
+package common.session;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.catalina.Manager;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class SessionManager implements Manager {
 
+    public static final String JSESSIONID = "JSESSIONID";
     private static final SessionManager INSTANCE = new SessionManager();
 
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();

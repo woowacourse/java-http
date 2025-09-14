@@ -1,7 +1,9 @@
-package org.apache.coyote.http.common;
+package org.apache.coyote.http;
 
-import static org.apache.coyote.http.common.HttpConstants.CRLF;
+import static common.HttpConstants.CRLF;
 
+import common.ContentType;
+import common.HttpConstants;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -79,6 +81,10 @@ public class HttpHeader {
 
     public void add(final String name, final String value) {
         headers.put(name, value);
+    }
+
+    public Map<String, String> asMap() {
+        return new HashMap<>(headers);
     }
 
     @Override

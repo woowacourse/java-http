@@ -1,9 +1,12 @@
 package org.apache.coyote.http.request;
 
+import static common.HttpConstants.COOKIE_HEADER_NAME;
+
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.http.common.ContentType;
-import org.apache.coyote.http.common.HttpHeader;
+import common.ContentType;
+import org.apache.coyote.http.HttpHeader;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpRequestHeader {
@@ -17,7 +20,7 @@ public class HttpRequestHeader {
         }
 
         final HttpHeader header = HttpHeader.from(rawRequestHeader);
-        final HttpCookie cookie = HttpCookie.from(header.get(HttpCookie.HEADER_NAME));
+        final HttpCookie cookie = HttpCookie.from(header.get(COOKIE_HEADER_NAME));
 
         return new HttpRequestHeader(header, cookie);
     }
@@ -36,6 +39,10 @@ public class HttpRequestHeader {
 
     public int getContentLength() {
         return header.getContentLength();
+    }
+
+    public Map<String, String> asMap() {
+        return header.asMap();
     }
 
     @Override

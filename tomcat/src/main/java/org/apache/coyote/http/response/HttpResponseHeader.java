@@ -1,22 +1,17 @@
 package org.apache.coyote.http.response;
 
-import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static common.HttpConstants.SET_COOKIE_HEADER_NAME;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.http.common.ContentType;
-import org.apache.coyote.http.common.HttpHeader;
+import common.ContentType;
+import org.apache.coyote.http.HttpHeader;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpResponseHeader {
 
-    public static final String SET_COOKIE_HEADER_NAME = "Set-Cookie";
-
     private final HttpHeader header;
-
-    public static HttpResponseHeader empty() {
-        return new HttpResponseHeader(HttpHeader.empty());
-    }
 
     public static HttpResponseHeader withContentType(final ContentType contentType) {
         final HttpHeader header = HttpHeader.empty();

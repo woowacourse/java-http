@@ -1,8 +1,9 @@
 package org.apache.coyote.http.request;
 
-import static org.apache.coyote.http.common.HttpConstants.HEADER_VALUE_SEPARATOR;
-import static org.apache.coyote.http.common.HttpConstants.KEY_VALUE_SEPARATOR;
-import static org.apache.coyote.http.common.HttpConstants.VALUE_SEPARATOR;
+import static common.HttpConstants.COOKIE_HEADER_NAME;
+import static common.HttpConstants.HEADER_VALUE_SEPARATOR;
+import static common.HttpConstants.KEY_VALUE_SEPARATOR;
+import static common.HttpConstants.VALUE_SEPARATOR;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
@@ -15,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpCookie {
-
-    public static final String HEADER_NAME = "Cookie";
 
     private final Map<String, String> values;
 
@@ -46,7 +45,7 @@ public class HttpCookie {
     }
 
     public String get(final String name) {
-        return values.get(name);
+        return values.getOrDefault(name, "");
     }
 
     @Override
@@ -54,10 +53,10 @@ public class HttpCookie {
         if (values.isEmpty()) {
             return "";
         }
-        
+
         final StringBuilder sb = new StringBuilder();
-        sb.append(HEADER_NAME).append(HEADER_VALUE_SEPARATOR).append(" ");
-        
+        sb.append(COOKIE_HEADER_NAME).append(HEADER_VALUE_SEPARATOR).append(" ");
+
         values.forEach((key, value) ->
                 sb.append(key).append(KEY_VALUE_SEPARATOR).append(value).append(VALUE_SEPARATOR).append(" "));
 

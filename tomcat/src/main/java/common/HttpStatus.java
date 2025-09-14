@@ -1,4 +1,4 @@
-package org.apache.coyote.http.response;
+package common;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

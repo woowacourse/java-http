@@ -29,7 +29,7 @@ public class HttpCookie {
         return cookies.containsKey(name);
     }
     
-    public boolean hasJSESSIONID() {
+    public boolean hasJSessionId() {
         return hasCookie("JSESSIONID");
     }
 

@@ -1,22 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.controller.Controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-
-    public static final String HEADER_DELIMITER = "\\s+";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -34,43 +30,45 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-            final var outputStream = connection.getOutputStream();
+        try (final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+            final var outputStream = connection.getOutputStream()) {
 
-            String requestLine = br.readLine();
-            String[] requestParts = requestLine.split(HEADER_DELIMITER);
-            String httpMethod = requestParts[0];
-            String requestUri = requestParts[1];
+            HttpRequest request = getHttpRequest(br);
+            RequestMapping requestMapping = new RequestMapping();
+            Controller controller = requestMapping.getController(request);
+            HttpResponse response = controller.service(request);
 
-            Map<String, String> headers = parseHttpHeaders(br);
-            String body = "POST".equals(httpMethod) ? getBody(headers, br) : "";
-            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-
-            if (isStaticResource(requestUri)) {
-                StaticResourceProcessor.processStatic(requestUri, outputStream);
-            } else {
-                DynamicRequestProcessor.processDynamic(httpMethod, requestUri, body, httpCookie, outputStream);
+            if (response == null) {
+                log.error("요청에 대한 응답이 NULL 입니다: {} {}", request.getMethod(), request.getRequestUri());
+                return;
             }
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+            outputStream.write(response.toHttpString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private boolean isStaticResource(String requestUri) {
-        return requestUri.contains(".") && !requestUri.contains("/login") && !requestUri.contains("/register");
+    private HttpRequest getHttpRequest(BufferedReader br) throws IOException {
+        String requestLine = br.readLine();
+        HttpHeaders headers = parseHttpHeaders(br);
+
+        RequestLineInfo requestLineInfo = RequestLineInfo.from(requestLine);
+        String body = HttpMethod.POST.equals(requestLineInfo.method()) ? getBody(headers, br) : "";
+        return HttpRequest.from(requestLineInfo, headers, body);
     }
 
-    private Map<String, String> parseHttpHeaders(BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private HttpHeaders parseHttpHeaders(BufferedReader br) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
         String line;
-        while (!(line = br.readLine()).isEmpty()) {
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(":", 2);
-            headers.put(headerParts[0].strip(), headerParts[1].strip());
+            headers.add(headerParts[0].strip(), headerParts[1].strip());
         }
         return headers;
     }
 
-    private String getBody(Map<String, String> headers, BufferedReader br) throws IOException {
+    private String getBody(HttpHeaders headers, BufferedReader br) throws IOException {
         int contentLength = Integer.parseInt(headers.get("Content-Length"));
         char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);

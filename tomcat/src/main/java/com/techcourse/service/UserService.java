@@ -6,12 +6,14 @@ import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.Cookies;
-import org.apache.coyote.http11.handler.controllerResponse.ControllerResponse;
-import org.apache.coyote.http11.handler.controllerResponse.JsonResponse;
-import org.apache.coyote.http11.handler.controllerResponse.StaticFileResponse;
-import org.apache.coyote.http11.httpRequest.CookieParser;
-import org.apache.coyote.http11.httpRequest.HttpRequest;
+import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.handler.applicationRequest.ApplicationRequest;
+import org.apache.coyote.http11.handler.applicationResponse.ApplicationResponse;
+import org.apache.coyote.http11.handler.applicationResponse.JsonResponse;
+import org.apache.coyote.http11.handler.applicationResponse.StaticFileResponse;
+import org.apache.coyote.http11.general.CookieParser;
 import org.apache.coyote.http11.httpResponse.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,20 +27,20 @@ public class UserService {
         this.sessionManager = sessionManager;
     }
 
-    public ControllerResponse loginPage(HttpRequest httpRequest) {
-        String sessionId = findSessionId(httpRequest);
+    public ApplicationResponse loginPage(ApplicationRequest applicationRequest) {
+        String sessionId = findSessionId(applicationRequest);
         if (sessionId == null || !isValidSession(sessionId)) {
-            JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-            response.addHeader("Location", "/login.html");
-            return response;
+            HttpHeaders headers = HttpHeaders.empty();
+            headers.add(CommonHeaderKeys.LOCATION.getKey(), "/login.html");
+            return new JsonResponse(HttpStatus.FOUND, headers, "");
         }
-        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader("Location", "/index.html");
-        return response;
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
+        return new JsonResponse(HttpStatus.FOUND, headers, "");
     }
 
-    private String findSessionId(HttpRequest httpRequest) {
-        Cookies cookies = CookieParser.parseFromHttpRequest(httpRequest);
+    private String findSessionId(ApplicationRequest applicationRequest) {
+        Cookies cookies = CookieParser.parseFromHeaders(applicationRequest.getHeaders());
         if (cookies.isEmpty()) {
             return null;
         }
@@ -51,16 +53,16 @@ public class UserService {
         return user != null;
     }
 
-    public ControllerResponse login(HttpRequest httpRequest) {
-        String account = httpRequest.getBodyValueOf("account");
-        String password = httpRequest.getBodyValueOf("password");
+    public ApplicationResponse login(ApplicationRequest applicationRequest) {
+        String account = applicationRequest.getBodyValueOf("account");
+        String password = applicationRequest.getBodyValueOf("password");
         if (account != null && password != null) {
             return handleLoginResult(account, password);
         }
         throw new IllegalArgumentException("잘못된 요청입니다.");
     }
 
-    private ControllerResponse handleLoginResult(String account, String password) {
+    private ApplicationResponse handleLoginResult(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
             .orElse(null);
         if (user == null || !user.isPasswordValid(password)) {
@@ -68,10 +70,10 @@ public class UserService {
         }
         logger.info(user.toString());
         Session session = buildSessionOfUser(user);
-        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-        response.addHeader("Location", "/index.html");
-        return response;
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
+        headers.add(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
+        return new JsonResponse(HttpStatus.FOUND, headers, "");
     }
 
     private Session buildSessionOfUser(User user) {
@@ -81,20 +83,20 @@ public class UserService {
         return session;
     }
 
-    public ControllerResponse registerPage() {
+    public ApplicationResponse registerPage() {
         return new StaticFileResponse(HttpStatus.OK, "register");
     }
 
-    public ControllerResponse register(HttpRequest httpRequest) {
-        String account = httpRequest.getBodyValueOf("account");
-        String email = httpRequest.getBodyValueOf("email");
-        String password = httpRequest.getBodyValueOf("password");
+    public ApplicationResponse register(ApplicationRequest applicationRequest) {
+        String account = applicationRequest.getBodyValueOf("account");
+        String email = applicationRequest.getBodyValueOf("email");
+        String password = applicationRequest.getBodyValueOf("password");
         User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
         Session session = buildSessionOfUser(newUser);
-        JsonResponse response = new JsonResponse(HttpStatus.FOUND, "");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-        response.addHeader("Location", "/index.html");
-        return response;
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add(CommonHeaderKeys.SET_COOKIE.getKey(), "JSESSIONID=" + session.getId());
+        headers.add(CommonHeaderKeys.LOCATION.getKey(), "/index.html");
+        return new JsonResponse(HttpStatus.FOUND, headers, "");
     }
 }

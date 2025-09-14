@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpRequest;
 
 import org.apache.coyote.http11.general.HttpBody;
 import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.general.HttpProtocolVersion;
 
 public class HttpRequest {
 
@@ -19,19 +20,23 @@ public class HttpRequest {
         return this.requestLine.pathEquals(path);
     }
 
-    public HttpMethod getMethod() {
-        return this.requestLine.getMethod();
+    public HttpProtocolVersion getProtocolVersion() {
+        return this.requestLine.getProtocolVersion();
     }
 
     public String getPath() {
         return this.requestLine.getPath();
     }
 
-    public String getHeaderValueOf(String key) {
-        return this.headers.getHeaderValueOf(key);
+    public HttpMethod getMethod() {
+        return this.requestLine.getMethod();
     }
 
-    public String getBodyValueOf(String key) {
-        return body.get(key);
+    public HttpHeaders getHeaders() {
+        return this.headers;
+    }
+
+    public HttpBody getBody() {
+        return this.body;
     }
 }

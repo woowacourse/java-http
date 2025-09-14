@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.general.CommonHeaderKeys;
 import org.apache.coyote.http11.general.HttpBody;
 import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.general.HttpProtocolVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,8 @@ public class HttpRequestParser {
         HttpMethod method = HttpMethod.from(splittedRequestLine[0]);
         String path = parsePath(splittedRequestLine[1]);
         QueryStrings queryStrings = parseQueryStrings(splittedRequestLine[1]);
-        return new RequestLine(method, path, queryStrings);
+        HttpProtocolVersion protocolVersion = HttpProtocolVersion.from(splittedRequestLine[2]);
+        return new RequestLine(method, path, queryStrings, protocolVersion);
     }
 
     private static String readOneLineOfInputStream(BufferedReader bufferedReader) throws IOException {
@@ -95,7 +98,7 @@ public class HttpRequestParser {
 
     private static HttpBody parseBody(HttpHeaders headers, BufferedReader bufferedReader) throws IOException {
         int contentLength = 0;
-        String rawContentLength = headers.getHeaderValueOf("Content-Length");
+        String rawContentLength = headers.getHeaderValueOf(CommonHeaderKeys.CONTENT_LENGTH.getKey());
         if (rawContentLength != null) {
             contentLength = Integer.parseInt(rawContentLength);
         }

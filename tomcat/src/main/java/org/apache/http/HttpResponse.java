@@ -20,6 +20,10 @@ public class HttpResponse {
         return response;
     }
 
+    public static HttpResponse createEmptyResponse(HttpRequest request) {
+        return new HttpResponse(request.getProtocol());
+    }
+
     public void redirect(String redirectPath) {
         setHttpStatus(HttpStatus.FOUND);
         setLocationHeader(redirectPath);

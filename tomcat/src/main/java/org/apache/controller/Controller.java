@@ -9,5 +9,5 @@ public interface Controller {
 
     boolean isProcessable(HttpRequest httpRequest);
 
-    HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException;
+    HttpResponse process(HttpRequest httpRequest) throws URISyntaxException, IOException;
 }

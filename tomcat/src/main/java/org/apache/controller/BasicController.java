@@ -12,7 +12,8 @@ public class BasicController implements Controller {
     }
 
     @Override
-    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public HttpResponse process(HttpRequest httpRequest) {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
         httpResponse.setResponseBody("Hello world!");
         httpResponse.setHttpStatus(HttpStatus.OK);
 

@@ -26,16 +26,18 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse)
+    public HttpResponse process(HttpRequest httpRequest)
             throws URISyntaxException, IOException {
-        if (httpRequest.getMethod().equals("GET")) {
-            return getLogin(httpRequest, httpResponse);
+        String method = httpRequest.getMethod();
+        if (method.equals("GET")) {
+            return doGet(httpRequest);
         }
-        return postLogin(httpRequest, httpResponse);
+        return doPost(httpRequest);
     }
 
-    private HttpResponse getLogin(HttpRequest httpRequest, HttpResponse httpResponse)
+    private HttpResponse doGet(HttpRequest httpRequest)
             throws IOException, URISyntaxException {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
         if (httpRequest.containsCookie()) {
             HttpCookie httpCookie = httpRequest.getHttpCookie();
 
@@ -58,8 +60,8 @@ public class LoginController implements Controller {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private HttpResponse postLogin(HttpRequest httpRequest, HttpResponse httpResponse)
-            throws URISyntaxException, IOException {
+    private HttpResponse doPost(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
         String account = httpRequest.getBodyAttribute("account");
         String password = httpRequest.getBodyAttribute("password");
 
@@ -67,24 +69,24 @@ public class LoginController implements Controller {
                 .orElseThrow(IllegalArgumentException::new);
 
         if (!user.checkPassword(password)) {
-            return postLoginFailed(httpResponse);
+            return postFailed(httpResponse);
         }
 
         if (user.checkPassword(password)) {
-            return postLoginSuccess(user, httpResponse);
+            return postSuccess(user, httpResponse);
         }
 
         return HttpResponse.notFound();
     }
 
-    private HttpResponse postLoginFailed(HttpResponse httpResponse)
+    private HttpResponse postFailed(HttpResponse httpResponse)
             throws IOException, URISyntaxException {
         httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
         httpResponse.setHttpCookie(null);
         return ViewUtils.render(httpResponse, "/401.html");
     }
 
-    private HttpResponse postLoginSuccess(User user, HttpResponse httpResponse) {
+    private HttpResponse postSuccess(User user, HttpResponse httpResponse) {
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);
         session.setAttribute("user", user);

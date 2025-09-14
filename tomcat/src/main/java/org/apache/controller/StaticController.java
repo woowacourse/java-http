@@ -19,8 +19,8 @@ public class StaticController implements Controller {
     }
 
     @Override
-    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse)
-            throws IOException, URISyntaxException {
+    public HttpResponse process(HttpRequest httpRequest) throws IOException, URISyntaxException {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
         httpResponse.setHttpStatus(HttpStatus.OK);
         return ViewUtils.render(httpResponse, httpRequest.getPath());
     }

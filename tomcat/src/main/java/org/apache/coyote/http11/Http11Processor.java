@@ -51,14 +51,13 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
-            HttpResponse emptyHttpResponse = new HttpResponse(httpRequest.getProtocol());
 
             Controller processorableController = controllers.stream()
                     .filter(controller -> controller.isProcessable(httpRequest))
                     .findFirst()
                     .orElse(new NotFoundController());
 
-            HttpResponse httpResponse = processorableController.process(httpRequest, emptyHttpResponse);
+            HttpResponse httpResponse = processorableController.process(httpRequest);
 
             String response = makeResponse(httpRequest, httpResponse);
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.view.ViewUtils;
 
 public class RegisterController implements Controller {
@@ -16,22 +17,17 @@ public class RegisterController implements Controller {
     }
 
     @Override
-    public HttpResponse process(HttpRequest httpRequest, HttpResponse httpResponse)
-            throws URISyntaxException, IOException {
+    public HttpResponse process(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        HttpResponse httpResponse = HttpResponse.createEmptyResponse(httpRequest);
         String method = httpRequest.getMethod();
 
         if (method.equals("GET")) {
-            httpResponse = getRegister(httpResponse);
+            return doGet(httpResponse);
         }
-
-        if (method.equals("POST")) {
-            httpResponse = postRegister(httpRequest, httpResponse);
-        }
-
-        return httpResponse;
+        return doPost(httpRequest, httpResponse);
     }
 
-    public HttpResponse postRegister(HttpRequest httpRequest, HttpResponse httpResponse)
+    public HttpResponse doPost(HttpRequest httpRequest, HttpResponse httpResponse)
             throws IOException, URISyntaxException {
         try {
             String account = httpRequest.getBodyAttribute("account");
@@ -50,8 +46,9 @@ public class RegisterController implements Controller {
         return httpResponse;
     }
 
-    public HttpResponse getRegister(HttpResponse httpResponse)
+    public HttpResponse doGet(HttpResponse httpResponse)
             throws IOException, URISyntaxException {
+        httpResponse.setHttpStatus(HttpStatus.OK);
         return ViewUtils.render(httpResponse, "/register.html");
     }
 }

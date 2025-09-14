@@ -19,8 +19,14 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_CORE_POOL_SIZE = 100;
-    private static final int DEFAULT_MAX_THREADS = 200;
+    //NumberOfCores  NumberOfLogicalProcessors
+    //4              8
+    //이게 내 컴퓨터 상태니까, 이론상 8코어 사용 가능한거네 하이퍼 스레딩 덕분에
+    //db가 없고 다 인메모리니까, disk i/o는 없을 것 같은데 그러면 wait time을 0이라고 했을 때
+    //8 곱하기 (1 + 0)이니까 그러면 8이네
+    //Optimal Threads = Number of Cores * (1 + Wait time / Service time)
+    private static final int DEFAULT_CORE_POOL_SIZE = 8;
+    private static final int DEFAULT_MAX_THREADS = 16;
 
     //ExecutorService로 스레드 풀을 통해 작업을 실행할 수 있도록 도와주는 인터페이스임
     //매번, thread.start()하는 대신, executor.submit(Runnable) 또는 .execute(Runnable)호출

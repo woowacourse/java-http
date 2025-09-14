@@ -1,6 +1,6 @@
 package com.techcourse.presentation;
 
-import com.techcourse.application.LoginService;
+import com.techcourse.application.UserService;
 import com.techcourse.model.User;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -14,10 +14,10 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String BASE_URL = "/register";
 
-    private final LoginService loginService;
+    private final UserService userService;
 
-    public RegisterController(final LoginService loginService) {
-        this.loginService = loginService;
+    public RegisterController(final UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class RegisterController extends AbstractController {
         }
 
         try {
-            final User user = loginService.register(account, password, email);
+            final User user = userService.register(account, password, email);
             if (user == null) {
                 return renderStaticPage(BASE_URL + ".html", request.requestLine().getProtocol());
             }

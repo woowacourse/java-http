@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.application.LoginService;
+import com.techcourse.application.UserService;
 import com.techcourse.presentation.Controller;
 import com.techcourse.presentation.HttpRequest;
 import com.techcourse.presentation.HttpResponse;
@@ -15,8 +15,8 @@ public class RequestProcessor {
     private final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public RequestProcessor() {
-        controllers.computeIfAbsent("LoginController", key -> new LoginController(new LoginService()));
-        controllers.computeIfAbsent("RegisterController", key -> new RegisterController(new LoginService()));
+        controllers.computeIfAbsent("LoginController", key -> new LoginController(new UserService()));
+        controllers.computeIfAbsent("RegisterController", key -> new RegisterController(new UserService()));
         controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());
     }
 

@@ -1,6 +1,6 @@
 package com.techcourse.presentation;
 
-import com.techcourse.application.LoginService;
+import com.techcourse.application.UserService;
 import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.catalina.Session;
@@ -13,10 +13,10 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String BASE_URL = "/login";
 
-    private final LoginService loginService;
+    private final UserService userService;
 
-    public LoginController(final LoginService loginService) {
-        this.loginService = loginService;
+    public LoginController(final UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class LoginController extends AbstractController {
         }
 
         try {
-            final User user = loginService.login(account, password);
+            final User user = userService.login(account, password);
             if (user == null) {
                 return renderStaticPage("/401.html", protocol);
             }

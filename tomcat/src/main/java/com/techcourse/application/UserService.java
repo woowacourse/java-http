@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginService {
+public class UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginService.class);
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private AtomicLong index = new AtomicLong(1);
 

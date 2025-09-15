@@ -7,7 +7,7 @@ import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>(); // step4: ConcurrentHashMap으로 변경
 
     @Override
     public void add(HttpSession session) {

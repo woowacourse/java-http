@@ -16,11 +16,11 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return attributes.get(name);
-    }
-
     public void setAttribute(final String name, final Object value) {
         attributes.put(name, value);
+    }
+
+    public Object getAttribute(final String name) {
+        return attributes.get(name);
     }
 }

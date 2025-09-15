@@ -72,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executorService.submit(processor); // step4: 스레드 풀을 활용하여 Http11Processor 실행
+        executorService.execute(processor); // step4: 스레드 풀을 활용하여 Http11Processor 실행
     }
 
     public void stop() {

@@ -4,6 +4,7 @@ public enum HttpStatus {
     OK(200, "OK"),
     REDIRECT(302, "Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    NOT_FOUND(404, "Not Found"),
     ;
 
     private final int code;

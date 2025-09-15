@@ -28,6 +28,12 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse notFound() {
+        status = HttpStatus.NOT_FOUND;
+
+        return this;
+    }
+
     public HttpResponse redirect(String location) {
         status = HttpStatus.REDIRECT;
 

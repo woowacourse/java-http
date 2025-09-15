@@ -2,15 +2,14 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.Optional;
 
 public class LoginController extends AbstractController {
 
@@ -32,6 +31,12 @@ public class LoginController extends AbstractController {
 
         URL resource = getClass().getClassLoader()
                 .getResource("static/login.html");
+
+        if (resource == null) {
+            response.redirect("404.html");
+            return;
+        }
+        
         Path resourcePath = Path.of(resource.getPath());
 
         response.ok()

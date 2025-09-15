@@ -6,8 +6,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
@@ -28,41 +26,30 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        Map<String, String> requestParams = request.getRequestParams();
-        Map<String, String> cookies = request.getHttpCookies();
-
-        final String account = requestParams.get("account");
-        final String password = requestParams.get("password");
+        final String account = request.getRequestParams().get("account");
+        final String password = request.getRequestParams().get("password");
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if (user.isPresent() && user.get().checkPassword(password) && !cookies.containsKey("JSESSIONID")) {
+        if (user.isPresent() && user.get().checkPassword(password)) {
             Session session = new Session(UUID.randomUUID().toString());
-            session.setAttribute("user", user);
+            session.setAttribute("user", user.get());
 
-            log.atInfo().log("Login success. user: {}", user.get());
-            log.atInfo().log("Session created. JSESSIONID: {}", session.getId());
+            log.atInfo().log("로그인 성공. user: {}", user.get());
+            log.atInfo().log("세션 생성. JSESSIONID: {}", session.getId());
             SessionManager.getInstance().add(session);
 
-            final byte[] body = "Login success".getBytes(StandardCharsets.UTF_8);
-
-            final Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "text/html;charset=utf-8");
-            headers.put("Content-Length", String.valueOf(body.length));
-            headers.put("Location", "/index.html");
-            headers.put("Set-Cookie", "JSESSIONID=" + session.getId() + "; Max-Age=3600");
+            final byte[] body = "로그인 성공".getBytes(StandardCharsets.UTF_8);
+            response.putHeader("Location", "/index.html");
+            response.putHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Max-Age=3600");
 
             response.setStatusLine("HTTP/1.1 302 Found");
-            response.setHeaders(headers);
             response.setBody(body);
         } else {
-            log.atInfo().log("Login failed");
+            log.atInfo().log("로그인 실패");
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
             final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
-            final Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "text/html;charset=utf-8");
-            headers.put("Content-Length", String.valueOf(body.length));
+
             response.setStatusLine("HTTP/1.1 401 Unauthorized");
-            response.setHeaders(headers);
             response.setBody(body);
         }
     }
@@ -72,30 +59,21 @@ public class LoginController extends AbstractController {
         final String sessionId = request.getHttpCookies().get("JSESSIONID");
 
         if (sessionId != null && SessionManager.getInstance().findSession(sessionId) != null) {
-            final Map<String, String> headers = new HashMap<>();
             final byte[] body = new byte[0];
-            headers.put("Location", "/index.html");
-            headers.put("Content-Type", "text/html;charset=utf-8");
-            headers.put("Content-Length", String.valueOf(body.length));
+            response.putHeader("Location", "/index.html");
 
             response.setStatusLine("HTTP/1.1 302 Found");
-            response.setHeaders(headers);
             response.setBody(body);
         } else {
-
-            final Map<String, String> headers = new HashMap<>();
             if (sessionId != null) {
-                log.atInfo().log("Expired or invalid session. JSESSIONID: {}", sessionId);
-                headers.put("Set-Cookie", "JSESSIONID=; Max-Age=0;");
+                log.atInfo().log("만료되었거나 유효하지 않은 세션입니다. JSESSIONID: {}", sessionId);
+                response.putHeader("Set-Cookie", "JSESSIONID=; Max-Age=0;");
             }
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             if (resource != null) {
                 final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
-                headers.put("Content-Type", "text/html;charset=utf-8");
-                headers.put("Content-Length", String.valueOf(body.length));
 
                 response.setStatusLine("HTTP/1.1 200 OK");
-                response.setHeaders(headers);
                 response.setBody(body);
             }
         }

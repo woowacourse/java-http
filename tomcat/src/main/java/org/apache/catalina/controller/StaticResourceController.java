@@ -4,8 +4,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -13,7 +11,7 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     public boolean supports(final HttpRequest request) {
-        return true;
+        return request.getRequestLine().getMethod().equals("GET");
     }
 
     @Override
@@ -25,10 +23,9 @@ public class StaticResourceController extends AbstractController {
         if (resource != null) {
             final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
             final String contentType = getContentType(resourcePath);
-            final Map<String, String> headers = createDefaultHeaders(contentType, body.length);
+            response.putHeader("Content-Type", contentType);
 
             response.setStatusLine("HTTP/1.1 200 OK");
-            response.setHeaders(headers);
             response.setBody(body);
         } else {
             handleNotFound(response);
@@ -43,10 +40,8 @@ public class StaticResourceController extends AbstractController {
         } else {
             body = "404 Not Found".getBytes(StandardCharsets.UTF_8);
         }
-        final Map<String, String> headers = createDefaultHeaders("text/html;charset=utf-8", body.length);
 
         response.setStatusLine("HTTP/1.1 404 Not Found");
-        response.setHeaders(headers);
         response.setBody(body);
     }
 
@@ -58,12 +53,5 @@ public class StaticResourceController extends AbstractController {
             return "text/javascript";
         }
         return "text/html;charset=utf-8";
-    }
-
-    private Map<String, String> createDefaultHeaders(final String contentType, final int contentLength) {
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", String.valueOf(contentLength));
-        return headers;
     }
 }

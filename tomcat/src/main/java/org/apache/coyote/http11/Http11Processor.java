@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(request, response);
 
             final StringBuilder headerBuilder = new StringBuilder();
-            for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
+            for (Map.Entry<String, String> entry : response.getHeaders().entrySet()){
                 headerBuilder.append(entry.getKey())
                         .append(": ")
                         .append(entry.getValue())

@@ -4,18 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+
     private StatusLine statusLine;
-    private Map<String, String> headers;
+    private ResponseHeaders headers;
     private byte[] body;
 
-    public HttpResponse(final StatusLine statusLine, final Map<String, String> headers, final byte[] body) {
+    public HttpResponse(final StatusLine statusLine, final ResponseHeaders headers, final byte[] body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
     }
 
     public static HttpResponse empty() {
-        return new HttpResponse(StatusLine.empty(), new HashMap<>(), "".getBytes());
+        return new HttpResponse(StatusLine.empty(), ResponseHeaders.empty(), "".getBytes());
     }
 
     public StatusLine getStatusLine() {
@@ -31,11 +33,18 @@ public class HttpResponse {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        addDefaultHeaders();
+        return new HashMap<>(headers.getHeaders());
     }
 
-    public void setHeaders(final Map<String, String> headers) {
-        this.headers = headers;
+    private void addDefaultHeaders() {
+        if (headers.get("Content-Type") == null) {
+            headers.put("Content-Type", DEFAULT_CONTENT_TYPE);
+        }
+    }
+
+    public void putHeader(String name, String field) {
+        headers.put(name, field);
     }
 
     public byte[] getBody() {
@@ -43,6 +52,7 @@ public class HttpResponse {
     }
 
     public void setBody(final byte[] body) {
+        headers.put("Content-Length", String.valueOf(body.length));
         this.body = body;
     }
 }

@@ -48,8 +48,8 @@ public class Connector implements Runnable {
     private ServerSocket createServerSocket(final int port, final int backlogCount) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkBacklogCount(backlogCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            final int checkedBacklogCount = checkBacklogCount(backlogCount);
+            return new ServerSocket(checkedPort, checkedBacklogCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -101,7 +101,7 @@ public class Connector implements Runnable {
                     """;
             writer.write("HTTP/1.1 429 Too Many Requests\r\n");
             writer.write("Content-Type: application/json\r\n");
-            writer.write("Connection: close");
+            writer.write("Connection: close\r\n");
             writer.write("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n");
             writer.write("\r\n");
             writer.write(body);
@@ -117,6 +117,7 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            executorService.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

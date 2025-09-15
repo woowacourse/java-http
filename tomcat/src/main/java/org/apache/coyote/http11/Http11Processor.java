@@ -20,6 +20,7 @@ import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.Location;
 import org.slf4j.Logger;
@@ -50,10 +51,11 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()
         ) {
             try {
-                String requestLine = bufferedReader.readLine();
+                String requestLineString = bufferedReader.readLine();
                 RequestHeader requestHeader = RequestHeader.from(parseRequestHeader(bufferedReader));
                 RequestBody requestBody = parseRequestBody(bufferedReader, requestHeader);
 
+                RequestLine requestLine = RequestLine.from(requestLineString);
                 HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
                 RequestController requestController = requestMapping.getRequestController(httpRequest);
 

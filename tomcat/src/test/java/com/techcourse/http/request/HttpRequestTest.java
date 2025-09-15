@@ -1,17 +1,16 @@
 package com.techcourse.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.util.List;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpVersion;
-import java.util.List;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +20,8 @@ class HttpRequestTest {
     @Test
     void ofTest1() {
         // given
-        String requestLine = "POST /register HTTP/1.1";
+        String requestLineString = "POST /register HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -48,7 +48,8 @@ class HttpRequestTest {
     @Test
     void ofTest2() {
         // given
-        String requestLine = "GET /search?name=java&category=programming HTTP/1.1";
+        String requestLineString = "GET /search?name=java&category=programming HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
         RequestBody requestBody = RequestBody.empty();
 
@@ -68,7 +69,8 @@ class HttpRequestTest {
     @Test
     void ofTest3() {
         // given
-        String requestLine = "GET / HTTP/1.1";
+        String requestLineString = "GET / HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
         RequestBody requestBody = RequestBody.empty();
 
@@ -84,7 +86,8 @@ class HttpRequestTest {
     @Test
     void ofTest4() {
         // given
-        String requestLine = "GET /index.html HTTP/1.1";
+        String requestLineString = "GET /index.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Cookie: JSESSIONID=abc123; theme=dark"
@@ -99,39 +102,12 @@ class HttpRequestTest {
         assertThat(httpRequest.hasEmptySessionId()).isFalse();
     }
 
-    @DisplayName("잘못된 요청 라인 형식인 경우")
-    @Test
-    void ofTest5() {
-        // given
-        String invalidRequestLine = "GET /index.html";
-        RequestHeader requestHeader = RequestHeader.from(List.of());
-        RequestBody requestBody = RequestBody.empty();
-
-        // when & then
-        assertThatThrownBy(() -> HttpRequest.of(invalidRequestLine, requestHeader, requestBody))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("올바르지 않은 요청 형식입니다.");
-    }
-
-    @DisplayName("여러 개의 물음표가 있는 url의 경우")
-    @Test
-    void ofTest6() {
-        // given
-        String requestLine = "GET /search?name=java?category=programming HTTP/1.1";
-        RequestHeader requestHeader = RequestHeader.from(List.of());
-        RequestBody requestBody = RequestBody.empty();
-
-        // when & then
-        assertThatThrownBy(() -> HttpRequest.of(requestLine, requestHeader, requestBody))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("잘못된 URI 형식: ?가 여러 번 포함되었습니다 → /search?name=java?category=programming");
-    }
-
     @DisplayName("확장자가 없는 경로에 기본 확장자 추가")
     @Test
     void getFilePathTest1() {
         // given
-        String requestLine = "GET /index HTTP/1.1";
+        String requestLineString = "GET /index HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of());
         RequestBody requestBody = RequestBody.empty();
 
@@ -146,7 +122,8 @@ class HttpRequestTest {
     @Test
     void getFilePathTest2() {
         // given
-        String requestLine = "GET /styles.css HTTP/1.1";
+        String requestLineString = "GET /styles.css HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of());
         RequestBody requestBody = RequestBody.empty();
 

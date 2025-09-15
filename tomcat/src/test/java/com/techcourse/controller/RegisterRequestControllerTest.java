@@ -11,6 +11,7 @@ import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,8 @@ class RegisterRequestControllerTest {
     @Test
     void serviceTest1() {
         // given
-        String requestLine = "GET /register.html HTTP/1.1";
+        String requestLineString = "GET /register.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
         RequestBody requestBody = RequestBody.empty();
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
@@ -47,7 +49,8 @@ class RegisterRequestControllerTest {
     @Test
     void serviceTest2() {
         // given
-        String requestLine = "POST /register HTTP/1.1";
+        String requestLineString = "POST /register HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -73,7 +76,8 @@ class RegisterRequestControllerTest {
     @Test
     void serviceTest3() {
         // given
-        String requestLine = "PUT /register HTTP/1.1";
+        String requestLineString = "PUT /register HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
         RequestBody requestBody = RequestBody.empty();
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
@@ -88,7 +92,8 @@ class RegisterRequestControllerTest {
     @Test
     void serviceTest4() {
         // given
-        String requestLine = "POST /register HTTP/1.1";
+        String requestLineString = "POST /register HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",

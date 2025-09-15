@@ -1,128 +1,47 @@
 package org.apache.coyote.http.request;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpVersion;
-import java.util.Map;
-import java.util.Objects;
 
 public class HttpRequest {
 
-    private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String QUERY_STRING_DELIMITER = "?";
     private static final String EXTENSION_DELIMITER = ".";
     private static final String ROOT_PATH = "/";
-    private static final String EMPTY = "";
     private static final String DEFAULT_EXTENSION = ".html";
 
-    private static final int METHOD_INDEX = 0;
-    private static final int URI_INDEX = 1;
-    private static final int VERSION_INDEX = 2;
-    private static final int REQUEST_LINE_PARTS = 3;
     private static final int NOT_FOUND_INDEX = -1;
 
-    private final HttpMethod httpMethod;
-    private final String path;
-    private final RequestParams requestParams;
+    private final RequestLine requestLine;
     private final ContentType contentType;
     private final RequestHeader requestHeader;
     private final HttpCookie httpCookie;
     private final RequestBody requestBody;
-    private final HttpVersion httpVersion;
 
-    public HttpRequest(final HttpMethod httpMethod,
-                       final String path,
-                       final RequestParams requestParams,
+    public HttpRequest(final RequestLine requestLine,
                        final ContentType contentType,
                        final RequestHeader requestHeader,
                        final HttpCookie httpCookie,
-                       final RequestBody requestBody,
-                       final HttpVersion httpVersion
+                       final RequestBody requestBody
     ) {
-        this.httpMethod = httpMethod;
-        this.path = path;
-        this.requestParams = requestParams;
+        this.requestLine = requestLine;
         this.contentType = contentType;
         this.requestHeader = requestHeader;
         this.httpCookie = httpCookie;
         this.requestBody = requestBody;
-        this.httpVersion = httpVersion;
     }
 
-    public static HttpRequest of(final String requestHeaderFirstLine,
+    public static HttpRequest of(final RequestLine requestLine,
                                  final RequestHeader requestHeader,
                                  final RequestBody requestBody) {
-        String[] requestLineValues = splitRequestLine(requestHeaderFirstLine);
 
-        String requestMethod = requestLineValues[METHOD_INDEX];
-        String requestUri = requestLineValues[URI_INDEX];
-        String requestProtocolVersion = requestLineValues[VERSION_INDEX];
-
-        HttpMethod httpMethod = HttpMethod.from(requestMethod);
-
-        String path = extractPath(requestUri);
-        String queryString = extractQueryString(requestUri);
-
-        RequestParams requestParams = RequestParams.from(queryString);
-        ContentType contentType = extractContentType(path);
+        ContentType contentType = extractContentType(requestLine.getPath());
         HttpCookie httpCookie = HttpCookie.from(requestHeader.getCookie());
 
-        HttpVersion httpVersion = HttpVersion.from(requestProtocolVersion);
-
-        return new HttpRequest(httpMethod, path, requestParams, contentType, requestHeader, httpCookie, requestBody,
-                httpVersion);
-    }
-
-    private static String[] splitRequestLine(final String requestLine) {
-        validateNullRequestLine(requestLine);
-        String[] requestLineValues = requestLine.split(REQUEST_LINE_DELIMITER);
-        validateRequestLineFormat(requestLineValues);
-        return requestLineValues;
-    }
-
-    private static void validateNullRequestLine(final String requestLine) {
-        if (requestLine == null) {
-            throw new UncheckedServletException("request line은 null이 될 수 없습니다.");
-        }
-    }
-
-    private static void validateRequestLineFormat(final String[] requestLineValues) {
-        if (requestLineValues.length != REQUEST_LINE_PARTS) {
-            throw new UncheckedServletException("올바르지 않은 요청 형식입니다.");
-        }
-    }
-
-    private static String extractPath(final String requestUri) {
-        int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
-
-        if (hasExtension(queryStringDelimiterIndex)) {
-            return requestUri.substring(0, queryStringDelimiterIndex);
-        }
-
-        return requestUri;
-    }
-
-    private static String extractQueryString(final String requestUri) {
-        int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
-
-        if (hasExtension(queryStringDelimiterIndex)) {
-            return requestUri.substring(queryStringDelimiterIndex + 1);
-        }
-
-        return EMPTY;
-    }
-
-    private static int findQueryStringDelimiterIndex(final String uri) {
-        int firstIndex = uri.indexOf(QUERY_STRING_DELIMITER);
-        int lastIndex = uri.lastIndexOf(QUERY_STRING_DELIMITER);
-
-        if (hasExtension(firstIndex) && firstIndex != lastIndex) {
-            throw new UncheckedServletException("잘못된 URI 형식: ?가 여러 번 포함되었습니다 → " + uri);
-        }
-
-        return firstIndex;
+        return new HttpRequest(requestLine, contentType, requestHeader, httpCookie, requestBody);
     }
 
     private static ContentType extractContentType(final String path) {
@@ -141,14 +60,11 @@ public class HttpRequest {
     }
 
     public String getFilePath() {
-        if (path.contains(EXTENSION_DELIMITER)) {
-            return path;
-        }
-        return path + DEFAULT_EXTENSION;
+        return requestLine.getFilePath();
     }
 
     public boolean isRootPath() {
-        return path.equals(ROOT_PATH);
+        return requestLine.isRootPath();
     }
 
     public boolean hasEmptySessionId() {
@@ -156,11 +72,11 @@ public class HttpRequest {
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return requestLine.getHttpMethod();
     }
 
     public Map<String, String> getRequestParams() {
-        return requestParams.queryParameters();
+        return requestLine.getRequestParams();
     }
 
     public ContentType getContentType() {
@@ -176,6 +92,6 @@ public class HttpRequest {
     }
 
     public HttpVersion getHttpVersion() {
-        return httpVersion;
+        return requestLine.getHttpVersion();
     }
 }

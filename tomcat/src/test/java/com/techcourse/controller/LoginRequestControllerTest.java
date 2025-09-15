@@ -11,6 +11,7 @@ import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeader;
+import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.session.Session;
 import org.apache.coyote.http.session.SessionRepository;
@@ -31,7 +32,8 @@ class LoginRequestControllerTest {
     @Test
     void serviceTest1() {
         // given
-        String requestLine = "GET /login.html HTTP/1.1";
+        String requestLineString = "GET /login.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
         RequestBody requestBody = RequestBody.empty();
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
@@ -52,7 +54,8 @@ class LoginRequestControllerTest {
         Session session = Session.newSession();
         SessionRepository.save(session);
 
-        String requestLine = "GET /login.html HTTP/1.1";
+        String requestLineString = "GET /login.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Cookie: JSESSIONID=" + session.getId()
@@ -73,7 +76,8 @@ class LoginRequestControllerTest {
     @Test
     void serviceTest3() {
         // given
-        String requestLine = "POST /login HTTP/1.1";
+        String requestLineString = "POST /login HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -99,7 +103,8 @@ class LoginRequestControllerTest {
     @Test
     void serviceTest4() {
         // given
-        String requestLine = "POST /login HTTP/1.1";
+        String requestLineString = "POST /login HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -121,7 +126,8 @@ class LoginRequestControllerTest {
     @Test
     void serviceTest5() {
         // given
-        String requestLine = "POST /login HTTP/1.1";
+        String requestLineString = "POST /login HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of(
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -140,7 +146,8 @@ class LoginRequestControllerTest {
     @Test
     void serviceTest6() {
         // given
-        String requestLine = "PUT /login HTTP/1.1";
+        String requestLineString = "PUT /login HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(requestLineString);
         RequestHeader requestHeader = RequestHeader.from(List.of("Host: localhost:8080"));
         RequestBody requestBody = RequestBody.empty();
         HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);

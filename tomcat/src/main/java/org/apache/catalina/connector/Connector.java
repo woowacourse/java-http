@@ -28,16 +28,15 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.serverSocket = createServerSocket(port, acceptCount, maxThreads);
+        this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount, final int maxThreads) {
+    private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            final int checkedMaxThreads = checkMaxThreads(maxThreads);
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
@@ -104,8 +103,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void redirectToErrorPage(final OutputStream outputStream, final Location location) throws IOException {
-        HttpResponse errorResponse = HttpResponse.found(HttpVersion.HTTP_1_1, location, ContentType.TEXT_HTML,
-                HttpCookie.empty());
+        HttpResponse errorResponse = HttpResponse.found(HttpVersion.HTTP_1_1, location, HttpCookie.empty());
         outputStream.write(errorResponse.toBytes());
         outputStream.flush();
     }

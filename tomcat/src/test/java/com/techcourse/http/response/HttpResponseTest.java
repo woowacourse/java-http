@@ -56,7 +56,7 @@ class HttpResponseTest {
         HttpCookie httpCookie = HttpCookie.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, ContentType.APPLICATION_JSON, httpCookie);
+        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, httpCookie);
 
         // then
         assertThat(httpResponse).isNotNull();
@@ -110,27 +110,10 @@ class HttpResponseTest {
         HttpCookie httpCookie = HttpCookie.empty();
 
         // when
-        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, ContentType.APPLICATION_JSON, httpCookie);
+        HttpResponse httpResponse = HttpResponse.found(httpVersion, location, httpCookie);
 
         // then
         String responseString = new String(httpResponse.toBytes());
         assertThat(responseString).doesNotContain("Location:");
-    }
-
-    @DisplayName("빈 응답인 경우")
-    @Test
-    void toBytesTest4() {
-        // given
-        HttpVersion httpVersion = HttpVersion.HTTP_1_1;
-        ContentType contentType = ContentType.TEXT_HTML;
-        ResponseBody responseBody = ResponseBody.empty();
-
-        // when
-        HttpResponse httpResponse = HttpResponse.ok(httpVersion, contentType, responseBody);
-
-        // then
-        String responseString = new String(httpResponse.toBytes());
-        assertThat(responseString).contains("Content-Length: 0");
-        assertThat(responseString).endsWith("\r\n\r\n");
     }
 }

@@ -35,8 +35,7 @@ public class RegisterRequestController extends AbstractRequestController {
         if (httpRequest.hasEmptySessionId()) {
             responseCookie.addSessionId(String.valueOf(UUID.randomUUID()));
         }
-        return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
-                responseCookie);
+        return HttpResponse.found(httpVersion, new Location("/index.html"), responseCookie);
     }
 
     private void registerUser(final Map<String, String> requestBodies) {

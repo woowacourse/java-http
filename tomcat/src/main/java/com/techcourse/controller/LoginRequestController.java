@@ -36,8 +36,7 @@ public class LoginRequestController extends AbstractRequestController {
         Optional<Session> session = SessionManager.findById(httpRequest.getJSessionId());
 
         if (session.isPresent()) {
-            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
-                    HttpCookie.empty());
+            return HttpResponse.found(httpVersion, new Location("/index.html"), HttpCookie.empty());
         }
         return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
     }
@@ -62,9 +61,8 @@ public class LoginRequestController extends AbstractRequestController {
             session.setAttribute("user", user);
             SessionManager.save(session);
             httpCookie.addSessionId(session.getId());
-            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
-                    httpCookie);
+            return HttpResponse.found(httpVersion, new Location("/index.html"), httpCookie);
         }
-        return HttpResponse.found(httpVersion, new Location("/401.html"), ContentType.APPLICATION_JSON, httpCookie);
+        return HttpResponse.found(httpVersion, new Location("/401.html"), httpCookie);
     }
 }

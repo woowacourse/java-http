@@ -30,4 +30,8 @@ public record ResponseBody(
 
         return "Content-Length: " + contentLength;
     }
+
+    public boolean isEmpty() {
+        return value.isEmpty();
+    }
 }

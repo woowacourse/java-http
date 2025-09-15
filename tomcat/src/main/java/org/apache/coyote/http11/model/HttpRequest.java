@@ -2,40 +2,67 @@ package org.apache.coyote.http11.model;
 
 import org.apache.coyote.http11.session.Session;
 
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Objects;
 
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final String path;
-    private final String version;
-    private final QueryParameter queryParameter;
-    private final Map<String, String> headers;
+    private final RequestLine requestLine;
+    private final Headers headers;
+    private final String body;
     private Session session;
 
-    public HttpRequest(HttpMethod method,
-                       String path,
-                       String version,
-                       QueryParameter queryParameter,
-                       Map<String, String> headers) {
-
-        this.method = method;
-        this.path = path;
-        this.version = version;
-        this.queryParameter = queryParameter;
+    private HttpRequest(final RequestLine requestLine, final Headers headers, final String body) {
+        this.requestLine = requestLine;
         this.headers = headers;
+        this.body = body;
+    }
+
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
+        final var requestLineString = bufferedReader.readLine();
+
+        if (requestLineString == null || requestLineString.isBlank()) {
+            throw new IllegalArgumentException("Empty request line");
+        }
+
+        final RequestLine requestLine = RequestLine.from(requestLineString);
+        final Headers headers = Headers.from(bufferedReader);
+        final String body = getBody(headers, bufferedReader);
+
+        if (body != null && Objects.equals(headers.getHeaderValue("Content-Type"), "application/x-www-form-urlencoded")) {
+            requestLine.mergeToQueryParameter(body);
+        }
+
+        return new HttpRequest(requestLine, headers, body);
+    }
+
+    private static String getBody(final Headers headers, final BufferedReader bufferedReader) throws IOException {
+        if (headers.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(headers.getHeaderValue("Content-Length"));
+
+            char[] bodyChars = new char[contentLength];
+            int read = bufferedReader.read(bodyChars);
+
+            return new String(bodyChars, 0, read);
+        }
+        return null;
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getHttpMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
+    }
+
+    public String getHttpVersion() {
+        return requestLine.getHttpVersion();
     }
 
     public String getQueryParameter(String key) {
-        return queryParameter.getParameter(key);
+        return requestLine.getQueryParameterValue(key);
     }
 
     public void setSession(Session session) {
@@ -43,7 +70,7 @@ public class HttpRequest {
     }
 
     public String getHeader(String name) {
-        return headers.get(name);
+        return headers.getHeaderValue(name);
     }
 
     public Cookie getCookies() {

@@ -1,11 +1,12 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.Objects;
+import org.apache.catalina.handler.StaticResourceHandler;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 import org.apache.coyote.http11.model.StatusCode;
-import org.apache.coyote.http11.util.StaticResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        String body = StaticResourceUtil.getStaticResource(request.getPath());
+        String body = StaticResourceHandler.getStaticResource(request.getPath());
         response.setStatusCode(StatusCode.OK);
-        response.setBodyAndContentLength(body);
+        response.setBodyAndContentLength(Objects.requireNonNull(body));
     }
 
     @Override
@@ -31,6 +32,7 @@ public class RegisterController extends AbstractController {
 
         log.info("user : {}", user);
         response.setStatusCode(StatusCode.FOUND);
-        response.setBodyAndContentLength(StaticResourceUtil.getStaticResource("/index.html"));
+        response.setBodyAndContentLength(Objects.requireNonNull(
+                StaticResourceHandler.getStaticResource("/index.html")));
     }
 }

@@ -1,17 +1,19 @@
 package org.apache.coyote.http11.processor;
 
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.ControllerMapper;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ControllerMapper;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.handler.StaticResourceHandler;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
-import org.apache.coyote.http11.util.HttpRequestUtil;
+
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -19,12 +21,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final StaticResourceController resourceHandler;
+    private final StaticResourceHandler staticResourceHandler;
     private final ControllerMapper controllerMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.resourceHandler = new StaticResourceController();
+        this.staticResourceHandler = new StaticResourceHandler();
         this.controllerMapper = new ControllerMapper();
         initializeControllers();
     }
@@ -42,11 +44,11 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            final var httpRequest = HttpRequestUtil.doParse(inputStream);
-            final var httpResponse = new HttpResponse();
+            final var httpRequest = HttpRequest.from(bufferedReader);
+            final var httpResponse = new HttpResponse(httpRequest.getHttpVersion());
 
             final var session = SessionManager.resolveSession(httpRequest, httpResponse);
 
@@ -69,6 +71,6 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(httpRequest, httpResponse);
             return;
         }
-        resourceHandler.execute(httpRequest, httpResponse);
+        staticResourceHandler.execute(httpRequest, httpResponse);
     }
 }

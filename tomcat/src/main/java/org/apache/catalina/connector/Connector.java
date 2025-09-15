@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +20,21 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ExecutorService executor;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
     public Connector(final int port, final int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+        this(port, acceptCount, Runtime.getRuntime().availableProcessors());
         this.stopped = false;
+    }
+
+    // socket 과 연결이 되면 maxThreads 만큼 할당한다.
+    public Connector(int port, int acceptCount, int maxThreads) {
+        this.serverSocket = createServerSocket(port, acceptCount);
+        this.executor = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -68,12 +77,14 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection);
         new Thread(processor).start();
+        executor.submit(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            executor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

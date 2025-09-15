@@ -27,7 +27,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);

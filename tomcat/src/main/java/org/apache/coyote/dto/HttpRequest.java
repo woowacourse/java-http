@@ -3,7 +3,7 @@ package org.apache.coyote.dto;
 import java.util.Map;
 import org.apache.coyote.cookie.HttpCookie;
 
-public record HttpRequest(RequestLine requestLine, Map<String, String> header) {
+public record HttpRequest(RequestLine requestLine, HttpHeader header) {
 
     public String method() {
         return requestLine.method();
@@ -21,7 +21,7 @@ public record HttpRequest(RequestLine requestLine, Map<String, String> header) {
     }
 
     public HttpCookie getCookie() {
-        final String cookieHeader = header.get("Cookie");
+        final String cookieHeader = header.getHeaders().get("Cookie");
         return new HttpCookie(cookieHeader);
     }
 

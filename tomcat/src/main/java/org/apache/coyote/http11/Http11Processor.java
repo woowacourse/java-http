@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.dto.HttpHeader;
 import org.apache.coyote.dto.HttpRequest;
 import org.apache.coyote.dto.HttpResponse;
 import org.apache.coyote.dto.RequestLine;
@@ -52,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(final BufferedReader reader) throws Exception {
          RequestLine requestLine = getRequestLine(reader);
 
-        final Map<String, String> header = HeaderParser.parseHeader(reader);
+        final HttpHeader header = HeaderParser.parseHeader(reader);
 
         if (requestLine.method().equals("POST")) {
             requestLine = getPostRequestInfo(reader, header, requestLine);
@@ -74,9 +75,9 @@ public class Http11Processor implements Runnable, Processor {
         return RequestLineParser.parse(requestLine);
     }
 
-    private RequestLine getPostRequestInfo(BufferedReader reader, Map<String, String> header, RequestLine requestInfo)
+    private RequestLine getPostRequestInfo(BufferedReader reader, HttpHeader header, RequestLine requestInfo)
             throws IOException {
-        int contentLength = Integer.parseInt(header.get("Content-Length"));
+        int contentLength = Integer.parseInt(header.getHeaders().get("Content-Length"));
         Map<String, String> postParams = PostBodyParser.parse(reader, contentLength);
         requestInfo = new RequestLine(requestInfo.method(), requestInfo.path(), postParams,requestInfo.version());
         return requestInfo;

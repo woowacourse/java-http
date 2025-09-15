@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.apache.coyote.dto.HttpHeader;
 import org.apache.coyote.dto.HttpRequest;
 import org.apache.coyote.dto.HttpResponse;
 import org.apache.coyote.handler.AbstractController;
@@ -23,11 +24,16 @@ public class PageRenderer extends AbstractController {
             path = PageEndpoint.findPageByPath(path.trim());
             String content = readStaticFile(path);
             String contentType = ContentType.findContentType(path);
-
-            HttpResponseBuilder.staticResponse(
+            HttpHeader httpHeader = new HttpHeader(
+                    Map.of(
+                            "Content-Type", contentType + ";charset=utf-8",
+                            "Content-Length", String.valueOf(content.getBytes().length)
+                    )
+            );
+            HttpResponseBuilder.initResponse(
                     version,
                     statusCode,
-                    contentType,
+                    httpHeader,
                     content,
                     response
             );
@@ -51,11 +57,17 @@ public class PageRenderer extends AbstractController {
         try {
             String content = readStaticFile("/404.html");
             String contentType = ContentType.HTML.getContentType();
+            HttpHeader httpHeader = new HttpHeader(
+                    Map.of(
+                            "Content-Type", contentType + ";charset=utf-8",
+                            "Content-Length", String.valueOf(content.getBytes().length)
+                    )
+            );
 
-            HttpResponseBuilder.staticResponse(
+            HttpResponseBuilder.initResponse(
                     version,
                     404,
-                    contentType,
+                    httpHeader,
                     content,
                     response
             );
@@ -64,7 +76,7 @@ public class PageRenderer extends AbstractController {
         }
     }
 
-    public static void sendRedirect(String version, int statusCode, Map<String, String> headers, HttpResponse response) {
-        HttpResponseBuilder.redirectResponse(version, statusCode, headers, response);
+    public static void sendRedirect(String version, int statusCode, HttpHeader headers, HttpResponse response) {
+        HttpResponseBuilder.initResponse(version, statusCode, headers, "", response);
     }
 }

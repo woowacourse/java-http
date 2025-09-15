@@ -24,7 +24,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executor;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector() {
         this(
@@ -84,7 +84,11 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (stopped || serverSocket.isClosed()) {
+                log.info("서버가 정상적으로 종료되었습니다.");
+                return;
+            }
+            log.error("클라이언트 연결 처리 중 오류: {}", e.getMessage());
         }
     }
 
@@ -101,7 +105,7 @@ public class Connector implements Runnable {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("서버 소켓 종료 중 오류: {}", e.getMessage());
         }
     }
 

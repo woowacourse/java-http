@@ -6,25 +6,31 @@ import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 
-    private final HttpVersion httpVersion;
+    private final RootRequestController rootRequestController;
+    private final LoginRequestController loginRequestController;
+    private final RegisterRequestController registerRequestController;
+    private final StaticResourceRequestController staticResourceRequestController;
 
     public RequestMapping(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
+        this.rootRequestController = new RootRequestController(httpVersion);
+        this.loginRequestController = new LoginRequestController(httpVersion);
+        this.registerRequestController = new RegisterRequestController(httpVersion);
+        this.staticResourceRequestController = new StaticResourceRequestController(httpVersion);
     }
 
     public RequestController getRequestController(final HttpRequest httpRequest) {
         if (httpRequest.isRootPath()) {
-            return new RootRequestController(httpVersion);
+            return rootRequestController;
         }
 
         if (httpRequest.getFilePath().equals("/login.html")) {
-            return new LoginRequestController(httpVersion);
+            return loginRequestController;
         }
 
         if (httpRequest.getFilePath().equals("/register.html")) {
-            return new RegisterRequestController(httpVersion);
+            return registerRequestController;
         }
 
-        return new StaticResourceRequestController(httpVersion);
+        return staticResourceRequestController;
     }
 }

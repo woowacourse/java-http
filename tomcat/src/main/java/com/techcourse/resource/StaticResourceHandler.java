@@ -25,9 +25,6 @@ public class StaticResourceHandler extends HttpRequestHandler {
 
     @Override
     protected HttpResponse handleGet(HttpRequest request) {
-//        TextResource responseBody = getResource();
-//        MimeType mimeType = MimeType.fromResource(responseBody);
-//        return new HttpResponse(HttpStatus.OK, responseBody.content(), mimeType, Map.of());
         ResponseBody responseBody = ResponseBody.fromTextResource(getResource());
         return HttpResponse.http11Builder(HttpStatus.OK)
                 .body(responseBody)

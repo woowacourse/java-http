@@ -5,7 +5,7 @@ public abstract class ResponseHeader {
     private final String name;
     private final String value;
 
-    protected ResponseHeader(String name, String value) {
+    public ResponseHeader(String name, String value) {
         this.name = name;
         this.value = value;
     }

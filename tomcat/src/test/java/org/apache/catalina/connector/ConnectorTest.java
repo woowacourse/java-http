@@ -13,9 +13,6 @@ class ConnectorTest {
 
     private static final int TEST_PORT = 8081;
     private static final String LOCALHOST = "127.0.0.1";
-    private static final int SERVER_PORT = 8080;
-    // acceptCount + maxThreads 보다 큰 값으로 설정
-    private static final int TOTAL_REQUESTS = 10;
 
     private static final Logger log = LoggerFactory.getLogger(ConnectorTest.class);
 

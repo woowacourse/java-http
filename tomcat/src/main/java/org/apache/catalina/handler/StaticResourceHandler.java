@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.handler;
 
 import ch.qos.logback.core.util.FileUtil;
 import org.apache.coyote.http11.model.ContentType;

@@ -106,10 +106,9 @@ public class Connector implements Runnable {
             writer.write("\r\n");
             writer.write(body);
             writer.flush();
-            writer.close();
-            connection.close();
-
+        } finally {
             log.warn("Task rejected from ThreadPoolExecutor: maximum pool size reached");
+            connection.close();
         }
     }
 

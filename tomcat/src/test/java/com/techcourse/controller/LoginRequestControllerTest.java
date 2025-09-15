@@ -14,7 +14,7 @@ import org.apache.coyote.http.request.RequestHeader;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.session.Session;
-import org.apache.coyote.http.session.SessionRepository;
+import org.apache.coyote.http.session.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class LoginRequestControllerTest {
     void serviceTest2() {
         // given
         Session session = Session.newSession();
-        SessionRepository.save(session);
+        SessionManager.save(session);
 
         String requestLineString = "GET /login.html HTTP/1.1";
         RequestLine requestLine = RequestLine.from(requestLineString);

@@ -32,13 +32,7 @@ public class StaticResourceHandler implements Handler {
             return;
         }
 
-        byte[] body;
-        if (ContentType.isBinary(resourcePath)) {
-            body = Files.readAllBytes(new File(resource.getPath()).toPath());
-        } else {
-            body = Files.readString(new File(resource.getPath()).toPath(), StandardCharsets.UTF_8)
-                    .getBytes(StandardCharsets.UTF_8);
-        }
+        byte[] body = Files.readAllBytes(new File(resource.getPath()).toPath());
 
         HttpHeaders headers = new HttpHeaders();
         headers.addHeader("Content-Type", ContentType.fromPath(resourcePath));

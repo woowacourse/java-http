@@ -1,0 +1,71 @@
+package org.apache.coyote.http.response;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class HttpResponseBodyTest {
+
+    @Test
+    @DisplayName("문자열로 ResponseBody 생성")
+    void createFromString() {
+        // given
+        final String content = "Hello World!";
+
+        // when
+        final HttpResponseBody body = HttpResponseBody.from(content.getBytes(StandardCharsets.UTF_8));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(body.toString()).isEqualTo(content);
+            softly.assertThat(body.getContentLength()).isEqualTo(content.getBytes().length);
+        });
+    }
+
+    @Test
+    @DisplayName("빈 ResponseBody 생성")
+    void createEmpty() {
+        // when
+        final HttpResponseBody body = HttpResponseBody.empty();
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(body.toString()).isEmpty();
+            softly.assertThat(body.getContentLength()).isEqualTo(0);
+        });
+    }
+
+    @Test
+    @DisplayName("한글 내용으로 ResponseBody 생성")
+    void createWithKoreanContent() {
+        // given
+        final String koreanContent = "안녕하세요!";
+
+        // when
+        final HttpResponseBody body = HttpResponseBody.from(koreanContent.getBytes(StandardCharsets.UTF_8));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(body.toString()).isEqualTo(koreanContent);
+            softly.assertThat(body.getContentLength()).isEqualTo(koreanContent.getBytes().length);
+        });
+    }
+
+    @Test
+    @DisplayName("큰 내용으로 ResponseBody 생성")
+    void createWithLargeContent() {
+        // given
+        final String largeContent = "테스트 내용 ".repeat(1000);
+
+        // when
+        final HttpResponseBody body = HttpResponseBody.from(largeContent.getBytes(StandardCharsets.UTF_8));
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(body.toString()).isEqualTo(largeContent);
+            softly.assertThat(body.getContentLength()).isEqualTo(largeContent.getBytes().length);
+        });
+    }
+}

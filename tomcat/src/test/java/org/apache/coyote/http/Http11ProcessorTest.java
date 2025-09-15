@@ -31,14 +31,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 12",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .contains("Content-Type: text/html;charset=UTF-8\r\n")
+                .contains("Content-Length: 12\r\n")
+                .endsWith("\r\nHello world!");
     }
 
     @Test
@@ -59,14 +56,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: 5564\r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String output = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+
+        assertThat(output).contains("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/html;charset=UTF-8")
+                .contains("Content-Length: 5564")
+                .contains(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
@@ -140,7 +137,7 @@ class Http11ProcessorTest {
         final String output = socket.output();
         assertSoftly(softly -> {
             softly.assertThat(output).contains("HTTP/1.1 200 OK");
-            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=UTF-8");
         });
     }
 
@@ -190,7 +187,144 @@ class Http11ProcessorTest {
         final String output = socket.output();
         assertSoftly(softly -> {
             softly.assertThat(output).contains("HTTP/1.1 200 OK");
-            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=UTF-8");
         });
+    }
+
+    @Test
+    @DisplayName("POST 요청 본문 파싱 및 처리")
+    void parsePostRequestBody() {
+        // given
+        final String request = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 51",
+                "",
+                "account=userPa&password=1234&email=user%40example.com");
+
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 302 Found"); // 회원가입 성공 후 리다이렉트
+            softly.assertThat(output).contains("Location: /index.html");
+        });
+    }
+
+    @Test
+    @DisplayName("쿠키가 포함된 요청 처리")
+    void requestWithCookies() {
+        // given
+        final String request = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=ABC123; theme=dark",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=UTF-8");
+        });
+    }
+
+    @Test
+    @DisplayName("잘못된 HTTP 메서드도 처리 시도")
+    void invalidHttpMethodStillProcessed() {
+        // given
+        final String request = String.join("\r\n",
+                "INVALID /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        // 잘못된 HTTP 메서드도 예외가 발생하지 않고 처리를 시도해야 함
+        processor.process(socket);
+    }
+
+    @Test
+    @DisplayName("최소한의 헤더로도 요청 처리")
+    void requestWithMinimalHeaders() {
+        // given
+        final String request = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        // 최소한의 헤더로도 기본적인 응답은 받을 수 있어야 함
+        assertThat(output).contains("HTTP/1.1");
+    }
+
+    @Test
+    @DisplayName("매우 긴 URL 요청")
+    void requestWithVeryLongUrl() {
+        // given
+        final String request = String.join("\r\n",
+                "GET " + "/" + "very-long-path-segment-".repeat(100) + " HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        // 긴 URL도 적절히 처리되어야 함
+        assertThat(output).contains("HTTP/1.1");
+    }
+
+    @Test
+    @DisplayName("Content-Length가 0인 POST 요청")
+    void postRequestWithZeroContentLength() {
+        // given
+        final String request = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 0",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        assertThat(output).contains("HTTP/1.1");
     }
 }

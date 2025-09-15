@@ -3,6 +3,8 @@ package com.techcourse.web.session;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import common.session.Session;
+import common.session.SessionManager;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -97,7 +99,7 @@ class SessionManagerTest {
         // given
         final Session session = new Session();
         sessionManager.add(session);
-        
+
         // 세션이 추가되었는지 확인
         assertThat(sessionManager.find(session.getId())).isPresent();
 
@@ -118,7 +120,7 @@ class SessionManagerTest {
 
         // when & then
         sessionManager.remove(session);
-        
+
         // 여전히 존재하지 않음을 확인
         final Optional<Session> foundSession = sessionManager.find(session.getId());
         assertThat(foundSession).isEmpty();
@@ -167,7 +169,7 @@ class SessionManagerTest {
         final Session session = new Session();
         sessionManager.add(session);
         final String sessionId = session.getId();
-        
+
         // 세션이 유효한지 확인
         assertThat(sessionManager.isValidSession(sessionId)).isTrue();
 

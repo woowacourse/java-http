@@ -1,6 +1,5 @@
-package org.apache.catalina;
+package common.session;
 
-import com.techcourse.web.session.Session;
 import java.util.Optional;
 
 /**

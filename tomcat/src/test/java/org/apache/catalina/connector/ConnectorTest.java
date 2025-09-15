@@ -21,10 +21,9 @@ class ConnectorTest {
     @Test
     void a() throws InterruptedException {
         int acceptCount = 3;
-        int maxThreads = 1;
         int requestCount = 10;
 
-        TestConnector testConnector = new TestConnector(TEST_PORT, acceptCount, maxThreads);
+        TestConnector testConnector = new TestConnector(TEST_PORT, acceptCount);
         testConnector.start();
 
         Thread[] requestThreads = new Thread[requestCount];

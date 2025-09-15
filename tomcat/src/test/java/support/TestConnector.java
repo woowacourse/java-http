@@ -14,7 +14,7 @@ public class TestConnector implements Runnable {
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public TestConnector(final int port, final int acceptCount, final int maxThreads) {
+    public TestConnector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }

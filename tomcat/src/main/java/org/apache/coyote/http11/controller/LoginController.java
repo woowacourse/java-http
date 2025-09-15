@@ -2,7 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import java.util.Objects;
-import org.apache.coyote.http11.Handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.model.Cookie;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;

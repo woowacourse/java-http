@@ -38,6 +38,22 @@ public class Connector implements Runnable {
         this.stopped = false;
     }
 
+    @Override
+    public void run() {
+        // 클라이언트가 연결될때까지 대기한다.
+        while (!stopped) {
+            connect();
+        }
+    }
+
+    public void start() {
+        var thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.start();
+        stopped = false;
+        log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
+    }
+
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
@@ -58,22 +74,6 @@ public class Connector implements Runnable {
                 Executors.defaultThreadFactory(),
                 new ThreadPoolExecutor.AbortPolicy()
         );
-    }
-
-    public void start() {
-        var thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
-        stopped = false;
-        log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
-    }
-
-    @Override
-    public void run() {
-        // 클라이언트가 연결될때까지 대기한다.
-        while (!stopped) {
-            connect();
-        }
     }
 
     private void connect() {

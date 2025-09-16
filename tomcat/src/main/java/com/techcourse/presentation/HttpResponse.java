@@ -15,7 +15,7 @@ public record HttpResponse(
     }
 
     public static Builder fromRequest(final HttpRequest request) {
-        return new Builder().protocol(request.requestLine().getProtocol());
+        return new Builder().protocol(request.getProtocol());
     }
 
     public String toMessage() {

@@ -49,6 +49,18 @@ public record HttpRequest(
         return new Builder();
     }
 
+    public String getProtocol() {
+        return requestLine.getProtocol();
+    }
+
+    public String getUri() {
+        return requestLine.getUri();
+    }
+
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
     public static class Builder {
         private RequestLine requestLine;
         private Headers headers = new Headers();

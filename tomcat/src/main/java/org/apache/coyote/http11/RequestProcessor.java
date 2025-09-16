@@ -21,7 +21,7 @@ public class RequestProcessor {
     }
 
     public String process(final HttpRequest request) {
-        final String uri = request.requestLine().getUri();
+        final String uri = request.getUri();
         final Controller controller = getController(uri);
         final HttpResponse response = controller.service(request);
         return response.toMessage();

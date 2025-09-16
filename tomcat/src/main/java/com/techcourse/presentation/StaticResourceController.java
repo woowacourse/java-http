@@ -13,7 +13,7 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        final String uri = request.requestLine().getUri();
+        final String uri = request.getUri();
 
         if (!StaticResourceManager.isStaticResource(uri)) {
             return HttpResponse.fromRequest(request)

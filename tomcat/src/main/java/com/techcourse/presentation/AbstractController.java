@@ -13,7 +13,7 @@ public abstract class AbstractController implements Controller {
     @Override
     public final HttpResponse service(final HttpRequest request) {
         validateRequest(request);
-        final String method = request.requestLine().getMethod();
+        final String method = request.getMethod();
 
         if ("GET".equals(method)) {
             return doGet(request);
@@ -26,7 +26,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void validateRequest(final HttpRequest request) {
-        final String uri = request.requestLine().getUri();
+        final String uri = request.getUri();
         final String basePath = getBasePath();
 
         if (basePath != null && !basePath.equals(uri)) {

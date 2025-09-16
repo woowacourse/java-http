@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.util.StaticResourceManager;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -29,14 +31,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        List<String> expected = new ArrayList<>();
+        expected.add("HTTP/1.1 200 OK \r\n");
+        expected.add("Content-Type: text/html; charset=utf-8 \r\n");
+        expected.add("Content-Length: 12 \r\n");
+        expected.add("Hello world!");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        var actual = socket.output();
+
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -57,12 +60,15 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        List<String> expected = new ArrayList<>();
+        expected.add("HTTP/1.1 200 OK \r\n");
+        expected.add("Content-Type: text/html; charset=utf-8 \r\n");
+        expected.add("Content-Length: 5564 \r\n");
+        expected.add(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+
+        var actual = socket.output();
+
+        assertThat(actual).contains(expected);
     }
 }

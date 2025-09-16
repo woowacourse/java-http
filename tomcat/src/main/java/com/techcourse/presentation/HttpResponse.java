@@ -1,13 +1,11 @@
 package com.techcourse.presentation;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map.Entry;
+import org.apache.coyote.http11.Headers;
 
 public record HttpResponse(
         String protocol,
         String statusCode,
-        LinkedHashMap<String, List<String>> headers,
+        Headers headers,
         String body
 ) {
     public static Builder builder() {
@@ -15,22 +13,16 @@ public record HttpResponse(
     }
 
     public String toMessage() {
-        final StringBuilder sb = new StringBuilder();
-
-        for (Entry<String, List<String>> header : headers.sequencedEntrySet()) {
-            sb.append(header.getKey()).append(": ").append(String.join("; ", header.getValue())).append(" \r\n");
-        }
-
         return String.join("\r\n",
                 protocol + " " + statusCode + " ",
-                sb.toString(),
+                headers.toHeaderString(),
                 body);
     }
 
     public static class Builder {
         private String protocol = "HTTP/1.1";
         private String statusCode = "200 OK";
-        private LinkedHashMap<String, List<String>> headers = new LinkedHashMap<>();
+        private Headers headers = new Headers();
         private String body = "";
 
         public Builder protocol(final String protocol) {
@@ -44,13 +36,7 @@ public record HttpResponse(
         }
 
         public Builder header(final String name, final String value) {
-            headers.compute(name, (k, v) -> {
-                if (v == null) {
-                    return List.of(value);
-                }
-                v.add(value);
-                return v;
-            });
+            headers.add(name, value);
             return this;
         }
 
@@ -91,7 +77,7 @@ public record HttpResponse(
         }
 
         public HttpResponse build() {
-            return new HttpResponse(protocol, statusCode, new LinkedHashMap<>(headers), body);
+            return new HttpResponse(protocol, statusCode, headers, body);
         }
     }
 }

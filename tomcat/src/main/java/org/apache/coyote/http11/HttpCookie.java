@@ -17,7 +17,7 @@ public class HttpCookie {
     private Map<String, String> extractCookie(final HttpRequest request) {
         final Map<String, String> cookies = new LinkedHashMap<>();
 
-        final String value = request.headers().get("Cookie");
+        final String value = request.getValueString("Cookie");
         if (value == null || value.isBlank()) {
             return Map.of();
         }

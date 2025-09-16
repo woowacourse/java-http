@@ -25,17 +25,14 @@ public class Http11Processor implements Runnable, Processor {
     private final Map<String, Controller> controllers = new HashMap<>();
 
     public Http11Processor(final Socket connection) {
+        controllers.put("login", new LoginController());
+        controllers.put("register", new RegisterController());
+        controllers.put("default", new DefaultController());
         this.connection = connection;
     }
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-
-        controllers.put("login", new LoginController());
-        controllers.put("register", new RegisterController());
-        controllers.put("default", new DefaultController());
-
         process(connection);
     }
 
@@ -48,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(bufferedReader);
             HttpResponse response = new HttpResponse(outputStream);
 
+            log.info("connect host: {}, port: {}, path:{}", connection.getInetAddress(), connection.getPort(), request.getUri());
             Session session = getSession(request);
             request.setSession(session);
             response.setVersion(HTTP_VERSION);

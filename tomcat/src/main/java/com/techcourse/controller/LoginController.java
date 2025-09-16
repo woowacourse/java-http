@@ -12,6 +12,8 @@ import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
+import com.techcourse.model.User;
+
 public class LoginController extends AbstractController {
 
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -41,7 +43,7 @@ public class LoginController extends AbstractController {
 
         if ("gugu".equals(account) && "password".equals(password)) {
             // 로그인 성공 시 세션 생성 및 JSESSIONID 쿠키 추가
-            com.techcourse.model.User user = new com.techcourse.model.User(account, password, "");
+            User user = new User(account, password, "");
             String jSessionId = java.util.UUID.randomUUID().toString();
             response.addCookie("JSESSIONID", jSessionId);
             Session session = new Session(jSessionId);

@@ -5,6 +5,10 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -16,20 +20,33 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250; // 기본 최대 스레드 수 추가
 
     private final ServerSocket serverSocket;
     private final Manager manager;
     private boolean stopped;
 
-    public Connector(Manager manager) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, manager);
+    private final ExecutorService executorService;
+
+    public Connector(final Manager manager) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, manager);
     }
 
-    public Connector(final int port, final int acceptCount, final Manager manager) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, final Manager manager) {
         Objects.requireNonNull(manager, "manager");
         this.manager = manager;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+
+        final int coreThreads = maxThreads;
+        final int maxPoolThreads = maxThreads;
+        final int queueCapacity = 100;
+        this.executorService = new ThreadPoolExecutor(
+                coreThreads,
+                maxPoolThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(queueCapacity)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -62,7 +79,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -71,12 +90,13 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, manager);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            executorService.shutdown();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

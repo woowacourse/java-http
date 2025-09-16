@@ -14,7 +14,7 @@ import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.Location;
 import org.apache.coyote.http.response.ResponseBody;
 import org.apache.coyote.http.session.Session;
-import org.apache.coyote.http.session.SessionRepository;
+import org.apache.coyote.http.session.SessionManager;
 
 public class LoginRequestController extends AbstractRequestController {
 
@@ -33,11 +33,10 @@ public class LoginRequestController extends AbstractRequestController {
     }
 
     private HttpResponse createGetLoginResponseBySession(final HttpRequest httpRequest) {
-        Optional<Session> session = SessionRepository.findById(httpRequest.getJSessionId());
+        Optional<Session> session = SessionManager.findById(httpRequest.getJSessionId());
 
         if (session.isPresent()) {
-            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
-                    HttpCookie.empty());
+            return HttpResponse.found(httpVersion, new Location("/index.html"), HttpCookie.empty());
         }
         return HttpResponse.ok(httpVersion, ContentType.TEXT_HTML, ResponseBody.createBy(httpRequest));
     }
@@ -60,11 +59,10 @@ public class LoginRequestController extends AbstractRequestController {
         if (user.checkPassword(password)) {
             Session session = Session.newSession();
             session.setAttribute("user", user);
-            SessionRepository.save(session);
+            SessionManager.save(session);
             httpCookie.addSessionId(session.getId());
-            return HttpResponse.found(httpVersion, new Location("/index.html"), ContentType.APPLICATION_JSON,
-                    httpCookie);
+            return HttpResponse.found(httpVersion, new Location("/index.html"), httpCookie);
         }
-        return HttpResponse.found(httpVersion, new Location("/401.html"), ContentType.APPLICATION_JSON, httpCookie);
+        return HttpResponse.found(httpVersion, new Location("/401.html"), httpCookie);
     }
 }

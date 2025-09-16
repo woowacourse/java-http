@@ -45,10 +45,9 @@ public class HttpResponse {
     }
 
     public static HttpResponse found(
-            final HttpVersion httpVersion, final Location location, final ContentType contentType,
-            final HttpCookie httpCookie
+            final HttpVersion httpVersion, final Location location, final HttpCookie httpCookie
     ) {
-        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, contentType, httpCookie,
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, location, null, httpCookie,
                 ResponseBody.empty());
     }
 
@@ -60,9 +59,12 @@ public class HttpResponse {
         List<String> lines = new ArrayList<>();
 
         lines.add(httpVersion.toProtocolString() + " " + httpStatus.toStatusLine() + " ");
-        lines.add(contentType.toHeaderLine() + " ");
-        lines.add(responseBody.toContentLengthHeaderLine() + " ");
-
+        if (contentType != null) {
+            lines.add(contentType.toHeaderLine() + " ");
+        }
+        if (!responseBody.isEmpty()) {
+            lines.add(responseBody.toContentLengthHeaderLine() + " ");
+        }
         if (!location.isEmpty()) {
             lines.add(location.toHttpHeaderFormat());
         }
@@ -71,7 +73,9 @@ public class HttpResponse {
         }
 
         lines.add("");
-        lines.add(responseBody.value());
+        if (!responseBody.isEmpty()) {
+            lines.add(responseBody.value());
+        }
 
         return String.join("\r\n", lines);
     }

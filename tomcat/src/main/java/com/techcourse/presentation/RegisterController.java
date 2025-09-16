@@ -2,7 +2,6 @@ package com.techcourse.presentation;
 
 import com.techcourse.application.UserService;
 import com.techcourse.model.User;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -24,14 +23,13 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doGet(final HttpRequest request) {
         final Session session = request.getSession(false);
         if (session != null) {
-            return HttpResponse.builder()
-                    .protocol(request.requestLine().getProtocol())
+            return HttpResponse.fromRequest(request)
                     .found()
-                    .location("http://localhost:8080/index.html")
+                    .location("/index.html")
                     .build();
         }
 
-        return renderStaticPage(BASE_URL + ".html", request.requestLine().getProtocol());
+        return renderStaticPage(BASE_URL + ".html", request);
     }
 
     @Override
@@ -49,7 +47,7 @@ public class RegisterController extends AbstractController {
         try {
             final User user = userService.register(account, password, email);
             if (user == null) {
-                return renderStaticPage(BASE_URL + ".html", request.requestLine().getProtocol());
+                return renderStaticPage(BASE_URL + ".html", request);
             }
 
             return createSuccessResponseWithSession(user, request);
@@ -64,12 +62,9 @@ public class RegisterController extends AbstractController {
     }
 
     private HttpResponse createBadRequestResponse(String errorMessage, HttpRequest request) {
-        return HttpResponse.builder()
-                .protocol(request.requestLine().getProtocol())
+        return HttpResponse.fromRequest(request)
                 .badRequest()
-                .contentType("text/plain;charset=utf-8")
-                .contentLength(errorMessage.getBytes(StandardCharsets.UTF_8).length)
-                .body(errorMessage)
+                .setPlainTextContent(errorMessage)
                 .build();
     }
 
@@ -79,14 +74,11 @@ public class RegisterController extends AbstractController {
         SessionManager.getInstance().add(session);
 
         final String body = "회원가입이 완료되었습니다.";
-        return HttpResponse.builder()
-                .protocol(request.requestLine().getProtocol())
+        return HttpResponse.fromRequest(request)
                 .seeOther()
-                .location("http://localhost:8080/index.html")
-                .addCookie("JSESSIONID" + "=" + session.getId())
-                .contentType("text/html;charset=utf-8")
-                .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                .body(body)
+                .location("/index.html")
+                .setSession(session)
+                .setPlainTextContent(body)
                 .build();
     }
 

@@ -23,37 +23,35 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(final HttpRequest request) {
         final Session session = request.getSession(false);
         if (session != null) {
-            return HttpResponse.builder()
-                    .protocol(request.requestLine().getProtocol())
+            return HttpResponse.fromRequest(request)
                     .found()
-                    .location("http://localhost:8080/index.html")
+                    .location("/index.html")
                     .build();
         }
 
-        return renderStaticPage("/login.html", request.requestLine().getProtocol());
+        return renderStaticPage("/login.html", request);
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
-        final String protocol = request.requestLine().getProtocol();
         final Map<String, String> params = request.params();
         final String account = params.get("account");
         final String password = params.get("password");
 
         if (account == null || password == null) {
             log.debug("요청 파라미터: {}", params);
-            return renderStaticPage("/401.html", protocol);
+            return renderStaticPage("/401.html", request);
         }
 
         try {
             final User user = userService.login(account, password);
             if (user == null) {
-                return renderStaticPage("/401.html", protocol);
+                return renderStaticPage("/401.html", request);
             }
 
             return createSuccessResponseWithSession(user, request);
         } catch (IllegalArgumentException e) {
-            return renderStaticPage("/401.html", protocol);
+            return renderStaticPage("/401.html", request);
         }
     }
 
@@ -62,11 +60,10 @@ public class LoginController extends AbstractController {
         session.setAttribute(user.getAccount(), user);
         SessionManager.getInstance().add(session);
 
-        return HttpResponse.builder()
-                .protocol(request.requestLine().getProtocol())
+        return HttpResponse.fromRequest(request)
                 .found()
-                .location("http://localhost:8080/index.html")
-                .addCookie("JSESSIONID=" + session.getId())
+                .location("/index.html")
+                .setSession(session)
                 .build();
     }
 

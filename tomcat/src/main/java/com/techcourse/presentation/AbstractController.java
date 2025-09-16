@@ -48,49 +48,43 @@ public abstract class AbstractController implements Controller {
         throw new IllegalArgumentException("POST 메서드는 지원되지 않습니다.");
     }
 
-    protected HttpResponse renderStaticPage(final String path, final String protocol) {
+    protected HttpResponse renderStaticPage(final String path, final HttpRequest request) {
         if (!StaticResourceManager.isStaticResource(path)) {
             throw new IllegalArgumentException("정적 자원이 존재하지 않는 요청 경로: " + path);
         }
 
         if ("/".equals(path)) {
-            return createRootPathResponse(protocol);
+            return createRootPathResponse(request);
         }
 
-        return createFileResponse(path, protocol);
+        return createFileResponse(path, request);
     }
 
-    private HttpResponse createRootPathResponse(final String protocol) {
+    private HttpResponse createRootPathResponse(final HttpRequest request) {
         final String body = "Hello world!";
-        return buildResponse(protocol, "200 OK", "text/html;charset=utf-8", body);
+        return HttpResponse.fromRequest(request)
+                .setPlainTextContent(body)
+                .build();
     }
 
-    private HttpResponse createFileResponse(final String path, final String protocol) {
+    private HttpResponse createFileResponse(final String path, final HttpRequest request) {
         final Path filePath = StaticResourceManager.getResourcePath(path);
         final String statusCode = getStatusCode(path);
 
         try {
             final String contentType = Files.probeContentType(filePath);
             final String body = new String(Files.readAllBytes(filePath));
-            return buildResponse(protocol, statusCode, contentType + ";charset=utf-8", body);
+
+            return HttpResponse.fromRequest(request)
+                    .statusCode(statusCode)
+                    .contentType(contentType)
+                    .setDefaultCharset()
+                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
+                    .body(body)
+                    .build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private HttpResponse buildResponse(
-            final String protocol,
-            final String statusCode,
-            final String contentType,
-            final String body
-    ) {
-        return HttpResponse.builder()
-                .protocol(protocol)
-                .statusCode(statusCode)
-                .contentType(contentType)
-                .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                .body(body)
-                .build();
     }
 
     private String getStatusCode(final String pathName) {

@@ -1,5 +1,7 @@
 package com.techcourse.presentation;
 
+import java.nio.charset.StandardCharsets;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.Headers;
 
 public record HttpResponse(
@@ -10,6 +12,10 @@ public record HttpResponse(
 ) {
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static Builder fromRequest(final HttpRequest request) {
+        return new Builder().protocol(request.requestLine().getProtocol());
     }
 
     public String toMessage() {
@@ -74,6 +80,21 @@ public record HttpResponse(
 
         public Builder location(final String uri) {
             return header("Location", uri);
+        }
+
+        public Builder setSession(final Session session) {
+            return addCookie("JSESSIONID=" + session.getId());
+        }
+
+        public Builder setPlainTextContent(final String bodyContent) {
+            return contentType("text/plain")
+                    .setDefaultCharset()
+                    .contentLength(bodyContent.getBytes(StandardCharsets.UTF_8).length)
+                    .body(bodyContent);
+        }
+
+        public Builder setDefaultCharset() {
+            return contentType("charset=utf-8");
         }
 
         public HttpResponse build() {

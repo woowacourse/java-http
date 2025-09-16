@@ -55,12 +55,9 @@ public class LoginController extends AbstractController {
 
         try {
             final User user = userService.login(account, password);
-            if (user == null) {
-                return createUnauthorizedResponse(request);
-            }
-
             return createSuccessResponseWithSession(user, request);
         } catch (IllegalArgumentException e) {
+            log.warn("로그인 실패: {}", e.getMessage());
             return createUnauthorizedResponse(request);
         }
     }

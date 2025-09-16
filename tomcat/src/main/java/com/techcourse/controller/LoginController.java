@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.core.controller.AbstractController;
 import org.apache.catalina.core.exception.UnauthorizedException;
 import org.apache.catalina.session.Session;
@@ -37,7 +36,8 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        if (!isExistUser(session.getUser().getAccount())) {
+        User user = (User) session.getAttribute("user");
+        if (!isExistUser(user.getAccount())) {
             response.setRedirection("/login.html");
             return;
         }
@@ -76,8 +76,9 @@ public class LoginController extends AbstractController {
     }
 
     private String makeSession(User user) {
-        String sessionId = UUID.randomUUID().toString();
-        SessionManager.add(new Session(sessionId, user));
-        return sessionId;
+        Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        return session.getId();
     }
 }

@@ -1,22 +1,31 @@
 package org.apache.catalina.session;
 
-import com.techcourse.model.User;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String id;
-    private final User user;
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
-    public Session(String id, User user) {
-        this.id = id;
-        this.user = user;
+    public Session() {
+        this.id = UUID.randomUUID().toString();
     }
 
     public String getId() {
         return id;
     }
 
-    public User getUser() {
-        return user;
+    public Object getAttribute(final String name) {
+        return values.get(name);
+    }
+
+    public void setAttribute(final String name, final Object value) {
+        values.put(name, value);
+    }
+
+    public void removeAttribute(final String name) {
+        values.remove(name);
     }
 }

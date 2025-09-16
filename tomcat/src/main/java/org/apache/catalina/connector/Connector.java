@@ -89,7 +89,7 @@ public class Connector implements Runnable {
         }
 
         final var processor = new Http11Processor(connection);
-        executorService.submit(processor);
+        executorService.execute(processor);
     }
 
     public void stop() {

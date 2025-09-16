@@ -28,12 +28,9 @@ public class RequestProcessor {
     }
 
     private Controller getController(final String uri) {
-        if ("/login".equals(uri)) {
-            return controllers.get("LoginController");
-        }
-        if ("/register".equals(uri)) {
-            return controllers.get("RegisterController");
-        }
-        return controllers.get("StaticResourceController");
+        return controllers.values().stream()
+                .filter(controller -> controller.canHandle(uri))
+                .findFirst()
+                .orElse(controllers.get("StaticResourceController"));
     }
 }

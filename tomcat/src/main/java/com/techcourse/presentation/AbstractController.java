@@ -11,6 +11,12 @@ public abstract class AbstractController implements Controller {
     protected abstract String getBasePath();
 
     @Override
+    public boolean canHandle(final String uri) {
+        final String basePath = getBasePath();
+        return basePath != null && basePath.equals(uri);
+    }
+
+    @Override
     public final HttpResponse service(final HttpRequest request) {
         validateRequest(request);
         final String method = request.requestLine().getMethod();

@@ -70,4 +70,20 @@ public final class StaticResourceManager {
     public static Path getResourcePath(final String path) {
         return STATIC_RESOURCES.get(path);
     }
+
+    public static ResourceWithType getResource(final String path) {
+        if ("/".equals(path)) {
+            return new ResourceWithType("Hello world!", "text/plain");
+        }
+
+        final Path filePath = STATIC_RESOURCES.get(path);
+
+        try {
+            final String contentType = Files.probeContentType(filePath);
+            final String content = new String(Files.readAllBytes(filePath));
+            return new ResourceWithType(content, contentType);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

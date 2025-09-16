@@ -2,6 +2,9 @@ package com.techcourse.presentation;
 
 import com.techcourse.application.UserService;
 import com.techcourse.model.User;
+import com.techcourse.util.ResourceWithType;
+import com.techcourse.util.StaticResourceManager;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -29,7 +32,14 @@ public class LoginController extends AbstractController {
                     .build();
         }
 
-        return renderStaticPage("/login.html", request);
+        final ResourceWithType resource = StaticResourceManager.getResource(BASE_URL + ".html");
+
+        return HttpResponse.fromRequest(request)
+                .contentType(resource.contentType())
+                .setDefaultCharset()
+                .contentLength(resource.content().getBytes(StandardCharsets.UTF_8).length)
+                .body(resource.content())
+                .build();
     }
 
     @Override
@@ -40,19 +50,31 @@ public class LoginController extends AbstractController {
 
         if (account == null || password == null) {
             log.debug("요청 파라미터: {}", params);
-            return renderStaticPage("/401.html", request);
+            return createUnauthorizedResponse(request);
         }
 
         try {
             final User user = userService.login(account, password);
             if (user == null) {
-                return renderStaticPage("/401.html", request);
+                return createUnauthorizedResponse(request);
             }
 
             return createSuccessResponseWithSession(user, request);
         } catch (IllegalArgumentException e) {
-            return renderStaticPage("/401.html", request);
+            return createUnauthorizedResponse(request);
         }
+    }
+
+    private HttpResponse createUnauthorizedResponse(final HttpRequest request) {
+        final ResourceWithType resource = StaticResourceManager.getResource("/401.html");
+
+        return HttpResponse.fromRequest(request)
+                .unauthorized()
+                .contentType(resource.contentType())
+                .setDefaultCharset()
+                .contentLength(resource.content().getBytes(StandardCharsets.UTF_8).length)
+                .body(resource.content())
+                .build();
     }
 
     private HttpResponse createSuccessResponseWithSession(final User user, final HttpRequest request) {

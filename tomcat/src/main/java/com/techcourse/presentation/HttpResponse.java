@@ -56,13 +56,23 @@ public record HttpResponse(
             return this;
         }
 
+        public Builder seeOther() {
+            this.statusCode = "303 See Other";
+            return this;
+        }
+
         public Builder badRequest() {
             this.statusCode = "400 Bad Request";
             return this;
         }
 
-        public Builder seeOther() {
-            this.statusCode = "303 See Other";
+        public Builder unauthorized() {
+            this.statusCode = "401 Unauthorized";
+            return this;
+        }
+
+        public Builder notFound() {
+            this.statusCode = "404 Not Found";
             return this;
         }
 

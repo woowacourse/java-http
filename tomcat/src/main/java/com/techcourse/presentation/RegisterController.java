@@ -2,6 +2,9 @@ package com.techcourse.presentation;
 
 import com.techcourse.application.UserService;
 import com.techcourse.model.User;
+import com.techcourse.util.ResourceWithType;
+import com.techcourse.util.StaticResourceManager;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -29,7 +32,7 @@ public class RegisterController extends AbstractController {
                     .build();
         }
 
-        return renderStaticPage(BASE_URL + ".html", request);
+        return createRegisterPageResponse(request);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class RegisterController extends AbstractController {
         try {
             final User user = userService.register(account, password, email);
             if (user == null) {
-                return renderStaticPage(BASE_URL + ".html", request);
+                return createRegisterPageResponse(request);
             }
 
             return createSuccessResponseWithSession(user, request);
@@ -61,10 +64,14 @@ public class RegisterController extends AbstractController {
                account.isBlank() || password.isBlank() || email.isBlank();
     }
 
-    private HttpResponse createBadRequestResponse(String errorMessage, HttpRequest request) {
+    private static HttpResponse createRegisterPageResponse(final HttpRequest request) {
+        final ResourceWithType resource = StaticResourceManager.getResource(BASE_URL + ".html");
+
         return HttpResponse.fromRequest(request)
-                .badRequest()
-                .setPlainTextContent(errorMessage)
+                .contentType(resource.contentType())
+                .setDefaultCharset()
+                .contentLength(resource.content().getBytes(StandardCharsets.UTF_8).length)
+                .body(resource.content())
                 .build();
     }
 
@@ -79,6 +86,13 @@ public class RegisterController extends AbstractController {
                 .location("/index.html")
                 .setSession(session)
                 .setPlainTextContent(body)
+                .build();
+    }
+
+    private HttpResponse createBadRequestResponse(String errorMessage, HttpRequest request) {
+        return HttpResponse.fromRequest(request)
+                .badRequest()
+                .setPlainTextContent(errorMessage)
                 .build();
     }
 

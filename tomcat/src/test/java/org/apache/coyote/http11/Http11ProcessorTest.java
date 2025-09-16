@@ -33,7 +33,7 @@ class Http11ProcessorTest {
         // then
         List<String> expected = new ArrayList<>();
         expected.add("HTTP/1.1 200 OK \r\n");
-        expected.add("Content-Type: text/html; charset=utf-8 \r\n");
+        expected.add("Content-Type: text/plain; charset=utf-8 \r\n");
         expected.add("Content-Length: 12 \r\n");
         expected.add("Hello world!");
 

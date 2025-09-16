@@ -60,7 +60,7 @@ public class Headers {
     public String getValueString(final String name) {
         return find(name)
                 .map(Header::getValueString)
-                .orElseThrow(() -> new IllegalArgumentException("일치하는 헤더가 존재하지 않습니다."));
+                .orElse("");
     }
 
     public String toHeaderString() {

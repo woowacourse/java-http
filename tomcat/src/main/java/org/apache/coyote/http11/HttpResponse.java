@@ -8,34 +8,48 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private HttpStatus status;
+    private final OutputStream outputStream;
+    private HttpStatus status = HttpStatus.OK;
     private final Map<String, String> headers = new HashMap<>();
-    private byte[] body = new byte[0];
+    private String body = "";
 
-    public void setStatus(HttpStatus status) {
+    public HttpResponse(final OutputStream outputStream) {
+        this.outputStream = outputStream;
+        headers.put("Content-Type", "text/html;charset=utf-8");
+    }
+
+    public void setStatus(final HttpStatus status) {
         this.status = status;
     }
 
-    public void addHeader(String name, String value) {
-        headers.put(name, value);
+    public void addHeader(final String key, final String value) {
+        headers.put(key, value);
     }
 
-    public void setBody(byte[] body) {
+    public void setBody(final String body) {
         this.body = body;
     }
 
-    public void send(OutputStream outputStream) throws IOException {
-        StringBuilder response = new StringBuilder();
-        response.append("HTTP/1.1 ").append(status.getCode()).append(" ").append(status.getMessage())
-                .append("\r\n");
+    public void send() throws IOException {
+        final byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+        addHeader("Content-Length", String.valueOf(bodyBytes.length));
 
-        for(Map.Entry<String, String> entry : headers.entrySet()) {
-            response.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+        final String responseLine = "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + "\r\n";
+        outputStream.write(responseLine.getBytes(StandardCharsets.UTF_8));
+
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            final String headerLine = header.getKey() + ": " + header.getValue() + "\r\n";
+            outputStream.write(headerLine.getBytes(StandardCharsets.UTF_8));
         }
 
-        response.append("\r\n");
-        outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
+        outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(bodyBytes);
         outputStream.flush();
+    }
+
+    public void sendRedirect(final String location) throws IOException {
+        setStatus(HttpStatus.FOUND);
+        addHeader("Location", location);
+        send();
     }
 }

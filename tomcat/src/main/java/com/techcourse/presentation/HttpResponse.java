@@ -76,6 +76,11 @@ public record HttpResponse(
             return this;
         }
 
+        public Builder internalServerError() {
+            this.statusCode = "500 Internal Server Error";
+            return this;
+        }
+
         public Builder contentType(final String contentType) {
             return header("Content-Type", contentType);
         }

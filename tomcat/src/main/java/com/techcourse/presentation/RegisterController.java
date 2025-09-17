@@ -89,13 +89,6 @@ public class RegisterController extends AbstractController {
                 .build();
     }
 
-    private HttpResponse createBadRequestResponse(String errorMessage, HttpRequest request) {
-        return HttpResponse.fromRequest(request)
-                .badRequest()
-                .setPlainTextContent(errorMessage)
-                .build();
-    }
-
     @Override
     protected String getBasePath() {
         return BASE_URL;

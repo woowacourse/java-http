@@ -23,15 +23,23 @@ public class SessionManager implements org.apache.coyote.SessionManager {
 
     @Override
     public org.apache.coyote.Session createSession() {
-        String sessionId = UUID.randomUUID().toString();
-        org.apache.coyote.Session session = new Session(sessionId);
-        add(session);
-        return session;
+        while (true) {
+            String sessionId = UUID.randomUUID().toString();
+            org.apache.coyote.Session candidate = new Session(sessionId);
+            if (SESSIONS.putIfAbsent(sessionId, candidate) == null) {
+                return candidate;
+            }
+        }
     }
 
     @Override
     public void add(final org.apache.coyote.Session session) {
-        SESSIONS.putIfAbsent(session.getId(), session);
+        if (session == null || session.getId() == null) {
+            throw new IllegalArgumentException("session or id is null");
+        }
+        if (SESSIONS.putIfAbsent(session.getId(), session) != null) {
+            throw new IllegalStateException("Duplicate session id: " + session.getId());
+        }
     }
 
     @Override

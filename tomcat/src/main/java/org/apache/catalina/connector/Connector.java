@@ -1,13 +1,17 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.concurrent.TimeUnit;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -15,17 +19,34 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int threadPoolSize) {
+        this.executorService = createExecutorService(acceptCount, threadPoolSize);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+    }
+
+    private ExecutorService createExecutorService(final int acceptCount, final int threadPoolSize) {
+        final int CORE_POOL_SIZE = 10;
+        final long KEEP_ALIVE_TIME = 60L;
+        final LinkedBlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>(acceptCount);
+        return new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                threadPoolSize,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                taskQueue,
+                new CallerRunsPolicy()
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -66,8 +87,9 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+
+        final var processor = new Http11Processor(connection);
+        executorService.execute(processor);
     }
 
     public void stop() {
@@ -75,6 +97,17 @@ public class Connector implements Runnable {
         try {
             serverSocket.close();
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);
         }
     }

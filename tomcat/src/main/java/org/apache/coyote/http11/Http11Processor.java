@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.presentation.HttpRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,34 +35,66 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final List<String> headers = new ArrayList<>();
-
-            String line;
-            while (!"".equals(line = bufferedReader.readLine())) {
-                headers.add(line);
-            }
-
-            int contentLength = 0;
-            for (String header : headers) {
-                if (header.toLowerCase().startsWith("content-length")) {
-                    contentLength = Integer.parseInt(header.split(":")[1].trim());
-                }
-            }
-
-            final char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            final String body = new String(buffer);
-
-            if (headers.getFirst() == null) {
+            final HttpRequest request = parseHttpRequest(bufferedReader);
+            if (request == null) {
                 return;
             }
 
-            final var response = new RequestProcessor().process(headers, body);
+            final String response = new RequestProcessor().process(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest parseHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final RequestLine requestLine = parseRequestLine(bufferedReader);
+        if (requestLine == null) {
+            return null;
+        }
+
+        final List<String> headers = parseHeaders(bufferedReader);
+        final String body = parseBody(bufferedReader, requestLine, headers);
+
+        return HttpRequest.builder()
+                .requestLine(requestLine)
+                .headers(headers)
+                .params(body)
+                .build();
+    }
+
+    private RequestLine parseRequestLine(final BufferedReader bufferedReader) throws IOException {
+        final String line = bufferedReader.readLine();
+        if (line == null) {
+            return null;
+        }
+        return new RequestLine(line);
+    }
+
+    private List<String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
+        final List<String> headers = new ArrayList<>();
+        String line;
+        while (!"".equals(line = bufferedReader.readLine())) {
+            headers.add(line);
+        }
+        return headers;
+    }
+
+    private String parseBody(
+            final BufferedReader bufferedReader,
+            final RequestLine requestLine,
+            final List<String> headers
+    ) throws IOException {
+        final HttpRequest requestForContentLength = HttpRequest.builder()
+                .requestLine(requestLine)
+                .headers(headers)
+                .build();
+        final int contentLength = requestForContentLength.getContentLength();
+
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

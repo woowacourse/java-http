@@ -1,71 +1,36 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.application.LoginService;
+import com.techcourse.application.UserService;
 import com.techcourse.presentation.Controller;
 import com.techcourse.presentation.HttpRequest;
 import com.techcourse.presentation.HttpResponse;
 import com.techcourse.presentation.LoginController;
 import com.techcourse.presentation.RegisterController;
 import com.techcourse.presentation.StaticResourceController;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class RequestProcessor {
 
-    private static final List<String> priority = new ArrayList<>();
-    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
+    private final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     public RequestProcessor() {
-        controllers.computeIfAbsent("StaticResourceController", key -> {
-            priority.add(key);
-            return new StaticResourceController();
-        });
-
-        final var staticResourceController = (StaticResourceController) controllers.get("StaticResourceController");
-
-        controllers.computeIfAbsent(
-                "LoginController",
-                key -> {
-                    priority.add(key);
-                    return new LoginController(new LoginService(), staticResourceController);
-                }
-        );
-        controllers.computeIfAbsent(
-                "RegisterController",
-                key -> {
-                    priority.add(key);
-                    return new RegisterController(new LoginService(), staticResourceController);
-                }
-        );
+        controllers.computeIfAbsent("LoginController", key -> new LoginController(new UserService()));
+        controllers.computeIfAbsent("RegisterController", key -> new RegisterController(new UserService()));
+        controllers.computeIfAbsent("StaticResourceController", key -> new StaticResourceController());
     }
 
-    public String process(final List<String> headers, final String body) {
-        final HttpRequest request = HttpRequestParser.parseHttpRequest(headers, body);
+    public String process(final HttpRequest request) {
+        final String uri = request.getUri();
+        final Controller controller = getController(uri);
+        final HttpResponse response = controller.service(request);
+        return response.toMessage();
+    }
 
-        final Controller responsibleController = priority.stream()
-                .map(controllers::get)
-                .filter(controller -> controller.isResponsible(request.path()))
+    private Controller getController(final String uri) {
+        return controllers.values().stream()
+                .filter(controller -> controller.canHandle(uri))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청 경로: " + request.path()));
-
-        final HttpResponse response = responsibleController.getResource(request);
-
-        return createResponseMessage(response);
-    }
-
-    private String createResponseMessage(final HttpResponse response) {
-        final Map<String, String> headers = response.headers();
-        final String header = headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.joining("\r\n"));
-
-        return String.join("\r\n",
-                response.protocol() + " " + response.statusCode() + " ",
-                header,
-                "",
-                response.body());
+                .orElse(controllers.get("StaticResourceController"));
     }
 }

@@ -1,102 +1,42 @@
 package com.techcourse.presentation;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import com.techcourse.util.ResourceWithType;
+import com.techcourse.util.StaticResourceManager;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(StaticResourceController.class);
-    private static final String BASE_DIRECTORY_NAME = "static";
-    private static final Map<String, Path> RESOURCE_PATHS = new ConcurrentHashMap<>();
-
-    public StaticResourceController() {
-        final URL baseUrl = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(BASE_DIRECTORY_NAME);
-
-        if (baseUrl != null) {
-            final Path basePath = getBasePath(baseUrl);
-            registerResourcePaths(basePath);
-        }
-    }
-
-    private Path getBasePath(final URL baseUrl) {
-        final Path basePath;
-        try {
-            basePath = Paths.get(baseUrl.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        log.debug("정적 자원 디렉토리 경로: {}", basePath);
-        return basePath;
-    }
-
-    private void registerResourcePaths(final Path basePath) {
-        try (final Stream<Path> files = Files.walk(basePath)) {
-            files.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        final String pathName = "/" + basePath.relativize(path);
-                        RESOURCE_PATHS.computeIfAbsent(pathName, key -> path);
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        log.debug("정적 자원 경로 등록 완료: {}", RESOURCE_PATHS.keySet());
+    @Override
+    public boolean canHandle(final String uri) {
+        return false;
     }
 
     @Override
-    public boolean isResponsible(final String path) {
-        if ("/".equals(path)) {
-            return true;
+    protected HttpResponse doGet(HttpRequest request) {
+        final String uri = request.getUri();
+
+        if (!StaticResourceManager.isStaticResource(uri)) {
+            return HttpResponse.fromRequest(request)
+                    .notFound()
+                    .location("/404.html")
+                    .build();
         }
-        return RESOURCE_PATHS.containsKey(path);
+
+        final ResourceWithType resource = StaticResourceManager.getResource(uri);
+        final String statusCode = getStatusCode(uri);
+
+        return HttpResponse.fromRequest(request)
+                .statusCode(statusCode)
+                .contentType(resource.contentType())
+                .setDefaultCharset()
+                .contentLength(resource.content().getBytes(StandardCharsets.UTF_8).length)
+                .body(resource.content())
+                .build();
     }
 
     @Override
-    public HttpResponse getResource(final HttpRequest request) {
-        if (!isResponsible(request.path())) {
-            throw new IllegalArgumentException("요청 경로에 해당하는 자원이 없습니다.");
-        }
-
-        if ("/".equals(request.path())) {
-            final String body = "Hello world!";
-
-            return HttpResponse.builder()
-                    .protocol(request.protocol())
-                    .statusCode("200 OK")
-                    .contentType("text/html;charset=utf-8")
-                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                    .body(body)
-                    .build();
-        }
-
-        final Path filePath = RESOURCE_PATHS.get(request.path());
-        final String statusCode = getStatusCode(request.path());
-
-        try {
-            final String contentType = Files.probeContentType(filePath);
-            final String body = new String(Files.readAllBytes(filePath));
-
-            return HttpResponse.builder()
-                    .protocol(request.protocol())
-                    .statusCode(statusCode)
-                    .contentType(contentType + ";charset=utf-8")
-                    .contentLength(body.getBytes(StandardCharsets.UTF_8).length)
-                    .body(body)
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    protected String getBasePath() {
+        return null;
     }
 
     private String getStatusCode(final String pathName) {

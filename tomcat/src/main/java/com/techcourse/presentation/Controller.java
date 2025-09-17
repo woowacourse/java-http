@@ -2,8 +2,8 @@ package com.techcourse.presentation;
 
 public interface Controller {
 
-    boolean isResponsible(final String path);
+    boolean canHandle(String uri);
 
-    HttpResponse getResource(final HttpRequest request);
+    HttpResponse service(HttpRequest request);
 
 }

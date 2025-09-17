@@ -1,12 +1,12 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session implements org.apache.coyote.Session {
 
     private final String id;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;
@@ -24,6 +24,10 @@ public class Session implements org.apache.coyote.Session {
 
     @Override
     public void setAttribute(final String name, final Object value) {
-        values.put(name, value);
+        if (value == null) {
+            values.remove(name);
+        } else {
+            values.put(name, value);
+        }
     }
 }

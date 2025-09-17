@@ -71,7 +71,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        executorService.submit(new Http11Processor(connection));
+        executorService.execute(new Http11Processor(connection));
     }
 
     public void stop() {

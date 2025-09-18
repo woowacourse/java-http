@@ -14,7 +14,8 @@ public class HttpSessionImpl extends AbstractHttpSession {
         super(servletContext);
     }
 
-    @Override    public Object getAttribute(String name) {
+    @Override
+    public Object getAttribute(String name) {
         checkValid();
         return attributes.get(name);
     }
@@ -42,5 +43,20 @@ public class HttpSessionImpl extends AbstractHttpSession {
     public void removeAttribute(String name) {
         checkValid();
         attributes.remove(name);
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        attributes.clear();
+    }
+
+    public boolean isValid() {
+        try {
+            checkValid();
+            return true;
+        } catch (IllegalStateException e) {
+            return false;
+        }
     }
 }

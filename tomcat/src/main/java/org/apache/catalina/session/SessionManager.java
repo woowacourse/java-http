@@ -33,32 +33,34 @@ public class SessionManager implements Manager {
 
     @Override
     public HttpSession findSession(String id) throws IOException {
-        if (id == null) return null;
-
-        HttpSessionImpl session = SESSIONS.get(id);
-        if (session == null) return null;
-
-        if (session.isExpired()) {
-            remove(session);
+        if (id == null) {
             return null;
         }
 
-        session.access();
-        return session;
+        return SESSIONS.computeIfPresent(id, (k, session) -> {
+            if (!session.isValid() || session.isExpired()) {
+                session.invalidate();
+                return null;
+            }
+            session.access(); // 접근 시간 갱신
+            return session;
+        });
     }
 
     @Override
     public void add(HttpSession session) {
         if (session instanceof HttpSessionImpl s) {
-            SESSIONS.put(s.getId(), s);
+            SESSIONS.putIfAbsent(s.getId(), s);
         }
     }
 
     @Override
     public void remove(HttpSession session) {
         if (session instanceof HttpSessionImpl s) {
-            s.invalidate();
-            SESSIONS.remove(s.getId());
+            SESSIONS.computeIfPresent(s.getId(), (k, v) -> {
+                v.invalidate();
+                return null; // null → remove
+            });
         }
     }
 }

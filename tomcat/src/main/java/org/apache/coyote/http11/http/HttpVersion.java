@@ -16,7 +16,7 @@ public enum HttpVersion {
     }
 
     public static HttpVersion from(String value) {
-        Arrays.stream(HttpVersion.values())
+        return Arrays.stream(HttpVersion.values())
                 .filter(v -> v.text.equalsIgnoreCase(value))
                 .findFirst()
                 .orElseThrow(() -> new HttpVersionNotSupported("지원하지 않는 HTTP 버전: " + value));

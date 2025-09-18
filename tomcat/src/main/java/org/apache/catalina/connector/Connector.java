@@ -2,6 +2,7 @@ package org.apache.catalina.connector;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
@@ -40,7 +41,7 @@ public class Connector implements Runnable {
                 corePoolSize,
                 maxThreads,
                 60L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(acceptCount),
+                new LinkedBlockingQueue<Runnable>(),
                 new ThreadPoolExecutor.AbortPolicy()
         );
     }

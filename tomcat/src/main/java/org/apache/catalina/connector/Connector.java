@@ -21,6 +21,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 200;
+    private static final int CORE_PULL_SIZE = 10;
 
     private final ServerSocket serverSocket;
     private final DispatcherHandler dispatcher;
@@ -28,20 +29,19 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector(DispatcherHandler dispatcher) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, dispatcher);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, CORE_PULL_SIZE, DEFAULT_MAX_THREADS, dispatcher);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads, DispatcherHandler dispatcher) {
+    public Connector(final int port, final int acceptCount, final int corePoolSize, final int maxThreads, DispatcherHandler dispatcher) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.dispatcher = dispatcher;
         this.executorService = new ThreadPoolExecutor(
-                maxThreads,
+                corePoolSize,
                 maxThreads,
                 60L, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(acceptCount),
                 new ThreadPoolExecutor.AbortPolicy()
-
         );
     }
 

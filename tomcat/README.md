@@ -25,7 +25,7 @@ Accept: */*
 
 #### 2. CSS 지원하기
 
-- [ ] 사용자가 페이지를 열었을 때 CSS 파일도 호출한다.
+- [x] 사용자가 페이지를 열었을 때 CSS 파일도 호출한다.
 
 브라우저에서 요청한 HTTP Request Header는 다음과 같다.
 
@@ -35,3 +35,9 @@ Host: localhost:8080
 Accept: text/css,*/*;q=0.1
 Connection: keep-alive
 ``` 
+
+#### 3. Query String 파싱
+
+- [ ] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여준다.
+- [ ] 로그인 페이지 접속 시 Query String을 파싱해서 아이디, 비밀번호 일치를 검사한다.
+- [ ] 일치 한다면 콘솔창에 로그로 회원을 조회한 결과가 나오게 한다.

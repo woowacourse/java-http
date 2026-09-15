@@ -8,7 +8,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -27,6 +28,10 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
+    private static String getUri(String line) {
+        return line.split(" ")[1];
+    }
+
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -41,14 +46,13 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line = reader.readLine();
             String method = line.split(" ")[0];
-            String uri = line.split(" ")[1];
+            String path = getPath(line);
 
-
-            final var responseBody = getResponseBody(method,uri);
+            final var responseBody = getResponseBody(method, line);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + getExtension(uri) + ";charset=utf-8 ",
+                    "Content-Type: text/" + getExtension(path) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -60,34 +64,58 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String method, String uri) {
+    private String getPath(String line) {
+        String uri = getUri(line);
+
+        return uri.split("'?'")[0];
+    }
+
+    private Map<String, String> getParameters(String line) {
+        String uri = getUri(line);
+        String queryString = uri.split("'?'")[1];
+
+        String[] splitQuery = queryString.split("&");
+        Map<String, String> map = new HashMap<>();
+        for (String s : splitQuery) {
+            String[] kv = s.split("=");
+            map.put(kv[0], kv[1]);
+        }
+        return map;
+    }
+
+    private String getResponseBody(String method, String line) {
+        String uri = getUri(line);
         if (uri.equals("/") && method.equals("GET")) {
             return "Hello world!";
-        } else if (uri.equals(INDEX_URI) && method.equals("GET")) {
-            return modelToView(INDEX_URI);
-        } else if (uri.equals(STYLES_CSS) && method.equals("GET")) {
-            return modelToView(STYLES_CSS);
         }
-        throw new IllegalArgumentException("잘못된 주소입니다.");
+        if ((uri.equals("/login") || uri.equals("/login.html")) && method.equals("GET")) {
+            printUserLog(line);
+            return modelToView("/login.html");
+        }
+        return modelToView(uri);
+    }
+
+    private void printUserLog(String line) {
+        Map<String, String> parameters = getParameters(line);
+        log.info("id: %d, account: '%s', email: '%s', password: '%s'".formatted(
+                parameters.get("id"), parameters.get("account"), parameters.get("email"), parameters.get("password")
+        ));
     }
 
     private String getExtension(String uri) {
-        if (uri.equals("/")) {
-            return "html";
-        }
         if (uri.endsWith(".html")) {
             return "html";
         }
         if (uri.endsWith(".css")) {
             return "css";
         }
-        throw new IllegalArgumentException("확인이 되지 않는 확장자 입니다.");
+        return "html";
     }
 
     @Nonnull
     private String modelToView(String uri) {
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + uri);
-        if(resource == null) {
+        if (resource == null) {
             throw new IllegalArgumentException("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요.");
         }
         try {

@@ -1,6 +1,20 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +42,57 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            HttpRequestHeader httpRequestHeader = makeHttpRequestHeader(reader);
+            String requestUrl = httpRequestHeader.getRequestUrlWithOutQuery();
 
-            final var responseBody = "Hello world!";
+            handleLogin(requestUrl, httpRequestHeader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            byte[] responseBody = getResponseBody(requestUrl);
+            HttpResponseHeader responseHeader = HttpResponseHeader.createDefault(requestUrl, responseBody.length);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(responseHeader.getResponseHeaderString().getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private byte[] getResponseBody(String requestUrl) throws IOException {
+        URL resourceUrl = getClass().getClassLoader().getResource("static" + requestUrl);
+
+        Path path = new File(Objects.requireNonNull(resourceUrl).getPath()).toPath();
+        return Files.readAllBytes(path);
+    }
+
+    private void handleLogin(String requestUrl, HttpRequestHeader httpRequestHeader) {
+        if (requestUrl.contains("login")) {
+            QueryParams params = QueryParams.from(httpRequestHeader.getQuery());
+            String account = params.getValue("account");
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            user.ifPresent(u -> {
+                log.info(u.toString());
+            });
+        }
+    }
+
+    private HttpRequestHeader makeHttpRequestHeader(BufferedReader reader) throws IOException {
+        String startLine = reader.readLine();
+        Map<String, String> headers = makeHeaders(reader);
+        return new HttpRequestHeader(startLine, headers);
+    }
+
+    private Map<String, String> makeHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.isBlank()) {
+                break;
+            }
+            String[] header = line.split(" ");
+            headers.put(header[0], header[1]);
+        }
+        return headers;
     }
 }

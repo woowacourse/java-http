@@ -37,11 +37,9 @@ public class Http11Processor implements Runnable, Processor {
             String request = reader.readLine();
             request = request.split(" ")[1];
 
-            String responseBody;
+            String responseBody = "Hello world!";
 
-            if ("/".equals(request)) {
-                responseBody = "Hello world!";
-            } else {
+            if (!"/".equals(request)) {
                 String resourcePath = "static" + request;
 
                 try (InputStream resource =

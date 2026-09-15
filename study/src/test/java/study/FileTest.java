@@ -3,8 +3,10 @@ package study;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -47,8 +49,10 @@ class FileTest {
         // todo
         final Path path = Path.of("src/test/resources", fileName);
 
+        InputStream inputStream = new FileInputStream(path.toFile());
+
         // todo
-        BufferedReader br = new BufferedReader(new FileReader(path.toFile().getAbsoluteFile()));
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         final List<String> actual = br.lines().toList();
 
         assertThat(actual).containsOnly("nextstep");

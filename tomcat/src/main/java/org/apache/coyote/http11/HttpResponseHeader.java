@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponseHeader {
@@ -17,9 +18,8 @@ public class HttpResponseHeader {
     }
 
     public static HttpResponseHeader createDefault(String requestUrl, int contentLength) {
-        Map<String, String> headers = new java.util.HashMap<>();
+        Map<String, String> headers = new HashMap<>();
 
-        // Content-Type 결정 로직
         String contentType = "text/html;charset=utf-8";
         if (requestUrl.endsWith(".css")) {
             contentType = "text/css";

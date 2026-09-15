@@ -5,8 +5,15 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +36,35 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
+
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
+            final String path = requestLine.split(" ")[1];
+
+            final String responseBody = readStaticResource(path);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.getBytes(UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String readStaticResource(final String path) throws IOException, URISyntaxException {
+        if (!path.equals("/index.html")) {
+            return "Hello world!";
+        }
+        final var resource = getClass().getClassLoader().getResource("static" + path);
+        return Files.readString(Path.of(resource.toURI()), UTF_8);
     }
 }

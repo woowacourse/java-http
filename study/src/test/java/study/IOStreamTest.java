@@ -79,6 +79,8 @@ class IOStreamTest {
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
 
+            outputStream.flush();
+
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
         }

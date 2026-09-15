@@ -6,8 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -89,18 +87,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(String path) throws IOException {
-        final String responseBody;
         if ("/".equals(path)) {
-            responseBody = "Hello world!";
-        } else {
-            final String resourceName = "static" + path;
-            final String fileName = Objects.requireNonNull(
-                    getClass().getClassLoader().getResource(resourceName)
-            ).getPath();
-
-            responseBody = Files.readString(Path.of(fileName));
+            return "Hello world!";
         }
-        return responseBody;
+        final String resourceName = "static" + path;
+        final String fileName = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(resourceName),
+                "리소스를 찾을 수 없음: " + resourceName
+        ).getPath();
+
+        return Files.readString(Path.of(fileName));
     }
 
     private String resolveContentType(final String requestUri) {
@@ -112,7 +108,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> parseQueryString(final String queryString) {
         final Map<String, String> parameters = new HashMap<>();
-
         if (queryString.isBlank()) {
             return parameters;
         }
@@ -122,29 +117,14 @@ public class Http11Processor implements Runnable, Processor {
             if (nameAndValue.length != 2) {
                 continue;
             }
-
-            final String name = URLDecoder.decode(
-                    nameAndValue[0],
-                    StandardCharsets.UTF_8
-            );
-            final String value = URLDecoder.decode(
-                    nameAndValue[1],
-                    StandardCharsets.UTF_8
-            );
-
-            parameters.put(name, value);
+            parameters.put(nameAndValue[0], nameAndValue[1]);
         }
-
         return parameters;
     }
 
     private void login(final Map<String, String> parameters) {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
-
-        if (account == null || password == null) {
-            return;
-        }
 
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

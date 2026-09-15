@@ -1,12 +1,17 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -47,7 +52,26 @@ public class Http11Processor implements Runnable, Processor {
             final String[] requestComponents = requestLine.split(" ");
             final String requestUri = requestComponents[1];
 
-            final String responseBody = getResponseBody(requestUri);
+            final int queryIndex = requestUri.indexOf('?');
+            String path;
+            final String queryString;
+            if (queryIndex >= 0) {
+                path = requestUri.substring(0, queryIndex);
+                queryString = requestUri.substring(queryIndex + 1);
+            } else {
+                path = requestUri;
+                queryString = "";
+            }
+
+            if ("/login".equals(path)) {
+                if (!queryString.isBlank()) {
+                    final Map<String, String> parameters = parseQueryString(queryString);
+                    login(parameters);
+                }
+                path += ".html";
+            }
+
+            final String responseBody = getResponseBody(path);
             final String contentType = resolveContentType(requestUri);
 
             final var response = String.join("\r\n",
@@ -64,12 +88,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String requestUri) throws IOException {
+    private String getResponseBody(String path) throws IOException {
         final String responseBody;
-        if ("/".equals(requestUri)) {
+        if ("/".equals(path)) {
             responseBody = "Hello world!";
         } else {
-            final String resourceName = "static" + requestUri;
+            final String resourceName = "static" + path;
             final String fileName = Objects.requireNonNull(
                     getClass().getClassLoader().getResource(resourceName)
             ).getPath();
@@ -84,6 +108,47 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css";
         }
         return "text/html";
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> parameters = new HashMap<>();
+
+        if (queryString.isBlank()) {
+            return parameters;
+        }
+
+        for (String pair : queryString.split("&")) {
+            final String[] nameAndValue = pair.split("=", 2);
+            if (nameAndValue.length != 2) {
+                continue;
+            }
+
+            final String name = URLDecoder.decode(
+                    nameAndValue[0],
+                    StandardCharsets.UTF_8
+            );
+            final String value = URLDecoder.decode(
+                    nameAndValue[1],
+                    StandardCharsets.UTF_8
+            );
+
+            parameters.put(name, value);
+        }
+
+        return parameters;
+    }
+
+    private void login(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("로그인 성공: {}", user));
     }
 
     private static boolean validateHeaders(BufferedReader bufferedReader) throws IOException {

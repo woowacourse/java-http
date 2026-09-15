@@ -33,16 +33,27 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            String filePath = parseRequestPathFrom(inputStream);
-            var responseBody = resolveContentOf(filePath);
-            final var response = buildResponseWith(responseBody);
+            final var response = buildResponseWith(inputStream);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String buildResponseWith(InputStream inputStream) throws IOException {
+        String path = parseRequestPathFrom(inputStream);
+
+        String contentType = contentTypeOf(path);
+        String responseBody = resolveContentOf(path);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private String parseRequestPathFrom(InputStream inputStream) throws IOException {
@@ -58,17 +69,18 @@ public class Http11Processor implements Runnable, Processor {
         return "Hello world!";
     }
 
-    private URL getResource(String filename) {
-        String path = "static" + filename;
+    private URL getResource(String filePath) {
+        String path = "static" + filePath;
         return getClass().getClassLoader().getResource(path);
     }
 
-    private String buildResponseWith(String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private String contentTypeOf(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html";
     }
 }

@@ -7,11 +7,13 @@ import static org.mockito.Mockito.verify;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
@@ -163,12 +165,11 @@ class IOStreamTest {
          * 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
-
-            final byte[] actual = new byte[0];
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -187,15 +188,24 @@ class IOStreamTest {
          * readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
+            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
             final StringBuilder actual = new StringBuilder();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+
+            try (BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                String line;
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    actual.append(line).append("\r\n");
+                }
+            }
 
             assertThat(actual).hasToString(emoji);
         }

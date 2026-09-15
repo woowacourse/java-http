@@ -19,6 +19,14 @@ public class HttpRequestHeader {
         this.headers = headers;
     }
 
+    public boolean containsKey(String key) {
+        return headers.containsKey(key);
+    }
+
+    public String getValue(String key) {
+        return headers.get(key);
+    }
+
     public String getRequestUrlWithOutQuery() {
         String requestUrl = getRequestUrl();
         if (requestUrl.contains(QUESTION_MARK)) {

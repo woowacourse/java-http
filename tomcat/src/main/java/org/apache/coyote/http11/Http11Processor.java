@@ -6,15 +6,15 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import javassist.NotFoundException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,29 +40,49 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (connection;
+             final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequestHeader httpRequestHeader = makeHttpRequestHeader(reader);
             String requestUrl = httpRequestHeader.getRequestUrlWithOutQuery();
-
             handleLogin(requestUrl, httpRequestHeader);
 
-            byte[] responseBody = getResponseBody(requestUrl);
-            HttpResponseHeader responseHeader = HttpResponseHeader.createDefault(requestUrl, responseBody.length);
+            String requestBody = getRequestBody(httpRequestHeader, reader);
 
-            outputStream.write(responseHeader.getResponseHeaderString().getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
-            outputStream.flush();
+            sendHttpResponse(requestUrl, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (NotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private byte[] getResponseBody(String requestUrl) throws IOException {
-        URL resourceUrl = getClass().getClassLoader().getResource("static" + requestUrl);
+    private void sendHttpResponse(String requestUrl, OutputStream outputStream) throws IOException, NotFoundException {
+        byte[] responseBody = getResponseBody(requestUrl);
+        HttpResponseHeader responseHeader = HttpResponseHeader.createDefault(requestUrl, responseBody.length);
+        outputStream.write(responseHeader.getResponseHeaderString().getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseBody);
+        outputStream.flush();
+    }
 
-        Path path = new File(Objects.requireNonNull(resourceUrl).getPath()).toPath();
+    private String getRequestBody(HttpRequestHeader httpRequestHeader, BufferedReader reader) throws IOException {
+        String body = "";
+        if (httpRequestHeader.containsKey("content-length")) {
+            int contentLength = Integer.parseInt(httpRequestHeader.getValue("content-length"));
+            char[] bodyChars = new char[contentLength];
+            int read = reader.read(bodyChars, 0, contentLength);
+            body = new String(bodyChars, 0, read);
+        }
+        return body;
+    }
+
+    private byte[] getResponseBody(String requestUrl) throws IOException, NotFoundException {
+        URL resourceUrl = getClass().getClassLoader().getResource("static" + requestUrl);
+        if (resourceUrl == null) {
+            throw new NotFoundException(requestUrl);
+        }
+        Path path = new File((resourceUrl).getPath()).toPath();
         return Files.readAllBytes(path);
     }
 
@@ -86,12 +106,11 @@ public class Http11Processor implements Runnable, Processor {
     private Map<String, String> makeHeaders(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.isBlank()) {
-                break;
-            }
-            String[] header = line.split(" ");
-            headers.put(header[0], header[1]);
+        while ((line = reader.readLine()) != null && !line.isBlank()) {
+            int colonIndex = line.indexOf(":");
+            String key = line.substring(0, colonIndex).trim();
+            String value = line.substring(colonIndex + 1).trim();
+            headers.put(key, value);
         }
         return headers;
     }

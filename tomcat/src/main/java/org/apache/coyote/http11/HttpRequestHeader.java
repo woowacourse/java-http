@@ -20,11 +20,11 @@ public class HttpRequestHeader {
     }
 
     public boolean containsKey(String key) {
-        return headers.containsKey(key);
+        return headers.containsKey(key.toLowerCase());
     }
 
     public String getValue(String key) {
-        return headers.get(key);
+        return headers.get(key.toLowerCase());
     }
 
     public String getRequestUrlWithOutQuery() {

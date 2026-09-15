@@ -108,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
         String line;
         while ((line = reader.readLine()) != null && !line.isBlank()) {
             int colonIndex = line.indexOf(":");
-            String key = line.substring(0, colonIndex).trim();
+            String key = line.substring(0, colonIndex).trim().toLowerCase();
             String value = line.substring(colonIndex + 1).trim();
             headers.put(key, value);
         }

@@ -40,28 +40,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String line = bufferedReader.readLine();
-            while (!"".equals(line)) {
-                if (line == null) {
-                    return;
-                }
-                line = bufferedReader.readLine();
+            if (!validateHeaders(bufferedReader)) {
+                return;
             }
 
             final String[] requestComponents = requestLine.split(" ");
             final String requestUri = requestComponents[1];
-
-            final String responseBody;
-            if ("/".equals(requestUri)) {
-                responseBody = "Hello world!";
-            } else {
-                final String resourceName = "static" + requestUri;
-                final String fileName = Objects.requireNonNull(
-                        getClass().getClassLoader().getResource(resourceName)
-                ).getPath();
-
-                responseBody = Files.readString(Path.of(fileName));
-            }
+            final String responseBody = getResponseBody(requestUri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -75,5 +60,31 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseBody(String requestUri) throws IOException {
+        final String responseBody;
+        if ("/".equals(requestUri)) {
+            responseBody = "Hello world!";
+        } else {
+            final String resourceName = "static" + requestUri;
+            final String fileName = Objects.requireNonNull(
+                    getClass().getClassLoader().getResource(resourceName)
+            ).getPath();
+
+            responseBody = Files.readString(Path.of(fileName));
+        }
+        return responseBody;
+    }
+
+    private static boolean validateHeaders(BufferedReader bufferedReader) throws IOException {
+        String line = bufferedReader.readLine();
+        while (!"".equals(line)) {
+            if (line == null) {
+                return false;
+            }
+            line = bufferedReader.readLine();
+        }
+        return true;
     }
 }

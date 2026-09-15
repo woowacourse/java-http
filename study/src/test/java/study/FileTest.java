@@ -1,5 +1,7 @@
 package study;
 
+import java.net.URL;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +30,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final String actual = File.findFilePath(fileName).getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,10 +46,11 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        String filePath = File.findFilePath(fileName).getPath();
+        final Path path = Paths.get(filePath);
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = File.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

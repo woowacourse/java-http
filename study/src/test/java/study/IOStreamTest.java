@@ -1,5 +1,6 @@
 package study;
 
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
-
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
 
             assertThat(actual).isEqualTo("nextstep");
@@ -78,7 +79,7 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
-
+            outputStream.flush();
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
         }
@@ -96,7 +97,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-
+            try (outputStream) {
+                outputStream.flush();
+            }
             verify(outputStream, atLeastOnce()).close();
         }
     }
@@ -128,7 +131,7 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -148,7 +151,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-
+            try (inputStream) {
+                inputStream.read();
+            }
             verify(inputStream, atLeastOnce()).close();
         }
     }
@@ -166,15 +171,20 @@ class IOStreamTest {
         /**
          * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.
          * InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.
-         * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
+         * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까? 8192(8KB)
          */
         @Test
         void 필터인_BufferedInputStream를_사용해보자() {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            final byte[] actual;
+            try(bufferedInputStream) {
+                actual = bufferedInputStream.readAllBytes();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -204,9 +214,16 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final StringBuilder actual = new StringBuilder();
-
+            String line;
+            try {
+                while ((line = bufferedReader.readLine()) != null) {
+                    actual.append(line).append("\r\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             assertThat(actual).hasToString(emoji);
         }
     }

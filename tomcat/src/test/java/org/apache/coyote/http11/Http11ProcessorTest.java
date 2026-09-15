@@ -10,7 +10,7 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class Http11ProcessorTest {
+class 현Http11ProcessorTest {
 
     @Test
     void process() {

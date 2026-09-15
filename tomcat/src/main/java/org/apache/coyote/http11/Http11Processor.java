@@ -1,7 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
+import org.apache.http.request.HttpRequestParser;
+import org.apache.http.request.HttpTomcatRequest;
+import org.apache.http.response.HttpTomcatResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +17,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+
+    private final HttpRequestParser httpRequestParser = new HttpRequestParser();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -29,6 +35,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            final HttpTomcatRequest httpTomcatRequest =
+                    httpRequestParser.parse(
+                            HttpTomcatRequest.class,
+                            new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            final HttpTomcatResponse httpTomcatResponse = new HttpTomcatResponse();
             final var responseBody = "Hello world!";
 
             final var response = String.join("\r\n",

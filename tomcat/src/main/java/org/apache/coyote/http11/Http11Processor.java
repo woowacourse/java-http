@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -44,14 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final String path = requestLine.split(" ")[1];
 
-            final String responseBody = readStaticResource(path);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes(UTF_8).length + " ",
-                    "",
-                    responseBody);
+            final String response = createResponse(path);
 
             outputStream.write(response.getBytes(UTF_8));
             outputStream.flush();
@@ -60,11 +54,40 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readStaticResource(final String path) throws IOException, URISyntaxException {
-        if (!path.equals("/index.html")) {
-            return "Hello world!";
+    private String createResponse(final String path) throws IOException, URISyntaxException {
+        if (path.equals("/")) {
+            return response("HTTP/1.1 200 OK ", "text/html", "Hello world!");
         }
+
         final var resource = getClass().getClassLoader().getResource("static" + path);
+        if (resource == null) {
+            final var notFound = getClass().getClassLoader().getResource("static/404.html");
+            return response("HTTP/1.1 404 Not Found ", "text/html", readResource(notFound));
+        }
+
+        return response("HTTP/1.1 200 OK ", contentType(path), readResource(resource));
+    }
+
+    private String readResource(final URL resource) throws IOException, URISyntaxException {
         return Files.readString(Path.of(resource.toURI()), UTF_8);
+    }
+
+    private String response(final String statusLine, final String contentType, final String body) {
+        return String.join("\r\n",
+                statusLine,
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + body.getBytes(UTF_8).length + " ",
+                "",
+                body);
+    }
+
+    private String contentType(final String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        if (path.endsWith(".svg")) {
+            return "image/svg+xml";
+        }
+        return "text/html";
     }
 }

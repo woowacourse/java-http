@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -18,8 +21,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String INDEX_URI = "/index.html";
-    private static final String STYLES_CSS = "/css/styles.css";
     private static final String RESOURCES_PREFIX = "static";
 
     private final Socket connection;
@@ -66,14 +67,24 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getPath(String line) {
         String uri = getUri(line);
-
-        return uri.split("'?'")[0];
+        int idx = uri.indexOf('?');
+        if(idx != -1) {
+            uri = uri.substring(0, idx);
+        }
+        return uri;
     }
 
     private Map<String, String> getParameters(String line) {
         String uri = getUri(line);
-        String queryString = uri.split("'?'")[1];
+        int idx = uri.indexOf('?');
+        if(idx != -1) {
+            return getStringStringMap(uri.substring(idx + 1));
+        }
+        throw new IllegalArgumentException("URI에 파라미터가 없습니다.");
+    }
 
+    @Nonnull
+    private Map<String, String> getStringStringMap(String queryString) {
         String[] splitQuery = queryString.split("&");
         Map<String, String> map = new HashMap<>();
         for (String s : splitQuery) {
@@ -84,29 +95,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(String method, String line) {
-        String uri = getUri(line);
-        if (uri.equals("/") && method.equals("GET")) {
+        String path = getPath(line);
+
+        if (path.equals("/") && method.equals("GET")) {
             return "Hello world!";
         }
-        if ((uri.equals("/login") || uri.equals("/login.html")) && method.equals("GET")) {
-            printUserLog(line);
+        if (path.equals("/login") && method.equals("GET")) {
+            Map<String, String> params = getParameters(line);
+            User user = InMemoryUserRepository.findByAccount(params.get("account")).orElse(null);
+            if(user == null) {
+                return "없는 유저입니다. 다시 입력해주세요";
+            }
+            log.info(user.toString());
             return modelToView("/login.html");
         }
-        return modelToView(uri);
+        return modelToView(path);
     }
 
-    private void printUserLog(String line) {
-        Map<String, String> parameters = getParameters(line);
-        log.info("id: %d, account: '%s', email: '%s', password: '%s'".formatted(
-                parameters.get("id"), parameters.get("account"), parameters.get("email"), parameters.get("password")
-        ));
-    }
-
-    private String getExtension(String uri) {
-        if (uri.endsWith(".html")) {
+    private String getExtension(String path) {
+        if (path.endsWith(".html")) {
             return "html";
         }
-        if (uri.endsWith(".css")) {
+        if (path.endsWith(".css")) {
             return "css";
         }
         return "html";
@@ -116,7 +126,8 @@ public class Http11Processor implements Runnable, Processor {
     private String modelToView(String uri) {
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + uri);
         if (resource == null) {
-            throw new IllegalArgumentException("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요.");
+            log.info("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요." + uri);
+            return "경로가 잘못됐습니다!!!";
         }
         try {
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

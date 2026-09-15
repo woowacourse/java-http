@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,12 +25,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        var expected = expectedResponse("text/html", "Hello world!");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -49,13 +47,81 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = expectedResponse("text/html", readResource("static/index.html"));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Accept: text/css,*/*;q=0.1",
+                "Connection: keep-alive",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        var expected = expectedResponse("text/css", readResource("static/css/styles.css"));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+        final var logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            processor.process(socket);
+        } finally {
+            logger.detachAppender(appender);
+        }
+
+        var expected = expectedResponse("text/html", readResource("static/login.html"));
+        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(appender.list)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .anyMatch(message -> message.contains("login user: User{id=1, account='gugu'"));
+    }
+
+    @Test
+    void empty_request() {
+        final var socket = new StubSocket("");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).isEmpty();
+    }
+
+    private String readResource(String resourceName) throws IOException {
+        try (InputStream inputStream = Objects.requireNonNull(
+                getClass().getClassLoader().getResourceAsStream(resourceName)
+        )) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private String expectedResponse(String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
     }
 }

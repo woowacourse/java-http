@@ -68,8 +68,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getRequestBody(HttpRequestHeader httpRequestHeader, BufferedReader reader) throws IOException {
         String body = "";
-        if (httpRequestHeader.containsKey("content-length")) {
-            int contentLength = Integer.parseInt(httpRequestHeader.getValue("content-length"));
+        if (httpRequestHeader.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
             char[] bodyChars = new char[contentLength];
             int read = reader.read(bodyChars, 0, contentLength);
             body = new String(bodyChars, 0, read);

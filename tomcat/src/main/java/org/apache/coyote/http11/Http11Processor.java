@@ -18,7 +18,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String INDEX_URI = "/index.html";
-    private static final String STYLES_CSS = "/styles.css";
+    private static final String STYLES_CSS = "/css/styles.css";
     private static final String RESOURCES_PREFIX = "static";
 
     private final Socket connection;
@@ -87,8 +87,11 @@ public class Http11Processor implements Runnable, Processor {
     @Nonnull
     private String modelToView(String uri) {
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + uri);
+        if(resource == null) {
+            throw new IllegalArgumentException("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요.");
+        }
         try {
-            return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

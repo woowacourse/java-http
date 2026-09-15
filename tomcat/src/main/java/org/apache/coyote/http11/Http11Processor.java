@@ -46,11 +46,13 @@ public class Http11Processor implements Runnable, Processor {
 
             final String[] requestComponents = requestLine.split(" ");
             final String requestUri = requestComponents[1];
+
             final String responseBody = getResponseBody(requestUri);
+            final String contentType = resolveContentType(requestUri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -75,6 +77,13 @@ public class Http11Processor implements Runnable, Processor {
             responseBody = Files.readString(Path.of(fileName));
         }
         return responseBody;
+    }
+
+    private String resolveContentType(final String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 
     private static boolean validateHeaders(BufferedReader bufferedReader) throws IOException {

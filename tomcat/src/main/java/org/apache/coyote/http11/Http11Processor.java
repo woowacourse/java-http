@@ -7,17 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,11 +43,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-
             var responseBody = "Hello world!";
 
             String[] tokens = line.split(" ");
-
             if (tokens.length < 2) {
                 return;
             }
@@ -64,22 +56,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (!"/".equals(path)) {
                 if ("/login".equals(path)) {
-                    String account =
-                            requestUri.getQueryParameter("account");
-                    String password =
-                            requestUri.getQueryParameter("password");
-
-                    if (account != null && password != null) {
-                        InMemoryUserRepository.findByAccount(account)
-                                .filter(user ->
-                                        user.checkPassword(password))
-                                .ifPresent(user ->
-                                        log.info(
-                                                "회원 조회 성공: account={}",
-                                                user.getAccount()
-                                        ));
-                    }
-
+                    logMatchingUser(requestUri);
                     path = "/login.html";
                 }
 
@@ -92,19 +69,36 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "text/css";
             }
 
-            byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-
-            var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBodyBytes.length + " ",
-                    "",
-                    responseBody
-            );
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writeResponse(outputStream, responseBody, contentType);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void logMatchingUser(RequestUri requestUri) {
+        String account = requestUri.getQueryParameter("account");
+        String password = requestUri.getQueryParameter("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("회원 조회 성공: account={}", user.getAccount()));
+    }
+
+    private void writeResponse(OutputStream outputStream, String responseBody, String contentType) throws IOException {
+        byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+
+        var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBodyBytes.length + " ",
+                "",
+                responseBody
+        );
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

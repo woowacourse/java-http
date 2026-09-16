@@ -44,12 +44,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String line = reader.readLine();
-            if (line == null) {
+            String requestLine = reader.readLine();
+            if (requestLine == null) {
                 return;
             }
 
-            Matcher matcher = REQUEST_LINE_PATTERN.matcher(line);
+            Matcher matcher = REQUEST_LINE_PATTERN.matcher(requestLine);
             if (!matcher.matches()) {
                 return;
             }

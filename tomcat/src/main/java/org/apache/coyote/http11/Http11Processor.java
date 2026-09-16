@@ -19,7 +19,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String START_LINE_DELIMITER = " ";
-    private static final char HEADER_DELIMITER = ':';
+    private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
+    private static final String CONTENT_TYPE_TEXT_CSS = "text/css;charset=utf-8";
+    private static final String CONTENT_TYPE_TEXT_JAVASCRIPT = "text/javascript;charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String PARAM_DELIMITER = "&";
@@ -47,11 +49,9 @@ public class Http11Processor implements Runnable, Processor {
             String[] startLineTokens = bufferedReader.readLine().split(START_LINE_DELIMITER);
             String httpUrl = startLineTokens[1];
 
-            Map<String, String> headers = parseHeaders(bufferedReader);
-
             if (httpUrl.startsWith("/index.html")) {
                 final String body = readFile("static/index.html");
-                final var response = createResponse(body, headers);
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpUrl.startsWith("/login")) {
                 final String body = readFile("static/login.html");
-                final var response = createResponse(body, headers);
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpUrl.startsWith("/css/styles.css")) {
                 final String body = readFile("static/css/styles.css");
-                final var response = createResponse(body, headers);
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_CSS);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpUrl.startsWith("/assets/chart-bar.js")) {
                 final String body = readFile("static/assets/chart-bar.js");
-                final var response = createResponse(body, headers);
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -96,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpUrl.startsWith("/js/scripts.js")) {
                 final String body = readFile("static/js/scripts.js");
-                final var response = createResponse(body, headers);
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -105,14 +105,14 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpUrl.startsWith("/assets/chart-pie.js")) {
                 final String body = readFile("static/assets/chart-pie.js");
-                final var response = createResponse(body, headers);
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
-            final var response = createResponse("Hello world!", headers);
+            final var response = createResponse("Hello world!", CONTENT_TYPE_TEXT_HTML);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -120,25 +120,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
-        // 각 요청을 처리하는 스레드는 개별적인 http11Processor 인스턴스를 가지므로, 동시성을 보장하는 자료구조를 사용하지 않았습니다.
-        Map<String, String> headers = new HashMap<>();
-        String nextLine = null;
-        while ((nextLine = bufferedReader.readLine()) != null) {
-            // Host에 콜론(:)이 포함될 수 있으므로 가장 먼저 만나는 콜론을 기준으로 나눕니다.
-            int headerDelimiterIndex = nextLine.indexOf(HEADER_DELIMITER);
-            String key = nextLine.substring(0, headerDelimiterIndex);
-            String value = nextLine.substring(headerDelimiterIndex + 1);
-
-            headers.put(key, value);
-        }
-        return headers;
-    }
-
-    private String createResponse(String responseBody, Map<String, String> headers) throws IOException {
+    private String createResponse(String responseBody, String contentType) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                CONTENT_TYPE + ": " + headers.get(CONTENT_TYPE) + " ",
+                CONTENT_TYPE + ": " + contentType + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

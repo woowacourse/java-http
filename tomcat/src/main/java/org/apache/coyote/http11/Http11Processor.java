@@ -2,14 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -49,21 +47,23 @@ public class Http11Processor implements Runnable, Processor {
 
             String line;
             while ((line = reader.readLine()) != null && !line.equals("")) {
-                line = reader.readLine();
                 log.debug("header : {}", line);
             }
 
             if (requestTarget.equals("/")) {
                 respondHelloWorld(outputStream);
-                return ;
+
+            } else if (requestTarget.endsWith(".css")) {
+                respondCssHeader(requestTarget, outputStream);
+            } else {
+                respondStaticResource(requestTarget, outputStream);
             }
-            respondStaticResource(requestTarget, outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public void respondHelloWorld(OutputStream outputStream) {
+    private void respondHelloWorld(OutputStream outputStream) {
         try {
             final var responseBody = "Hello world!";
 
@@ -81,17 +81,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public void respondStaticResource(String requestTarget, OutputStream outputStream) {
-        try {
-            final var resourceStream = getClass()
-                    .getClassLoader()
-                    .getResourceAsStream("static" + requestTarget);
+    private void respondStaticResource(String requestTarget, OutputStream outputStream) {
+        try (final var resourceStream = getClass()
+                .getClassLoader()
+                .getResourceAsStream("static" + requestTarget)) {
 
             final var responseBody = Objects.requireNonNull(resourceStream).readAllBytes();
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType(requestTarget),
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     new String(responseBody));
@@ -101,5 +100,39 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void respondCssHeader(String requestTarget, OutputStream outputStream) {
+        try (final var resourceStream = getClass()
+                .getClassLoader()
+                .getResourceAsStream("static" + requestTarget)) {
+
+            final var responseBody = Objects.requireNonNull(resourceStream).readAllBytes();
+
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: " + contentType(requestTarget),
+                    "Content-Length: " + responseBody.length + " ",
+                    "",
+                    new String(responseBody));
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private String contentType(final String requestTarget) {
+        if (requestTarget.endsWith(".css")) {
+            return "text/css; charset=utf-8 ";
+        }
+        if (requestTarget.endsWith(".js")) {
+            return "application/javascript; charset=utf-8 ";
+        }
+        if (requestTarget.endsWith(".svg")) {
+            return "image/svg+xml ";
+        }
+        return "text/html;charset=utf-8 ";
     }
 }

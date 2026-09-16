@@ -18,7 +18,7 @@ public class HttpTomcatRequest implements HttpRequest {
         this.httpMethod = httpMethod;
         this.url = url;
         this.protocol = protocol;
-        Header = header;
+        this.Header = Map.copyOf(header);
         this.queryParams = queryParams;
         this.body = body;
     }
@@ -45,7 +45,7 @@ public class HttpTomcatRequest implements HttpRequest {
 
     @Override
     public Map<String, String> getQueryParams() {
-        return queryParams;
+        return Map.copyOf(queryParams);
     }
 
     @Override

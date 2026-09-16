@@ -56,7 +56,7 @@ public class HttpTomcatResponse implements HttpResponse {
 
     @Override
     public Map<String, String> getHeaders() {
-        return Collections.unmodifiableMap(headers);
+        return Map.copyOf(headers);
     }
 
     @Override

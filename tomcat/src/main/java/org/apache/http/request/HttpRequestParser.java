@@ -63,17 +63,6 @@ public class HttpRequestParser {
         );
     }
 
-    private String getBody(String input) {
-        String[] messageParts = input.split(
-                HEAD_BODY_SEPARATOR,
-                2
-        );
-
-        return messageParts.length > 1
-                ? messageParts[1]
-                : "";
-    }
-
     private String[] parseRequestLine(String line) {
         String[] requestLine = line.split(" ", 3);
 

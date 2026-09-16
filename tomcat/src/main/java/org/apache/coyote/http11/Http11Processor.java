@@ -1,6 +1,12 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +35,20 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String requestLine = bufferedReader.readLine();
+            String path = requestLine.split(" ")[1];
+
+            var responseBody = "Hello world!";
+
+            if (path.equals("/index.html")) {
+                URL resource = getClass().getClassLoader()
+                        .getResource("static/index.html");
+
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,7 +45,17 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String path = requestLine.split(" ")[1];
+            String uri = requestLine.split(" ")[1];
+
+            String path = uri;
+            String queryString = "";
+
+            int index = uri.indexOf("?");
+
+            if (index != -1) {
+                path = uri.substring(0, index);
+                queryString = uri.substring(index + 1);
+            }
 
             String line = bufferedReader.readLine();
 
@@ -73,6 +84,42 @@ public class Http11Processor implements Runnable, Processor {
 
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
                 contentType = "text/css;charset=utf-8";
+            }
+
+            if (path.equals("/login")) {
+                URL resource = getClass().getClassLoader()
+                        .getResource("static/login.html");
+
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+                if (!queryString.isEmpty()) {
+                    String[] parameters = queryString.split("&");
+
+                    String account = "";
+                    String password = "";
+
+                    for (String parameter : parameters) {
+                        String[] keyValue = parameter.split("=", 2);
+
+                        if (keyValue.length != 2) {
+                            continue;
+                        }
+
+                        if (keyValue[0].equals("account")) {
+                            account = keyValue[1];
+                        } else if (keyValue[0].equals("password")) {
+                            password = keyValue[1];
+                        }
+                    }
+
+                    var user = InMemoryUserRepository.findByAccount(account);
+
+                    if (user.isPresent()) {
+                        if (user.get().checkPassword(password)) {
+                            log.info("로그인 성공 : account={}", user.get().getAccount());
+                        }
+                    }
+                }
             }
 
             final var response = String.join("\r\n",

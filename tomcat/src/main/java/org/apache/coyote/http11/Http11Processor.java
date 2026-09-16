@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +10,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +45,18 @@ public class Http11Processor implements Runnable, Processor {
             if (requestLine == null) {
                 return;
             }
+
             final String[] tokens = requestLine.split(" ");
             final String requestTarget = tokens[1];
+
+            int index = requestTarget.indexOf("?");
+            String path = requestTarget;
+            String queryString = "";
+
+            if (index != -1) {
+                path = requestTarget.substring(0, index);
+                queryString = requestTarget.substring(index + 1);
+            }
 
             log.debug("request line: {}", requestLine);
 
@@ -50,14 +65,20 @@ public class Http11Processor implements Runnable, Processor {
                 log.debug("header : {}", line);
             }
 
-            if (requestTarget.equals("/")) {
+            if (path.equals("/")) {
                 respondHelloWorld(outputStream);
-
-            } else if (requestTarget.endsWith(".css")) {
-                respondCssHeader(requestTarget, outputStream);
-            } else {
-                respondStaticResource(requestTarget, outputStream);
+                return;
             }
+
+            if (path.endsWith(".css")) {
+                respondCss(path, outputStream);
+            }
+
+            if (path.equals("/login")) {
+                handleLogin(queryString, outputStream);
+                return;
+            }
+            respondStaticResource(path, outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -102,7 +123,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondCssHeader(String requestTarget, OutputStream outputStream) {
+    private void handleLogin(String queryString, OutputStream outputStream) {
+
+        Map<String, String> params = parseQueryString(queryString);
+        String account = params.get("account");
+        String password = params.get("password");
+
+        if (account == null || password == null) {
+            log.debug("로그인 파라미터가 부족합니다.");
+            return;
+        }
+
+        final boolean authenticated = InMemoryUserRepository
+                .findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
+
+        if (authenticated) {
+            log.debug("로그인 성공: {}", account);
+        } else {
+            log.debug("비밀번호 불일치: {}", account);
+        }
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        String[] queryList = queryString.split("&");
+        Map<String, String> params = new HashMap<>();
+        for (String str : queryList) {
+            String[] query = str.split("=");
+            params.put(query[0], query[1]);
+        }
+
+        return params;
+    }
+
+    private void respondCss(String requestTarget, OutputStream outputStream) {
         try (final var resourceStream = getClass()
                 .getClassLoader()
                 .getResourceAsStream("static" + requestTarget)) {

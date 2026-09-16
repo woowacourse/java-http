@@ -10,7 +10,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +36,11 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            String requestEndPoint = parseRequestEndPointFromInputStream(inputStream);
-            var responseBody = consistProperBodyContents(requestEndPoint);
-            final var response = consistResponseWithBodyAndHeader(responseBody);
+            Map<String, String> requestInformations = parseRequestFromInputStream(inputStream);
+
+            var responseBody = consistProperBodyContents(requestInformations);
+
+            final var response = consistResponseWithBodyAndHeader(requestInformations, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -46,17 +49,29 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String consistResponseWithBodyAndHeader(String responseBody) {
+    private String consistResponseWithBodyAndHeader(Map<String, String> requestInformations, String responseBody) {
+        String contentType = requestInformations.get("Content-Type");
+        if (contentType == null) {
+            contentType = "text/html";
+        }
+
+        if (requestInformations.get("endpoint").contains("/css/")) {
+            contentType = "text/css";
+        }
+
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+
     }
 
-    private String consistProperBodyContents(String requestEndPoint) throws URISyntaxException, IOException {
+    private String consistProperBodyContents(Map<String, String> requestInformations)
+            throws URISyntaxException, IOException {
         StringBuilder sb = new StringBuilder();
+        String requestEndPoint = requestInformations.get("endpoint");
 
         if (!requestEndPoint.equals("/")) {
             String fileName = requestEndPoint.replaceFirst("/", "");
@@ -73,9 +88,26 @@ public class Http11Processor implements Runnable, Processor {
         return "Hello world!";
     }
 
-    private String parseRequestEndPointFromInputStream(InputStream inputStream) {
-        Stream<String> requestInfo = new BufferedReader(new InputStreamReader(inputStream)).lines();
-        String firstLineOfHttpRequest = requestInfo.filter(x -> x.contains("HTTP")).findAny().get();
-        return firstLineOfHttpRequest.split(" ")[1];
+    private Map<String, String> parseRequestFromInputStream(InputStream inputStream) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        try {
+            Map<String, String> request = new HashMap<>();
+
+            String requestLine = reader.readLine();
+            request.put("endpoint", requestLine.split(" ")[1]);
+
+            reader.lines()
+                    .takeWhile(line -> !line.isBlank())
+                    .map(line -> line.split(":", 2))
+                    .forEach(attribute ->
+                            request.put(attribute[0].trim(), attribute[1].trim())
+                    );
+
+            return request;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
     }
 }

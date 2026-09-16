@@ -20,8 +20,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final QupringMvc qupringMvc;
-    private final HttpRequestParser httpRequestParser = new HttpRequestParser();
-    private final HttpResponseParser httpResponseParser = new HttpResponseParser();
+
     private boolean stopped;
 
     public Connector(QupringMvc qupringMvc) {

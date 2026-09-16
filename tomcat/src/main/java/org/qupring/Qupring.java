@@ -22,7 +22,7 @@ public class Qupring {
 
     private void validateApplicationClass(Class<?> application) {
         if (!application.isAnnotationPresent(QupringApplication.class)) {
-            throw new IllegalArgumentException("The application class must be annotated with @QupringApplication");
+            throw new IllegalArgumentException("해당 애플리케이션은 @QupringApplication이 붙어있지 않습니다.");
         }
     }
 }

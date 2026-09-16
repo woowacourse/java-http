@@ -24,9 +24,7 @@ public class ApplicationScanner {
         URL resourceUrl = classLoader.getResource("static");
 
         if (resourceUrl == null) {
-            throw new IllegalStateException(
-                    "static 폴더를 찾을 수 없습니다."
-            );
+            throw new IllegalStateException("static 폴더를 찾을 수 없습니다.");
         }
 
         File rootFolder = new File(resourceUrl.getFile());

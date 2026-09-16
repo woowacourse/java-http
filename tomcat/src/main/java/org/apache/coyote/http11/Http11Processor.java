@@ -32,23 +32,33 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var requestLine = new BufferedReader(new InputStreamReader(inputStream)).readLine();
+            final var requestLine = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).readLine();
+            var requestUri = "/";
             var responseBody = "Hello world!";
+            var contentType = "text/html;charset=utf-8";
 
-            if (requestLine != null && "/index.html".equals(requestLine.split(" ")[1])) {
-                try (final var resource = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+            if (requestLine != null) {
+                requestUri = requestLine.split(" ")[1];
+            }
+
+            if ("/index.html".equals(requestUri) || "/css/styles.css".equals(requestUri)) {
+                try (final var resource = getClass().getClassLoader().getResourceAsStream("static" + requestUri)) {
                     responseBody = new String(resource.readAllBytes(), StandardCharsets.UTF_8);
                 }
             }
 
+            if (requestUri.endsWith(".css")) {
+                contentType = "text/css;charset=utf-8";
+            }
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Type: " + contentType + " ",
+                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

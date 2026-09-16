@@ -93,14 +93,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parsePathFrom(String requestUri) {
-        if (!requestUri.endsWith(".html")) {
+        String path = requestUri;
+        if (path.contains("?")) {
             int queryFileStrEndIndex = requestUri.indexOf("?");
             if (queryFileStrEndIndex != -1) {
-                requestUri = requestUri.substring(0, queryFileStrEndIndex).concat(".html");
+                path = path.substring(0, queryFileStrEndIndex);
             }
         }
 
-        return requestUri;
+        if(!path.contains(".")) {
+            path = path.concat(".html");
+        }
+
+        return path;
     }
 
     private String resolveContentOf(String filePath) throws IOException {

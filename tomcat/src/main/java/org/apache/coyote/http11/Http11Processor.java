@@ -68,16 +68,20 @@ public class Http11Processor implements Runnable, Processor {
             log.info(user.toString());
 
             URL url = getClass().getClassLoader().getResource("static" + "/login.html");
-            File file = new File(url.getFile());
-            Path paths = file.toPath();
-            return Files.readString(paths);
+            if (url != null) {
+                File file = new File(url.getFile());
+                Path paths = file.toPath();
+                return Files.readString(paths);
+            }
         }
 
         if (!requestUri.equals("/")) {
             URL url = getClass().getClassLoader().getResource("static" + requestUri);
-            File file = new File(url.getFile());
-            Path path = file.toPath();
-            return Files.readString(path);
+            if (url != null) {
+                File file = new File(url.getFile());
+                Path paths = file.toPath();
+                return Files.readString(paths);
+            }
         }
         return "Hello world!";
     }

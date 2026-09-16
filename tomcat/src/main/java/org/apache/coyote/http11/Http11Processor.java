@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,20 +37,26 @@ public class Http11Processor implements Runnable, Processor {
 
             final RequestLine requestLine = readRequestLine(inputStream);
             final String requestTarget = requestLine.requestTarget();
-            final String resourcePath = "static" + requestLine.requestTarget();
+            final String requestPath = extractRequestPath(requestTarget);
+            final String requestQuery = extractQuery(requestTarget);
+            final Map<String, String> queryParameters = parseQuery(requestQuery);
+            final String resourcePath = resolveResourcePath(requestPath);
+
+            logUserIfAuthenticated(requestPath, queryParameters);
+
             var responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
             try (InputStream resourceStream = getClass()
                     .getClassLoader()
                     .getResourceAsStream(resourcePath)) {
 
-                if (resourceStream != null && !requestTarget.equals("/")) {
+                if (resourceStream != null && !requestPath.equals("/")) {
                     responseBody = resourceStream.readAllBytes();
                 }
             }
 
             String responseContentType = "text/html;charset=utf-8";
-            if (requestTarget.endsWith(".css")) {
+            if (requestPath.endsWith(".css")) {
                 responseContentType = "text/css;charset=utf-8";
             }
 
@@ -80,5 +89,68 @@ public class Http11Processor implements Runnable, Processor {
     private BufferedReader getReader(InputStream inputStream) {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         return new BufferedReader(inputStreamReader);
+    }
+
+    private String extractRequestPath(final String requestTarget) {
+        final int queryIndex = requestTarget.indexOf("?");
+        if (queryIndex < 0) {
+            return requestTarget;
+        }
+
+        return requestTarget.substring(0, queryIndex);
+    }
+
+    private String extractQuery(final String requestTarget) {
+        final int queryIndex = requestTarget.indexOf("?");
+        if (queryIndex < 0 || queryIndex == requestTarget.length() - 1) {
+            return "";
+        }
+
+        return requestTarget.substring(queryIndex + 1);
+    }
+
+    private String resolveResourcePath(final String requestPath) {
+        if (requestPath.equals("/login")) {
+            return "static/login.html";
+        }
+
+        return "static" + requestPath;
+    }
+
+    private void logUserIfAuthenticated(
+            final String requestPath,
+            final Map<String, String> queryParameters
+    ) {
+        if (!requestPath.equals("/login")) {
+            return;
+        }
+
+        final String account = queryParameters.get("account");
+        final String password = queryParameters.get("password");
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("User: {}", user));
+    }
+
+    private Map<String, String> parseQuery(final String query) {
+        if (query.isBlank()) {
+            return Map.of();
+        }
+
+        final Map<String, String> queryMap = new HashMap<>();
+
+        for (final String param : query.split("&")) {
+            final String[] keyAndValue = param.split("=", 2);
+            if (keyAndValue.length != 2) {
+                throw new IllegalArgumentException("Invalid query parameter: " + param);
+            }
+            queryMap.put(keyAndValue[0], keyAndValue[1]);
+        }
+
+        return Map.copyOf(queryMap);
     }
 }

@@ -47,39 +47,32 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+
             var responseBody = "Hello world!";
 
             String[] tokens = line.split(" ");
-            String uri = tokens[1];
+            RequestUri requestUri = new RequestUri(tokens[1]);
 
-            if (!uri.equals("/")) {
-                int index = uri.indexOf("?");
+            String path = requestUri.getPath();
 
-                String path = uri;
+            if (!"/".equals(path)) {
+                if ("/login".equals(path)) {
+                    String account =
+                            requestUri.getQueryParameter("account");
+                    String password =
+                            requestUri.getQueryParameter("password");
 
-                if (index != -1) {
-                    path = uri.substring(0, index);
-                    String queryString = uri.substring(index + 1);
-
-                    Map<String, String> params = new HashMap<>();
-
-                    for (String query : queryString.split("&")) {
-                        String[] pair = query.split("=", 2);
-
-                        if (pair.length == 2) {
-                            params.put(pair[0], pair[1]);
-                        }
+                    if (account != null && password != null) {
+                        InMemoryUserRepository.findByAccount(account)
+                                .filter(user ->
+                                        user.checkPassword(password))
+                                .ifPresent(user ->
+                                        log.info(
+                                                "회원 조회 성공: account={}",
+                                                user.getAccount()
+                                        ));
                     }
 
-                    InMemoryUserRepository.findByAccount(params.get("account"))
-                            .filter(user ->
-                                    user.checkPassword(params.get("password")))
-                            .ifPresent(user ->
-                                    log.info("회원 조회 성공: account={}",
-                                            user.getAccount()));
-                }
-
-                if ("/login".equals(path)) {
                     path = "/login.html";
                 }
 
@@ -92,21 +85,21 @@ public class Http11Processor implements Runnable, Processor {
                 );
             }
 
+            String contentType = "text/html";
+
+            if (path.endsWith(".css")) {
+                contentType = "text/css";
+            }
+
+            byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+
             var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + responseBodyBytes.length + " ",
                     "",
-                    responseBody);
-
-            if(uri.endsWith(".css")) {
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            }
+                    responseBody
+            );
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

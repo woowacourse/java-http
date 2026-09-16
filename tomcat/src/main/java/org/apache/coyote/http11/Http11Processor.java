@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import static com.techcourse.db.InMemoryUserRepository.findByAccount;
+
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +37,21 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private static void empty(OutputStream outputStream, String contentType) throws IOException {
+        final var responseBody = "Hello world!";
+        response(responseBody, outputStream, contentType);
+    }
+
+    private static void login(Request request) {
+        Map<String, String> requestParams = request.getRequestParams().getParams();
+        String account = requestParams.getOrDefault("account", "");
+        String password = requestParams.getOrDefault("password", "");
+        User user = findByAccount(account).orElse(null);
+        if (user != null && user.checkPassword(password)) {
+            log.info(user.toString());
+        }
+    }
+
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -44,11 +63,24 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             Request request = HttpParser.getRequest(inputStream);
-            final URL resource = getClass().getClassLoader().getResource("static" + "path");
-            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            response(responseBody, outputStream, "html");
+            if (request.getPath().equals("/")) {
+                empty(outputStream, request.getContentType());
+                return;
+            }
+            if (request.getPath().startsWith("/login")) {
+                login(request);
+            }
+            handling(outputStream, request);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handling(OutputStream outputStream, Request request) throws IOException {
+        String path = request.getPath();
+        String contentType = request.getContentType();
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        response(responseBody, outputStream, contentType);
     }
 }

@@ -56,7 +56,7 @@ public class Request {
         return requestParams;
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public String getContentType() {
+        return contentType.getType();
     }
 }

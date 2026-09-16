@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -15,6 +16,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,12 +46,50 @@ public class Http11Processor implements Runnable, Processor {
             if (line == null) {
                 return;
             }
+
             var responseBody = "Hello world!";
 
             String[] tokens = line.split(" ");
-            if(!tokens[1].equals("/")) {
-                final var resourceFile = getResourceFile("static" +tokens[1]);
-                responseBody = Files.readString(resourceFile.toPath(), StandardCharsets.UTF_8);
+            String uri = tokens[1];
+
+            if (!uri.equals("/")) {
+                int index = uri.indexOf("?");
+
+                String path = uri;
+
+                if (index != -1) {
+                    path = uri.substring(0, index);
+                    String queryString = uri.substring(index + 1);
+
+                    Map<String, String> params = new HashMap<>();
+
+                    for (String query : queryString.split("&")) {
+                        String[] pair = query.split("=", 2);
+
+                        if (pair.length == 2) {
+                            params.put(pair[0], pair[1]);
+                        }
+                    }
+
+                    InMemoryUserRepository.findByAccount(params.get("account"))
+                            .filter(user ->
+                                    user.checkPassword(params.get("password")))
+                            .ifPresent(user ->
+                                    log.info("회원 조회 성공: account={}",
+                                            user.getAccount()));
+                }
+
+                if ("/login".equals(path)) {
+                    path = "/login.html";
+                }
+
+                final var resourceFile =
+                        getResourceFile("static" + path);
+
+                responseBody = Files.readString(
+                        resourceFile.toPath(),
+                        StandardCharsets.UTF_8
+                );
             }
 
             var response = String.join("\r\n",
@@ -58,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
 
-            if(tokens[1].endsWith(".css")) {
+            if(uri.endsWith(".css")) {
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/css;charset=utf-8 ",

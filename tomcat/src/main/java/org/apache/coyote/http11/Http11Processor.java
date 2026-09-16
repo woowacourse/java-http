@@ -25,6 +25,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private final StaticResourceLoader resourceLoader = new StaticResourceLoader();
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -51,6 +53,11 @@ public class Http11Processor implements Runnable, Processor {
             var responseBody = "Hello world!";
 
             String[] tokens = line.split(" ");
+
+            if (tokens.length < 2) {
+                return;
+            }
+
             RequestUri requestUri = new RequestUri(tokens[1]);
 
             String path = requestUri.getPath();
@@ -76,13 +83,7 @@ public class Http11Processor implements Runnable, Processor {
                     path = "/login.html";
                 }
 
-                final var resourceFile =
-                        getResourceFile("static" + path);
-
-                responseBody = Files.readString(
-                        resourceFile.toPath(),
-                        StandardCharsets.UTF_8
-                );
+                responseBody = resourceLoader.load(path);
             }
 
             String contentType = "text/html";
@@ -104,16 +105,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private File getResourceFile(String fileName) {
-        final URL resource = getClass().getClassLoader().getResource(fileName);
-
-        try {
-            return Path.of(resource.toURI()).toFile();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
     }
 }

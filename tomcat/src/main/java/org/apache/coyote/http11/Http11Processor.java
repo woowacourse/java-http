@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,14 +43,54 @@ public class Http11Processor implements Runnable, Processor {
                 requestUri = requestLine.split(" ")[1];
             }
 
-            if ("/index.html".equals(requestUri) || "/css/styles.css".equals(requestUri)) {
-                try (final var resource = getClass().getClassLoader().getResourceAsStream("static" + requestUri)) {
+            var requestPath = requestUri;
+            var queryString = "";
+            final var queryStringIndex = requestUri.indexOf("?");
+
+            if (queryStringIndex >= 0) {
+                requestPath = requestUri.substring(0, queryStringIndex);
+                queryString = requestUri.substring(queryStringIndex + 1);
+            }
+
+            var resourcePath = "";
+            if ("/index.html".equals(requestPath) || "/css/styles.css".equals(requestPath)) {
+                resourcePath = "static" + requestPath;
+            }
+            if ("/login".equals(requestPath)) {
+                resourcePath = "static/login.html";
+            }
+
+            if (!resourcePath.isEmpty()) {
+                try (final var resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
                     responseBody = new String(resource.readAllBytes(), StandardCharsets.UTF_8);
                 }
             }
 
-            if (requestUri.endsWith(".css")) {
+            if (requestPath.endsWith(".css")) {
                 contentType = "text/css;charset=utf-8";
+            }
+
+            final var parameters = new HashMap<String, String>();
+            if (!queryString.isEmpty()) {
+                final var queryParameters = queryString.split("&");
+                for (final var queryParameter : queryParameters) {
+                    final var keyValue = queryParameter.split("=", 2);
+                    if (keyValue.length == 2) {
+                        parameters.put(keyValue[0], keyValue[1]);
+                    }
+                }
+            }
+
+            final var account = parameters.get("account");
+            final var password = parameters.get("password");
+            if ("/login".equals(requestPath) && account != null && password != null) {
+                final var foundUser = InMemoryUserRepository.findByAccount(account);
+                if (foundUser.isPresent()) {
+                    final var user = foundUser.get();
+                    if (user.checkPassword(password)) {
+                        log.info("login user: {}", user);
+                    }
+                }
             }
 
             final var response = String.join("\r\n",

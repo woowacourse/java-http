@@ -77,4 +77,40 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).endsWith("\r\n\r\n없는 유저입니다. 다시 입력해주세요");
     }
+
+    @Test
+    void query_string이_없는_login_요청은_로그인_페이지를_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("<title>로그인</title>");
+    }
+
+    @Test
+    void 로그인_파라미터의_값이_비어_있으면_로그인하지_않는다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=&password= HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).endsWith("\r\n\r\n없는 유저입니다. 다시 입력해주세요");
+    }
 }

@@ -38,6 +38,10 @@ final class QueryParameters {
         return Optional.ofNullable(values.get(name));
     }
 
+    boolean isEmpty() {
+        return values.isEmpty();
+    }
+
     private static String decode(final String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }

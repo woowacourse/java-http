@@ -66,6 +66,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (path.equals("/login") && request.method().equals("GET")) {
             QueryParameters queryParameters = request.queryParameters();
+            if (queryParameters.isEmpty()) {
+                return modelToView("/login.html");
+            }
             User user = queryParameters
                     .get("account")
                     .flatMap(InMemoryUserRepository::findByAccount)

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.ApplicationController;
 import com.techcourse.service.ApplicationService;
 import com.techcourse.web.ApplicationDispatcher;
+import com.techcourse.web.StaticResourceHandler;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class Http11ProcessorTest {
     void emptyRequest() {
         // given
         final var socket = new StubSocket("");
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -32,7 +33,7 @@ class Http11ProcessorTest {
     void badRequest() {
         // given
         final var socket = new StubSocket("GET /index.html\r\n\r\n");
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -51,7 +52,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -73,7 +74,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -96,10 +97,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var service = new ApplicationService();
-        final var controller = new ApplicationController(service);
-        final var dispatcher = new ApplicationDispatcher(controller);
-        final var processor = new Http11Processor(socket, dispatcher);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -122,7 +120,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -148,10 +146,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var service = new ApplicationService();
-        final var controller = new ApplicationController(service);
-        final var dispatcher = new ApplicationDispatcher(controller);
-        final var processor = new Http11Processor(socket, dispatcher);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -174,7 +169,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -188,6 +183,15 @@ class Http11ProcessorTest {
         );
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private Http11Processor createProcessor(StubSocket socket) {
+        final var service = new ApplicationService();
+        final var controller = new ApplicationController(service);
+        final var resourceHandler = new StaticResourceHandler();
+        final var dispatcher = new ApplicationDispatcher(controller, resourceHandler);
+
+        return new Http11Processor(socket, dispatcher);
     }
 
     private String readResource(String path) throws IOException {

@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -13,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Dispatcher;
 import org.slf4j.Logger;
@@ -27,10 +28,6 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(final Socket connection, final Dispatcher dispatcher) {
         this.connection = connection;
         this.dispatcher = dispatcher;
-    }
-
-    public Http11Processor(final Socket connection) {
-        this(connection, (path, params) -> java.util.Optional.empty());
     }
 
     @Override
@@ -63,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
                 return Optional.empty();
             }
 
-            return Optional.of(createResponse(request.get()));
+            return Optional.of(dispatcher.dispatch(request.get()));
         } catch (BadRequestException e) {
             return Optional.of(HttpResponse.badRequest(
                     "400 Bad Request".getBytes(StandardCharsets.UTF_8)
@@ -116,36 +113,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addQueryParameter(Map<String, String> query, String parameter) {
         String[] keyValue = parameter.split("=");
-        String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);;
+        String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
         String value = "";
 
         if (keyValue.length == 2) {
-            value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);;
+            value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
         }
 
         query.put(key, value);
-    }
-
-    private HttpResponse createResponse(HttpRequest request) throws IOException {
-        var dispatchedPath = dispatcher.dispatch(request.path(), request.parameters());
-        String responsePath = dispatchedPath.orElse(request.path());
-
-        if ("/".equals(responsePath)) {
-            return HttpResponse.ok(
-                    "text/html;charset=utf-8",
-                    "Hello world!".getBytes(StandardCharsets.UTF_8)
-            );
-        }
-
-        var resource = readResource(responsePath);
-        if (resource.isPresent()) {
-            return HttpResponse.ok(getContentType(responsePath), resource.get());
-        }
-
-        byte[] notFoundBody = readResource("/404.html")
-                .orElseGet(() -> "404 Not Found".getBytes(StandardCharsets.UTF_8));
-
-        return HttpResponse.notFound(notFoundBody);
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
@@ -160,32 +135,5 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
         outputStream.write(response.body());
         outputStream.flush();
-    }
-
-    private String getContentType(String path) {
-        if (path.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        }
-
-        return "text/html;charset=utf-8";
-    }
-
-    private Optional<byte[]> readResource(String path) throws IOException {
-        try (InputStream resource = getClass()
-                .getClassLoader()
-                .getResourceAsStream("static" + path)) {
-
-            if (resource == null) {
-                return Optional.empty();
-            }
-
-            return Optional.of(resource.readAllBytes());
-        }
     }
 }

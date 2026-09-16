@@ -1,9 +1,7 @@
 package org.apache.coyote;
 
-import java.util.Map;
-import java.util.Optional;
-
+import java.io.IOException;
 public interface Dispatcher {
 
-    Optional<String> dispatch(String path, Map<String, String> params);
+    HttpResponse dispatch(HttpRequest httpRequest) throws IOException;
 }

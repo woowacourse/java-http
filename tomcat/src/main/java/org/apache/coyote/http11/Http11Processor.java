@@ -15,6 +15,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final String ROOT_DIRECTORY = "/";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String DEFAULT_BODY = "Hello world!";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -37,15 +38,29 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final String target = bufferedReader.readLine()
                 .split(" ")[1];
-            final String readResource = readStaticResource(target);
 
-            final String response = generateResponse(readResource);
+            final String contentType = getContentType(target);
+            final String body = readStaticResource(target);
+
+            final String response = generateResponse(body, contentType);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(final String target) {
+        if (target.equals(ROOT_DIRECTORY)) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+        final String prefix = "text/";
+        final int lastDotIndex = target.lastIndexOf(".");
+        if (lastDotIndex == 0) {
+            throw new IllegalArgumentException("유효한 타겟 uri가 아닙니다.");
+        }
+        return prefix + target.substring(lastDotIndex + 1);
     }
 
     private String readStaticResource(String target) throws IOException {
@@ -70,10 +85,10 @@ public class Http11Processor implements Runnable, Processor {
         return readResource.toString();
     }
 
-    private String generateResponse(final String body) {
+    private String generateResponse(final String body, final String contentType)  {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type: " + contentType + ";charset=utf-8 ",
             "Content-Length: " + body.getBytes().length + " ",
             "",
             body);

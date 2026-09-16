@@ -59,4 +59,22 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void 비밀번호가_일치하지_않으면_로그인하지_않는다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=wrong-password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).endsWith("\r\n\r\n없는 유저입니다. 다시 입력해주세요");
+    }
 }

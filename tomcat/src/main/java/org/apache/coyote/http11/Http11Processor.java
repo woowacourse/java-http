@@ -65,11 +65,13 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
         if (path.equals("/login") && request.method().equals("GET")) {
-            User user = request.queryParameters()
+            QueryParameters queryParameters = request.queryParameters();
+            User user = queryParameters
                     .get("account")
                     .flatMap(InMemoryUserRepository::findByAccount)
                     .orElse(null);
-            if(user == null) {
+            String password = queryParameters.get("password").orElse(null);
+            if(user == null || !user.checkPassword(password)) {
                 return "없는 유저입니다. 다시 입력해주세요";
             }
             log.info(user.toString());

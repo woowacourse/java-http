@@ -49,6 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
             final String requestLine = bufferedReader.readLine();
             if (requestLine == null) {
                 return;
@@ -156,6 +157,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+
         } catch (IOException | URISyntaxException e) {
             log.error("HTTP 요청 처리 중 입출력 오류가 발생했습니다.", e);
         } catch (RuntimeException e) {

@@ -3,8 +3,10 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,8 +29,17 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        /* [1] Class 사용 :
+            Class는 자신이 속한 패키지를 기준(상대 경로)으로 소스를 찾는 것을 기본값으로 하므로
+            상대 경로와 절대 경로를 구분할 수 있는 장치가 필요한데, 그 역할을 /가 해준다!
+            Class의 getResource 메서드는 내부적으로는 ClassLoader에게 일을 위임하는 방식을 채택하고 있다.
+            /가 붙으면 /를 뺀 이름을 ClassLoader에게 주면서 경로를 찾도록 하고,
+            /가 없으면 현재 클래스의 패키지 경로(예: com/example/)를 문자열 앞에 붙여서 ClassLoader에게 넘겨준다.
+        */
+        // final String actual = getClass().getResource("/" + fileName).getPath();
+
+        // [2] ClassLoader 사용 : 클래스패스(Classpath)의 최상위 루트만을 유일한 시작점으로 인식하므로, 오히려 /를 붙이면 동작에 오류가 생김!
+        final String actual = getClass().getClassLoader().getResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -43,12 +54,14 @@ class FileTest {
     void 파일의_내용을_읽는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        final String resourceURL = ClassLoader.getSystemClassLoader().getResource(fileName).getPath();
+        final Path path = Path.of(resourceURL);
 
-        // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        try (final BufferedReader reader = Files.newBufferedReader(path)) {
+            final List<String> actual = reader.lines().toList();
+            assertThat(actual).containsOnly("nextstep");
+        } catch (IOException e) {
+            System.err.println("입출력 시스템 오류 발생");
+        }
     }
 }

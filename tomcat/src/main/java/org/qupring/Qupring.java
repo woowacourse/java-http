@@ -16,8 +16,10 @@ public class Qupring {
         HandlerMapping handlerMapping = new HandlerMapping();
         handlerMapping.addResourceMappings(applicationScanner.scanForResources());
 
+        /*
         //임시
         handlerMapping.addControllerMappings(List.of(UserController.class));
+         */
 
         QupringMvc qupringMvc = new QupringMvc(handlerMapping);
 

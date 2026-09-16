@@ -10,6 +10,7 @@ import org.qupring.annotation.Route;
 // 실험용 컨트롤러
 public class UserController {
 
+    /*
     @Route(path = "/login", method = HttpMethod.GET)
     public String login(HttpRequest request, HttpResponse response) {
         User user = InMemoryUserRepository.findByAccount(request.getQueryParams().get("account"))
@@ -18,4 +19,6 @@ public class UserController {
         System.out.println(user.toString());
         return "login";
     }
+
+     */
 }

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +55,24 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(String requestUri) throws IOException {
+        if (requestUri.contains("/login")) {
+            int index = requestUri.indexOf("?");
+            String path = requestUri.substring(0, index);
+            String queryString = requestUri.substring(index + 1);
+            index = queryString.indexOf("&");
+
+            String account = queryString.substring(0, index);
+            index = account.indexOf("=");
+            account = account.substring(index + 1);
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+            log.info(user.toString());
+
+            URL url = getClass().getClassLoader().getResource("static" + "/login.html");
+            File file = new File(url.getFile());
+            Path paths = file.toPath();
+            return Files.readString(paths);
+        }
+
         if (!requestUri.equals("/")) {
             URL url = getClass().getClassLoader().getResource("static" + requestUri);
             File file = new File(url.getFile());

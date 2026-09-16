@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,34 +58,35 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseBody(String requestUri) throws IOException {
         if (requestUri.contains("/login")) {
-            int index = requestUri.indexOf("?");
-            String path = requestUri.substring(0, index);
-            String queryString = requestUri.substring(index + 1);
-            index = queryString.indexOf("&");
-
-            String account = queryString.substring(0, index);
-            index = account.indexOf("=");
-            account = account.substring(index + 1);
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+            String[] value = getQueryParameterValues(requestUri);
+            User user = InMemoryUserRepository.findByAccount(value[0]).orElseThrow();
             log.info(user.toString());
 
-            URL url = getClass().getClassLoader().getResource("static" + "/login.html");
-            if (url != null) {
-                File file = new File(url.getFile());
-                Path paths = file.toPath();
-                return Files.readString(paths);
+            String paths = getStaticResource("/login.html");
+            if (paths != null) {
+                return paths;
             }
         }
 
         if (!requestUri.equals("/")) {
-            URL url = getClass().getClassLoader().getResource("static" + requestUri);
-            if (url != null) {
-                File file = new File(url.getFile());
-                Path paths = file.toPath();
-                return Files.readString(paths);
+            String paths = getStaticResource(requestUri);
+            if (paths != null) {
+                return paths;
             }
         }
         return "Hello world!";
+    }
+
+    @Nonnull
+    private String[] getQueryParameterValues(String requestUri) {
+        int index = requestUri.indexOf("?");
+        String queryString = requestUri.substring(index + 1);
+        String[] queryParameters = queryString.split("&");
+        String[] queryParameterValues = new String[queryParameters.length];
+        for (int i = 0; i < queryParameters.length; i++) {
+            queryParameterValues[i] = queryParameters[i].split("=")[1];
+        }
+        return queryParameterValues;
     }
 
     private String getContentType(String requestUri) {
@@ -94,5 +97,16 @@ public class Http11Processor implements Runnable, Processor {
             return "Content-Type: text/javascript;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";
+    }
+
+    @Nullable
+    private String getStaticResource(String requestUri) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + requestUri);
+        if (url != null) {
+            File file = new File(url.getFile());
+            Path paths = file.toPath();
+            return Files.readString(paths);
+        }
+        return null;
     }
 }

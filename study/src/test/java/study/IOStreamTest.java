@@ -1,5 +1,7 @@
 package study;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -134,8 +136,10 @@ class IOStreamTest {
             /**
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
+             * ref: https://www.geeksforgeeks.org/java/java-program-to-convert-byte-array-to-string/
              */
-            final String actual = "";
+            byte[] readAllBytes = inputStream.readAllBytes();
+            final String actual = new String(readAllBytes, StandardCharsets.UTF_8);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -155,6 +159,10 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+
+            try (inputStream) {
+                // do something
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }

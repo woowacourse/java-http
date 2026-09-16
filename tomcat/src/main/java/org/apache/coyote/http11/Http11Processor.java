@@ -5,8 +5,11 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,7 +32,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var requestLine = new BufferedReader(new InputStreamReader(inputStream)).readLine();
+            var responseBody = "Hello world!";
+
+            if (requestLine != null && "/index.html".equals(requestLine.split(" ")[1])) {
+                try (final var resource = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+                    responseBody = new String(resource.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

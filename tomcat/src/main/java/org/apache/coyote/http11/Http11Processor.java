@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,8 +32,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final RequestLine requestLine = readRequestLine(inputStream);
+            log.info("requestLine: {}", requestLine);
 
+            final var responseBody = "Hello world!";
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
@@ -43,5 +48,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private RequestLine readRequestLine(InputStream inputStream) throws IOException {
+        final BufferedReader reader = getReader(inputStream);
+        String line = reader.readLine();
+
+        if (line == null) {
+            throw new IllegalStateException("request line is null");
+        }
+
+        return RequestLine.from(line);
+    }
+
+    private BufferedReader getReader(InputStream inputStream) {
+        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        return new BufferedReader(inputStreamReader);
     }
 }

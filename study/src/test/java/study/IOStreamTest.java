@@ -7,11 +7,13 @@ import static org.mockito.Mockito.verify;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
@@ -195,15 +197,22 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             final StringBuilder actual = new StringBuilder();
+            String temp;
+
+            while ((temp = reader.readLine()) != null) {
+                actual.append(temp + "\r\n");
+            }
+
 
             assertThat(actual).hasToString(emoji);
         }

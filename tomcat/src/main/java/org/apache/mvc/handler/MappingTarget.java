@@ -1,4 +1,4 @@
-package org.apache.handler;
+package org.apache.mvc.handler;
 
 import org.apache.http.HttpMethod;
 

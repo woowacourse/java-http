@@ -52,9 +52,9 @@ Connection: keep-alive
 
 #### 1. HTTP Status Code 302
 
-- [ ] 로그인 여부에 따라 다른 페이지로 이동한다.
-- [ ] 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
-- [ ] 로그인에 실패하면 401.html로 리다이렉트한다.
+- [x] 로그인 여부에 따라 다른 페이지로 이동한다.
+    - [x] 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
+    - [x] 로그인에 실패하면 401.html로 리다이렉트한다.
 
 `InMemoryUserRepository`에는 다음과 같은 정보가 들어있다.
 
@@ -63,4 +63,25 @@ account: "gugu",
 password: "password"
 ```
 
+#### 2. POST 방식으로 회원가입
 
+- [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+    - [ ] 회원가입 페이지를 보여줄 때는 GET을 사용한다.
+    - [ ] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+    - [ ] 회원가입을 완료하면 index.html로 리다이렉트한다.
+- [ ] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
+
+브라우저에서 HTTP 요청을 다음과 같이 보낸다.
+
+```http request
+POST /register HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 80
+Content-Type: application/x-www-form-urlencoded
+Accept: */*
+
+account = gugu &
+password = password &
+email = hkkang%40woowahan.com
+```

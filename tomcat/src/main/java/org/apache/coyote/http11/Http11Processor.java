@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     private final Socket connection;
 
@@ -50,14 +51,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String consistResponseWithBodyAndHeader(Map<String, String> requestInformations, String responseBody) {
-        String contentType = requestInformations.get("Content-Type");
-        if (contentType == null) {
-            contentType = "text/html";
-        }
-
-        if (requestInformations.get("endpoint").contains("/css/")) {
-            contentType = "text/css";
-        }
+        String contentType = resolveContentType(requestInformations.get("Accept"));
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -66,6 +60,22 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 responseBody);
 
+    }
+
+    private String resolveContentType(String accept) {
+        if (accept == null || accept.isBlank()) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+
+        String preferred = accept.split(",")[0]
+                .split(";")[0]
+                .trim();
+
+        if (preferred.isEmpty() || preferred.equals("*/*")) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+
+        return preferred;
     }
 
     private String consistProperBodyContents(Map<String, String> requestInformations)

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +21,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final String ROOT_PATH = "/";
+    private static final String ROOT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -80,22 +83,66 @@ public class Http11Processor implements Runnable, Processor {
 
     private String consistProperBodyContents(Map<String, String> requestInformations)
             throws URISyntaxException, IOException {
-        StringBuilder sb = new StringBuilder();
         String requestEndPoint = requestInformations.get("endpoint");
 
-        if (!requestEndPoint.equals("/")) {
-            String fileName = requestEndPoint.replaceFirst("/", "");
+        int queryStringIndex = requestEndPoint.indexOf('?');
+        String path = requestEndPoint;
 
-            URL resource = getClass().getClassLoader().getResource("static/" + fileName);
-            if (resource == null) {
-                return "";
+        if (queryStringIndex != -1) {
+            path = requestEndPoint.substring(0, queryStringIndex);
+            Map<String, String> queryParams = parseQueryString(requestEndPoint.substring(queryStringIndex + 1));
+
+            if (path.equals("/login")) {
+                logFoundUser(queryParams);
             }
-            Path path = Path.of(resource.toURI());
-
-            return sb.append(Files.readString(path)).toString();
         }
 
-        return "Hello world!";
+        if (path.equals(ROOT_PATH)) {
+            return ROOT_RESPONSE_BODY;
+        }
+
+        if (path.equals("/login")) {
+            path = "/login" + ".html";
+        }
+
+        return readStaticResource(path);
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> queryParams = new HashMap<>();
+
+        for (String pair : queryString.split("&")) {
+            String[] keyAndValue = pair.split("=", 2);
+            if (keyAndValue.length == 2) {
+                queryParams.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+
+        return queryParams;
+    }
+
+    private void logFoundUser(Map<String, String> queryParams) {
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("{}", user));
+    }
+
+    private String readStaticResource(String path) throws URISyntaxException, IOException {
+        String fileName = path.replaceFirst(ROOT_PATH, "");
+
+        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
+        if (resource == null) {
+            return "";
+        }
+
+        return Files.readString(Path.of(resource.toURI()));
     }
 
     private Map<String, String> parseRequestFromInputStream(InputStream inputStream) {

@@ -45,18 +45,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String requestUri = requestLine.getUri();
-            final int queryIndex = requestUri.indexOf('?');
-            String path;
-            final String queryString;
-            if (queryIndex >= 0) {
-                path = requestUri.substring(0, queryIndex);
-                queryString = requestUri.substring(queryIndex + 1);
-            } else {
-                path = requestUri;
-                queryString = "";
-            }
-
+            String path = requestLine.getPath();
+            String queryString = requestLine.getQueryString();
             String code = "200";
             String status = "OK";
             if ("/login".equals(path)) {
@@ -75,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
                 path += ".html";
             }
 
-            final var response = makeResponse(path, requestUri, code, status);
+            final var response = makeResponse(path, code, status);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -85,12 +75,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeResponse(
             String path,
-            String requestUri,
             String code,
             String status
     ) throws IOException {
         final String responseBody = getResponseBody(path);
-        final String contentType = resolveContentType(requestUri);
+        final String contentType = resolveContentType(path);
 
         return String.join("\r\n",
                 "HTTP/1.1 " + code + " " + status + " ",
@@ -114,8 +103,8 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(Path.of(fileName));
     }
 
-    private String resolveContentType(final String requestUri) {
-        if (requestUri.endsWith(".css")) {
+    private String resolveContentType(final String path) {
+        if (path.endsWith(".css")) {
             return "text/css";
         }
         return "text/html";

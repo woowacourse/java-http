@@ -22,6 +22,8 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private final HttpResponseParser httpResponseParser = new HttpResponseParser();
 
+    private final ResourceMappingProvider resourceMappingProvider = new ResourceMappingProvider();
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -43,6 +45,10 @@ public class Http11Processor implements Runnable, Processor {
                     httpRequestParser.parse(
                             HttpTomcatRequest.class,
                             new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+
+
+
+
             final HttpTomcatResponse httpTomcatResponse = HttpTomcatResponse.createDefault();
             final String response = httpResponseParser.parse(httpTomcatResponse);
 

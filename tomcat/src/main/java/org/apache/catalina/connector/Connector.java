@@ -1,6 +1,8 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.http.request.HttpRequestParser;
+import org.apache.http.response.HttpResponseParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,12 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+
+    private final HttpRequestParser httpRequestParser = new HttpRequestParser();
+    private final HttpResponseParser httpResponseParser = new HttpResponseParser();
+
+    private final ResourceMappingProvider resourceMappingProvider = new ResourceMappingProvider();
+
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);

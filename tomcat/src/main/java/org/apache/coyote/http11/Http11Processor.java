@@ -3,12 +3,14 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
@@ -120,7 +122,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLogin(String queryString, OutputStream outputStream) {
+    private void handleLogin(String queryString, OutputStream outputStream) throws IOException {
         Map<String, String> params = parseQueryString(queryString);
         String account = params.get("account");
         String password = params.get("password");
@@ -137,8 +139,25 @@ public class Http11Processor implements Runnable, Processor {
 
         if (authenticated) {
             log.debug("로그인 성공: {}", account);
+            response302LoginSuccessHeader(outputStream);
         } else {
             log.debug("비밀번호 불일치: {}", account);
+            respondStaticResource("/401.html", outputStream);
+        }
+    }
+
+    private void response302LoginSuccessHeader(OutputStream outputStream) {
+        try {
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 302 Redirect ",
+                    "Set-Cookie: logined=true ",
+                    "Location: /index.html ",
+                    "");
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
         }
     }
 

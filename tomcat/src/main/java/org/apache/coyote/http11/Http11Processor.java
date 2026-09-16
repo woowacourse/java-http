@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -60,7 +61,12 @@ public class Http11Processor implements Runnable, Processor {
                     path = "/login.html";
                 }
 
-                responseBody = resourceLoader.load(path);
+                try {
+                    responseBody = resourceLoader.load(path);
+                } catch (FileNotFoundException e) {
+                    writeResponse(outputStream, "404 Not Found", "Not Found", "text/plain");
+                    return;
+                }
             }
 
             String contentType = "text/html";
@@ -69,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "text/css";
             }
 
-            writeResponse(outputStream, responseBody, contentType);
+            writeResponse(outputStream, "200 OK", responseBody, contentType);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -88,17 +94,17 @@ public class Http11Processor implements Runnable, Processor {
                 .ifPresent(user -> log.info("회원 조회 성공: account={}", user.getAccount()));
     }
 
-    private void writeResponse(OutputStream outputStream, String responseBody, String contentType) throws IOException {
+    private void writeResponse(OutputStream outputStream, String status, String responseBody, String contentType) throws IOException {
         byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
 
         var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBodyBytes.length + " ",
                 "",
                 responseBody
         );
-        outputStream.write(response.getBytes());
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 }

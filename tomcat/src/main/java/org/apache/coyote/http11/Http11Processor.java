@@ -12,7 +12,6 @@ import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
 
@@ -37,28 +36,28 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String request = readHttpRequest(new BufferedReader(new InputStreamReader(inputStream)));
+            String rawRequest = readHttpRequest(new BufferedReader(new InputStreamReader(inputStream)));
+            MyHttpRequest httpRequest = MyHttpRequest.of(rawRequest);
+            log.info("start: {}", httpRequest);
 
-            String responseBody;
-            if (request.contains("/index.html")) {
-                final String fileName = "static/index.html";
-                URL fileUrl = this.getClass().getClassLoader().getResource(fileName);
-                File file = new File(Objects.requireNonNull(fileUrl).toURI());
+            URL fileUrl = this.getClass().getClassLoader().getResource(httpRequest.resourcePath);
+            File file = new File(Objects.requireNonNull(fileUrl).toURI());
+            String responseBody = "Hello world!";
+            if (file.isFile()) {
                 responseBody = Files.readString(file.toPath(), StandardCharsets.UTF_8);
-            } else {
-                responseBody = "Hello world!";
             }
 
             // 공통 응답
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + httpRequest.contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+            log.info("end: {}", httpRequest);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -71,5 +70,35 @@ public class Http11Processor implements Runnable, Processor {
             sb.append(line).append("\r\n");
         }
         return sb.toString();
+    }
+
+    record MyHttpRequest(String method, String resourcePath, String contentType, String version) {
+
+        private static final String RESOURCE_PATH_PREFIX = "static";
+
+        static MyHttpRequest of(String rawRequest) {
+            String requestLine = rawRequest.lines()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("http 요청을 읽을 수 없습니다."));
+            String[] split = requestLine.split(" ");
+            return new MyHttpRequest(
+                    split[0],
+                    RESOURCE_PATH_PREFIX + split[1],
+                    contentTypeOf(split[1]),
+                    split[2]
+            );
+        }
+
+        private static String contentTypeOf(String url) {
+            int lastDotIndex = url.lastIndexOf(".");
+            String fileNameExtension = url.substring(lastDotIndex + 1);
+            return switch (fileNameExtension) {
+                case "/", "html" -> "text/html";
+                case "css" -> "text/css";
+                case "js" -> "text/javascript";
+                case "ico" -> "image/x-icon";
+                default -> "text/plain";
+            };
+        }
     }
 }

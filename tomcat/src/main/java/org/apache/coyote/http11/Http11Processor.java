@@ -33,31 +33,48 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String request = bf.readLine();
-            String path = request.split(" ")[1];
-            String responseBody = "Hello world!";
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            if(path.equals("/index.html")) {
-                try(final InputStream resourceStream = getClass()
+            String line = reader.readLine();
+            if (line == null) {
+                return;
+            }
+
+            final String path = line.split(" ")[1];
+
+            while (!"".equals(line)) {
+                line = reader.readLine();
+                if (line == null) {
+                    return;
+                }
+            }
+
+            String responseBody = "Hello world!";
+            if (!path.equals("/")) {
+                try (final InputStream resourceStream = getClass()
                         .getClassLoader()
                         .getResourceAsStream("static" + path)) {
 
-                    if(resourceStream == null) {
+                    if (resourceStream == null) {
                         throw new IllegalArgumentException("리소스를 찾을 수 없습니다: " + "static" + path);
                     }
                     responseBody = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
                 }
             }
 
+            final String contentType = path.endsWith(".css")
+                    ? "text/css;charset=utf-8 "
+                    : "text/html;charset=utf-8 ";
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Type: " + contentType,
+                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

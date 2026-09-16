@@ -1,10 +1,13 @@
 package study;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +31,9 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+
+        final String actual = resourceUrl.getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,11 +49,14 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Paths.get(fileName);
 
         // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        try {
+            final List<String> actual = Files.readAllLines(path);
+            assertThat(actual).containsOnly("nextstep");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

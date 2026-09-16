@@ -7,6 +7,7 @@ import java.nio.file.Path;
 public class HtmlReader {
 
     public static String read(String fileName){
+
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         URL url = cl.getResource(fileName);
         final Path path = Path.of(url.getPath());

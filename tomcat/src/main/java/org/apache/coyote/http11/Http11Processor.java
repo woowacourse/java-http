@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.apache.http.request.HttpRequestParser;
 import org.apache.http.request.HttpTomcatRequest;
+import org.apache.http.response.HttpResponseParser;
 import org.apache.http.response.HttpTomcatResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
 
     private final HttpRequestParser httpRequestParser = new HttpRequestParser();
+    private final HttpResponseParser httpResponseParser = new HttpResponseParser();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -35,19 +37,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            System.out.println("inputStream = " + new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+
             final HttpTomcatRequest httpTomcatRequest =
                     httpRequestParser.parse(
                             HttpTomcatRequest.class,
                             new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-            final HttpTomcatResponse httpTomcatResponse = new HttpTomcatResponse();
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpTomcatResponse httpTomcatResponse = HttpTomcatResponse.createDefault();
+            final String response = httpResponseParser.parse(httpTomcatResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

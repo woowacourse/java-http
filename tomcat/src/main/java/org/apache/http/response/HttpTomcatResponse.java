@@ -6,9 +6,30 @@ import java.util.Map;
 
 public class HttpTomcatResponse implements HttpResponse {
 
-    private int statusCode = 200;
-    private final Map<String, String> headers = new HashMap<>();
-    private String body = "";
+    private static final int DEFAULT_STATUS_CODE = 200;
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+
+    private int statusCode;
+    private final Map<String, String> headers;
+    private String body;
+
+    private HttpTomcatResponse(
+            int statusCode,
+            Map<String, String> headers,
+            String body
+    ) {
+        this.statusCode = statusCode;
+        this.headers = new HashMap<>(headers);
+        this.body = body;
+    }
+
+    public static HttpTomcatResponse createDefault() {
+        return new HttpTomcatResponse(
+                DEFAULT_STATUS_CODE,
+                Map.of("Content-Type", DEFAULT_CONTENT_TYPE),
+                ""
+        );
+    }
 
     @Override
     public int getStatus() {

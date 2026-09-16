@@ -77,10 +77,10 @@ class IOStreamTest {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
             /**
-             * todo
-             * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
+             * 둘 다 내부에 byte[]를 갖지만, ByteArrayOutputStream은  byte[]가 최종 목적지이고, BufferedOutputStream는 입력과 쓰기의 속도를 맞추기 위한 임시 버퍼이다.
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();

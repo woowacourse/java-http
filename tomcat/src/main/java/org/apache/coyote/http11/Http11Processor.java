@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +11,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int ELEMENT_SIZE = 2;
 
     private final Socket connection;
 
@@ -70,10 +68,6 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (path.endsWith(".css")) {
-                respondCss(path, outputStream);
-            }
-
             if (path.equals("/login")) {
                 handleLogin(queryString, outputStream);
                 return;
@@ -107,7 +101,10 @@ public class Http11Processor implements Runnable, Processor {
                 .getClassLoader()
                 .getResourceAsStream("static" + requestTarget)) {
 
-            final var responseBody = Objects.requireNonNull(resourceStream).readAllBytes();
+            byte[] responseBody = new byte[0];
+            if (resourceStream != null) {
+                responseBody = resourceStream.readAllBytes();
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -124,7 +121,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLogin(String queryString, OutputStream outputStream) {
-
         Map<String, String> params = parseQueryString(queryString);
         String account = params.get("account");
         String password = params.get("password");
@@ -151,39 +147,21 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> params = new HashMap<>();
         for (String str : queryList) {
             String[] query = str.split("=");
+            if (query.length < ELEMENT_SIZE) {
+                continue;
+            }
             params.put(query[0], query[1]);
         }
 
         return params;
     }
 
-    private void respondCss(String requestTarget, OutputStream outputStream) {
-        try (final var resourceStream = getClass()
-                .getClassLoader()
-                .getResourceAsStream("static" + requestTarget)) {
-
-            final var responseBody = Objects.requireNonNull(resourceStream).readAllBytes();
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType(requestTarget),
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    new String(responseBody));
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
     private String contentType(final String requestTarget) {
         if (requestTarget.endsWith(".css")) {
-            return "text/css; charset=utf-8 ";
+            return "text/css;charset=utf-8 ";
         }
         if (requestTarget.endsWith(".js")) {
-            return "application/javascript; charset=utf-8 ";
+            return "application/javascript;charset=utf-8 ";
         }
         if (requestTarget.endsWith(".svg")) {
             return "image/svg+xml ";

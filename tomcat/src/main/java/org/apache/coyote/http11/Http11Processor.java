@@ -1,9 +1,12 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +29,21 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            byte[] bytes = readResource("static/index.html");
+            String readLine = bufferedReader.readLine();
+            if (readLine == null) {
+                return;
+            }
+
+            String[] requestHeader = readLine.split(" ");
+            String path = requestHeader[1];
+
+            byte[] bytes = resolveResponseBody(path);
             String responseBody = new String(bytes);
 
             final var response = String.join("\r\n",
@@ -45,6 +59,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private byte[] resolveResponseBody(String path) throws IOException {
+        if (path.equals("/")) {
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
+        }
+
+        if (path.equals("/index.html")) {
+            return readResource("static" + path);
+        }
+
+        throw new IOException("지원하지 않는 요청 경로: " + path);
     }
 
     private byte[] readResource(String resourcePath) throws IOException {

@@ -45,25 +45,34 @@ public class Http11Processor implements Runnable, Processor {
             String path = streamTokenizer.nextToken();
             log.info("path: {}", path);
 
+            String html = "html";
             if (path.equals("/")) {
                 log.info("path is empty");
                 final var responseBody = "Hello world!";
-                response(responseBody, outputStream);
+                response(responseBody, outputStream, html);
                 return;
+            }
+
+            if (path.startsWith("/css")) {
+                String css = "css";
+                log.info(css);
+                final URL resource = getClass().getClassLoader().getResource("static" + path);
+                final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                response(responseBody, outputStream, css);
             }
 
             final URL resource = getClass().getClassLoader().getResource("static" + path);
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            response(responseBody, outputStream);
+            response(responseBody, outputStream, html);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static void response(String responseBody, OutputStream outputStream) throws IOException {
+    private static void response(String responseBody, OutputStream outputStream, String type) throws IOException {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

@@ -1,17 +1,12 @@
 package org.apache.coyote.http11;
 
-import static com.techcourse.db.InMemoryUserRepository.findByAccount;
-
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +43,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpParser
-            final URL resource = getClass().getClassLoader().getResource("static" + path);
+            Request request = HttpParser.getRequest(inputStream);
+            final URL resource = getClass().getClassLoader().getResource("static" + "path");
             final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            response(responseBody, outputStream, html);
+            response(responseBody, outputStream, "html");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

@@ -10,9 +10,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -29,10 +26,6 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
-    private static String getUri(String line) {
-        return line.split(" ")[1];
-    }
-
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -46,10 +39,10 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line = reader.readLine();
-            String method = line.split(" ")[0];
-            String path = getPath(line);
+            HttpRequest request = HttpRequest.from(line);
+            String path = request.path();
 
-            final var responseBody = getResponseBody(method, line);
+            final var responseBody = getResponseBody(request);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -65,44 +58,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getPath(String line) {
-        String uri = getUri(line);
-        int idx = uri.indexOf('?');
-        if(idx != -1) {
-            uri = uri.substring(0, idx);
-        }
-        return uri;
-    }
+    private String getResponseBody(final HttpRequest request) {
+        String path = request.path();
 
-    private Map<String, String> getParameters(String line) {
-        String uri = getUri(line);
-        int idx = uri.indexOf('?');
-        if(idx != -1) {
-            return getStringStringMap(uri.substring(idx + 1));
-        }
-        throw new IllegalArgumentException("URI에 파라미터가 없습니다.");
-    }
-
-    @Nonnull
-    private Map<String, String> getStringStringMap(String queryString) {
-        String[] splitQuery = queryString.split("&");
-        Map<String, String> map = new HashMap<>();
-        for (String s : splitQuery) {
-            String[] kv = s.split("=");
-            map.put(kv[0], kv[1]);
-        }
-        return map;
-    }
-
-    private String getResponseBody(String method, String line) {
-        String path = getPath(line);
-
-        if (path.equals("/") && method.equals("GET")) {
+        if (path.equals("/") && request.method().equals("GET")) {
             return "Hello world!";
         }
-        if (path.equals("/login") && method.equals("GET")) {
-            Map<String, String> params = getParameters(line);
-            User user = InMemoryUserRepository.findByAccount(params.get("account")).orElse(null);
+        if (path.equals("/login") && request.method().equals("GET")) {
+            User user = request.queryParameters()
+                    .get("account")
+                    .flatMap(InMemoryUserRepository::findByAccount)
+                    .orElse(null);
             if(user == null) {
                 return "없는 유저입니다. 다시 입력해주세요";
             }

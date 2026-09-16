@@ -67,6 +67,9 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
+        /**
+         * 여기서 스레드 생성
+         */
         new Thread(processor).start();
     }
 

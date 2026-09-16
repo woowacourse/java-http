@@ -1,6 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +21,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    /**
+     * 단일 요청 처리 진입점
+     * @param connection
+     */
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -29,7 +40,42 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final String requestLine = bufferedReader.readLine();
+
+            final String[] requestParts = requestLine.split(" ");
+
+            final String method = requestParts[0];
+            final String requestUri = requestParts[1];
+            final String httpVersion = requestParts[2];
+
+            String line;
+            //null: 연결이 끊겼거나 입력이 끝남
+            //"": HTTP 헤더가 끝났다는 뜻
+            while((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            }
+
+            final String responseBody;
+
+            if ("/".equals(requestUri)) {
+                responseBody = "Hello world!";
+            } else {
+                final var resource =
+                        getClass().getClassLoader().getResource("static" + requestUri);
+
+                if (resource == null) {
+                    return;
+                }
+
+                try {
+                    final byte[] body =
+                            Files.readAllBytes(Path.of(resource.toURI()));
+
+                    responseBody = new String(body, StandardCharsets.UTF_8);
+                } catch (URISyntaxException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

@@ -16,6 +16,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void emptyRequest() {
+        // given
+        final var socket = new StubSocket("");
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEmpty();
+    }
+
+    @Test
     void process() {
         // given
         final var socket = new StubSocket();

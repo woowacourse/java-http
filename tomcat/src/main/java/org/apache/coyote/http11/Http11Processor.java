@@ -43,10 +43,15 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var reader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequest request = parseRequest(reader);
-            HttpResponse response = createResponse(request);
+            Optional<HttpRequest> request = parseRequest(reader);
+
+            if (request.isEmpty()) {
+                return;
+            }
+
+            HttpResponse response = createResponse(request.get());
 
             writeResponse(outputStream, response);
 
@@ -55,16 +60,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest parseRequest(BufferedReader reader) throws IOException {
+    private Optional<HttpRequest> parseRequest(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
+        if (requestLine == null) {
+            return Optional.empty();
+        }
+
         String[] parts = requestLine.split(" ", 3);
         URI uri = URI.create(parts[1]);
 
-        return new HttpRequest(
+        return Optional.of(new HttpRequest(
                 parts[0],
                 uri.getPath(),
                 parseQueryParameters(uri.getRawQuery())
-        );
+        ));
     }
 
     private Map<String, String> parseQueryParameters(String rawQuery) {
@@ -82,19 +91,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addQueryParameter(Map<String, String> query, String parameter) {
-        String[] keyValue = parameter.split("=", 2);
-        String key = decode(keyValue[0]);
+        String[] keyValue = parameter.split("=");
+        String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);;
         String value = "";
 
         if (keyValue.length == 2) {
-            value = decode(keyValue[1]);
+            value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);;
         }
 
         query.put(key, value);
-    }
-
-    private String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
     private HttpResponse createResponse(HttpRequest request) throws IOException {
@@ -115,6 +120,7 @@ public class Http11Processor implements Runnable, Processor {
 
         byte[] notFoundBody = readResource("/404.html")
                 .orElseGet(() -> "404 Not Found".getBytes(StandardCharsets.UTF_8));
+
         return HttpResponse.notFound(notFoundBody);
     }
 

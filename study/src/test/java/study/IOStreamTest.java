@@ -1,13 +1,20 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
@@ -49,11 +56,7 @@ class IOStreamTest {
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
-            /**
-             * todo
-             * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
-             */
-
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
 
             assertThat(actual).isEqualTo("nextstep");

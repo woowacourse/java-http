@@ -39,30 +39,76 @@ public class Http11Processor implements Runnable, Processor {
 
             String reqUrl = reqFirstLine.split(" ")[1];
 
-            var responseBody = "";
+            String responseBody;
             if (reqUrl.equals("/")) {
                 responseBody = "Hello world!";
 
-            } else if (reqUrl.equals("/index.html")) {
-                String fileName = "static/index.html";
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
 
-                Path path = Path.of(Http11Processor.class.getClassLoader()
-                        .getResource(fileName)
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+            } else if (reqUrl.equals("/css/styles.css")){
+                String cssFile = "static/css/styles.css";
+
+                Path path = Path.of(this.getClass().getClassLoader()
+                        .getResource(cssFile)
                         .toURI());
 
                 responseBody = Files.readString(path);
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+            } else if (reqUrl.equals("/index.html")) {
+                String indexHtmlFile = "static/index.html";
+
+                Path path = Path.of(Http11Processor.class.getClassLoader()
+                        .getResource(indexHtmlFile)
+                        .toURI());
+
+                responseBody = Files.readString(path);
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } else if (reqUrl.endsWith(".js")){
+                String staticPath = "static/" + reqUrl;
+
+                Path path = Path.of(this.getClass().getClassLoader()
+                        .getResource(staticPath)
+                        .toURI());
+
+                responseBody = Files.readString(path);
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/javascript;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
             }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);

@@ -131,6 +131,33 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /not-found.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String responseBody = readResource("static/404.html");
+        var expected = createResponse(
+                "404 Not Found",
+                "text/html;charset=utf-8",
+                responseBody
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     private String readResource(String path) throws IOException {
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(path)) {
             return new String(
@@ -141,10 +168,14 @@ class Http11ProcessorTest {
     }
 
     private String createResponse(String contentType, String responseBody) {
+        return createResponse("200 OK", contentType, responseBody);
+    }
+
+    private String createResponse(String status, String contentType, String responseBody) {
         int contentLength = responseBody.getBytes(StandardCharsets.UTF_8).length;
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK",
+                "HTTP/1.1 " + status,
                 "Content-Type: " + contentType,
                 "Content-Length: " + contentLength,
                 "",

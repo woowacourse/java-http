@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,29 +63,48 @@ public class Http11Processor implements Runnable, Processor {
                 queryString = "";
             }
 
+            String code = "200";
+            String status = "OK";
             if ("/login".equals(path)) {
                 if (!queryString.isBlank()) {
                     final Map<String, String> parameters = parseQueryString(queryString);
-                    login(parameters);
+                    if (login(parameters)) {
+                        path = "/index";
+                        code = "302";
+                        status = "FOUND";
+                    } else {
+                        path = "/401";
+                        code = "401";
+                        status = "UNAUTHORIZED";
+                    }
                 }
                 path += ".html";
             }
 
-            final String responseBody = getResponseBody(path);
-            final String contentType = resolveContentType(requestUri);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            final var response = makeResponse(path, requestUri, code, status);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String makeResponse(
+            String path,
+            String requestUri,
+            String code,
+            String status
+    ) throws IOException {
+        final String responseBody = getResponseBody(path);
+        final String contentType = resolveContentType(requestUri);
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + code + " " + status + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
     }
 
     private String getResponseBody(String path) throws IOException {
@@ -122,13 +143,19 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private void login(final Map<String, String> parameters) {
+    private boolean login(final Map<String, String> parameters) {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("로그인 성공: {}", user));
+        Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+
+        if (loginUser.isEmpty()) {
+            return false;
+        }
+
+        log.info("로그인 성공: {}", loginUser);
+        return true;
     }
 
     private static boolean validateHeaders(BufferedReader bufferedReader) throws IOException {

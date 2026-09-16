@@ -28,16 +28,12 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            final String actual = Objects.requireNonNull(classLoader.getResource(fileName).toURI()).getPath();
-            assertThat(actual).endsWith(fileName);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        ClassLoader classLoader = getClass().getClassLoader();
+        final String actual = Objects.requireNonNull(classLoader.getResource(fileName).toURI()).getPath();
+        assertThat(actual).endsWith(fileName);
     }
 
     /**
@@ -47,17 +43,13 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
 
-        try {
-            final ClassLoader classLoader = getClass().getClassLoader();
-            final Path path = Path.of(classLoader.getResource(fileName).toURI());
-            final List<String> actual = Files.readAllLines(path, Charset.defaultCharset());
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final Path path = Path.of(classLoader.getResource(fileName).toURI());
+        final List<String> actual = Files.readAllLines(path, Charset.defaultCharset());
 
-            assertThat(actual).containsOnly("nextstep");
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        assertThat(actual).containsOnly("nextstep");
     }
 }

@@ -1,22 +1,16 @@
 package org.qupring.mvc.handler;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.apache.http.HttpMethod;
+import org.qupring.annotation.Route;
 
 public class HandlerMapping {
 
-    private final Map<String, String> resourcesMappings = new HashMap<>();
-
-    public void addResourceMappings(Map<String, String> mappings) {
-        resourcesMappings.putAll(mappings);
-    }
-
-    public String getResource(String path) {
-        return resourcesMappings.get(path);
-    }
-
-/*
     private final Map<MappingTarget, Method> controllerMappings = new HashMap<>();
+    private final Map<String, String> resourcesMappings = new HashMap<>();
 
     public HandlerMapping(Class<?>... classes) {
         for (Class<?> clazz : classes) {
@@ -28,6 +22,14 @@ public class HandlerMapping {
                 }
             }
         }
+    }
+
+    public void addResourceMappings(Map<String, String> mappings) {
+        resourcesMappings.putAll(mappings);
+    }
+
+    public String getResource(String path) {
+        return resourcesMappings.get(path);
     }
 
     public void addControllerMappings(List<Class<?>> classes) {
@@ -43,5 +45,5 @@ public class HandlerMapping {
         return controllerMappings.get(new MappingTarget(path, method));
     }
 
- */
+
 }

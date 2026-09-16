@@ -1,7 +1,8 @@
 package org.apache.http.response;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpTomcatResponse implements HttpResponse {
@@ -18,14 +19,17 @@ public class HttpTomcatResponse implements HttpResponse {
             String body
     ) {
         this.statusCode = statusCode;
-        this.headers = new HashMap<>(headers);
+        this.headers = new LinkedHashMap<>(headers);
         this.body = body;
     }
 
     public static HttpTomcatResponse createDefault() {
+        Map<String, String> defaultHeaders = new LinkedHashMap<>();
+        defaultHeaders.put("Content-Type", DEFAULT_CONTENT_TYPE);
+        defaultHeaders.put("Content-Length", "0");
         return new HttpTomcatResponse(
                 DEFAULT_STATUS_CODE,
-                Map.of("Content-Type", DEFAULT_CONTENT_TYPE),
+                defaultHeaders,
                 ""
         );
     }
@@ -63,5 +67,10 @@ public class HttpTomcatResponse implements HttpResponse {
     @Override
     public void setBody(String body) {
         this.body = body;
+        int contentLength = body
+                .getBytes(StandardCharsets.UTF_8)
+                .length;
+
+        headers.put("Content-Length", String.valueOf(contentLength));
     }
 }

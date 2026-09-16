@@ -5,8 +5,6 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.http.request.HttpRequestParser;
-import org.apache.http.response.HttpResponseParser;
 import org.qupring.mvc.QupringMvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

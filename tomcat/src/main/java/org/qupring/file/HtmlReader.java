@@ -12,8 +12,9 @@ public class HtmlReader {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         URL url = cl.getResource(fileName);
 
-        if (Objects.isNull(url))
+        if (Objects.isNull(url)) {
             return "";
+        }
 
         final Path path = Path.of(url.getPath());
 

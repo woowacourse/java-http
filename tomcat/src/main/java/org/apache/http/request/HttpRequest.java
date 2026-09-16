@@ -1,7 +1,6 @@
 package org.apache.http.request;
 
 import java.util.Map;
-import javax.print.DocFlavor.STRING;
 import org.apache.http.HttpMethod;
 
 public interface HttpRequest {

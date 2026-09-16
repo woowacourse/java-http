@@ -35,7 +35,7 @@ public class HttpRequestParser {
         String head = messageParts[0];
         String body = "";
 
-        if(messageParts.length > 1) {
+        if (messageParts.length > 1) {
             body = messageParts[1];
         }
 
@@ -62,6 +62,7 @@ public class HttpRequestParser {
                 body
         );
     }
+
     private String getBody(String input) {
         String[] messageParts = input.split(
                 HEAD_BODY_SEPARATOR,

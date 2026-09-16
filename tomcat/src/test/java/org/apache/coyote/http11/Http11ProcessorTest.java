@@ -1,6 +1,12 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Application;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.qupring.Qupring;
+import org.qupring.mvc.ApplicationScanner;
+import org.qupring.mvc.QupringMvc;
+import org.qupring.mvc.handler.HandlerMapping;
 import support.StubSocket;
 
 import java.io.File;
@@ -12,11 +18,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private QupringMvc qupringMvc;
+
+    @BeforeEach
+    void setup() {
+        ApplicationScanner applicationScanner = new ApplicationScanner();
+        HandlerMapping handlerMapping = new HandlerMapping();
+        handlerMapping.addResourceMappings(applicationScanner.scanForResources());
+
+        qupringMvc = new QupringMvc(handlerMapping);
+
+    }
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, qupringMvc);
 
         // when
         processor.process(socket);
@@ -43,7 +61,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, qupringMvc);
 
         // when
         processor.process(socket);

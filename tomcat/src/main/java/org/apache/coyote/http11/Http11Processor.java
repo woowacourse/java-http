@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,12 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String START_LINE_DELIMITER = " ";
+    private static final char HEADER_DELIMITER = ':';
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String PARAM_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final Socket connection;
 
@@ -40,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            String[] startLineTokens = bufferedReader.readLine().split(" ");
+            String[] startLineTokens = bufferedReader.readLine().split(START_LINE_DELIMITER);
             String httpUrl = startLineTokens[1];
 
             Map<String, String> headers = parseHeaders(bufferedReader);
@@ -66,13 +70,9 @@ public class Http11Processor implements Runnable, Processor {
                 String account = queryParams.get("account");
                 String password = queryParams.get("password");
 
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                if (user.isPresent()) {
-                    User user1 = user.get();
-                    if (user1.checkPassword(password)) {
-                        log.info("{}", user1);
-                    }
-                }
+                InMemoryUserRepository.findByAccount(account)
+                        .filter(user -> user.checkPassword(password))
+                        .ifPresent(user -> log.info("{}", user));
                 return;
             }
 
@@ -126,9 +126,9 @@ public class Http11Processor implements Runnable, Processor {
         String nextLine = null;
         while ((nextLine = bufferedReader.readLine()) != null) {
             // Host에 콜론(:)이 포함될 수 있으므로 가장 먼저 만나는 콜론을 기준으로 나눕니다.
-            int colonIndex = nextLine.indexOf(':');
-            String key = nextLine.substring(0, colonIndex);
-            String value = nextLine.substring(colonIndex + 1);
+            int headerDelimiterIndex = nextLine.indexOf(HEADER_DELIMITER);
+            String key = nextLine.substring(0, headerDelimiterIndex);
+            String value = nextLine.substring(headerDelimiterIndex + 1);
 
             headers.put(key, value);
         }
@@ -138,7 +138,7 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(String responseBody, Map<String, String> headers) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + headers.get("Content-Type") + " ",
+                CONTENT_TYPE + ": " + headers.get(CONTENT_TYPE) + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -150,17 +150,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> parseQueryParams(String[] queryParamLine) {
-        int questionMarkIndex = queryParamLine[1].lastIndexOf("?");
+        int queryStringDelimiterIndex = queryParamLine[1].lastIndexOf(QUERY_STRING_DELIMITER);
 
-        String queries = queryParamLine[1].substring(questionMarkIndex + 1);
-        String[] query = queries.split("&");
+        String queryLine = queryParamLine[1].substring(queryStringDelimiterIndex + 1);
+        String[] params = queryLine.split(PARAM_DELIMITER);
 
-        Map<String, String> queryMap = new HashMap<>();
-        for (String s : query) {
-            String[] keyToken = s.split("=");
-            queryMap.put(keyToken[0], keyToken[1]);
+        Map<String, String> queries = new HashMap<>();
+        for (String param : params) {
+            String[] keyToken = param.split(KEY_VALUE_DELIMITER);
+            queries.put(keyToken[0], keyToken[1]);
         }
 
-        return queryMap;
+        return queries;
     }
 }

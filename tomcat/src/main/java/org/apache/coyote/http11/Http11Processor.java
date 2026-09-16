@@ -5,8 +5,12 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,7 +33,22 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String request = bf.readLine();
+            String path = request.split(" ")[1];
+            String responseBody = "Hello world!";
+
+            if(path.equals("/index.html")) {
+                try(final InputStream resourceStream = getClass()
+                        .getClassLoader()
+                        .getResourceAsStream("static" + path)) {
+
+                    if(resourceStream == null) {
+                        throw new IllegalArgumentException("리소스를 찾을 수 없습니다: " + "static" + path);
+                    }
+                    responseBody = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

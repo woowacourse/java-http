@@ -42,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             String path = requestLine.split(" ")[1];
 
             var responseBody = "Hello world!";
+            var contentType = "text/html;charset=utf-8";
 
             if (path.equals("/index.html")) {
                 URL resource = getClass().getClassLoader()
@@ -50,9 +51,17 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             }
 
+            if (path.equals("/css/styles.css")) {
+                URL resource = getClass().getClassLoader()
+                        .getResource("static/css/styles.css");
+
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                contentType = "text/css;charset=utf-8";
+            }
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

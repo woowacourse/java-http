@@ -5,13 +5,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Dispatcher;
@@ -45,67 +45,91 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            String rawRequest = reader.readLine();
-            rawRequest = rawRequest.split(" ")[1];
-            URI uri = URI.create(rawRequest);
+            HttpRequest request = parseRequest(reader);
+            HttpResponse response = createResponse(request);
 
-            String request = uri.getPath();
-            String rawQuery = uri.getRawQuery();
-            String status = "200 OK";
-            String responseBody = "Hello world!";
-            String contentType = "text/html;charset=utf-8";
-
-            var dispatchedPath = dispatcher.dispatch(request, getQuery(rawQuery));
-            String responsePath = dispatchedPath.orElse(request);
-
-            if (!"/".equals(responsePath)) {
-                var resource = readResource(responsePath);
-
-                if (resource.isEmpty()) {
-                    status = "404 Not Found";
-                    contentType = "text/html;charset=utf-8";
-                    responseBody = readResource("/404.html")
-                            .orElse("404 Not Found");
-                } else {
-                    status = "200 OK";
-                    contentType = getContentType(responsePath);
-                    responseBody = resource.get();
-                }
-
-            }
-
-            byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-            var response = String.join("\r\n",
-                    "HTTP/1.1 " + status,
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBodyBytes.length,
-                    "",
-                    responseBody
-            );
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            writeResponse(outputStream, response);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> getQuery(String rawQuery) {
+    private HttpRequest parseRequest(BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
+        String[] parts = requestLine.split(" ", 3);
+        URI uri = URI.create(parts[1]);
+
+        return new HttpRequest(
+                parts[0],
+                uri.getPath(),
+                parseQueryParameters(uri.getRawQuery())
+        );
+    }
+
+    private Map<String, String> parseQueryParameters(String rawQuery) {
         Map<String, String> query = new HashMap<>();
-        if (rawQuery != null) {
-            String[] params = rawQuery.split("&");
-            for (String param : params) {
-                String[] kv = param.split("=", 2);
-                String key = URLDecoder.decode(kv[0], StandardCharsets.UTF_8);
-                String value = kv.length > 1
-                        ? URLDecoder.decode(kv[1], StandardCharsets.UTF_8)
-                        : "";
-                query.put(key, value);
-            }
+
+        if (rawQuery == null || rawQuery.isBlank()) {
+            return query;
+        }
+
+        for (String parameter : rawQuery.split("&")) {
+            addQueryParameter(query, parameter);
         }
 
         return query;
+    }
+
+    private void addQueryParameter(Map<String, String> query, String parameter) {
+        String[] keyValue = parameter.split("=", 2);
+        String key = decode(keyValue[0]);
+        String value = "";
+
+        if (keyValue.length == 2) {
+            value = decode(keyValue[1]);
+        }
+
+        query.put(key, value);
+    }
+
+    private String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
+        var dispatchedPath = dispatcher.dispatch(request.path(), request.parameters());
+        String responsePath = dispatchedPath.orElse(request.path());
+
+        if ("/".equals(responsePath)) {
+            return HttpResponse.ok(
+                    "text/html;charset=utf-8",
+                    "Hello world!".getBytes(StandardCharsets.UTF_8)
+            );
+        }
+
+        var resource = readResource(responsePath);
+        if (resource.isPresent()) {
+            return HttpResponse.ok(getContentType(responsePath), resource.get());
+        }
+
+        byte[] notFoundBody = readResource("/404.html")
+                .orElseGet(() -> "404 Not Found".getBytes(StandardCharsets.UTF_8));
+        return HttpResponse.notFound(notFoundBody);
+    }
+
+    private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        String headers = String.join("\r\n",
+                "HTTP/1.1 " + response.statusCode(),
+                "Content-Type: " + response.contentType(),
+                "Content-Length: " + response.contentLength(),
+                "",
+                ""
+        );
+
+        outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(response.body());
+        outputStream.flush();
     }
 
     private String getContentType(String path) {
@@ -122,7 +146,7 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private Optional<String> readResource(String path) throws IOException {
+    private Optional<byte[]> readResource(String path) throws IOException {
         try (InputStream resource = getClass()
                 .getClassLoader()
                 .getResourceAsStream("static" + path)) {
@@ -131,11 +155,7 @@ public class Http11Processor implements Runnable, Processor {
                 return Optional.empty();
             }
 
-            return Optional.of(new String(
-                    resource.readAllBytes(),
-                    StandardCharsets.UTF_8
-            ));
+            return Optional.of(resource.readAllBytes());
         }
     }
 }
-

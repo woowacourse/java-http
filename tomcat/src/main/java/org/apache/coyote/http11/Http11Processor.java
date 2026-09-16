@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,31 +39,43 @@ public class Http11Processor implements Runnable, Processor {
 
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            final String line = bufferedReader.readLine();
-            if (line == null) {
+            final String requestLine = bufferedReader.readLine();
+            if (requestLine == null) {
                 return;
             }
-            final String[] lines = line.split(" ");
+            final String[] lines = requestLine.split(" ");
             final String uri = lines[1];
+
+            String headerLine = bufferedReader.readLine();
+            while (headerLine != null && !headerLine.isEmpty()) {
+                headerLine = bufferedReader.readLine();
+                if (headerLine == null) {
+                    return;
+                }
+            }
 
             var responseBody = "Hello world!";
             int contentLength = responseBody.getBytes().length;
+            String contentType = "text/html;charset=utf-8";
 
-            if (uri.equals("/index.html")) {
-                URL resourceUrl = getClass().getClassLoader().getResource("static/index.html");
-                if (resourceUrl == null) {
+            if (!uri.equals("/")) {
+                byte[] fileBytes = readResource("static" + uri);
+
+                if (fileBytes == null) {
                     return;
                 }
-                URI resourceUri = resourceUrl.toURI();
-                Path path = Paths.get(resourceUri);
-                byte[] fileBytes = Files.readAllBytes(path);
+
                 responseBody = new String(fileBytes, StandardCharsets.UTF_8);
                 contentLength = fileBytes.length;
             }
 
+            if (uri.endsWith(".css")) {
+                contentType = "text/css";
+            }
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + contentLength + " ",
                     "",
                     responseBody);
@@ -74,5 +85,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private byte[] readResource(String resourcePath) throws IOException, URISyntaxException {
+        URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
+        if (resourceUrl == null) {
+            return null;
+        }
+        URI resourceUri = resourceUrl.toURI();
+        Path path = Paths.get(resourceUri);
+
+        return Files.readAllBytes(path);
     }
 }

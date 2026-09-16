@@ -1,5 +1,11 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +34,9 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final String actual = getClass().getClassLoader()
+            .getResource(fileName)
+            .toString();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +48,23 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Path.of(getClass()
+            .getClassLoader()
+            .getResource(fileName)
+            .getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        BufferedReader bufferedReader =
+            new BufferedReader(new FileReader(path.toFile()));
+        String str;
+        final List<String> actual = new ArrayList<>();
+        while ((str = bufferedReader.readLine()) != null) {
+            actual.add(str);
+        }
 
         assertThat(actual).containsOnly("nextstep");
     }

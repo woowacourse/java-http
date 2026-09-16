@@ -51,7 +51,9 @@ public class Http11Processor implements Runnable, Processor {
         String path = parsePathFrom(requestUri);
         String queryString = parseQueryStringFrom(requestUri);
 
-        logAccountInfo(queryString);
+        if(path.startsWith("/login")){
+            return loginResponse(queryString);
+        }
 
         String contentType = contentTypeOf(path);
         String responseBody = resolveContentOf(path);
@@ -64,20 +66,40 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private void logAccountInfo(String queryString) {
-        if (queryString != null) {
-            String[] queryParts = queryString.split("&");
+    private String loginResponse(String queryString) {
+        Optional<User> account = findAccount(queryString);
 
-            String accountQuery = queryParts[0].substring(queryParts[0].lastIndexOf("=") + 1);
-            String passwordQuery = queryParts[1].substring(queryParts[1].lastIndexOf("=") + 1);
-
-            Optional<User> account = InMemoryUserRepository.findByAccount(accountQuery);
-            account.ifPresent(user -> {
-                if(user.checkPassword(passwordQuery)) {
-                    log.info("user : " + user);
-                }
-            });
+        if(account.isPresent()) {
+            return String.join("\r\n",
+                    "HTTP/1.1 302 FOUND ",
+                    "Location: /index.html "
+            );
         }
+
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /401.html "
+        );
+    }
+
+    private Optional<User> findAccount(String queryString) {
+        if (queryString == null) {
+            return Optional.empty();
+        }
+
+        String[] queryParts = queryString.split("&");
+
+        String accountQuery = queryParts[0].substring(queryParts[0].lastIndexOf("=") + 1);
+        String passwordQuery = queryParts[1].substring(queryParts[1].lastIndexOf("=") + 1);
+
+        Optional<User> account = InMemoryUserRepository.findByAccount(accountQuery);
+
+        if(account.isPresent() && account.get().checkPassword(passwordQuery)) {
+            log.info("user : " + account);
+            return account;
+        }
+
+        return Optional.empty();
     }
 
     private String parseQueryStringFrom(String requestUri) {

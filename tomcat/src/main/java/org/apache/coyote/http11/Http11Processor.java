@@ -46,16 +46,13 @@ public class Http11Processor implements Runnable, Processor {
             String firstLine = reader.readLine();
             StringTokenizer streamTokenizer = new StringTokenizer(firstLine);
             String method = streamTokenizer.nextToken();
-            log.info("method: {}", method);
             String query = streamTokenizer.nextToken();
             String[] uri = query.split("\\?");
             String path = uri[0];
-            log.info("path: {}", path);
 
             if (uri.length > 1 && path.equals("/login")) {
                 String[] queryParams = uri[1].split("&");
                 for (String param : queryParams) {
-                    log.info("param: {}", param);
                     String name =  param.split("=")[0];
                     String value =  param.split("=")[1];
                     if (name.equals("account")) {
@@ -67,8 +64,6 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 }
             }
-
-            log.info("path: {}", path);
 
             if (path.equals("/")) {
                 log.info("path is empty");

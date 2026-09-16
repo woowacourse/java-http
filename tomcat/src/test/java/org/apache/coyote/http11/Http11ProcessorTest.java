@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -33,7 +35,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() throws IOException, URISyntaxException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -49,12 +51,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL url = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(Paths.get(url.toURI())));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

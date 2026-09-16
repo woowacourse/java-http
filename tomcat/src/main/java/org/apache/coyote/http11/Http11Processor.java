@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -38,14 +41,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
-
             final String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
             }
-            final String path = requestLine.split(" ")[1];
+            final String uri = requestLine.split(" ")[1];
 
-            final String response = createResponse(path);
+            final String response = createResponse(uri);
 
             outputStream.write(response.getBytes(UTF_8));
             outputStream.flush();
@@ -54,18 +56,61 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String path) throws IOException, URISyntaxException {
+    private String createResponse(final String uri) throws IOException, URISyntaxException {
+        final int index = uri.indexOf("?");
+        final String path;
+        final String queryString;
+        if (index == -1) {
+            path = uri;
+            queryString = "";
+        } else {
+            path = uri.substring(0, index);
+            queryString = uri.substring(index + 1);
+        }
+
         if (path.equals("/")) {
             return response("HTTP/1.1 200 OK ", "text/html", "Hello world!");
         }
 
-        final var resource = getClass().getClassLoader().getResource("static" + path);
+        if (path.equals("/login")) {
+            login(parseQueryString(queryString));
+            final var loginPage = findResource("/login.html");
+            return response("HTTP/1.1 200 OK ", "text/html", readResource(loginPage));
+        }
+
+        final var resource = findResource(path);
         if (resource == null) {
-            final var notFound = getClass().getClassLoader().getResource("static/404.html");
+            final var notFound = findResource("/404.html");
             return response("HTTP/1.1 404 Not Found ", "text/html", readResource(notFound));
         }
 
         return response("HTTP/1.1 200 OK ", contentType(path), readResource(resource));
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> params = new HashMap<>();
+        if (queryString.isEmpty()) {
+            return params;
+        }
+        for (final String pair : queryString.split("&")) {
+            final String[] keyAndValue = pair.split("=", 2);
+            if (keyAndValue.length == 2) {
+                params.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+        return params;
+    }
+
+    private void login(final Map<String, String> params) {
+        final String account = params.get("account");
+        final String password = params.get("password");
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("user : {}", user));
     }
 
     private String readResource(final URL resource) throws IOException, URISyntaxException {
@@ -92,5 +137,9 @@ public class Http11Processor implements Runnable, Processor {
             return "image/svg+xml";
         }
         return "text/html";
+    }
+
+    private URL findResource(final String path) {
+        return getClass().getClassLoader().getResource("static" + path);
     }
 }

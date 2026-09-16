@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Dispatcher;
 import org.slf4j.Logger;
@@ -46,34 +47,36 @@ public class Http11Processor implements Runnable, Processor {
 
             String rawRequest = reader.readLine();
             rawRequest = rawRequest.split(" ")[1];
-
             URI uri = URI.create(rawRequest);
 
             String request = uri.getPath();
             String rawQuery = uri.getRawQuery();
+            String status = "200 OK";
+            String responseBody = "Hello world!";
+            String contentType = "text/html;charset=utf-8";
+
             var dispatchedPath = dispatcher.dispatch(request, getQuery(rawQuery));
             String responsePath = dispatchedPath.orElse(request);
 
-            String responseBody = "Hello world!";
-            log.info("request: {}", request);
-
             if (!"/".equals(responsePath)) {
-                String resourcePath = "static" + responsePath;
+                var resource = readResource(responsePath);
 
-                try (InputStream resource =
-                             getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-                    responseBody = new String(
-                            Objects.requireNonNull(resource).readAllBytes(),
-                            StandardCharsets.UTF_8
-                    );
-
+                if (resource.isEmpty()) {
+                    status = "404 Not Found";
+                    contentType = "text/html;charset=utf-8";
+                    responseBody = readResource("/404.html")
+                            .orElse("404 Not Found");
+                } else {
+                    status = "200 OK";
+                    contentType = getContentType(responsePath);
+                    responseBody = resource.get();
                 }
+
             }
 
             byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-            String contentType = getContentType(responsePath);
             var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK",
+                    "HTTP/1.1 " + status,
                     "Content-Type: " + contentType,
                     "Content-Length: " + responseBodyBytes.length,
                     "",
@@ -117,6 +120,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html;charset=utf-8";
+    }
+
+    private Optional<String> readResource(String path) throws IOException {
+        try (InputStream resource = getClass()
+                .getClassLoader()
+                .getResourceAsStream("static" + path)) {
+
+            if (resource == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(new String(
+                    resource.readAllBytes(),
+                    StandardCharsets.UTF_8
+            ));
+        }
     }
 }
 

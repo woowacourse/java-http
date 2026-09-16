@@ -53,7 +53,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             var resourcePath = "";
-            if ("/index.html".equals(requestPath) || "/css/styles.css".equals(requestPath)) {
+            if ("/index.html".equals(requestPath)
+                    || "/css/styles.css".equals(requestPath)
+                    || requestPath.startsWith("/js/")
+                    || requestPath.startsWith("/assets/")) {
                 resourcePath = "static" + requestPath;
             }
             if ("/login".equals(requestPath)) {
@@ -68,6 +71,9 @@ public class Http11Processor implements Runnable, Processor {
 
             if (requestPath.endsWith(".css")) {
                 contentType = "text/css;charset=utf-8";
+            }
+            if (requestPath.endsWith(".js")) {
+                contentType = "application/javascript;charset=utf-8";
             }
 
             final var parameters = new HashMap<String, String>();

@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +13,8 @@ public class Headers {
         this.headers.putAll(headers);
     }
 
-    public static Headers of(InputStream inputStream) throws IOException {
+    public static Headers of(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             String[] parts = line.split(":", 2);

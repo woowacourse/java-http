@@ -44,11 +44,13 @@ public class Http11Processor implements Runnable, Processor {
             String path = requestHeader[1];
 
             byte[] bytes = resolveResponseBody(path);
-            String responseBody = new String(bytes);
+            String responseBody = new String(bytes, StandardCharsets.UTF_8);
+
+            String contentType = resolveContentType(path);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK",
-                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + bytes.length,
                     "",
                     responseBody
@@ -61,16 +63,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String resolveContentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+
+        return "text/html;charset=utf-8";
+    }
+
     private byte[] resolveResponseBody(String path) throws IOException {
         if (path.equals("/")) {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
-        if (path.equals("/index.html")) {
-            return readResource("static" + path);
-        }
-
-        throw new IOException("지원하지 않는 요청 경로: " + path);
+        return readResource("static" + path);
     }
 
     private byte[] readResource(String resourcePath) throws IOException {

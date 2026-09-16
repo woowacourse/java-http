@@ -24,7 +24,7 @@ public class HttpRequestParser {
         String[] lines = head.split("\r\n");
 
         String[] requestLine = lines[0].split(" ");
-
+        System.out.println("Request Line: " + lines[0]);
         HttpMethod method = HttpMethod.fromString(requestLine[0]);
         String uri = requestLine[1];
         String protocol = requestLine[2];

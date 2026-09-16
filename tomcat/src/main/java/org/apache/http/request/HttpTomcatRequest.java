@@ -11,7 +11,8 @@ public class HttpTomcatRequest implements HttpRequest {
     private final Map<String, String> Header;
     private final String body;
 
-    public HttpTomcatRequest(HttpMethod httpMethod, String url, String protocol, Map<String, String> header, String body) {
+    public HttpTomcatRequest(HttpMethod httpMethod, String url, String protocol, Map<String, String> header,
+                             String body) {
         this.httpMethod = httpMethod;
         this.url = url;
         this.protocol = protocol;

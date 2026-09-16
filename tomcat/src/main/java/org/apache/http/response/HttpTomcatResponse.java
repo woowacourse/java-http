@@ -8,9 +8,8 @@ public class HttpTomcatResponse implements HttpResponse {
 
     private static final int DEFAULT_STATUS_CODE = 200;
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
-
-    private int statusCode;
     private final Map<String, String> headers;
+    private int statusCode;
     private String body;
 
     private HttpTomcatResponse(

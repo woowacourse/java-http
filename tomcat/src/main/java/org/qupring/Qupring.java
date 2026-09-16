@@ -3,6 +3,7 @@ package org.qupring;
 import org.apache.catalina.startup.Tomcat;
 import org.qupring.annotation.QupringApplication;
 import org.qupring.mvc.ApplicationScanner;
+import org.qupring.mvc.QupringMvc;
 import org.qupring.mvc.handler.HandlerMapping;
 
 public class Qupring {
@@ -12,9 +13,10 @@ public class Qupring {
         ApplicationScanner applicationScanner = new ApplicationScanner();
         HandlerMapping handlerMapping = new HandlerMapping();
         handlerMapping.addResourceMappings(applicationScanner.scanForResources());
-        handlerMapping.addControllerMappings(applicationScanner.scanForControllers(application));
 
-        final var tomcat = new Tomcat();
+        QupringMvc qupringMvc = new QupringMvc(handlerMapping);
+
+        final var tomcat = new Tomcat(qupringMvc);
         tomcat.start();
     }
 

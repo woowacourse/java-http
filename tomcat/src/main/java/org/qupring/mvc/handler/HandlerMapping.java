@@ -1,16 +1,22 @@
 package org.qupring.mvc.handler;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.qupring.annotation.Route;
-import org.apache.http.HttpMethod;
 
 public class HandlerMapping {
 
-    private final Map<MappingTarget, Method> controllerMappings = new HashMap<>();
     private final Map<String, String> resourcesMappings = new HashMap<>();
+
+    public void addResourceMappings(Map<String, String> mappings) {
+        resourcesMappings.putAll(mappings);
+    }
+
+    public String getResource(String path) {
+        return resourcesMappings.get(path);
+    }
+
+/*
+    private final Map<MappingTarget, Method> controllerMappings = new HashMap<>();
 
     public HandlerMapping(Class<?>... classes) {
         for (Class<?> clazz : classes) {
@@ -24,10 +30,6 @@ public class HandlerMapping {
         }
     }
 
-    public void addResourceMappings(Map<String, String> mappings) {
-        resourcesMappings.putAll(mappings);
-    }
-
     public void addControllerMappings(List<Class<?>> classes) {
         for (Class<?> clazz : classes) {
             for (Method method : clazz.getDeclaredMethods()) {
@@ -37,20 +39,9 @@ public class HandlerMapping {
         }
     }
 
-    public Method getControllerHandler(String path, HttpMethod method) {
+    public Method getControllerMethod(String path, HttpMethod method) {
         return controllerMappings.get(new MappingTarget(path, method));
     }
 
-    public String getResource(String path) {
-        return resourcesMappings.get(path);
-    }
-
-    public boolean hasControllerHandler(String path, HttpMethod method) {
-        return controllerMappings.containsKey(new MappingTarget(path, method));
-    }
-
-    public boolean hasResourceHandler(String path) {
-        return resourcesMappings.containsKey(path);
-    }
-
+ */
 }

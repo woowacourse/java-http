@@ -1,11 +1,13 @@
 package com.techcourse;
 
-import org.apache.catalina.startup.Tomcat;
+import org.qupring.Qupring;
+import org.qupring.annotation.QupringApplication;
 
+@QupringApplication
 public class Application {
 
     public static void main(String[] args) {
-        final var tomcat = new Tomcat();
-        tomcat.start();
+        Qupring qupring = new Qupring();
+        qupring.run(Application.class);
     }
 }

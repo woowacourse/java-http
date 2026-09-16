@@ -45,18 +45,29 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            Optional<HttpRequest> request = parseRequest(reader);
-
-            if (request.isEmpty()) {
+            Optional<HttpResponse> response = handleRequest(reader);
+            if (response.isEmpty()) {
                 return;
             }
 
-            HttpResponse response = createResponse(request.get());
-
-            writeResponse(outputStream, response);
-
+            writeResponse(outputStream, response.get());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private Optional<HttpResponse> handleRequest(BufferedReader reader) throws IOException {
+        try {
+            Optional<HttpRequest> request = parseRequest(reader);
+            if (request.isEmpty()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(createResponse(request.get()));
+        } catch (BadRequestException e) {
+            return Optional.of(HttpResponse.badRequest(
+                    "400 Bad Request".getBytes(StandardCharsets.UTF_8)
+            ));
         }
     }
 
@@ -66,14 +77,27 @@ public class Http11Processor implements Runnable, Processor {
             return Optional.empty();
         }
 
-        String[] parts = requestLine.split(" ", 3);
-        URI uri = URI.create(parts[1]);
+        String[] parts = requestLine.split(" ",3);
+
+        if (parts.length != 3) {
+            throw new BadRequestException("Invalid request line: " + requestLine);
+        }
+
+        URI uri = createUri(parts[1], requestLine);
 
         return Optional.of(new HttpRequest(
                 parts[0],
                 uri.getPath(),
                 parseQueryParameters(uri.getRawQuery())
         ));
+    }
+
+    private URI createUri(String target, String requestLine) {
+        try {
+            return URI.create(target);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid request line: " + requestLine);
+        }
     }
 
     private Map<String, String> parseQueryParameters(String rawQuery) {

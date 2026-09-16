@@ -30,4 +30,8 @@ public record HttpResponse(
     public static HttpResponse notFound(byte[] body) {
         return new HttpResponse("404 Not Found", "text/html;charset=utf-8", body);
     }
+
+    public static HttpResponse badRequest(byte[] body) {
+        return new HttpResponse("400 Bad Request", "text/html;charset=utf-8", body);
+    }
 }

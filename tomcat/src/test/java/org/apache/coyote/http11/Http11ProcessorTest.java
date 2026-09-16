@@ -29,6 +29,25 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void badRequest() {
+        // given
+        final var socket = new StubSocket("GET /index.html\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = createResponse(
+                "400 Bad Request",
+                "text/html;charset=utf-8",
+                "400 Bad Request"
+        );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void process() {
         // given
         final var socket = new StubSocket();

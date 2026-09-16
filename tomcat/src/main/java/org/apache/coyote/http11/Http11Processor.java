@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +29,31 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            byte[] bytes = readResource("static/index.html");
+            String responseBody = new String(bytes);
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: " + bytes.length,
                     "",
-                    responseBody);
+                    responseBody
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private byte[] readResource(String resourcePath) throws IOException {
+        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (resourceStream == null) {
+                throw new IOException(resourcePath + " 파일을 찾을 수 없습니다.");
+            }
+
+            return resourceStream.readAllBytes();
         }
     }
 }

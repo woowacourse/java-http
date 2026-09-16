@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ResourceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,8 +29,7 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        final String actual = new ClassPathResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }

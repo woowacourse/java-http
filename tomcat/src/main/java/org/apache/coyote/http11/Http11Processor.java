@@ -1,18 +1,15 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
@@ -26,16 +23,28 @@ public class Http11Processor implements Runnable, Processor {
             return new ResponseContent("Hello world!", HTML_CONTENT_TYPE);
         }
 
-        final var resourcePath = "static" + requestPath;
+        final var staticPath = staticPathFor(requestPath);
+        final var resourcePath = "static" + staticPath;
 
-        try (final var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)){
+        try (final var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
                 return new ResponseContent("Hello world!", HTML_CONTENT_TYPE);
             }
 
             final var body = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
-            return new ResponseContent(body, contentTypeFor(requestPath));
+            return new ResponseContent(body, contentTypeFor(staticPath));
         }
+    }
+
+    private String staticPathFor(final String requestPath) {
+        final var lastSlashIndex = requestPath.lastIndexOf('/');
+        final var lastDotIndex = requestPath.lastIndexOf('.');
+
+        if (lastDotIndex > lastSlashIndex) {
+            return requestPath;
+        }
+
+        return requestPath + ".html";
     }
 
     private String contentTypeFor(final String requestPath) {
@@ -69,7 +78,11 @@ public class Http11Processor implements Runnable, Processor {
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8)
             );
             final var requestHeader = RequestHeader.from(reader);
-            final var responseContent = responseContentFor(requestHeader.path());
+            final var requestUri = RequestUri.from(requestHeader.path());
+
+            logLoginResult(requestUri);
+
+            final var responseContent = responseContentFor(requestUri.path());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -83,5 +96,25 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void logLoginResult(final RequestUri requestUri) {
+        if (!requestUri.path().equals("/login")) {
+            return;
+        }
+
+        final var account = requestUri.queryParameter("account");
+        final var password = requestUri.queryParameter("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> log.info("login succeeded: user={}", user),
+                        () -> log.warn("login failed: account={}", account)
+                );
     }
 }

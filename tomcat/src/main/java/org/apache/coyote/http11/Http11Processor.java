@@ -35,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            // 1. HTTP 요청을 문자열 한 줄씩 읽을 수 있도록 만든다.
+
             final var reader = new BufferedReader(
                     new InputStreamReader(
                             inputStream,
@@ -43,48 +43,62 @@ public class Http11Processor implements Runnable, Processor {
                     )
             );
 
-            // 2. Request Line을 읽는다.
+            // 1. Request Line 읽기
             final String requestLine = reader.readLine();
 
             if (requestLine == null) {
                 return;
             }
 
-            // 3. "GET /index.html HTTP/1.1"에서 "/index.html"을 추출한다.
+            // GET /index.html HTTP/1.1
             final String[] requestLineParts = requestLine.split(" ");
             final String uri = requestLineParts[1];
 
-            // 4. 기존 / 요청은 Hello world!를 유지한다.
-            String responseBody = "Hello world!";
+            String responseBody;
+            String contentType;
 
-            // 5. /index.html 요청이면 실제 index.html을 읽는다.
-            if ("/index.html".equals(uri)) {
+            // 2. 기존 기본 요청
+            if ("/".equals(uri)) {
+                responseBody = "Hello world!";
+                contentType = "text/html;charset=utf-8";
+            } else {
+
+                // 3. URI를 classpath resource 경로로 변환
+                final String resourcePath = "static" + uri;
+
                 final URL resource = getClass()
                         .getClassLoader()
-                        .getResource("static/index.html");
+                        .getResource(resourcePath);
 
                 final Path path = Path.of(resource.toURI());
 
+                // 4. 파일 읽기
                 responseBody = Files.readString(
                         path,
                         StandardCharsets.UTF_8
                 );
+
+                // 5. Content-Type 결정
+                if (uri.endsWith(".css")) {
+                    contentType = "text/css";
+                } else {
+                    contentType = "text/html;charset=utf-8";
+                }
             }
-            //System.out.println(responseBody);
-            // 6. HTTP Content-Length는 body의 byte 크기다.
+
             final byte[] responseBodyBytes =
                     responseBody.getBytes(StandardCharsets.UTF_8);
 
-            // 7. HTTP Response를 만든다.
+            // 6. HTTP Response 생성
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBodyBytes.length + " ",
                     "",
                     responseBody
             );
 
-            // 8. 클라이언트에게 응답한다.
+            // 7. 응답 전송
             outputStream.write(
                     response.getBytes(StandardCharsets.UTF_8)
             );

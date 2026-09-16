@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.StringTokenizer;
 import javax.annotation.Nonnull;
 
@@ -17,7 +20,8 @@ public class Request {
         this.contentType = contentType;
     }
 
-    public static Request from(String requestLine, ContextType contentType) {
+    public static Request from(Map<String, String> headers) {
+        String requestLine = headers.get
         StringTokenizer tokenizer = new StringTokenizer(requestLine);
         String method = tokenizer.nextToken();
         return splitUri(tokenizer, method, contentType);

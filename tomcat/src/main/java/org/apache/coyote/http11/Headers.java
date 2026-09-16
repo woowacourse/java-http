@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class Headers {
 
@@ -30,7 +28,7 @@ public class Headers {
         return new Headers(headers);
     }
 
-    public Set<Entry<String, String>> getHeaders() {
-        return Set.copyOf(headers.entrySet());
+    public Map<String, String> getHeaders() {
+        return Map.copyOf(headers);
     }
 }

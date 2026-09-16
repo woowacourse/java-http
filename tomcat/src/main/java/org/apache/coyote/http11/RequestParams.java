@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class RequestParams {
 
@@ -23,7 +21,7 @@ public class RequestParams {
         return new RequestParams(params);
     }
 
-    public Set<Entry<String, String>> getParams() {
-        return Set.copyOf(params.entrySet());
+    public Map<String, String> getParams() {
+        return Map.copyOf(params);
     }
 }

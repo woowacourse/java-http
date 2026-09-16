@@ -2,14 +2,11 @@ package org.apache.coyote.http11;
 
 import static com.techcourse.db.InMemoryUserRepository.findByAccount;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.StringTokenizer;
 
 public class HttpParser {
 
@@ -17,16 +14,8 @@ public class HttpParser {
     private static final String CSS = "css";
 
     public static Request getRequest(InputStream inputStream) throws IOException {
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String requestLine = reader.readLine();
-        String hostLine = reader.readLine();
-        String 
-        StringTokenizer streamTokenizer = new StringTokenizer(requestLine);
-        String method = streamTokenizer.nextToken();
-        String query = streamTokenizer.nextToken();
-        String[] uri = query.split("\\?");
-        String path = uri[0];
+        Headers headers = Headers.of(inputStream);
+        Request request = Request.from(headers.getHeaders());
 
         if (uri.length > 1 && path.equals("/login")) {
             String[] queryParams = uri[1].split("&");

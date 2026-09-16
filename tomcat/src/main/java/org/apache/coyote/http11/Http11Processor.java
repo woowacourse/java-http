@@ -39,7 +39,23 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             String requestLine = bufferedReader.readLine();
+
+            if (requestLine == null) {
+                return;
+            }
+
             String path = requestLine.split(" ")[1];
+
+            String line = bufferedReader.readLine();
+
+            while (!"".equals(line)) {
+                if (line == null) {
+                    return;
+                }
+
+                line = bufferedReader.readLine();
+            }
+
 
             var responseBody = "Hello world!";
             var contentType = "text/html;charset=utf-8";
@@ -62,11 +78,11 @@ public class Http11Processor implements Runnable, Processor {
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

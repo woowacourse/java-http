@@ -54,6 +54,7 @@ class IOStreamTest {
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
 
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
 
             assertThat(actual).isEqualTo("nextstep");
@@ -79,6 +80,8 @@ class IOStreamTest {
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
 
+            outputStream.flush();
+
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
         }
@@ -96,6 +99,10 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+
+            try (outputStream) {
+                // do something
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }

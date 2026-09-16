@@ -41,10 +41,8 @@ public class Http11Processor implements Runnable, Processor {
                 final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-            if (!validateHeaders(bufferedReader)) {
-                return;
-            }
-
+            final Headers headers = validateHeaders(bufferedReader);
+            
             String path = requestLine.getPath();
             String queryString = requestLine.getQueryString();
             String code = "200";
@@ -141,14 +139,17 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private static boolean validateHeaders(BufferedReader bufferedReader) throws IOException {
+    private static Headers validateHeaders(BufferedReader bufferedReader) throws IOException {
+        final Headers headers = new Headers();
+
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             if (line == null) {
-                return false;
+                throw new IllegalArgumentException();
             }
+            headers.add(line);
             line = bufferedReader.readLine();
         }
-        return true;
+        return headers;
     }
 }

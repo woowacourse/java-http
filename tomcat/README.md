@@ -38,6 +38,29 @@ Connection: keep-alive
 
 #### 3. Query String 파싱
 
-- [ ] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여준다.
-- [ ] 로그인 페이지 접속 시 Query String을 파싱해서 아이디, 비밀번호 일치를 검사한다.
-- [ ] 일치 한다면 콘솔창에 로그로 회원을 조회한 결과가 나오게 한다.
+- [x] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여준다.
+- [x] 로그인 페이지 접속 시 Query String을 파싱해서 아이디, 비밀번호 일치를 검사한다.
+- [x] 일치 한다면 콘솔창에 로그로 회원을 조회한 결과가 나오게 한다.
+
+## 2단계 - 로그인 구현하기
+
+> 1단계에서 HTML 파일을 출력하는 간단한 웹서버를 만들었다.
+> 이제 로그인과 회원가입 기능을 추가해보자.
+> 로그인에 필요한 쿠키와 세션도 같이 구현해보자.
+
+### 기능 요구 사항
+
+#### 1. HTTP Status Code 302
+
+- [ ] 로그인 여부에 따라 다른 페이지로 이동한다.
+- [ ] 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
+- [ ] 로그인에 실패하면 401.html로 리다이렉트한다.
+
+`InMemoryUserRepository`에는 다음과 같은 정보가 들어있다.
+
+```text
+account: "gugu",
+password: "password"
+```
+
+

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -58,4 +59,38 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() throws IOException {
+        final var httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final var resource = getClass()
+                .getClassLoader()
+                .getResource("static/css/styles.css");
+        final var body = Files.readString(
+                new File(resource.getFile()).toPath(),
+                StandardCharsets.UTF_8
+        );
+
+        final var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                body);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
 }

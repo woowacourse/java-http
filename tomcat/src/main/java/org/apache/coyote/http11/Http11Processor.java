@@ -15,6 +15,36 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
+    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String CSS_CONTENT_TYPE = "text/css";
+
+    private record ResponseContent(String body, String contentType) {
+    }
+
+    private ResponseContent responseContentFor(final String requestPath) throws IOException {
+        if (requestPath.equals("/")) {
+            return new ResponseContent("Hello world!", HTML_CONTENT_TYPE);
+        }
+
+        final var resourcePath = "static" + requestPath;
+
+        try (final var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)){
+            if (resourceStream == null) {
+                return new ResponseContent("Hello world!", HTML_CONTENT_TYPE);
+            }
+
+            final var body = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
+            return new ResponseContent(body, contentTypeFor(requestPath));
+        }
+    }
+
+    private String contentTypeFor(final String requestPath) {
+        if (requestPath.endsWith(".css")) {
+            return CSS_CONTENT_TYPE;
+        }
+
+        return HTML_CONTENT_TYPE;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -39,24 +69,14 @@ public class Http11Processor implements Runnable, Processor {
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8)
             );
             final var requestHeader = RequestHeader.from(reader);
-
-            String responseBody;
-
-            if (requestHeader.path().equals("/index.html")) {
-                final URL resource = getClass().getClassLoader().getResource("static/index.html");
-                responseBody = new String(
-                        Files.readAllBytes(
-                                new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
-            } else {
-                responseBody = "Hello world!";
-            }
+            final var responseContent = responseContentFor(requestHeader.path());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                    "Content-Type: " + responseContent.contentType() + " ",
+                    "Content-Length: " +  responseContent.body().getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
-                    responseBody);
+                    responseContent.body());
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();

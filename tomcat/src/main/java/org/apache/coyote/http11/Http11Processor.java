@@ -10,7 +10,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +38,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String path = extractRequestPath(inputStream);
-            URL url = findStaticResource(path);
-            String contentType = findContentType(path);
+            HttpRequestHeader header = extractHeader(inputStream);
+            URL url = findStaticResource(header.firstLine().requestTarget());
+            String contentType = resolveContentType(header);
             final String responseBody = resolveContentOf(url);
 
             final var response = String.join("\r\n",
@@ -47,7 +48,8 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
-                    responseBody);
+                    responseBody
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -56,36 +58,38 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestPath(InputStream inputStream) {
+    private HttpRequestHeader extractHeader(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        try {
-            String line = br.readLine();
-            Objects.requireNonNull(line);
+        Map<String, String> headers = new HashMap<>();
 
-            return line.split(" ")[1];
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String line = br.readLine();
+        RequestLine firstLine = RequestLine.from(line);
+
+        do {
+            line = br.readLine();
+            String[] parts = line.split(": ", 2);
+            if (parts.length == 2) {
+                headers.put(parts[0], parts[1]);
+            }
+        } while (!line.isEmpty());
+        return new HttpRequestHeader(firstLine, headers);
     }
 
-    private URL findStaticResource(String path) {
-        return getClass().getClassLoader().getResource(STATIC_ROOT + path);
+    private URL findStaticResource(String requestTarget) {
+        return getClass().getClassLoader().getResource(STATIC_ROOT + requestTarget);
     }
 
-    private String findContentType(String path) {
-        if (path.endsWith(".html") || path.endsWith("/")) {
-            return "text/html";
+    private String resolveContentType(HttpRequestHeader header) {
+        String accept = header.header().get("Accept");
+        if (accept != null && !accept.isEmpty()) {
+            String preferred = accept.split(",")[0]
+                    .split(";")[0].trim();
+            if (!preferred.equals("*/*")) {
+                return preferred;
+            }
         }
 
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-
-        if (path.endsWith(".js")) {
-            return "text/javascript";
-        }
-
-        throw new RuntimeException("알 수 없는 Content-Type입니다.");
+        return "text/html";
     }
 
     private String resolveContentOf(URL fileUrl) {

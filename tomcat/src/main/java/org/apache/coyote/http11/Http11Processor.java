@@ -63,6 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             Request request = HttpParser.getRequest(inputStream);
+            log.info("request: {}", request);
             if (request.getPath().equals("/")) {
                 empty(outputStream, request.getContentType());
                 return;
@@ -79,6 +80,10 @@ public class Http11Processor implements Runnable, Processor {
     private void handling(OutputStream outputStream, Request request) throws IOException {
         String path = request.getPath();
         String contentType = request.getContentType();
+        if (!path.contains(".")) {
+            path += "." + contentType;
+        }
+        log.info("path: {}", path);
         final URL resource = getClass().getClassLoader().getResource("static" + path);
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         response(responseBody, outputStream, contentType);

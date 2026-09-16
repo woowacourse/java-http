@@ -66,4 +66,14 @@ public class Request {
     public String getContentType() {
         return contentType.getType();
     }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "method='" + method + '\'' +
+                ", path='" + path + '\'' +
+                ", requestParams=" + requestParams +
+                ", contentType=" + contentType +
+                '}';
+    }
 }

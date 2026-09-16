@@ -216,17 +216,49 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
-            final String emoji = String.join("\r\n",
+        void BufferedReader를_사용하여_문자열을_읽어온다_using_InputStreamReader() throws IOException {
+            final String emoji = String.join(System.lineSeparator(),
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            InputStreamReader isr = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            char[] cbuf = new char[emoji.length()];
+            isr.read(cbuf);
 
-            final StringBuilder actual = new StringBuilder();
+            final StringBuilder actual = new StringBuilder(new String(cbuf));
 
             assertThat(actual).hasToString(emoji);
+
+            inputStream.close();
+        }
+
+        /**
+         * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다.
+         * 읽어온 문자(char)를 문자열(String)로 처리하자.
+         * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
+         */
+        @Test
+        void BufferedReader를_사용하여_문자열을_읽어온다_using_BufferedReader() throws IOException {
+            final String emoji = String.join(System.lineSeparator(),
+                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
+                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
+                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
+                    "");
+            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+            final StringBuilder actual = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                actual.append(line).append(System.lineSeparator());
+            }
+
+            assertThat(actual).hasToString(emoji);
+
+            br.close();
+            inputStream.close();
         }
     }
 }

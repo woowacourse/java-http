@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    getContentType(requestLineParts[1]),
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -60,5 +60,15 @@ public class Http11Processor implements Runnable, Processor {
             return Files.readString(path);
         }
         return "Hello world!";
+    }
+
+    private String getContentType(String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return "Content-Type: text/css;charset=utf-8 ";
+        }
+        if (requestUri.endsWith(".js")) {
+            return "Content-Type: text/javascript;charset=utf-8 ";
+        }
+        return "Content-Type: text/html;charset=utf-8 ";
     }
 }

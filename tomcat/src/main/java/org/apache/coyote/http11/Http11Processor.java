@@ -38,20 +38,18 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
             String line = reader.readLine();
             HttpRequest request = HttpRequest.from(line);
             String path = request.path();
 
             final var responseBody = getResponseBody(request);
+            final var response = HttpResponse.ok(
+                    "text/" + getExtension(path) + ";charset=utf-8",
+                    responseBody
+            );
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + getExtension(path) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -65,15 +63,14 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
         if (path.equals("/login") && request.method().equals("GET")) {
-            QueryParameters queryParameters = request.queryParameters();
-            if (queryParameters.isEmpty()) {
+            if (!request.hasParameters()) {
                 return modelToView("/login.html");
             }
-            User user = queryParameters
-                    .get("account")
-                    .flatMap(InMemoryUserRepository::findByAccount)
-                    .orElse(null);
-            String password = queryParameters.get("password").orElse(null);
+            String account = request.getParameter("account");
+            User user = account == null
+                    ? null
+                    : InMemoryUserRepository.findByAccount(account).orElse(null);
+            String password = request.getParameter("password");
             if(user == null || !user.checkPassword(password)) {
                 return "없는 유저입니다. 다시 입력해주세요";
             }

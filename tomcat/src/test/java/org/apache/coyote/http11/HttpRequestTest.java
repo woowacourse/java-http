@@ -21,15 +21,15 @@ class HttpRequestTest {
         );
 
         assertThat(request.path()).isEqualTo("/login");
-        assertThat(request.queryParameters().get("account")).contains("gugu");
-        assertThat(request.queryParameters().get("password")).contains("password");
+        assertThat(request.getParameter("account")).isEqualTo("gugu");
+        assertThat(request.getParameter("password")).isEqualTo("password");
     }
 
     @Test
-    void query_string이_없으면_빈_파라미터를_반환한다() {
+    void query_string이_없으면_parameter는_null이다() {
         HttpRequest request = HttpRequest.from("GET /login HTTP/1.1");
 
-        assertThat(request.queryParameters().get("account")).isEmpty();
+        assertThat(request.getParameter("account")).isNull();
     }
 
     @Test
@@ -38,7 +38,7 @@ class HttpRequestTest {
                 "GET /login?account=gugu%40email.com&password=pass%20word HTTP/1.1"
         );
 
-        assertThat(request.queryParameters().get("account")).contains("gugu@email.com");
-        assertThat(request.queryParameters().get("password")).contains("pass word");
+        assertThat(request.getParameter("account")).isEqualTo("gugu@email.com");
+        assertThat(request.getParameter("password")).isEqualTo("pass word");
     }
 }

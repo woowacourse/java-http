@@ -6,15 +6,19 @@ final class HttpRequest {
 
     private final String method;
     private final URI uri;
+    private final QueryParameters queryParameters;
 
-    private HttpRequest(final String method, final URI uri) {
+    private HttpRequest(final String method, final URI uri, final QueryParameters queryParameters) {
         this.method = method;
         this.uri = uri;
+        this.queryParameters = queryParameters;
     }
 
     static HttpRequest from(final String requestLine) {
         final String[] requestLineParts = requestLine.split(" ", 3);
-        return new HttpRequest(requestLineParts[0], URI.create(requestLineParts[1]));
+        final URI uri = URI.create(requestLineParts[1]);
+        final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
+        return new HttpRequest(requestLineParts[0], uri, queryParameters);
     }
 
     String method() {
@@ -25,7 +29,11 @@ final class HttpRequest {
         return uri.getPath();
     }
 
-    QueryParameters queryParameters() {
-        return QueryParameters.from(uri.getRawQuery());
+    String getParameter(final String name) {
+        return queryParameters.get(name).orElse(null);
+    }
+
+    boolean hasParameters() {
+        return !queryParameters.isEmpty();
     }
 }

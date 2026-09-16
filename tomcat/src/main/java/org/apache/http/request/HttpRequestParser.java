@@ -79,12 +79,10 @@ public class HttpRequestParser {
     private Map<String, String> parseHeaders(
             String[] lines
     ) {
-        Map<String, String> headers =
-                new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
 
         for (int i = 1; i < lines.length; i++) {
-            String[] header =
-                    lines[i].split(":", 2);
+            String[] header = lines[i].split(":", 2);
 
             if (header.length != 2) {
                 continue;
@@ -119,9 +117,11 @@ public class HttpRequestParser {
 
             String name = decode(parameter[0]);
 
-            String value = parameter.length == 2
-                    ? decode(parameter[1])
-                    : "";
+            String value = "";
+
+            if(parameter.length == 2){
+                value = decode(parameter[1]);
+            }
 
             parameters.put(name, value);
         }

@@ -12,18 +12,6 @@ public class HandlerMapping {
     private final Map<MappingTarget, Method> controllerMappings = new HashMap<>();
     private final Map<String, String> resourcesMappings = new HashMap<>();
 
-    public HandlerMapping(Class<?>... classes) {
-        for (Class<?> clazz : classes) {
-            for (Method method : clazz.getDeclaredMethods()) {
-                Route route = method.getAnnotation(Route.class);
-
-                if (route != null) {
-                    controllerMappings.put(new MappingTarget(route.path(), route.method()), method);
-                }
-            }
-        }
-    }
-
     public void addResourceMappings(Map<String, String> mappings) {
         resourcesMappings.putAll(mappings);
     }

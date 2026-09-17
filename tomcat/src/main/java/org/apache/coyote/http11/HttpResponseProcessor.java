@@ -4,17 +4,16 @@ import org.apache.coyote.HttpStatus;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 
 public class HttpResponseProcessor {
     private static final char CR = '\r';
     private static final char LF = '\n';
-    private static final String STATIC_RESOURCE_PREFIX = "/static";
+    private static final String STATIC_RESOURCE_PREFIX = "static";
     private static final byte[] DEFAULT_BODY = "Hello world!".getBytes();
     private static final String MIME_HTML = "text/html;charset=utf-8";
     private final OutputStream outputStream;
@@ -25,8 +24,13 @@ public class HttpResponseProcessor {
     }
 
     public void send(String uri) throws IOException, URISyntaxException {
-        URI resourceUri = Objects.requireNonNull(getClass().getClassLoader().getResource(STATIC_RESOURCE_PREFIX + uri)).toURI();
-        Path resourcePath = Path.of(resourceUri);
+        URL resourceUri = getClass().getClassLoader().getResource(STATIC_RESOURCE_PREFIX + uri);
+        if (resourceUri == null) {
+            sendError(HttpStatus.NOT_FOUND);
+            return;
+        }
+
+        Path resourcePath = Path.of(resourceUri.toURI());
         if ("/".equals(uri)) {
             send(HttpStatus.OK, MIME_HTML, DEFAULT_BODY);
             return;
@@ -34,9 +38,7 @@ public class HttpResponseProcessor {
         if (resourcePath.toFile().exists()) {
             byte[] content = Files.readAllBytes(resourcePath);
             send(HttpStatus.OK, MIME_HTML, content);
-            return;
         }
-        sendError(HttpStatus.NOT_FOUND);
     }
 
     public void sendError(HttpStatus status) throws IOException {

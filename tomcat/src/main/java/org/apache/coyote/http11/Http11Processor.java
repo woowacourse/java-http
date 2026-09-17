@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -35,33 +36,21 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String requestLine = reader.readLine();
-            if (requestLine == null) {
+            String requestUri = readRequestUri(reader);
+            if (requestUri == null) {
                 return;
             }
 
-            while (true) {
-                String headerLine = reader.readLine();
+            String path = parsePath(requestUri);
+            String queryString = parseQueryString(requestUri);
+            handleLogin(path, queryString);
 
-                if (headerLine == null) {
-                    return;
-                }
-
-                if (headerLine.isEmpty()) {
-                    break;
-                }
-            }
-
-            String[] requestParts = requestLine.split(" ");
-            String requestUri = requestParts[1];
-
-            byte[] responseBody = readResponseBody(requestUri);
-            String contentType = resolveContentType(requestUri);
+            byte[] responseBody = readResponseBody(path);
+            String contentType = resolveContentType(path);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
+                    "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     "");
@@ -75,17 +64,65 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String resolveContentType(String requestUri) {
-        if (requestUri.endsWith(".css")) {
-            return "text/css;charset=utf-8";
+    private void handleLogin(String path, String queryString) {
+        if (!"/login".equals(path) || queryString.isEmpty()) {
+            return;
         }
 
-        return "text/html;charset=utf-8";
+        int index = queryString.indexOf("&");
+        String account = queryString.substring(0, index).split("=")[1];
+        String password = queryString.substring(index + 1).split("=")[1];
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("user: {}", user));
+    }
+
+    private String parsePath(String requestUri) {
+        int queryIndex = requestUri.indexOf("?");
+        if (queryIndex >= 0) {
+            return requestUri.substring(0, queryIndex);
+        }
+        return requestUri;
+    }
+
+    private String parseQueryString(String requestUri) {
+        int queryIndex = requestUri.indexOf("?");
+        if (queryIndex >= 0) {
+            return requestUri.substring(queryIndex + 1);
+        }
+
+        return "";
+    }
+
+    private String readRequestUri(BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
+        while (true) {
+            String headerLine = reader.readLine();
+            if (headerLine.isEmpty()) {
+                break;
+            }
+        }
+
+        String[] requestParts = requestLine.split(" ");
+        return requestParts[1];
+    }
+
+    private String resolveContentType(String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return "text/css;";
+        }
+
+        return "text/html;";
     }
 
     private byte[] readResponseBody(String requestUri) throws IOException {
         if ("/".equals(requestUri)) {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
+        }
+
+        if ("/login".equals(requestUri)) {
+            requestUri = requestUri + ".html";
         }
 
         String resourceName = "static" + requestUri;

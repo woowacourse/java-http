@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final String requestLine = reader.readLine();
 
-            if(requestLine == null) {
+            if (requestLine == null) {
                 return;
             }
             final String[] requestParts = requestLine.split(" ");
@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            String type = "html";
+            String type = getContentType(requestUri);
             if (requestUri.equals("/index.html")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
@@ -58,31 +58,26 @@ public class Http11Processor implements Runnable, Processor {
             if (requestUri.equals("/css/styles.css")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
-                type="css";
             }
 
             if (requestUri.equals("/js/scripts.js")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
-                type = "javascript";
             }
 
             if (requestUri.equals("/assets/chart-area.js")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
-                type = "javascript";
             }
 
             if (requestUri.equals("/assets/chart-bar.js")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
-                type = "javascript";
             }
 
             if (requestUri.equals("/assets/chart-pie.js")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
-                type = "javascript";
             }
 
             final String responseHeader = createResponseHeader(version, type, responseBody.length);
@@ -98,10 +93,10 @@ public class Http11Processor implements Runnable, Processor {
     private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         String line;
-        while((line = reader.readLine()) != null && !line.isEmpty()) {
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
             final String[] header = line.split(":", 2);
-            final String name =  header[0].trim();
-            final String value =  header[1].trim();
+            final String name = header[0].trim();
+            final String value = header[1].trim();
             headers.put(name, value);
         }
         return headers;
@@ -110,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponseHeader(final String version, String type, final int contentLength) {
         return String.join("\r\n",
                 version + " 200 OK ",
-                "Content-Type: text/"+ type + ";charset=utf-8 ",
+                "Content-Type: " + type + ";charset=utf-8 ",
                 "Content-Length: " + contentLength + " ",
                 "",
                 "");
@@ -120,5 +115,15 @@ public class Http11Processor implements Runnable, Processor {
         return getClass().getClassLoader()
                 .getResource(path)
                 .getPath();
+    }
+
+    private String getContentType(final String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return "text/css";
+        }
+        if (requestUri.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html;charset=utf-8";
     }
 }

@@ -2,11 +2,13 @@ package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.*;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -42,12 +44,24 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String requestUri = readRequestUri(reader);
+            String[] pathParts = requestUri.split("\\?", 2);
+            String path = pathParts[0];
 
-            if (requestUri.endsWith(".html") || requestUri.endsWith(".css") || requestUri.endsWith(".js")) {
-                serveStaticFile(reader, requestUri, outputStream);
+            Map<String, String> queryParameters = new HashMap<>();
+            if (pathParts.length > 1) {
+                queryParameters = parseQueryParameters(pathParts[1]);
+            }
+
+            if (path.equals("/login")) {
+                logLoginResult(queryParameters);
+                serveStaticFile(reader, "/login.html", outputStream);
                 return;
             }
-            if (requestUri.equals("/")) {
+            if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
+                serveStaticFile(reader, path, outputStream);
+                return;
+            }
+            if (path.equals("/")) {
                 serverHomePage(outputStream);
             }
         } catch (IOException | UncheckedServletException e) {
@@ -68,6 +82,37 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return parts[1];
+    }
+
+    private Map<String, String> parseQueryParameters(String queryString) {
+        Map<String, String> queryParameters = new HashMap<>();
+
+        for (String param : queryString.split("&")) {
+            if (param.isEmpty()) continue;
+
+            String[] keyValue = param.split("=", 2);
+            String key = URLDecoder.decode(keyValue[0], UTF_8);
+            String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], UTF_8) : "";
+            queryParameters.put(key, value);
+        }
+
+        return queryParameters;
+    }
+
+    private void logLoginResult(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> log.info("user: {}", user),
+                        () -> log.info("로그인 실패: account={}", account)
+                );
     }
 
     private void serveStaticFile(BufferedReader reader, String requestUri, OutputStream outputStream) throws IOException {

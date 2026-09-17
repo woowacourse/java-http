@@ -2,13 +2,13 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +47,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handle(HttpRequestLine requestLine) throws IOException {
-        String uri = requestLine.uri();
+    private HttpResponse handle(final HttpRequestLine requestLine) throws IOException {
+        final String uri = requestLine.uri();
 
         if ("/".equals(uri)) {
             return new HttpResponse(
@@ -59,14 +59,27 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(uri)) {
-            uri = "/login.html";
-            User user = InMemoryUserRepository.findByAccount(requestLine.queryParameters().get("account"))
-                    .orElseThrow(() -> new RuntimeException("로그인에 실패했습니다."));
-
-            log.info("user : {}", user);
+            return login(requestLine.queryParameters());
         }
 
-        String path = resolvePath(uri);
+        return getStaticResource(uri);
+    }
+
+    private HttpResponse login(final Map<String, String> queryParameters) throws IOException {
+        final String account = queryParameters.get("account");
+        final String password = queryParameters.get("password");
+
+        if (account != null && password != null) {
+            InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .ifPresent(user -> log.info("user : {}", user));
+        }
+
+        return getStaticResource("/login.html");
+    }
+
+    private HttpResponse getStaticResource(final String uri) throws IOException {
+        final String path = resolvePath(uri);
 
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(path)) {
             return new HttpResponse(

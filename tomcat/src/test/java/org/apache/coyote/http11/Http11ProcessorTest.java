@@ -13,6 +13,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void missingResourceReturnsNotFound() {
+        final var socket = new StubSocket("GET /missing.html HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/plain;charset=utf-8 ",
+                "Content-Length: 9 ",
+                "",
+                "Not Found");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void process() {
         // given
         final var socket = new StubSocket();

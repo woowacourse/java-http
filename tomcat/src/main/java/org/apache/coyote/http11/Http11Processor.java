@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,19 +36,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String[] request = reader.readLine().trim().split("\\s+");
-            String url = request[1];
-            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            String response = buildResponse(responseBody, "text/html");
-            if (url.equals("/index.html")) {
-                responseBody = buildResponseBody("static/index.html");
-                response = buildResponse(responseBody, "text/html");
-            } else if (url.contains("css")) {
-                responseBody = buildResponseBody("static/css/styles.css");
-                response = buildResponse(responseBody, "text/css");
-            }
+            String url = parseRequestUrl(inputStream);
+            String contentType = findContentType(url);
 
+            byte[] responseBody = buildResponseBody(url);
+            String response = buildResponse(responseBody, contentType);
             outputStream.write(response.getBytes());
             outputStream.write(responseBody);
             outputStream.flush();
@@ -58,19 +49,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private byte[] buildResponseBody(String resourcePath) throws URISyntaxException, IOException {
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
-        Path path = Path.of(resource.toURI());
-        final InputStream htmlInputStream = new BufferedInputStream(Files.newInputStream(path));
-        return htmlInputStream.readAllBytes();
-    }
-
-    private String buildResponse(byte[] responseBody, String contentType) {
+    private String buildResponse(
+            byte[] responseBody,
+            String contentType
+    ) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 "");
+    }
+
+    private byte[] buildResponseBody(String url) throws URISyntaxException, IOException {
+        if ("/".equals(url)) {
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
+        }
+        String resourcePath = "static" + url;
+        URL resource = getClass().getClassLoader().getResource(resourcePath);
+        Path path = Path.of(resource.toURI());
+        return Files.readAllBytes(path);
+    }
+
+    private String parseRequestUrl(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        String[] request = reader.readLine().trim().split("\\s+");
+        return request[1];
+    }
+
+    private String findContentType(String url) {
+        if (url.endsWith(".html")) {
+            return "text/html";
+        }
+        if (url.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

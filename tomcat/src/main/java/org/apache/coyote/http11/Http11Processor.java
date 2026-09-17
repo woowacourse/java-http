@@ -46,6 +46,9 @@ public class Http11Processor implements Runnable, Processor {
             if (request.getMethod() == HttpMethod.POST && request.getUri().contains("login")) {
                 response = handleLogin(request);
             }
+            else if (request.getMethod() == HttpMethod.GET && request.getUri().equals("/logout")) {
+                response = handleLogout(request);
+            }
             else if (request.getMethod() == HttpMethod.POST && request.getUri().contains("register")) {
                 response = handleRegister(request);
             }
@@ -65,6 +68,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse handleLogout(HttpRequest request) {
+        Session session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        HttpResponse response = new HttpResponse();
+        response.setHeader(new HttpResponseHeader(new Cookies(), new LinkedHashMap<>()));
+        response.addCookie(Cookie.expiredJSessionId());
+        response.sendRedirect("/index.html");
+        return response;
     }
 
     private HttpResponse handleLoginPage(HttpRequest request) throws IOException, URISyntaxException {

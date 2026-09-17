@@ -42,11 +42,12 @@ public class Http11Processor implements Runnable, Processor {
 
             String[] requestHeader = readLine.split(" ");
             String path = requestHeader[1];
+            String resourcePath = extractResourcePath(path);
 
-            byte[] bytes = resolveResponseBody(path);
+            byte[] bytes = resolveResponseBody(resourcePath);
             String responseBody = new String(bytes, StandardCharsets.UTF_8);
 
-            String contentType = resolveContentType(path);
+            String contentType = resolveContentType(resourcePath);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK",
@@ -63,20 +64,34 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String resolveContentType(String path) {
-        if (path.endsWith(".css")) {
+    private String resolveContentType(String resourcePath) {
+        if (resourcePath.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
 
         return "text/html;charset=utf-8";
     }
 
-    private byte[] resolveResponseBody(String path) throws IOException {
-        if (path.equals("/")) {
+    private byte[] resolveResponseBody(String resourcePath) throws IOException {
+        if (resourcePath.equals("/")) {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
-        return readResource("static" + path);
+        if (resourcePath.equals("/login")) {
+            return readResource("static" + resourcePath + ".html");
+        }
+
+        return readResource("static" + resourcePath);
+    }
+
+    private String extractResourcePath(String path) {
+        int index = path.indexOf("?");
+
+        if (index == -1) {
+            return path;
+        }
+
+        return path.substring(0, index);
     }
 
     private byte[] readResource(String resourcePath) throws IOException {

@@ -41,18 +41,22 @@ public class Http11Processor implements Runnable, Processor {
             final String path = requestLineParts[1];
 
             final String responseBody;
+            final String contentType;
+
             if ("/".equals(path)) {
                 responseBody = "Hello world!";
+                contentType = "text/html";
             } else {
                 final String fileName = "static" + path;
                 final URL url = ClassLoader.getSystemResource(fileName); // 클래스패스에서 static/ 아래 파일을 찾아 실제 위치를 URL로 돌려 줌
                 final File file = new File(url.toURI());
                 responseBody = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                contentType = resolveContentType(path);
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
@@ -64,5 +68,12 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String resolveContentType(final String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

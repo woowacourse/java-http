@@ -21,7 +21,7 @@ public class RequestParams {
         return new RequestParams(params);
     }
 
-    public Map<String, String> getParams() {
-        return Map.copyOf(params);
+    public String getParams(String key) {
+        return params.getOrDefault(key, "");
     }
 }

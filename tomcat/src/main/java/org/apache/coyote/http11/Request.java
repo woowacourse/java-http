@@ -59,8 +59,11 @@ public class Request {
         return path;
     }
 
-    public RequestParams getRequestParams() {
-        return requestParams;
+    public String getRequestParam(String key) {
+        if (requestParams == null) {
+            return "";
+        }
+        return requestParams.getParams(key);
     }
 
     public String getContentType() {

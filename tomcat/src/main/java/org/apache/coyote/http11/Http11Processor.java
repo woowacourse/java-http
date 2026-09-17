@@ -43,9 +43,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static void login(Request request) {
-        Map<String, String> requestParams = request.getRequestParams().getParams();
-        String account = requestParams.getOrDefault("account", "");
-        String password = requestParams.getOrDefault("password", "");
+        String account = request.getRequestParam("account");
+        String password = request.getRequestParam("password");
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
             log.info(user.toString());

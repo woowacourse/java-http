@@ -28,6 +28,7 @@ public class Session {
     }
 
     public void invalidate() {
-        
+        values.clear();
+        SessionManager.remove(this);
     }
 }

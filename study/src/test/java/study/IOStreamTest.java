@@ -211,7 +211,8 @@ class IOStreamTest {
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final byte[] emojiBytes = emoji.getBytes(StandardCharsets.UTF_8);
+            final InputStream inputStream = new ByteArrayInputStream(emojiBytes);
 
             final StringBuilder actual = new StringBuilder();
             try (final BufferedReader reader = new BufferedReader(

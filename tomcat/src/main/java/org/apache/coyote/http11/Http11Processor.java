@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +22,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_URI = "/";
     private static final String STATIC_RESOURCE_ROOT = "static";
+    private static final String LOGIN = "/login";
+    private static final String DOT_HTML = ".html";
 
     private final Socket connection;
 
@@ -46,12 +50,25 @@ public class Http11Processor implements Runnable, Processor {
             }
             final String[] requestParts = requestLine.split(" ");
             final String method = requestParts[0];
-            final String requestUri = requestParts[1];
+            String requestUri = requestParts[1];
             final String version = requestParts[2];
             final Map<String, String> headers = readHeaders(reader);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             String contentType = getContentType(requestUri);
+
+            String queryString;
+            final int queryIndex = requestUri.indexOf('?');
+            if(queryIndex != -1) {
+                queryString = requestUri.substring(queryIndex + 1);
+                requestUri = requestUri.substring(0, queryIndex);
+                String[] queryStringParts = queryString.split("&");
+                checkUser(queryStringParts);
+            }
+
+            if(requestUri.equals(LOGIN)) {
+                requestUri += DOT_HTML;
+            }
 
             if (!requestUri.equals(ROOT_URI)) {
                 final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
@@ -103,5 +120,17 @@ public class Http11Processor implements Runnable, Processor {
             return "text/javascript";
         }
         return "text/html;charset=utf-8";
+    }
+
+    private void checkUser(final String[] requestParts) {
+        final String account = requestParts[0].split("=", 2)[1];
+        String password = requestParts[1].split("=", 2)[1];
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalStateException("유저가 없습니다."));
+
+        if(user.checkPassword(password)) {
+            System.out.println(user);
+        }
     }
 }

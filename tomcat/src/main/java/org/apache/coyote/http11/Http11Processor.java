@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,6 +22,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
+    private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PAGE = "/login.html";
+    private static final String NOT_FOUND_PAGE = "/404.html";
 
     private final Socket connection;
 
@@ -50,19 +54,24 @@ public class Http11Processor implements Runnable, Processor {
             readHeaders(reader);
             log.info("request: {}", requestLine);
 
-            final String url = requestLine.split(" ")[1];
+            final RequestUri requestUri = RequestUri.from(requestLine.split(" ")[1]);
+            final String path = requestUri.getPath();
 
-            if ("/".equals(url)) {
-                writeResponse(outputStream, "200 OK", ContentType.HTML, "Hello world!".getBytes(StandardCharsets.UTF_8));
+            if ("/".equals(path)) {
+                writeResponse(
+                        outputStream,
+                        "200 OK",
+                        ContentType.HTML,
+                        "Hello world!".getBytes(StandardCharsets.UTF_8));
                 return;
             }
 
-            final Optional<Path> staticFile = findStaticFile(url);
-            if (staticFile.isEmpty()) {
-                writeResponse(outputStream, "404 Not Found", ContentType.HTML, readNotFoundBody());
+            if (LOGIN_PATH.equals(path)) {
+                logLoginUser(requestUri);
+                writeStaticFile(outputStream, LOGIN_PAGE);
                 return;
             }
-            writeResponse(outputStream, "200 OK", ContentType.from(url), Files.readAllBytes(staticFile.get()));
+            writeStaticFile(outputStream, path);
         } catch (IOException | UncheckedServletException |URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -74,6 +83,32 @@ public class Http11Processor implements Runnable, Processor {
             line = reader.readLine();
         }
     }
+
+    private void logLoginUser(final RequestUri requestUri) {
+        final Optional<String> account = requestUri.getQueryParameter("account");
+        final Optional<String> password = requestUri.getQueryParameter("password");
+        if (account.isEmpty() || password.isEmpty()) {
+            log.info("login parameters are missing");
+            return;
+        }
+        InMemoryUserRepository.findByAccount(account.get())
+                .filter(user -> user.checkPassword(password.get()))
+                .ifPresentOrElse(
+                        user -> log.info("user: {}", user),
+                        () -> log.info("login failed. account: {}", account.get())
+                );
+    }
+
+    private void writeStaticFile(final OutputStream outputStream, final String filePath)
+            throws IOException, URISyntaxException {
+        final Optional<Path> staticFile = findStaticFile(filePath);
+        if (staticFile.isEmpty()) {
+            writeResponse(outputStream, "404 Not Found", ContentType.HTML, readNotFoundBody());
+            return;
+        }
+        writeResponse(outputStream, "200 OK", ContentType.from(filePath), Files.readAllBytes(staticFile.get()));
+    }
+
 
     private Optional<Path> findStaticFile(final String url) throws URISyntaxException {
         final URL resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + url);

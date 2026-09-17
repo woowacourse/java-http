@@ -93,4 +93,56 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final byte[] responseBody;
+        try (final var resource = getClass().getClassLoader()
+                .getResourceAsStream("static/login.html")) {
+            responseBody = resource.readAllBytes();
+        }
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .endsWith(new String(responseBody, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void loginWithQueryString() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final byte[] responseBody;
+        try (final var resource = getClass().getClassLoader()
+                .getResourceAsStream("static/login.html")) {
+            responseBody = resource.readAllBytes();
+        }
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .endsWith(new String(responseBody, StandardCharsets.UTF_8));
+    }
 }

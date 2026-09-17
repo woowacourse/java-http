@@ -15,12 +15,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,11 +39,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
             final var outputStream = connection.getOutputStream()) {
 
-            RequestTarget requestTarget = getRequestTarget(inputStream);
-            String requestPath = requestTarget.path();
+            HttpRequest requestTarget = getRequestTarget(inputStream);
+            String requestPath = requestTarget.getHttpPath();
 
             if ("/login".equals(requestPath)) {
-                logLoginUser(requestTarget.queryParams());
+                logLoginUser(requestTarget);
             }
 
             String responseBody = getResponseBody(requestPath);
@@ -75,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(file.toPath(), StandardCharsets.UTF_8);
     }
 
-    private RequestTarget getRequestTarget(InputStream inputStream) throws IOException {
+    private HttpRequest getRequestTarget(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         String requestLine = reader.readLine();
@@ -83,20 +79,12 @@ public class Http11Processor implements Runnable, Processor {
             throw new IOException("HTTP 요청 라인이 존재하지 않습니다.");
         }
 
-        String[] requestParts = requestLine.split(" ", 3);
-        if (requestParts.length != 3) {
-            throw new IOException("잘못된 HTTP 요청 라인입니다: " + requestLine);
-        }
-
-        String[] targetParts = requestParts[1].split("\\?", 2);
-
-        return RequestTarget.of(targetParts);
+        return HttpRequest.from(requestLine);
     }
 
-    private void logLoginUser(Map<String, String> queryParams) {
-
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+    private void logLoginUser(HttpRequest httpRequest) {
+        String account = httpRequest.getParams("account");
+        String password = httpRequest.getParams("password");
 
         if (account == null || password == null) {
             return;
@@ -138,28 +126,4 @@ public class Http11Processor implements Runnable, Processor {
 
         return "text/html";
     }
-
-    private record RequestTarget(String path, Map<String, String> queryParams) {
-        public static RequestTarget of(String[] target) {
-            if (target.length == 1) {
-                return new RequestTarget(target[0], Map.of());
-            }
-
-            Map<String, String> queryParams = Arrays.stream(target[1].split("&"))
-                    .map(parameter -> parameter.split("=", 2))
-                    .filter(parameter -> parameter.length == 2)
-                    .collect(Collectors.toUnmodifiableMap(
-                            parameter -> decode(parameter[0]),
-                            parameter -> decode(parameter[1]),
-                            (previous, replacement) -> replacement
-                    ));
-
-            return new RequestTarget(target[0], queryParams);
-        }
-
-        private static String decode(String value) {
-            return URLDecoder.decode(value, StandardCharsets.UTF_8);
-        }
-    }
-
 }

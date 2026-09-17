@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -7,8 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 소켓의 InputStream은 클라이언트가 보낸 HTTP 요청을 바이트로 읽고,
@@ -64,6 +68,42 @@ public class Http11Processor implements Runnable, Processor {
 
                 writeResponse(outputStream, response);
                 return;
+            } else if (filePath.contains("/login")) {
+                URI uri = URI.create(filePath);
+
+                String path = uri.getPath();
+                String rawQuery = uri.getRawQuery();
+
+                if (path.equals("/login") && rawQuery != null) {
+                    Map<String, String> queryParameters = parseQueryParameters(uri);
+
+                    String account = queryParameters.get("account");
+                    String password = queryParameters.get("password");
+
+                    InMemoryUserRepository.findByAccount(account)
+                            .filter(user -> user.checkPassword(password))
+                            .ifPresent(user -> log.info("user : " + user.toString()));
+                }
+
+                String loginPath = path + ".html";
+                InputStream resourceAsStream = getClass()
+                        .getClassLoader()
+                        .getResourceAsStream("static" + loginPath);
+
+                if (resourceAsStream == null) {
+                    return;
+                }
+
+                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
+
+                    final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+                    final var response = createResponse(responseBody, "text/html");
+
+                    writeResponse(outputStream, response);
+                }
+
+                return;
             }
 
             // 클래스 로더에서 정적 파일 가져오기
@@ -92,6 +132,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static Map<String, String> parseQueryParameters(URI uri) {
+        String rawQuery = uri.getRawQuery();
+        Map<String, String> queryParameters = Arrays.stream(rawQuery.split("&"))
+                .map(parameter -> parameter.split("=", 2))
+                .collect(Collectors.toMap(
+                        parts -> parts[0],
+                        parts -> parts.length > 1 ? parts[1] : ""
+                ));
+        return queryParameters;
     }
 
     private static String createResponse(String responseBody, String contentType) {

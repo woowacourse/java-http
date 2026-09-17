@@ -28,7 +28,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final String actual = "resources/nextstep.txt";
 
         assertThat(actual).endsWith(fileName);
     }

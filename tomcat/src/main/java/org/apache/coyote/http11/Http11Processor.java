@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,11 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Map<String, String> CONTENT_TYPES = Map.of(
+            ".html", "text/html;charset=utf-8",
+            ".css", "text/css;charset=utf-8",
+            ".js", "application/javascript;charset=utf-8"
+    );
 
     private final Socket connection;
 
@@ -45,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             InputStream resourceStream = getResourceStream(requestUri);
 
             String responseBody = getResponseBody(requestUri, resourceStream);
-            String response = createResponse(responseBody);
+            String response = createResponse(requestUri, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -80,11 +86,19 @@ public class Http11Processor implements Runnable, Processor {
         return new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    private String createResponse(final String responseBody) {
+    private String createResponse(final String requestUri, final String responseBody) {
+        String contentType = CONTENT_TYPES.entrySet().stream()
+                .filter(entry -> requestUri.endsWith(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse("text/plain;charset=utf-8");
+
+        byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: " + contentType,
+                "Content-Length: " + responseBodyBytes.length,
                 "",
                 responseBody
         );

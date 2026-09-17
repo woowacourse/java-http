@@ -44,7 +44,7 @@ public class HttpRequest {
         return header.getCookieValue(key);
     }
 
-    public Session getSession(boolean create) throws IOException {
+    public Session getSession(boolean create) {
         String jsessionid = getCookie("JSESSIONID");
         if(create && !hasSession()) {
             UUID uuid = UUID.randomUUID();
@@ -55,7 +55,7 @@ public class HttpRequest {
         return SessionManager.findSession(jsessionid);
     }
 
-    public boolean hasSession() throws IOException {
+    public boolean hasSession() {
         String jsessionid = getCookie("JSESSIONID");
         if (jsessionid == null || jsessionid.isEmpty()) {
            return false;

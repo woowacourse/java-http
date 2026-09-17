@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
 
-    private String startLine = "HTTP/1.1 200 OK\r\n";
+    private String startLine = "HTTP/1.1 200 OK \r\n";
     private HttpResponseHeader header;
     private HttpResponseBody body;
 
@@ -26,7 +26,7 @@ public class HttpResponse {
     }
 
     public void sendRedirect(String location) {
-        this.startLine = "HTTP/1.1 302 Found\r\n";
+        this.startLine = "HTTP/1.1 302 Found \r\n";
         if (header != null) {
             header.setHeaders("Location", location);
         }

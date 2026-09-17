@@ -36,12 +36,12 @@ public class HttpResponseHeader {
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
 
         String cookieString = cookies.toString();
         if (cookieString != null && !cookieString.isEmpty()) {
-            sb.append("Set-Cookie: ").append(cookieString).append("\r\n");
+            sb.append("Set-Cookie: ").append(cookieString).append(" \r\n");
         }
 
         sb.append("\r\n");

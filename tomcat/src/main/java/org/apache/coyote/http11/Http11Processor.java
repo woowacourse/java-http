@@ -1,6 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +36,59 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            final String requestLine = reader.readLine();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if(requestLine == null) {
+                return;
+            }
+            final String[] requestParts = requestLine.split(" ");
+            final String method = requestParts[0];
+            final String requestUri = requestParts[1];
+            final String version = requestParts[2];
+            final Map<String, String> headers = readHeaders(reader);
 
-            outputStream.write(response.getBytes());
+            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+
+            if (requestUri.equals("/index.html")) {
+                final Path path = Path.of(getResourcePath("static" + requestUri));
+                responseBody = Files.readAllBytes(path);
+            }
+
+            final String responseHeader = createResponseHeader(version, responseBody.length);
+
+            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+        while((line = reader.readLine()) != null && !line.isEmpty()) {
+            final String[] header = line.split(":", 2);
+            final String name =  header[0].trim();
+            final String value =  header[1].trim();
+            headers.put(name, value);
+        }
+        return headers;
+    }
+
+    private String createResponseHeader(final String version, final int contentLength) {
+        return String.join("\r\n",
+                version + " 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + contentLength + " ",
+                "",
+                "");
+    }
+
+    private String getResourcePath(String path) {
+        return getClass().getClassLoader()
+                .getResource(path)
+                .getPath();
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.Dispatcher;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final Dispatcher dispatcher;
+    private final SessionManager sessionManager = new SessionManager();
     private boolean stopped;
 
     public Connector(Dispatcher dispatcher) {
@@ -69,7 +71,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, dispatcher);
+        var processor = new Http11Processor(connection, dispatcher, sessionManager);
         new Thread(processor).start();
     }
 

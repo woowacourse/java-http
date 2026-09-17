@@ -1,7 +1,9 @@
 package com.techcourse.controller;
 
+import com.techcourse.model.User;
 import com.techcourse.service.ApplicationService;
 import java.util.Map;
+import org.apache.catalina.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +17,23 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    public ControllerResult login(Map<String, String> params) {
+    public ControllerResult login(Map<String, String> params, Session session) {
         String account = params.get("account");
         String password = params.get("password");
+
+        if (session.getAttribute("user") != null) {
+            var user = session.getAttribute("user");
+            if(applicationService.isUser((User) user)){
+                return new ControllerResult.Redirect("/index.html");
+            }
+            return new ControllerResult.Redirect("/401.html");
+        }
 
         if (account != null && password != null) {
             var user = applicationService.login(account, password);
             if (user.isPresent()) {
                 log.info("User :{}", user.get());
+                session.setAttribute("user", user.get());
                 return new ControllerResult.Redirect("/index.html");
             }
             return new ControllerResult.Redirect("/401.html");

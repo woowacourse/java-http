@@ -3,6 +3,7 @@ package com.techcourse.service;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
+import org.apache.catalina.Session;
 
 public class ApplicationService {
 
@@ -22,7 +23,9 @@ public class ApplicationService {
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+    }
 
-        return;
+    public boolean isUser(User user) {
+        return InMemoryUserRepository.findByAccount(user.getAccount()).isPresent();
     }
 }

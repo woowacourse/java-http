@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpResponse;
@@ -26,10 +28,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
     private final Dispatcher dispatcher;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final Dispatcher dispatcher) {
+    public Http11Processor(final Socket connection, final Dispatcher dispatcher, final SessionManager sessionManager) {
         this.connection = connection;
         this.dispatcher = dispatcher;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -61,11 +65,22 @@ public class Http11Processor implements Runnable, Processor {
                 return Optional.empty();
             }
 
-            HttpResponse response = dispatcher.dispatch(request.get());
+            String sessionId = request.get().cookies().getCookie("JSESSIONID");
+            Session session = sessionManager.findSession(sessionId);
+            boolean created = session == null || !session.isValid();
 
-            if (request.get().cookies().getCookie("JSESSIONID") == null) {
-                String sessionId = UUID.randomUUID().toString();
-                response = response.withCookie("JSESSIONID", sessionId);
+            if (created) {
+                if (session != null) {
+                    sessionManager.remove(session);
+                }
+                session = new Session(UUID.randomUUID().toString());
+                sessionManager.add(session);
+            }
+
+            HttpResponse response = dispatcher.dispatch(request.get(), session);
+
+            if (created) {
+                response = response.withCookie("JSESSIONID", session.getId());
             }
 
             return Optional.of(response);

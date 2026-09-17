@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 import org.apache.coyote.HttpResponse;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import com.techcourse.model.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -231,20 +234,78 @@ class Http11ProcessorTest {
                 "Cookie: yummy_cookie=choco; JSESSIONID=existing-session; token=abc==",
                 "content-length: 12",
                 "", "account=gugu"));
-        final var processor = new Http11Processor(socket, request -> {
+        final var manager = new SessionManager();
+        final var existing = new Session("existing-session");
+        manager.add(existing);
+        final var processor = new Http11Processor(socket, (request, session) -> {
+            assertThat(session).isSameAs(existing);
             assertThat(request.cookies().getCookie("yummy_cookie")).isEqualTo("choco");
             assertThat(request.cookies().getCookie("JSESSIONID")).isEqualTo("existing-session");
             assertThat(request.cookies().getCookie("token")).isEqualTo("abc==");
             assertThat(request.parameters()).containsEntry("account", "gugu");
             return HttpResponse.redirect("/index.html");
-        });
+        }, manager);
 
         processor.process(socket);
 
         assertThat(socket.output()).isEqualTo(createRedirectResponse("/index.html"));
     }
 
-    private void assertSessionCookie(String response) {
+    @Test
+    void loginSessionIsCreatedBeforeControllerAndReusedOnNextRequest() throws IOException {
+        final var manager = new SessionManager();
+        final var login = new StubSocket(String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "", "account=gugu&password=password"));
+
+        createProcessor(login, manager).process(login);
+
+        String sessionId = assertSessionCookie(login.output());
+        Session session = manager.findSession(sessionId);
+        assertThat(session).isNotNull();
+        assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("gugu");
+        assertThat(login.output()).contains("Location: /index.html\r\n");
+
+        final var next = new StubSocket("GET /login HTTP/1.1\r\nCookie: JSESSIONID="
+                + sessionId + "\r\n\r\n");
+        createProcessor(next, manager).process(next);
+
+        assertThat(next.output()).isEqualTo(createRedirectResponse("/index.html"));
+        assertThat(manager.findSession(sessionId)).isSameAs(session);
+    }
+
+    @Test
+    void unknownSessionIdIsReplaced() throws IOException {
+        final var manager = new SessionManager();
+        final var socket = new StubSocket("GET /login HTTP/1.1\r\nCookie: JSESSIONID=unknown\r\n\r\n");
+
+        createProcessor(socket, manager).process(socket);
+
+        String sessionId = assertSessionCookie(socket.output());
+        assertThat(sessionId).isNotEqualTo("unknown");
+        assertThat(manager.findSession(sessionId).getAttribute("user")).isNull();
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+    }
+
+    @Test
+    void invalidatedSessionIsReplaced() throws IOException {
+        final var manager = new SessionManager();
+        final var previous = new Session("invalid-session");
+        manager.add(previous);
+        previous.invalidate();
+        final var socket = new StubSocket("GET /login HTTP/1.1\r\nCookie: JSESSIONID=invalid-session\r\n\r\n");
+
+        createProcessor(socket, manager).process(socket);
+
+        String sessionId = assertSessionCookie(socket.output());
+        assertThat(manager.findSession("invalid-session")).isNull();
+        assertThat(manager.findSession(sessionId).isValid()).isTrue();
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+    }
+
+    private String assertSessionCookie(String response) {
         var cookies = response.split("\r\n\r\n", 2)[0].lines()
                 .filter(line -> line.startsWith("Set-Cookie: "))
                 .toList();
@@ -252,15 +313,22 @@ class Http11ProcessorTest {
         assertThat(cookies.getFirst()).startsWith("Set-Cookie: JSESSIONID=");
         String sessionId = cookies.getFirst().substring("Set-Cookie: JSESSIONID=".length());
         assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
+        return sessionId;
     }
 
     private Http11Processor createProcessor(StubSocket socket) {
+        final var manager = new SessionManager();
+        manager.add(new Session("existing-session"));
+        return createProcessor(socket, manager);
+    }
+
+    private Http11Processor createProcessor(StubSocket socket, SessionManager manager) {
         final var service = new ApplicationService();
         final var resourceHandler = new StaticResourceHandler();
         final var controller = new ApplicationController(service);
         final var dispatcher = new ApplicationDispatcher(controller, resourceHandler);
 
-        return new Http11Processor(socket, dispatcher);
+        return new Http11Processor(socket, dispatcher, manager);
     }
 
     private String readResource(String path) throws IOException {

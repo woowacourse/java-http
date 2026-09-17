@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +11,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +40,26 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             final String requestLine = bufferedReader.readLine();
-            final String[] requestLineParts = requestLine.split(" ");
-            final String path = requestLineParts[1];
+            final String[] requestLineParts = requestLine.split(" "); // 요청 첫 줄(Request Line) 분리
+            final String requestUri = requestLineParts[1];
+
+            final int queryStartIndex = requestUri.indexOf('?');
+            final String path;
+            final String queryString;
+
+            if (queryStartIndex == -1) { // 쿼리가 없는 경우
+                path = requestUri;
+                queryString = "";
+            } else {
+                path = requestUri.substring(0, queryStartIndex);
+                queryString = requestUri.substring(queryStartIndex + 1);
+            }
+
+            final Map<String, String> queryParams = parseQueryString(queryString);
+
+            if ("/login".equals(path)) {
+                logLoginUser(queryParams);
+            }
 
             final String responseBody;
             final String contentType;
@@ -47,19 +68,11 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = "Hello world!";
                 contentType = "text/html";
             } else {
-                final String fileName = "static" + path;
-                final URL url = ClassLoader.getSystemResource(fileName); // 클래스패스에서 static/ 아래 파일을 찾아 실제 위치를 URL로 돌려 줌
-                final File file = new File(url.toURI());
-                responseBody = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                responseBody = readStaticFile(path);
                 contentType = resolveContentType(path);
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
+            final String response = buildResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -70,10 +83,58 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> queryParams = new HashMap<>();
+        if (queryString.isEmpty()) {
+            return queryParams;
+        }
+
+        for (final String pair : queryString.split("&")) { // "account=gugu", "password=password"
+            final String[] keyValue = pair.split("="); // ["account", "gugu"]
+            queryParams.put(keyValue[0], keyValue[1]); // "account" -> "gugu"
+        }
+        return queryParams;
+    }
+
+    private void logLoginUser(final Map<String, String> queryParams) {
+        final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
+
+        if (account != null) {
+            InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .ifPresent(user -> log.info("user : {}", user));
+        }
+    }
+
+    private String readStaticFile(final String path) throws URISyntaxException, IOException {
+        final String fileName = "static" + resolveFileName(path);
+        final URL url = ClassLoader.getSystemResource(fileName); // 클래스패스에서 static/ 아래 파일을 찾아 실제 위치를 URL로 돌려 줌
+        final File file = new File(url.toURI());
+        return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+    }
+
+    // 요청 path를 받아서, 서버에서 찾을 파일 이름을 돌려 줌
+    private String resolveFileName(final String path) {
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+        return path;
+    }
+
     private String resolveContentType(final String path) {
         if (path.endsWith(".css")) {
             return "text/css";
         }
         return "text/html";
+    }
+
+    private String buildResponse(final String contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
     }
 }

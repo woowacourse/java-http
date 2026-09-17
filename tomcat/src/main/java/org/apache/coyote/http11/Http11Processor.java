@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,21 +45,19 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String uri = requestLine.split(" ")[1];
-            String path = extractPath(uri);
-            Map<String, String> params = extractQueryParams(uri);
+            HttpRequest request = HttpRequest.from(requestLine);
 
-            if (path.equals("/login") && !params.isEmpty()) {
-                login(params);
+            if (request.getPath().equals("/login") && !request.getQueryParams().isEmpty()) {
+                login(request.getQueryParams());
             }
 
             String statusLine = "200 OK";
-            byte[] responseBody = createResponseBody(path);
+            byte[] responseBody = createResponseBody(request.getPath());
             if (responseBody == null) {
                 statusLine = "404 Not Found";
                 responseBody = createResponseBody("/404.html");
             }
-            String contentType = determineContentType(path);
+            String contentType = determineContentType(request.getPath());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 " + statusLine + " ",
@@ -74,26 +71,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String extractPath(final String uri) {
-        if (uri.contains("?")) {
-            return uri.substring(0, uri.indexOf("?"));
-        }
-        return uri;
-    }
-
-    private Map<String, String> extractQueryParams(final String uri) {
-        final Map<String, String> params = new HashMap<>();
-        if (!uri.contains("?")) {
-            return params;
-        }
-        final String queryString = uri.substring(uri.indexOf("?") + 1);
-        for (String param : queryString.split("&")) {
-            String[] kv = param.split("=");
-            params.put(kv[0], kv[1]);
-        }
-        return params;
     }
 
     private void login(final Map<String, String> params) {

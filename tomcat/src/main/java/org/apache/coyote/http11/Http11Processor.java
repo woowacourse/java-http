@@ -4,12 +4,12 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -62,16 +62,16 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.write(response.getResponseBytes());
             }
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse handleLoginPage(HttpRequest request) throws IOException {
+    private HttpResponse handleLoginPage(HttpRequest request) throws IOException, URISyntaxException {
         Session session = request.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
             HttpResponse response = new HttpResponse();
-            response.setHeader(new HttpResponseHeader(new Cookies(), new HashMap<>()));
+            response.setHeader(new HttpResponseHeader(new Cookies(), new LinkedHashMap<>()));
             response.sendRedirect("/index.html");
             return response;
         }
@@ -97,23 +97,23 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         HttpResponse response = new HttpResponse();
-        response.setHeader(new HttpResponseHeader(new Cookies(), new HashMap<>()));
+        response.setHeader(new HttpResponseHeader(new Cookies(), new LinkedHashMap<>()));
         response.sendRedirect("/index.html");
         return response;
     }
 
-    private HttpResponse handlePage(String resourcePath) throws IOException {
+    private HttpResponse handlePage(String resourcePath) throws IOException, URISyntaxException {
         URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
         if (resource == null) {
             throw new IllegalStateException("resource not found: " + resourcePath);
         }
-        Path path = new File((resource).getPath()).toPath();
+        Path path = Path.of(resource.toURI());
         byte[] bytes = Files.readAllBytes(path);
 
         HttpResponse response = new HttpResponse();
         response.setBody(new HttpResponseBody(bytes));
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", ContentType.from(resourcePath));
         headers.put("Content-Length", String.valueOf(bytes.length));
         response.setHeader(new HttpResponseHeader(new Cookies(), headers));
@@ -127,7 +127,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = params.getValue("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         HttpResponse response = new HttpResponse();
-        response.setHeader(new HttpResponseHeader(new Cookies(), new HashMap<>()));
+        response.setHeader(new HttpResponseHeader(new Cookies(), new LinkedHashMap<>()));
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.checkPassword(password)) {

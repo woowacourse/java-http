@@ -54,16 +54,29 @@ public class Http11Processor implements Runnable, Processor {
             log.info("method: {}, target: {}, version: {}",
                     method, requestTarget, httpVersion);
 
-            final var responseBody = "Hello world!";
+            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
-            final var response = String.join("\r\n",
+            if ("/index.html".equals(requestTarget)) {
+                try (var resource = getClass().getClassLoader()
+                        .getResourceAsStream("static/index.html")) {
+
+                    if (resource == null) {
+                        throw new IOException("static/index.html 파일을 찾을 수 없습니다.");
+                    }
+
+                    responseBody = resource.readAllBytes();
+                }
+            }
+
+            final String responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    "");
 
-            outputStream.write(response.getBytes());
+            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

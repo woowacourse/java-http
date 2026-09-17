@@ -38,10 +38,11 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestTarget = extractRequestTarget(inputStream);
             String responseBody = resolveResponseBody(requestTarget);
+            String contentType = resolveContentType(requestTarget);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -71,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
         String fileName = "static" + requestTarget;
         final URL resource = getClass().getClassLoader().getResource(fileName);
         if (resource == null) {
-            throw new RuntimeException();
+            throw new RuntimeException("resource not found");
         }
         return readStaticResource(resource);
     }
@@ -79,5 +80,15 @@ public class Http11Processor implements Runnable, Processor {
     private String readStaticResource(URL resource) throws IOException {
         final Path path = new File(resource.getPath()).toPath();
         return Files.readString(path);
+    }
+
+    private String resolveContentType(String requestTarget) {
+        if (requestTarget.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (requestTarget.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 }

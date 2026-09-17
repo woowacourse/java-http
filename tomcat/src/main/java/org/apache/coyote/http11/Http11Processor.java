@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,21 +30,42 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            final var responseBody = "Hello world!";
+            final String requestLine = reader.readLine();
+            final String requestPath = requestLine.split(" ")[1];
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            while (!reader.readLine().isEmpty()) {
 
-            outputStream.write(response.getBytes());
+            }
+
+            if ("/index.html".equals(requestPath)) {
+                final byte[] responseBody = getClass()
+                        .getClassLoader()
+                        .getResourceAsStream("static/index.html")
+                        .readAllBytes();
+
+                outputStream.write(response(responseBody).getBytes());
+            } else {
+                final var responseBody = "Hello world!";
+                final byte[] responseBodyByte = responseBody.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(response(responseBodyByte).getBytes(StandardCharsets.UTF_8));
+            }
+
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String response(final byte[] responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                new String(responseBody, StandardCharsets.UTF_8));
     }
 }

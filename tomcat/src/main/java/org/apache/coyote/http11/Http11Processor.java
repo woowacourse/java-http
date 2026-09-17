@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +16,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -84,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
-            } else if("/css/styles.css".equals(requestLine[1])) {
+            } else if ("/css/styles.css".equals(requestLine[1])) {
                 URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
                 Path path = Path.of(resource.toURI());
                 String responseLine = "HTTP/1.1 200 OK ";
@@ -99,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
-            } else if(requestLine[1].endsWith("js")) {
+            } else if (requestLine[1].endsWith("js")) {
                 URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
                 Path path = Path.of(resource.toURI());
                 String responseLine = "HTTP/1.1 200 OK ";
@@ -114,6 +118,40 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
+            } else if (requestLine[1].startsWith("/login")) {
+                if (Arrays.asList(requestLine[1].split("")).contains("?")) {
+                    String queryString = requestLine[1].substring(requestLine[1].indexOf("?") + 1);
+                    String[] queryStringWithAndSplits = queryString.split("&");
+                    Map<String, String> queryStringMap = new HashMap<>();
+                    for (String queryStringWithAndSplit : queryStringWithAndSplits) {
+                        String[] split = queryStringWithAndSplit.split("=");
+                        queryStringMap.put(split[0], split[1]);
+                    }
+                    Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringMap.get("account"));
+                    if (optionalUser.isEmpty()) {
+                        return;
+                    }
+                    User user = optionalUser.get();
+                    if (!user.checkPassword(queryStringMap.get("password"))) {
+                        throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
+                    }
+                    log.info(user.toString());
+                }
+                URL resource = getClass().getClassLoader().getResource("static" + "/login.html");
+                Path path = Path.of(resource.toURI());
+                String responseLine = "HTTP/1.1 200 OK ";
+                String contentType = "Content-Type: text/html;charset=utf-8 ";
+                String responseBody = Files.readString(path);
+                String length = "Content-Length: " + responseBody.getBytes().length + " ";
+                final var response = String.join("\r\n",
+                        responseLine,
+                        contentType,
+                        length,
+                        "",
+                        responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);

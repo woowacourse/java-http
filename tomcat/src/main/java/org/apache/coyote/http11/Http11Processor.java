@@ -37,6 +37,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestLine = bufferedReader.readLine();
             String responseBody = "Hello world!";
+            String contentType = "text/html";
             if (requestLine != null) {
                 String [] strings = requestLine.split(" ");
                 if (!strings[1].equals("/")) {
@@ -44,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                     final URL resource = getClass().getClassLoader().getResource(fileName);
                     if (resource != null) {
                         responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                        contentType = getContentType(strings[1]);
                     }
                 }
             }
@@ -51,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -61,5 +63,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(String string) {
+        if (string.endsWith(".css"))
+            return "text/css";
+        if (string.endsWith(".js"))
+            return "application/javascript";
+        return "text/html";
     }
 }

@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +39,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String requestTarget = extractRequestTarget(inputStream);
-            String responseBody = resolveResponseBody(requestTarget);
-            String contentType = resolveContentType(requestTarget);
+            String requestPath = extractRequestPath(requestTarget);
+
+            String resourcePath = resolveResourcePath(requestPath);
+            log.info(resourcePath);
+
+            String responseBody = resolveResponseBody(resourcePath);
+            String contentType = resolveContentType(resourcePath);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -54,6 +61,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+
+    private String extractRequestPath(String requestTarget) {
+        int queryStartIndex = requestTarget.indexOf('?');
+
+        if (queryStartIndex < 0) {
+            queryStartIndex = requestTarget.length();
+        }
+
+        return requestTarget.substring(0, queryStartIndex);
+    }
+
+    private String resolveResourcePath(String requestPath) {
+        if ("/".equals(requestPath)) {
+            return "/";
+        }
+        if (!requestPath.contains(".")) {
+            requestPath = requestPath + ".html";
+        }
+        return "static" + requestPath;
+    }
+
     private String extractRequestTarget(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String line = br.readLine();
@@ -65,12 +93,11 @@ public class Http11Processor implements Runnable, Processor {
         return words[1];
     }
 
-    private String resolveResponseBody(String requestTarget) throws IOException {
-        if ("/".equals(requestTarget)) {
+    private String resolveResponseBody(String resourcePath) throws IOException {
+        if ("/".equals(resourcePath)) {
             return "Hello world!";
         }
-        String fileName = "static" + requestTarget;
-        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
         if (resource == null) {
             throw new RuntimeException("resource not found");
         }

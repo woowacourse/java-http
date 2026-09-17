@@ -62,6 +62,50 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("루트 경로는 index.html로 응답한다")
+    void root() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("<title>대시보드</title>");
+    }
+
+    @Test
+    @DisplayName("확장자가 없는 HTML 경로는 .html을 붙여 응답한다")
+    void extensionlessHtmlPath() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("<title>로그인</title>");
+    }
+
+    @Test
     @DisplayName("html은 text_html로 응답한다")
     void htmlTest() {
         // given

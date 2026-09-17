@@ -59,6 +59,7 @@ public class Http11Processor implements Runnable, Processor {
                 path = uri.substring(0, queryIndex);
                 queryString = uri.substring(queryIndex + 1);
             }
+            path = normalizePath(path);
 
             String header;
 
@@ -117,6 +118,18 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html;charset=utf-8";
+    }
+
+    private String normalizePath(String path) {
+        if (path.equals("/")) {
+            return "/index.html";
+        }
+
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+
+        return path;
     }
 
     private Map<String, String> parseQueryString(String queryString) {

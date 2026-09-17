@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public record RequestLine(
         String method,
-        String requestTarget,
+        RequestTarget requestTarget,
         String httpVersion
 ) {
     public static RequestLine from(String line) {
@@ -13,6 +13,6 @@ public record RequestLine(
         if (parts.length < 3) {
             throw new IllegalArgumentException("request format error");
         }
-        return new RequestLine(parts[0], parts[1], parts[2]);
+        return new RequestLine(parts[0], RequestTarget.from(parts[1]), parts[2]);
     }
 }

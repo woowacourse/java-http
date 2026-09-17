@@ -18,6 +18,13 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_RESOURCE_ROOT = "static";
+    private static final String INDEX_URI = "/index.html";
+    private static final String CSS_URI = "/css/styles.css";
+    private static final String SCRIPT_URI = "/js/scripts.js";
+    private static final String CHART_AREA_URI = "/assets/chart-area.js";
+    private static final String CHART_BAR_URI = "/assets/chart-bar.js";
+    private static final String CHART_PIE_URI = "/assets/chart-pie.js";
 
     private final Socket connection;
 
@@ -49,38 +56,38 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            String type = getContentType(requestUri);
-            if (requestUri.equals("/index.html")) {
-                final Path path = Path.of(getResourcePath("static" + requestUri));
+            String contentType = getContentType(requestUri);
+            if (requestUri.equals(INDEX_URI)) {
+                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            if (requestUri.equals("/css/styles.css")) {
-                final Path path = Path.of(getResourcePath("static" + requestUri));
+            if (requestUri.equals(CSS_URI)) {
+                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            if (requestUri.equals("/js/scripts.js")) {
-                final Path path = Path.of(getResourcePath("static" + requestUri));
+            if (requestUri.equals(SCRIPT_URI)) {
+                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            if (requestUri.equals("/assets/chart-area.js")) {
-                final Path path = Path.of(getResourcePath("static" + requestUri));
+            if (requestUri.equals(CHART_AREA_URI)) {
+                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            if (requestUri.equals("/assets/chart-bar.js")) {
-                final Path path = Path.of(getResourcePath("static" + requestUri));
+            if (requestUri.equals(CHART_BAR_URI)) {
+                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            if (requestUri.equals("/assets/chart-pie.js")) {
-                final Path path = Path.of(getResourcePath("static" + requestUri));
+            if (requestUri.equals(CHART_PIE_URI)) {
+                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            final String responseHeader = createResponseHeader(version, type, responseBody.length);
+            final String responseHeader = createResponseHeader(version, contentType, responseBody.length);
 
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -102,10 +109,10 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String createResponseHeader(final String version, String type, final int contentLength) {
+    private String createResponseHeader(final String version, String contentType, final int contentLength) {
         return String.join("\r\n",
                 version + " 200 OK ",
-                "Content-Type: " + type + ";charset=utf-8 ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + contentLength + " ",
                 "",
                 "");

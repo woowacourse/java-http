@@ -61,15 +61,33 @@ public class Http11Processor implements Runnable, Processor {
                         "Content-Length: " + responseBody.getBytes().length + " ",
                         "",
                         responseBody);
-            } else  {
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (path.toString().endsWith(".css")) {
                 byte[] responseBody = Files.readAllBytes(path);
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Type: text/css;charset=utf-8 ",
                         "Content-Length: " + responseBody.length + " ",
                         "",
                         new String(responseBody, StandardCharsets.UTF_8));
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
             }
+
+            byte[] responseBody = Files.readAllBytes(path);
+            response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.length + " ",
+                    "",
+                    new String(responseBody, StandardCharsets.UTF_8));
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -29,7 +29,12 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        log.info(
+                "connect host: {}, port: {}",
+                connection.getInetAddress(),
+                connection.getPort()
+        );
+
         process(connection);
     }
 
@@ -37,53 +42,53 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = reader.readLine();
 
-            if (requestLine == null) { // 클라이언트가 아무 요청도 보내지 않고 연결만 끊은 경우 처리. 파싱할 것 X
+            if (requestLine == null) {
                 return;
             }
 
             RequestTarget requestTarget = parseRequestTarget(requestLine);
-
             readHeaders(reader);
             logUserIfExists(requestTarget.queryString());
+            String resourcePath = normalizePath(requestTarget.path());
+            URL resource = findResource(resourcePath);
 
-            URL resource = findResource(requestTarget.path());
-
-            if (resource == null) { // 요청한 정적 파일을 못 찾은 경우 처리.
+            if (resource == null) {
                 return;
             }
 
             byte[] body = readBody(resource);
-            String response = createResponse(requestTarget.path(), body);
 
+            String response = createResponse(resourcePath, body);
             writeResponse(outputStream, response, body);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private RequestTarget parseRequestTarget(String line) {
-        String[] requestLine = line.split(" ");
-        String uri = requestLine[1];
+    private RequestTarget parseRequestTarget(String requestLine) {
+        String[] parts = requestLine.split(" ");
 
-        String path = uri;
-        String queryString = null;
-
+        // 추후 Request Line 형식 검증 추가 예정
+        String uri = parts[1];
         int queryIndex = uri.indexOf("?");
 
-        if (queryIndex != -1) {
-            path = uri.substring(0, queryIndex);
-            queryString = uri.substring(queryIndex + 1);
+        if (queryIndex == -1) {
+            return new RequestTarget(uri, null);
         }
 
-        return new RequestTarget(normalizePath(path), queryString);
+        String path = uri.substring(0, queryIndex);
+        String queryString = uri.substring(queryIndex + 1);
+
+        return new RequestTarget(path, queryString);
     }
 
     private void readHeaders(BufferedReader reader) throws IOException {
         String header;
+
         while ((header = reader.readLine()) != null && !header.isEmpty()) {
             // Header는 현재 사용하지 않으므로 읽고 버린다.
         }
@@ -97,41 +102,9 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParams = parseQueryString(queryString);
         String account = queryParams.get("account");
 
-        InMemoryUserRepository.findByAccount(account) // 추후 UserService 생성
-                .ifPresent(user ->
-                        log.info("조회된 사용자: id={}, account={}",
-                                user.getId(),
-                                user.getAccount()
-                        )
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent(user -> log.info("조회된 사용자: id={}, account={}", user.getId(), user.getAccount())
                 );
-    }
-
-    private URL findResource(String path) {
-        return getClass()
-                .getClassLoader()
-                .getResource("static" + path);
-    }
-
-    private byte[] readBody(URL resource) throws IOException {
-        try (InputStream resourceStream = resource.openStream()) {
-            return resourceStream.readAllBytes();
-        }
-    }
-
-    private String createResponse(String path, byte[] body) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + getContentType(path) + " ",
-                "Content-Length: " + body.length + " ",
-                "",
-                ""
-        );
-    }
-
-    private void writeResponse(OutputStream outputStream, String response, byte[] body) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
-        outputStream.flush();
     }
 
     private String normalizePath(String path) {
@@ -144,6 +117,39 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return path;
+    }
+
+    private URL findResource(String resourcePath) {
+        return getClass()
+                .getClassLoader()
+                .getResource("static" + resourcePath);
+    }
+
+    private byte[] readBody(URL resource) throws IOException {
+        try (InputStream resourceStream = resource.openStream()) {
+            return resourceStream.readAllBytes();
+        }
+    }
+
+    private String createResponse(String resourcePath, byte[] body) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: " + getContentType(resourcePath),
+                "Content-Length: " + body.length,
+                "",
+                ""
+        );
+    }
+
+    private void writeResponse(
+            OutputStream outputStream,
+            String response,
+            byte[] body
+    ) throws IOException {
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(body);
+        outputStream.flush();
     }
 
     private String getContentType(String path) {
@@ -167,9 +173,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryParams;
-    }
-
-    private record RequestTarget(String path, String queryString) {
     }
 
 }

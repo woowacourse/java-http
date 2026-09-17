@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(String requestUri) throws IOException {
-        if (requestUri.contains("/login")) {
+        if (requestUri.contains("/login?")) {
             String[] value = getQueryParameterValues(requestUri);
             User user = InMemoryUserRepository.findByAccount(value[0]).orElseThrow();
             log.info(user.toString());
@@ -102,6 +102,10 @@ public class Http11Processor implements Runnable, Processor {
     @Nullable
     private String getStaticResource(String requestUri) throws IOException {
         URL url = getClass().getClassLoader().getResource("static" + requestUri);
+        if (url == null) {
+            requestUri = requestUri + ".html";
+            url = getClass().getClassLoader().getResource("static" + requestUri);
+        }
         if (url != null) {
             File file = new File(url.getFile());
             Path paths = file.toPath();

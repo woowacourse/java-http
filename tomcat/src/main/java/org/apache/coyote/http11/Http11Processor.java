@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
                 header.put(headerLine[0], headerLine[1].trim());
             }
             String contentLength = header.get("Content-Length");
-            if(contentLength != null) {
+            if (contentLength != null) {
                 char[] buffer = new char[Integer.parseInt(contentLength)];
                 int count = bufferedReader.read(buffer, 0, Integer.parseInt(contentLength));
                 String requestBody = new String(buffer, 0, count);
@@ -68,24 +68,37 @@ public class Http11Processor implements Runnable, Processor {
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
-            } else {
-                if (requestLine[1].equals("/index.html")) {
-                    URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
-                    Path path = Path.of(resource.toURI());
-                    String responseLine = "HTTP/1.1 200 OK ";
-                    String contentType = "Content-Type: text/html;charset=utf-8 ";
-                    String responseBody = Files.readString(path);
-                    String length = "Content-Length: " + responseBody.getBytes().length + " ";
+            } else if ("/index.html".equals(requestLine[1])) {
+                URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
+                Path path = Path.of(resource.toURI());
+                String responseLine = "HTTP/1.1 200 OK ";
+                String contentType = "Content-Type: text/html;charset=utf-8 ";
+                String responseBody = Files.readString(path);
+                String length = "Content-Length: " + responseBody.getBytes().length + " ";
 
-                    final var response = String.join("\r\n",
-                            responseLine,
-                            contentType,
-                            length,
-                            "",
-                            responseBody);
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                }
+                final var response = String.join("\r\n",
+                        responseLine,
+                        contentType,
+                        length,
+                        "",
+                        responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } else if("/css/styles.css".equals(requestLine[1])) {
+                URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
+                Path path = Path.of(resource.toURI());
+                String responseLine = "HTTP/1.1 200 OK ";
+                String contentType = "Content-Type: text/css;charset=utf-8 ";
+                String responseBody = Files.readString(path);
+                String length = "Content-Length: " + responseBody.getBytes().length + " ";
+                final var response = String.join("\r\n",
+                        responseLine,
+                        contentType,
+                        length,
+                        "",
+                        responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);

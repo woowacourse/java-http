@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,22 +62,47 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpUrl.startsWith("/login")) {
-                final String body = readFile("static/login.html");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-
                 Map<String, String> queryParams = parseQueryParams(startLineTokens);
 
                 String account = queryParams.get("account");
                 String password = queryParams.get("password");
 
                 if (account != null && password != null) {
-                    InMemoryUserRepository.findByAccount(account)
-                            .filter(user -> user.checkPassword(password))
-                            .ifPresent(user -> log.info("{}", user));
+                    Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
+                            .filter(user -> user.checkPassword(password));
+                    if (loginUser.isPresent()) {
+                        User user = loginUser.get();
+                        log.info("{}", user);
+
+                        String response = createRedirectResponse("/index.html");
+                        outputStream.write(response.getBytes());
+                        outputStream.flush();
+
+                        return;
+                    }
+
+                    String response = createRedirectResponse("/401.html");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+
+                    return;
                 }
+
+                final String body = readFile("static/login.html");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                return;
+            }
+
+            if (httpUrl.startsWith("/401.html")) {
+                final String body = readFile("static/401.html");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
                 return;
             }
 
@@ -130,6 +157,14 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createRedirectResponse(String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + redirectUrl + " ",
+                "Content-Length: 0 ",
+                "");
     }
 
     private String createResponse(String responseBody, String contentType) throws IOException {

@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -49,15 +51,21 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
 
-        final Path path = getFile(fileName).toPath();
+        final File file = getFile(fileName);
+        final Path path = file.toPath();
 
         final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }
 
-    private File getFile(String fileName) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        return new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
+    private File getFile(String fileName) throws URISyntaxException {
+        Class<?> testClass = getClass();
+        ClassLoader classLoader = testClass.getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+        URL requiredResource = Objects.requireNonNull(resource);
+        URI resourceUri = requiredResource.toURI();
+
+        return new File(resourceUri);
     }
 }

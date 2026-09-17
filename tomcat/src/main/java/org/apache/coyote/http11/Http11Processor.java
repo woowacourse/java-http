@@ -113,6 +113,15 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if (httpUrl.startsWith("/assets/chart-area.js")) {
+                final String body = readFile("static/assets/chart-area.js");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             final var response = createResponse("Hello world!", CONTENT_TYPE_TEXT_HTML);
             outputStream.write(response.getBytes());
             outputStream.flush();

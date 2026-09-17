@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -10,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +43,11 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestTarget = extractRequestTarget(inputStream);
             String requestPath = extractRequestPath(requestTarget);
+            Map<String, String> queryParameters = parseQueryParameters(requestTarget);
+
+            handleRequest(requestPath, queryParameters);
 
             String resourcePath = resolveResourcePath(requestPath);
-            log.info(resourcePath);
-
             String responseBody = resolveResponseBody(resourcePath);
             String contentType = resolveContentType(resourcePath);
 
@@ -61,6 +65,22 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void handleRequest(String requestPath, Map<String, String> queryParameters) {
+        if ("/login".equals(requestPath) && !queryParameters.isEmpty()) {
+            handleLogin(queryParameters.get("account"), queryParameters.get("password"));
+        }
+    }
+
+    private void handleLogin(String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+        if (user.checkPassword(password)) {
+            log.info("user={}", user);
+        } else {
+            throw new RuntimeException("invalid account or password");
+        }
+    }
+
 
     private String extractRequestPath(String requestTarget) {
         int queryStartIndex = requestTarget.indexOf('?');
@@ -70,6 +90,25 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return requestTarget.substring(0, queryStartIndex);
+    }
+
+    Map<String, String> parseQueryParameters(String requestTarget) {
+        int queryStartIndex = requestTarget.indexOf('?');
+
+        if (queryStartIndex < 0) {
+            return Map.of();
+        }
+
+        Map<String, String> queryParametersMap = new HashMap<>();
+
+        String queryParametersString = requestTarget.substring(queryStartIndex + 1);
+        String[] queryParametersArray = queryParametersString.split("&");
+        for (String queryParameter : queryParametersArray) {
+            String[] pair = queryParameter.split("=");
+            queryParametersMap.put(pair[0], pair[1]);
+        }
+
+        return queryParametersMap;
     }
 
     private String resolveResourcePath(String requestPath) {

@@ -3,12 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import jakarta.servlet.http.HttpUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,8 +46,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String[] header = bufferedReader.readLine().split(" ");
-            String uri = header[1];
+            String uri = getUri(bufferedReader);
             if (uri.equals("/favicon.ico")) {
                 return;
             }
@@ -58,57 +55,28 @@ public class Http11Processor implements Runnable, Processor {
             String path = findPath(uri, index);
             Map<String, String> queryParams = findQueryString(uri, index);
 
-            URL resource = getClass().getClassLoader().getResource(path);
-            final Path filePath = Paths.get(Objects.requireNonNull(resource).toURI());
+            final Path filePath = getPath(path);
+            final String responseBody = findResponseBody(filePath);
 
-            String response;
-            if (Files.isDirectory(filePath)) {
-                final var responseBody = "Hello world!";
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            if (filePath.toString().endsWith(".css")) {
-                byte[] responseBody = Files.readAllBytes(filePath);
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css;charset=utf-8 ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "",
-                        new String(responseBody, StandardCharsets.UTF_8));
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            byte[] responseBody = Files.readAllBytes(filePath);
-            response = String.join("\r\n",
+            final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.length + " ",
+                    "Content-Type: "+ findContentType(filePath) + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
-                    new String(responseBody, StandardCharsets.UTF_8));
+                    responseBody);
 
-            if (!queryParams.isEmpty()) {
-                User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                        .orElseThrow(IllegalArgumentException::new);
-                log.info("user: {}", user);
-            }
+            loggingUser(queryParams);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getUri(BufferedReader bufferedReader) throws IOException {
+        String[] header = bufferedReader.readLine().split(" ");
+        return header[1];
     }
 
     private String findPath(String uri, int index) {
@@ -141,5 +109,35 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryParams;
+    }
+
+    private Path getPath(String path) throws URISyntaxException {
+        URL resource = getClass().getClassLoader().getResource(path);
+        return Paths.get(Objects.requireNonNull(resource).toURI());
+    }
+
+    private String findContentType(Path filePath) {
+        if (filePath.toString().endsWith(".css")) {
+            return "text/css";
+        } else if (filePath.toString().endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html";
+    }
+
+    private String findResponseBody(Path filePath) throws IOException {
+        if (Files.isDirectory(filePath)) {
+            return "Hello world!";
+        }
+
+        return Files.readString(filePath);
+    }
+
+    private void loggingUser(Map<String, String> queryParams) {
+        if (!queryParams.isEmpty()) {
+            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                    .orElseThrow(IllegalArgumentException::new);
+            log.info("user: {}", user);
+        }
     }
 }

@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +34,58 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
+
+            while (true) {
+                String headerLine = reader.readLine();
+
+                if (headerLine == null) {
+                    return;
+                }
+
+                if (headerLine.isEmpty()) {
+                    break;
+                }
+            }
+
+            String[] requestParts = requestLine.split(" ");
+            String requestUri = requestParts[1];
+
+            byte[] responseBody = readResponseBody(requestUri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    "");
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBody);
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private byte[] readResponseBody(String requestUri) throws IOException {
+        if ("/".equals(requestUri)) {
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
+        }
+
+        String resourceName = "static" + requestUri;
+        try (InputStream resourceStream =
+                     Http11Processor.class
+                             .getClassLoader()
+                             .getResourceAsStream(resourceName)) {
+
+            return Objects.requireNonNull(resourceStream).readAllBytes();
         }
     }
 }

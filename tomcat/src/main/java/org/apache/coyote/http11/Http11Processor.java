@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +39,42 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String url = parseRequestUrl(inputStream);
-            String contentType = findContentType(url);
+            UriInfo uriInfo = UriInfo.makeUriInfo(url);
+            if ("/login".equals(uriInfo.path()) && !uriInfo.queryString().isBlank()) {
+                User user = RequestHandler.findUser(parseUserAccount(uriInfo.queryString()));
+                log.info("로그인 사용자: {}", user.getAccount());
+            }
 
-            byte[] responseBody = buildResponseBody(url);
+            String resourceUrl = uriInfo.path();
+            if ("/login".equals(resourceUrl)) {
+                resourceUrl = "/login.html";
+            }
+
+            String contentType = findContentType(resourceUrl);
+            byte[] responseBody = buildResponseBody(resourceUrl);
             String response = buildResponse(responseBody, contentType);
+
             outputStream.write(response.getBytes());
             outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseUserAccount(String queryString) {
+        String[] parameters = queryString.split("&");
+
+        for (String parameter : parameters) {
+            String[] nameAndValue = parameter.split("=");
+
+            if ("account".equals(nameAndValue[0])) {
+                return nameAndValue[1];
+            }
+        }
+        throw new IllegalArgumentException(
+                "account 파라미터가 없습니다."
+        );
     }
 
     private String buildResponse(

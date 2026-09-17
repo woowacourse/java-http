@@ -1,6 +1,12 @@
 package org.apache.coyote.http11;
 
+
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +32,22 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (BufferedReader bufferedReader =
+                     new BufferedReader(
+                             new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            var responseBody = "Hello world!";
+
+            String requestFirstLine = bufferedReader.readLine();
+            String[] parts = requestFirstLine.split(" ");
+            String path = parts[1];
+
+            if (!("/").equals(path)) {
+                log.info("path: {}", path);
+                Path filePath = Path.of(getClass().getResource("/static" + path).toURI());
+                responseBody = Files.readString(filePath);
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -42,6 +60,8 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 }

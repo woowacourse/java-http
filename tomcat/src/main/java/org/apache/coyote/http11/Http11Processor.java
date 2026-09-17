@@ -2,17 +2,16 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -81,7 +80,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            writeResponse(outputStream, status, resource.readAllBytes());
+            final var contentType = MimeTypeResolver.resolve(resourcePath);
+            writeResponse(outputStream, contentType, status, resource.readAllBytes());
         }
     }
 
@@ -90,18 +90,20 @@ public class Http11Processor implements Runnable, Processor {
                 getClass().getClassLoader().getResourceAsStream(NOT_FOUND_RESOURCE_PATH),
                 "404 페이지를 찾을 수 없습니다."
         )) {
-            writeResponse(outputStream, "404 Not Found", resource.readAllBytes());
+            writeResponse(outputStream, "text/html", "404 Not Found", resource.readAllBytes());
         }
     }
 
     private void writeResponse(
             final OutputStream outputStream,
+            final String contentType,
             final String status,
             final byte[] responseBody
     ) throws IOException {
+        final var contentTypeHeader = addCharsetIfNecessary(contentType);
         final var responseHeader = String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentTypeHeader + " ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 "");
@@ -109,5 +111,12 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
         outputStream.flush();
+    }
+
+    private String addCharsetIfNecessary(final String contentType) {
+        if (contentType.startsWith("text/")) {
+            return contentType + ";charset=utf-8";
+        }
+        return contentType;
     }
 }

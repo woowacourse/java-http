@@ -1,11 +1,14 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +67,23 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String path = "static" + uri;
+
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            path = "static" + uri.substring(0, index);
+            Map<String, String> params = new HashMap<>();
+            for (String pair : uri.substring(index + 1).split("&")) {
+                String[] keyValue = pair.split("=");
+                params.put(keyValue[0], keyValue[1]);
+            }
+            InMemoryUserRepository.findByAccount(params.get("account"))
+                    .ifPresent(user -> log.info("user: {}", user));
+        }
+
+        if (!path.contains(".")) {
+            path += ".html";
+        }
+
         URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
             return "404 Not Found";

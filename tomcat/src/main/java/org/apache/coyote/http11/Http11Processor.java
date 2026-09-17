@@ -1,6 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +36,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String requestTarget = extractRequestTarget(inputStream);
+            String responseBody = resolveResponseBody(requestTarget);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -43,5 +51,33 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractRequestTarget(InputStream inputStream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        String line = br.readLine();
+
+        String[] words = line.split(" ");
+        while (line != null && !line.isEmpty())  {
+            line = br.readLine();
+        }
+        return words[1];
+    }
+
+    private String resolveResponseBody(String requestTarget) throws IOException {
+        if ("/".equals(requestTarget)) {
+            return "Hello world!";
+        }
+        String fileName = "static" + requestTarget;
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        if (resource == null) {
+            throw new RuntimeException();
+        }
+        return readStaticResource(resource);
+    }
+
+    private String readStaticResource(URL resource) throws IOException {
+        final Path path = new File(resource.getPath()).toPath();
+        return Files.readString(path);
     }
 }

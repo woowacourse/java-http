@@ -61,4 +61,26 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() {
+        // given
+        final String request = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("Content-Type: text/css;charset=utf-8")
+                .contains("@charset \"UTF-8\"")
+                .doesNotContain("Hello world!");
+    }
 }

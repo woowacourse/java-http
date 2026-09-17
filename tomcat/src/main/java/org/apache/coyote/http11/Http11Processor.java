@@ -55,6 +55,11 @@ public class Http11Processor implements Runnable, Processor {
                 if (path.equals("/index.html")) {
                     responseBody = readFile("static/index.html");
                 }
+
+                if (path.equals("/css/styles.css")) {
+                    responseBody = readFile("static/css/styles.css");
+                    contentType = "text/css";
+                }
             }
 
             String response = String.join("\r\n",

@@ -18,13 +18,8 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String ROOT_URI = "/";
     private static final String STATIC_RESOURCE_ROOT = "static";
-    private static final String INDEX_URI = "/index.html";
-    private static final String CSS_URI = "/css/styles.css";
-    private static final String SCRIPT_URI = "/js/scripts.js";
-    private static final String CHART_AREA_URI = "/assets/chart-area.js";
-    private static final String CHART_BAR_URI = "/assets/chart-bar.js";
-    private static final String CHART_PIE_URI = "/assets/chart-pie.js";
 
     private final Socket connection;
 
@@ -57,32 +52,8 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             String contentType = getContentType(requestUri);
-            if (requestUri.equals(INDEX_URI)) {
-                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
-                responseBody = Files.readAllBytes(path);
-            }
 
-            if (requestUri.equals(CSS_URI)) {
-                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
-                responseBody = Files.readAllBytes(path);
-            }
-
-            if (requestUri.equals(SCRIPT_URI)) {
-                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
-                responseBody = Files.readAllBytes(path);
-            }
-
-            if (requestUri.equals(CHART_AREA_URI)) {
-                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
-                responseBody = Files.readAllBytes(path);
-            }
-
-            if (requestUri.equals(CHART_BAR_URI)) {
-                final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
-                responseBody = Files.readAllBytes(path);
-            }
-
-            if (requestUri.equals(CHART_PIE_URI)) {
+            if (!requestUri.equals(ROOT_URI)) {
                 final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
                 responseBody = Files.readAllBytes(path);
             }

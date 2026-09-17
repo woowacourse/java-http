@@ -99,6 +99,21 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
+            } else if(requestLine[1].endsWith("js")) {
+                URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
+                Path path = Path.of(resource.toURI());
+                String responseLine = "HTTP/1.1 200 OK ";
+                String contentType = "Content-Type: text/javascript;charset=utf-8 ";
+                String responseBody = Files.readString(path);
+                String length = "Content-Length: " + responseBody.getBytes().length + " ";
+                final var response = String.join("\r\n",
+                        responseLine,
+                        contentType,
+                        length,
+                        "",
+                        responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);

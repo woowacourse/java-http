@@ -5,8 +5,16 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +37,52 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String line = br.readLine();
+            if (line == null) {
+                return;
+            }
 
-            final var response = String.join("\r\n",
+            String[] str = line.split(" ", 3);
+            String method = str[0];
+            URI uri = URI.create(str[1]);
+            String path = uri.getRawPath();
+
+            String responseBody = "Hello world!";
+            String contentType = "text/html";
+
+            if (method.equals("GET")) {
+                if (path.equals("/index.html")) {
+                    responseBody = readFile("static/index.html");
+                }
+            }
+
+            String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private String readFile(String fileName) throws IOException {
+        try {
+            var resource = getClass().getClassLoader().getResource(fileName);
+            if (resource == null) {
+                throw new FileNotFoundException("리소스를 찾을 수 없습니다: " + fileName);
+            }
+
+            Path path = Path.of(resource.toURI());
+            return Files.readString(path, StandardCharsets.UTF_8);
+
+        } catch (URISyntaxException e) {
+            throw new IOException("리소스 경로 변환에 실패했습니다: " + fileName, e);
         }
     }
 }

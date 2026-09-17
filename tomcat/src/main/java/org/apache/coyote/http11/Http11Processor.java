@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,6 +60,10 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/login".equals(uri)) {
             uri = "/login.html";
+            User user = InMemoryUserRepository.findByAccount(requestLine.queryString().get("account"))
+                    .orElseThrow(() -> new RuntimeException("로그인에 실패했습니다."));
+
+            log.info("user : {}", user);
         }
 
         String path = resolvePath(uri);

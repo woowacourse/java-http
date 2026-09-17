@@ -36,6 +36,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final var requestPath = parseRequestPath(inputStream);
 
+            String contentType = determineContentType(requestPath);
+
             final byte[] responseBody;
             if (requestPath.equals("/")) {
                 responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
@@ -43,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = readStaticResource(requestPath);
             }
 
-            writeResponse(outputStream, responseBody);
+            writeResponse(outputStream, responseBody, contentType);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -81,14 +83,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeResponse(final OutputStream outputStream, final byte[] bytes) throws IOException {
+    private void writeResponse(final OutputStream outputStream, final byte[] bytes, String contentType) throws IOException {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + bytes.length + " ",
                 "\r\n");
         outputStream.write(response.getBytes());
         outputStream.write(bytes);
         outputStream.flush();
+    }
+
+    private String determineContentType(final String path) {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 }

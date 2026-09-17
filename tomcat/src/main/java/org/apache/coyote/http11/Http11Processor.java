@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,6 +47,12 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String uri = requestLine.split(" ")[1];
+            String path = extractPath(uri);
+
+            if (path.equals("/login")) {
+                login(extractQueryParams(uri));
+            }
+
             byte[] responseBody = createResponseBody(uri);
             String contentType = determineContentType(uri);
 
@@ -57,6 +68,40 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractPath(final String uri) {
+        if (uri.contains("?")) {
+            return uri.substring(0, uri.indexOf("?"));
+        }
+        return uri;
+    }
+
+    private Map<String, String> extractQueryParams(final String uri) {
+        final Map<String, String> params = new HashMap<>();
+        if (!uri.contains("?")) {
+            return params;
+        }
+        final String queryString = uri.substring(uri.indexOf("?") + 1);
+        for (String param : queryString.split("&")) {
+            String[] kv = param.split("=");
+            params.put(kv[0], kv[1]);
+        }
+        return params;
+    }
+
+    private void login(final Map<String, String> params) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
+        user.ifPresentOrElse(
+                u -> {
+                    if (u.checkPassword(params.get("password"))) {
+                        log.info("로그인 성공! 아이디 : {}", u.getAccount());
+                    } else {
+                        log.info("비밀번호가 일치하지 않습니다.");
+                    }
+                },
+                () -> log.info("존재하지 않는 계정입니다.")
+        );
     }
 
     private byte[] createResponseBody(final String uri) throws IOException {

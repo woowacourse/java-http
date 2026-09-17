@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 public class HttpRequestLine {
 
     private static final String SP = " ";
-    private static final Charset DEFAULT_CHARSETS = StandardCharsets.US_ASCII;
+    private static final Charset REQUEST_LINE_CHARSET = StandardCharsets.US_ASCII;
 
     private final String method;
     private final String uri;
@@ -21,8 +21,8 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine from(InputStream inputStream) throws IOException {
-        final String requestLine  = new BufferedReader(
-                new InputStreamReader(inputStream, DEFAULT_CHARSETS)).readLine();
+        final String requestLine = new BufferedReader(
+                new InputStreamReader(inputStream, REQUEST_LINE_CHARSET)).readLine();
 
         if (requestLine == null) {
             throw new IOException("클라이언트가 요청 없이 연결을 닫았습니다.");

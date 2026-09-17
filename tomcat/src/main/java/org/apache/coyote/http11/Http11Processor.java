@@ -71,9 +71,11 @@ public class Http11Processor implements Runnable, Processor {
                 String account = queryParams.get("account");
                 String password = queryParams.get("password");
 
-                InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.checkPassword(password))
-                        .ifPresent(user -> log.info("{}", user));
+                if (account != null && password != null) {
+                    InMemoryUserRepository.findByAccount(account)
+                            .filter(user -> user.checkPassword(password))
+                            .ifPresent(user -> log.info("{}", user));
+                }
                 return;
             }
 
@@ -146,6 +148,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> parseQueryParams(String[] queryParamLine) {
         int queryStringDelimiterIndex = queryParamLine[1].lastIndexOf(QUERY_STRING_DELIMITER);
+        if (queryStringDelimiterIndex == -1) {
+            return new HashMap<>();
+        }
 
         String queryLine = queryParamLine[1].substring(queryStringDelimiterIndex + 1);
         String[] params = queryLine.split(PARAM_DELIMITER);

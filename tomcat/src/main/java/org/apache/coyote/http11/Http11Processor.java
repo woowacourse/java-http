@@ -5,12 +5,19 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String NOT_FOUND_FILE_PATH = "static/404.html";
 
     private final Socket connection;
 
@@ -27,21 +34,60 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            String requestStartLine = bufferedReader.readLine();
+            HttpRequest httpRequest = HttpRequest.from(requestStartLine);
+            writeResponse(outputStream, httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void writeResponse(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isRoot()) {
+            writeRootResponse(outputStream);
+            return;
+        }
+        writeResource(outputStream, httpRequest);
+    }
+
+    private void writeRootResponse(OutputStream outputStream) throws IOException {
+        final var responseBody = "Hello world!";
+
+        writeHttpResponse(outputStream, responseBody);
+    }
+
+    private void writeResource(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        URL resource = getClass().getClassLoader().getResource(httpRequest.findTargetPath());
+
+        if (resource == null) {
+            writeNotFoundResource(outputStream);
+        }
+
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        writeHttpResponse(outputStream, responseBody);
+    }
+
+    private void writeNotFoundResource(OutputStream outputStream) throws IOException {
+        URL resource = getClass().getClassLoader().getResource(NOT_FOUND_FILE_PATH);
+
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        writeHttpResponse(outputStream, responseBody);
+    }
+
+    private void writeHttpResponse(OutputStream outputStream, String responseBody) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
     }
 }

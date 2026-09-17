@@ -56,17 +56,17 @@ public class Http11Processor implements Runnable, Processor {
 
             // THINK: 추후 uri -> path, queryParams 부분을 VO로 포장하여 응집.
             URI uri = URI.create(matcher.group("uri"));
+            String method = matcher.group("method");
             String path = uri.getPath();
             String query = uri.getQuery(); //
 
-            if (path.equals("/login")) {
-                Map<String, String> queryParams = parseQuery(query);
-                String username = queryParams.get("account");
-                String password = queryParams.get("password");
-                InMemoryUserRepository.findByAccount(username) // NOTE: 어색함 - 1단계 요구사항이라 로그인 페이지 접속 시, 인증 과정 수행
-                        .filter(user -> user.checkPassword(password))
-                        .ifPresent(user -> log.info("user : {}", user));
 
+            /*
+            * 구현 사항
+            * 1. GET /login에 대해서는 /login.html을 돌려준다.
+            *
+            * */
+            if (method.equals("GET") && path.equals("/login")) {
                 path = "/login.html";
             }
 

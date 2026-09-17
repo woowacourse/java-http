@@ -1,7 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.resolver.ContentType;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.cookie.Cookies;
 
 public class HttpResponseHeader {
 

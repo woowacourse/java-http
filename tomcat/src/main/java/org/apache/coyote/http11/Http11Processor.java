@@ -21,7 +21,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final String NOT_FOUND_RESOURCE_PATH = "static/404.html";
-    private static final String DEFAULT_RESOURCE_PATH = "static/index.html";
 
     private final Socket connection;
 
@@ -44,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final var resourcePath = extractResourcePath(reader.readLine());
 
             if ("/".equals(resourcePath)) {
-                writeResource(outputStream, DEFAULT_RESOURCE_PATH);
+                writeResponse(outputStream, "text/html", "200 OK", "Hello world!".getBytes(StandardCharsets.UTF_8));
                 return;
             }
             writeResource(outputStream, STATIC_RESOURCE_PATH + appendHtmlExtension(resourcePath));

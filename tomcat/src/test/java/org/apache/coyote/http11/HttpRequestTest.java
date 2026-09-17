@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,7 +19,8 @@ class HttpRequestTest {
         assertThat(request.getMethod()).isEqualTo("GET");
         assertThat(request.isGetMethod()).isTrue();
         assertThat(request.getRequestTarget()).isEqualTo("/index.html");
-        assertThat(request.getQueryParameters()).isEmpty();
+        assertThat(request.getQueryParameter("account")).isNull();
+        assertThat(request.getQueryParameter("password")).isNull();
     }
 
     @Test
@@ -48,35 +48,38 @@ class HttpRequestTest {
 
         assertThat(request.getRequestTarget()).isEqualTo("/login");
         assertThat(request.isPath("/login")).isTrue();
-        assertThat(request.getQueryParameters()).containsExactlyInAnyOrderEntriesOf(Map.of("account", "gugu", "password", "password"));
+        assertThat(request.getQueryParameter("account")).isEqualTo("gugu");
+        assertThat(request.getQueryParameter("password")).isEqualTo("password");
     }
 
     @Test
     void parsesParametersRegardlessOfTheirOrder() throws IOException {
         HttpRequest request = parse("GET /login?password=password&account=gugu HTTP/1.1\r\n\r\n");
 
-        assertThat(request.getQueryParameters()).containsExactlyInAnyOrderEntriesOf(Map.of("account", "gugu", "password", "password"));
+        assertThat(request.getQueryParameter("account")).isEqualTo("gugu");
+        assertThat(request.getQueryParameter("password")).isEqualTo("password");
     }
 
     @Test
     void preservesAnEmptyParameterValue() throws IOException {
         HttpRequest request = parse("GET /login?account=gugu&password= HTTP/1.1\r\n\r\n");
 
-        assertThat(request.getQueryParameters()).containsExactlyInAnyOrderEntriesOf(Map.of("account", "gugu", "password", ""));
+        assertThat(request.getQueryParameter("account")).isEqualTo("gugu");
+        assertThat(request.getQueryParameter("password")).isEmpty();
     }
 
     @Test
     void preservesEqualsSignsInsideAValue() throws IOException {
         HttpRequest request = parse("GET /login?password=a=b=c HTTP/1.1\r\n\r\n");
 
-        assertThat(request.getQueryParameters()).containsEntry("password", "a=b=c");
+        assertThat(request.getQueryParameter("password")).isEqualTo("a=b=c");
     }
 
     @Test
     void preservesQuestionMarksInsideAValue() throws IOException {
         HttpRequest request = parse("GET /login?password=a?b HTTP/1.1\r\n\r\n");
 
-        assertThat(request.getQueryParameters()).containsEntry("password", "a?b");
+        assertThat(request.getQueryParameter("password")).isEqualTo("a?b");
     }
 
     @Test

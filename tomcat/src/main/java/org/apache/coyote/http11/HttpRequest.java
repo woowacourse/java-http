@@ -64,7 +64,7 @@ public class HttpRequest {
         return requestTarget;
     }
 
-    public Map<String, String> getQueryParameters() {
-        return Map.copyOf(queryParameters);
+    public String getQueryParameter(String account) {
+        return queryParameters.get(account);
     }
 }

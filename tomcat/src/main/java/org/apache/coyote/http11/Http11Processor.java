@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             return createResponseBody("static/index.html", "text/html");
         }
         if (httpRequest.isGetMethod() && httpRequest.isPath("/login")) {
+            handleLogin(httpRequest);
             return createResponseBody("static/login.html", "text/html");
         }
         if (httpRequest.isGetMethod() && httpRequest.isPath("/register")) {
@@ -69,6 +72,16 @@ public class Http11Processor implements Runnable, Processor {
             return createResponseBody("static/assets/chart-pie.js", "text/javascript");
         }
         return createResponse("Hello world!", "text/html");
+    }
+
+    private void handleLogin(HttpRequest httpRequest) {
+        String account = httpRequest.getQueryParameter("account");
+        String password = httpRequest.getQueryParameter("password");
+
+        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+        if (user != null && user.checkPassword(password)) {
+            log.info(user.toString());
+        }
     }
 
     private String createResponseBody(String resourcePath, String contentType) throws URISyntaxException, IOException {

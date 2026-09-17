@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequestLine requestLine = HttpRequestLine.from(inputStream);
-            final String uri = requestLine.getUri();
+            final String uri = requestLine.uri();
 
             final String responseBody = readContentsFrom(uri);
             final String response = String.join(

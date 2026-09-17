@@ -7,18 +7,13 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class HttpRequestLine {
-
+public record HttpRequestLine(
+        String method,
+        String uri
+) {
     private static final String SP = " ";
     private static final Charset REQUEST_LINE_CHARSET = StandardCharsets.US_ASCII;
 
-    private final String method;
-    private final String uri;
-
-    private HttpRequestLine(String method, String uri) {
-        this.method = method;
-        this.uri = uri;
-    }
 
     public static HttpRequestLine from(InputStream inputStream) throws IOException {
         final String requestLine = new BufferedReader(
@@ -35,13 +30,5 @@ public class HttpRequestLine {
         }
 
         return new HttpRequestLine(requestLineParts[0], requestLineParts[1]);
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public String getUri() {
-        return uri;
     }
 }

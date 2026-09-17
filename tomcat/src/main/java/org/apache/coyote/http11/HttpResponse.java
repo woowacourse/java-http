@@ -7,25 +7,20 @@ import java.util.Arrays;
 public record HttpResponse(
         HttpStatusLine statusLine,
         String contentType,
-        int contentLength,
         byte[] responseBody
-
 ) {
     private static final Charset HEADER_CHARSET = StandardCharsets.US_ASCII;
-
-    public static HttpResponse of(HttpStatusLine statusLine, String contentType, byte[] responseBody) {
-        return new HttpResponse(statusLine, contentType, responseBody.length, responseBody);
-    }
+    private static final String CRLF = "\r\n";
+    private static final String CONTENT_TYPE_KEY = "Content-Type: ";
+    private static final String CONTENT_LENGTH_KEY = "Content-Length: ";
 
     public byte[] toBytes() {
         final byte[] header = String.join(
-                "\r\n",
-                statusLine.toString() + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                ""
-        ).getBytes(HEADER_CHARSET);
+                CRLF,
+                statusLine + " ",   // Http11ProcessorTest에서 줄 끝에 공백이 있는 형식을 기대한다.
+                CONTENT_TYPE_KEY  + contentType + " ",
+                CONTENT_LENGTH_KEY  + responseBody.length + " "
+        ).concat(CRLF + CRLF).getBytes(HEADER_CHARSET);   // 마지막 헤더 줄 끝 + 헤더 끝을 알리는 빈 줄
 
         final byte[] response = Arrays.copyOf(header, header.length + responseBody.length);
         System.arraycopy(responseBody, 0, response, header.length, responseBody.length);

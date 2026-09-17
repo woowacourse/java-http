@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         String uri = requestLine.uri();
 
         if ("/".equals(uri)) {
-            return HttpResponse.of(
+            return new HttpResponse(
                     new HttpStatusLine(HTTP_VERSION, 200, "OK"),
                     "text/html;charset=utf-8",
                     "Hello world!".getBytes(StandardCharsets.UTF_8)
@@ -69,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         String path = resolvePath(uri);
 
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(path)) {
-            return HttpResponse.of(
+            return new HttpResponse(
                     new HttpStatusLine(HTTP_VERSION, 200, "OK"),
                     contentTypeOf(path),
                     resource.readAllBytes()

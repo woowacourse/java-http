@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * 소켓의 InputStream은 클라이언트가 보낸 HTTP 요청을 바이트로 읽고,
@@ -27,6 +28,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final Map<String, String> MIME_TYPES = Map.of(
+            "html", "text/html",
+            "css", "text/css"
+    );
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -44,29 +50,42 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            // 요청 경로 읽는 부분
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String requestFirstLine = bufferedReader.readLine();
             String[] firstLineParts = requestFirstLine.trim().split("\\s+");
-            String fileName = firstLineParts[1];
+            String filePath = firstLineParts[1];
 
-            if (fileName.equals("/")) {
+            // 요청 경로 없을 경우 문자열 반환
+            if (filePath.equals("/")) {
                 final var responseBody = "Hello world!";
-                final var response = createResponse(responseBody);
+                final var response = createResponse(responseBody, "text/html");
 
                 writeResponse(outputStream, response);
                 return;
             }
 
+            // 클래스 로더에서 정적 파일 가져오기
             InputStream resourceAsStream = getClass()
                     .getClassLoader()
-                    .getResourceAsStream("static" + fileName);
+                    .getResourceAsStream("static" + filePath);
 
+            if (resourceAsStream == null) {
+                return;
+            }
+
+            // 확장자에 맞는 content-type 추출
+            int pointIndex = filePath.lastIndexOf('.');
+            String fileExtension = filePath.substring(pointIndex + 1);
+            String contentType = MIME_TYPES.get(fileExtension);
+
+            // 정적 파일 반환
             try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
 
                 final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-                final var response = createResponse(responseBody);
+                final var response = createResponse(responseBody, contentType);
 
                 writeResponse(outputStream, response);
             }
@@ -75,18 +94,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String createResponse(String responseBody) {
+    private static String createResponse(String responseBody, String contentType) {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
         return response;
     }
 
     private static void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 }

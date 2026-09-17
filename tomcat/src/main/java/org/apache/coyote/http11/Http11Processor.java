@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/login".equals(uri)) {
             uri = "/login.html";
-            User user = InMemoryUserRepository.findByAccount(requestLine.queryString().get("account"))
+            User user = InMemoryUserRepository.findByAccount(requestLine.queryParameters().get("account"))
                     .orElseThrow(() -> new RuntimeException("로그인에 실패했습니다."));
 
             log.info("user : {}", user);

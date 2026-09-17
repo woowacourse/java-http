@@ -43,28 +43,30 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream)
-            );
-
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
             }
-
             readHeaders(reader);
 
             String requestUri = extractRequestUri(requestLine);
-
             String path = extractPath(requestUri);
             Map<String, String> queryParams = extractQueryParams(requestUri);
+
             handleLogin(path, queryParams);
 
             String resourcePath = resolveResourcePath(path);
             InputStream resourceStream = getResourceStream(resourcePath);
 
+            String status = "200 OK";
+            if (resourceStream == null) {
+                status = "404 Not Found";
+                resourcePath = "/404.html";
+                resourceStream = getResourceStream(resourcePath);
+            }
             String responseBody = getResponseBody(path, resourceStream);
-            String response = createResponse(resourcePath, responseBody);
+            String response = createResponse(status, resourcePath, responseBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -155,20 +157,22 @@ public class Http11Processor implements Runnable, Processor {
         return new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    private String createResponse(final String resourcePath, final String responseBody) {
+    private String createResponse(final String status, final String resourcePath, final String responseBody) {
         String contentType = CONTENT_TYPES.entrySet()
                 .stream()
                 .filter(entry -> resourcePath.endsWith(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .findFirst()
                 .orElse("text/html;charset=utf-8");
+
         byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
         return String.format(
-                "HTTP/1.1 200 OK \r\n"
+                "HTTP/1.1 %s \r\n"
                         + "Content-Type: %s \r\n"
                         + "Content-Length: %d \r\n"
                         + "\r\n"
                         + "%s",
+                status,
                 contentType,
                 responseBodyBytes.length,
                 responseBody

@@ -75,13 +75,15 @@ public class Http11Processor implements Runnable, Processor {
         String line = br.readLine();
         RequestLine firstLine = RequestLine.from(line);
 
-        do {
-            line = br.readLine();
+        while ((line = br.readLine()) != null) {
+            if (line.isEmpty()) {
+                break;
+            }
             String[] parts = line.split(": ", 2);
             if (parts.length == 2) {
                 headers.put(parts[0], parts[1]);
             }
-        } while (!line.isEmpty());
+        }
         return new HttpRequestHeader(firstLine, headers);
     }
 

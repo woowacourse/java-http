@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +34,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = reader.readLine();
+            if (line == null) { return; }
 
-            final var response = String.join("\r\n",
+            String[] tokens = line.split(" ");
+            String uri = tokens[1];
+
+            String responseBody = resolveResponseBody(uri);
+
+            String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -43,5 +55,19 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String resolveResponseBody(String uri) throws IOException {
+        if (uri.equals("/")) {
+            return "Hello world!";
+        }
+
+        String path = "static" + uri;
+        URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            return "404 Not Found";
+        }
+
+        return new String(Files.readAllBytes(Path.of(resource.getPath())));
     }
 }

@@ -5,8 +5,13 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +34,36 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String requestLine = reader.readLine();
+
+            if (requestLine == null) {
+                return;
+            }
+
+            String uri = requestLine.split(" ")[1];
+            byte[] responseBody = createResponseBody(uri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    new String(responseBody));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private byte[] createResponseBody(final String uri) throws IOException {
+        if (uri.equals("/")) {
+            return "Hello world!".getBytes();
+        }
+        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+        final File file = new File(resource.getFile());
+        return Files.readAllBytes(file.toPath());
     }
 }

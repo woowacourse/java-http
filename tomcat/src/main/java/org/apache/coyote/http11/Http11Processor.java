@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -34,25 +35,27 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-
+            String requestLine = bufferedReader.readLine();
             final String requestUri = requestLine.split(" ")[1];
             log.info("request uri: {}", requestUri);
 
             String responseBody;
-            if (requestUri.equals("/index.html")) {
-                final Path path = Path.of(getClass().getClassLoader().getResource("static/index.html").getPath());
+            if (requestUri.equals("/")) {
+                responseBody = "Hello world!";
+            }
+            else {
+                URL url = getClass().getClassLoader().getResource("static/" + requestUri);
+                if (url == null)
+                    return;
+                final Path path = Path.of(url.getPath());
                 responseBody = Files.readString(path);
             }
-            else
-                responseBody = "Hello world!";
+
+            final String contentType = getContentType(requestUri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -62,5 +65,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(final String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return "text/css; charset=utf-8";
+        }
+
+        if (requestUri.endsWith(".js")) {
+            return "text/javascript; charset=utf-8";
+        }
+
+        return "text/html; charset=utf-8";
     }
 }

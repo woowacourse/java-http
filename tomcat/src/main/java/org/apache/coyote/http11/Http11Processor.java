@@ -46,11 +46,18 @@ public class Http11Processor implements Runnable, Processor {
                         .getResourceAsStream("static/index.html")
                         .readAllBytes();
 
-                outputStream.write(response(responseBody).getBytes());
+                outputStream.write(response(responseBody, "text/html;charset=utf-8").getBytes(StandardCharsets.UTF_8));
+            } else if ("/css/styles.css".equals(requestPath)) {
+              final byte[] responseBody = getClass()
+                      .getClassLoader()
+                      .getResourceAsStream("static/css/styles.css")
+                      .readAllBytes();
+
+              outputStream.write(response(responseBody, "text/css;charset=utf-8").getBytes(StandardCharsets.UTF_8));
             } else {
                 final var responseBody = "Hello world!";
-                final byte[] responseBodyByte = responseBody.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(response(responseBodyByte).getBytes(StandardCharsets.UTF_8));
+                final byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(response(responseBodyBytes, "text/html;charset=utf-8").getBytes(StandardCharsets.UTF_8));
             }
 
             outputStream.flush();
@@ -60,10 +67,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String response(final byte[] responseBody) {
+    private String response(final byte[] responseBody, final String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 new String(responseBody, StandardCharsets.UTF_8));

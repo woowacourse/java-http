@@ -48,16 +48,22 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = requestLine.split(" ")[1];
             String path = extractPath(uri);
+            Map<String, String> params = extractQueryParams(uri);
 
-            if (path.equals("/login")) {
-                login(extractQueryParams(uri));
+            if (path.equals("/login") && !params.isEmpty()) {
+                login(params);
             }
 
-            byte[] responseBody = createResponseBody(uri);
-            String contentType = determineContentType(uri);
+            String statusLine = "200 OK";
+            byte[] responseBody = createResponseBody(path);
+            if (responseBody == null) {
+                statusLine = "404 Not Found";
+                responseBody = createResponseBody("/404.html");
+            }
+            String contentType = determineContentType(path);
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + statusLine + " ",
                     "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
@@ -104,20 +110,23 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private byte[] createResponseBody(final String uri) throws IOException {
-        if (uri.equals("/")) {
+    private byte[] createResponseBody(final String path) throws IOException {
+        if (path.equals("/")) {
             return "Hello world!".getBytes();
         }
-        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+        final String resourcePath = path.equals("/login") ? "/login.html" : path;
+        final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
+        if (resource == null) {
+            return null;
+        }
         final File file = new File(resource.getFile());
         return Files.readAllBytes(file.toPath());
     }
 
-    private String determineContentType(final String uri) {
-        if (uri.endsWith(".css")) {
+    private String determineContentType(final String path) {
+        if (path.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
         return "text/html;charset=utf-8";
     }
-
 }

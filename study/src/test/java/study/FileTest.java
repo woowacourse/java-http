@@ -1,10 +1,16 @@
 package study;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,11 +30,16 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(fileName)
+        );
+//        File file = new File(resource.toURI());
+//        final String actual = file.getPath();
+        final String actual = resource.getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +51,15 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource(fileName));
+        final Path path = Path.of(resource.getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(path, StandardCharsets.UTF_8);
 
         assertThat(actual).containsOnly("nextstep");
     }

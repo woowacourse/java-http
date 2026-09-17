@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -13,6 +14,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,13 +38,24 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var requestPath = parseRequestPath(inputStream);
 
-            String contentType = determineContentType(requestPath);
+            final var requestUri = parseRequestUri(inputStream);
+            final var requestPath = extractPath(requestUri);
+            final var contentType = determineContentType(requestPath);
 
             final byte[] responseBody;
+
             if (requestPath.equals("/")) {
                 responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+            } else if (requestPath.equals("/login")) {
+                final var parameters = parseQueryString(requestUri);
+                final var authenticated = authenticate(parameters);
+
+                if (authenticated) {
+                    responseBody = readStaticResource("/index.html");
+                } else {
+                    responseBody = readStaticResource("/401.html");
+                }
             } else {
                 responseBody = readStaticResource(requestPath);
             }
@@ -51,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestPath(final InputStream inputStream) throws IOException {
+    private String parseRequestUri(final InputStream inputStream) throws IOException {
         final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
 
         final var line = reader.readLine();
@@ -99,5 +114,40 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css;charset=utf-8";
         }
         return "text/html;charset=utf-8";
+    }
+
+    private String extractPath(final String uri) {
+        String[] parsedUri = uri.split("\\?");
+        return parsedUri[0];
+    }
+
+    private Map<String, String> parseQueryString(final String uri) {
+        final var queryIndex = uri.indexOf('?');
+
+        if (queryIndex < 0 || queryIndex == uri.length() - 1) {
+            return Map.of();
+        }
+
+        final var queryString = uri.substring(queryIndex + 1);
+
+        return Arrays.stream(queryString.split("&"))
+                .map(parameter -> parameter.split("=", 2))
+                .collect(Collectors.toMap(
+                        pair -> pair[0],
+                        pair -> pair[1]
+                ));
+    }
+
+    private boolean authenticate(Map<String, String> parameters) {
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
+
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
     }
 }

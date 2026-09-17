@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
 
@@ -31,32 +32,31 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequestLine requestLine = HttpRequestLine.from(inputStream);
-            final String uri = requestLine.uri();
 
-            final String responseBody = readContentsFrom(uri);
-            final String response = String.join(
-                    "\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody
-            );
+            HttpResponse httpResponse = handle(requestLine.uri());
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(httpResponse.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readContentsFrom(String uri) throws IOException {
+    private HttpResponse handle(String uri) throws IOException {
         if (uri.equals("/")) {
-            return "Hello world!";
+            return HttpResponse.of(
+                    new HttpStatusLine(HTTP_VERSION, 200, "OK"),
+                    "text/html;charset=utf-8",
+                    "Hello world!".getBytes()
+            );
         }
 
         try (InputStream resource = findResource(uri)) {
-            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
+            return HttpResponse.of(
+                    new HttpStatusLine(HTTP_VERSION, 200, "OK"),
+                    "text/html;charset=utf-8",
+                    resource.readAllBytes()
+            );
         }
     }
 

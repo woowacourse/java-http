@@ -24,15 +24,14 @@ public class HttpResponseProcessor {
         this.outputStream = outputStream;
     }
 
-    public void send(String uri) throws IOException, URISyntaxException {
-        URL resourceUri = getClass().getClassLoader().getResource(STATIC_RESOURCE_PREFIX + uri);
+    public void send(String path) throws IOException, URISyntaxException {
+        URL resourceUri = getClass().getClassLoader().getResource(STATIC_RESOURCE_PREFIX + path);
         if (resourceUri == null) {
             sendError(HttpStatus.NOT_FOUND);
             return;
         }
-
         Path resourcePath = Path.of(resourceUri.toURI());
-        if ("/".equals(uri)) {
+        if ("/".equals(path)) {
             send(HttpStatus.OK, MimeType.TEXT_HTML, DEFAULT_BODY);
             return;
         }

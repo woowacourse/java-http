@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,7 +36,12 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponseProcessor responseProcessor = new HttpResponseProcessor(outputStream);
             try {
                 final HttpRequest httpRequest = new Http11RequestProcessor(inputStream).process();
-                responseProcessor.send(httpRequest.getUri());
+                if ("/login".equals(httpRequest.getPath())) {
+                    logLogin(httpRequest);
+                    responseProcessor.send("/login.html");
+                    return;
+                }
+                responseProcessor.send(httpRequest.getPath());
             } catch (HttpParseException | URISyntaxException e) {
                 log.warn("잘못된 HTTP 요청입니다.");
                 responseProcessor.sendError(HttpStatus.BAD_REQUEST);
@@ -42,5 +49,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void logLogin(HttpRequest httpRequest) {
+        Optional<String> account = httpRequest.getQueryParameter("account");
+        Optional<String> password = httpRequest.getQueryParameter("password");
+        if (account.isEmpty() || password.isEmpty()) {
+            return;
+        }
+        InMemoryUserRepository.findByAccount(account.get())
+                .filter(user -> user.checkPassword(password.get()))
+                .ifPresent(user -> log.info("user : {}", user));
     }
 }

@@ -1,8 +1,7 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.HttpStatus;
-
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -19,7 +18,11 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public String getUri() {
-        return requestLine.getUri();
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public Optional<String> getQueryParameter(String key) {
+        return requestLine.getUri().findParameter(key);
     }
 }

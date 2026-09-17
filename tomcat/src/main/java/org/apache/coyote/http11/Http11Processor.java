@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -12,6 +13,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -36,20 +39,38 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String requestLine = bufferedReader.readLine();
+
             String responseBody = "Hello world!";
             String contentType = "text/html";
+
             if (requestLine != null) {
-                String [] strings = requestLine.split(" ");
-                if (!strings[1].equals("/")) {
-                    final String fileName = "static" + strings[1];
+                String uri = requestLine.split(" ")[1];
+
+                String path = uri;
+                String queryString = "";
+                int index = uri.indexOf("?");
+
+                if (index != -1) {
+                    path = uri.substring(0, index);
+                    queryString = uri.substring(index + 1);
+                }
+
+                if (path.equals("/login") && !queryString.isEmpty()) {
+                    final Map<String, String> params = parseQueryString(queryString);
+                    InMemoryUserRepository.findByAccount(params.get("account"))
+                            .filter(user -> user.checkPassword(params.get("password")))
+                            .ifPresent(user -> log.info("{}", user));
+                }
+
+                if (!path.equals("/")) {
+                    String fileName = toFileName(path);
                     final URL resource = getClass().getClassLoader().getResource(fileName);
                     if (resource != null) {
                         responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                        contentType = getContentType(strings[1]);
+                        contentType = getContentType(fileName);
                     }
                 }
             }
-
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -71,5 +92,23 @@ public class Http11Processor implements Runnable, Processor {
         if (string.endsWith(".js"))
             return "application/javascript";
         return "text/html";
+    }
+
+    private String toFileName(final String path) {
+        if (path.contains(".")) {
+            return "static" + path;
+        }
+        return "static" + path + ".html";
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> users = new HashMap<>();
+        for (final String userInfo : queryString.split("&")) {
+            final String[] keyAndValue = userInfo.split("=", 2);
+            if (keyAndValue.length == 2) {
+                users.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+        return users;
     }
 }

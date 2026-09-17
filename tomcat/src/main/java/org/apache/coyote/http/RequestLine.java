@@ -50,7 +50,7 @@ public class RequestLine {
             throw new IllegalArgumentException("요청 라인이 비어 있습니다.");
         }
 
-        final String[] parts = firstLine.trim().split(" ", -1);
+        final String[] parts = firstLine.trim().split(" ");
         if (parts.length != RequestLine.PART_COUNT) {
             throw new IllegalArgumentException("잘못된 요청 라인입니다: " + firstLine);
         }

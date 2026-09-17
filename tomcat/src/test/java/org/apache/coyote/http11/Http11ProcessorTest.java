@@ -9,176 +9,106 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-//    @Test
-//    void process() {
-//        // given
-//        final var socket = new StubSocket();
-//        final var processor = new Http11Processor(socket);
-//
-//        // when
-//        processor.process(socket);
-//
-//        // then
-//        var expected = String.join("\r\n",
-//                "HTTP/1.1 200 OK ",
-//                "Content-Type: text/html;charset=utf-8 ",
-//                "Content-Length: 12 ",
-//                "",
-//                "Hello world!");
-//
-//        assertThat(socket.output()).isEqualTo(expected);
-//    }
-
     @Test
-    void index() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
+    @DisplayName("/ 요청을 index.html 정적 리소스로 응답한다")
+    void processTest() throws IOException {
         // when
-        processor.process(socket);
+        String response = process("/");
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).isEqualTo(expectedResponse("/index.html", "text/html;charset=utf-8"));
     }
 
     @Test
-    @DisplayName("루트 경로는 index.html로 응답한다")
-    void root() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET / HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
+    @DisplayName("index.html 정적 리소스를 응답한다")
+    void index() throws IOException {
         // when
-        processor.process(socket);
+        String response = process("/index.html");
 
         // then
-        assertThat(socket.output())
-                .contains("HTTP/1.1 200 OK")
-                .contains("<title>대시보드</title>");
+        assertThat(response).isEqualTo(expectedResponse("/index.html", "text/html;charset=utf-8"));
     }
 
     @Test
     @DisplayName("확장자가 없는 HTML 경로는 .html을 붙여 응답한다")
-    void extensionlessHtmlPath() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
+    void extensionlessHtmlPath() throws IOException {
         // when
-        processor.process(socket);
+        String response = process("/login");
 
         // then
-        assertThat(socket.output())
-                .contains("HTTP/1.1 200 OK")
-                .contains("<title>로그인</title>");
+        assertThat(response).isEqualTo(expectedResponse("/login.html", "text/html;charset=utf-8"));
     }
 
     @Test
     @DisplayName("html은 text_html로 응답한다")
     void htmlTest() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
         // when
-        processor.process(socket);
+        String response = process("/index.html");
 
         // then
-        assertThat(socket.output())
+        assertThat(response)
                 .contains("Content-Type: text/html;charset=utf-8 ");
     }
 
     @Test
     @DisplayName("css text_css로 응답한다")
     void css() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
         // when
-        processor.process(socket);
+        String response = process("/css/styles.css");
 
         // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/css/styles.css");
-
-        final byte[] body = Files.readAllBytes(
-                new File(resource.getFile()).toPath()
-        );
-
-        final String expected = "HTTP/1.1 200 OK \r\n"
-                + "Content-Type: text/css;charset=utf-8 \r\n"
-                + "Content-Length: " + body.length + " \r\n"
-                + "\r\n"
-                + new String(body, StandardCharsets.UTF_8);
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).isEqualTo(expectedResponse("/css/styles.css", "text/css;charset=utf-8"));
     }
 
     @Test
     @DisplayName("쿼리 스트링이 포함된 요청에서 경로에 해당하는 HTML을 응답한다")
-    void queryString() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login.html?account=gugu&password=password HTTP/1.1 ",
+    void queryString() throws IOException {
+        // when
+        String response = process("/login.html?account=gugu&password=password");
+
+        // then
+        assertThat(response).isEqualTo(expectedResponse("/login.html", "text/html;charset=utf-8"));
+    }
+
+    private String process(String path) {
+        final var socket = new StubSocket(httpRequest(path));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        return socket.output();
+    }
+
+    private String httpRequest(String path) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "",
                 "");
-
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        assertThat(socket.output())
-                .contains("HTTP/1.1 200 OK");
     }
+
+    private String expectedResponse(String path, String contentType) throws IOException {
+        byte[] body = readResource(path);
+
+        return "HTTP/1.1 200 OK \r\n"
+                + "Content-Type: " + contentType + " \r\n"
+                + "Content-Length: " + body.length + " \r\n"
+                + "\r\n"
+                + new String(body, StandardCharsets.UTF_8);
+    }
+
+    private byte[] readResource(String path) throws IOException {
+        URL resource = getClass()
+                .getClassLoader()
+                .getResource("static" + path);
+
+        return Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
+    }
+
 }

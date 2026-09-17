@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -38,86 +39,99 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = reader.readLine();
+            String requestLine = reader.readLine();
 
-            if (line == null) {
+            if (requestLine == null) { // 클라이언트가 아무 요청도 보내지 않고 연결만 끊은 경우 처리. 파싱할 것 X
                 return;
             }
 
-            String[] requestLine = line.split(" ");
+            RequestTarget requestTarget = parseRequestTarget(requestLine);
 
-            String method = requestLine[0];
-            String uri = requestLine[1];
-            String version = requestLine[2];
+            readHeaders(reader);
+            logUserIfExists(requestTarget.queryString());
 
-            String path = uri;
-            String queryString = null;
+            URL resource = findResource(requestTarget.path());
 
-            int queryIndex = uri.indexOf("?");
-
-            if (queryIndex != -1) {
-                path = uri.substring(0, queryIndex);
-                queryString = uri.substring(queryIndex + 1);
-            }
-            path = normalizePath(path);
-
-            String header;
-
-            while ((header = reader.readLine()) != null && !header.isEmpty()) {
-                // Header는 현재 사용하지 않으므로 읽고 버린다.
-            }
-
-            if (queryString != null) {
-                Map<String, String> queryParams = parseQueryString(queryString);
-
-                String account = queryParams.get("account");
-
-                InMemoryUserRepository.findByAccount(account) // 추후 UserService 생성
-                        .ifPresent(user ->
-                                log.info("조회된 사용자: id={}, account={}",
-                                        user.getId(),
-                                        user.getAccount()
-                                )
-                        );
-            }
-
-            // 추후 requestLine(method/path) 검증 추가 예정
-
-            URL resource = getClass()
-                    .getClassLoader()
-                    .getResource("static" + path);
-
-            if (resource == null) {
+            if (resource == null) { // 요청한 정적 파일을 못 찾은 경우 처리.
                 return;
             }
 
-            byte[] body;
-            try (InputStream resourceStream = resource.openStream()) {
-                body = resourceStream.readAllBytes();
-            }
+            byte[] body = readBody(resource);
+            String response = createResponse(requestTarget.path(), body);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(path) + " ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    ""
-            );
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(body);
-            outputStream.flush();
+            writeResponse(outputStream, response, body);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getContentType(String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
+    private RequestTarget parseRequestTarget(String line) {
+        String[] requestLine = line.split(" ");
+        String uri = requestLine[1];
+
+        String path = uri;
+        String queryString = null;
+
+        int queryIndex = uri.indexOf("?");
+
+        if (queryIndex != -1) {
+            path = uri.substring(0, queryIndex);
+            queryString = uri.substring(queryIndex + 1);
         }
 
-        return "text/html;charset=utf-8";
+        return new RequestTarget(normalizePath(path), queryString);
+    }
+
+    private void readHeaders(BufferedReader reader) throws IOException {
+        String header;
+        while ((header = reader.readLine()) != null && !header.isEmpty()) {
+            // Header는 현재 사용하지 않으므로 읽고 버린다.
+        }
+    }
+
+    private void logUserIfExists(String queryString) {
+        if (queryString == null) {
+            return;
+        }
+
+        Map<String, String> queryParams = parseQueryString(queryString);
+        String account = queryParams.get("account");
+
+        InMemoryUserRepository.findByAccount(account) // 추후 UserService 생성
+                .ifPresent(user ->
+                        log.info("조회된 사용자: id={}, account={}",
+                                user.getId(),
+                                user.getAccount()
+                        )
+                );
+    }
+
+    private URL findResource(String path) {
+        return getClass()
+                .getClassLoader()
+                .getResource("static" + path);
+    }
+
+    private byte[] readBody(URL resource) throws IOException {
+        try (InputStream resourceStream = resource.openStream()) {
+            return resourceStream.readAllBytes();
+        }
+    }
+
+    private String createResponse(String path, byte[] body) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + getContentType(path) + " ",
+                "Content-Length: " + body.length + " ",
+                "",
+                ""
+        );
+    }
+
+    private void writeResponse(OutputStream outputStream, String response, byte[] body) throws IOException {
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(body);
+        outputStream.flush();
     }
 
     private String normalizePath(String path) {
@@ -130,6 +144,14 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return path;
+    }
+
+    private String getContentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+
+        return "text/html;charset=utf-8";
     }
 
     private Map<String, String> parseQueryString(String queryString) {
@@ -146,4 +168,8 @@ public class Http11Processor implements Runnable, Processor {
 
         return queryParams;
     }
+
+    private record RequestTarget(String path, String queryString) {
+    }
+
 }

@@ -87,4 +87,31 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.length + " \r\n" +
+                "\r\n" +
+                new String(responseBody, StandardCharsets.UTF_8);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

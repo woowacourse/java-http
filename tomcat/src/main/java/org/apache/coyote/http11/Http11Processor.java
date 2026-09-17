@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,28 +37,53 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String line = reader.readLine();
-            if (line == null) {
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
                 return;
             }
 
-            final String path = line.split(" ")[1];
+            final String uri = requestLine.split(" ")[1];
 
-            while (!"".equals(line)) {
+            String line;
+            while (true) {
                 line = reader.readLine();
                 if (line == null) {
                     return;
                 }
+                if (line.isEmpty()) {
+                    break;
+                }
+            }
+
+            final int index = uri.indexOf("?");
+            String path = uri;
+            String queryString = "";
+
+            if (index >= 0) {
+                path = uri.substring(0, index);
+                queryString = uri.substring(index + 1);
+            }
+
+            if ("/login".equals(path) && !queryString.isEmpty()) {
+                final String[] parameters = queryString.split("&");
+                final String account = parameters[0].split("=", 2)[1];
+                final String password = parameters[1].split("=", 2)[1];
+
+                InMemoryUserRepository.findByAccount(account)
+                        .filter(user -> user.checkPassword(password))
+                        .ifPresent(user -> log.info("login user: {}", user.getAccount()));
             }
 
             String responseBody = "Hello world!";
             if (!path.equals("/")) {
+                final String resourcePath = "/login".equals(path) ? "/login.html" : path;
+
                 try (final InputStream resourceStream = getClass()
                         .getClassLoader()
-                        .getResourceAsStream("static" + path)) {
+                        .getResourceAsStream("static" + resourcePath)) {
 
                     if (resourceStream == null) {
-                        throw new IllegalArgumentException("리소스를 찾을 수 없습니다: " + "static" + path);
+                        throw new IllegalArgumentException("리소스를 찾을 수 없습니다: " + "static" + resourcePath);
                     }
                     responseBody = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
                 }

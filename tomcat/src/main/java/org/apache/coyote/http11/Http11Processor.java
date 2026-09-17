@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import jakarta.servlet.http.HttpUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -9,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -47,7 +52,26 @@ public class Http11Processor implements Runnable, Processor {
             if (split[1].equals("/favicon.ico")) {
                 return;
             }
-            final String fileName = "static" + split[1];
+
+            String[] part = split[1].split("\\?");
+
+            String fileName = part[0];
+            if (fileName != null && !fileName.isBlank()) {
+                if (!fileName.equals("/") && !fileName.contains(".")) {
+                    fileName += ".html";
+                }
+            }
+            fileName = "static" + fileName;
+
+            String[] queries = new String[0];
+            if (part.length > 1) {
+                queries = part[1].split("&");
+            }
+            Map<String, String> params = new HashMap<>();
+            for (String query : queries) {
+                String[] q = query.split("=");
+                params.put(q[0], q[1]);
+            }
 
             URL resource = getClass().getClassLoader().getResource(fileName);
             final Path path = Paths.get(Objects.requireNonNull(resource).toURI());
@@ -88,6 +112,12 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     new String(responseBody, StandardCharsets.UTF_8));
+
+            if (queries.length > 0) {
+                User user = InMemoryUserRepository.findByAccount(params.get("account"))
+                        .orElseThrow(IllegalArgumentException::new);
+                log.info("user: {}", user);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

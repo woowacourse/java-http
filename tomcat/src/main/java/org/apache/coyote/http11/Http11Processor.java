@@ -1,6 +1,12 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +17,9 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_RESOURCE_PATH = "static";
+    private static final String NOT_FOUND_RESOURCE_PATH = "static/404.html";
+    private static final String DEFAULT_RESOURCE_PATH = "static/index.html";
 
     private final Socket connection;
 
@@ -29,19 +38,76 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            final var requestLine = reader.readLine();
+            final var resourcePath = extractResourcePath(requestLine);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            if (resourcePath == null) {
+                writeResource(outputStream, DEFAULT_RESOURCE_PATH, "200 OK");
+                return;
+            }
+            writeResource(outputStream, resourcePath, "200 OK");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractResourcePath(final String requestLine) {
+        if (requestLine == null) {
+            return null;
+        }
+
+        final var requestParts = requestLine.split(" ");
+        if (requestParts.length < 2) {
+            return null;
+        }
+
+        final var requestPath = requestParts[1];
+        if ("/".equals(requestPath)) {
+            return null;
+        }
+
+        return STATIC_RESOURCE_PATH + requestPath;
+    }
+
+    private void writeResource(
+            final OutputStream outputStream,
+            final String resourcePath,
+            final String status
+    ) throws IOException {
+        try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (resource == null) {
+                writeNotFoundResponse(outputStream);
+                return;
+            }
+
+            writeResponse(outputStream, status, resource.readAllBytes());
+        }
+    }
+
+    private void writeNotFoundResponse(final OutputStream outputStream) throws IOException {
+        try (InputStream resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResourceAsStream(NOT_FOUND_RESOURCE_PATH),
+                "404 페이지를 찾을 수 없습니다."
+        )) {
+            writeResponse(outputStream, "404 Not Found", resource.readAllBytes());
+        }
+    }
+
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String status,
+            final byte[] responseBody
+    ) throws IOException {
+        final var responseHeader = String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                "");
+
+        outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseBody);
+        outputStream.flush();
     }
 }

@@ -31,6 +31,10 @@ public class RequestLine {
         }
     }
 
+    public boolean isPost() {
+        return "POST".equals(method);
+    }
+
     public String getMethod() {
         return method;
     }

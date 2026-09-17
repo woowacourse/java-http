@@ -41,9 +41,24 @@ public class Http11Processor implements Runnable, Processor {
                 final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-            final Headers headers = validateHeaders(bufferedReader);
-            
+            final Headers headers = readHeaders(bufferedReader);
+
             String path = requestLine.getPath();
+            if (requestLine.isPost() && "/register".equals(path)) {
+                final int contentLength = headers.contentLength();
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+
+                final Map<String, String> parameters = parseQueryString(requestBody);
+                register(parameters);
+
+                final var response = makeResponse("/index.html", "200", "OK");
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             String queryString = requestLine.getQueryString();
             String code = "200";
             String status = "OK";
@@ -119,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
             if (nameAndValue.length != 2) {
                 continue;
             }
-            parameters.put(nameAndValue[0], nameAndValue[1]);
+            parameters.put(nameAndValue[0].trim(), nameAndValue[1].trim());
         }
         return parameters;
     }
@@ -139,7 +154,18 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private static Headers validateHeaders(BufferedReader bufferedReader) throws IOException {
+    private void register(final Map<String, String> parameters) {
+        User user = new User(
+                parameters.get("account"),
+                parameters.get("password"),
+                parameters.get("email")
+        );
+
+        InMemoryUserRepository.save(user);
+        log.info("회원가입 성공: {}", user);
+    }
+
+    private static Headers readHeaders(BufferedReader bufferedReader) throws IOException {
         final Headers headers = new Headers();
 
         String line = bufferedReader.readLine();

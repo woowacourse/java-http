@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -78,10 +79,10 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void queryString() throws IOException {
-        //given
+    void login() throws IOException {
+        // given
         final String httpRequest = String.join("\r\n",
-                "GET /css/styles.css?version=1 HTTP/1.1 ",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "",
                 "");
@@ -93,11 +94,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n" +
+                new String(body, StandardCharsets.UTF_8);
 
-        assertThat(socket.output())
-                .contains("Content-Type: text/css;charset=utf-8 \r\n")
-                .endsWith(expectedBody);
+        assertThat(socket.output()).isEqualTo(expected);
     }
 }

@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequestLine requestLine = HttpRequestLine.from(inputStream);
             log.info("requestLine = {}", requestLine);
 
-            HttpResponse httpResponse = handle(requestLine.uri());
+            HttpResponse httpResponse = handle(requestLine);
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();
@@ -45,13 +45,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handle(String uri) throws IOException {
-        if (uri.equals("/")) {
+    private HttpResponse handle(HttpRequestLine requestLine) throws IOException {
+        String uri = requestLine.uri();
+
+        if ("/".equals(uri)) {
             return HttpResponse.of(
                     new HttpStatusLine(HTTP_VERSION, 200, "OK"),
                     "text/html;charset=utf-8",
                     "Hello world!".getBytes(StandardCharsets.UTF_8)
             );
+        }
+
+        if ("/login".equals(uri)) {
+            uri = "/login.html";
         }
 
         String path = resolvePath(uri);

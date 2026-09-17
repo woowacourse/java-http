@@ -35,7 +35,7 @@ public class RequestUri {
     private Map<String, String> addQueryParameters(String queryString) {
         Map<String, String> queryParameters = new HashMap<>();
 
-        String[] parameters = queryString.split(QUERY_PARAM_DELIMITER, 2);
+        String[] parameters = queryString.split(QUERY_PARAM_DELIMITER);
         for (String parameter : parameters) {
             if (parameter.isBlank()) {
                 continue;

@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,8 +31,13 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = HttpRequest.parse(inputStream);
 
-            final var responseBody = "Hello world!";
+            var responseBody = "Hello world!";
+            if (httpRequest.isGetMethod() && httpRequest.isPath("/index.html")) {
+                final Path path = Path.of(ClassLoader.getSystemResource("static/index.html").toURI());
+                responseBody = Files.readString(path);
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -42,6 +50,8 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 }

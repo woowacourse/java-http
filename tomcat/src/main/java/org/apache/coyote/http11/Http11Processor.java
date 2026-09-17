@@ -22,6 +22,22 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
+    public static final String FAVICON_PATH = "/favicon.ico";
+    public static final String STATIC_PATH = "static";
+    public static final String QUERY_DELIMITER = "?";
+    public static final String PARAM_DELIMITER = "&";
+    public static final String PARAM_EQUAL = "=";
+
+    public static final String SLASH = "/";
+    public static final String EXTENSION_DELIMITER = ".";
+    public static final String HTML_EXTENSION = ".html";
+    public static final String CSS_EXTENSION = ".css";
+    public static final String JS_EXTENSION = ".js";
+
+    public static final String CSS_CONTENT_TYPE = "text/css";
+    public static final String JS_CONTENT_TYPE = "text/javascript";
+    public static final String HTML_CONTENT_TYPE = "text/html";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -47,11 +63,11 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             String uri = getUri(bufferedReader);
-            if (uri.equals("/favicon.ico")) {
+            if (uri.equals(FAVICON_PATH)) {
                 return;
             }
 
-            int index = uri.indexOf("?");
+            int index = uri.indexOf(QUERY_DELIMITER);
             String path = findPath(uri, index);
             Map<String, String> queryParams = findQueryString(uri, index);
 
@@ -86,12 +102,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (!path.isBlank()) {
-            if (!path.equals("/") && !path.contains(".")) {
-                path += ".html";
+            if (!path.equals(SLASH) && !path.contains(EXTENSION_DELIMITER)) {
+                path += HTML_EXTENSION;
             }
         }
 
-        return "static" + path;
+        return STATIC_PATH + path;
     }
 
     private Map<String, String> findQueryString(String uri, int index) {
@@ -102,8 +118,8 @@ public class Http11Processor implements Runnable, Processor {
 
         Map<String, String> queryParams = new HashMap<>();
         if (!queryString.isEmpty()) {
-            for (String query : queryString.split("&")) {
-                String[] q = query.split("=");
+            for (String query : queryString.split(PARAM_DELIMITER)) {
+                String[] q = query.split(PARAM_EQUAL);
                 queryParams.put(q[0], q[1]);
             }
         }
@@ -117,12 +133,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String findContentType(Path filePath) {
-        if (filePath.toString().endsWith(".css")) {
-            return "text/css";
-        } else if (filePath.toString().endsWith(".js")) {
-            return "text/javascript";
+        if (filePath.toString().endsWith(CSS_EXTENSION)) {
+            return CSS_CONTENT_TYPE;
+        } else if (filePath.toString().endsWith(JS_EXTENSION)) {
+            return JS_CONTENT_TYPE;
         }
-        return "text/html";
+        return HTML_CONTENT_TYPE;
     }
 
     private String findResponseBody(Path filePath) throws IOException {

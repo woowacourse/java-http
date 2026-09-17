@@ -3,6 +3,8 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +20,7 @@ class FileTest {
 
     /**
      * resource 디렉터리 경로 찾기
-     *
+     * <p>
      * File 객체를 생성하려면 파일의 경로를 알아야 한다.
      * 자바 애플리케이션은 resource 디렉터리에 HTML, CSS 같은 정적 파일을 저장한다.
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
@@ -28,26 +30,31 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        ClassLoader classLoader = FileTest.class.getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+
+        final String actual = resource.getPath();
 
         assertThat(actual).endsWith(fileName);
     }
 
     /**
      * 파일 내용 읽기
-     *
+     * <p>
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws Exception {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Path.of(FileTest.class.getClassLoader()
+                .getResource(fileName)
+                .toURI());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

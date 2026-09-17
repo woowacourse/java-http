@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
             OutputStream outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));) {
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             final var requestLine = reader.readLine();
             if (requestLine == null) {
@@ -50,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             int index = requestTarget.indexOf("?");
             String path = requestTarget;
             String queryString = "";
+            int contentLength = 0;
 
             if (index != -1) {
                 path = requestTarget.substring(0, index);
@@ -59,21 +61,30 @@ public class Http11Processor implements Runnable, Processor {
             log.debug("request line: {}", requestLine);
 
             String line;
-            while ((line = reader.readLine()) != null && !line.equals("")) {
+            while ((line = reader.readLine()) != null) {
+                if (line.isEmpty() || line.equals("\r") || line.equals("\n")) {
+                    break;
+                }
+
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.split(":")[1].trim());
+                }
                 log.debug("header : {}", line);
             }
+
+            char[] buffer = new char[contentLength];
+            int bytesRead = reader.read(buffer, 0, contentLength);
+            String requestBody = new String(buffer, 0, bytesRead);
 
             if (path.equals("/")) {
                 respondHelloWorld(outputStream);
                 return;
             }
             if (path.equals("/register")) {
-                handleRegister(outputStream);
-                return;
+                handleRegister(requestBody, outputStream);
             }
             if (path.equals("/login")) {
-                handleLogin(queryString, outputStream);
-                return;
+                handleLogin(requestBody, outputStream);
             }
             respondStaticResource(htmlParser(path), outputStream);
         } catch (IOException e) {
@@ -132,13 +143,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleLogin(String queryString, OutputStream outputStream) throws IOException {
         Map<String, String> params = parseQueryString(queryString);
-        String account = params.get("account");
-        String password = params.get("password");
 
-        if (account == null || password == null) {
+        if (params.size() < 2) {
             log.debug("로그인 파라미터가 부족합니다.");
             return;
         }
+        String account = params.get("account");
+        String password = params.get("password");
 
         final boolean authenticated = InMemoryUserRepository
                 .findByAccount(account)
@@ -154,9 +165,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleRegister(OutputStream outputStream)
-            throws IOException {
+    private void handleRegister(String queryString, OutputStream outputStream) {
+        Map<String, String> params = parseQueryString(queryString);
+        if (params.size() < 3) {
+            log.debug("회원가입 파라미터가 부족합니다.");
+            return;
+        }
+        User user = new User(params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(user);
+        log.debug("User : {}", user);
+        response201UserCreatedHeader(outputStream);
+        response302LoginSuccessHeader(outputStream);
+    }
 
+    private void response201UserCreatedHeader(OutputStream outputStream) {
+        try {
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 302 Redirect ",
+                    "Location: /index.html ",
+                    "Content-Type: application/json ",
+                    "");
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private void response302LoginSuccessHeader(OutputStream outputStream) {

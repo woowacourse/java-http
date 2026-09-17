@@ -66,9 +66,21 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
             }
 
+            // 헤더를 하나씩 읽으면서 Accept 존재하면 확장자 설정
+            // Accept 존재하지 않으면 기본값 text/html로 설정
+            String contentType = "text/html";
+            for(String line : header) {
+                if(line.startsWith("Accept:")) {
+                    if(line.contains("text/css")) {
+                        contentType = "text/css";
+                    }
+                    break;
+                }
+            }
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

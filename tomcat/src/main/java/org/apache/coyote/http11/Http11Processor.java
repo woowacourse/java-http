@@ -49,6 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String method = parts[0];
             final String requestTarget = parts[1];
+            final String path = requestTarget.split("\\?", 2)[0];
             final String httpVersion = parts[2];
 
             log.info("method: {}, target: {}, version: {}",
@@ -57,14 +58,18 @@ public class Http11Processor implements Runnable, Processor {
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             String contentType = "text/html;charset=utf-8";
 
-            if ("/index.html".equals(requestTarget)
-                    || "/css/styles.css".equals(requestTarget)) {
+            if ("/index.html".equals(path)
+                    || "/css/styles.css".equals(path)
+                    || "/login".equals(path)) {
 
-                if ("/css/styles.css".equals(requestTarget)) {
+                if ("/css/styles.css".equals(path)) {
                     contentType = "text/css;charset=utf-8";
                 }
 
-                final String resourcePath = "static" + requestTarget;
+                final String resourcePath = "/login".equals(path)
+                        ? "static/login.html"
+                        : "static" + path;
+
                 try (var resource = getClass().getClassLoader()
                         .getResourceAsStream(resourcePath)) {
 
@@ -75,7 +80,6 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = resource.readAllBytes();
                 }
             }
-
             final String responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + " ",

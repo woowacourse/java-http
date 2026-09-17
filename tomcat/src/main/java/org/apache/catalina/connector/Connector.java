@@ -18,44 +18,24 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private volatile boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    private Connector(final ServerSocket serverSocket, boolean stopped) {
+        this.serverSocket = serverSocket;
+        this.stopped = stopped;
     }
 
-    public Connector(final int port, final int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
-    }
-
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    public static Connector create() {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new Connector(
+                    new ServerSocket(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT), false
+            );
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private int checkPort(final int port) {
-        final int MIN_PORT = 1;
-        final int MAX_PORT = 65535;
-
-        if (port < MIN_PORT || MAX_PORT < port) {
-            return DEFAULT_PORT;
-        }
-        return port;
-    }
-
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
-    }
-
     public void startListening() {
         Thread thread = new Thread(this);
         thread.start();
-
         stopped = false;
 
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
@@ -73,15 +53,15 @@ public class Connector implements Runnable {
             Socket connection = serverSocket.accept();
             dispatch(connection);
         } catch (IOException e) {
+            if (stopped) {
+                return;
+            }
+
             log.error(e.getMessage(), e);
         }
     }
 
     private void dispatch(final Socket connection) {
-        if (connection == null) {
-            return;
-        }
-
         Http11Processor processor = new Http11Processor(connection);
 
         Thread thread = new Thread(processor);

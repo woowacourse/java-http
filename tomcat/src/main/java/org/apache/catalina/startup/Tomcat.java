@@ -10,7 +10,7 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        Connector connector = new Connector();
+        Connector connector = Connector.create();
         connector.startListening();
 
         registerShutdownHook(connector);

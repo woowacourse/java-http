@@ -32,19 +32,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
-
-            var responseBody = "Hello world!";
-            if (httpRequest.isGetMethod() && httpRequest.isPath("/index.html")) {
-                final Path path = Path.of(ClassLoader.getSystemResource("static/index.html").toURI());
-                responseBody = Files.readString(path);
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String response = handleRequest(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -53,5 +41,50 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String handleRequest(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/index.html")) {
+            return createResponseBody("static/index.html", "text/html");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/login")) {
+            return createResponseBody("static/login.html", "text/html");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/register")) {
+            return createResponseBody("static/register.html", "text/html");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/css/styles.css")) {
+            return createResponseBody("static/css/styles.css", "text/css");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/js/scripts.js")) {
+            return createResponseBody("static/js/scripts.js", "text/javascript");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/assets/chart-area.js")) {
+            return createResponseBody("static/assets/chart-area.js", "text/javascript");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/assets/chart-bar.js")) {
+            return createResponseBody("static/assets/chart-bar.js", "text/javascript");
+        }
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/assets/chart-pie.js")) {
+            return createResponseBody("static/assets/chart-pie.js", "text/javascript");
+        }
+        return createResponse("Hello world!", "text/html");
+    }
+
+    private String createResponseBody(String resourcePath, String contentType) throws URISyntaxException, IOException {
+        final Path path = Path.of(ClassLoader.getSystemResource(resourcePath).toURI());
+        String responseBody = Files.readString(path);
+
+        return createResponse(responseBody, contentType);
+    }
+
+
+    private String createResponse(String responseBody, String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

@@ -1,16 +1,32 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String START_LINE_DELIMITER = " ";
+    private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
+    private static final String CONTENT_TYPE_TEXT_CSS = "text/css;charset=utf-8";
+    private static final String CONTENT_TYPE_TEXT_JAVASCRIPT = "text/javascript;charset=utf-8";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String PARAM_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final Socket connection;
 
@@ -27,21 +43,124 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
+             final var inputStreamReader = new InputStreamReader(inputStream);
+             final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String[] startLineTokens = bufferedReader.readLine().split(START_LINE_DELIMITER);
+            String httpUrl = startLineTokens[1];
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (httpUrl.startsWith("/index.html")) {
+                final String body = readFile("static/index.html");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (httpUrl.startsWith("/login")) {
+                final String body = readFile("static/login.html");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                Map<String, String> queryParams = parseQueryParams(startLineTokens);
+
+                String account = queryParams.get("account");
+                String password = queryParams.get("password");
+
+                if (account != null && password != null) {
+                    InMemoryUserRepository.findByAccount(account)
+                            .filter(user -> user.checkPassword(password))
+                            .ifPresent(user -> log.info("{}", user));
+                }
+                return;
+            }
+
+            if (httpUrl.startsWith("/css/styles.css")) {
+                final String body = readFile("static/css/styles.css");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_CSS);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (httpUrl.startsWith("/assets/chart-bar.js")) {
+                final String body = readFile("static/assets/chart-bar.js");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (httpUrl.startsWith("/js/scripts.js")) {
+                final String body = readFile("static/js/scripts.js");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (httpUrl.startsWith("/assets/chart-pie.js")) {
+                final String body = readFile("static/assets/chart-pie.js");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (httpUrl.startsWith("/assets/chart-area.js")) {
+                final String body = readFile("static/assets/chart-area.js");
+                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            final var response = createResponse("Hello world!", CONTENT_TYPE_TEXT_HTML);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createResponse(String responseBody, String contentType) throws IOException {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                CONTENT_TYPE + ": " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String readFile(String path) throws IOException {
+        URL url = getClass().getClassLoader().getResource(path);
+        return new String(Files.readAllBytes(new File(url.getFile()).toPath()), StandardCharsets.UTF_8);
+    }
+
+    private Map<String, String> parseQueryParams(String[] queryParamLine) {
+        int queryStringDelimiterIndex = queryParamLine[1].lastIndexOf(QUERY_STRING_DELIMITER);
+        if (queryStringDelimiterIndex == -1) {
+            return new HashMap<>();
+        }
+
+        String queryLine = queryParamLine[1].substring(queryStringDelimiterIndex + 1);
+        String[] params = queryLine.split(PARAM_DELIMITER);
+
+        Map<String, String> queries = new HashMap<>();
+        for (String param : params) {
+            String[] keyToken = param.split(KEY_VALUE_DELIMITER);
+            queries.put(keyToken[0], keyToken[1]);
+        }
+
+        return queries;
     }
 }

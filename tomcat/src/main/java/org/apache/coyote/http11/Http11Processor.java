@@ -48,36 +48,21 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String[] split = bufferedReader.readLine().split(" ");
-            if (split[1].equals("/favicon.ico")) {
+            String[] header = bufferedReader.readLine().split(" ");
+            String uri = header[1];
+            if (uri.equals("/favicon.ico")) {
                 return;
             }
 
-            String[] part = split[1].split("\\?");
+            int index = uri.indexOf("?");
+            String path = findPath(uri, index);
+            Map<String, String> queryParams = findQueryString(uri, index);
 
-            String fileName = part[0];
-            if (fileName != null && !fileName.isBlank()) {
-                if (!fileName.equals("/") && !fileName.contains(".")) {
-                    fileName += ".html";
-                }
-            }
-            fileName = "static" + fileName;
-
-            String[] queries = new String[0];
-            if (part.length > 1) {
-                queries = part[1].split("&");
-            }
-            Map<String, String> params = new HashMap<>();
-            for (String query : queries) {
-                String[] q = query.split("=");
-                params.put(q[0], q[1]);
-            }
-
-            URL resource = getClass().getClassLoader().getResource(fileName);
-            final Path path = Paths.get(Objects.requireNonNull(resource).toURI());
+            URL resource = getClass().getClassLoader().getResource(path);
+            final Path filePath = Paths.get(Objects.requireNonNull(resource).toURI());
 
             String response;
-            if (Files.isDirectory(path)) {
+            if (Files.isDirectory(filePath)) {
                 final var responseBody = "Hello world!";
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
@@ -91,8 +76,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (path.toString().endsWith(".css")) {
-                byte[] responseBody = Files.readAllBytes(path);
+            if (filePath.toString().endsWith(".css")) {
+                byte[] responseBody = Files.readAllBytes(filePath);
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/css;charset=utf-8 ",
@@ -105,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            byte[] responseBody = Files.readAllBytes(path);
+            byte[] responseBody = Files.readAllBytes(filePath);
             response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
@@ -113,8 +98,8 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     new String(responseBody, StandardCharsets.UTF_8));
 
-            if (queries.length > 0) {
-                User user = InMemoryUserRepository.findByAccount(params.get("account"))
+            if (!queryParams.isEmpty()) {
+                User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
                         .orElseThrow(IllegalArgumentException::new);
                 log.info("user: {}", user);
             }
@@ -124,5 +109,37 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String findPath(String uri, int index) {
+        String path = uri;
+        if (index != -1) {
+            path = uri.substring(0, index);
+        }
+
+        if (!path.isBlank()) {
+            if (!path.equals("/") && !path.contains(".")) {
+                path += ".html";
+            }
+        }
+
+        return "static" + path;
+    }
+
+    private Map<String, String> findQueryString(String uri, int index) {
+        String queryString = "";
+        if (index != -1) {
+            queryString = uri.substring(index + 1);
+        }
+
+        Map<String, String> queryParams = new HashMap<>();
+        if (!queryString.isEmpty()) {
+            for (String query : queryString.split("&")) {
+                String[] q = query.split("=");
+                queryParams.put(q[0], q[1]);
+            }
+        }
+
+        return queryParams;
     }
 }

@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = extractRequestPath(requestTarget);
             Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            handleRequest(requestPath, queryParameters);
+            dispatchRequest(requestPath, queryParameters);
 
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
@@ -65,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleRequest(String requestPath, Map<String, String> queryParameters) {
+    private void dispatchRequest(String requestPath, Map<String, String> queryParameters) {
         if ("/login".equals(requestPath) && !queryParameters.isEmpty()) {
             handleLogin(queryParameters.get("account"), queryParameters.get("password"));
         }
@@ -99,16 +99,16 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
 
-        Map<String, String> queryParametersMap = new HashMap<>();
+        Map<String, String> queryParameters = new HashMap<>();
 
-        String queryParametersString = requestTarget.substring(queryStartIndex + 1);
-        String[] queryParametersArray = queryParametersString.split("&");
-        for (String queryParameter : queryParametersArray) {
-            String[] pair = queryParameter.split("=");
-            queryParametersMap.put(pair[0], pair[1]);
+        String queryString = requestTarget.substring(queryStartIndex + 1);
+        String[] parameterPairs = queryString.split("&");
+        for (String parameterPair : parameterPairs) {
+            String[] nameAndValue = parameterPair.split("=");
+            queryParameters.put(nameAndValue[0], nameAndValue[1]);
         }
 
-        return queryParametersMap;
+        return queryParameters;
     }
 
     private String resolveResourcePath(String requestPath) {
@@ -122,37 +122,38 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String extractRequestTarget(InputStream inputStream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        String line = br.readLine();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String requestLine = bufferedReader.readLine();
 
-        String[] words = line.split(" ");
-        while (line != null && !line.isEmpty())  {
-            line = br.readLine();
+        String[] requestLineParts = requestLine.split(" ");
+        String headerLine = bufferedReader.readLine();
+        while (headerLine != null && !headerLine.isEmpty())  {
+            headerLine = bufferedReader.readLine();
         }
-        return words[1];
+        return requestLineParts[1];
     }
 
     private String resolveResponseBody(String resourcePath) throws IOException {
         if ("/".equals(resourcePath)) {
             return "Hello world!";
         }
-        final URL resource = getClass().getClassLoader().getResource(resourcePath);
-        if (resource == null) {
+        final URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
+        if (resourceUrl == null) {
             throw new RuntimeException("resource not found");
         }
-        return readStaticResource(resource);
+        return readStaticResource(resourceUrl);
     }
 
-    private String readStaticResource(URL resource) throws IOException {
-        final Path path = new File(resource.getPath()).toPath();
-        return Files.readString(path);
+    private String readStaticResource(URL resourceUrl) throws IOException {
+        final Path filePath = new File(resourceUrl.getPath()).toPath();
+        return Files.readString(filePath);
     }
 
-    private String resolveContentType(String requestTarget) {
-        if (requestTarget.endsWith(".css")) {
+    private String resolveContentType(String resourcePath) {
+        if (resourcePath.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
-        if (requestTarget.endsWith(".js")) {
+        if (resourcePath.endsWith(".js")) {
             return "application/javascript;charset=utf-8";
         }
         return "text/html;charset=utf-8";

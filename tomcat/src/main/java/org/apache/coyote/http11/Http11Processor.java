@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -12,9 +13,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -47,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             String method = str[0];
             URI uri = URI.create(str[1]);
             String path = uri.getRawPath();
+            String query = uri.getRawQuery();
 
             String responseBody = "Hello world!";
             String contentType = "text/html";
@@ -54,6 +59,30 @@ public class Http11Processor implements Runnable, Processor {
             if (method.equals("GET")) {
                 if (path.equals("/index.html")) {
                     responseBody = readFile("static/index.html");
+                }
+
+                if (path.equals("/login") || path.equals("/login.html")) {
+                    responseBody = readFile("static/login.html");
+
+                    if (query != null) {
+                        Map<String, String> queryParams = new HashMap<>();
+                        for (String parameter : query.split("&")) {
+                            String[] pair = parameter.split("=", 2);
+                            if (pair.length == 2) {
+                                queryParams.put(
+                                        URLDecoder.decode(pair[0], StandardCharsets.UTF_8),
+                                        URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
+                            }
+                        }
+
+                        String account = queryParams.get("account");
+                        String password = queryParams.get("password");
+                        if (account != null && password != null) {
+                            InMemoryUserRepository.findByAccount(account)
+                                    .filter(user -> user.checkPassword(password))
+                                    .ifPresent(user -> log.info("회원 조회 성공: {}", user.getAccount()));
+                        }
+                    }
                 }
 
                 if (path.equals("/css/styles.css")) {

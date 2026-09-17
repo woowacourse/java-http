@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + getContentType(path) + " ",
                     "Content-Length: " + body.length + " ",
                     "",
                     ""
@@ -84,5 +84,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+
+        return "text/html;charset=utf-8";
     }
 }

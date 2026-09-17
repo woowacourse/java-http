@@ -5,8 +5,11 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,6 +32,17 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+            );
+
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
+
+            readHeaders(reader);
+
             final var responseBody = "Hello world!";
 
             final var response = String.join("\r\n",
@@ -42,6 +56,16 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void readHeaders(final BufferedReader reader) throws IOException {
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            if (line.isEmpty()) {
+                return;
+            }
         }
     }
 }

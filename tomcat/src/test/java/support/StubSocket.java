@@ -36,7 +36,7 @@ public class StubSocket extends Socket {
     }
 
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(request.getBytes());
+        return new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8));
     }
 
     public OutputStream getOutputStream() {

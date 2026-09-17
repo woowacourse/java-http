@@ -46,17 +46,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String[] tokens = requestLine.split(" ");
-            final String requestTarget = tokens[1];
-
-            int index = requestTarget.indexOf("?");
-            String path = requestTarget;
-            String queryString = "";
+            final String path = tokens[1];
             int contentLength = 0;
-
-            if (index != -1) {
-                path = requestTarget.substring(0, index);
-                queryString = requestTarget.substring(index + 1);
-            }
 
             log.debug("request line: {}", requestLine);
 

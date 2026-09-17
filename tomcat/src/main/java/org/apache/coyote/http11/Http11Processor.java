@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -16,8 +15,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -76,14 +73,6 @@ public class Http11Processor implements Runnable, Processor {
         while (line != null && !line.isEmpty()) {
             line = reader.readLine();
         }
-    }
-
-    private byte[] readBody(final String url) throws IOException, URISyntaxException {
-        if (Objects.equals(url, "/")) {
-            return "Hello world!".getBytes(StandardCharsets.UTF_8);
-        }
-        URL resource = getClass().getClassLoader().getResource("static" + url);
-        return Files.readAllBytes(Path.of(resource.toURI()));
     }
 
     private Optional<Path> findStaticFile(final String url) throws URISyntaxException {

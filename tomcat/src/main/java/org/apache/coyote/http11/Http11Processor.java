@@ -4,13 +4,12 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -109,9 +108,9 @@ public class Http11Processor implements Runnable, Processor {
             url = getClass().getClassLoader().getResource("static" + requestUri);
         }
         if (url != null) {
-            File file = new File(url.getFile());
-            Path paths = file.toPath();
-            return Files.readString(paths);
+            try (InputStream inputStream = url.openStream()) {
+                return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
         }
         return null;
     }

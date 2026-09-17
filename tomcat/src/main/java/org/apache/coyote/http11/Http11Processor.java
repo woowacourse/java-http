@@ -55,13 +55,21 @@ public class Http11Processor implements Runnable, Processor {
                     method, requestTarget, httpVersion);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+            String contentType = "text/html;charset=utf-8";
 
-            if ("/index.html".equals(requestTarget)) {
+            if ("/index.html".equals(requestTarget)
+                    || "/css/styles.css".equals(requestTarget)) {
+
+                if ("/css/styles.css".equals(requestTarget)) {
+                    contentType = "text/css;charset=utf-8";
+                }
+
+                final String resourcePath = "static" + requestTarget;
                 try (var resource = getClass().getClassLoader()
-                        .getResourceAsStream("static/index.html")) {
+                        .getResourceAsStream(resourcePath)) {
 
                     if (resource == null) {
-                        throw new IOException("static/index.html 파일을 찾을 수 없습니다.");
+                        throw new IOException(resourcePath + " 파일을 찾을 수 없습니다.");
                     }
 
                     responseBody = resource.readAllBytes();
@@ -70,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     "");

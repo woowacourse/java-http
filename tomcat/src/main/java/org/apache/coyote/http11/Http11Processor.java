@@ -49,13 +49,43 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-
+            String type = "html";
             if (requestUri.equals("/index.html")) {
                 final Path path = Path.of(getResourcePath("static" + requestUri));
                 responseBody = Files.readAllBytes(path);
             }
 
-            final String responseHeader = createResponseHeader(version, responseBody.length);
+            if (requestUri.equals("/css/styles.css")) {
+                final Path path = Path.of(getResourcePath("static" + requestUri));
+                responseBody = Files.readAllBytes(path);
+                type="css";
+            }
+
+            if (requestUri.equals("/js/scripts.js")) {
+                final Path path = Path.of(getResourcePath("static" + requestUri));
+                responseBody = Files.readAllBytes(path);
+                type = "javascript";
+            }
+
+            if (requestUri.equals("/assets/chart-area.js")) {
+                final Path path = Path.of(getResourcePath("static" + requestUri));
+                responseBody = Files.readAllBytes(path);
+                type = "javascript";
+            }
+
+            if (requestUri.equals("/assets/chart-bar.js")) {
+                final Path path = Path.of(getResourcePath("static" + requestUri));
+                responseBody = Files.readAllBytes(path);
+                type = "javascript";
+            }
+
+            if (requestUri.equals("/assets/chart-pie.js")) {
+                final Path path = Path.of(getResourcePath("static" + requestUri));
+                responseBody = Files.readAllBytes(path);
+                type = "javascript";
+            }
+
+            final String responseHeader = createResponseHeader(version, type, responseBody.length);
 
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -77,10 +107,10 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String createResponseHeader(final String version, final int contentLength) {
+    private String createResponseHeader(final String version, String type, final int contentLength) {
         return String.join("\r\n",
                 version + " 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/"+ type + ";charset=utf-8 ",
                 "Content-Length: " + contentLength + " ",
                 "",
                 "");

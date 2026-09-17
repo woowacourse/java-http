@@ -13,8 +13,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -59,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                         "",
                         responseBody);
 
@@ -86,19 +89,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static void login(String query) {
-        String[] loginInfo = query.split("&");
-        String account = loginInfo[0].split("=")[1];
-        String password = loginInfo[1].split("=")[1];
+        Map<String, String> queryParams = parseQueryParams(query);
 
-        User user = InMemoryUserRepository.findByAccount(account)
+        if (queryParams.get("account") == null || queryParams.get("password") == null) {
+            return;
+        }
+
+        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
-        if (user.checkPassword(password)) {
+        if (user.checkPassword(queryParams.get("password"))) {
             log.info("user : {}", user.toString());
         }
     }
 
     private static void writeAndFlush(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 
@@ -109,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
         return response;
@@ -123,6 +128,16 @@ public class Http11Processor implements Runnable, Processor {
             return "javascript";
         }
         return "html";
+    }
+
+    private static Map<String, String> parseQueryParams(String queryParams) {
+        Map<String, String> queries = new HashMap<>();
+
+        for (String s : queryParams.split("&")) {
+            queries.put(s.split("=")[0], s.split("=")[1]);
+        }
+
+        return queries;
     }
 
     private Path getPath(String filePath) throws URISyntaxException {

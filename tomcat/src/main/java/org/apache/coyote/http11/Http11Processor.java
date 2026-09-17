@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -50,11 +51,28 @@ public class Http11Processor implements Runnable, Processor {
             String[] parts = requestToString.split(" ");
             String path = parts[1];
 
+            if (path.startsWith("/login")) {
+                String uri = path;
+                int index = path.indexOf("?");
+                path = uri.substring(0, index) + ".html";
+
+                String queryString = uri.substring(index + 1);
+                int queryIndex = queryString.indexOf("&");
+                String name = queryString.substring(8, queryIndex);
+                String password = queryString.substring(queryIndex + 10);
+
+                if (InMemoryUserRepository.findByAccount(name) != null) {
+                    log.info("user: {}", InMemoryUserRepository.findByAccount(name));
+                }
+            }
+
             if (!("/").equals(path)) {
                 log.info("path: {}", path);
                 Path filePath = Path.of(getClass().getResource("/static" + path).toURI());
                 responseBody = Files.readString(filePath);
             }
+
+
 
             String contentType = "text/html;charset=utf-8 ";
             if (requestToString.contains("text/css")) {

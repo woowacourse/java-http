@@ -249,7 +249,6 @@ public class Http11Processor implements Runnable, Processor {
         if (account == null || account.isBlank() || password == null || password.isBlank()) {
             return false;
         }
-
         var optionalUser = InMemoryUserRepository.findByAccount(account);
 
         if (optionalUser.isEmpty()) {

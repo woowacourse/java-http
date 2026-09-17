@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class QueryParam {
 
@@ -19,7 +19,7 @@ public class QueryParam {
     }
 
     public static QueryParam from(String s) {
-        String[] param = s.split("=");
+        String[] param = s.split("=", 2);
         return new QueryParam(param[0], param[1]);
     }
 }

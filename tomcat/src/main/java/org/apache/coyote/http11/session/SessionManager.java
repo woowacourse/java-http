@@ -1,6 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ public class SessionManager {
     }
 
 
-    public static Session findSession(String id) throws IOException {
+    public static Session findSession(String id) {
         return SESSIONS.get(id);
     }
 

@@ -1,7 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.resolver.ContentType;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.cookie.Cookies;
 
 public class HttpResponseHeader {
 
@@ -36,12 +39,12 @@ public class HttpResponseHeader {
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
 
         String cookieString = cookies.toString();
         if (cookieString != null && !cookieString.isEmpty()) {
-            sb.append("Set-Cookie: ").append(cookieString).append("\r\n");
+            sb.append("Set-Cookie: ").append(cookieString).append(" \r\n");
         }
 
         sb.append("\r\n");

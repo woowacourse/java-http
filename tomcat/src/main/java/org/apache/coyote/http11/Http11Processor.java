@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readFile(String path) throws IOException {
         URL url = getClass().getClassLoader().getResource(path);
-        return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+        return new String(Files.readAllBytes(new File(url.getFile()).toPath()), StandardCharsets.UTF_8);
     }
 
     private Map<String, String> parseQueryParams(String[] queryParamLine) {

@@ -4,20 +4,19 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -40,44 +39,75 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var reader = new BufferedReader(new InputStreamReader(inputStream,
-                    StandardCharsets.UTF_8));
-
+            final BufferedReader reader = createReader(inputStream);
             final String requestLine = reader.readLine();
-            if (requestLine == null) return;
+            if (requestLine == null) {
+                return;
+            }
 
-            final String requestTarget = requestLine.split(" ")[1];
-            final String[] targetParts = requestTarget.split("\\?", 2);
-            final String path = targetParts[0];
-            final String queryString = targetParts.length == 2 ? targetParts[1] : "";
-            final Map<String, String> queryParameters = parseQueryString(queryString);
+            final String requestTarget = extractRequestTarget(requestLine);
+            final String path = extractPath(requestTarget);
+            final Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            login(path, queryParameters);
 //            레벨2에 사용 예쩡
 //            String line;
 //            while ((line = reader.readLine()) != null && !line.isEmpty()) {
 //
 //            }
-
-            final byte[] responseBody = createResponseBody(path);
-            if (responseBody == null) {
-                return;
-            }
-
-            final var responseHeader = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + resolveContentType(path) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    "");
-
-
-            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
-            outputStream.flush();
+            final byte[] responseBody = handleRequest(path, queryParameters);
+            writeResponse(outputStream, path, responseBody);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private BufferedReader createReader(final InputStream inputStream) {
+        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    }
+
+    private String extractRequestTarget(final String requestLine) {
+        final String[] requestLineParts = requestLine.trim().split("\\s+", 3);
+
+        if (requestLineParts.length != 3) {
+            throw new IllegalArgumentException(
+                    "올바르지 않은 HTTP 요청 라인입니다: " + requestLine
+            );
+        }
+
+        return requestLineParts[1];
+    }
+
+    private String extractPath(final String requestTarget) {
+        return requestTarget.split("\\?", 2)[0];
+    }
+
+    private Map<String, String> parseQueryParameters(final String requestTarget) {
+        final String[] targetParts = requestTarget.split("\\?", 2);
+        final String queryString = targetParts.length == 2 ? targetParts[1] : "";
+
+        return parseQueryString(queryString);
+    }
+
+    private void writeResponse(final OutputStream outputStream, final String path,
+                               final byte[] responseBody) throws IOException {
+        if (responseBody == null) {
+            return;
+        }
+
+        outputStream.write(createResponseHeader(path, responseBody.length));
+        outputStream.write(responseBody);
+        outputStream.flush();
+    }
+
+    private byte[] createResponseHeader(final String path, final int contentLength) {
+        final String responseHeader = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + resolveContentType(path) + ";charset=utf-8 ",
+                "Content-Length: " + contentLength + " ",
+                "",
+                "");
+
+        return responseHeader.getBytes(StandardCharsets.UTF_8);
     }
 
     private String resolveContentType(final String path) {
@@ -88,12 +118,14 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private byte[] createResponseBody(final String path) throws IOException {
+    private byte[] handleRequest(final String path,
+                                 final Map<String, String> queryParameters) throws IOException {
         if ("/".equals(path)) {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
         if ("/login".equals(path)) {
+            login(queryParameters);
             return readResource("/login.html");
         }
 
@@ -117,11 +149,7 @@ public class Http11Processor implements Runnable, Processor {
         return queryParameters;
     }
 
-    private void login(final String path, final Map<String, String> queryParameters) {
-        if (!"/login".equals(path)) {
-            return;
-        }
-
+    private void login(final Map<String, String> queryParameters) {
         final String account = queryParameters.get("account");
         final String password = queryParameters.get("password");
         if (account == null || password == null) {

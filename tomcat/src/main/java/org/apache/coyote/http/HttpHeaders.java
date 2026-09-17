@@ -32,6 +32,14 @@ public class HttpHeaders {
         return new HttpHeaders(values);
     }
 
+    public static HttpHeaders from(Map<String, String> headers) {
+        return new HttpHeaders(headers);
+    }
+
+    public Map<String, String> getValues() {
+        return values;
+    }
+
     public Optional<String> get(String name) {
         return Optional.ofNullable(values.get(name));
     }

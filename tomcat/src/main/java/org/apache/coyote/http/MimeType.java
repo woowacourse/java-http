@@ -1,4 +1,4 @@
-package org.apache.catalina.resource;
+package org.apache.coyote.http;
 
 import java.util.Arrays;
 

@@ -2,19 +2,29 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.handler.LoginHandler;
+import com.techcourse.handler.StaticResourceHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.apache.catalina.handler.ResourceResolver;
+import org.apache.coyote.Adapter;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private static final Adapter ADAPTER = new ResourceResolver(List.of(
+            new LoginHandler(),
+            new StaticResourceHandler()
+    ));
+
     @Test
     void process() throws IOException {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, ADAPTER);
 
         // when
         processor.process(socket);
@@ -34,7 +44,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, ADAPTER);
 
         // when
         processor.process(socket);

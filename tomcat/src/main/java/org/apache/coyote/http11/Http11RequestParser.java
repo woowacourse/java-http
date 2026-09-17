@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpServletRequest;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.RequestBody;
@@ -25,10 +24,9 @@ public class Http11RequestParser {
     public HttpServletRequest parse() throws IOException {
         final RequestLine requestLine = RequestLine.from(readFirstLine());
         final HttpHeaders headers = HttpHeaders.from(readHeaderLines());
-        final ContentType contentType = ContentType.from(headers.contentType());
-        final RequestBody body = RequestBody.of(contentType, readBody(headers.contentLength()));
+        final RequestBody body = RequestBody.of(readBody(headers.contentLength()));
 
-        return HttpServletRequest.of(requestLine, headers, body);
+        return new HttpServletRequest(requestLine, headers, body);
     }
 
     private String readFirstLine() throws IOException {

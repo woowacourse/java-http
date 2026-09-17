@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,27 +49,42 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.of(
                     new HttpStatusLine(HTTP_VERSION, 200, "OK"),
                     "text/html;charset=utf-8",
-                    "Hello world!".getBytes()
+                    "Hello world!".getBytes(StandardCharsets.UTF_8)
             );
         }
 
-        try (InputStream resource = findResource(uri)) {
+        String path = resolvePath(uri);
+
+        try (InputStream resource = getClass().getClassLoader().getResourceAsStream(path)) {
             return HttpResponse.of(
                     new HttpStatusLine(HTTP_VERSION, 200, "OK"),
-                    "text/html;charset=utf-8",
+                    contentTypeOf(path),
                     resource.readAllBytes()
             );
         }
     }
 
-    private InputStream findResource(String uri) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream resource = classLoader.getResourceAsStream("static" + uri);
+    private String resolvePath(String uri) {
+        String path = "static" + uri;
 
-        if (resource == null) {
-            resource = classLoader.getResourceAsStream("static/404.html");
+        if (getClass().getClassLoader().getResource(path) == null) {
+            return "static/404.html";
         }
 
-        return resource;
+        return path;
+    }
+
+    private String contentTypeOf(String path) {
+        String contentType = URLConnection.guessContentTypeFromName(path);
+
+        if (contentType == null) {
+            return "application/octet-stream";
+        }
+
+        if (contentType.startsWith("text/")) {
+            return contentType + ";charset=utf-8";
+        }
+
+        return contentType;
     }
 }

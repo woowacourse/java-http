@@ -41,17 +41,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
-            final String uri = bufferedReader.readLine()
-                .split(" ")[1];
-            final Map<String, String> target = parseTarget(uri);
-            final String path = target.get("path");
-            final Map<String, String> queryParams = extractQueryParams(target.get("queryString"));
-            if (!queryParams.isEmpty()) {
-                getUser(queryParams);
+            RequestTarget requestTarget = getRequestTarget(bufferedReader);
+            if (requestTarget.hasQueryParams()) {
+                getUser(requestTarget.queryParams());
             }
 
-            final String contentType = getContentType(path);
-            final String body = readStaticResource(path);
+            final String contentType = getContentType(requestTarget.path());
+            final String body = readStaticResource(requestTarget.path());
 
             final String response = generateResponse(body, contentType);
 
@@ -62,17 +58,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private RequestTarget getRequestTarget(final BufferedReader bufferedReader) throws IOException {
+        final String uri = bufferedReader.readLine()
+            .split(" ")[1];
+        final Map<String, String> target = parseTarget(uri);
+        final String path = target.get("path");
+        final Map<String, String> queryParams = extractQueryParams(target.get("queryString"));
+
+        return new RequestTarget(path, queryParams);
+    }
+
     private Map<String, String> parseTarget(String uri) {
-        final int index = uri.indexOf("?");
+        final String queryDelimiter = "?";
         String path = "";
         String queryString = "";
-        if (index == -1) {
+        if (!uri.contains(queryDelimiter)) {
             path = uri;
             queryString = "";
         }
-        if (index != -1) {
-            path = uri.substring(0, index);
-            queryString = uri.substring(index + 1);
+        if (uri.contains(queryDelimiter)) {
+            final int queryIndex = uri.indexOf(queryDelimiter);
+            path = uri.substring(0, queryIndex);
+            queryString = uri.substring(queryIndex + 1);
         }
         if (path.length() > 1 && !path.contains(".")) {
             path += ".html";
@@ -89,12 +96,12 @@ public class Http11Processor implements Runnable, Processor {
         }
         Arrays.stream(queryString.split("&"))
             .map(keyValue -> keyValue.split("="))
-            .forEach(splitted -> queryParams.put(splitted[0], splitted[1]));
+            .forEach(split -> queryParams.put(split[0], split[1]));
 
         return queryParams;
     }
 
-    private void getUser(Map<String, String> queryParams) {
+    private void getUser(final Map<String, String> queryParams) {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
         final User user = InMemoryUserRepository.findByAccount(account)
@@ -116,21 +123,21 @@ public class Http11Processor implements Runnable, Processor {
         return prefix + filePath.substring(lastDotIndex + 1);
     }
 
-    private String readStaticResource(String filePath) throws IOException {
+    private String readStaticResource(final String filePath) throws IOException {
         if (filePath.equals(ROOT_DIRECTORY)) {
             return DEFAULT_BODY;
         }
-        final StringBuffer readResource = new StringBuffer();
+        final StringBuilder readResource = new StringBuilder();
 
         final Path path = Path.of(getClass()
             .getResource("/static" + filePath)
             .getPath());
 
-        String string;
+        String line;
         try (final BufferedReader bufferedReader =
             new BufferedReader(new FileReader(path.toFile()))) {
-            while ((string = bufferedReader.readLine()) != null) {
-                readResource.append(string);
+            while ((line = bufferedReader.readLine()) != null) {
+                readResource.append(line);
                 readResource.append("\n");
             }
         }

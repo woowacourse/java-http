@@ -38,6 +38,22 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = reader.readLine();
             log.info("request line: {}", requestLine);
 
+            if (requestLine == null) {
+                return;
+            }
+
+            final String[] parts = requestLine.split(" ");
+            if (parts.length != 3) {
+                return;
+            }
+
+            final String method = parts[0];
+            final String requestTarget = parts[1];
+            final String httpVersion = parts[2];
+
+            log.info("method: {}, target: {}, version: {}",
+                    method, requestTarget, httpVersion);
+
             final var responseBody = "Hello world!";
 
             final var response = String.join("\r\n",

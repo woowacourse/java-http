@@ -22,10 +22,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final Map<String, String> CONTENT_TYPE = Map.of("html", "text/html", "css", "text/css", "js", "application/javascript");
+    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String STATIC_ROOT = "static";
     private static final String DEFAULT_REQUEST = "/";
-    private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_REQUEST = "/login";
+    private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
 
@@ -45,8 +46,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final InputStreamReader inputReader = new InputStreamReader(inputStream);
-             final BufferedReader reader = new BufferedReader(inputReader)) {
+             final var inputReader = new InputStreamReader(inputStream);
+             final var reader = new BufferedReader(inputReader)) {
 
             String requestUri = reader.readLine().split(" ")[1];
 
@@ -59,7 +60,6 @@ public class Http11Processor implements Runnable, Processor {
             }
             Map<String, String> queryParams = parseQueryString(queryString);
 
-            String response = "";
             if (requestUri.equals(DEFAULT_REQUEST)) {
                 requestUri = INDEX_PAGE;
             }
@@ -69,21 +69,11 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             URL url = getClass().getClassLoader().getResource(STATIC_ROOT + requestUri);
+            String response;
             if (url == null) {
-                url = getClass().getClassLoader().getResource(STATIC_ROOT + NOT_FOUND_PAGE);
-                String responseBody = new String(Files.readAllBytes(Paths.get(url.toURI())));
-                String extension = getExtension(NOT_FOUND_PAGE);
-
-                response = "HTTP/1.1 404 Not Found \r\n" +
-                        "Content-Type: " + CONTENT_TYPE.get(extension) + ";charset=utf-8 \r\n" +
-                        "Content-Length: " + getContentLength(responseBody) + " \r\n\r\n" + responseBody;
+                response = makeResponse(HttpStatus.NOT_FOUND, NOT_FOUND_PAGE);
             } else {
-                String responseBody = new String(Files.readAllBytes(Paths.get(url.toURI())));
-                String extension = getExtension(requestUri);
-
-                response = "HTTP/1.1 200 OK \r\n" +
-                        "Content-Type: " + CONTENT_TYPE.get(extension) + ";charset=utf-8 \r\n" +
-                        "Content-Length: " + getContentLength(responseBody) + " \r\n\r\n" + responseBody;
+                response = makeResponse(HttpStatus.OK, requestUri);
             }
 
             outputStream.write(response.getBytes());
@@ -124,9 +114,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getExtension(String requestUri) {
-        int lastIndex = requestUri.lastIndexOf(".");
-        return requestUri.substring(lastIndex + 1);
+    private String makeResponse(HttpStatus status, String resourcePath) throws IOException, URISyntaxException {
+        URL url = getClass().getClassLoader().getResource(STATIC_ROOT + resourcePath);
+        String responseBody = new String(Files.readAllBytes(Paths.get(url.toURI())));
+        String extension = getExtension(resourcePath);
+
+        return HTTP_VERSION + " " + status.getCode() + " " + status.getReasonPhrase() + " \r\n" +
+                "Content-Type: " + CONTENT_TYPE.getOrDefault(extension, "text/html") + ";charset=utf-8 \r\n" +
+                "Content-Length: " + getContentLength(responseBody) + " \r\n\r\n" +
+                responseBody;
+    }
+
+    private String getExtension(String resourcePath) {
+        int lastIndex = resourcePath.lastIndexOf(".");
+        return resourcePath.substring(lastIndex + 1);
     }
 
     private int getContentLength(String responseBody) {

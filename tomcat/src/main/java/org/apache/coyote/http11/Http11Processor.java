@@ -3,14 +3,12 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
@@ -69,12 +67,15 @@ public class Http11Processor implements Runnable, Processor {
                 respondHelloWorld(outputStream);
                 return;
             }
-
+            if (path.equals("/register")) {
+                handleRegister(outputStream);
+                return;
+            }
             if (path.equals("/login")) {
                 handleLogin(queryString, outputStream);
                 return;
             }
-            respondStaticResource(path, outputStream);
+            respondStaticResource(htmlParser(path), outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -122,6 +123,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String htmlParser(String path) {
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+        return path;
+    }
+
     private void handleLogin(String queryString, OutputStream outputStream) throws IOException {
         Map<String, String> params = parseQueryString(queryString);
         String account = params.get("account");
@@ -144,6 +152,11 @@ public class Http11Processor implements Runnable, Processor {
             log.debug("비밀번호 불일치: {}", account);
             respondStaticResource("/401.html", outputStream);
         }
+    }
+
+    private void handleRegister(OutputStream outputStream)
+            throws IOException {
+
     }
 
     private void response302LoginSuccessHeader(OutputStream outputStream) {

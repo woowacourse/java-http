@@ -56,14 +56,42 @@ public class Http11Processor implements Runnable, Processor {
             final String url = requestLine[1];
             final String httpVersion = requestLine[2];
 
+            // URL 쿼리 분리
+            String[] devidedUrlQuery = url.split("\\?");
+            boolean isQuery = devidedUrlQuery.length > 1;
+            String urlPath = devidedUrlQuery[0];
+            Map<String, String> queryMap = new LinkedHashMap<>();
+
+            if(isQuery) {
+                String queryString = devidedUrlQuery[1];
+                if(queryString != null && !queryString.isBlank()) {
+                    String[] query = queryString.split("&");
+                    for(int i = 0; i < query.length; i++) {
+                        String[] value = query[i].split("=");
+                        queryMap.put(value[0], value[1]);
+                    }
+                }
+            }
+
+
             // 경로 없음 -> Hello world!
             // 경로 존재하면 파일 읽기
             String responseBody;
             if(url.equals("/")) {
                 responseBody = "Hello world!";
-            } else {
-                URL resource = getClass().getClassLoader().getResource("static" + url);
+            } else if (urlPath.equals("/login")) {
+                URL resource = getClass().getClassLoader().getResource("static" + urlPath + ".html");
                 responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+            } else {
+                URL resource = getClass().getClassLoader().getResource("static" + urlPath);
+                responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+            }
+
+            // 로그
+            if(urlPath.equals("/login") && isQuery && queryMap.containsKey("account") && queryMap.containsKey("password")) {
+                InMemoryUserRepository.findByAccount(queryMap.get("account"))
+                        .filter(user -> user.checkPassword(queryMap.get("password")))
+                        .ifPresent(user -> log.info("회원 조회 성공: {}", user));
             }
 
             // 헤더를 하나씩 읽으면서 Accept 존재하면 확장자 설정

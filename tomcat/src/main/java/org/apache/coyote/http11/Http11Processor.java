@@ -11,7 +11,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -58,8 +59,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseBody(String requestUri) throws IOException {
         if (requestUri.contains("/login?")) {
-            String[] value = getQueryParameterValues(requestUri);
-            User user = InMemoryUserRepository.findByAccount(value[0]).orElseThrow();
+            Map<String, String> queryMap = getQuerySeparate(requestUri);
+            String account = queryMap.get("account");
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
             log.info(user.toString());
 
             String paths = getStaticResource("/login.html");
@@ -77,16 +79,16 @@ public class Http11Processor implements Runnable, Processor {
         return "Hello world!";
     }
 
-    @Nonnull
-    private String[] getQueryParameterValues(String requestUri) {
+    private Map<String, String> getQuerySeparate(String requestUri) {
+        Map<String, String> queryMap = new HashMap<>();
         int index = requestUri.indexOf("?");
         String queryString = requestUri.substring(index + 1);
         String[] queryParameters = queryString.split("&");
-        String[] queryParameterValues = new String[queryParameters.length];
-        for (int i = 0; i < queryParameters.length; i++) {
-            queryParameterValues[i] = queryParameters[i].split("=")[1];
+        for (String parameter : queryParameters) {
+            String[] queryParameter = parameter.split("=", -1);
+            queryMap.put(queryParameter[0], queryParameter[1]);
         }
-        return queryParameterValues;
+        return queryMap;
     }
 
     private String getContentType(String requestUri) {

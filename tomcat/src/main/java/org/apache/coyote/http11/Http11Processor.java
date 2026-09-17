@@ -53,16 +53,16 @@ public class Http11Processor implements Runnable, Processor {
             final String url = requestLine.split(" ")[1];
 
             if ("/".equals(url)) {
-                writeResponse(outputStream, "200 OK", "Hello world!".getBytes(StandardCharsets.UTF_8));
+                writeResponse(outputStream, "200 OK", ContentType.HTML, "Hello world!".getBytes(StandardCharsets.UTF_8));
                 return;
             }
 
             final Optional<Path> staticFile = findStaticFile(url);
             if (staticFile.isEmpty()) {
-                writeResponse(outputStream, "404 Not Found", readNotFoundBody());
+                writeResponse(outputStream, "404 Not Found", ContentType.HTML, readNotFoundBody());
                 return;
             }
-            writeResponse(outputStream, "200 OK", Files.readAllBytes(staticFile.get()));
+            writeResponse(outputStream, "200 OK", ContentType.from(url), Files.readAllBytes(staticFile.get()));
         } catch (IOException | UncheckedServletException |URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -97,10 +97,17 @@ public class Http11Processor implements Runnable, Processor {
         return "Not Found".getBytes(StandardCharsets.UTF_8);
     }
 
-    private void writeResponse(final OutputStream outputStream, final String status, final byte[] body) throws IOException {
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String status,
+            final ContentType contentType,
+            final byte[] body
+    ) throws IOException {
+        log.info("content-type: {}", contentType.getValue());
+
         final String header = String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType.getValue() + " ",
                 "Content-Length: " + body.length + " ",
                 "",
                 "");

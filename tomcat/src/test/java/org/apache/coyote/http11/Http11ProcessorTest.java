@@ -58,4 +58,33 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n" +
+                new String(body);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

@@ -43,8 +43,8 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestUri = readRequestUri(reader);
 
-            if (requestUri.equals("/index.html")) {
-                serverIndexPage(reader, requestUri, outputStream);
+            if (requestUri.endsWith(".html") || requestUri.endsWith(".css") || requestUri.endsWith(".js")) {
+                serveStaticFile(reader, requestUri, outputStream);
                 return;
             }
             if (requestUri.equals("/")) {
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String readRequestUri(BufferedReader reader) throws IOException {
+    private String readRequestUri(BufferedReader reader) throws IOException {
         String line = reader.readLine();
 
         if (line == null) {
@@ -67,11 +67,10 @@ public class Http11Processor implements Runnable, Processor {
             throw new IOException("Invalid line received: " + line);
         }
 
-        String requestUri = parts[1];
-        return requestUri;
+        return parts[1];
     }
 
-    private void serverIndexPage(BufferedReader reader, String requestUri, OutputStream outputStream) throws IOException {
+    private void serveStaticFile(BufferedReader reader, String requestUri, OutputStream outputStream) throws IOException {
         Map<String, String> headers = new HashMap<>();
         readRequestHeader(reader, headers);
 
@@ -80,21 +79,31 @@ public class Http11Processor implements Runnable, Processor {
         Path path = Path.of(resource.getPath());
 
         byte[] responseBody = Files.readAllBytes(path);
-
-        final var response = createHtmlOkResponseHeader(responseBody.length);
+        String contentType = findContentType(requestUri);
+        final var response = createHtmlOkResponseHeader(contentType, responseBody.length);
 
         writeResponse(outputStream, response.getBytes(UTF_8), responseBody);
     }
 
-    private static void serverHomePage(OutputStream outputStream) throws IOException {
+    private String findContentType(String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return "text/css";
+        }
+        if (requestUri.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html;charset=utf-8";
+    }
+
+    private void serverHomePage(OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
 
-        final var response = createHtmlOkResponseHeader(responseBody.getBytes().length);
+        final var response = createHtmlOkResponseHeader(findContentType("/"), responseBody.getBytes().length);
 
         writeResponse(outputStream, response.getBytes(), responseBody.getBytes(UTF_8));
     }
 
-    private static void readRequestHeader(BufferedReader reader, Map<String, String> headers) throws IOException {
+    private void readRequestHeader(BufferedReader reader, Map<String, String> headers) throws IOException {
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             String[] headerParts = line.split(" ");
@@ -103,17 +112,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Nonnull
-    private static String createHtmlOkResponseHeader(int contentLength) {
+    private String createHtmlOkResponseHeader(String contentType, int contentLength) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + contentLength + " ",
                 "",
                 ""
         );
     }
 
-    private static void writeResponse(OutputStream outputStream, byte[] response, byte[] responseBody)
+    private void writeResponse(OutputStream outputStream, byte[] response, byte[] responseBody)
             throws IOException {
         outputStream.write(response);
         outputStream.write(responseBody);

@@ -12,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Dispatcher;
@@ -59,7 +61,14 @@ public class Http11Processor implements Runnable, Processor {
                 return Optional.empty();
             }
 
-            return Optional.of(dispatcher.dispatch(request.get()));
+            HttpResponse response = dispatcher.dispatch(request.get());
+
+            if (request.get().cookies().getCookie("JSESSIONID") == null) {
+                String sessionId = UUID.randomUUID().toString();
+                response = response.withCookie("JSESSIONID", sessionId);
+            }
+
+            return Optional.of(response);
         } catch (BadRequestException e) {
             return Optional.of(HttpResponse.badRequest(
                     "400 Bad Request".getBytes(StandardCharsets.UTF_8)
@@ -90,8 +99,24 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.of(new HttpRequest(
                 parts[0],
                 uri.getPath(),
-                parameters
+                parameters,
+                parseCookies(headers.get("cookie"))
         ));
+    }
+
+    private HttpCookie parseCookies(String cookieHeader) {
+        Map<String, String> cookies = new HashMap<>();
+        if (cookieHeader == null || cookieHeader.isBlank()) {
+            return new HttpCookie(cookies);
+        }
+
+        for (String cookie : cookieHeader.split(";")) {
+            String[] parts = cookie.trim().split("=", 2);
+            if (parts.length == 2 && !parts[0].isBlank()) {
+                cookies.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+        return new HttpCookie(cookies);
     }
 
     private URI createUri(String target, String requestLine) {
@@ -178,15 +203,15 @@ public class Http11Processor implements Runnable, Processor {
         while ((line = readline(inputStream)) != null && !line.isBlank()) {
             String[] parts = line.split(":", 2);
             if (parts.length == 2) {
-                headers.put(parts[0].trim(), parts[1].trim());
+                headers.put(parts[0].trim().toLowerCase(), parts[1].trim());
             }
         }
         return headers;
     }
 
     private String readBody(InputStream inputStream, Map<String, String> headers) throws IOException {
-        if (headers.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        if (headers.containsKey("content-length")) {
+            int contentLength = Integer.parseInt(headers.get("content-length"));
             byte[] body = inputStream.readNBytes(contentLength);
             return new String(body, StandardCharsets.UTF_8);
         }

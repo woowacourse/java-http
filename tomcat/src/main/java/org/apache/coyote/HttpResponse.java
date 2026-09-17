@@ -1,5 +1,6 @@
 package org.apache.coyote;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Map;
 
@@ -45,5 +46,12 @@ public record HttpResponse(
     public static HttpResponse redirect(String location) {
         return new HttpResponse("302 Found", "text/html;charset=utf-8", new byte[0],
                 Map.of("Location", location));
+    }
+
+    public HttpResponse withCookie(String name, String value) {
+        Map<String, String> newHeaders = new HashMap<>(headers);
+        newHeaders.put("Set-Cookie", name + "=" + value);
+
+        return new HttpResponse(statusCode, contentType, body, newHeaders);
     }
 }

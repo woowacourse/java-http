@@ -11,6 +11,8 @@ import support.StubSocket;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
+import org.apache.coyote.HttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +53,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket("GET / HTTP/1.1\r\nCookie: JSESSIONID=existing-session\r\n\r\n");
         final var processor = createProcessor(socket);
 
         // when
@@ -69,6 +71,7 @@ class Http11ProcessorTest {
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=existing-session",
                 "Connection: keep-alive ",
                 "",
                 "");
@@ -92,6 +95,7 @@ class Http11ProcessorTest {
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=wrong-password HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session",
                 "Connection: keep-alive",
                 "",
                 "");
@@ -114,6 +118,7 @@ class Http11ProcessorTest {
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session",
                 "Connection: keep-alive",
                 "",
                 "");
@@ -140,6 +145,7 @@ class Http11ProcessorTest {
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session",
                 "Connection: keep-alive",
                 "",
                 "");
@@ -162,6 +168,7 @@ class Http11ProcessorTest {
         final String httpRequest = String.join("\r\n",
                 "GET /not-found.css HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session",
                 "Connection: keep-alive",
                 "",
                 "");
@@ -185,13 +192,66 @@ class Http11ProcessorTest {
 
     @Test
     void loginPage() throws IOException {
-        final var socket = new StubSocket("GET /login HTTP/1.1\r\n\r\n");
+        final var socket = new StubSocket("GET /login HTTP/1.1\r\nCookie: JSESSIONID=existing-session\r\n\r\n");
         final var processor = createProcessor(socket);
 
         processor.process(socket);
 
         assertThat(socket.output()).isEqualTo(createResponse(
                 "text/html;charset=utf-8", readResource("static/login.html")));
+    }
+
+    @Test
+    void issuesSessionCookieWhenCookieHeaderIsMissing() {
+        final var socket = new StubSocket();
+
+        createProcessor(socket).process(socket);
+
+        assertSessionCookie(socket.output());
+    }
+
+    @Test
+    void issuesSessionCookieWhenOnlyOtherCookiesExistAndPreservesRedirect() {
+        final var socket = new StubSocket(String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry",
+                "", ""));
+
+        createProcessor(socket).process(socket);
+
+        assertSessionCookie(socket.output());
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n")
+                .contains("\r\nLocation: /index.html\r\n");
+    }
+
+    @Test
+    void parsesCookiesAndKeepsExistingSession() {
+        final var socket = new StubSocket(String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Cookie: yummy_cookie=choco; JSESSIONID=existing-session; token=abc==",
+                "content-length: 12",
+                "", "account=gugu"));
+        final var processor = new Http11Processor(socket, request -> {
+            assertThat(request.cookies().getCookie("yummy_cookie")).isEqualTo("choco");
+            assertThat(request.cookies().getCookie("JSESSIONID")).isEqualTo("existing-session");
+            assertThat(request.cookies().getCookie("token")).isEqualTo("abc==");
+            assertThat(request.parameters()).containsEntry("account", "gugu");
+            return HttpResponse.redirect("/index.html");
+        });
+
+        processor.process(socket);
+
+        assertThat(socket.output()).isEqualTo(createRedirectResponse("/index.html"));
+    }
+
+    private void assertSessionCookie(String response) {
+        var cookies = response.split("\r\n\r\n", 2)[0].lines()
+                .filter(line -> line.startsWith("Set-Cookie: "))
+                .toList();
+        assertThat(cookies).hasSize(1);
+        assertThat(cookies.getFirst()).startsWith("Set-Cookie: JSESSIONID=");
+        String sessionId = cookies.getFirst().substring("Set-Cookie: JSESSIONID=".length());
+        assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
     }
 
     private Http11Processor createProcessor(StubSocket socket) {

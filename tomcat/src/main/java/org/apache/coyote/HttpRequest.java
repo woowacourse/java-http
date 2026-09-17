@@ -5,7 +5,8 @@ import java.util.Map;
 public record HttpRequest(
         String method,
         String path,
-        Map<String, String> parameters
+        Map<String, String> parameters,
+        HttpCookie cookies
 ) {
 
     public HttpRequest {

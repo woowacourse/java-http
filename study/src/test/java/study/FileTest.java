@@ -1,5 +1,11 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +34,10 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        String actual = "";
+        URL url = FileTest.class.getClassLoader().getResource(fileName);
+        Assertions.assertNotNull(url);
+        actual = url.getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,15 +49,20 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        URL url = FileTest.class.getClassLoader().getResource(fileName);
+        Assertions.assertNotNull(url);
+        final Path path = Path.of(url.toURI());
 
         // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            final List<String> actual = reader.lines().toList();
+            assertThat(actual).containsOnly("nextstep");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

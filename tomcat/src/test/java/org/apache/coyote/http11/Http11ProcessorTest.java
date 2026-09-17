@@ -87,7 +87,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginFail() throws IOException {
+    void loginFail() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=wrong-password HTTP/1.1",
@@ -103,8 +103,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String responseBody = readResource("static/login.html");
-        var expected = createResponse("text/html;charset=utf-8", responseBody);
+        var expected = createRedirectResponse("/401.html");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -136,7 +135,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void login() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1",
@@ -152,8 +151,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String responseBody = readResource("static/login.html");
-        var expected = createResponse("text/html;charset=utf-8", responseBody);
+        var expected = createRedirectResponse("/index.html");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -185,10 +183,21 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Test
+    void loginPage() throws IOException {
+        final var socket = new StubSocket("GET /login HTTP/1.1\r\n\r\n");
+        final var processor = createProcessor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).isEqualTo(createResponse(
+                "text/html;charset=utf-8", readResource("static/login.html")));
+    }
+
     private Http11Processor createProcessor(StubSocket socket) {
         final var service = new ApplicationService();
-        final var controller = new ApplicationController(service);
         final var resourceHandler = new StaticResourceHandler();
+        final var controller = new ApplicationController(service);
         final var dispatcher = new ApplicationDispatcher(controller, resourceHandler);
 
         return new Http11Processor(socket, dispatcher);
@@ -201,6 +210,17 @@ class Http11ProcessorTest {
                     StandardCharsets.UTF_8
             );
         }
+    }
+
+    private String createRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 0",
+                "Location: " + location,
+                "",
+                ""
+        );
     }
 
     private String createResponse(String contentType, String responseBody) {

@@ -1,6 +1,8 @@
 package com.techcourse.web;
 
 import com.techcourse.controller.ApplicationController;
+import com.techcourse.controller.ControllerResult.Redirect;
+import com.techcourse.controller.ControllerResult.View;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -24,8 +26,10 @@ public class ApplicationDispatcher implements Dispatcher {
         Map<String, String> parameters = httpRequest.parameters();
 
         if ("/login".equals(path)) {
-            String responsePath = applicationController.login(parameters);
-            return staticResourceHandler.createResponse(responsePath);
+            return switch (applicationController.login(parameters)) {
+                case View view -> staticResourceHandler.createResponse(view.path());
+                case Redirect redirect -> HttpResponse.redirect(redirect.location());
+            };
         }
 
         if ("/".equals(path)) {
@@ -37,4 +41,5 @@ public class ApplicationDispatcher implements Dispatcher {
 
         return staticResourceHandler.createResponse(path);
     }
+
 }

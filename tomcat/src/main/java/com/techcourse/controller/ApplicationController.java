@@ -15,16 +15,19 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-
-    public String login(Map<String, String> params) {
+    public ControllerResult login(Map<String, String> params) {
         String account = params.get("account");
         String password = params.get("password");
 
         if (account != null && password != null) {
             var user = applicationService.login(account, password);
-            user.ifPresent(loginUser -> log.info("login user: {}", loginUser));
+            if (user.isPresent()) {
+                log.info("User :{}", user.get());
+                return new ControllerResult.Redirect("/index.html");
+            }
+            return new ControllerResult.Redirect("/401.html");
         }
 
-        return "/login.html";
+        return new ControllerResult.View("/login.html");
     }
 }

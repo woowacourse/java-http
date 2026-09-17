@@ -124,15 +124,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-        String headers = String.join("\r\n",
+        StringBuilder headers = new StringBuilder(String.join("\r\n",
                 "HTTP/1.1 " + response.statusCode(),
                 "Content-Type: " + response.contentType(),
                 "Content-Length: " + response.contentLength(),
-                "",
                 ""
-        );
+        ));
+        response.headers().forEach((name, value) ->
+                headers.append(name).append(": ").append(value).append("\r\n"));
+        headers.append("\r\n");
 
-        outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(headers.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(response.body());
         outputStream.flush();
     }

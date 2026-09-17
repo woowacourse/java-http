@@ -9,10 +9,12 @@ import java.nio.charset.StandardCharsets;
 
 public record HttpRequestLine(
         String method,
-        String uri
+        String uri,
+        String queryString
 ) {
     private static final String SP = " ";
     private static final Charset REQUEST_LINE_CHARSET = StandardCharsets.US_ASCII;
+    private static final String QUERY_DELIMITER = "?";
 
 
     public static HttpRequestLine from(InputStream inputStream) throws IOException {
@@ -29,6 +31,17 @@ public record HttpRequestLine(
             throw new IOException("잘못된 HTTP Request Line 형식입니다: " + requestLine);
         }
 
-        return new HttpRequestLine(requestLineParts[0], requestLineParts[1]);
+        final String requestTarget = requestLineParts[1];
+        final int queryIndex = requestTarget.indexOf(QUERY_DELIMITER);
+
+        if (queryIndex == -1) {
+            return new HttpRequestLine(requestLineParts[0], requestTarget, null);
+        }
+
+        return new HttpRequestLine(
+                requestLineParts[0],
+                requestTarget.substring(0, queryIndex),
+                requestTarget.substring(queryIndex + 1)
+        );
     }
 }

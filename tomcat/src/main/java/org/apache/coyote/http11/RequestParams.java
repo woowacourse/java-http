@@ -15,10 +15,18 @@ public class RequestParams {
         Map<String, String> params = new HashMap<>();
         String[] parameters = queryString.split("&");
         for (String param : parameters) {
-            String[] kv = param.split("=");
-            params.put(kv[0], kv[1]);
+            putParams(param, params);
         }
         return new RequestParams(params);
+    }
+
+    private static void putParams(String param, Map<String, String> params) {
+        String[] keyValue = param.split("=");
+        if (keyValue.length == 2) {
+            String key = keyValue[0].trim();
+            String value = keyValue[1].trim();
+            params.put(key, value);
+        }
     }
 
     public String getParams(String key) {

@@ -30,7 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequestLine requestLine = HttpRequestLine.from(inputStream);
+            final HttpRequestLine requestLine = HttpRequestLine.from(inputStream);
             final String uri = requestLine.getUri();
 
             final String responseBody = readContentsFrom(uri);

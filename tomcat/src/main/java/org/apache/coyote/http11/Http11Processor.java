@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,20 +49,30 @@ public class Http11Processor implements Runnable, Processor {
             final String[] lines = requestLine.split(" ");
             final String uri = lines[1];
 
-            String headerLine = bufferedReader.readLine();
-            while (headerLine != null && !headerLine.isEmpty()) {
-                headerLine = bufferedReader.readLine();
-                if (headerLine == null) {
-                    return;
-                }
+            int queryIndex = uri.indexOf("?");
+
+            String path = uri;
+            String queryString = "";
+
+            if (queryIndex != -1) {
+                path = uri.substring(0, queryIndex);
+                queryString = uri.substring(queryIndex + 1);
             }
+
+            readHeaders(bufferedReader);
 
             var responseBody = "Hello world!";
             int contentLength = responseBody.getBytes().length;
-            String contentType = "text/html;charset=utf-8";
+            String contentType = getContentType(path);
 
-            if (!uri.equals("/")) {
-                byte[] fileBytes = readResource("static" + uri);
+            if (!path.equals("/")) {
+                String resourcePath = getResourcePath(path);
+
+                byte[] fileBytes = readResource(resourcePath);
+
+                if (path.equals("/login") && !queryString.isEmpty()) {
+                    login(queryString);
+                }
 
                 if (fileBytes == null) {
                     return;
@@ -67,10 +80,6 @@ public class Http11Processor implements Runnable, Processor {
 
                 responseBody = new String(fileBytes, StandardCharsets.UTF_8);
                 contentLength = fileBytes.length;
-            }
-
-            if (uri.endsWith(".css")) {
-                contentType = "text/css";
             }
 
             final var response = String.join("\r\n",
@@ -96,5 +105,60 @@ public class Http11Processor implements Runnable, Processor {
         Path path = Paths.get(resourceUri);
 
         return Files.readAllBytes(path);
+    }
+
+    private void readHeaders(BufferedReader bufferedReader) throws IOException {
+        String headerLine = bufferedReader.readLine();
+        while (headerLine != null && !headerLine.isEmpty()) {
+            headerLine = bufferedReader.readLine();
+            if (headerLine == null) {
+                return;
+            }
+        }
+    }
+
+    private String getResourcePath(String path) {
+        if (path.equals("/login")) {
+            return "static/login.html";
+        }
+        return "static" + path;
+    }
+
+    private void login(String queryString) {
+        Map<String, String> loginInfo = parseQueryString(queryString);
+
+        String account = loginInfo.get("account");
+        String password = loginInfo.get("password");
+
+        var optionalUser = InMemoryUserRepository.findByAccount(account);
+
+        if (optionalUser.isPresent()) {
+            var user = optionalUser.get();
+
+            if (user.checkPassword(password)) {
+                log.info("login user: {}", user);
+            }
+        }
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> parameters = new HashMap<>();
+
+        for (String parameter : queryString.split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length == 2) {
+                parameters.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        return parameters;
+    }
+
+    private String getContentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html;charset=utf-8";
     }
 }

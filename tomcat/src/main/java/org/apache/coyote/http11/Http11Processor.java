@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
             path = uri.substring(0, index);
             queryString = uri.substring(index + 1);
         }
-        if (!path.contains(".")) {
+        if (path.length() > 1 && !path.contains(".")) {
             path += ".html";
         }
         return Map.of(

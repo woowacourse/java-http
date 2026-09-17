@@ -44,35 +44,35 @@ public class Http11Processor implements Runnable, Processor {
             if (request.isEmpty()) {
                 return;
             }
-            final String response = createResponse(request.get());
+            final HttpResponse response = createResponse(request.get());
 
-            outputStream.write(response.getBytes(UTF_8));
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException | HttpRequestParseException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponse(final HttpRequest request) throws IOException, URISyntaxException {
+    private HttpResponse createResponse(final HttpRequest request) throws IOException, URISyntaxException {
         final String path = request.getPath();
 
         if (path.equals("/")) {
-            return response("HTTP/1.1 200 OK ", "text/html", "Hello world!");
+            return new HttpResponse(HttpStatus.OK, "text/html", "Hello world!");
         }
 
         if (path.equals("/login")) {
             login(request);
             final var loginPage = findResource("/login.html");
-            return response("HTTP/1.1 200 OK ", "text/html", readResource(loginPage));
+            return new HttpResponse(HttpStatus.OK, "text/html", readResource(loginPage));
         }
 
         final var resource = findResource(path);
         if (resource == null) {
             final var notFound = findResource("/404.html");
-            return response("HTTP/1.1 404 Not Found ", "text/html", readResource(notFound));
+            return new HttpResponse(HttpStatus.NOT_FOUND, "text/html", readResource(notFound));
         }
 
-        return response("HTTP/1.1 200 OK ", contentType(path), readResource(resource));
+        return new HttpResponse(HttpStatus.OK, contentType(path), readResource(resource));
     }
 
     private void login(final HttpRequest request) {
@@ -89,15 +89,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readResource(final URL resource) throws IOException, URISyntaxException {
         return Files.readString(Path.of(resource.toURI()), UTF_8);
-    }
-
-    private String response(final String statusLine, final String contentType, final String body) {
-        return String.join("\r\n",
-                statusLine,
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + body.getBytes(UTF_8).length + " ",
-                "",
-                body);
     }
 
     private String contentType(final String path) {

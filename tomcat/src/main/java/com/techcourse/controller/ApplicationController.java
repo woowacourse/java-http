@@ -30,4 +30,14 @@ public class ApplicationController {
 
         return new ControllerResult.View("/login.html");
     }
+
+    public ControllerResult register(Map<String, String> params) {
+
+        if(params.get("account") != null && params.get("password") != null && params.get("email") != null) {
+            applicationService.register(params.get("account"), params.get("password"), params.get("email"));
+            return new ControllerResult.Redirect("/index.html");
+        }
+
+        return new ControllerResult.View("/register.html");
+    }
 }

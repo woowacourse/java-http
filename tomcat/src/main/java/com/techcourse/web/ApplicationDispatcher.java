@@ -32,6 +32,13 @@ public class ApplicationDispatcher implements Dispatcher {
             };
         }
 
+        if ("/register".equals(path)) {
+            return switch (applicationController.register(parameters)) {
+                case View view -> staticResourceHandler.createResponse(view.path());
+                case Redirect redirect -> HttpResponse.redirect(redirect.location());
+            };
+        }
+
         if ("/".equals(path)) {
             return HttpResponse.ok(
                     "text/html;charset=utf-8",

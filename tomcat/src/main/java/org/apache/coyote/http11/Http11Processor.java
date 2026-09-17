@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
@@ -39,10 +39,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var outputStream = connection.getOutputStream()) {
 
-            Optional<HttpResponse> response = handleRequest(reader);
+            Optional<HttpResponse> response = handleRequest(inputStream);
             if (response.isEmpty()) {
                 return;
             }
@@ -53,9 +52,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<HttpResponse> handleRequest(BufferedReader reader) throws IOException {
+    private Optional<HttpResponse> handleRequest(InputStream inputStream) throws IOException {
         try {
-            Optional<HttpRequest> request = parseRequest(reader);
+            Optional<HttpRequest> request = parseRequest(inputStream);
             if (request.isEmpty()) {
                 return Optional.empty();
             }
@@ -68,8 +67,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<HttpRequest> parseRequest(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
+    private Optional<HttpRequest> parseRequest(InputStream inputStream) throws IOException {
+        String requestLine = readline(inputStream);
         if (requestLine == null) {
             return Optional.empty();
         }
@@ -82,10 +81,16 @@ public class Http11Processor implements Runnable, Processor {
 
         URI uri = createUri(parts[1], requestLine);
 
+        Map<String, String> headers = readHeaders(inputStream);
+        String body = readBody(inputStream, headers);
+
+        Map<String, String> parameters = parseParameters(uri.getRawQuery());
+        parameters.putAll(parseParameters(body));
+
         return Optional.of(new HttpRequest(
                 parts[0],
                 uri.getPath(),
-                parseQueryParameters(uri.getRawQuery())
+                parameters
         ));
     }
 
@@ -97,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseQueryParameters(String rawQuery) {
+    private Map<String, String> parseParameters(String rawQuery) {
         Map<String, String> query = new HashMap<>();
 
         if (rawQuery == null || rawQuery.isBlank()) {
@@ -137,5 +142,54 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(headers.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(response.body());
         outputStream.flush();
+    }
+
+    private String readline(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream line = new ByteArrayOutputStream();
+
+        while (true) {
+            int value = inputStream.read();
+
+            if (value == -1) {
+                if (line.size() == 0) {
+                    return null;
+                }
+                throw new BadRequestException("Incomplete HTTP line");
+            }
+
+            if (value == '\r') {
+                if (inputStream.read() != '\n') {
+                    throw new BadRequestException("Invalid line ending");
+                }
+                return line.toString(StandardCharsets.ISO_8859_1);
+            }
+
+            if (value == '\n') {
+                throw new BadRequestException("Invalid line ending");
+            }
+
+            line.write(value);
+        }
+    }
+
+    private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = readline(inputStream)) != null && !line.isBlank()) {
+            String[] parts = line.split(":", 2);
+            if (parts.length == 2) {
+                headers.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+        return headers;
+    }
+
+    private String readBody(InputStream inputStream, Map<String, String> headers) throws IOException {
+        if (headers.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            byte[] body = inputStream.readNBytes(contentLength);
+            return new String(body, StandardCharsets.UTF_8);
+        }
+        return "";
     }
 }

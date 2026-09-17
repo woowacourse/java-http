@@ -54,6 +54,13 @@ public class Http11Processor implements Runnable, Processor {
                       .readAllBytes();
 
               outputStream.write(response(responseBody, "text/css;charset=utf-8").getBytes(StandardCharsets.UTF_8));
+            } else if (requestPath.endsWith(".js")) {
+                final byte[] responseBody = getClass()
+                        .getClassLoader()
+                        .getResourceAsStream("static" + requestPath)
+                        .readAllBytes();
+
+                outputStream.write(response(responseBody, "application/javascript;charset=utf-8").getBytes(StandardCharsets.UTF_8));
             } else {
                 final var responseBody = "Hello world!";
                 final byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);

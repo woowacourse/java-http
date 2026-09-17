@@ -1,16 +1,30 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_DIRECTORY = "static";
+    private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PAGE = "/login.html";
+    private static final String NOT_FOUND_PAGE = "/404.html";
 
     private final Socket connection;
 
@@ -26,22 +40,114 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var reader = new BufferedReader(
+                 new InputStreamReader(
+                         connection.getInputStream(),
+                         StandardCharsets.UTF_8
+                 ));
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
+            readHeaders(reader);
+            log.info("request: {}", requestLine);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final RequestUri requestUri = RequestUri.from(requestLine.split(" ")[1]);
+            final String path = requestUri.getPath();
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            if ("/".equals(path)) {
+                writeResponse(
+                        outputStream,
+                        "200 OK",
+                        ContentType.HTML,
+                        "Hello world!".getBytes(StandardCharsets.UTF_8));
+                return;
+            }
+
+            if (LOGIN_PATH.equals(path)) {
+                logLoginUser(requestUri);
+                writeStaticFile(outputStream, LOGIN_PAGE);
+                return;
+            }
+            writeStaticFile(outputStream, path);
+        } catch (IOException | UncheckedServletException |URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void readHeaders(final BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        while (line != null && !line.isEmpty()) {
+            line = reader.readLine();
+        }
+    }
+
+    private void logLoginUser(final RequestUri requestUri) {
+        final Optional<String> account = requestUri.getQueryParameter("account");
+        final Optional<String> password = requestUri.getQueryParameter("password");
+        if (account.isEmpty() || password.isEmpty()) {
+            log.info("login parameters are missing");
+            return;
+        }
+        InMemoryUserRepository.findByAccount(account.get())
+                .filter(user -> user.checkPassword(password.get()))
+                .ifPresentOrElse(
+                        user -> log.info("user: {}", user),
+                        () -> log.info("login failed. account: {}", account.get())
+                );
+    }
+
+    private void writeStaticFile(final OutputStream outputStream, final String filePath)
+            throws IOException, URISyntaxException {
+        final Optional<Path> staticFile = findStaticFile(filePath);
+        if (staticFile.isEmpty()) {
+            writeResponse(outputStream, "404 Not Found", ContentType.HTML, readNotFoundBody());
+            return;
+        }
+        writeResponse(outputStream, "200 OK", ContentType.from(filePath), Files.readAllBytes(staticFile.get()));
+    }
+
+
+    private Optional<Path> findStaticFile(final String url) throws URISyntaxException {
+        final URL resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + url);
+        if (resource == null) {
+            return Optional.empty();
+        }
+
+        final Path path = Path.of(resource.toURI());
+        if (!Files.isRegularFile(path)) {
+            return Optional.empty();
+        }
+        return Optional.of(path);
+    }
+
+    private byte[] readNotFoundBody() throws IOException, URISyntaxException {
+        final Optional<Path> notFoundPage = findStaticFile("/404.html");
+        if (notFoundPage.isPresent()) {
+            return Files.readAllBytes(notFoundPage.get());
+        }
+
+        return "Not Found".getBytes(StandardCharsets.UTF_8);
+    }
+
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String status,
+            final ContentType contentType,
+            final byte[] body
+    ) throws IOException {
+        log.info("content-type: {}", contentType.getValue());
+
+        final String header = String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Content-Type: " + contentType.getValue() + " ",
+                "Content-Length: " + body.length + " ",
+                "",
+                "");
+        outputStream.write(header.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(body);
+        outputStream.flush();
     }
 }

@@ -116,4 +116,25 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("쿼리 스트링이 포함된 요청에서 경로에 해당하는 HTML을 응답한다")
+    void queryString() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login.html?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK");
+    }
 }

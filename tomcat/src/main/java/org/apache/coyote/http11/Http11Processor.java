@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -46,13 +47,37 @@ public class Http11Processor implements Runnable, Processor {
             String[] requestLine = line.split(" ");
 
             String method = requestLine[0];
-            String path = requestLine[1];
+            String uri = requestLine[1];
             String version = requestLine[2];
+
+            String path = uri;
+            String queryString = null;
+
+            int queryIndex = uri.indexOf("?");
+
+            if (queryIndex != -1) {
+                path = uri.substring(0, queryIndex);
+                queryString = uri.substring(queryIndex + 1);
+            }
 
             String header;
 
             while ((header = reader.readLine()) != null && !header.isEmpty()) {
-                System.out.println(header);
+                // Header는 현재 사용하지 않으므로 읽고 버린다.
+            }
+
+            if (queryString != null) {
+                Map<String, String> queryParams = parseQueryString(queryString);
+
+                String account = queryParams.get("account");
+
+                InMemoryUserRepository.findByAccount(account) // 추후 UserService 생성
+                        .ifPresent(user ->
+                                log.info("조회된 사용자: id={}, account={}",
+                                        user.getId(),
+                                        user.getAccount()
+                                )
+                        );
             }
 
             // 추후 requestLine(method/path) 검증 추가 예정
@@ -92,5 +117,20 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html;charset=utf-8";
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> queryParams = new HashMap<>();
+
+        for (String parameter : queryString.split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+
+            String key = keyValue[0];
+            String value = keyValue[1];
+
+            queryParams.put(key, value);
+        }
+
+        return queryParams;
     }
 }

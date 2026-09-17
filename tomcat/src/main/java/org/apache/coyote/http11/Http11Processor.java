@@ -56,10 +56,11 @@ public class Http11Processor implements Runnable, Processor {
 
             final var responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + resolveContentType(uri) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     "");
+
 
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -67,6 +68,14 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String resolveContentType(final String uri) {
+        if (uri.endsWith(".css")) {
+            return "text/css";
+        }
+
+        return "text/html";
     }
 
     private byte[] createResponseBody(final String uri) throws IOException {

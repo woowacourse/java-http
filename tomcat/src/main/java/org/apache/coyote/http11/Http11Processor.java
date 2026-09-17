@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 final HttpRequest httpRequest = new Http11RequestProcessor(inputStream).process();
                 responseProcessor.send(httpRequest.getUri());
-            } catch (HttpParseException e) {
+            } catch (HttpParseException | URISyntaxException e) {
                 log.warn("잘못된 HTTP 요청입니다.");
                 responseProcessor.sendError(HttpStatus.BAD_REQUEST);
             }

@@ -14,8 +14,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -38,42 +37,31 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8))) {
 
-            final var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
+            final Optional<HttpRequest> request = HttpRequest.from(reader);
+            if (request.isEmpty()) {
                 return;
             }
-            final String uri = requestLine.split(" ")[1];
-
-            final String response = createResponse(uri);
+            final String response = createResponse(request.get());
 
             outputStream.write(response.getBytes(UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException | HttpRequestParseException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponse(final String uri) throws IOException, URISyntaxException {
-        final int index = uri.indexOf("?");
-        final String path;
-        final String queryString;
-        if (index == -1) {
-            path = uri;
-            queryString = "";
-        } else {
-            path = uri.substring(0, index);
-            queryString = uri.substring(index + 1);
-        }
+    private String createResponse(final HttpRequest request) throws IOException, URISyntaxException {
+        final String path = request.getPath();
 
         if (path.equals("/")) {
             return response("HTTP/1.1 200 OK ", "text/html", "Hello world!");
         }
 
         if (path.equals("/login")) {
-            login(parseQueryString(queryString));
+            login(request);
             final var loginPage = findResource("/login.html");
             return response("HTTP/1.1 200 OK ", "text/html", readResource(loginPage));
         }
@@ -87,23 +75,9 @@ public class Http11Processor implements Runnable, Processor {
         return response("HTTP/1.1 200 OK ", contentType(path), readResource(resource));
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> params = new HashMap<>();
-        if (queryString.isEmpty()) {
-            return params;
-        }
-        for (final String pair : queryString.split("&")) {
-            final String[] keyAndValue = pair.split("=", 2);
-            if (keyAndValue.length == 2) {
-                params.put(keyAndValue[0], keyAndValue[1]);
-            }
-        }
-        return params;
-    }
-
-    private void login(final Map<String, String> params) {
-        final String account = params.get("account");
-        final String password = params.get("password");
+    private void login(final HttpRequest request) {
+        final String account = request.getQueryParameter("account");
+        final String password = request.getQueryParameter("password");
         if (account == null || password == null) {
             return;
         }

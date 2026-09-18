@@ -15,7 +15,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -120,6 +122,15 @@ public class Http11Processor implements Runnable, Processor {
         }
         if(method.equals("POST")) {
             log.info("Register BODY :" + body);
+
+            Map<String, String> map = new HashMap<>();
+            String[] params = body.split("&");
+
+            for (String param : params) {
+                map.put(param.split("=")[0], param.split("=")[1]);
+            }
+            InMemoryUserRepository.save(new User(map.get("account"), map.get("password"), map.get("email")));
+
             writeRedirect(outputStream, "/index.html");
         }
     }

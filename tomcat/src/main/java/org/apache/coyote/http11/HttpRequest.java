@@ -25,27 +25,23 @@ public class HttpRequest {
         String path = tokens[1];
 
         Map<String, String> params = new HashMap<>();
-        if(path.contains("?")) {
+        if (path.contains("?")) {
             String[] paramTokens = path.split("\\?");
             path = paramTokens[0];
 
-            for(String param : paramTokens[1].split("&")) {
+            for (String param : paramTokens[1].split("&")) {
                 String[] pair = param.split("=");
-                if(pair.length == 2) {
+                if (pair.length == 2) {
                     params.put(pair[0], pair[1]);
                 }
             }
         }
 
-        return new HttpRequest(HttpMethod.valueOf(method), path,params);
+        return new HttpRequest(HttpMethod.valueOf(method), path, params);
     }
 
     public boolean isGetMethod() {
         return this.method == HttpMethod.GET;
-    }
-
-    public HttpMethod getMethod() {
-        return method;
     }
 
     public String getPath() {

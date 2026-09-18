@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
+
 public class HttpResponse {
 
     private final int statusCode;
@@ -20,18 +22,23 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok(String contentType, byte[] body) {
-        return new HttpResponse(200, "OK", contentType, body);
+        return new HttpResponse(
+                200,
+                "OK",
+                contentType,
+                body
+        );
     }
 
-    public byte[] toBytes() {
-        String body = String.join(
+    @Override
+    public String toString() {
+        return String.join(
                 "\r\n",
                 "HTTP/1.1 " + statusCode + " " + statusText,
                 "Content-Type: " + contentType,
-                "Content-Length: " + this.body.length,
+                "Content-Length: " + body.length,
                 "",
-                "");
-
-        return body.getBytes();
+                new String(body, StandardCharsets.UTF_8)
+        );
     }
 }

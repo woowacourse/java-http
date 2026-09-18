@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -10,8 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,11 +45,42 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String requestUri = requestLine.split(" ")[1];
+            final int queryIndex = requestUri.indexOf('?');
+            String path = requestUri;
+            if (queryIndex >= 0) {
+                path = requestUri.substring(0, queryIndex);
+            }
+
+            if ("/login".equals(path)) {
+                if (queryIndex >= 0) {
+                  
+                    final String queryString = requestUri.substring(queryIndex + 1);
+                    final Map<String, String> parameters = new HashMap<>();
+                    for (String parameter : queryString.split("&")) {
+                        final String[] pair = parameter.split("=", 2);
+                        if (pair.length == 2) {
+                            parameters.put(
+                                    URLDecoder.decode(pair[0], StandardCharsets.UTF_8),
+                                    URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
+                        }
+                    }
+
+                    final String account = parameters.get("account");
+                    final String password = parameters.get("password");
+                    if (account != null && password != null) {
+                        InMemoryUserRepository.findByAccount(account)
+                                .filter(user -> user.checkPassword(password))
+                                .ifPresent(user -> log.info("Login succeeded: account={}", user.getAccount()));
+                    }
+                }
+                path = "/login.html";
+            }
+
             String responseBody = "Hello world!";
-            if ("/index.html".equals(requestUri) || "/css/styles.css".equals(requestUri)) {
-                final var resource = getClass().getClassLoader().getResource("static" + requestUri);
+            if ("/index.html".equals(path) || "/css/styles.css".equals(path) || "/login.html".equals(path)) {
+                final var resource = getClass().getClassLoader().getResource("static" + path);
                 if (resource == null) {
-                    throw new IOException("Resource not found: " + requestUri);
+                    throw new IOException("Resource not found: " + path);
                 }
                 responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
             }

@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.annotation.Nonnull;
@@ -80,16 +81,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(String path) {
-        if (path.endsWith(".html")) {
-            return "text/html; charset=utf-8";
-        }
         if (path.endsWith(".css")) {
             return "text/css";
         }
         if (path.endsWith(".js")) {
             return "text/javascript";
         }
-        return "text/plain";
+        return "text/html; charset=utf-8";
     }
 
     @Nonnull
@@ -97,13 +95,14 @@ public class Http11Processor implements Runnable, Processor {
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + path);
         if (resource == null) {
             log.info("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요. path: {}", path);
+            return "잘못된 주소입니다.";
         }
         try {
             URI uri = resource.toURI();
-            return new String(Files.readAllBytes(Paths.get(uri)));
+            return Files.readString(Paths.get(uri));
         } catch (IOException | URISyntaxException e) {
             log.error(e.getMessage(),e);
         }
-        return "잘못된 주소";
+        return "잘못된 주소입니다";
     }
 }

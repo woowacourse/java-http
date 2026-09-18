@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -8,6 +10,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +50,26 @@ public class Http11Processor implements Runnable, Processor {
             final String path = requestLine.split(" ")[1];
             String filePath = "static" + path;
             String contentType = "text/html;charset=utf-8";
+
+            if (path.contains("?")) {
+                filePath = "static/login.html";
+
+                if (path.contains("?")) {
+                    final String queryString = path.split("\\?")[1];
+                    final Map<String, String> params = parseQueryString(queryString);
+
+                    final String account = params.get("account");
+                    final String password = params.get("password");
+
+                    log.info("로그인 시도 - account: {}, password: {}", account, password);
+
+                    final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                    user.ifPresentOrElse(
+                            foundUser -> log.info("회원 조회 결과: {}", foundUser),
+                            () -> log.info("회원을 찾을 수 없습니다. account: {}", account)
+                    );
+                }
+            }
 
             if (path.equals("/") || path.equals("/index.html")) {
                 filePath = "static/index.html";
@@ -86,5 +111,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> params = new HashMap<>();
+        if (queryString == null || queryString.isBlank()) {
+            return params;
+        }
+
+        final String[] pairs = queryString.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=");
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+            } else if (keyValue.length == 1) {
+                params.put(keyValue[0], "");
+            }
+        }
+        return params;
     }
 }

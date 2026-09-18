@@ -61,18 +61,7 @@ public class Http11Processor implements Runnable, Processor {
                     method, requestTarget, httpVersion);
 
             if ("/login".equals(path) && targetParts.length == 2) {
-                final Map<String, String> parameters = new HashMap<>();
-
-                for (String parameter : targetParts[1].split("&")) {
-                    final String[] pair = parameter.split("=", 2);
-                    if (pair.length != 2) {
-                        continue;
-                    }
-
-                    final String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
-                    final String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
-                    parameters.put(key, value);
-                }
+                final Map<String, String> parameters = parseQuery(targetParts[1]);
 
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
@@ -123,5 +112,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseQuery(String query) {
+        final Map<String, String> parameters = new HashMap<>();
+
+        for (String parameter : query.split("&")) {
+            final String[] pair = parameter.split("=", 2);
+            if (pair.length != 2) {
+                continue;
+            }
+
+            final String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
+            final String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+            parameters.put(key, value);
+        }
+
+        return parameters;
     }
 }

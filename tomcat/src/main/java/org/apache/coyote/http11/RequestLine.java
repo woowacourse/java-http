@@ -15,4 +15,10 @@ public record RequestLine(
         }
         return new RequestLine(parts[0], RequestTarget.from(parts[1]), parts[2]);
     }
+
+    public String path() {
+        Objects.requireNonNull(requestTarget);
+
+        return requestTarget().path();
+    }
 }

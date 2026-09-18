@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequestHeader header = extractHeader(inputStream);
             String contentType = resolveContentType(header);
-            URL url = findStaticResource(header.firstLine().requestTarget().path(), contentType);
+            URL url = findStaticResource(header.path(), contentType);
             final String responseBody = resolveContentOf(url);
 
             verifyUser(header);

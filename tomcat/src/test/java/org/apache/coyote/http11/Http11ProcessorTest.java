@@ -83,4 +83,37 @@ class Http11ProcessorTest {
                     .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
         }
     }
+
+    @Test
+    void login() throws IOException {
+        assertLoginResponse("/login");
+    }
+
+    @Test
+    void loginWithQuery() throws IOException {
+        assertLoginResponse("/login?account=gugu&password=password");
+    }
+
+    private void assertLoginResponse(String requestTarget) throws IOException {
+        final var socket = new StubSocket(
+                "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        try (var resource = getClass().getClassLoader()
+                .getResourceAsStream("static/login.html")) {
+
+            assertThat(resource).isNotNull();
+            final byte[] expectedBody = resource.readAllBytes();
+            final String[] response = socket.output().split("\r\n\r\n", 2);
+
+            assertThat(response).hasSize(2);
+            assertThat(response[0].split("\r\n")).contains(
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + expectedBody.length + " ");
+            assertThat(response[1])
+                    .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
+        }
+    }
 }

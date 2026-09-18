@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.MyHttpRequest;
 import org.slf4j.Logger;
@@ -75,10 +76,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private static void authenticate(MyHttpRequest httpRequest) {
         Map<String, String> queryParams = httpRequest.queryParameters();
-        InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .filter(user -> user.getAccount().equals("gugu"))
-                .filter(user -> user.checkPassword(queryParams.get("password")))
-                .ifPresent(user -> log.info("user matched={}", user));
+
+        User user = getUserByAccount(queryParams.get("account"));
+
+        if (user.checkPassword(queryParams.get("password"))) {
+            log.info("user matched={}", user);
+        }
+    }
+
+    private static User getUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
     }
 
     private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)

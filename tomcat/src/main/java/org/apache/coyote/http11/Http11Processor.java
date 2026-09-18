@@ -72,12 +72,12 @@ public class Http11Processor implements Runnable, Processor {
 
         String path = "static" + uri;
 
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
+        if (uri.contains(QUERY_SEPARATOR)) {
+            int index = uri.indexOf(QUERY_SEPARATOR);
             path = "static" + uri.substring(0, index);
             Map<String, String> params = new HashMap<>();
-            for (String pair : uri.substring(index + 1).split("&")) {
-                String[] keyValue = pair.split("=");
+            for (String pair : uri.substring(index + 1).split(PARAMETER_SEPARATOR)) {
+                String[] keyValue = pair.split(KEY_VALUE_SEPARATOR);
                 params.put(keyValue[0], keyValue[1]);
             }
             InMemoryUserRepository.findByAccount(params.get("account"))

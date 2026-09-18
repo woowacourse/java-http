@@ -20,6 +20,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String NOT_FOUND_PAGE = "static/404.html";
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -40,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestLine = bufferedReader.readLine();
 
+            String statusLine = "HTTP/1.1 200 OK ";
             String responseBody = "Hello world!";
             String contentType = "text/html";
 
@@ -63,17 +66,21 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if (!path.equals("/")) {
-                    String resourcePath = toResourcePath(path);
+                    final String resourcePath = toResourcePath(path);
                     final URL resource = getClass().getClassLoader().getResource(resourcePath);
                     if (resource != null) {
-                        responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                        responseBody = readResource(resource);
                         contentType = getContentType(resourcePath);
+                    } else {
+                        statusLine = "HTTP/1.1 404 Not Found ";
+                        final URL notFound = getClass().getClassLoader().getResource(NOT_FOUND_PAGE);
+                        responseBody = readResource(notFound);
                     }
                 }
             }
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    statusLine,
                     "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
@@ -92,6 +99,10 @@ public class Http11Processor implements Runnable, Processor {
         if (string.endsWith(".js"))
             return "application/javascript";
         return "text/html";
+    }
+
+    private String readResource(final URL resource) throws IOException {
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
     private String toResourcePath(final String path) {

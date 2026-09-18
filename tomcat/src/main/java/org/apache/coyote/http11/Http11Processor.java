@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -23,6 +25,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String WHITESPACE_REGEX = " ";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String QUESTION_MARK = "?";
+    public static final String HTML_EXTENSION = ".html";
 
     private final Socket connection;
 
@@ -53,32 +57,30 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String requestUri = part.substring(1);
-            if (requestUri.contains("?")) {
-                int index = requestUri.indexOf("?");
-                String uriPath = requestUri.substring(0, index);
+
+            URL resource = getClass().getClassLoader()
+                .getResource(RESOURCE_FILE_PREFIX + requestUri);
+
+            if (requestUri.contains(QUESTION_MARK)) {
+                int index = requestUri.indexOf(QUESTION_MARK);
+                part = requestUri.substring(0, index);
                 String queryString = requestUri.substring(index + 1);
 
-                URL resource = getClass().getClassLoader().getResource(RESOURCE_FILE_PREFIX + uriPath + ".html");
-                Path path = new File(resource.getPath()).toPath();
+                resource = getClass().getClassLoader()
+                    .getResource(RESOURCE_FILE_PREFIX + part + HTML_EXTENSION);
 
-                byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
+                String[] splitQuery = queryString.split("&");
+                String account = splitQuery[0].substring(8);
+                String password = splitQuery[1].substring(9);
 
-                String response = "";
-                if (uriPath.equals("login")) {
-                    response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + body.length + " ",
-                        "",
-                        new String(Files.readAllBytes(path)));
-                }
+                User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalStateException("등록되지 않은 계정입니다."));
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
+                user.isMatchPassword(password);
+
+                log.info("user : {}", user);
             }
 
-            URL resource = getClass().getClassLoader().getResource(RESOURCE_FILE_PREFIX + requestUri);
             if (validateURLIsNull(resource, outputStream)) {
                 return;
             }
@@ -149,6 +151,15 @@ public class Http11Processor implements Runnable, Processor {
             response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        if (part.equals("login")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + body.length + " ",
                 "",
                 new String(Files.readAllBytes(path)));

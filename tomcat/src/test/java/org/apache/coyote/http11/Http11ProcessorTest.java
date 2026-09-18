@@ -168,11 +168,15 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String responseBody = new String(
+                Files.readAllBytes(new File(resource.getFile()).toPath()),
+                java.nio.charset.StandardCharsets.UTF_8
+        );
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: " + responseBody.getBytes(java.nio.charset.StandardCharsets.UTF_8).length + " \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                responseBody;
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -241,5 +245,36 @@ class Http11ProcessorTest {
         new Http11Processor(socket).process(socket);
 
         assertThat(SessionManager.getInstance().findSession(sessionId)).isNull();
+    }
+
+    @Test
+    void sessionEndpointReturnsLoginState() {
+        String sessionId = UUID.randomUUID().toString();
+        String body = "account=gugu&password=password";
+        final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final var sessionSocket = new StubSocket(getRequest("/session", sessionId));
+        new Http11Processor(sessionSocket).process(sessionSocket);
+
+        assertThat(sessionSocket.output()).endsWith("{\"loggedIn\":true,\"account\":\"gugu\"}");
+    }
+
+    @Test
+    void logoutInvalidatesSession() {
+        String sessionId = UUID.randomUUID().toString();
+        String body = "account=gugu&password=password";
+        final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final var logoutSocket = new StubSocket(postRequest("/logout", "", sessionId));
+        new Http11Processor(logoutSocket).process(logoutSocket);
+
+        assertThat(logoutSocket.output()).startsWith("HTTP/1.1 204 No Content");
+        assertThat(SessionManager.getInstance().findSession(sessionId)).isNull();
+
+        final var sessionSocket = new StubSocket(getRequest("/session", sessionId));
+        new Http11Processor(sessionSocket).process(sessionSocket);
+        assertThat(sessionSocket.output()).endsWith("{\"loggedIn\":false}");
     }
 }

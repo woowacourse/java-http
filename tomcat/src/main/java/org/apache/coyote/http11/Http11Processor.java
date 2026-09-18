@@ -129,6 +129,8 @@ public class Http11Processor implements Runnable, Processor {
             case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html", newSessionId);
             case "/register" -> handleRegister(method, body, newSessionId, outputStream);
             case "/login" -> handleLogin(method, body, sessionId, newSessionId, outputStream);
+            case "/session" -> handleSession(sessionId, newSessionId, outputStream);
+            case "/logout" -> handleLogout(method, sessionId, newSessionId, outputStream);
             default -> serveResource(path, newSessionId, outputStream);
         }
     }
@@ -211,6 +213,60 @@ public class Http11Processor implements Runnable, Processor {
             return Optional.of(loginUser);
         }
         return Optional.empty();
+    }
+
+    private void handleSession(
+            String sessionId,
+            Optional<String> newSessionId,
+            OutputStream outputStream
+    ) throws IOException {
+        Optional<User> loginUser = getLoginUser(sessionId);
+        String responseBody = loginUser
+                .map(user -> "{\"loggedIn\":true,\"account\":\"" + escapeJson(user.getAccount()) + "\"}")
+                .orElse("{\"loggedIn\":false}");
+        writeResponse(outputStream, "200 OK", responseBody, "application/json", newSessionId);
+    }
+
+    private String escapeJson(String value) {
+        StringBuilder escaped = new StringBuilder();
+        for (char character : value.toCharArray()) {
+            switch (character) {
+                case '"' -> escaped.append("\\\"");
+                case '\\' -> escaped.append("\\\\");
+                case '\b' -> escaped.append("\\b");
+                case '\f' -> escaped.append("\\f");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                default -> {
+                    if (character < 0x20) {
+                        escaped.append(String.format("\\u%04x", (int) character));
+                    } else {
+                        escaped.append(character);
+                    }
+                }
+            }
+        }
+        return escaped.toString();
+    }
+
+    private void handleLogout(
+            String method,
+            String sessionId,
+            Optional<String> newSessionId,
+            OutputStream outputStream
+    ) throws IOException {
+        if (!POST.equals(method)) {
+            writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
+            return;
+        }
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        writeResponse(outputStream, "204 No Content", "", "text/plain", newSessionId);
     }
 
     private Map<String, String> parseFormBody(String body) {

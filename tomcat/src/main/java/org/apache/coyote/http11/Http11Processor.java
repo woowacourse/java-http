@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -130,7 +132,10 @@ public class Http11Processor implements Runnable, Processor {
                 continue;
             }
 
-            queryParams.put(q[0], q[1]);
+            String key = URLDecoder.decode(q[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(q[1], StandardCharsets.UTF_8);
+
+            queryParams.put(key, value);
         }
 
         return queryParams;

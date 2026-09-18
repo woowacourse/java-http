@@ -14,13 +14,16 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css";
+    private static final String OK_STATUS = "200 OK";
+    private static final String NOT_FOUND_STATUS = "404 Not Found";
+    private static final String NOT_FOUND_BODY = "404 Not Found";
 
-    private record ResponseContent(String body, String contentType) {
+    private record ResponseContent(String status, String body, String contentType) {
     }
 
     private ResponseContent responseContentFor(final String requestPath) throws IOException {
         if (requestPath.equals("/")) {
-            return new ResponseContent("Hello world!", HTML_CONTENT_TYPE);
+            return new ResponseContent(OK_STATUS, "Hello world!", HTML_CONTENT_TYPE);
         }
 
         final var staticPath = staticPathFor(requestPath);
@@ -28,11 +31,11 @@ public class Http11Processor implements Runnable, Processor {
 
         try (final var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
-                return new ResponseContent("Hello world!", HTML_CONTENT_TYPE);
+                return new ResponseContent(NOT_FOUND_STATUS, NOT_FOUND_BODY, HTML_CONTENT_TYPE);
             }
 
             final var body = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
-            return new ResponseContent(body, contentTypeFor(staticPath));
+            return new ResponseContent(OK_STATUS, body, contentTypeFor(staticPath));
         }
     }
 
@@ -85,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
             final var responseContent = responseContentFor(requestUri.path());
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + responseContent.status() + " ",
                     "Content-Type: " + responseContent.contentType() + " ",
                     "Content-Length: " +  responseContent.body().getBytes(StandardCharsets.UTF_8).length + " ",
                     "",

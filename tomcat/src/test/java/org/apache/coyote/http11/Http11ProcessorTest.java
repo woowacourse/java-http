@@ -3,10 +3,11 @@ package org.apache.coyote.http11;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,9 +34,9 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() throws IOException, URISyntaxException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -53,8 +54,8 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "\r\n" +
+                new String(Files.readAllBytes(Path.of(resource.toURI())));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

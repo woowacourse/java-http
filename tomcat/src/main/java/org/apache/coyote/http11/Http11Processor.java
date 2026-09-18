@@ -1,6 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +35,48 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            final String requestLine = reader.readLine();
 
-            final var responseBody = "Hello world!";
+            if (requestLine == null || requestLine.isBlank()) {
+                return;
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+            final String path = requestLine.split(" ")[1];
+            String filePath = "static" + path;
+            String contentType = "text/html;charset=utf-8";
+
+            if (path.equals("/") || path.equals("/index.html")) {
+                filePath = "static/index.html";
+                contentType = "text/html;charset=utf-8";
+            }
+
+
+            final URL resource = getClass().getClassLoader().getResource(filePath);
+            if (resource == null) {
+                final var response404 = "HTTP/1.1 404 Not Found\r\n\r\n";
+                outputStream.write(response404.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
+
+            final var responseHeader = String.join("\r\n",
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: " + contentType,
+                    "Content-Length: " + body.length,
                     "",
-                    responseBody);
+                    "");
 
-            outputStream.write(response.getBytes());
+            outputStream.write(responseHeader.getBytes());
+            outputStream.write(body);
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 }

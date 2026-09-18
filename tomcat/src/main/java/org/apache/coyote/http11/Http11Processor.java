@@ -7,7 +7,6 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -36,13 +35,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            // URL 파싱
             String line = bufferedReader.readLine();
             final String[] tokens = line.split(" ", 3);
             final String uri = tokens[1];
@@ -68,22 +64,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getPath(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return uri.substring(0, index);
-        }
-        return uri;
-    }
-
-    private Optional<String> getQueryString(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return Optional.of(uri.substring(index + 1));
-        }
-        return Optional.empty();
-    }
-
     private void login(String queryString) {
         Map<String, String> paramsMap = getParamsMap(queryString);
         User user = getValidatedUser(paramsMap);
@@ -102,6 +82,22 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readAllBytes(path);
     }
 
+    private String getPath(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            return uri.substring(0, index);
+        }
+        return uri;
+    }
+
+    private Optional<String> getQueryString(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            return Optional.of(uri.substring(index + 1));
+        }
+        return Optional.empty();
+    }
+
     private String getContentType(String path) {
         if (path.endsWith(".css")) {
             return "text/css;charset=utf-8";
@@ -109,7 +105,6 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    @Nonnull
     private Map<String, String> getParamsMap(String queryString) {
         Map<String, String> paramsMap = new HashMap<>();
         String[] data = queryString.split("\\&");
@@ -120,7 +115,6 @@ public class Http11Processor implements Runnable, Processor {
         return paramsMap;
     }
 
-    @Nonnull
     private User getValidatedUser(Map<String, String> paramsMap) {
         User user = InMemoryUserRepository.findByAccount(paramsMap.get("account")).orElseThrow(
                 () -> new IllegalArgumentException("회원 없음")
@@ -129,7 +123,6 @@ public class Http11Processor implements Runnable, Processor {
         return user;
     }
 
-    @Nonnull
     private String getResourcePath(String requestTarget) {
         String resourcePath = "static" + requestTarget;
         if (!requestTarget.contains(".")) {

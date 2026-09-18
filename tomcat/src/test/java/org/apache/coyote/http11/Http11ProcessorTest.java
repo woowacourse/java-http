@@ -252,7 +252,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginSessionIsCreatedBeforeControllerAndReusedOnNextRequest() throws IOException {
+    void loginSessionIsCreatedBeforeControllerAndReusedOnNextRequest() {
         final var manager = new SessionManager();
         final var login = new StubSocket(String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -277,7 +277,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void unknownSessionIdIsReplaced() throws IOException {
+    void unknownSessionIdIsReplaced() {
         final var manager = new SessionManager();
         final var socket = new StubSocket("GET /login HTTP/1.1\r\nCookie: JSESSIONID=unknown\r\n\r\n");
 
@@ -290,7 +290,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void invalidatedSessionIsReplaced() throws IOException {
+    void invalidatedSessionIsReplaced() {
         final var manager = new SessionManager();
         final var previous = new Session("invalid-session");
         manager.add(previous);

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,8 @@ public class Http11Processor implements Runnable, Processor {
                 String queryString = uri.substring(index + 1);
 
                 Map<String, String> paramsMap = getParamsMap(queryString);
+                User user = getValidatedUser(paramsMap);
+                log.info(user.toString());
             }
 
             final var responseBody = createResponseBody(path);
@@ -99,5 +103,14 @@ public class Http11Processor implements Runnable, Processor {
             paramsMap.put(param[0], param[1]);
         }
         return paramsMap;
+    }
+
+    @Nonnull
+    private User getValidatedUser(Map<String, String> paramsMap) {
+        User user = InMemoryUserRepository.findByAccount(paramsMap.get("account")).orElseThrow(
+                () -> new IllegalArgumentException("회원 없음")
+        );
+        user.checkPassword(paramsMap.get("password"));
+        return user;
     }
 }

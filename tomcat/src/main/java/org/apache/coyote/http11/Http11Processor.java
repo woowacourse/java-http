@@ -7,9 +7,9 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -25,6 +25,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -39,18 +41,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        try (final BufferedInputStream inputStream =
+                     new BufferedInputStream(connection.getInputStream());
+             final OutputStream outputStream =
+                     connection.getOutputStream()) {
 
             // 1. Request Line
-            final String requestLine = reader.readLine();
-
+            final String requestLine = readLine(inputStream);
             if (requestLine == null) {
                 return;
             }
+
+            consumeHeaders(inputStream);
 
             final String uri = extractUri(requestLine);    // GET /login?account=gugu&password=password HTTP/1.1
             if (uri == null) {
@@ -69,8 +71,9 @@ public class Http11Processor implements Runnable, Processor {
             if ("/".equals(path)) {
                 writeResponse(
                         outputStream,
-                        "Hello world!",
-                        "text/html;charset=utf-8"
+                        "200 OK",
+                        "text/html;charset=utf-8",
+                        HELLO_WORLD
                 );
                 return;
             }
@@ -84,6 +87,36 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private String readLine(final BufferedInputStream inputStream) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int value;
+        while ((value = inputStream.read()) != -1) {
+            if (value == '\n') {
+                break;
+            }
+            if (value != '\r') {
+                buffer.write(value);
+            }
+        }
+
+        if (value == -1 && buffer.size() == 0) {
+            return null;
+        }
+
+        return buffer.toString(StandardCharsets.UTF_8);
+    }
+
+    private void consumeHeaders(final BufferedInputStream inputStream) throws IOException {
+        String line;
+        while ((line = readLine(inputStream)) != null) {
+            if (line.isEmpty()) {
+                return;
+            }
+        }
+    }
+
 
     private String extractUri(final String requestLine) {
         final String[] parts = requestLine.split(" ", 3);
@@ -175,19 +208,39 @@ public class Http11Processor implements Runnable, Processor {
         final URL resource = getClass()
                 .getClassLoader()
                 .getResource(resourcePath);
+        if (resource == null) {
+            writeNotFound(outputStream);
+            return;
+        }
+        final byte[] responseBody =
+                Files.readAllBytes(
+                        Path.of(resource.toURI())
+                );
 
-        final Path resourceFile =
-                Path.of(resource.toURI());
 
-        final String responseBody =
-                Files.readString(
-                        resourceFile,
+        writeResponse(
+                outputStream,
+                "200 OK",
+                resolveContentType(path),
+                responseBody
+        );
+    }
+
+    private void writeNotFound(
+            final OutputStream outputStream
+    ) throws IOException {
+
+        final byte[] responseBody =
+                "Not Found".getBytes(
                         StandardCharsets.UTF_8
                 );
 
-        final String contentType = resolveContentType(path);
-
-        writeResponse(outputStream, responseBody, contentType);
+        writeResponse(
+                outputStream,
+                "404 Not Found",
+                "text/plain;charset=utf-8",
+                responseBody
+        );
     }
 
     private String resolveResourcePath(final String path) {
@@ -212,27 +265,30 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeResponse(
             final OutputStream outputStream,
-            final String responseBody,
-            final String contentType
+            final String status,
+            final String contentType,
+            final byte[] responseBody
     ) throws IOException {
 
-        final byte[] responseBodyBytes =
-                responseBody.getBytes(StandardCharsets.UTF_8);
-
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBodyBytes.length + " ",
-                "",
-                responseBody
-        );
+        final String responseHeaders =
+                String.join("\r\n",
+                        "HTTP/1.1 " + status + " ",
+                        "Content-Type: "
+                                + contentType + " ",
+                        "Content-Length: "
+                                + responseBody.length + " ",
+                        "",
+                        ""
+                );
 
         outputStream.write(
-                response.getBytes(StandardCharsets.UTF_8)
+                responseHeaders.getBytes(
+                        StandardCharsets.UTF_8
+                )
         );
 
+        outputStream.write(responseBody);
         outputStream.flush();
     }
-
-
 }
+

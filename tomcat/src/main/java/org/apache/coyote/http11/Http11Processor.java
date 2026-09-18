@@ -55,18 +55,24 @@ public class Http11Processor implements Runnable, Processor {
 
             var responseBody = "Hello world!";
 
+            var contentType = "text/html;charset=utf-8";
+
             if (!requestUri.equals("/")) {
                 //클래스는 클래스로더에 대한 정보를 가짐
                 //클래스로더는 파일의 위치에 대한 정보를 가짐
                 //getResource는 파일을 찾지 못하면 null을 반환함
                 URL resource = getClass().getClassLoader().getResource("static" + requestUri);
 
+                if (requestUri.endsWith(".css")) {
+                    contentType = "text/css";
+                }
+
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: "+ contentType + " ",
                     "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);

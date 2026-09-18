@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -8,7 +10,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +65,36 @@ public class Http11Processor implements Runnable, Processor {
                 line = bufferedReader.readLine();
             }
 
-            String requestTarget = stringBuilder.toString().split(" ")[REQUEST_TARGET_INDEX];
-            final String responseBody = getResponseBody(requestTarget);
+            String requestUri = stringBuilder.toString().split(" ")[REQUEST_TARGET_INDEX];
 
-            String contentType = getContentType(requestTarget);
+            Map<String, String> queryParameters = new HashMap<>();
+            if (requestUri.contains("?")) {
+                String[] uriParts = requestUri.split("\\?", 2);
+                requestUri = uriParts[0];
+
+                String queryString = uriParts[1];
+                String[] queryPairs = queryString.split("&");
+                for (String queryPair : queryPairs) {
+                    String[] keyAndValue = queryPair.split("=");
+
+                    queryParameters.put(keyAndValue[0], keyAndValue[1]);
+                }
+
+                Optional<User> user = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
+                if(user.isEmpty()){
+                    throw new RuntimeException("존재하지 않는 사용자입니다.");
+                }
+                User foundUser = user.get();
+                if (foundUser.checkPassword(queryParameters.get("password"))) {
+                    log.info("user : {}", foundUser);
+                }
+            }
+
+            final String responseBody = getResponseBody(requestUri);
+            if (responseBody == null) {
+                return;
+            }
+            String contentType = getContentType(requestUri);
 
             final var response = String.join(CRLF,
                     HTTP_1_1_200_OK,
@@ -80,20 +111,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getContentType(String requestTarget) {
-        if (requestTarget.endsWith(CSS_EXTENSION)) {
+    private String getContentType(String requestUri) {
+        if (requestUri.endsWith(CSS_EXTENSION)) {
             return CONTENT_TYPE_CSS;
         }
         return CONTENT_TYPE_TEXT_HTML_CHARSET_UTF_8;
     }
 
-    private String getResponseBody(String requestTarget) throws URISyntaxException, IOException {
-        if (Objects.equals(requestTarget, HOME_PATH)) {
+    private String getResponseBody(String requestUri) throws URISyntaxException, IOException {
+        if (Objects.equals(requestUri, HOME_PATH)) {
             return HELLO_WORLD;
         }
 
-        final URL resource = getClass().getClassLoader().getResource(STATIC + requestTarget);
-        final Path path = Paths.get(Objects.requireNonNull(resource).toURI());
+        if (requestUri.contains("/login")) {
+            requestUri = "/login.html";
+        }
+
+        final URL resource = getClass().getClassLoader().getResource(STATIC + requestUri);
+        if (resource == null) {
+            return null;
+        }
+        final Path path = Paths.get(resource.toURI());
 
         byte[] bytes = Files.readAllBytes(path);
         return new String(bytes);

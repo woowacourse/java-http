@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +19,8 @@ import java.nio.file.Path;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String QUERY_PARAM_DELIMITER = "&";
+    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
 
     private final Socket connection;
 
@@ -36,22 +41,56 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String requestLine = bufferedReader.readLine();
-            final String requestUri = requestLine.split(" ")[1];
-            log.info("request uri: {}", requestUri);
+            final String requestTarget = requestLine.split(" ")[1];
+            log.info("request uri: {}", requestTarget);
+
+            final URI uri = URI.create(requestTarget);
 
             String responseBody;
-            if (requestUri.equals("/")) {
+            if (requestTarget.equals("/")) {
                 responseBody = "Hello world!";
             }
+            else if (requestTarget.startsWith("/login")) {
+                URL url = getClass().getClassLoader().getResource("static/login.html");
+                if (url == null)
+                    return;
+                final Path path = Path.of(url.getPath());
+                final String[] queryParams = uri.getQuery().split(QUERY_PARAM_DELIMITER);
+
+                String account = null;
+                String password = null;
+                for (int i = 0; i < queryParams.length; i++) {
+                    final String key = queryParams[i].split(QUERY_PARAM_VALUE_DELIMITER)[0];
+                    final String value = queryParams[i].split(QUERY_PARAM_VALUE_DELIMITER)[1];
+
+                    if (key.equals("account")) {
+                        account = value;
+                    }
+                    if (key.equals("password")) {
+                        password = value;
+                    }
+                }
+
+                User userByAccount = InMemoryUserRepository.findByAccount(account)
+                                        .orElseThrow();
+                if (!userByAccount.checkPassword(password)) {
+                    log.error("login error");
+                    throw new IllegalArgumentException();
+                }
+
+                log.info("user : " + userByAccount);
+
+                responseBody = Files.readString(path);
+            }
             else {
-                URL url = getClass().getClassLoader().getResource("static/" + requestUri);
+                URL url = getClass().getClassLoader().getResource("static/" + uri.getPath());
                 if (url == null)
                     return;
                 final Path path = Path.of(url.getPath());
                 responseBody = Files.readString(path);
             }
 
-            final String contentType = getContentType(requestUri);
+            final String contentType = getContentType(requestTarget);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -69,13 +108,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(final String requestUri) {
         if (requestUri.endsWith(".css")) {
-            return "text/css; charset=utf-8";
+            return "text/css;charset=utf-8";
         }
 
         if (requestUri.endsWith(".js")) {
-            return "text/javascript; charset=utf-8";
+            return "text/javascript;charset=utf-8";
         }
 
-        return "text/html; charset=utf-8";
+        return "text/html;charset=utf-8";
     }
 }

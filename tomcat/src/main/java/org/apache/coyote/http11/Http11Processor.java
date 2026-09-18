@@ -121,11 +121,16 @@ public class Http11Processor implements Runnable, Processor {
         String requestLine = bufferedReader.readLine();
 
         String[] requestLineParts = requestLine.split(" ");
+        skipHeaders(bufferedReader);
+        return requestLineParts[1];
+    }
+
+    private void skipHeaders(BufferedReader bufferedReader) throws IOException {
         String headerLine = bufferedReader.readLine();
+
         while (headerLine != null && !headerLine.isEmpty()) {
             headerLine = bufferedReader.readLine();
         }
-        return requestLineParts[1];
     }
 
     private String resolveResponseBody(String resourcePath) throws IOException {

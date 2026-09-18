@@ -7,11 +7,11 @@ public class RequestLine {
     private static final String DELIMITER = " ";
     private static final String SUPPORTED_VERSION = "HTTP/1.1";
 
-    private final String method;
+    private final HttpMethod method;
     private final HttpRequestTarget target;
     private final String version;
 
-    public RequestLine(String method, HttpRequestTarget target, String version) {
+    public RequestLine(HttpMethod method, HttpRequestTarget target, String version) {
         this.method = method;
         this.target = target;
         this.version = version;
@@ -22,19 +22,20 @@ public class RequestLine {
         validateVersion(requestParts[2]);
 
         return new RequestLine(
-                requestParts[0],
+                HttpMethod.from(requestParts[0]),
                 new HttpRequestTarget(requestParts[1]),
                 requestParts[2]
         );
     }
 
-    public void validateMethod(Set<String> supportedMethods) {
-        if (!supportedMethods.contains(method)) {
-            throw new BadRequestException("지원하지 않는 HTTP 메서드입니다: " + method);
-        }
+    public static RequestLine from(String requestLine, Set<HttpMethod> supportedMethods) {
+        RequestLine parsedRequestLine = from(requestLine);
+        validateMethod(parsedRequestLine.method, supportedMethods);
+
+        return parsedRequestLine;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
@@ -58,6 +59,12 @@ public class RequestLine {
         }
 
         return requestParts;
+    }
+
+    private static void validateMethod(HttpMethod method, Set<HttpMethod> supportedMethods) {
+        if (!supportedMethods.contains(method)) {
+            throw new BadRequestException("지원하지 않는 HTTP 메서드입니다: " + method);
+        }
     }
 
     private static void validateVersion(String version) {

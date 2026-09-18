@@ -13,14 +13,6 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(String requestLine) {
-        return from(requestLine, HttpHeaders.empty(), HttpBody.empty());
-    }
-
-    public static HttpRequest from(String requestLine, Set<String> supportedMethods) {
-        return from(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods);
-    }
-
     public static HttpRequest from(String requestLine, HttpHeaders headers, HttpBody body) {
         return new HttpRequest(RequestLine.from(requestLine), headers, body);
     }
@@ -29,15 +21,14 @@ public class HttpRequest {
             String requestLine,
             HttpHeaders headers,
             HttpBody body,
-            Set<String> supportedMethods
+            Set<HttpMethod> supportedMethods
     ) {
-        RequestLine parsedRequestLine = RequestLine.from(requestLine);
-        parsedRequestLine.validateMethod(supportedMethods);
+        RequestLine parsedRequestLine = RequestLine.from(requestLine, supportedMethods);
 
         return new HttpRequest(parsedRequestLine, headers, body);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 

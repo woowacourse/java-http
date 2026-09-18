@@ -15,7 +15,7 @@ class RequestLineTest {
         final RequestLine requestLine = RequestLine.from("GET /login?account=gugu HTTP/1.1");
 
         // then
-        assertThat(requestLine.getMethod()).isEqualTo("GET");
+        assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(requestLine.getPath()).isEqualTo("/login");
         assertThat(requestLine.getParams("account")).isEqualTo("gugu");
         assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1");
@@ -36,13 +36,25 @@ class RequestLineTest {
     }
 
     @Test
-    void unsupportedMethod() {
-        // given
-        final RequestLine requestLine = RequestLine.from("POST /index.html HTTP/1.1");
+    void supportedMethod() {
+        // when
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1", Set.of(HttpMethod.GET));
 
-        // when & then
-        assertThatThrownBy(() -> requestLine.validateMethod(Set.of("GET")))
+        // then
+        assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET);
+    }
+
+    @Test
+    void unsupportedMethod() {
+        assertThatThrownBy(() -> RequestLine.from("POST /index.html HTTP/1.1", Set.of(HttpMethod.GET)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("지원하지 않는 HTTP 메서드입니다: POST");
+    }
+
+    @Test
+    void versionIsValidatedBeforeMethod() {
+        assertThatThrownBy(() -> RequestLine.from("POST /index.html ABC", Set.of(HttpMethod.GET)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("지원하지 않는 HTTP 버전입니다: ABC");
     }
 }

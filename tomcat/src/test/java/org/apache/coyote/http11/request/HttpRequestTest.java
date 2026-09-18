@@ -16,10 +16,10 @@ class HttpRequestTest {
         final String requestLine = "GET /login?account=gugu HTTP/1.1";
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine);
+        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty());
 
         // then
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getHttpPath()).isEqualTo("/login");
         assertThat(request.getParams("account")).isEqualTo("gugu");
         assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
@@ -31,7 +31,7 @@ class HttpRequestTest {
         final String requestLine = "GET /index.html ABC HTTP/1.1";
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(requestLine))
+        assertThatThrownBy(() -> HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("잘못된 http요청 형태입니다.");
     }
@@ -40,13 +40,13 @@ class HttpRequestTest {
     void supportedMethod() {
         // given
         final String requestLine = "GET /index.html HTTP/1.1";
-        final Set<String> supportedMethods = Set.of("GET");
+        final Set<HttpMethod> supportedMethods = Set.of(HttpMethod.GET);
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine, supportedMethods);
+        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods);
 
         // then
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getHttpPath()).isEqualTo("/index.html");
     }
 
@@ -54,10 +54,10 @@ class HttpRequestTest {
     void unsupportedMethod() {
         // given
         final String requestLine = "POST /index.html HTTP/1.1";
-        final Set<String> supportedMethods = Set.of("GET");
+        final Set<HttpMethod> supportedMethods = Set.of(HttpMethod.GET);
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(requestLine, supportedMethods))
+        assertThatThrownBy(() -> HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("지원하지 않는 HTTP 메서드입니다: POST");
     }
@@ -68,10 +68,10 @@ class HttpRequestTest {
         final String requestLine = "POST /index.html HTTP/1.1";
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine);
+        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty());
 
         // then
-        assertThat(request.getMethod()).isEqualTo("POST");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
     }
 
     @Test
@@ -80,7 +80,7 @@ class HttpRequestTest {
         final String requestLine = "GET /index.html ABC";
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(requestLine))
+        assertThatThrownBy(() -> HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty()))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("지원하지 않는 HTTP 버전입니다: ABC");
     }

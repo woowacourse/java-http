@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import java.util.Set;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Set<String> SUPPORTED_METHODS = Set.of("GET");
+    private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET);
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 

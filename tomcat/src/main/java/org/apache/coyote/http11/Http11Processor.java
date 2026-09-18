@@ -158,8 +158,9 @@ public class Http11Processor implements Runnable, Processor {
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
-            if (user.get().checkPassword(password)) {
-                log.info("로그인 사용자 조회 성공: {}", user);
+            User foundUser = user.get();
+            if (foundUser.checkPassword(password)) {
+                log.info("로그인 사용자 조회 성공: {}", foundUser);
             }
             else {
                 log.info("아이디 또는 비밀번호가 일치하지 않습니다.");

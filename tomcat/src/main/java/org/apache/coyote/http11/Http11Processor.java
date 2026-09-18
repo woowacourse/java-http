@@ -89,15 +89,7 @@ public class Http11Processor implements Runnable, Processor {
                         ? "static/login.html"
                         : "static" + path;
 
-                try (var resource = getClass().getClassLoader()
-                        .getResourceAsStream(resourcePath)) {
-
-                    if (resource == null) {
-                        throw new IOException(resourcePath + " 파일을 찾을 수 없습니다.");
-                    }
-
-                    responseBody = resource.readAllBytes();
-                }
+                responseBody = readResource(resourcePath);
             }
             final String responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -129,5 +121,17 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return parameters;
+    }
+
+    private byte[] readResource(String resourcePath) throws IOException {
+        try (var resource = getClass().getClassLoader()
+                .getResourceAsStream(resourcePath)) {
+
+            if (resource == null) {
+                throw new IOException(resourcePath + " 파일을 찾을 수 없습니다.");
+            }
+
+            return resource.readAllBytes();
+        }
     }
 }

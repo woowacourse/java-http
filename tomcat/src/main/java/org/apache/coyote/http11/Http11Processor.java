@@ -81,7 +81,9 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
 
-            loggingUser(queryParams);
+            if (uri.contains("login")) {
+                loggingUser(queryParams);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

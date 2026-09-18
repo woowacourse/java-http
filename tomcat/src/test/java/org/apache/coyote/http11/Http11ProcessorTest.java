@@ -89,6 +89,48 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void javascript() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n" +
+                        "Content-Type: application/javascript;charset=utf-8 \r\n");
+    }
+
+    @Test
+    void svg() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n" +
+                        "Content-Type: image/svg+xml;charset=utf-8 \r\n");
+    }
+
+    @Test
     void login() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

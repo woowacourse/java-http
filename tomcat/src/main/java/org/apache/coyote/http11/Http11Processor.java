@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
@@ -40,79 +41,96 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            // 요청 헤더 읽기
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final StringBuilder builder = new StringBuilder();
-
-            String line;
-            while (!(line = reader.readLine()).isBlank()) {
-                builder.append(line);
-                builder.append("\r\n");
-            }
-
-            String request = builder.toString();
+            final String request = readRequest(inputStream);
             if (request.isBlank()) {
                 return;
             }
 
-            // 경로, 타입, 바디 가져옴
             String uri = request.split(" ")[1];
             log.info("uri: {}", uri);
+            final String type = findType(uri);
 
-            String type = "html";
-            if (uri.contains(".")) {
-                type = List.of(uri.split("\\.")).getLast();
-            }
-            log.info("type: {}", type);
-
-            String queryString = "";
-            if (uri.contains("?")) {
-                queryString = List.of(uri.split("\\?")).getLast();
-            }
-
-            log.info("queryString: {}", queryString);
-
-            Map<String, String> pairs = new LinkedHashMap<>();
+            final String queryString = findQueryString(uri);
             if (!queryString.isBlank()) {
                 uri = List.of(uri.split("\\?")).getFirst() + ".html";
-                List<String> queries = List.of(queryString.split("&"));
-
-                for (String query : queries) {
-                    String[] pair = query.split("=");
-                    log.info("pair[0]: {}", pair[0]);
-                    log.info("pair[1]: {}", pair[1]);
-                    pairs.put(pair[0], pair[1]);
-                }
-                Optional<User> user = InMemoryUserRepository.findByAccount(pairs.get("account"));
-                if (user.isPresent() && user.get().checkPassword(pairs.get("password"))) {
-                    log.info("user : {}", user.get());
-                }
+                final Map<String, String> pairs = findQueries(queryString);
+                userMatching(pairs);
             }
 
-            var responseBody = "Hello world!";
-            if (!uri.equals("/") && !uri.isBlank()) {
-                URL resource = getClass().getClassLoader().getResource("static" + uri);
-//                log.info("resource = {}", resource);
-
-                final String filePath = resource.getFile();
-                final Path path = Paths.get(filePath);
-//                log.info("path = {}", path);
-
-                responseBody = Files.readString(path);
-            }
-
-            // 응답 생성
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + type + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String responseBody = makeResponseBody(uri);
+            final String response = makeResponse(type, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String readRequest(InputStream inputStream) throws IOException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        final StringBuilder builder = new StringBuilder();
+
+        String line;
+        while (!(line = reader.readLine()).isBlank()) {
+            builder.append(line);
+            builder.append("\r\n");
+        }
+        return builder.toString();
+    }
+
+    private String findType(String uri) {
+        if (uri.contains(".")) {
+            return List.of(uri.split("\\.")).getLast();
+        }
+        return "html";
+    }
+
+    private String findQueryString(String uri) {
+        if (uri.contains("?")) {
+            return List.of(uri.split("\\?")).getLast();
+        }
+        return "";
+    }
+
+    private Map<String, String> findQueries(String queryString) {
+        final List<String> queries = List.of(queryString.split("&"));
+        final Map<String, String> pairs = new LinkedHashMap<>();
+
+        for (String query : queries) {
+            String[] pair = query.split("=", 2);
+            log.info("pair[0]: {}", pair[0]);
+            log.info("pair[1]: {}", pair[1]);
+            pairs.put(pair[0], pair[1]);
+        }
+        return pairs;
+    }
+
+    private void userMatching(Map<String, String> pairs) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(pairs.get("account"));
+        if (user.isPresent() && user.get().checkPassword(pairs.get("password"))) {
+            log.info("user : {}", user.get());
+        }
+    }
+
+    private String makeResponseBody(String uri) throws IOException {
+        if (uri.equals("/") || uri.isBlank()) {
+            return "Hello world!";
+        }
+        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+
+        final String filePath = resource.getFile();
+        final Path path = Paths.get(filePath);
+
+        return Files.readString(path);
+    }
+
+    private String makeResponse(String type, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/" + type + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

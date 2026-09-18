@@ -1,6 +1,7 @@
 package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
 import org.apache.catalina.handler.ResourceHandler;
@@ -22,19 +23,27 @@ public class LoginHandler implements ResourceHandler {
 
     @Override
     public HttpServletResponse handle(HttpServletRequest request) throws IOException {
-        logIfLoginSucceeds(request.requestLine().getQueryParam());
-        return HttpServletResponse.ok(StaticResourceBody.from(request.path()));
+        QueryParam queryParam = request.requestLine().getQueryParam();
+        if(queryParam.isEmpty()) {
+            return HttpServletResponse.ok(StaticResourceBody.from("/login"));
+        }
+
+        Optional<User> user = login(queryParam);
+        if (user.isEmpty()) {
+            return HttpServletResponse.redirect("401.html");
+        }
+        log.info("login user: {}", user);
+        return HttpServletResponse.redirect("/index.html");
     }
 
-    private void logIfLoginSucceeds(QueryParam queryParam) {
+    private Optional<User> login(QueryParam queryParam) {
         final Optional<String> account = queryParam.get("account");
         final Optional<String> password = queryParam.get("password");
         if (account.isEmpty() || password.isEmpty()) {
-            return;
+            return Optional.empty();
         }
 
-        InMemoryUserRepository.findByAccount(account.get())
-                .filter(user -> user.checkPassword(password.get()))
-                .ifPresent(user -> log.info("user : {}", user));
+        return InMemoryUserRepository.findByAccount(account.get())
+                .filter(user -> user.checkPassword(password.get()));
     }
 }

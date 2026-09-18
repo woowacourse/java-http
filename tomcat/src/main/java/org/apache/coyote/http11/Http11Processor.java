@@ -102,13 +102,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> users = new HashMap<>();
-        for (final String userInfo : queryString.split("&")) {
-            final String[] keyAndValue = userInfo.split("=", 2);
+        final Map<String, String> params = new HashMap<>();
+        for (final String parameter : queryString.split("&")) {
+            final String[] keyAndValue = parameter.split("=", 2);
             if (keyAndValue.length == 2) {
-                users.put(keyAndValue[0], keyAndValue[1]);
+                params.put(keyAndValue[0], keyAndValue[1]);
             }
         }
-        return users;
+        return params;
     }
 }

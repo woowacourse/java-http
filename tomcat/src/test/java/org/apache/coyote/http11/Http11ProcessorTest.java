@@ -8,8 +8,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class Http11ProcessorTest {
 
@@ -29,7 +31,7 @@ class Http11ProcessorTest {
 
     @Test
     void loginWithoutCredentialsServesLoginPage() throws IOException {
-        final var socket = new StubSocket("GET /login HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var socket = new StubSocket(getRequest("/login"));
 
         new Http11Processor(socket).process(socket);
 
@@ -50,7 +52,7 @@ class Http11ProcessorTest {
 
     @Test
     void registerPageIsServedForGetRequest() throws IOException {
-        final var socket = new StubSocket("GET /register HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var socket = new StubSocket(getRequest("/register"));
 
         new Http11Processor(socket).process(socket);
 
@@ -78,8 +80,19 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length,
+                "Cookie: JSESSIONID=existing-session-id",
                 "",
                 body
+        );
+    }
+
+    private String getRequest(String path) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session-id",
+                "",
+                ""
         );
     }
 
@@ -91,7 +104,7 @@ class Http11ProcessorTest {
 
     @Test
     void missingResourceReturnsNotFound() {
-        final var socket = new StubSocket("GET /missing.html HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var socket = new StubSocket(getRequest("/missing.html"));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -108,7 +121,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket(getRequest("/"));
         final var processor = new Http11Processor(socket);
 
         // when
@@ -132,6 +145,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session-id",
                 "",
                 "");
 
@@ -150,5 +164,31 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void responseSetsJSessionIdWhenRequestDoesNotHaveOne() {
+        final var socket = new StubSocket("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\nSet-Cookie: JSESSIONID=");
+
+        String sessionId = socket.output()
+                .lines()
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .map(line -> line.substring("Set-Cookie: JSESSIONID=".length()))
+                .findFirst()
+                .orElseThrow();
+        assertThatCode(() -> UUID.fromString(sessionId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void responseDoesNotSetJSessionIdWhenRequestAlreadyHasOne() {
+        final var socket = new StubSocket(getRequest("/"));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie:");
     }
 }

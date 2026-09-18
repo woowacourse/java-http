@@ -60,8 +60,10 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> headers = readHeaders(reader);
             String body = readBody(reader, headers);
+            Optional<String> newSessionId = new HttpCookie(headers.get("cookie"))
+                    .createJSessionIdIfAbsent();
 
-            handleRequest(method, requestUri, body, outputStream);
+            handleRequest(method, requestUri, body, newSessionId, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -107,19 +109,30 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private void handleRequest(String method, RequestUri requestUri, String body, OutputStream outputStream) throws IOException {
+    private void handleRequest(
+            String method,
+            RequestUri requestUri,
+            String body,
+            Optional<String> newSessionId,
+            OutputStream outputStream
+    ) throws IOException {
         String path = requestUri.getPath();
         switch (path) {
-            case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html");
-            case "/register" -> handleRegister(method, body, outputStream);
-            case "/login" -> handleLogin(method, body, outputStream);
-            default -> serveResource(path, outputStream);
+            case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html", newSessionId);
+            case "/register" -> handleRegister(method, body, newSessionId, outputStream);
+            case "/login" -> handleLogin(method, body, newSessionId, outputStream);
+            default -> serveResource(path, newSessionId, outputStream);
         }
     }
 
-    private void handleRegister(String method, String body, OutputStream outputStream) throws IOException {
+    private void handleRegister(
+            String method,
+            String body,
+            Optional<String> newSessionId,
+            OutputStream outputStream
+    ) throws IOException {
         if (method.equals("GET")) {
-            serveResource("/register.html", outputStream);
+            serveResource("/register.html", newSessionId, outputStream);
             return;
         }
 
@@ -131,22 +144,32 @@ public class Http11Processor implements Runnable, Processor {
                     parameters.get("email")
             ));
 
-            writeRedirect(outputStream, "/index.html");
+            writeRedirect(outputStream, "/index.html", newSessionId);
         }
     }
 
-    private void handleLogin(String method, String body, OutputStream outputStream) throws IOException {
+    private void handleLogin(
+            String method,
+            String body,
+            Optional<String> newSessionId,
+            OutputStream outputStream
+    ) throws IOException {
         if (method.equals("GET")) {
-            serveResource("/login.html", outputStream);
+            serveResource("/login.html", newSessionId, outputStream);
             return;
         }
 
         if (method.equals("POST")) {
             Map<String, String> parameters = parseFormBody(body);
             Optional<User> loginUser = login(parameters);
-            loginUser.ifPresent(user -> log.info("회원 조회 성공: account={}", user.getAccount()));
-            String location = loginUser.isPresent() ? "/index.html" : "/401.html";
-            writeRedirect(outputStream, location);
+            if (loginUser.isEmpty()) {
+                writeRedirect(outputStream, "/401.html", newSessionId);
+                return;
+            }
+
+            User user = loginUser.get();
+            log.info("회원 조회 성공: account={}", user.getAccount());
+            writeRedirect(outputStream, "/index.html", newSessionId);
         }
     }
 
@@ -167,17 +190,21 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private void serveResource(String path, OutputStream outputStream) throws IOException {
+    private void serveResource(
+            String path,
+            Optional<String> newSessionId,
+            OutputStream outputStream
+    ) throws IOException {
         String responseBody;
         try {
             responseBody = resourceLoader.load(path);
         } catch (FileNotFoundException e) {
-            writeResponse(outputStream, "404 Not Found", "Not Found", "text/plain");
+            writeResponse(outputStream, "404 Not Found", "Not Found", "text/plain", newSessionId);
             return;
         }
 
         String contentType = path.endsWith(".css") ? "text/css" : "text/html";
-        writeResponse(outputStream, "200 OK", responseBody, contentType);
+        writeResponse(outputStream, "200 OK", responseBody, contentType, newSessionId);
     }
 
     private Optional<User> login(Map<String, String> params) {
@@ -192,28 +219,41 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password));
     }
 
-    private void writeRedirect(OutputStream outputStream, String location) throws IOException {
-        String response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
+    private void writeRedirect(
+            OutputStream outputStream,
+            String location,
+            Optional<String> newSessionId
+    ) throws IOException {
+        String response = "HTTP/1.1 302 Found\r\n"
+                + setCookieHeader(newSessionId)
+                + "Location: " + location + "\r\n"
+                + "Content-Length: 0\r\n\r\n";
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 
-    private void writeResponse(OutputStream outputStream, String status, String responseBody, String contentType) throws IOException {
+    private void writeResponse(
+            OutputStream outputStream,
+            String status,
+            String responseBody,
+            String contentType,
+            Optional<String> newSessionId
+    ) throws IOException {
         byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
 
-        var response = String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBodyBytes.length + " ",
-                "",
-                responseBody
-        );
+        String response = "HTTP/1.1 " + status + " \r\n"
+                + setCookieHeader(newSessionId)
+                + "Content-Type: " + contentType + ";charset=utf-8 \r\n"
+                + "Content-Length: " + responseBodyBytes.length + " \r\n"
+                + "\r\n"
+                + responseBody;
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
+    }
+
+    private String setCookieHeader(Optional<String> newSessionId) {
+        return newSessionId
+                .map(sessionId -> "Set-Cookie: " + HttpCookie.JSESSION_ID + "=" + sessionId + "\r\n")
+                .orElse("");
     }
 }

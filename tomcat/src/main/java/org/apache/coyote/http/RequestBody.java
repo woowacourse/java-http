@@ -4,11 +4,11 @@ import java.util.Optional;
 
 public interface RequestBody {
 
-    static RequestBody of(String contentType, String rawBody) {
+    static RequestBody of(ContentType contentType, String rawBody) {
         if (rawBody.isEmpty()) {
             return TextBody.EMPTY;
         }
-        if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
+        if (contentType == ContentType.FORM_URLENCODED) {
             return FormBody.from(rawBody);
         }
         return new TextBody(rawBody);

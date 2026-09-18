@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.List;
+import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpServletRequest;
 import org.apache.coyote.http.HttpServletResponse;
@@ -23,7 +24,7 @@ class LoginHandlerTest {
         HttpServletRequest request = new HttpServletRequest(
                 RequestLine.from("GET /login?account=gugu&password=password HTTP/1.1 "),
                 HttpHeaders.from(List.of()),
-                RequestBody.of(null,"")
+                RequestBody.of(ContentType.PLAIN,"")
         );
 
         HttpServletResponse response = loginHandler.handle(request);
@@ -39,7 +40,7 @@ class LoginHandlerTest {
         HttpServletRequest request = new HttpServletRequest(
                 RequestLine.from("GET /login?account=gugu&password=wrongPassword HTTP/1.1 "),
                 HttpHeaders.from(List.of()),
-                RequestBody.of(null, "")
+                RequestBody.of(ContentType.PLAIN, "")
         );
 
         HttpServletResponse response = loginHandler.handle(request);

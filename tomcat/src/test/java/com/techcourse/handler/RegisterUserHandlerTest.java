@@ -1,15 +1,11 @@
 package com.techcourse.handler;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
-import com.techcourse.db.InMemoryUserRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpServletRequest;
 import org.apache.coyote.http.HttpServletResponse;
-import org.apache.coyote.http.HttpStatus;
 import org.apache.coyote.http.RequestBody;
 import org.apache.coyote.http.RequestLine;
 import org.assertj.core.api.Assertions;
@@ -37,8 +33,8 @@ class RegisterUserHandlerTest {
         return new HttpServletRequest(
                 RequestLine.from("POST /register HTTP/1.1 "),
                 HttpHeaders.from(List.of(
-                        "Content-Type: application/x-www-form-urlencoded",
+                        "Content-Type: " + ContentType.FORM_URLENCODED.value(),
                         "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length)),
-                RequestBody.of("application/x-www-form-urlencoded", body));
+                RequestBody.of(ContentType.FORM_URLENCODED, body));
     }
 }

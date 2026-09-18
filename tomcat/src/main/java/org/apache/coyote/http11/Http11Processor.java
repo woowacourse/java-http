@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,11 +34,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+        String requestPath = "unknown";
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
             String url = parseRequestUrl(inputStream);
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
+            requestPath = uriInfo.path();
             if ("/login".equals(uriInfo.path()) && !uriInfo.queryString().isBlank()) {
                 User user = RequestHandler.findUser(parseUserAccount(uriInfo.queryString()));
                 log.info("로그인 사용자: {}", user.getAccount());
@@ -57,8 +58,8 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes());
             outputStream.write(responseBody);
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
-            log.error(e.getMessage(), e);
+        } catch (IOException | URISyntaxException | RuntimeException e) {
+            log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
     }
 

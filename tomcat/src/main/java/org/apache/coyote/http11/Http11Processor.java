@@ -34,8 +34,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
+
             String responseBody = resolveResponseBody(reader);
 
             final var response = String.join("\r\n",
@@ -57,10 +58,11 @@ public class Http11Processor implements Runnable, Processor {
         final String requestPath = requestLine.split(" ")[1];
         try {
             final URI uri = getClass().getClassLoader().getResource("static" + requestPath).toURI();
+
             final Path path = Path.of(uri);
 
-            if (!Files.isRegularFile(path)) {
-                return "Hello world!";
+            if ("/".equals(requestPath)) {
+                return DEFAULT_MESSAGE;
             }
             return Files.readString(path);
         } catch (URISyntaxException e) {

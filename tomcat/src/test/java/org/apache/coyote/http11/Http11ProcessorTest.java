@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.nio.charset.StandardCharsets;
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -115,5 +120,53 @@ class Http11ProcessorTest {
             assertThat(response[1])
                     .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
         }
+    }
+
+    private List<String> loginSuccessLogs(String requestTarget) {
+        final Logger logger =
+                (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.setContext(logger.getLoggerContext());
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            final var socket = new StubSocket(
+                    "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+            new Http11Processor(socket).process(socket);
+
+            return appender.list.stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .filter(message -> message.startsWith("회원 조회 성공: "))
+                    .toList();
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
+    void matchingCredentialsLogSuccess() {
+        assertThat(loginSuccessLogs("/login?account=gugu&password=password"))
+                .containsExactly("회원 조회 성공: gugu");
+    }
+
+    @Test
+    void wrongPasswordDoesNotLogSuccess() {
+        assertThat(loginSuccessLogs("/login?account=gugu&password=wrong"))
+                .isEmpty();
+    }
+
+    @Test
+    void encodedQueryInDifferentOrderLogsSuccess() {
+        assertThat(loginSuccessLogs("/login?password=pass%77ord&account=%67ugu"))
+                .containsExactly("회원 조회 성공: gugu");
+    }
+
+    @Test
+    void missingPasswordDoesNotLogSuccess() {
+        assertThat(loginSuccessLogs("/login?account=gugu"))
+                .isEmpty();
     }
 }

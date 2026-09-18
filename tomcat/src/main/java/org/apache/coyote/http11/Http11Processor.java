@@ -19,6 +19,8 @@ import java.util.*;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_RESOURCE_PATH = "/";
+    private static final String DEFAULT_VALUE = "Hello world!";
 
     private final Socket connection;
 
@@ -44,17 +46,10 @@ public class Http11Processor implements Runnable, Processor {
             String line = bufferedReader.readLine();
             final String[] tokens = line.split(" ", 3);
             final String uri = tokens[1];
-            String path = tokens[1];
 
-            if (uri.contains("?")) {
-                int index = uri.indexOf("?");
-                path = uri.substring(0, index);
-                String queryString = uri.substring(index + 1);
-
-                Map<String, String> paramsMap = getParamsMap(queryString);
-                User user = getValidatedUser(paramsMap);
-                log.info(user.toString());
-            }
+            String path = getPath(uri);
+            Optional<String> queryString = getQueryString(uri);
+            queryString.ifPresent(this::login);
 
             final var responseBody = createResponseBody(path);
             final String contentType = getContentType(path);
@@ -73,10 +68,33 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String getPath(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            return uri.substring(0, index);
+        }
+        return uri;
+    }
+
+    private Optional<String> getQueryString(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            return Optional.of(uri.substring(index + 1));
+        }
+        return Optional.empty();
+    }
+
+    private void login(String queryString) {
+        Map<String, String> paramsMap = getParamsMap(queryString);
+        User user = getValidatedUser(paramsMap);
+        log.info("user: {}", user.toString());
+    }
+
     private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {
-        final String resourcePath = "static" + requestTarget;
-        if (requestTarget.equals("/")) {
-            return "Hello world!".getBytes();
+        String resourcePath = getResourcePath(requestTarget);
+
+        if (requestTarget.equals(DEFAULT_RESOURCE_PATH)) {
+            return DEFAULT_VALUE.getBytes();
         }
 
         final URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource(resourcePath));
@@ -85,19 +103,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(String path) {
-        if (path.equals("/") || path.endsWith(".html")){
-            return "text/html;charset=utf-8";
-        }
         if (path.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
-        return "application/octet-stream";
+        return "text/html;charset=utf-8";
     }
 
     @Nonnull
     private Map<String, String> getParamsMap(String queryString) {
-        String[] data = queryString.split("\\&");
         Map<String, String> paramsMap = new HashMap<>();
+        String[] data = queryString.split("\\&");
         for (String d : data) {
             String[] param = d.split("\\=");
             paramsMap.put(param[0], param[1]);
@@ -112,5 +127,14 @@ public class Http11Processor implements Runnable, Processor {
         );
         user.checkPassword(paramsMap.get("password"));
         return user;
+    }
+
+    @Nonnull
+    private String getResourcePath(String requestTarget) {
+        String resourcePath = "static" + requestTarget;
+        if (!requestTarget.contains(".")) {
+            resourcePath = resourcePath.concat(".html");
+        }
+        return resourcePath;
     }
 }

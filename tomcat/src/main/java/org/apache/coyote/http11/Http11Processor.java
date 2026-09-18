@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
                         .ifPresent(user -> log.info("login user: {}", user.getAccount()));
             }
 
-            String responseBody = "Hello world!";
+            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             if (!path.equals("/")) {
                 final String resourcePath = "/login".equals(path) ? "/login.html" : path;
 
@@ -85,20 +85,21 @@ public class Http11Processor implements Runnable, Processor {
                     if (resourceStream == null) {
                         throw new IllegalArgumentException("리소스를 찾을 수 없습니다: " + "static" + resourcePath);
                     }
-                    responseBody = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
+                    responseBody = resourceStream.readAllBytes();
                 }
             }
 
             final String contentType = getContentType(path);
 
-            final var response = String.join("\r\n",
+            final var responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    "");
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

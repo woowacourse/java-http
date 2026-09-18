@@ -165,11 +165,18 @@ public class Http11Processor implements Runnable, Processor {
 
         User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+        validatePassword(queryParams, user);
+
+        log.info("user: {}", user);
+    }
+
+    private void validatePassword(Map<String, String> queryParams, User user) {
+        if (!queryParams.containsKey("password")) {
+            throw new IllegalArgumentException("비밀번호는 필수값입니다.");
+        }
 
         if (!user.checkPassword(queryParams.get("password"))) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-
-        log.info("user: {}", user);
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +25,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CRLF = "\r\n";
     private static final String STATIC_RESOURCE_ROOT = "static";
     private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String LOGIN_PATH = "/login";
+    private static final String ACCOUNT_PARAMETER = "account";
 
     private static final String ACCEPT_HEADER = "Accept";
     private static final String ACCEPT_ANY = "*/*";
@@ -57,7 +61,11 @@ public class Http11Processor implements Runnable, Processor {
             }
             final var requestHeaders = readHeaders(bufferedReader);
             final var contentType = decideContentType(requestHeaders);
-            final var path = parsePath(requestLine);
+            final var uri = parseUri(requestLine);
+            final var pathAndQueryString = splitPathAndQueryString(uri);
+            final var path = pathAndQueryString[0];
+            final var queryParameters = parseQueryParameters(pathAndQueryString);
+            logLoginUser(path, queryParameters);
 
             var statusLine = STATUS_OK;
             final byte[] responseBody;
@@ -85,7 +93,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestLine(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
-        log.info("{}", requestLine);
+        log.info("requestLine: {}", requestLine);
         return requestLine;
     }
 
@@ -96,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
             final String[] nameAndValue = headerLine.split(":", 2);
             headers.put(nameAndValue[0], nameAndValue[1].trim());
         }
-        log.info("{}", headers);
+        log.info("headers: {}", headers);
         return headers;
     }
 
@@ -108,13 +116,41 @@ public class Http11Processor implements Runnable, Processor {
         return TEXT_HTML;
     }
 
-    private String parsePath(final String requestLine) {
+    private String parseUri(final String requestLine) {
         final String[] tokens = requestLine.split(" ");
         return tokens[1];
     }
 
+    private String[] splitPathAndQueryString(final String uri) {
+        return uri.split("\\?", 2);
+    }
+
+    private Map<String, String> parseQueryParameters(final String[] pathAndQueryString) {
+        final Map<String, String> queryParameters = new LinkedHashMap<>();
+        if (pathAndQueryString.length < 2) {
+            return queryParameters;
+        }
+        final String[] pairs = pathAndQueryString[1].split("&");
+        for (int i = 0; i < pairs.length; i++) {
+            final String[] nameAndValue = pairs[i].split("=", 2);
+            queryParameters.put(URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
+                    URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8));
+        }
+        return queryParameters;
+    }
+
+    private void logLoginUser(final String path, final Map<String, String> queryParameters) {
+        if (path.equals(LOGIN_PATH) && queryParameters.containsKey(ACCOUNT_PARAMETER)) {
+            InMemoryUserRepository.findByAccount(queryParameters.get(ACCOUNT_PARAMETER))
+                    .ifPresent(user -> log.info("user: {}", user));
+        }
+    }
+
     private URL findResource(final String path) {
-        return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path);
+        if (path.contains(".")) {
+            return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path);
+        }
+        return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path + ".html");
     }
 
     private String buildResponse(final String statusLine, final String contentType, final byte[] body) {

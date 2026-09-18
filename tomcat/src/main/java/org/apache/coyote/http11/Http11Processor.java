@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
             // 요청 경로 없을 경우 문자열 반환
             if (filePath.equals("/")) {
                 final var responseBody = "Hello world!";
-                final var response = createResponse(responseBody, "text/html");
+                final var response = createResponse("HTTP/1.1 200 OK ", responseBody, "text/html");
 
                 writeResponse(outputStream, response);
                 return;
@@ -91,6 +91,11 @@ public class Http11Processor implements Runnable, Processor {
                         .getResourceAsStream("static" + loginPath);
 
                 if (resourceAsStream == null) {
+                    String response = createResponse(
+                            "HTTP/1.1 404 Not Found",
+                            "Not Found",
+                            "text/plain");
+                    writeResponse(outputStream, response);
                     return;
                 }
 
@@ -98,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
 
                     final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-                    final var response = createResponse(responseBody, "text/html");
+                    final var response = createResponse("HTTP/1.1 200 OK ", responseBody, "text/html");
 
                     writeResponse(outputStream, response);
                 }
@@ -112,6 +117,11 @@ public class Http11Processor implements Runnable, Processor {
                     .getResourceAsStream("static" + filePath);
 
             if (resourceAsStream == null) {
+                String response = createResponse(
+                        "HTTP/1.1 404 Not Found",
+                        "Not Found",
+                        "text/plain");
+                writeResponse(outputStream, response);
                 return;
             }
 
@@ -125,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-                final var response = createResponse(responseBody, contentType);
+                final var response = createResponse("HTTP/1.1 200 OK ", responseBody, contentType);
 
                 writeResponse(outputStream, response);
             }
@@ -145,9 +155,9 @@ public class Http11Processor implements Runnable, Processor {
         return queryParameters;
     }
 
-    private static String createResponse(String responseBody, String contentType) {
+    private static String createResponse(String statusLine, String responseBody, String contentType) {
         final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                statusLine,
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",

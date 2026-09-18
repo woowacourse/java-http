@@ -43,17 +43,8 @@ public class Http11Processor implements Runnable, Processor {
             final String[] requestLineParts = requestLine.split(" "); // 요청 첫 줄(Request Line) 분리
             final String requestUri = requestLineParts[1];
 
-            final int queryStartIndex = requestUri.indexOf('?');
-            final String path;
-            final String queryString;
-
-            if (queryStartIndex == -1) { // 쿼리가 없는 경우
-                path = requestUri;
-                queryString = "";
-            } else {
-                path = requestUri.substring(0, queryStartIndex);
-                queryString = requestUri.substring(queryStartIndex + 1);
-            }
+            final String path = extractPath(requestUri);
+            final String queryString = extractQueryString(requestUri);
 
             final Map<String, String> queryParams = parseQueryString(queryString);
 
@@ -81,6 +72,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private String extractPath(final String requestUri) {
+        final int queryStartIndex = requestUri.indexOf('?');
+        if (queryStartIndex == -1) { // 쿼리가 없는 경우
+            return requestUri;
+        }
+        return requestUri.substring(0, queryStartIndex);
+    }
+
+    private String extractQueryString(String requestUri) {
+        final int queryStartIndex = requestUri.indexOf('?');
+        if (queryStartIndex == -1) { // 쿼리가 없는 경우
+            return "";
+        }
+        return requestUri.substring(queryStartIndex + 1);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

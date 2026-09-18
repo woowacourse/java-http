@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.catalina.handler.ResourceHandler;
 import org.apache.coyote.http.HttpServletRequest;
 import org.apache.coyote.http.HttpServletResponse;
@@ -24,15 +25,20 @@ public class LoginHandler implements ResourceHandler {
     @Override
     public HttpServletResponse handle(HttpServletRequest request) throws IOException {
         QueryParam queryParam = request.requestLine().getQueryParam();
-        if(queryParam.isEmpty()) {
+        if (queryParam.isEmpty()) {
             return HttpServletResponse.ok(StaticResourceBody.from("/login"));
         }
 
         Optional<User> user = login(queryParam);
         if (user.isEmpty()) {
-            return HttpServletResponse.redirect("401.html");
+            return HttpServletResponse.redirect("/401.html");
         }
         log.info("login user: {}", user);
+
+        if (request.cookie("JSESSIONID").isEmpty()) {
+            return HttpServletResponse.redirect("/index.html")
+                    .addCookie("JSESSIONID", UUID.randomUUID().toString());
+        }
         return HttpServletResponse.redirect("/index.html");
     }
 

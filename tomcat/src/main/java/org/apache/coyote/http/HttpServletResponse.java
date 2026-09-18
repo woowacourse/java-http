@@ -41,7 +41,20 @@ public class HttpServletResponse {
         return values;
     }
 
-    public HttpStatus status() { return status; }
-    public HttpHeaders headers() { return headers; }
-    public ResponseBody body() { return body; }
+    public HttpServletResponse addCookie(String key, String value) {
+        headers.setCookie(key, value);
+        return this;
+    }
+
+    public HttpStatus status() {
+        return status;
+    }
+
+    public HttpHeaders headers() {
+        return headers;
+    }
+
+    public ResponseBody body() {
+        return body;
+    }
 }

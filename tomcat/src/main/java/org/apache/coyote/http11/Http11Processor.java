@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final String STATIC_ROOT = "static";
+    private static final String MIME_TYPE_DEFAULT = "text/html";
+    private static final String MIME_TYPES_WILDCARD = "*/*";
     private static final Map<String, String> MIME_TYPE = Map.ofEntries(
             Map.entry("text/html", ".html"),
             Map.entry("text/css", ".css"),
@@ -97,14 +99,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private String resolveContentType(HttpRequestHeader header) {
         String accept = header.header().get("Accept");
-        if (accept != null && !accept.isEmpty()) {
-            String preferred = accept.split(",")[0]
-                    .split(";")[0].trim();
-            if (!preferred.equals("*/*")) {
-                return preferred;
-            }
+
+        if (accept == null || accept.isEmpty()) {
+            return MIME_TYPE_DEFAULT;
         }
-        return "text/html";
+
+        String preferred = accept.split(",")[0].split(";")[0].trim();
+
+        if (MIME_TYPES_WILDCARD.equals(preferred)) {
+            return MIME_TYPE_DEFAULT;
+        }
+
+        return preferred;
     }
 
     private String resolveContentOf(URL fileUrl) {

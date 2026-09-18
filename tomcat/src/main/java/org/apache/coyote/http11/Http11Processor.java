@@ -40,10 +40,11 @@ public class Http11Processor implements Runnable, Processor {
             final String requestURI = requestLineComponents[1];
 
             final var responseBody = readResource(requestURI);
+            final String contentType = requestURI.endsWith(".css") ? "text/css" : "text/html;charset=utf-8";
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

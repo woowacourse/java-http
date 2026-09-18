@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+// 서버 생명주기 관리
+// Connector를 생성 및 실행한 뒤, System.in.read()를 통해 메인 스레드가 즉시 종료되지 않도록 콘솔 키 입력을 대기
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);

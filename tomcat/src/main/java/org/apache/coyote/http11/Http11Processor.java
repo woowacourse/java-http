@@ -152,10 +152,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void loggingUser(Map<String, String> queryParams) {
-        if (!queryParams.isEmpty()) {
-            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                    .orElseThrow(IllegalArgumentException::new);
-            log.info("user: {}", user);
+        if (queryParams.isEmpty()) {
+            return;
         }
+
+        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+
+        if (!user.checkPassword(queryParams.get("password"))) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        log.info("user: {}", user);
     }
 }

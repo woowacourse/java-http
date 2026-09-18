@@ -67,8 +67,8 @@ public class Http11Processor implements Runnable, Processor {
 
             if (uri.contains("?")) {
                 int index = uri.indexOf("?");
-                path = uri.substring(0, index);
-                queryString = uri.substring(index + 1);
+                path = uri.substring(0, index);  // 순수 경로, 예: /login
+                queryString = uri.substring(index + 1);  // 쿼리 스트링, 예: account=moving@naver.com&password=password
             }
 
             // 5. /login 요청 시 Query String 파싱 및 회원 조회

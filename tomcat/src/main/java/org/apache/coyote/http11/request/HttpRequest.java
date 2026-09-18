@@ -48,6 +48,14 @@ public class HttpRequest {
         return headers.get(name);
     }
 
+    public String getHost() {
+        String authority = requestLine.getAuthority();
+        if (authority != null) {
+            return authority;
+        }
+        return headers.get("Host");
+    }
+
     public HttpBody getBody() {
         return body;
     }

@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpRequestTargetTest {
     @Test
     void parseRequestTarget() {
-        HttpRequestTarget target = new HttpRequestTarget("/login?account=gugu");
+        HttpRequestTarget target = HttpRequestTarget.from("/login?account=gugu");
 
         assertThat(target.getPath()).isEqualTo("/login");
         assertThat(target.getParams("account")).isEqualTo("gugu");
@@ -15,7 +15,7 @@ class HttpRequestTargetTest {
 
     @Test
     void requestTargetWithoutQueryString() {
-        HttpRequestTarget target = new HttpRequestTarget("/index.html");
+        HttpRequestTarget target = HttpRequestTarget.from("/index.html");
 
         assertThat(target.getPath()).isEqualTo("/index.html");
         assertThat(target.getParams("account")).isNull();

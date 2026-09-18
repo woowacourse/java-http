@@ -23,7 +23,7 @@ public class RequestLine {
 
         return new RequestLine(
                 HttpMethod.from(requestParts[0]),
-                new HttpRequestTarget(requestParts[1]),
+                HttpRequestTarget.from(requestParts[1]),
                 requestParts[2]
         );
     }
@@ -37,6 +37,10 @@ public class RequestLine {
 
     public HttpMethod getMethod() {
         return method;
+    }
+
+    public String getAuthority() {
+        return target.getAuthority();
     }
 
     public String getPath() {

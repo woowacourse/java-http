@@ -15,6 +15,10 @@ public class HttpQueryParams {
     }
 
     public static HttpQueryParams from(String queryInfo) {
+        if(queryInfo == null) {
+            return new HttpQueryParams(Map.of());
+        }
+
         Map<String, String> params = Arrays.stream(queryInfo.split("&"))
                 .map(parameter -> parameter.split("=", 2))
                 .filter(parameter -> parameter.length == 2)

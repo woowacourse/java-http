@@ -111,7 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         switch (path) {
             case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html");
             case "/register" -> handleRegister(method, body, outputStream);
-            case "/login" -> handleLogin(requestUri, outputStream);
+            case "/login" -> handleLogin(method, body, outputStream);
             default -> serveResource(path, outputStream);
         }
     }
@@ -135,17 +135,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLogin(RequestUri requestUri, OutputStream outputStream) throws IOException {
-        if (requestUri.getQueryParameter("account") == null
-                && requestUri.getQueryParameter("password") == null) {
-            serveResource("/login.html", outputStream);
-            return;
-        }
+    private void handleLogin(String method, String body, OutputStream outputStream) throws IOException {
 
-        Optional<User> loginUser = login(requestUri);
-        loginUser.ifPresent(user -> log.info("회원 조회 성공: account={}", user.getAccount()));
-        String location = loginUser.isPresent() ? "/index.html" : "/401.html";
-        writeRedirect(outputStream, location);
+        if(method.equals("GET")) {
+            serveResource("/login.html", outputStream);
+        }
+        if(method.equals("POST")) {
+            log.info("Register BODY :" + body);
+
+            Map<String, String> map = new HashMap<>();
+            String[] params = body.split("&");
+
+            for (String param : params) {
+                map.put(param.split("=")[0], param.split("=")[1]);
+            }
+
+            Optional<User> loginUser = login(map);
+            String location = loginUser.isPresent() ? "/index.html" : "/401.html";
+            writeRedirect(outputStream, location);
+        }
     }
 
     private void serveResource(String path, OutputStream outputStream) throws IOException {
@@ -161,9 +169,9 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, "200 OK", responseBody, contentType);
     }
 
-    private Optional<User> login(RequestUri requestUri) {
-        String account = requestUri.getQueryParameter("account");
-        String password = requestUri.getQueryParameter("password");
+    private Optional<User> login(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
 
         if (account == null || password == null) {
             return Optional.empty();

@@ -7,6 +7,7 @@ public enum MimeType {
     TEXT_HTML("text/html;charset=utf-8", "html"),
     TEXT_CSS("text/css;charset=utf-8", "css"),
     TEXT_JAVASCRIPT("text/javascript;charset=utf-8", "js"),
+    IMAGE_SVG("image/svg+xml", "svg"),
     ;
 
     private final String typeName;

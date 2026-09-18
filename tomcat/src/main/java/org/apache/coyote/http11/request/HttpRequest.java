@@ -10,22 +10,51 @@ public class HttpRequest {
     private final String method;
     private final HttpRequestTarget target;
     private final String version;
+    private final HttpHeaders headers;
+    private final HttpBody body;
 
-    public HttpRequest(String method, HttpRequestTarget target, String version) {
+    public HttpRequest(
+            String method,
+            HttpRequestTarget target,
+            String version,
+            HttpHeaders headers,
+            HttpBody body
+    ) {
         this.method = method;
         this.target = target;
         this.version = version;
+        this.headers = headers;
+        this.body = body;
     }
 
     public static HttpRequest from(String requestLine) {
-        String[] requestParts = parseRequestLine(requestLine);
-        validateVersion(requestParts[2]);
-
-        return new HttpRequest(requestParts[0], new HttpRequestTarget(requestParts[1]), requestParts[2]);
+        return from(requestLine, HttpHeaders.empty(), HttpBody.empty());
     }
 
     public static HttpRequest from(String requestLine, Set<String> supportedMethods) {
-        HttpRequest request = from(requestLine);
+        return from(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods);
+    }
+
+    public static HttpRequest from(String requestLine, HttpHeaders headers, HttpBody body) {
+        String[] requestParts = parseRequestLine(requestLine);
+        validateVersion(requestParts[2]);
+
+        return new HttpRequest(
+                requestParts[0],
+                new HttpRequestTarget(requestParts[1]),
+                requestParts[2],
+                headers,
+                body
+        );
+    }
+
+    public static HttpRequest from(
+            String requestLine,
+            HttpHeaders headers,
+            HttpBody body,
+            Set<String> supportedMethods
+    ) {
+        HttpRequest request = from(requestLine, headers, body);
         request.validateMethod(supportedMethods);
 
         return request;
@@ -45,6 +74,14 @@ public class HttpRequest {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getHeader(String name) {
+        return headers.get(name);
+    }
+
+    public HttpBody getBody() {
+        return body;
     }
 
     private static String[] parseRequestLine(String requestLine) {

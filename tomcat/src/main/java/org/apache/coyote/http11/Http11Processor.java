@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.coyote.http11.request.HttpBody;
+import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -13,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class Http11Processor implements Runnable, Processor {
@@ -82,7 +86,44 @@ public class Http11Processor implements Runnable, Processor {
             throw new IOException("HTTP 요청 라인이 존재하지 않습니다.");
         }
 
-        return HttpRequest.from(requestLine, SUPPORTED_METHODS);
+        HttpHeaders headers = readHeaders(reader);
+        HttpBody body = readBody(reader, headers.getContentLength());
+
+        return HttpRequest.from(requestLine, headers, body, SUPPORTED_METHODS);
+    }
+
+    private HttpHeaders readHeaders(BufferedReader reader) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+
+        String line = reader.readLine();
+        while (line != null && !line.isEmpty()) {
+            headerLines.add(line);
+            line = reader.readLine();
+        }
+
+        if (line == null) {
+            throw new IOException("HTTP 헤더가 빈 줄로 끝나지 않았습니다.");
+        }
+
+        return HttpHeaders.from(headerLines);
+    }
+
+    private HttpBody readBody(BufferedReader reader, int contentLength) throws IOException {
+        if (contentLength == 0) {
+            return HttpBody.empty();
+        }
+
+        char[] buffer = new char[contentLength];
+        int totalRead = 0;
+        while (totalRead < contentLength) {
+            int read = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (read == -1) {
+                throw new IOException("HTTP body가 Content-Length보다 짧습니다.");
+            }
+            totalRead += read;
+        }
+
+        return new HttpBody(new String(buffer));
     }
 
     private void logLoginUser(HttpRequest httpRequest) {

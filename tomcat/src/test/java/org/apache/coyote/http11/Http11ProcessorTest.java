@@ -15,7 +15,6 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
-
     @Test
     void process() {
         // given
@@ -161,6 +160,29 @@ class Http11ProcessorTest {
                 "400 Bad Request",
                 "text/plain",
                 "지원하지 않는 HTTP 메서드입니다: POST"
+        );
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void invalidHeader() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host localhost",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse(
+                "400 Bad Request",
+                "text/plain",
+                "잘못된 http 헤더 형태입니다: Host localhost"
         );
         assertThat(socket.output()).isEqualTo(expected);
     }

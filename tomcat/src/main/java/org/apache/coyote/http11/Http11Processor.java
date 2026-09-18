@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,25 +81,27 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getStaticResource(final String uri) throws IOException {
-        final String path = resolvePath(uri);
+        final URL resource = getClass().getClassLoader().getResource("static" + uri);
 
-        try (InputStream resource = getClass().getClassLoader().getResourceAsStream(path)) {
-            return new HttpResponse(
-                    new HttpStatusLine(HTTP_VERSION, 200, "OK"),
-                    contentTypeOf(path),
-                    resource.readAllBytes()
-            );
+        if (resource == null) {
+            return readResource(notFoundResource(), new HttpStatusLine(HTTP_VERSION,
+                    404, "Not Found"));
         }
+
+        return readResource(resource, new HttpStatusLine(HTTP_VERSION, 200, "OK"));
     }
 
-    private String resolvePath(String uri) {
-        String path = "static" + uri;
+    private URL notFoundResource() {
+        return Objects.requireNonNull(
+                getClass().getClassLoader().getResource("static/404.html"),
+                "static/404.html이 존재하지 않습니다."
+        );
+    }
 
-        if (getClass().getClassLoader().getResource(path) == null) {
-            return "static/404.html";
+    private HttpResponse readResource(final URL resource, final HttpStatusLine statusLine) throws IOException {
+        try (InputStream body = resource.openStream()) {
+            return new HttpResponse(statusLine, contentTypeOf(resource.getPath()), body.readAllBytes());
         }
-
-        return path;
     }
 
     private String contentTypeOf(String path) {

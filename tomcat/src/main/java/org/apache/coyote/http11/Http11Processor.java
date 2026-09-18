@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -146,13 +147,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private static Map<String, String> parseQueryParameters(URI uri) {
         String rawQuery = uri.getRawQuery();
-        Map<String, String> queryParameters = Arrays.stream(rawQuery.split("&"))
+
+        return Arrays.stream(rawQuery.split("&"))
                 .map(parameter -> parameter.split("=", 2))
                 .collect(Collectors.toMap(
-                        parts -> parts[0],
-                        parts -> parts.length > 1 ? parts[1] : ""
+                        parts -> decode(parts[0]),
+                        parts -> parts.length > 1 ? decode(parts[1]) : ""
                 ));
-        return queryParameters;
     }
 
     private static String createResponse(String statusLine, String responseBody, String contentType) {
@@ -168,5 +169,9 @@ public class Http11Processor implements Runnable, Processor {
     private static void writeResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
+    }
+
+    private static String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

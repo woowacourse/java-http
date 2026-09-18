@@ -10,7 +10,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,10 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String STATIC = "static/";
+    private static final String RESOURCE_FILE_PREFIX = "static/";
+    private static final String WHITESPACE_REGEX = " ";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String WHITESPACE_REGEX = " ";
 
     private final Socket connection;
 
@@ -39,14 +39,12 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+            final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                return;
-            }
 
             String[] parts = requestLine.split(WHITESPACE_REGEX);
             String part = parts[1];
@@ -55,8 +53,32 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String requestUri = part.substring(1);
+            if (requestUri.contains("?")) {
+                int index = requestUri.indexOf("?");
+                String uriPath = requestUri.substring(0, index);
+                String queryString = requestUri.substring(index + 1);
 
-            URL resource = getClass().getClassLoader().getResource(STATIC + requestUri);
+                URL resource = getClass().getClassLoader().getResource(RESOURCE_FILE_PREFIX + uriPath + ".html");
+                Path path = new File(resource.getPath()).toPath();
+
+                byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
+
+                String response = "";
+                if (uriPath.equals("login")) {
+                    response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + body.length + " ",
+                        "",
+                        new String(Files.readAllBytes(path)));
+                }
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            URL resource = getClass().getClassLoader().getResource(RESOURCE_FILE_PREFIX + requestUri);
             if (validateURLIsNull(resource, outputStream)) {
                 return;
             }
@@ -65,24 +87,7 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
 
-            String response = "";
-            if (part.equals("/css/styles.css")) {
-                response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;charset=utf-8 ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    new String(Files.readAllBytes(path)));
-            }
-
-            if (part.equals("/index.html")) {
-                response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    new String(Files.readAllBytes(path)));
-            }
+            String response = createResponse(part, body, path);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -93,7 +98,67 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static boolean isRootRequest(String part, OutputStream outputStream) throws IOException {
+    private static String createResponse(String part, byte[] body, Path path) throws IOException {
+        String response = "";
+        if (part.equals("/css/styles.css")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        if (part.equals("/index.html")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        if (part.equals("/assets/chart-area.js")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        if (part.equals("/assets/chart-bar.js")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        if (part.equals("/assets/chart-pie.js")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        if (part.equals("/js/scripts.js")) {
+            response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(Files.readAllBytes(path)));
+        }
+
+        return response;
+    }
+
+    private static boolean isRootRequest(String part, OutputStream outputStream)
+        throws IOException {
         if (part.equals("/")) {
             final var responseBody = "Hello world!";
 
@@ -111,7 +176,8 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private static boolean validateURLIsNull(URL resource, OutputStream outputStream) throws IOException {
+    private static boolean validateURLIsNull(URL resource, OutputStream outputStream)
+        throws IOException {
         if (resource == null) {
             String notFound = String.join("\r\n",
                 "HTTP/1.1 404 Not Found ",

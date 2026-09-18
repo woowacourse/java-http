@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -41,15 +40,19 @@ public class Http11Processor implements Runnable, Processor {
             // URL 파싱
             String line = bufferedReader.readLine();
             final String[] tokens = line.split(" ", 3);
-            String method = tokens[0];
             final String requestTarget = tokens[1];
-            String httpVersion = tokens[2];
+
+            // 헤더 파싱
+            while (!"".equals(line) && (line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+            }
 
             final var responseBody = createResponseBody(requestTarget);
+            final String contentType = getContentType(requestTarget);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     new String(responseBody));
@@ -71,5 +74,12 @@ public class Http11Processor implements Runnable, Processor {
         final URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource(resourcePath));
         final Path path = new File(resource.getFile()).toPath();
         return Files.readAllBytes(path);
+    }
+
+    private static String getContentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 }

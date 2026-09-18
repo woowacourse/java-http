@@ -5,8 +5,14 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +35,41 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            // URL 파싱
+            String line = bufferedReader.readLine();
+            final String[] tokens = line.split(" ", 3);
+            String method = tokens[0];
+            final String requestTarget = tokens[1];
+            String httpVersion = tokens[2];
+
+            final var responseBody = createResponseBody(requestTarget);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    new String(responseBody));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | URISyntaxException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {
+        final String resourcePath = "static" + requestTarget;
+
+        if (requestTarget.equals("/")) {
+            return "Hello world!".getBytes();
+        }
+
+        final URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource(resourcePath));
+        final Path path = new File(resource.getFile()).toPath();
+        return Files.readAllBytes(path);
     }
 }

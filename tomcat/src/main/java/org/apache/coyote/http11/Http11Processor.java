@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestUri = requestLine.split(" ")[1];
             String responseBody = "Hello world!";
-            if ("/index.html".equals(requestUri)) {
+            if ("/index.html".equals(requestUri) || "/css/styles.css".equals(requestUri)) {
                 final var resource = getClass().getClassLoader().getResource("static" + requestUri);
                 if (resource == null) {
                     throw new IOException("Resource not found: " + requestUri);
@@ -50,9 +50,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
             }
 
+            final String contentType = requestUri.endsWith(".css") ? "text/css" : "text/html";
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);

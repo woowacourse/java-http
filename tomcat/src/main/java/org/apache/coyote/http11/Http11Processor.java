@@ -1,9 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +53,37 @@ public class Http11Processor implements Runnable, Processor {
 
             final String method = parts[0];
             final String requestTarget = parts[1];
-            final String path = requestTarget.split("\\?", 2)[0];
+            final String[] targetParts = requestTarget.split("\\?", 2);
+            final String path = targetParts[0];
             final String httpVersion = parts[2];
 
             log.info("method: {}, target: {}, version: {}",
                     method, requestTarget, httpVersion);
+
+            if ("/login".equals(path) && targetParts.length == 2) {
+                final Map<String, String> parameters = new HashMap<>();
+
+                for (String parameter : targetParts[1].split("&")) {
+                    final String[] pair = parameter.split("=", 2);
+                    if (pair.length != 2) {
+                        continue;
+                    }
+
+                    final String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
+                    final String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+                    parameters.put(key, value);
+                }
+
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
+
+                if (account != null && password != null) {
+                    InMemoryUserRepository.findByAccount(account)
+                            .filter(user -> user.checkPassword(password))
+                            .ifPresent(user ->
+                                    log.info("회원 조회 성공: {}", user.getAccount()));
+                }
+            }
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             String contentType = "text/html;charset=utf-8";

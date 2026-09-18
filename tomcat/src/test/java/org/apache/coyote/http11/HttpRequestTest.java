@@ -72,4 +72,15 @@ class HttpRequestTest {
         // then
         assertThat(request.getMethod()).isEqualTo("POST");
     }
+
+    @Test
+    void unsupportedVersion() {
+        // given
+        final String requestLine = "GET /index.html ABC";
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(requestLine))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("지원하지 않는 HTTP 버전입니다: ABC");
+    }
 }

@@ -4,6 +4,8 @@ import java.util.Set;
 
 public class HttpRequest {
 
+    private static final String SUPPORTED_VERSION = "HTTP/1.1";
+
     private final String method;
     private final HttpRequestTarget target;
     private final String version;
@@ -16,6 +18,7 @@ public class HttpRequest {
 
     public static HttpRequest from(String requestLine) {
         String[] requestParts = parseRequestLine(requestLine);
+        validateVersion(requestParts[2]);
 
         return new HttpRequest(requestParts[0], new HttpRequestTarget(requestParts[1]), requestParts[2]);
     }
@@ -51,6 +54,12 @@ public class HttpRequest {
         }
 
         return requestParts;
+    }
+
+    private static void validateVersion(String version) {
+        if (!SUPPORTED_VERSION.equals(version)) {
+            throw new BadRequestException("지원하지 않는 HTTP 버전입니다: " + version);
+        }
     }
 
     private void validateMethod(Set<String> supportedMethods) {

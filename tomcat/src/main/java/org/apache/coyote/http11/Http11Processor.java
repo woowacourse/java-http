@@ -7,12 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -132,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readResource(final URL resource) throws IOException {
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return Files.readString(Path.of(resource.getFile()));
     }
 
     private String toResourcePath(final String path) {

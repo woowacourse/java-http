@@ -4,10 +4,10 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -31,12 +31,12 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-             final var outputStream = connection.getOutputStream()) {
-            String[] requestLine = reader.readLine().split(" ");
-            String uri = requestLine[1];
-
-            String response = buildResponse(uri);
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream()
+        ) {
+            HttpRequest httpRequest = readHttpRequest(inputStream);
+            String response = buildResponse(httpRequest);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -44,53 +44,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponse(String uri) {
-        String path = extractPath(uri);
+    private HttpRequest readHttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        if ("/login".equals(path)) {
-            return buildLoginResponse(extractQueryParams(uri));
+        StringBuilder request = new StringBuilder();
+        int contentLength = 0;
+
+        String line;
+        while (!(line = reader.readLine()).isEmpty()) {
+            request.append(line).append("\r\n");
+
+            if (line.startsWith("Content-Length:")) {
+                contentLength = Integer.parseInt(
+                        line.substring("Content-Length:".length()).trim()
+                );
+            }
         }
-        if ("/".equals(path)) {
+
+        request.append("\r\n");
+
+        char[] body = new char[contentLength];
+        reader.read(body);
+        request.append(body);
+
+        return new HttpRequest(request.toString());
+    }
+
+    private String buildResponse(HttpRequest httpRequest) {
+        if ("/login".equals(httpRequest.getPath())) {
+            return buildLoginResponse(httpRequest.getQueryParams());
+        }
+        if ("/".equals(httpRequest.getPath())) {
             return buildRootResponse();
         }
 
-        return buildResourceResponse(path);
-    }
-
-    private String extractPath(String uri) {
-        if (!uri.contains("?")) {
-            return uri;
-        }
-
-        int indexOfQueryDelimiter = uri.indexOf("?");
-        return uri.substring(0, indexOfQueryDelimiter);
-    }
-
-    private Map<String, String> extractQueryParams(String uri) {
-        if (!uri.contains("?")) {
-            return Map.of();
-        }
-
-        int indexOfQueryDelimiter = uri.indexOf("?");
-        String rawParams = uri.substring(indexOfQueryDelimiter + 1);
-        if (rawParams.isEmpty()) {
-            return Map.of();
-        }
-
-        Map<String, String> params = new LinkedHashMap<>();
-        for (String rawParam : rawParams.split("&")) {
-            if (rawParam.isEmpty()) {
-                continue;
-            }
-
-            String[] nameAndValue = rawParam.split("=", 2);
-            if (nameAndValue.length < 2) {
-                params.put(nameAndValue[0], "");
-            } else {
-                params.put(nameAndValue[0], nameAndValue[1]);
-            }
-        }
-        return params;
+        return buildResourceResponse(httpRequest.getPath());
     }
 
     private String buildLoginResponse(Map<String, String> params) {
@@ -115,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 "");
     }
-    
+
     private boolean shouldShowLoginPage(
             String account,
             String password
@@ -173,7 +161,7 @@ public class Http11Processor implements Runnable, Processor {
             if (inputStream == null) {
                 return null;
             }
-            
+
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException();

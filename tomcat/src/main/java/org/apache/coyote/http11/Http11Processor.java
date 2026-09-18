@@ -125,9 +125,9 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         for (String query : queryString.split(PARAM_DELIMITER)) {
-            String[] q = query.split(PARAM_EQUAL);
+            String[] q = query.split(PARAM_EQUAL, 2);
             if (q.length != 2) {
-                throw new IllegalArgumentException("올바른 파라미터 형식이 아닙니다.");
+                continue;
             }
 
             queryParams.put(q[0], q[1]);

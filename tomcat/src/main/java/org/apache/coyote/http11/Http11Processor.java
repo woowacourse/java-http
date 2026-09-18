@@ -58,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
     private void writeRootResponse(OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
 
-        writeHttpResponse(outputStream, responseBody);
+        writeHttpResponse(outputStream, getContentType(responseBody + ".html"), responseBody);
     }
 
     private void writeResource(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
@@ -66,11 +66,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (resource == null) {
             writeNotFoundResource(outputStream);
+            return;
         }
 
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        writeHttpResponse(outputStream, responseBody);
+        writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);
     }
 
     private void writeNotFoundResource(OutputStream outputStream) throws IOException {
@@ -78,16 +79,26 @@ public class Http11Processor implements Runnable, Processor {
 
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        writeHttpResponse(outputStream, responseBody);
+        writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);
     }
 
-    private void writeHttpResponse(OutputStream outputStream, String responseBody) throws IOException {
+    private void writeHttpResponse(OutputStream outputStream, String contentType, String responseBody) throws IOException {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType +";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
         outputStream.write(response.getBytes());
+    }
+
+    private String getContentType(String resource) {
+        if (resource.endsWith(".html")) {
+            return "text/html";
+        }
+        if (resource.endsWith(".css")) {
+            return "text/css";
+        }
+        return "";
     }
 }

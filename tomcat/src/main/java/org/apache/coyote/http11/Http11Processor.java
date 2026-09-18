@@ -90,8 +90,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         for (final String pair : queryString.split("&")) { // "account=gugu", "password=password"
-            final String[] keyValue = pair.split("="); // ["account", "gugu"]
-            queryParams.put(keyValue[0], keyValue[1]); // "account" -> "gugu"
+            final String[] keyValue = pair.split("=", 2); // ["account", "gugu"]
+            if (keyValue.length == 2) {
+                queryParams.put(keyValue[0], keyValue[1]); // "account" -> "gugu"
+            }
         }
         return queryParams;
     }

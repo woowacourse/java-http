@@ -1,5 +1,9 @@
 package study;
 
+import java.io.FileReader;
+import java.net.URL;
+import java.util.ArrayList;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +32,20 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        // 스프링 자바 애플리케이션은 resource 디렉터리에 있는 파일을 ClassLoader를 사용해서 찾는다.
+        // 이는 실행 시 classPath에 있는 파일을 찾는 방법이다.
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        URL url = cl.getResource(fileName);
+        final String actual = url.toString();
+
+        // 다른 방법으로는 파일 객체를 생성해서 getAbsolutePath() 메서드를 사용해서 절대 경로를 찾을 수 있다.
+        // 단 이 방법은 운영체제 실제 경로를 반환하기 때문에, jar 파일로 패키징된 경우에는 사용할 수 없다.
+        // fileName = "src/main/resources/nextstep.txt";
+        // final File file = new File(fileName);
+        // final String actual = file.getAbsolutePath();
 
         assertThat(actual).endsWith(fileName);
+        assertThat(actual).endsWith("/java-http/study/build/resources/test/nextstep.txt");
     }
 
     /**
@@ -44,11 +59,26 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        URL url = cl.getResource(fileName);
+        Assertions.assertNotNull(url);
+        final Path path = Path.of(url.getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = new ArrayList<>();
+        try(FileReader fileReader = new FileReader(path.toFile())) {
+            StringBuilder sb = new StringBuilder();
+            int ch;
+            while ((ch = fileReader.read()) != -1) {
+                sb.append((char) ch);
+            }
+            actual.add(sb.toString().trim());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
 
         assertThat(actual).containsOnly("nextstep");
+
     }
 }

@@ -141,14 +141,7 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final ByteArrayOutputStream buffer = new ByteArrayOutputStream();   // 양동이
-
-            int data;
-            while ((data = inputStream.read()) != -1) {
-                buffer.write(data);        // 읽은 그 값을 모은다 (다시 읽지 않는다)
-            }
-
-            final String actual = buffer.toString(StandardCharsets.UTF_8);
+            final String actual = new String(inputStream.readAllBytes());
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);

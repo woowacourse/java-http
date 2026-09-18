@@ -90,7 +90,11 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 final var user = InMemoryUserRepository.findByAccount(account);
-                log.info("조회된 회원: {}", user);
+                if (user == null) {
+                    log.warn("존재하지 않는 회원입니다. account: {}", account);
+                } else {
+                    log.info("조회된 회원: {}", user);
+                }
 
                 // 응답해 줄 실제 정적 파일 경로 지정
                 path = "/login.html";

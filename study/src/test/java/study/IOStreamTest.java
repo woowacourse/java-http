@@ -1,5 +1,7 @@
 package study;
 
+import java.nio.charset.StandardCharsets;
+import static org.assertj.core.api.Assertions.in;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import static org.mockito.Mockito.*;
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
  * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.
+ * 스트림을 사용하는 이유 -> 파일, 네트워크, 메모리 각각 다른 곳에서 읽는 데이터를 추상화하여 볼 수 있는 표준화된 통로가 필요하기 때문
  *
  * InputStream은 데이터를 읽고, OutputStream은 데이터를 쓴다.
  * FilterStream은 InputStream이나 OutputStream에 연결될 수 있다.
@@ -53,6 +56,7 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -77,7 +81,10 @@ class IOStreamTest {
              * todo
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
+             * ByteArrayOutputStream 은 메모리 내부에 저장하고 하나의 바이트 배열로 만들기 위해 사용
+             * BufferedOutputStream 은 임시 버퍼에 저장하여 버퍼 단위로 내보내, 디스크나 네트워크 접근 회수를 줄여 IO 성능을 향상시키기 위해 사용한다
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -94,8 +101,15 @@ class IOStreamTest {
             /**
              * todo
              * try-with-resources를 사용한다.
+             * (try-catch의 괄호 안에서 객체를 생성하는 문장을 넣으면, 따로 closefㅡㄹ 해주지 않아도 try 블럭을 벗어나면 자동으로 호출된다
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (outputStream)  {
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -128,7 +142,8 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+
+            final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -148,6 +163,11 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (inputStream) {
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -169,12 +189,16 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            final byte[] actual = new byte[text.getBytes().length];
+
+            bufferedInputStream.read(actual);
+            bufferedInputStream.close();
+
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -197,15 +221,25 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            InputStreamReader isr = new InputStreamReader(inputStream, "UTF-8");
+            BufferedReader br = new BufferedReader(isr);
+
 
             final StringBuilder actual = new StringBuilder();
+
+            actual.append(br.readLine());
+            actual.append("\r\n");
+            actual.append(br.readLine());
+            actual.append("\r\n");
+            actual.append(br.readLine());
+            actual.append("\r\n");
 
             assertThat(actual).hasToString(emoji);
         }

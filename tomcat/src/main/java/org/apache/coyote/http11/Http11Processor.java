@@ -18,12 +18,20 @@ public class Http11Processor implements Runnable, Processor {
     private static final String NOT_FOUND_STATUS = "404 Not Found";
     private static final String NOT_FOUND_BODY = "404 Not Found";
 
-    private record ResponseContent(String status, String body, String contentType) {
+    private record ResponseContent(String status, byte[] body, String contentType) {
+        private ResponseContent {
+            body = body.clone();
+        }
+
+        @Override
+        public byte[] body() {
+            return body.clone();
+        }
     }
 
     private ResponseContent responseContentFor(final String requestPath) throws IOException {
         if (requestPath.equals("/")) {
-            return new ResponseContent(OK_STATUS, "Hello world!", HTML_CONTENT_TYPE);
+            return textResponseContent(OK_STATUS, "Hello world!");
         }
 
         final var staticPath = staticPathFor(requestPath);
@@ -31,12 +39,15 @@ public class Http11Processor implements Runnable, Processor {
 
         try (final var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
-                return new ResponseContent(NOT_FOUND_STATUS, NOT_FOUND_BODY, HTML_CONTENT_TYPE);
+                return textResponseContent(NOT_FOUND_STATUS, NOT_FOUND_BODY);
             }
 
-            final var body = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
-            return new ResponseContent(OK_STATUS, body, contentTypeFor(staticPath));
+            return new ResponseContent(OK_STATUS, resourceStream.readAllBytes(), contentTypeFor(staticPath));
         }
+    }
+
+    private ResponseContent textResponseContent(final String status, final String body) {
+        return new ResponseContent(status, body.getBytes(StandardCharsets.UTF_8), HTML_CONTENT_TYPE);
     }
 
     private String staticPathFor(final String requestPath) {
@@ -86,15 +97,17 @@ public class Http11Processor implements Runnable, Processor {
             logLoginResult(requestUri);
 
             final var responseContent = responseContentFor(requestUri.path());
+            final var responseBody = responseContent.body();
 
-            final var response = String.join("\r\n",
+            final var responseHeader = String.join("\r\n",
                     "HTTP/1.1 " + responseContent.status() + " ",
                     "Content-Type: " + responseContent.contentType() + " ",
-                    "Content-Length: " +  responseContent.body().getBytes(StandardCharsets.UTF_8).length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseContent.body());
+                    "");
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

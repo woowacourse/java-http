@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
-
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,6 +51,35 @@ class Http11ProcessorTest {
                 "404 Not Found");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void staticResourceIsSentWithoutTextConversion() throws IOException {
+        final var httpRequest = String.join("\r\n",
+                "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+        final var resource = getClass().getClassLoader()
+                .getResource("static/assets/img/error-404-monochrome.svg");
+        final var body = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        processor.process(socket);
+
+        final var responseHeader = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                "");
+        final var expectedOutput = new ByteArrayOutputStream();
+        expectedOutput.writeBytes(responseHeader.getBytes(StandardCharsets.UTF_8));
+        expectedOutput.writeBytes(body);
+
+        assertThat(socket.outputBytes()).isEqualTo(expectedOutput.toByteArray());
     }
 
     @Test

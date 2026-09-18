@@ -166,14 +166,22 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addQueryParameter(Map<String, String> query, String parameter) {
         String[] keyValue = parameter.split("=");
-        String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+        String key = decodeParameter(keyValue[0]);
         String value = "";
 
         if (keyValue.length == 2) {
-            value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            value = decodeParameter(keyValue[1]);
         }
 
         query.put(key, value);
+    }
+
+    private String decodeParameter(String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid URL encoding");
+        }
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {

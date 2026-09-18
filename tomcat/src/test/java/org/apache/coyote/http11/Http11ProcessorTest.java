@@ -384,6 +384,39 @@ class Http11ProcessorTest {
         assertThat(service.login(account, "replacement")).isEmpty();
     }
 
+    @Test
+    void malformedFormEncodingReturnsBadRequest() {
+        for (String body : new String[]{"account=%ZZ", "%ZZ=gugu", "account=%", "account=%4"}) {
+            final var socket = new StubSocket("POST /login HTTP/1.1\r\n"
+                    + "Content-Type: application/x-www-form-urlencoded\r\n"
+                    + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                    + "\r\n\r\n" + body);
+
+            createProcessor(socket).process(socket);
+
+            assertThat(socket.output()).as("body: %s", body).isEqualTo(
+                    createResponse("400 Bad Request", "text/html;charset=utf-8", "400 Bad Request"));
+        }
+    }
+
+    @Test
+    void validEncodedFormParametersAreDecoded() {
+        String body = "acc%6Funt=gu%67u&note=hello+world%40%ED%95%9C";
+        final var socket = new StubSocket("POST /login HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + body);
+        final var processor = new Http11Processor(socket, (request, session) -> {
+            assertThat(request.parameters()).containsEntry("account", "gugu")
+                    .containsEntry("note", "hello world@한");
+            return HttpResponse.redirect("/index.html");
+        }, new SessionManager());
+
+        processor.process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+    }
+
     private Http11Processor createProcessor(StubSocket socket) {
         final var manager = new SessionManager();
         manager.add(new Session("existing-session"));

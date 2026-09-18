@@ -84,6 +84,20 @@ public class Http11Processor implements Runnable, Processor {
                 path = "/register.html";
             }
 
+            if (method.equals("POST") && path.equals("/register")) {
+                Map<String, String> requestBody = parseQuery(body);
+                String account = requestBody.get("account");
+                String password = requestBody.get("password");
+                String email = requestBody.get("email");
+
+                User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+
+                String responseBody = redirect("302 FOUND", "/index.html");
+                outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+            }
+
             if (method.equals("GET") && path.equals("/login")) {
                 path = "/login.html";
             }

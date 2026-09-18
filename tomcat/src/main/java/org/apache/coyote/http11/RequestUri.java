@@ -41,6 +41,9 @@ public class RequestUri {
                 continue;
             }
             String[] keyValue = parameter.split(KEY_VALUE_DELIMITER, 2);
+            if (keyValue.length != 2) {
+                continue;
+            }
             queryParameters.put(keyValue[0], keyValue[1]);
         }
         return queryParameters;

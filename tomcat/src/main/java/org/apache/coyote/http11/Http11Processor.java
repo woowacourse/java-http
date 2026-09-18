@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -80,16 +79,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(String path) {
-        if (path.endsWith(".html")) {
-            return "text/html; charset=utf-8";
-        }
         if (path.endsWith(".css")) {
             return "text/css";
         }
         if (path.endsWith(".js")) {
             return "text/javascript";
         }
-        return "text/plain";
+        return "text/html; charset=utf-8";
     }
 
     @Nonnull
@@ -97,13 +93,14 @@ public class Http11Processor implements Runnable, Processor {
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + path);
         if (resource == null) {
             log.info("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요. path: {}", path);
+            return "잘못된 주소입니다.";
         }
         try {
             URI uri = resource.toURI();
-            return new String(Files.readAllBytes(Paths.get(uri)));
+            return Files.readString(Paths.get(uri));
         } catch (IOException | URISyntaxException e) {
-            log.error(e.getMessage(),e);
+            log.error(e.getMessage(), e);
         }
-        return "잘못된 주소";
+        return "잘못된 주소입니다";
     }
 }

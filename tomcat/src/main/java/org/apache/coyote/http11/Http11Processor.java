@@ -79,10 +79,13 @@ public class Http11Processor implements Runnable, Processor {
 
             if ("/index.html".equals(path)
                     || "/css/styles.css".equals(path)
+                    || path.endsWith(".js")
                     || "/login".equals(path)) {
 
                 if ("/css/styles.css".equals(path)) {
                     contentType = "text/css;charset=utf-8";
+                } else if (path.endsWith(".js")) {
+                    contentType = "text/javascript;charset=utf-8";
                 }
 
                 final String resourcePath = "/login".equals(path)

@@ -226,10 +226,21 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readBody(InputStream inputStream, Map<String, String> headers) throws IOException {
         if (headers.containsKey("content-length")) {
-            int contentLength = Integer.parseInt(headers.get("content-length"));
+            int contentLength = parseContentLength(headers.get("content-length"));
             byte[] body = inputStream.readNBytes(contentLength);
             return new String(body, StandardCharsets.UTF_8);
         }
         return "";
+    }
+
+    private int parseContentLength(String value) {
+        if (!value.matches("[0-9]+")) {
+            throw new BadRequestException("Invalid Content-Length");
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Content-Length is out of range");
+        }
     }
 }

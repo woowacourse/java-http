@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
                 body = new String(buffer);
             }
 
-            // THINK: 추후 uri -> path, queryParams 부분을 VO로 포장하여 응집.
+            // THINK: 추후 uri -> path, queryParams 부분을 VO로 포장하여 응집. - P0
             URI uri = URI.create(matcher.group("uri"));
             String method = matcher.group("method");
             String path = uri.getPath();
@@ -103,6 +103,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            // THINK 반복되는 엔드포인트 매핑 리팩터링 - P1
             if (method.equals("GET") && path.equals("/login")) {
                 log.info("로그인 GET 요청");
                 if (session != null && session.getAttribute("user") != null) {
@@ -166,7 +167,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    // THINK QueryParam VO로 포장
+    // THINK QueryParam VO로 포장 - P0
     private Map<String, String> parseQuery(String query) {
         if (query == null || query.isBlank()) {
             return Collections.emptyMap();
@@ -181,7 +182,7 @@ public class Http11Processor implements Runnable, Processor {
         return result;
     }
 
-    // THINK: 추후 응답 관련 내용을 응집화한 HttpResponse으로 포장
+    // THINK: 추후 응답 관련 내용을 응집화한 HttpResponse으로 포장 - P0
     public String getResponseBody(String status, String contentType, String content) {
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
         return String.join("\r\n",

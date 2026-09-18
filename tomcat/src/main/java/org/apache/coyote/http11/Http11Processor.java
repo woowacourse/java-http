@@ -63,11 +63,11 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if (!path.equals("/")) {
-                    String fileName = toFileName(path);
-                    final URL resource = getClass().getClassLoader().getResource(fileName);
+                    String resourcePath = toResourcePath(path);
+                    final URL resource = getClass().getClassLoader().getResource(resourcePath);
                     if (resource != null) {
                         responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                        contentType = getContentType(fileName);
+                        contentType = getContentType(resourcePath);
                     }
                 }
             }
@@ -94,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private String toFileName(final String path) {
+    private String toResourcePath(final String path) {
         if (path.contains(".")) {
             return "static" + path;
         }

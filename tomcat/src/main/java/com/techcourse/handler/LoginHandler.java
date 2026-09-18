@@ -7,14 +7,13 @@ import org.apache.catalina.handler.ResourceHandler;
 import org.apache.coyote.http.HttpServletRequest;
 import org.apache.coyote.http.HttpServletResponse;
 import org.apache.coyote.http.QueryParam;
+import org.apache.coyote.http.StaticResourceBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements ResourceHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-
-    private final StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
 
     @Override
     public boolean canHandle(HttpServletRequest request) {
@@ -24,7 +23,7 @@ public class LoginHandler implements ResourceHandler {
     @Override
     public HttpServletResponse handle(HttpServletRequest request) throws IOException {
         logIfLoginSucceeds(request.requestLine().getQueryParam());
-        return staticResourceHandler.handle(request);
+        return HttpServletResponse.ok(StaticResourceBody.from(request.path()));
     }
 
     private void logIfLoginSucceeds(QueryParam queryParam) {

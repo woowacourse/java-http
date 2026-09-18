@@ -1,12 +1,21 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,16 +38,62 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
 
+            final String requestUri = requestLine.split(" ")[1];
+            final int queryIndex = requestUri.indexOf('?');
+            String path = requestUri;
+            if (queryIndex >= 0) {
+                path = requestUri.substring(0, queryIndex);
+            }
+
+            if ("/login".equals(path)) {
+                if (queryIndex >= 0) {
+                  
+                    final String queryString = requestUri.substring(queryIndex + 1);
+                    final Map<String, String> parameters = new HashMap<>();
+                    for (String parameter : queryString.split("&")) {
+                        final String[] pair = parameter.split("=", 2);
+                        if (pair.length == 2) {
+                            parameters.put(
+                                    URLDecoder.decode(pair[0], StandardCharsets.UTF_8),
+                                    URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
+                        }
+                    }
+
+                    final String account = parameters.get("account");
+                    final String password = parameters.get("password");
+                    if (account != null && password != null) {
+                        InMemoryUserRepository.findByAccount(account)
+                                .filter(user -> user.checkPassword(password))
+                                .ifPresent(user -> log.info("Login succeeded: account={}", user.getAccount()));
+                    }
+                }
+                path = "/login.html";
+            }
+
+            String responseBody = "Hello world!";
+            if ("/index.html".equals(path) || "/css/styles.css".equals(path) || "/login.html".equals(path)) {
+                final var resource = getClass().getClassLoader().getResource("static" + path);
+                if (resource == null) {
+                    throw new IOException("Resource not found: " + path);
+                }
+                responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
+            }
+
+            final String contentType = requestUri.endsWith(".css") ? "text/css" : "text/html";
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

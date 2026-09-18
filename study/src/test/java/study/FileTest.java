@@ -1,5 +1,9 @@
 package study;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +32,8 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL resource = getClass().getClassLoader().getResource(fileName);
+        final String actual = resource.toString();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,10 +49,16 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final Path path = new File(resource.getPath()).toPath();
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        List<String> actual = null;
+        try {
+            actual = Files.readAllLines(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         assertThat(actual).containsOnly("nextstep");
     }

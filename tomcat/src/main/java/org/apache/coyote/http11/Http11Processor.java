@@ -49,6 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = reader.readLine();
             log.info("request line 첫 줄: {}", requestLine);
             if (requestLine == null) {
+                log.warn("클라이언트로부터 전달된 RequestLine이 존재하지 않습니다.");
                 return;
             }
 

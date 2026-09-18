@@ -34,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     Map<Integer, String> httpStatusMessage = new HashMap<>(){
         {
             put(200, "OK");
+            put(204, "No Content");
             put(400, "Bad Request");
             put(404, "Not Found");
             put(500, "Internal Server Error");

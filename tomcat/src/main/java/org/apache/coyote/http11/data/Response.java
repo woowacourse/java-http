@@ -7,6 +7,14 @@ public record Response(
             Map<String, String> responseHeaderMap,
             String responseBody) {
 
+        public static Response noContent() {
+            return new Response(204, Map.of(), "");
+        }
+
+        public static Response ok() {
+            return new Response(200, Map.of(), "");
+        }
+
         public static Response ok(
                 final Map<String, String> responseHeaderMap,
                 final String responseBody) {

@@ -19,9 +19,6 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String ROOT_DIRECTORY = "/";
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
-    private static final String DEFAULT_BODY = "Hello world!";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -112,8 +109,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final String filePath) {
-        if (filePath.equals(ROOT_DIRECTORY)) {
-            return DEFAULT_CONTENT_TYPE;
+        final String defaultContentType = "text/html";
+        if (filePath.equals("/")) {
+            return defaultContentType;
         }
         final String prefix = "text/";
         final int lastDotIndex = filePath.lastIndexOf(".");
@@ -124,8 +122,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readStaticResource(final String filePath) throws IOException {
-        if (filePath.equals(ROOT_DIRECTORY)) {
-            return DEFAULT_BODY;
+        final String rootDirectory = "/";
+        final String defaultBody = "Hello world!";
+        if (filePath.equals(rootDirectory)) {
+            return defaultBody;
         }
         final StringBuilder readResource = new StringBuilder();
 

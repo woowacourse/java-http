@@ -49,8 +49,12 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String[] parts = requestLine.split(WHITESPACE_REGEX);
-            String requestUri = parts[1].substring(1);
+            String part = parts[1];
+            if (isRootRequest(part, outputStream)) {
+                return;
+            }
 
+            String requestUri = part.substring(1);
             final String fileName = requestUri;
 
             URL resource = getClass().getClassLoader().getResource(STATIC + fileName);
@@ -76,6 +80,24 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static boolean isRootRequest(String part, OutputStream outputStream) throws IOException {
+        if (part.equals("/")) {
+            final var responseBody = "Hello world!";
+
+            final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            return true;
+        }
+        return false;
     }
 
     private static boolean validateURLIsNull(URL resource, OutputStream outputStream) throws IOException {

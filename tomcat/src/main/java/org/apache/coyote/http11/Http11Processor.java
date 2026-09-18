@@ -55,9 +55,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String requestUri = part.substring(1);
-            final String fileName = requestUri;
 
-            URL resource = getClass().getClassLoader().getResource(STATIC + fileName);
+            URL resource = getClass().getClassLoader().getResource(STATIC + requestUri);
             if (validateURLIsNull(resource, outputStream)) {
                 return;
             }
@@ -66,12 +65,24 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
 
-            final var response = String.join("\r\n",
+            String response = "";
+            if (part.equals("/css/styles.css")) {
+                response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + body.length + " ",
+                    "",
+                    new String(Files.readAllBytes(path)));
+            }
+
+            if (part.equals("/index.html")) {
+                response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + body.length + " ",
                     "",
                     new String(Files.readAllBytes(path)));
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

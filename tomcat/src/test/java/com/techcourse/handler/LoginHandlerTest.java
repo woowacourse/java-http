@@ -23,7 +23,7 @@ class LoginHandlerTest {
         HttpServletRequest request = new HttpServletRequest(
                 RequestLine.from("GET /login?account=gugu&password=password HTTP/1.1 "),
                 HttpHeaders.from(List.of()),
-                RequestBody.of("")
+                RequestBody.of(null,"")
         );
 
         HttpServletResponse response = loginHandler.handle(request);
@@ -39,7 +39,7 @@ class LoginHandlerTest {
         HttpServletRequest request = new HttpServletRequest(
                 RequestLine.from("GET /login?account=gugu&password=wrongPassword HTTP/1.1 "),
                 HttpHeaders.from(List.of()),
-                RequestBody.of("")
+                RequestBody.of(null, "")
         );
 
         HttpServletResponse response = loginHandler.handle(request);

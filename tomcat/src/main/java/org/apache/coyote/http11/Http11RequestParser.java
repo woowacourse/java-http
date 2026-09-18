@@ -24,7 +24,7 @@ public class Http11RequestParser {
     public HttpServletRequest parse() throws IOException {
         final RequestLine requestLine = RequestLine.from(readFirstLine());
         final HttpHeaders headers = HttpHeaders.from(readHeaderLines());
-        final RequestBody body = RequestBody.of(readBody(headers.contentLength()));
+        final RequestBody body = RequestBody.of(headers.contentType(), readBody(headers.contentLength()));
 
         return new HttpServletRequest(requestLine, headers, body);
     }

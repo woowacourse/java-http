@@ -13,4 +13,8 @@ public record HttpServletRequest(
     public Optional<String> cookie(String key) {
         return headers.getCookie(key);
     }
+
+    public HttpMethod method() {
+        return requestLine.getHttpMethod();
+    }
 }

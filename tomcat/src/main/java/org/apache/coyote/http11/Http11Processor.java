@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,22 +45,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            List<String> headers = new ArrayList<>();
-            String line;
-            while ((line = reader.readLine()) != null && !line.isEmpty() ) {
-                headers.add(line);
+            String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
             }
-            String[] tokens = headers.get(0).split(" ");
+
+            String[] tokens = requestLine.split(" ");
             if (tokens.length < 2) {
                 return;
             }
 
-
             String method = tokens[0];
             var requestUri = new RequestUri(tokens[1]);
 
-            int contentLength = findContentLength(headers);
-            String body = readBody(reader, contentLength);
+            Map<String, String> headers = readHeaders(reader);
+            String body = readBody(reader, headers);
 
             handleRequest(method, requestUri, body, outputStream);
         } catch (IOException | UncheckedServletException e) {
@@ -68,24 +67,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private int findContentLength(List<String> headers) {
-        for (String header : headers) {
-            if (header.toLowerCase().startsWith("content-length:")) {
-                String value = header
-                        .substring("content-length:".length())
-                        .trim();
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
 
-                return Integer.parseInt(value);
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] pair = line.split(":", 2);
+
+            if (pair.length == 2) {
+                headers.put(pair[0].trim().toLowerCase(Locale.ROOT), pair[1].trim());
             }
         }
 
-        return 0;
+        return headers;
     }
 
     private String readBody(
             BufferedReader reader,
-            int contentLength
+            Map<String, String> headers
     ) throws IOException {
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
         char[] buffer = new char[contentLength];
         int totalRead = 0;
 
@@ -117,43 +118,53 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRegister(String method, String body, OutputStream outputStream) throws IOException {
-        if(method.equals("GET")) {
+        if (method.equals("GET")) {
             serveResource("/register.html", outputStream);
+            return;
         }
-        if(method.equals("POST")) {
-            log.info("Register BODY :" + body);
 
-            Map<String, String> map = new HashMap<>();
-            String[] params = body.split("&");
-
-            for (String param : params) {
-                map.put(param.split("=")[0], param.split("=")[1]);
-            }
-            InMemoryUserRepository.save(new User(map.get("account"), map.get("password"), map.get("email")));
+        if (method.equals("POST")) {
+            Map<String, String> parameters = parseFormBody(body);
+            InMemoryUserRepository.save(new User(
+                    parameters.get("account"),
+                    parameters.get("password"),
+                    parameters.get("email")
+            ));
 
             writeRedirect(outputStream, "/index.html");
         }
     }
 
     private void handleLogin(String method, String body, OutputStream outputStream) throws IOException {
-
-        if(method.equals("GET")) {
+        if (method.equals("GET")) {
             serveResource("/login.html", outputStream);
+            return;
         }
-        if(method.equals("POST")) {
-            log.info("Register BODY :" + body);
 
-            Map<String, String> map = new HashMap<>();
-            String[] params = body.split("&");
-
-            for (String param : params) {
-                map.put(param.split("=")[0], param.split("=")[1]);
-            }
-
-            Optional<User> loginUser = login(map);
+        if (method.equals("POST")) {
+            Map<String, String> parameters = parseFormBody(body);
+            Optional<User> loginUser = login(parameters);
+            loginUser.ifPresent(user -> log.info("회원 조회 성공: account={}", user.getAccount()));
             String location = loginUser.isPresent() ? "/index.html" : "/401.html";
             writeRedirect(outputStream, location);
         }
+    }
+
+    private Map<String, String> parseFormBody(String body) {
+        Map<String, String> parameters = new HashMap<>();
+
+        for (String parameter : body.split("&")) {
+            String[] pair = parameter.split("=", 2);
+            if (pair.length != 2) {
+                continue;
+            }
+
+            String name = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+            parameters.put(name, value);
+        }
+
+        return parameters;
     }
 
     private void serveResource(String path, OutputStream outputStream) throws IOException {

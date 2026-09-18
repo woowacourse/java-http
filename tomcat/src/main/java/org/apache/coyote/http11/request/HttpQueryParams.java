@@ -1,10 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.BadRequestException;
 
 public class HttpQueryParams {
     private final Map<String, String> queryParams;

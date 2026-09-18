@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Set;
+import org.apache.coyote.http11.BadRequestException;
 
 public class HttpRequest {
 

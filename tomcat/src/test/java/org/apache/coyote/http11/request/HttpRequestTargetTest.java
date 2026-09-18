@@ -1,11 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTargetTest {
-
     @Test
     void parseRequestTarget() {
         HttpRequestTarget target = new HttpRequestTarget("/login?account=gugu");

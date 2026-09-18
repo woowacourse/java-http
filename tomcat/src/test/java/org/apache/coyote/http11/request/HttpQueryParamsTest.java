@@ -1,12 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.BadRequestException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpQueryParamsTest {
-
     @Test
     void parseQueryString() {
         // given

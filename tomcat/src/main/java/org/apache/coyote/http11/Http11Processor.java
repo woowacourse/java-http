@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.session.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +15,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +94,7 @@ public class Http11Processor implements Runnable, Processor {
                 String responseBody = redirect("302 FOUND", "/index.html");
                 outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
+                return;
             }
 
             if (method.equals("GET") && path.equals("/login")) {
@@ -110,7 +109,8 @@ public class Http11Processor implements Runnable, Processor {
                         .filter(user -> user.checkPassword(password));
 
                 if (loginedUser.isPresent()) {
-                    String responseBody = redirect("302 FOUND", "/index.html");
+                    HttpCookie cookie = new HttpCookie("JSESSIONID=" + UUID.randomUUID());
+                    String responseBody = redirect("302 FOUND", "/index.html", cookie);
                     outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
                     outputStream.flush();
                     return;
@@ -178,7 +178,16 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 " + status,
                 "Location: " + location,
                 "Content-Length: 0",
-                "",
+                "");
+    }
+
+    public String redirect(String status, String location, HttpCookie cookie) {
+        log.info("Cookie : {}", cookie.serialize());
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                "Location: " + location,
+                "Set-Cookie: " + cookie.serialize(),
+                "Content-Length: 0",
                 "");
     }
 

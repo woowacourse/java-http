@@ -11,15 +11,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String INDEX_PATH = "/index.html";
-    private static final String INDEX_RESOURCE = "static/index.html";
+    private static final String STATIC_ROOT = "static";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
-    private static final String DEFAULT_BODY = "Hello world!";
+    private static final String CSS_CONTENT_TYPE = "text/css";
+    private static final String JAVASCRIPT_CONTENT_TYPE = "application/javascript";
+    private static final byte[] DEFAULT_BODY = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
     private final Socket connection;
 
@@ -49,9 +49,11 @@ public class Http11Processor implements Runnable, Processor {
 
             readHeaders(reader);
 
-            final var parsedRequestLine = RequestLine.parse(requestLine);
-            final var response = createResponse(parsedRequestLine);
-            response.writeTo(outputStream);
+            final var requestUri = extractRequestUri(requestLine);
+            final var responseBody = readResponseBody(requestUri);
+            final var contentType = findContentType(requestUri);
+
+            writeResponse(outputStream, contentType, responseBody);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -67,15 +69,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse createResponse(final RequestLine requestLine) throws IOException {
-        if (!requestLine.targets(INDEX_PATH)) {
-            return HttpResponse.html(DEFAULT_BODY);
+    private String extractRequestUri(final String requestLine) {
+        final var requestParts = requestLine.trim().split("\\s+");
+
+        if (requestParts.length != 3) {
+            throw new UncheckedServletException(
+                    new IllegalArgumentException("Invalid request line: " + requestLine)
+            );
         }
 
-        return HttpResponse.html(readResource(INDEX_RESOURCE));
+        return requestParts[1];
     }
 
-    private byte[] readResource(final String resourcePath) throws IOException {
+    private byte[] readResponseBody(final String requestUri) throws IOException {
+        if ("/".equals(requestUri)) {
+            return DEFAULT_BODY.clone();
+        }
+
+        validateRequestUri(requestUri);
+
+        final var resourcePath = STATIC_ROOT + requestUri;
         final var classLoader = Http11Processor.class.getClassLoader();
 
         try (final var resource = classLoader.getResourceAsStream(resourcePath)) {
@@ -87,65 +100,45 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private record RequestLine(String method, String target, String protocol) {
+    private void validateRequestUri(final String requestUri) {
+        final var invalidPath = !requestUri.startsWith("/")
+                || requestUri.contains("..")
+                || requestUri.contains("\\");
 
-        private static final int REQUEST_PART_COUNT = 3;
-
-        private RequestLine {
-            Objects.requireNonNull(method);
-            Objects.requireNonNull(target);
-            Objects.requireNonNull(protocol);
-        }
-
-        private static RequestLine parse(final String value) {
-            final var requestParts = value.trim().split("\\s+");
-
-            if (requestParts.length != REQUEST_PART_COUNT) {
-                throw new UncheckedServletException(
-                        new IllegalArgumentException("Invalid request line: " + value)
-                );
-            }
-
-            return new RequestLine(requestParts[0], requestParts[1], requestParts[2]);
-        }
-
-        private boolean targets(final String path) {
-            return target.equals(path);
+        if (invalidPath) {
+            throw new UncheckedServletException(
+                    new IllegalArgumentException("Invalid request URI: " + requestUri)
+            );
         }
     }
 
-    private static final class HttpResponse {
-
-        private static final String STATUS_LINE = "HTTP/1.1 200 OK ";
-
-        private final String contentType;
-        private final byte[] body;
-
-        private HttpResponse(final String contentType, final byte[] body) {
-            this.contentType = Objects.requireNonNull(contentType);
-            this.body = Objects.requireNonNull(body).clone();
+    private String findContentType(final String requestUri) {
+        if (requestUri.endsWith(".css")) {
+            return CSS_CONTENT_TYPE;
         }
 
-        private static HttpResponse html(final byte[] body) {
-            return new HttpResponse(HTML_CONTENT_TYPE, body);
+        if (requestUri.endsWith(".js")) {
+            return JAVASCRIPT_CONTENT_TYPE;
         }
 
-        private static HttpResponse html(final String body) {
-            return html(body.getBytes(StandardCharsets.UTF_8));
-        }
+        return HTML_CONTENT_TYPE;
+    }
 
-        private void writeTo(final OutputStream outputStream) throws IOException {
-            final var headers = String.join("\r\n",
-                    STATUS_LINE,
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    ""
-            );
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String contentType,
+            final byte[] responseBody
+    ) throws IOException {
+        final var responseHeaders = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                ""
+        );
 
-            outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(body);
-            outputStream.flush();
-        }
+        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseBody);
+        outputStream.flush();
     }
 }

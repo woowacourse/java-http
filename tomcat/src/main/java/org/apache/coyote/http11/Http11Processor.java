@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +46,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+            // Request Line
             String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
@@ -54,20 +58,50 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            // Request Header
+            Map<String, String> headers = new HashMap<>();
+            String line;
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                String[] header = line.split(":", 2);
+                headers.put(header[0].trim(), header[1].trim());
+            }
+
+            // Request Body
+            String body = "";
+            String contentLength = headers.get("Content-Length");
+            if (contentLength != null) {
+                char[] buffer = new char[Integer.parseInt(contentLength)];
+                reader.read(buffer, 0, buffer.length);
+                body = new String(buffer);
+            }
+
             // THINK: 추후 uri -> path, queryParams 부분을 VO로 포장하여 응집.
             URI uri = URI.create(matcher.group("uri"));
             String method = matcher.group("method");
             String path = uri.getPath();
-            String query = uri.getQuery(); //
 
-
-            /*
-            * 구현 사항
-            * 1. GET /login에 대해서는 /login.html을 돌려준다.
-            *
-            * */
             if (method.equals("GET") && path.equals("/login")) {
                 path = "/login.html";
+            }
+
+            if (method.equals("POST") && path.equals("/login")) {
+                Map<String, String> requestBody = parseQuery(body);
+                String account = requestBody.get("account");
+                String password = requestBody.get("password");
+                Optional<User> loginedUser = InMemoryUserRepository.findByAccount(account)
+                        .filter(user -> user.checkPassword(password));
+
+                if (loginedUser.isPresent()) {
+                    String responseBody = redirect("302 FOUND", "/index.html");
+                    outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
+                } else {
+                    String responseBody = redirect("302 FOUND", "/401.html");
+                    outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
+                }
             }
 
             if (path.equals("/")) {
@@ -119,6 +153,15 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + bytes.length,
                 "",
                 content);
+    }
+
+    public String redirect(String status, String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
     }
 
     private String contentTypeOf(String path) {

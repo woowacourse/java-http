@@ -2,14 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,29 +37,41 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String line = "";
+            String request = reader.readLine();
+            if (request == null) {
+                return;
+            }
+            String requestUri = request.split(" ")[1];
 
-            while (line != null) {
+            String line = reader.readLine();
+
+            while (!"".equals(line)) {
+                if (line == null) {
+                    return;
+                }
+
                 line = reader.readLine();
-                System.out.println(line);
             }
 
-            //클래스는 클래스로더에 대한 정보를 가짐
-            //클래스로더는 파일의 위치에 대한 정보를 가짐
-            //getResource는 파일을 찾지 못하면 null을 던짐
-            String dk = getClass().getClassLoader().getResource("static/index.html").getPath();
-            System.out.println(dk);
+            var responseBody = "Hello world!";
 
-            final var responseBody = "Hello world!";
+            if (!requestUri.equals("/")) {
+                //클래스는 클래스로더에 대한 정보를 가짐
+                //클래스로더는 파일의 위치에 대한 정보를 가짐
+                //getResource는 파일을 찾지 못하면 null을 반환함
+                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

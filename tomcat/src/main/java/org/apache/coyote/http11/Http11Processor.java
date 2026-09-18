@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParams = httpRequest.queryParameters();
         InMemoryUserRepository.findByAccount(queryParams.get("account"))
                 .filter(user -> user.getAccount().equals("gugu"))
-                .filter(user -> user.checkPassword("password"))
+                .filter(user -> user.checkPassword(queryParams.get("password")))
                 .ifPresent(user -> log.info("user matched={}", user));
     }
 

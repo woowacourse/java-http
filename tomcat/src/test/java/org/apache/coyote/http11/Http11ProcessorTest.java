@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -13,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
-    void process() {
+    void process() throws URISyntaxException {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
@@ -33,7 +34,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() throws IOException, URISyntaxException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",

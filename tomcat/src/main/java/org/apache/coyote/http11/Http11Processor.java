@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -62,7 +65,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeResource(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        URL resource = getClass().getClassLoader().getResource(httpRequest.findTargetPath());
+        if (!httpRequest.isParameterEmpty()) {
+            findUser(httpRequest);
+        }
+
+        URL resource = getClass().getClassLoader().getResource(httpRequest.getResourcePath());
 
         if (resource == null) {
             writeNotFoundResource(outputStream);
@@ -72,6 +79,19 @@ public class Http11Processor implements Runnable, Processor {
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);
+    }
+
+    private void findUser(HttpRequest httpRequest) {
+        Optional<User> userOpt = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
+        if (userOpt.isEmpty()) {
+            return;
+        }
+
+        User user = userOpt.get();
+        String password = httpRequest.getParameter("password");
+        if (password != null && user.checkPassword(password)) {
+            log.info(user.toString());
+        }
     }
 
     private void writeNotFoundResource(OutputStream outputStream) throws IOException {

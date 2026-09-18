@@ -6,37 +6,40 @@ public class HttpRequest {
 
     private final String ALLOWED_METHOD = "GET";
     private final String ALLOWED_VERSION = "HTTP/1.1";
-    private static final String ROOT_PATH = "/";
-    private static final String STATIC_TARGET_PATH = "static";
 
     private final String method;
-    private final String target;
+    private final HttpRequestUri httpRequestUri;
     private final String version;
 
-    private HttpRequest(String method, String target, String version) {
+    private HttpRequest(String method, HttpRequestUri httpRequestUri, String version) {
         validate(method, version);
         this.method = method;
-        this.target = target;
+        this.httpRequestUri = httpRequestUri;
         this.version = version;
     }
 
     public static HttpRequest from(String startLine) {
         StringTokenizer stringTokenizer = new StringTokenizer(startLine, " ");
         String method = stringTokenizer.nextToken();
-        String target = stringTokenizer.nextToken();
+        HttpRequestUri httpRequestUri = HttpRequestUri.from(stringTokenizer.nextToken());
         String version = stringTokenizer.nextToken();
-        return new HttpRequest(method, target, version);
+        return new HttpRequest(method, httpRequestUri, version);
     }
 
     public boolean isRoot() {
-        if (ROOT_PATH.equals(target)) {
-            return true;
-        }
-        return false;
+        return httpRequestUri.isRoot();
     }
 
-    public String findTargetPath() {
-        return STATIC_TARGET_PATH + target;
+    public boolean isParameterEmpty() {
+        return httpRequestUri.isParameterEmpty();
+    }
+
+    public String getParameter(String key) {
+        return httpRequestUri.getParameter(key);
+    }
+
+    public String getResourcePath() {
+        return httpRequestUri.getResourcePath();
     }
 
     private void validate(String method, String version) {
@@ -56,9 +59,5 @@ public class HttpRequest {
             return;
         }
         throw new IllegalArgumentException("400 지원하지 않는 HTTP 버전입니다: " + version);
-    }
-
-    public String getTarget() {
-        return target;
     }
 }

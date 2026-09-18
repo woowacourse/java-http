@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public final class HttpResponse {
+final class HttpResponse {
 
     private final String contentType;
     private final String body;

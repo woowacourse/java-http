@@ -35,47 +35,55 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = reader.readLine();
+
+            if (requestLine == null || requestLine.isBlank()) {
+                return;
+            }
+
             HttpRequest request = HttpRequest.from(requestLine);
 
             if (request.isGetMethod() && request.getPath().equals("/index.html")) {
-                byte[] body = getResourceFileBytes("static/index.html");
-                HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", body);
-
-                writeResponse(outputStream, response);
+                writeStaticResource("static/index.html", "text/html;charset=utf-8", outputStream);
                 return;
             }
 
             if (request.isGetMethod() && request.getPath().equals("/css/styles.css")) {
-                byte[] body = getResourceFileBytes("static/css/styles.css");
-                HttpResponse response = HttpResponse.ok("text/css;charset=utf-8", body);
-
-                writeResponse(outputStream, response);
+                writeStaticResource("static/css/styles.css", "text/css;charset=utf-8", outputStream);
                 return;
             }
 
             if (request.isGetMethod() && request.getPath().equals("/login")) {
-                User user = InMemoryUserRepository.findByAccount(request.getParamValue("account"))
-                        .orElseThrow(() -> new RuntimeException("아이디 또는 비밀번호가 틀렸습니다."));
+                User user = findUserOrThrow(request);
+                validatePassword(user, request);
 
-                if (!user.checkPassword(request.getParamValue("password"))) {
-                    throw new RuntimeException("아이디 또는 비밀번호가 틀렸습니다.");
-                }
-
-                byte[] body = getResourceFileBytes("static/login.html");
-                HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", body);
-
-                writeResponse(outputStream, response);
+                writeStaticResource("static/login.html", "text/html;charset=utf-8", outputStream);
                 log.info(user.toString());
                 return;
             }
 
             byte[] body = "Hello World!".getBytes();
             HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", body);
-
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void validatePassword(User user, HttpRequest request) {
+        if (!user.checkPassword(request.getParamValue("password"))) {
+            throw new RuntimeException("아이디 또는 비밀번호가 틀렸습니다.");
+        }
+    }
+
+    private User findUserOrThrow(HttpRequest request) {
+        return InMemoryUserRepository.findByAccount(request.getParamValue("account"))
+                .orElseThrow(() -> new RuntimeException("아이디 또는 비밀번호가 틀렸습니다."));
+    }
+
+    private void writeStaticResource(String path, String contentType, OutputStream outputStream) throws IOException {
+        byte[] body = getResourceFileBytes(path);
+        HttpResponse response = HttpResponse.ok(contentType, body);
+        writeResponse(outputStream, response);
     }
 
     private byte[] getResourceFileBytes(String path) throws IOException {

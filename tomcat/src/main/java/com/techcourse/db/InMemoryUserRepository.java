@@ -2,6 +2,7 @@ package com.techcourse.db;
 
 import com.techcourse.model.User;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,10 @@ public class InMemoryUserRepository {
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
+    }
+
+    public static List<User> findAll() {
+        return List.copyOf(database.values());
     }
 
     private InMemoryUserRepository() {}

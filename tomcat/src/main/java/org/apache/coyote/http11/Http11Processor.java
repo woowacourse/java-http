@@ -10,9 +10,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +81,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-
     private String extractRequestPath(String requestTarget) {
         int queryStartIndex = requestTarget.indexOf('?');
 
@@ -99,16 +98,12 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
 
-        Map<String, String> queryParameters = new HashMap<>();
-
         String queryString = requestTarget.substring(queryStartIndex + 1);
         String[] parameterPairs = queryString.split("&");
-        for (String parameterPair : parameterPairs) {
-            String[] nameAndValue = parameterPair.split("=");
-            queryParameters.put(nameAndValue[0], nameAndValue[1]);
-        }
 
-        return queryParameters;
+        return Arrays.stream(parameterPairs)
+                .map(parameterPair -> parameterPair.split("="))
+                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
     private String resolveResourcePath(String requestPath) {

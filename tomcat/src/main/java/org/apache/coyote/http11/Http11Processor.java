@@ -44,27 +44,23 @@ public class Http11Processor implements Runnable, Processor {
             final Headers headers = readHeaders(bufferedReader);
 
             String path = requestLine.getPath();
-            if (requestLine.isPost() && "/register".equals(path)) {
-                final int contentLength = headers.contentLength();
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
-
-                final Map<String, String> parameters = parseQueryString(requestBody);
-                register(parameters);
-
-                final var response = makeResponse("/index.html", "200", "OK");
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            String queryString = requestLine.getQueryString();
             String code = "200";
             String status = "OK";
-            if ("/login".equals(path)) {
-                if (!queryString.isBlank()) {
-                    final Map<String, String> parameters = parseQueryString(queryString);
+
+            if (requestLine.isPost()) {
+                final int contentLength = headers.contentLength();
+                final char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+
+                final String requestBody = new String(buffer);
+                final Map<String, String> parameters = parseQueryString(requestBody);
+
+                if ("/register".equals(path)) {
+                    register(parameters);
+                    path = "/index";
+                    code = "200";
+                    status = "OK";
+                } else if ("/login".equals(path)) {
                     if (login(parameters)) {
                         path = "/index";
                         code = "302";
@@ -143,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
 
-        Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
+        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
 
         if (loginUser.isEmpty()) {
@@ -155,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void register(final Map<String, String> parameters) {
-        User user = new User(
+        final User user = new User(
                 parameters.get("account"),
                 parameters.get("password"),
                 parameters.get("email")

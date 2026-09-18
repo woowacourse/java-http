@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,20 +169,29 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
-        validatePassword(queryParams, user);
+        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
 
-        log.info("user: {}", user);
+        if (user.isEmpty()) {
+            return;
+        }
+
+        User foundUser = user.get();
+        if (checkPassword(queryParams, foundUser)) {
+            log.info("user: {}", foundUser);
+        }
     }
 
-    private void validatePassword(Map<String, String> queryParams, User user) {
+    private boolean checkPassword(Map<String, String> queryParams, User user) {
         if (!queryParams.containsKey("password")) {
-            throw new IllegalArgumentException("비밀번호는 필수값입니다.");
+            log.info("비밀번호는 필수값입니다.");
+            return false;
         }
 
         if (!user.checkPassword(queryParams.get("password"))) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            log.info("비밀번호가 일치하지 않습니다.");
+            return false;
         }
+
+        return true;
     }
 }

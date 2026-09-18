@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -38,14 +37,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
             String line = reader.readLine();
             HttpRequest request = HttpRequest.from(line);
+
             String path = request.path();
 
             final var responseBody = getResponseBody(request);
             final var response = HttpResponse.ok(
-                    "text/" + getExtension(path) + ";charset=utf-8",
+                    getContentType(path),
                     responseBody
             );
 
@@ -67,27 +66,27 @@ public class Http11Processor implements Runnable, Processor {
                 return modelToView("/login.html");
             }
             String account = request.getParameter("account");
-            User user = account == null
-                    ? null
-                    : InMemoryUserRepository.findByAccount(account).orElse(null);
             String password = request.getParameter("password");
-            if(user == null || !user.checkPassword(password)) {
-                return "없는 유저입니다. 다시 입력해주세요";
-            }
-            log.info(user.toString());
+
+            InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .ifPresent(user -> log.info(user.toString()));
             return modelToView("/login.html");
         }
         return modelToView(path);
     }
 
-    private String getExtension(String path) {
+    private String getContentType(String path) {
         if (path.endsWith(".html")) {
-            return "html";
+            return "text/html; charset=utf-8";
         }
         if (path.endsWith(".css")) {
-            return "css";
+            return "text/css";
         }
-        return "html";
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/plain";
     }
 
     @Nonnull

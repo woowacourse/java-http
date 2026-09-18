@@ -1,6 +1,5 @@
 package org.apache.coyote;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 public enum MimeType {

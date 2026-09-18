@@ -51,6 +51,14 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "text/html;charset=utf-8";
             }
 
+            if (path.endsWith(".css")) {
+                contentType = "text/css;charset=utf-8";
+            }
+
+            if (path.endsWith(".js")) {
+                contentType = "application/javascript;charset=utf-8";
+            }
+
 
             final URL resource = getClass().getClassLoader().getResource(filePath);
             if (resource == null) {

@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ public class Http11Processor implements Runnable, Processor {
             final String[] tokens = requestLine.split(" ");
             final String path = tokens[1];
             int contentLength = 0;
+            String cookieHeader = "";
+            String setCookie = "";
 
             log.debug("request line: {}", requestLine);
 
@@ -57,10 +60,20 @@ public class Http11Processor implements Runnable, Processor {
                     break;
                 }
 
-                if (line.startsWith("Content-Length:")) {
+                if (line.startsWith("Content-Length: ")) {
                     contentLength = Integer.parseInt(line.split(":")[1].trim());
                 }
+
+                if (line.startsWith("Cookie: ")) {
+                    cookieHeader = line.split(":")[1].trim();
+                }
                 log.debug("header : {}", line);
+            }
+
+            HttpCookie cookie = new HttpCookie(cookieHeader);
+
+            if (getSessionId(cookie) == null) {
+                cookie.add("JSESSIONID", UUID.randomUUID().toString());
             }
 
             char[] buffer = new char[contentLength];
@@ -224,5 +237,9 @@ public class Http11Processor implements Runnable, Processor {
             return "image/svg+xml ";
         }
         return "text/html;charset=utf-8 ";
+    }
+
+    private String getSessionId(HttpCookie cookie) {
+        return cookie.getCookie("JSESSIONID");
     }
 }

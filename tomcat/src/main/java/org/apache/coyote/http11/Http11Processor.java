@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -40,37 +42,85 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            Optional<RequestUri> requestUri = readRequestUri(reader);
-            if (requestUri.isEmpty()) {
+
+            List<String> headers = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null && !line.isEmpty() ) {
+                headers.add(line);
+            }
+            String[] tokens = headers.get(0).split(" ");
+            if (tokens.length < 2) {
                 return;
             }
 
-            handleRequest(requestUri.get(), outputStream);
+
+            String method = tokens[0];
+            var requestUri = new RequestUri(tokens[1]);
+
+            int contentLength = findContentLength(headers);
+            String body = readBody(reader, contentLength);
+
+            handleRequest(method, requestUri, body, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Optional<RequestUri> readRequestUri(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-        if (requestLine == null) {
-            return Optional.empty();
+    private int findContentLength(List<String> headers) {
+        for (String header : headers) {
+            if (header.toLowerCase().startsWith("content-length:")) {
+                String value = header
+                        .substring("content-length:".length())
+                        .trim();
+
+                return Integer.parseInt(value);
+            }
         }
 
-        String[] tokens = requestLine.split(" ");
-        if (tokens.length < 2) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new RequestUri(tokens[1]));
+        return 0;
     }
 
-    private void handleRequest(RequestUri requestUri, OutputStream outputStream) throws IOException {
+    private String readBody(
+            BufferedReader reader,
+            int contentLength
+    ) throws IOException {
+        char[] buffer = new char[contentLength];
+        int totalRead = 0;
+
+        while (totalRead < contentLength) {
+            int readCount = reader.read(
+                    buffer,
+                    totalRead,
+                    contentLength - totalRead
+            );
+
+            if (readCount == -1) {
+                throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
+            }
+
+            totalRead += readCount;
+        }
+
+        return new String(buffer);
+    }
+
+    private void handleRequest(String method, RequestUri requestUri, String body, OutputStream outputStream) throws IOException {
         String path = requestUri.getPath();
         switch (path) {
             case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html");
+            case "/register" -> handleRegister(method, body, outputStream);
             case "/login" -> handleLogin(requestUri, outputStream);
             default -> serveResource(path, outputStream);
+        }
+    }
+
+    private void handleRegister(String method, String body, OutputStream outputStream) throws IOException {
+        if(method.equals("GET")) {
+            serveResource("/register.html", outputStream);
+        }
+        if(method.equals("POST")) {
+            log.info("Register BODY :" + body);
+            writeRedirect(outputStream, "/index.html");
         }
     }
 

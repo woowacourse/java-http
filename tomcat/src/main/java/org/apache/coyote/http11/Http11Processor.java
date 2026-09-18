@@ -62,20 +62,20 @@ public class Http11Processor implements Runnable, Processor {
             String[] firstLineParts = requestFirstLine.trim().split("\\s+");
             String filePath = firstLineParts[1];
 
+            URI uri = URI.create(filePath);
+            String uriPath = uri.getPath();
+
             // 요청 경로 없을 경우 문자열 반환
-            if (filePath.equals("/")) {
+            if ("/".equals(uriPath)) {
                 final var responseBody = "Hello world!";
                 final var response = createResponse("HTTP/1.1 200 OK ", responseBody, "text/html");
 
                 writeResponse(outputStream, response);
                 return;
-            } else if (filePath.contains("/login")) {
-                URI uri = URI.create(filePath);
-
-                String path = uri.getPath();
+            } else if ("/login".equals(uriPath)) {
                 String rawQuery = uri.getRawQuery();
 
-                if (path.equals("/login") && rawQuery != null) {
+                if (rawQuery != null) {
                     Map<String, String> queryParameters = parseQueryParameters(uri);
 
                     String account = queryParameters.get("account");
@@ -86,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
                             .ifPresent(user -> log.info("user : " + user.toString()));
                 }
 
-                String loginPath = path + ".html";
+                String loginPath = uriPath + ".html";
                 InputStream resourceAsStream = getClass()
                         .getClassLoader()
                         .getResourceAsStream("static" + loginPath);
@@ -115,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
             // 클래스 로더에서 정적 파일 가져오기
             InputStream resourceAsStream = getClass()
                     .getClassLoader()
-                    .getResourceAsStream("static" + filePath);
+                    .getResourceAsStream("static" + uriPath);
 
             if (resourceAsStream == null) {
                 String response = createResponse(
@@ -127,8 +127,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 확장자에 맞는 content-type 추출
-            int pointIndex = filePath.lastIndexOf('.');
-            String fileExtension = filePath.substring(pointIndex + 1);
+            int pointIndex = uriPath.lastIndexOf('.');
+            String fileExtension = uriPath.substring(pointIndex + 1);
             String contentType = MIME_TYPES.get(fileExtension);
 
             // 정적 파일 반환
@@ -157,13 +157,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static String createResponse(String statusLine, String responseBody, String contentType) {
-        final var response = String.join("\r\n",
+        return String.join("\r\n",
                 statusLine,
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
-        return response;
     }
 
     private static void writeResponse(OutputStream outputStream, String response) throws IOException {

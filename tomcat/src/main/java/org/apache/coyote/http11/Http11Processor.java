@@ -5,6 +5,8 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.session.HttpCookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +29,11 @@ public class Http11Processor implements Runnable, Processor {
             Pattern.compile("^(?<method>[A-Z]+) (?<uri>\\S+) (?<version>HTTP/\\d\\.\\d)$");
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -63,6 +67,8 @@ public class Http11Processor implements Runnable, Processor {
                 String[] header = line.split(":", 2);
                 headers.put(header[0].trim(), header[1].trim());
             }
+            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+            Session session = sessionManager.findSession(httpCookie.getAttribute("JSESSIONID"));
 
             // Request Body
             String body = "";
@@ -98,6 +104,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (method.equals("GET") && path.equals("/login")) {
+                log.info("로그인 GET 요청");
+                if (session != null && session.getAttribute("user") != null) {
+                    log.info("로그인 세션 확인 됨.");
+                    String responseBody = redirect("302 FOUND", "/index.html");
+                    outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
+                }
                 path = "/login.html";
             }
 
@@ -109,7 +123,12 @@ public class Http11Processor implements Runnable, Processor {
                         .filter(user -> user.checkPassword(password));
 
                 if (loginedUser.isPresent()) {
-                    HttpCookie cookie = new HttpCookie("JSESSIONID=" + UUID.randomUUID());
+                    UUID sessionId = UUID.randomUUID();
+                    HttpCookie cookie = new HttpCookie("JSESSIONID=" + sessionId);
+                    Session newSession = new Session(sessionId.toString());
+                    newSession.setAttribute("user", loginedUser.get());
+                    sessionManager.add(newSession);
+
                     String responseBody = redirect("302 FOUND", "/index.html", cookie);
                     outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
                     outputStream.flush();

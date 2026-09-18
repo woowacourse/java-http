@@ -4,7 +4,6 @@ import org.apache.coyote.HttpStatus;
 import org.apache.coyote.MimeType;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -38,7 +37,7 @@ public class HttpResponseProcessor {
         sendStaticResource(HttpStatus.OK, mimeType, Files.readAllBytes(resourcePath));
     }
 
-    private Optional<Path> findStaticResource(String path) throws IOException, URISyntaxException {
+    private Optional<Path> findStaticResource(String path) throws URISyntaxException {
         URL resourceUrl = getClass().getClassLoader().getResource(STATIC_RESOURCE_PREFIX + path);
         if (resourceUrl == null) {
             return Optional.empty();

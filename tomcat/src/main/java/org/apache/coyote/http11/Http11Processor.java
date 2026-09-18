@@ -80,6 +80,10 @@ public class Http11Processor implements Runnable, Processor {
             String method = matcher.group("method");
             String path = uri.getPath();
 
+            if (method.equals("GET") && path.equals("/register")) {
+                path = "/register.html";
+            }
+
             if (method.equals("GET") && path.equals("/login")) {
                 path = "/login.html";
             }

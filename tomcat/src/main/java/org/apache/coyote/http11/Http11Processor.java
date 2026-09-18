@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +27,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String GET = "GET";
     private static final String POST = "POST";
+    private static final String SESSION_USER = "user";
 
     private final Socket connection;
 
     private final StaticResourceLoader resourceLoader = new StaticResourceLoader();
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -62,10 +66,11 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> headers = readHeaders(reader);
             String body = readBody(reader, headers);
-            Optional<String> newSessionId = new HttpCookie(headers.get("cookie"))
-                    .createJSessionIdIfAbsent();
+            HttpCookie cookies = new HttpCookie(headers.get("cookie"));
+            Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();
+            String sessionId = cookies.get(HttpCookie.JSESSION_ID).orElseThrow();
 
-            handleRequest(method, requestUri, body, newSessionId, outputStream);
+            handleRequest(method, requestUri, body, sessionId, newSessionId, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -115,6 +120,7 @@ public class Http11Processor implements Runnable, Processor {
             String method,
             RequestUri requestUri,
             String body,
+            String sessionId,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
@@ -122,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
         switch (path) {
             case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html", newSessionId);
             case "/register" -> handleRegister(method, body, newSessionId, outputStream);
-            case "/login" -> handleLogin(method, body, newSessionId, outputStream);
+            case "/login" -> handleLogin(method, body, sessionId, newSessionId, outputStream);
             default -> serveResource(path, newSessionId, outputStream);
         }
     }
@@ -153,10 +159,16 @@ public class Http11Processor implements Runnable, Processor {
     private void handleLogin(
             String method,
             String body,
+            String sessionId,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
         if (method.equals(GET)) {
+            if (getLoginUser(sessionId).isPresent()) {
+                writeRedirect(outputStream, "/index.html", newSessionId);
+                return;
+            }
+
             serveResource("/login.html", newSessionId, outputStream);
             return;
         }
@@ -171,8 +183,34 @@ public class Http11Processor implements Runnable, Processor {
 
             User user = loginUser.get();
             log.info("회원 조회 성공: account={}", user.getAccount());
+            Session session = getOrCreateSession(sessionId);
+            session.setAttribute(SESSION_USER, user);
             writeRedirect(outputStream, "/index.html", newSessionId);
         }
+    }
+
+    private Session getOrCreateSession(String sessionId) {
+        Session session = sessionManager.findSession(sessionId);
+        if (session != null) {
+            return session;
+        }
+
+        Session newSession = new Session(sessionId);
+        sessionManager.add(newSession);
+        return newSession;
+    }
+
+    private Optional<User> getLoginUser(String sessionId) {
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            return Optional.empty();
+        }
+
+        Object user = session.getAttribute(SESSION_USER);
+        if (user instanceof User loginUser) {
+            return Optional.of(loginUser);
+        }
+        return Optional.empty();
     }
 
     private Map<String, String> parseFormBody(String body) {

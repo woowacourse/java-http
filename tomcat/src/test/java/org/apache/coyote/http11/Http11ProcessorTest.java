@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -75,22 +78,30 @@ class Http11ProcessorTest {
     }
 
     private String postRequest(String path, String body) {
+        return postRequest(path, body, UUID.randomUUID().toString());
+    }
+
+    private String postRequest(String path, String body, String sessionId) {
         return String.join("\r\n",
                 "POST " + path + " HTTP/1.1",
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length,
-                "Cookie: JSESSIONID=existing-session-id",
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 body
         );
     }
 
     private String getRequest(String path) {
+        return getRequest(path, UUID.randomUUID().toString());
+    }
+
+    private String getRequest(String path, String sessionId) {
         return String.join("\r\n",
                 "GET " + path + " HTTP/1.1",
                 "Host: localhost:8080",
-                "Cookie: JSESSIONID=existing-session-id",
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 ""
         );
@@ -190,5 +201,45 @@ class Http11ProcessorTest {
         new Http11Processor(socket).process(socket);
 
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
+    }
+
+    @Test
+    void successfulLoginStoresUserInSession() {
+        String sessionId = UUID.randomUUID().toString();
+        String body = "account=gugu&password=password";
+        final var socket = new StubSocket(postRequest("/login", body, sessionId));
+
+        new Http11Processor(socket).process(socket);
+
+        Session session = SessionManager.getInstance().findSession(sessionId);
+        assertThat(session).isNotNull();
+        assertThat(session.getAttribute("user"))
+                .isInstanceOf(User.class)
+                .extracting(user -> ((User) user).getAccount())
+                .isEqualTo("gugu");
+    }
+
+    @Test
+    void loggedInUserIsRedirectedWhenAccessingLoginPage() {
+        String sessionId = UUID.randomUUID().toString();
+        String body = "account=gugu&password=password";
+        final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final var loginPageSocket = new StubSocket(getRequest("/login", sessionId));
+        new Http11Processor(loginPageSocket).process(loginPageSocket);
+
+        assertRedirect(loginPageSocket, "/index.html");
+    }
+
+    @Test
+    void failedLoginDoesNotCreateSession() {
+        String sessionId = UUID.randomUUID().toString();
+        String body = "account=gugu&password=wrong";
+        final var socket = new StubSocket(postRequest("/login", body, sessionId));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(SessionManager.getInstance().findSession(sessionId)).isNull();
     }
 }

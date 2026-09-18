@@ -10,8 +10,8 @@ import org.apache.http.HttpMethod;
 public class HttpRequestParser {
 
     private static final String LINE_SEPARATOR = "\r\n";
-    private static final String HEAD_BODY_SEPARATOR =
-            "\r\n\r\n";
+    private static final String HEAD_BODY_SEPARATOR = "\r\n\r\n";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
 
     public <T> T parse(
             Class<T> type,
@@ -105,6 +105,8 @@ public class HttpRequestParser {
     ) {
         Map<String, String> parameters =
                 new HashMap<>();
+        parameters.put("Content-Type", DEFAULT_CONTENT_TYPE);
+        parameters.put("Content-Length", "0");
 
         if (query == null || query.isBlank()) {
             return parameters;

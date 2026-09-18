@@ -1,5 +1,6 @@
 package org.apache.http.request;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.http.HttpMethod;
 
@@ -18,7 +19,7 @@ public class HttpTomcatRequest implements HttpRequest {
         this.httpMethod = httpMethod;
         this.url = url;
         this.protocol = protocol;
-        this.Header = Map.copyOf(header);
+        this.Header = new LinkedHashMap<>(header);
         this.queryParams = queryParams;
         this.body = body;
     }

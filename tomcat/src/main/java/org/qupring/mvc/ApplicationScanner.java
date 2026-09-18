@@ -68,6 +68,13 @@ public class ApplicationScanner {
                     "/" + relativePath,
                     "static/" + relativePath
             );
+
+            String nonHtmlRelativePath = relativePath.replace(".html", "");
+
+            resources.put(
+                    "/" + nonHtmlRelativePath,
+                    "static/" + relativePath
+            );
         }
     }
 

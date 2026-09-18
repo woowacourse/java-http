@@ -10,15 +10,17 @@ import org.qupring.annotation.Route;
 // 실험용 컨트롤러
 public class UserController {
 
-    /*
-    @Route(path = "/login", method = HttpMethod.GET)
-    public String login(HttpRequest request, HttpResponse response) {
+    @Route(path = "/login", method = HttpMethod.POST)
+    public void login(HttpRequest request, HttpResponse response) {
         User user = InMemoryUserRepository.findByAccount(request.getQueryParams().get("account"))
                 .orElseThrow();
+        String inputPassword = request.getQueryParams().get("password");
 
-        System.out.println(user.toString());
-        return "login";
+        if(!user.checkPassword(inputPassword)) {
+            response.setStatus(404);
+        }
+
     }
 
-     */
+
 }

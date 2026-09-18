@@ -109,7 +109,9 @@ public class Http11Processor implements Runnable, Processor {
         String body = readBody(inputStream, headers);
 
         Map<String, String> parameters = parseParameters(uri.getRawQuery());
-        parameters.putAll(parseParameters(body));
+        if (isFormUrlEncoded(headers.get("content-type"))) {
+            parameters.putAll(parseParameters(body));
+        }
 
         return Optional.of(new HttpRequest(
                 parts[0],
@@ -117,6 +119,12 @@ public class Http11Processor implements Runnable, Processor {
                 parameters,
                 parseCookies(headers.get("cookie"))
         ));
+    }
+
+    private boolean isFormUrlEncoded(String contentType) {
+        return contentType != null
+                && contentType.split(";", 2)[0].trim()
+                        .equalsIgnoreCase("application/x-www-form-urlencoded");
     }
 
     private HttpCookie parseCookies(String cookieHeader) {

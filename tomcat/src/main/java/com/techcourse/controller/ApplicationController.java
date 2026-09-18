@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.model.User;
+import com.techcourse.exception.DuplicateAccountException;
 import com.techcourse.service.ApplicationService;
 import java.util.Map;
 import org.apache.catalina.Session;
@@ -45,8 +46,12 @@ public class ApplicationController {
     public ControllerResult register(Map<String, String> params) {
 
         if(params.get("account") != null && params.get("password") != null && params.get("email") != null) {
-            applicationService.register(params.get("account"), params.get("password"), params.get("email"));
-            return new ControllerResult.Redirect("/index.html");
+            try {
+                applicationService.register(params.get("account"), params.get("password"), params.get("email"));
+                return new ControllerResult.Redirect("/index.html");
+            } catch (DuplicateAccountException e) {
+                return new ControllerResult.View("/register.html");
+            }
         }
 
         return new ControllerResult.View("/register.html");

@@ -233,6 +233,7 @@ class Http11ProcessorTest {
                 "POST /login HTTP/1.1",
                 "Cookie: yummy_cookie=choco; JSESSIONID=existing-session; token=abc==",
                 "content-length: 12",
+                "Content-Type: application/x-www-form-urlencoded",
                 "", "account=gugu"));
         final var manager = new SessionManager();
         final var existing = new Session("existing-session");
@@ -314,6 +315,73 @@ class Http11ProcessorTest {
         String sessionId = cookies.getFirst().substring("Set-Cookie: JSESSIONID=".length());
         assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
         return sessionId;
+    }
+
+    @Test
+    void formBodyWithCharsetIsParsedAlongsideQuery() {
+        final var socket = new StubSocket(String.join("\r\n",
+                "POST /login?source=query HTTP/1.1",
+                "Content-Type: Application/X-WWW-Form-Urlencoded; charset=UTF-8",
+                "Content-Length: 12", "", "account=gugu"));
+        final var processor = new Http11Processor(socket, (request, session) -> {
+            assertThat(request.parameters()).hasSize(2)
+                    .containsEntry("source", "query")
+                    .containsEntry("account", "gugu");
+            return HttpResponse.redirect("/index.html");
+        }, new SessionManager());
+
+        processor.process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+    }
+
+    @Test
+    void nonFormBodyIsNotParsedButQueryIsPreserved() {
+        for (String contentType : new String[]{"", "application/json", "text/plain",
+                "application/x-www-form-urlencoded-other"}) {
+            String header = contentType.isEmpty() ? "" : "Content-Type: " + contentType + "\r\n";
+            final var socket = new StubSocket("POST /login?source=query HTTP/1.1\r\n"
+                    + header + "Content-Length: 12\r\n\r\naccount=gugu");
+            final var processor = new Http11Processor(socket, (request, session) -> {
+                assertThat(request.parameters()).as("Content-Type: %s", contentType)
+                        .hasSize(1).containsEntry("source", "query");
+                return HttpResponse.redirect("/index.html");
+            }, new SessionManager());
+
+            processor.process(socket);
+
+            assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+        }
+    }
+
+    @Test
+    void duplicateRegistrationReturnsFormAndPreservesExistingAccount() throws IOException {
+        final var service = new ApplicationService();
+        String account = "registration-" + UUID.randomUUID();
+        String originalBody = "account=" + account + "&password=original&email=original%40example.com";
+        final var first = new StubSocket("POST /register HTTP/1.1\r\n"
+                + "Cookie: JSESSIONID=existing-session\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + originalBody.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + originalBody);
+
+        createProcessor(first).process(first);
+
+        assertThat(first.output()).isEqualTo(createRedirectResponse("/index.html"));
+
+        String duplicateBody = "account=" + account + "&password=replacement&email=other%40example.com";
+        final var duplicate = new StubSocket("POST /register HTTP/1.1\r\n"
+                + "Cookie: JSESSIONID=existing-session\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + duplicateBody.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + duplicateBody);
+
+        createProcessor(duplicate).process(duplicate);
+
+        assertThat(duplicate.output()).isEqualTo(createResponse(
+                "text/html;charset=utf-8", readResource("static/register.html")));
+        assertThat(service.login(account, "original")).isPresent();
+        assertThat(service.login(account, "replacement")).isEmpty();
     }
 
     private Http11Processor createProcessor(StubSocket socket) {

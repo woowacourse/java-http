@@ -25,8 +25,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String WHITESPACE_REGEX = " ";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String QUESTION_MARK = "?";
-    public static final String HTML_EXTENSION = ".html";
+
+    private static final String QUESTION_MARK = "?";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String CSS_EXTENSION = ".css";
+    private static final String JS_EXTENSION = ".js";
 
     private final Socket connection;
 
@@ -101,71 +104,30 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static String createResponse(String part, byte[] body, Path path) throws IOException {
-        String response = "";
-        if (part.equals("/css/styles.css")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
+        String contentType = resolveContentType(part);
+        if (contentType == null) {
+            return "";
         }
 
-        if (part.equals("/index.html")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
-        }
+        return String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: " + contentType + ";charset=utf-8 ",
+            "Content-Length: " + body.length + " ",
+            "",
+            new String(Files.readAllBytes(path)));
+    }
 
-        if (part.equals("/assets/chart-area.js")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/javascript;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
+    private static String resolveContentType(String part) {
+        if (part.endsWith(CSS_EXTENSION)) {
+            return "text/css";
         }
-
-        if (part.equals("/assets/chart-bar.js")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/javascript;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
+        if (part.endsWith(JS_EXTENSION)) {
+            return "text/javascript";
         }
-
-        if (part.equals("/assets/chart-pie.js")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/javascript;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
+        if (part.endsWith(HTML_EXTENSION) || part.equals("login")) {
+            return "text/html";
         }
-
-        if (part.equals("/js/scripts.js")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/javascript;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
-        }
-
-        if (part.equals("login")) {
-            response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(Files.readAllBytes(path)));
-        }
-
-        return response;
+        return null;
     }
 
     private static boolean isRootRequest(String part, OutputStream outputStream)

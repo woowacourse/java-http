@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,7 +51,12 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = reader.readLine();
             readHeaders(reader);
 
-            final String requestPath = parsePath(requestLine);
+            final String requestUri = parseUri(requestLine);
+            final String requestPath = parsePath(requestUri);
+
+            if (requestPath.equals("/login")) {
+                login(parseQueryParams(requestUri));
+            }
             final String responseBody = resolveResponseBody(requestPath);
 
             final var response = String.join("\r\n",
@@ -65,6 +71,51 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseUri(String requestLine) {
+        if (requestLine == null || requestLine.isBlank()) {
+            return ROOT_PATH;
+        }
+        return requestLine.trim().split(" ")[PATH_INDEX];
+    }
+
+    private String parsePath(String requestUri) {
+        final int index = requestUri.indexOf("?");
+        if (index == -1) {
+            return requestUri;
+        }
+        return requestUri.substring(0, index);
+    }
+
+    private Map<String, String> parseQueryParams(final String requestUri) {
+        final int index = requestUri.indexOf("?");
+        if (index == -1) {
+            return Map.of();
+        }
+        final Map<String, String> queryParams = new HashMap<>();
+        for (final String param : requestUri.substring(index + 1).split("&")) {
+            final String[] keyAndValue = param.split("=", 2);
+            if (keyAndValue.length == 2) {
+                queryParams.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+        return queryParams;
+    }
+
+    private void login(final Map<String, String> queryParams) {
+        final String account = queryParams.get("account");
+        if (account == null) {
+            return;
+        }
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            log.info("존재하지 않는 계정입니다: {}", account);
+            return;
+        }
+        final User foundUser = user.get();
+        log.info("{}", foundUser);
+        log.info("비밀번호 일치 여부: {}", foundUser.checkPassword(queryParams.get("password")));
     }
 
     private String resolveContentType(String requestPath) {
@@ -105,12 +156,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new IOException("잘못된 리소스 경로입니다: " + requestPath, e);
         }
-    }
-
-    private String parsePath(String requestLine) {
-        if (requestLine == null || requestLine.isBlank()) {
-            return ROOT_PATH;
-        }
-        return requestLine.trim().split(" ")[PATH_INDEX];
     }
 }

@@ -23,6 +23,8 @@ import java.util.Optional;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String GET = "GET";
+    private static final String POST = "POST";
 
     private final Socket connection;
 
@@ -131,12 +133,12 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (method.equals("GET")) {
+        if (method.equals(GET)) {
             serveResource("/register.html", newSessionId, outputStream);
             return;
         }
 
-        if (method.equals("POST")) {
+        if (method.equals(POST)) {
             Map<String, String> parameters = parseFormBody(body);
             InMemoryUserRepository.save(new User(
                     parameters.get("account"),
@@ -154,12 +156,12 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (method.equals("GET")) {
+        if (method.equals(GET)) {
             serveResource("/login.html", newSessionId, outputStream);
             return;
         }
 
-        if (method.equals("POST")) {
+        if (method.equals(POST)) {
             Map<String, String> parameters = parseFormBody(body);
             Optional<User> loginUser = login(parameters);
             if (loginUser.isEmpty()) {
@@ -228,8 +230,7 @@ public class Http11Processor implements Runnable, Processor {
                 + setCookieHeader(newSessionId)
                 + "Location: " + location + "\r\n"
                 + "Content-Length: 0\r\n\r\n";
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+        write(outputStream, response);
     }
 
     private void writeResponse(
@@ -247,6 +248,10 @@ public class Http11Processor implements Runnable, Processor {
                 + "Content-Length: " + responseBodyBytes.length + " \r\n"
                 + "\r\n"
                 + responseBody;
+        write(outputStream, response);
+    }
+
+    private void write(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }

@@ -41,4 +41,8 @@ public class HttpCookie {
                 .collect(Collectors.joining("; "));
     }
 
+    public String  getAttribute(String name) {
+        return attributes.get(name);
+    }
+
 }

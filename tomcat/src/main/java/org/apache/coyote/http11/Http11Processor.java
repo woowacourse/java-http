@@ -169,8 +169,19 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+        final String account = queryParams.get("account");
+        if (account == null || account.isBlank()) {
+            log.info("아이디는 필수값입니다.");
+            return;
+        }
 
+        final String password = queryParams.get("password");
+        if (password == null || password.isBlank()) {
+            log.info("비밀번호는 필수값입니다.");
+            return;
+        }
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
             return;
         }
@@ -182,11 +193,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean checkPassword(Map<String, String> queryParams, User user) {
-        if (!queryParams.containsKey("password")) {
-            log.info("비밀번호는 필수값입니다.");
-            return false;
-        }
-
         if (!user.checkPassword(queryParams.get("password"))) {
             log.info("비밀번호가 일치하지 않습니다.");
             return false;

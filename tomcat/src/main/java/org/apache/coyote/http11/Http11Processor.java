@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -10,7 +11,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,8 +54,13 @@ public class Http11Processor implements Runnable, Processor {
             readHeaders(reader);
 
             final var requestUri = extractRequestUri(requestLine);
-            final var responseBody = readResponseBody(requestUri);
-            final var contentType = findContentType(requestUri);
+            final var requestPath = extractRequestPath(requestUri);
+            final var queryParameters = parseQueryParameters(requestUri);
+
+            logLoginUser(requestPath, queryParameters);
+
+            final var responseBody = readResponseBody(requestPath);
+            final var contentType = findContentType(requestPath);
 
             writeResponse(outputStream, contentType, responseBody);
         } catch (IOException | UncheckedServletException e) {
@@ -81,14 +90,71 @@ public class Http11Processor implements Runnable, Processor {
         return requestParts[1];
     }
 
-    private byte[] readResponseBody(final String requestUri) throws IOException {
-        if ("/".equals(requestUri)) {
+    private String extractRequestPath(final String requestUri) {
+        final var queryIndex = requestUri.indexOf('?');
+
+        if (queryIndex < 0) {
+            return requestUri;
+        }
+
+        return requestUri.substring(0, queryIndex);
+    }
+
+    private Map<String, String> parseQueryParameters(final String requestUri) {
+        final var queryIndex = requestUri.indexOf('?');
+
+        if (queryIndex < 0 || queryIndex == requestUri.length() - 1) {
+            return Map.of();
+        }
+
+        final Map<String, String> parameters = new HashMap<>();
+        final var queryString = requestUri.substring(queryIndex + 1);
+
+        for (final var parameter : queryString.split("&")) {
+            final var nameAndValue = parameter.split("=", 2);
+            if (nameAndValue.length == 2) {
+                parameters.put(
+                        decode(nameAndValue[0]),
+                        decode(nameAndValue[1])
+                );
+            }
+        }
+
+        return Map.copyOf(parameters);
+    }
+
+    private String decode(final String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    private void logLoginUser(
+            final String requestPath,
+            final Map<String, String> queryParameters
+    ) {
+        if (!"/login".equals(requestPath)) {
+            return;
+        }
+
+        final var account = queryParameters.get("account");
+        final var password = queryParameters.get("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("회원 조회 결과: account={}", user.getAccount()));
+    }
+
+    private byte[] readResponseBody(final String requestPath) throws IOException {
+        if ("/".equals(requestPath)) {
             return DEFAULT_BODY.clone();
         }
 
-        validateRequestUri(requestUri);
+        validateRequestUri(requestPath);
 
-        final var resourcePath = STATIC_ROOT + requestUri;
+        final var resourcePath = findResourcePath(requestPath);
         final var classLoader = Http11Processor.class.getClassLoader();
 
         try (final var resource = classLoader.getResourceAsStream(resourcePath)) {
@@ -98,6 +164,14 @@ public class Http11Processor implements Runnable, Processor {
 
             return resource.readAllBytes();
         }
+    }
+
+    private String findResourcePath(final String requestPath) {
+        if ("/login".equals(requestPath)) {
+            return STATIC_ROOT + "/login.html";
+        }
+
+        return STATIC_ROOT + requestPath;
     }
 
     private void validateRequestUri(final String requestUri) {

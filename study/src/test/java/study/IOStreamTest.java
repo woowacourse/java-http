@@ -103,6 +103,20 @@ class IOStreamTest {
 
             verify(outputStream, atLeastOnce()).close();
         }
+
+        @Test
+        void OutputStream은_try_with_resources를_사용할수_있다() throws IOException {
+            final OutputStream outputStream = mock(OutputStream.class);
+
+            try (outputStream) {
+                outputStream.write(127);
+                outputStream.flush();
+            }
+
+            verify(outputStream, atLeastOnce()).write(127);
+            verify(outputStream, atLeastOnce()).flush();
+            verify(outputStream, atLeastOnce()).close();
+        }
     }
 
     /**

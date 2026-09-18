@@ -48,8 +48,7 @@ public class Http11Processor implements Runnable, Processor {
         String path = extractPath(uri);
 
         if ("/login".equals(path)) {
-            logLoginRequest(extractQueryParams(uri));
-            return buildResourceResponse("/login.html");
+            return buildLoginResponse(extractQueryParams(uri));
         }
         if ("/".equals(path)) {
             return buildRootResponse();
@@ -94,18 +93,42 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private void logLoginRequest(Map<String, String> params) {
+    private String buildLoginResponse(Map<String, String> params) {
         String account = params.get("account");
         String password = params.get("password");
-        if (account == null && password == null) {
-            return;
+
+        if (shouldShowLoginPage(account, password)) {
+            return buildResourceResponse("/login.html");
         }
 
-        InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .ifPresentOrElse(
-                        user -> log.info(user.toString()),
-                        () -> log.info("회원 조회 실패. account = {}, password = {}", account, password)
-                );
+        if (isLoginSuccessful(account, password)) {
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found",
+                    "Location: /index.html",
+                    "",
+                    "");
+        }
+
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /401.html",
+                "",
+                "");
+    }
+    
+    private boolean shouldShowLoginPage(
+            String account,
+            String password
+    ) {
+        return account == null && password == null;
+    }
+
+    private boolean isLoginSuccessful(
+            String account,
+            String password
+    ) {
+        return InMemoryUserRepository.findByAccountAndPassword(account, password)
+                .isPresent();
     }
 
     private String buildRootResponse() {

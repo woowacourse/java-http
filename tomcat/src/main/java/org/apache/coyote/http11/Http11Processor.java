@@ -19,6 +19,9 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String QUERY_SEPARATOR = "?";
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
 
     private final Socket connection;
 

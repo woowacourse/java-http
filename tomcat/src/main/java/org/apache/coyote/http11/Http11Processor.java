@@ -91,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
         return requestTarget.substring(0, queryStartIndex);
     }
 
-    Map<String, String> parseQueryParameters(String requestTarget) {
+    private Map<String, String> parseQueryParameters(String requestTarget) {
         int queryStartIndex = requestTarget.indexOf('?');
 
         if (queryStartIndex < 0) {
@@ -122,7 +122,7 @@ public class Http11Processor implements Runnable, Processor {
 
         String[] requestLineParts = requestLine.split(" ");
         String headerLine = bufferedReader.readLine();
-        while (headerLine != null && !headerLine.isEmpty())  {
+        while (headerLine != null && !headerLine.isEmpty()) {
             headerLine = bufferedReader.readLine();
         }
         return requestLineParts[1];
@@ -132,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
         if ("/".equals(resourcePath)) {
             return "Hello world!";
         }
-        final URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
+        URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
         if (resourceUrl == null) {
             throw new RuntimeException("resource not found");
         }
@@ -140,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readStaticResource(URL resourceUrl) throws IOException {
-        final Path filePath = new File(resourceUrl.getPath()).toPath();
+        Path filePath = new File(resourceUrl.getPath()).toPath();
         return Files.readString(filePath);
     }
 

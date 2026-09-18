@@ -33,7 +33,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() throws Exception {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -54,7 +54,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.toURI()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

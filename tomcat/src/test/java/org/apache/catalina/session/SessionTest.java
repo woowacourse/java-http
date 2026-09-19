@@ -44,4 +44,15 @@ class SessionTest {
         assertThat(session.getAttribute("user")).isNull();
         assertThat(session.getAttribute("cart")).isNull();
     }
+
+    @Test
+    void 세션을_무효화하면_SessionManager에서도_제거한다() {
+        final Session session = new Session("session-id");
+        final SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+
+        session.invalidate();
+
+        assertThat(sessionManager.findSession("session-id")).isNull();
+    }
 }

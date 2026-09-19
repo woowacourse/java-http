@@ -44,11 +44,15 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String[] requestLine = bufferedReader.readLine().split(" ");
+            String firstLine = bufferedReader.readLine();
+            if (firstLine == null) {
+                return;
+            }
+            String[] requestLine = firstLine.split(" ");
             Map<String, String> header = new HashMap<>();
             while (true) {
                 String line = bufferedReader.readLine();
-                if ("".equals(line)) {
+                if (line == null || line.isEmpty()) {
                     break;
                 }
                 String[] headerLine = line.split(":");

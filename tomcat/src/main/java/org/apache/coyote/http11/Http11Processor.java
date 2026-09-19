@@ -65,17 +65,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeResource(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        if (!httpRequest.isParameterEmpty()) {
+        if (httpRequest.isLoginRequest() && httpRequest.hasParameters("account", "password")) {
             findUser(httpRequest);
         }
-
-        URL resource = getClass().getClassLoader().getResource(httpRequest.getResourcePath());
+        String resourcePath = httpRequest.getResourcePath();
+        if (httpRequest.isLoginRequest()) {
+            resourcePath += ".html";
+        }
+        URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         if (resource == null) {
             writeNotFoundResource(outputStream);
             return;
         }
-
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);

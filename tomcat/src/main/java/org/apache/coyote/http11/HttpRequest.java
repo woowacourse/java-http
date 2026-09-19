@@ -34,7 +34,7 @@ public class HttpRequest {
         if (index == -1) {
             return new HttpRequest(method, requestUri, Map.of(), version);
         }
-        String path = requestUri.substring(0, index) + ".html";
+        String path = requestUri.substring(0, index);
         Map<String, String> queryParameters = parseQueryParameters(requestUri.substring(index + 1));
         return new HttpRequest(method, path, queryParameters, version);
     }
@@ -43,8 +43,13 @@ public class HttpRequest {
         return ROOT_PATH.equals(path);
     }
 
-    public boolean isParameterEmpty() {
-        return queryParameters.isEmpty();
+    public boolean hasParameters(String... names) {
+        for (String name : names) {
+            if (!queryParameters.containsKey(name)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public String getParameter(String key) {
@@ -53,6 +58,10 @@ public class HttpRequest {
 
     public String getResourcePath() {
         return STATIC_TARGET_PATH + path;
+    }
+
+    public boolean isLoginRequest() {
+        return "GET".equals(method) && "/login".equals(path);
     }
 
     private static Map<String, String> parseQueryParameters(String queryString) {

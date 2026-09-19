@@ -50,40 +50,52 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            RequestTarget requestTarget = parseRequestTarget(requestLine);
+            String uri = parseUri(requestLine);
+            String queryString = extractQueryString(uri);
+            String resourcePath = normalizePath(parsePath(uri));
+
             readHeaders(reader);
-            logUserIfExists(requestTarget.queryString());
-            String resourcePath = normalizePath(requestTarget.path());
+            logUserIfExists(resourcePath, queryString);
+
             URL resource = findResource(resourcePath);
 
             if (resource == null) {
+                writeNotFoundResponse(outputStream);
                 return;
             }
 
             byte[] body = readBody(resource);
 
-            String response = createResponse(resourcePath, body);
+            String response = createResponse("200 OK", resourcePath, body);
             writeResponse(outputStream, response, body);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private RequestTarget parseRequestTarget(String requestLine) {
+    private String parseUri(String requestLine) {
         String[] parts = requestLine.split(" ");
 
         // 추후 Request Line 형식 검증 추가 예정
-        String uri = parts[1];
-        int queryIndex = uri.indexOf("?");
+        return parts[1];
+    }
 
+    private String parsePath(String uri) {
+        int queryIndex = uri.indexOf("?");
         if (queryIndex == -1) {
-            return new RequestTarget(uri, null);
+            return uri;
         }
 
-        String path = uri.substring(0, queryIndex);
-        String queryString = uri.substring(queryIndex + 1);
+        return uri.substring(0, queryIndex);
+    }
 
-        return new RequestTarget(path, queryString);
+    private String extractQueryString(String uri) {
+        int queryIndex = uri.indexOf("?");
+        if (queryIndex == -1) {
+            return null;
+        }
+
+        return uri.substring(queryIndex + 1);
     }
 
     private void readHeaders(BufferedReader reader) throws IOException {
@@ -94,17 +106,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logUserIfExists(String queryString) {
-        if (queryString == null) {
+    private void logUserIfExists(String resourcePath, String queryString) {
+        if (!isLoginPath(resourcePath) || queryString == null) {
             return;
         }
 
         Map<String, String> queryParams = parseQueryString(queryString);
         String account = queryParams.get("account");
+        String password = queryParams.get("password");
+
+        if (account == null || password == null) {
+            return;
+        }
 
         InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
                 .ifPresent(user -> log.info("조회된 사용자: id={}, account={}", user.getId(), user.getAccount())
                 );
+    }
+
+    private boolean isLoginPath(String resourcePath) {
+        return resourcePath.equals("/login.html");
     }
 
     private String normalizePath(String path) {
@@ -131,9 +153,22 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(String resourcePath, byte[] body) {
+    private void writeNotFoundResponse(OutputStream outputStream) throws IOException {
+        String resourcePath = "/404.html";
+        URL resource = findResource(resourcePath);
+
+        if (resource == null) {
+            return;
+        }
+
+        byte[] body = readBody(resource);
+        String response = createResponse("404 Not Found", resourcePath, body);
+        writeResponse(outputStream, response, body);
+    }
+
+    private String createResponse(String status, String resourcePath, byte[] body) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK",
+                "HTTP/1.1 " + status,
                 "Content-Type: " + getContentType(resourcePath),
                 "Content-Length: " + body.length,
                 "",
@@ -165,6 +200,10 @@ public class Http11Processor implements Runnable, Processor {
 
         for (String parameter : queryString.split("&")) {
             String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length != 2) {
+                continue;
+            }
 
             String key = keyValue[0];
             String value = keyValue[1];

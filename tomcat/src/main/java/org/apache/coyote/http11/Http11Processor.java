@@ -58,54 +58,44 @@ public class Http11Processor implements Runnable, Processor {
             String password = queryMap.get("password");
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
             if (foundUser.isEmpty()) {
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found",
-                        "Location: /401.html",
-                        getContentType(requestUri),
-                        "Content-Length: " + 0,
-                        "",
-                        "");
+                return getRedirectResponse("/401.html", getContentType(requestUri));
             }
 
             User user = foundUser.get();
             log.info(user.toString());
 
             if (user.checkPassword(password)) {
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found",
-                        "Location: /index.html",
-                        getContentType(requestUri),
-                        "Content-Length: " + 0,
-                        "",
-                        "");
+                return getRedirectResponse("/index.html", getContentType(requestUri));
             }
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found",
-                    "Location: /401.html",
-                    getContentType(requestUri),
-                    "Content-Length: " + 0,
-                    "",
-                    "");
+            return getRedirectResponse("/401.html", getContentType(requestUri));
         }
 
         if (!requestUri.equals("/")) {
             String paths = getStaticResource(requestUri);
             if (paths != null) {
-                return String.join("\r\n",
-                        "HTTP/1.1 200 OK",
-                        getContentType(requestUri),
-                        "Content-Length: " + paths.getBytes().length + " ",
-                        "",
-                        paths);
+                return getOkResponse(getContentType(requestUri), paths);
             }
         }
-        String empty = "Hello world!";
+        return getOkResponse(getContentType(requestUri), "Hello world!");
+    }
+
+    private String getRedirectResponse(String location, String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                contentType,
+                "Content-Length: " + 0,
+                "",
+                "");
+    }
+
+    private String getOkResponse(String contentType, String body) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK",
-                getContentType(requestUri),
-                "Content-Length: " + empty.getBytes().length + " ",
+                contentType,
+                "Content-Length: " + body.getBytes().length + " ",
                 "",
-                empty);
+                body);
     }
 
     private Map<String, String> getQuerySeparate(String requestUri) {

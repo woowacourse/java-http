@@ -8,7 +8,8 @@ public record MyHttpRequest(
         String uri,
         String resourcePath,
         String contentType,
-        String version
+        String version,
+        String body
 ) {
 
     private static final String RESOURCE_PATH_PREFIX = "static";
@@ -30,8 +31,22 @@ public record MyHttpRequest(
                 split[1],
                 extractResourcePath(split[1]),
                 contentTypeOf(split[1]),
-                split[2]
+                split[2],
+                extractBody(rawRequest)
         );
+    }
+
+    private static String extractBody(String rawRequest) {
+        final String bodySeparator = "\r\n\r\n";
+        int startIndexOfBody = rawRequest.indexOf(bodySeparator);
+        if (startIndexOfBody == -1) {
+            return "";
+        }
+        return rawRequest.substring(startIndexOfBody + bodySeparator.length());
+    }
+
+    public boolean hasRequestBody() {
+        return !body.isEmpty();
     }
 
     public boolean hasQueryParameter() {

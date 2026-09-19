@@ -27,9 +27,22 @@
 
 - [ ] 로그인 성공 여부에 따라 리다이렉트 한다.
   - [x] 로그인 버튼을 누르면 HTTP method를 POST로 요청한다.
-  - [ ] 성공하면 http status code를 302로 반환하고, `/index.html`로 리다이렉트 한다.
+  - [x] 성공하면 http status code를 302로 반환하고, `/index.html`로 리다이렉트 한다.
   - [ ] 실패하면 `401.html`로 리다이렉틓 한다.
 - [ ] 회원가입
   - [ ] `http://localhost/register` 로 접속하면 GET 요청으로 `register.html`을 보여준다.
   - [ ] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.
   - 회원가입을 완료하면 `index.html`로 리다이렉트 한다.
+
+### 302 Found redirection response
+
+```http
+HTTP/1.1 302 Found
+Location: https://www.example.com/new-profile-url
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+```
+
+이 응답을 받은 브라우저는 자동적으로 `Location` 헤더에 적힌 URL로 GET 요청을 보내 유저를 new page로 redirecting 한다.
+
+다만 302 응답을 받은 user agent가 후속 redirection request를 수정할 수 있는데, 이를 방지하려면 응답 이후 메서드 변경이 금지된 307 Temporary Redirect를 사용해야 된다. 

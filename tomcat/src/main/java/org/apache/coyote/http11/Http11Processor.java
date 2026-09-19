@@ -145,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (user.get().checkPassword(password)) {
-            System.out.println(user.get());
+            log.info("로그인 성공: {}", user.get());
         }
     }
 }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.Cookie;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String PARAM_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
 
     private final Socket connection;
 
@@ -50,17 +53,22 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
+            // Parse StartLine
             String[] startLineTokens = bufferedReader.readLine().split(START_LINE_DELIMITER);
             HttpMethod httpMethod = HttpMethod.valueOf(startLineTokens[0]); // HttpMethod 잘못 입력 시 예외가 발생함.(인지중)
             String httpUrl = startLineTokens[1];
             HttpVersion httpVersion = HttpVersion.getByString(startLineTokens[2]); // ENUM과 맞지 않는 값 입력 시 예외 발생 (인지중)
 
             log.info("{}, {}, {}", httpMethod.name(), httpUrl, httpVersion.getValue());
-            // 헤더 가져오기
+
+            // Parse Headers
             Map<String, String> headers = parseHeaders(bufferedReader);
 
-            // body 가져오기
+            // Prase Body
             String httpBody = parseBody(bufferedReader, headers.get(CONTENT_LENGTH));
+
+            // Parse Cookie
+            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
 
             if (httpUrl.startsWith("/index.html")) {
                 final String body = readFile("static/index.html");
@@ -93,6 +101,15 @@ public class Http11Processor implements Runnable, Processor {
                     if (loginUser.isPresent()) {
                         User user = loginUser.get();
                         log.info("로그인 성공! 아이디 : {}", user.getAccount());
+
+                        if (httpCookie.get("JSESSIONID") == null) {
+                            String response = createResponseWithCookieAndRedirect("/index.html",
+                                    new Cookie("JSESSIONID",
+                                            UUID.randomUUID().toString()));
+                            outputStream.write(response.getBytes());
+                            outputStream.flush();
+                            return;
+                        }
 
                         String response = createRedirectResponse("/index.html");
                         outputStream.write(response.getBytes());
@@ -252,6 +269,15 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String createResponseWithCookieAndRedirect(String redirectUrl, Cookie cookie) throws IOException {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Set-Cookie" + ": " + cookie.getName() + "=" + cookie.getValue() + " ",
+                "Location: " + redirectUrl + " ",
+                "Content-Length: 0 ",
+                "");
     }
 
     private String readFile(String path) throws IOException {

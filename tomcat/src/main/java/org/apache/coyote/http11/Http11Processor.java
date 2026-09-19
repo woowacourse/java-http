@@ -109,9 +109,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void saveUser(HttpRequest request) {
-        String name = request.getParameter("name");
-        String password = request.getParameter("password");
-        String email = request.getParameter("email");
+        String name = request.getBodyParameter("account");
+        String password = request.getBodyParameter("password");
+        String email = request.getBodyParameter("email");
         User user = new User(name, password, email);
 
         InMemoryUserRepository.save(user);

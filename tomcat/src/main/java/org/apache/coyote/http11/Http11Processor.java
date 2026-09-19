@@ -43,17 +43,27 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             String[] requestLineParts = bufferedReader.readLine().split(" ");
             final var requestMethod = requestLineParts[0].toUpperCase();
+            log.info("요청 메소드: {}, 요청 URI: {}", requestMethod, requestLineParts[1]);
             Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
-            String cookieHeader = "";
             HttpCookie httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
-            if (!httpCookie.hasJSessionId()) {
-                String sessionId = httpCookie.createJSessionId();
+            String sessionId = httpCookie.getJSessionId();
+            String cookieHeader = "";
+
+            if (sessionId == null) {
+                sessionId = httpCookie.createJSessionId();
                 cookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
+                log.info("세션 생성: {}", sessionId);
+            }
+            Session session = SessionManager.findSession(sessionId);
+            if (session == null) {
+                session = new Session(sessionId);
+                SessionManager.add(session);
+                log.info("세션 저장: {}", sessionId);
             }
 
             String response = "";
             if (requestMethod.equals("GET")) {
-                response = getResponse(requestLineParts[1], cookieHeader);
+                response = getResponse(requestLineParts[1], cookieHeader, session);
             }
             if (requestMethod.equals("POST")) {
                 response = getPostResponse(bufferedReader, requestLineParts[1], requestHeaders, cookieHeader);
@@ -104,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private String getResponse(String requestUri, String cookieHeader) throws IOException {
+    private String getResponse(String requestUri, String cookieHeader, Session session) throws IOException {
         if (requestUri.contains("/login?")) {
             Map<String, String> queryMap = getQuerySeparate(requestUri);
             String account = queryMap.get("account");
@@ -115,13 +125,20 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             User user = foundUser.get();
-            log.info(user.toString());
 
             if (user.checkPassword(password)) {
-                log.info("로그인 성공! 아이디 : {}", user.getAccount());
+                log.info("로그인 성공! 아이디: {}, 세션 아이디: {}", user.getAccount(), session.getId());
+                session.setAttribute("user", user);
                 return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
             }
             return getRedirectResponse("/401.html", getContentType(requestUri), cookieHeader);
+        }
+        if (requestUri.equals("/login")) {
+            if (session.getAttribute("user") != null) {
+                log.info("로그인 페이지 접근! 세션 아이디: {}", session.getId());
+                return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
+
+            }
         }
 
         if (!requestUri.equals("/")) {

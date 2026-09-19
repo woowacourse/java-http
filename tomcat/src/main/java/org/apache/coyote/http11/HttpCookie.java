@@ -20,6 +20,10 @@ public class HttpCookie {
         }
     }
 
+    public String getJSessionId() {
+        return cookies.get("JSESSIONID");
+    }
+
     public boolean hasJSessionId() {
         return cookies.containsKey("JSESSIONID");
     }

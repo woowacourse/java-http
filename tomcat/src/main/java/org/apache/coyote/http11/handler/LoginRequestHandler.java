@@ -11,8 +11,8 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public Response handle(Request request) {;
-        final String account = request.queryParameters().get("account");
-        final String password = request.queryParameters().get("password");
+        final String account = request.getQueryParameters().get("account");
+        final String password = request.getQueryParameters().get("password");
 
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
@@ -26,6 +26,6 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(Request request) {
-        return request.requestPoint().path().equals("/login");
+        return request.getRequestPoint().getPath().equals("/login");
     }
 }

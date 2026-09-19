@@ -1,24 +1,25 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.resolver;
 
 import static org.apache.coyote.http11.config.TomcatServerConfiguration.DEFAULT_CHARSET;
 import static org.apache.coyote.http11.config.TomcatServerConfiguration.DEFAULT_CHARSET_NAME;
+import static org.apache.coyote.http11.config.TomcatServerConfiguration.STATIC_RESOURCE_PATH;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticResourceRequestHandler implements RequestHandler {
-    private static final Logger log = LoggerFactory.getLogger(StaticResourceRequestHandler.class);
+public class StaticResourceResolver implements RequestResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(StaticResourceResolver.class);
 
     @Override
-    public Response handle(Request request) {
-        final String resourcePath = request.requestPoint().path();
+    public Response handleRequest(Request request) {
+        final String resourcePath = STATIC_RESOURCE_PATH + request.getRequestPoint().getPath();
 
-        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("static" + resourcePath)) {
+        try (var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
                 return Response.notFound();
             }
@@ -37,15 +38,6 @@ public class StaticResourceRequestHandler implements RequestHandler {
         throw new RuntimeException("Failed to read resource: " + resourcePath);
     }
 
-    @Override
-    public boolean canHandle(Request request) {
-        final String endpoint = request.requestPoint().path().toLowerCase();
-
-        return endpoint.endsWith(".html")
-                || endpoint.endsWith(".css")
-                || endpoint.endsWith(".js");
-    }
-
     private String getContentType(String resourcePath) {
         if (resourcePath.endsWith(".html")) {
             return "text/html";
@@ -57,4 +49,14 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
         throw new IllegalArgumentException("Unsupported resource type: " + resourcePath);
     }
+
+    @Override
+    public boolean canHandle(Request request) {
+        final String endpoint = request.getRequestPoint().getPath().toLowerCase();
+
+        return endpoint.endsWith(".html")
+                || endpoint.endsWith(".css")
+                || endpoint.endsWith(".js");
+    }
+
 }

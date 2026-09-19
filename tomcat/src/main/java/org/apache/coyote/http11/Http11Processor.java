@@ -3,15 +3,13 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.config.TomcatServerConfiguration.requestResolvers;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
-import org.apache.coyote.http11.resolver.RequestResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,7 +32,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Request request = Request.from(inputStream.readAllBytes());
+            final Request request = Request.from(inputStream);
             final Response response = handleRequest(request);
 
             outputStream.write(response.toString().getBytes());
@@ -45,11 +43,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response handleRequest(Request request) {
-        for (RequestResolver resolver : requestResolvers) {
-            if (!resolver.canHandle(request)) {
-                continue;
+        for (var resolver : requestResolvers) {
+            if (resolver.canHandle(request)) {
+                return resolver.handleRequest(request);
             }
-            return resolver.handleRequest(request);
         }
 
         return Response.notFound();

@@ -6,11 +6,9 @@ import org.apache.coyote.http11.data.Response;
 import org.apache.coyote.http11.handler.LoginRequestHandler;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.handler.RootRequestHandler;
-import org.apache.coyote.http11.handler.StaticResourceRequestHandler;
 
 public class ServletResolver implements RequestResolver {
     private final List<RequestHandler> servlets = List.of(
-            new StaticResourceRequestHandler(),
             new RootRequestHandler(),
             new LoginRequestHandler()
     );

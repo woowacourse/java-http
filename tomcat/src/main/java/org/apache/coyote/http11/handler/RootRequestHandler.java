@@ -20,6 +20,6 @@ public class RootRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(Request request) {
-            return request.requestPoint().path().equals("/");
+            return request.getRequestPoint().getPath().equals("/");
         }
 }

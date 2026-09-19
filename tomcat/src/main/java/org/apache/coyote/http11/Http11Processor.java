@@ -130,6 +130,10 @@ public class Http11Processor implements Runnable, Processor {
         String account = loginInfo.get("account");
         String password = loginInfo.get("password");
 
+        if (account == null || account.isBlank() || password == null || password.isBlank()) {
+            return;
+        }
+
         var optionalUser = InMemoryUserRepository.findByAccount(account);
 
         if (optionalUser.isPresent()) {

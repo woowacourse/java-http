@@ -61,6 +61,27 @@ class Http11ProcessorLoginTest {
     }
 
     @Test
+    void 로그인_상태에서_GET_으로_로그인_페이지에_접근하면_index로_리다이렉트한다() {
+        final Session session = new Session("login-session-id");
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+        SessionManager.getInstance().add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=login-session-id",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    @Test
     void 비밀번호가_일치하지_않으면_401로_리다이렉트한다() {
         final StubSocket socket = postLoginRequest("gugu", "wrong");
 

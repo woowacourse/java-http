@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,12 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if (request.getMethod().equals("GET") && request.getPath().equals("/login")
+                    && isLoggedIn(request)) {
+                response.sendRedirect("/index.html");
+                return;
+            }
+
             String statusLine = "200 OK";
             byte[] responseBody = createResponseBody(request.getPath());
             if (responseBody == null) {
@@ -102,6 +109,11 @@ public class Http11Processor implements Runnable, Processor {
         log.info("로그인 성공! 아이디 : {}", foundUser.getAccount());
         request.getSession(true).setAttribute("user", foundUser);
         return true;
+    }
+
+    private boolean isLoggedIn(final HttpRequest request) {
+        final Session session = request.getSession(false);
+        return session != null && session.getAttribute("user") != null;
     }
 
     private byte[] createResponseBody(final String path) throws IOException {

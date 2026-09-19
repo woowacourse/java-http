@@ -58,10 +58,23 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            String contentType = "";
+
+            if (requestTarget.split("\\.")[1].equals("html")) {
+                contentType = "Content-Type: text/html;charset=utf-8 ";
+            }
+            if (requestTarget.split("\\.")[1].equals("css")) {
+                contentType = "Content-Type: text/css;charset=utf-8 ";
+            }
+            if (requestTarget.split("\\.")[1].equals("js")) {
+                contentType = "Content-Type: text/js;charset=utf-8 ";
+            }
+
+
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    contentType,
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody

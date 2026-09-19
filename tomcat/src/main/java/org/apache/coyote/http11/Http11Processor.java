@@ -11,9 +11,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 
@@ -42,7 +42,8 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestStartLine = bufferedReader.readLine();
             HttpRequest httpRequest = HttpRequest.from(requestStartLine);
-            writeResponse(outputStream, httpRequest);
+            HttpResponse response = createResponse(httpRequest);
+            response.writeTo(outputStream);
 
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -50,21 +51,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeResponse(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+    private HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRoot()) {
-            writeRootResponse(outputStream);
-            return;
+            return HttpResponse.ok("text/html", "Hello world!".getBytes(StandardCharsets.UTF_8));
         }
-        writeResource(outputStream, httpRequest);
+        return createResourceResponse(httpRequest);
     }
 
-    private void writeRootResponse(OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
-
-        writeHttpResponse(outputStream, getContentType(responseBody + ".html"), responseBody);
-    }
-
-    private void writeResource(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+    private HttpResponse createResourceResponse(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isLoginRequest() && httpRequest.hasParameters("account", "password")) {
             findUser(httpRequest);
         }
@@ -75,12 +69,10 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         if (resource == null) {
-            writeNotFoundResource(outputStream);
-            return;
+            return createNotFoundResponse();
         }
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);
+        byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        return HttpResponse.ok(getContentType(resource.getPath()), body);
     }
 
     private void findUser(HttpRequest httpRequest) {
@@ -96,27 +88,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeNotFoundResource(OutputStream outputStream) throws IOException {
+    private HttpResponse createNotFoundResponse() throws IOException {
         URL resource = getClass().getClassLoader().getResource(NOT_FOUND_FILE_PATH);
 
         if (resource == null) {
-            writeHttpResponse(outputStream, "", "404 NOT FOUND");
-            return;
+            return HttpResponse.notFound("text/plain", "404 NOT FOUND".getBytes(StandardCharsets.UTF_8));
         }
 
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);
-    }
-
-    private void writeHttpResponse(OutputStream outputStream, String contentType, String responseBody) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType +";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        outputStream.write(response.getBytes());
+        byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        return HttpResponse.notFound(getContentType(resource.getPath()), body);
     }
 
     private String getContentType(String resource) {

@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,6 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String NOT_FOUND_STATUS = "404 Not Found";
     private static final String NOT_FOUND_BODY = "404 Not Found";
     private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
+    private static final String USER_SESSION_ATTRIBUTE = "user";
 
     private record ResponseContent(String status, byte[] body, String contentType) {
         private ResponseContent {
@@ -100,7 +103,14 @@ public class Http11Processor implements Runnable, Processor {
             final var requestHeader = RequestHeader.from(reader);
             final var requestUri = RequestUri.from(requestHeader.path());
             final var requestCookie = HttpCookie.from(requestHeader.header("Cookie"));
-            final var newSessionId = newSessionIdFor(requestCookie);
+            final var currentSession = sessionFor(requestCookie);
+
+            if (requestHeader.method().equals("GET")
+                    && requestUri.path().equals("/login")
+                    && currentSession.map(this::getUser).isPresent()) {
+                redirect(outputStream, "/index.html", Optional.empty());
+                return;
+            }
 
             if (requestHeader.method().equals("POST")) {
                 final var requestBody = readRequestBody(reader, requestHeader);
@@ -108,13 +118,29 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (requestUri.path().equals("/register")) {
                     register(parameters);
-                    redirect(outputStream, "/index.html", newSessionId);
+                    redirect(outputStream, "/index.html", newSessionIdFor(requestCookie));
                     return;
                 }
 
                 if (requestUri.path().equals("/login")) {
-                    final var location = isLoginSuccess(parameters) ? "/index.html" : "/401.html";
-                    redirect(outputStream, location, newSessionId);
+                    final var user = authenticatedUser(parameters);
+
+                    if (user.isPresent()) {
+                        final var sessionId = requestCookie.value(SESSION_ID_COOKIE_NAME)
+                                .orElseGet(() -> UUID.randomUUID().toString());
+                        final var session = currentSession.orElseGet(
+                                () -> SessionManager.create(sessionId)
+                        );
+                        session.setAttribute(USER_SESSION_ATTRIBUTE, user.get());
+                        final var sessionIdToSet = requestCookie.value(SESSION_ID_COOKIE_NAME).isPresent()
+                                ? Optional.<String>empty()
+                                : Optional.of(session.getId());
+
+                        redirect(outputStream, "/index.html", sessionIdToSet);
+                        return;
+                    }
+
+                    redirect(outputStream, "/401.html", newSessionIdFor(requestCookie));
                     return;
                 }
             }
@@ -122,7 +148,7 @@ public class Http11Processor implements Runnable, Processor {
             final var responseContent = responseContentFor(requestUri.path());
             final var responseBody = responseContent.body();
 
-            final var responseHeader = responseHeaderFor(responseContent, newSessionId);
+            final var responseHeader = responseHeaderFor(responseContent, newSessionIdFor(requestCookie));
 
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -150,6 +176,11 @@ public class Http11Processor implements Runnable, Processor {
         final var email = parameters.get("email");
 
         InMemoryUserRepository.save(new User(account, password, email));
+    }
+
+    private Optional<Session> sessionFor(final HttpCookie requestCookie) {
+        return requestCookie.value(SESSION_ID_COOKIE_NAME)
+                .flatMap(SessionManager::findSession);
     }
 
     private Optional<String> newSessionIdFor(final HttpCookie requestCookie) {
@@ -212,16 +243,19 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
-    private boolean isLoginSuccess(final Map<String, String> parameters) {
+    private User getUser(final Session session) {
+        return (User) session.getAttribute(USER_SESSION_ATTRIBUTE);
+    }
+
+    private Optional<User> authenticatedUser(final Map<String, String> parameters) {
         final var account = parameters.get("account");
         final var password = parameters.get("password");
 
         if (account == null || password == null) {
-            return false;
+            return Optional.empty();
         }
 
         return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
+                .filter(user -> user.checkPassword(password));
     }
 }

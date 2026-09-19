@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -200,12 +201,25 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginSuccessRedirectsToIndex() {
+    void loggedInUserIsRedirectedToIndexWhenAccessingLoginPage() {
         final var requestBody = "account=gugu&password=password";
-        final var socket = new StubSocket(postRequest("/login", requestBody));
-        final var processor = new Http11Processor(socket);
+        final var loginSocket = new StubSocket(postRequestWithoutSession("/login", requestBody));
+        final var loginProcessor = new Http11Processor(loginSocket);
 
-        processor.process(socket);
+        loginProcessor.process(loginSocket);
+
+        assertThat(loginSocket.output()).contains("Location: /index.html");
+        final var sessionId = sessionIdFrom(loginSocket.output());
+        final var loginPageRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + sessionId + " ",
+                "",
+                "");
+        final var loginPageSocket = new StubSocket(loginPageRequest);
+        final var loginPageProcessor = new Http11Processor(loginPageSocket);
+
+        loginPageProcessor.process(loginPageSocket);
 
         final var expected = String.join("\r\n",
                 "HTTP/1.1 302 Found",
@@ -214,7 +228,7 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(loginPageSocket.output()).isEqualTo(expected);
     }
 
     @Test
@@ -280,6 +294,26 @@ class Http11ProcessorTest {
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 requestBody);
+    }
+
+    private String postRequestWithoutSession(final String path, final String requestBody) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+    }
+
+    private String sessionIdFrom(final String response) {
+        final var matcher = Pattern.compile("Set-Cookie: JSESSIONID=([^\\r\\n]+)")
+                .matcher(response);
+
+        assertThat(matcher.find()).isTrue();
+
+        return matcher.group(1);
     }
 
 }

@@ -41,10 +41,6 @@ public class Http11Processor implements Runnable, Processor {
             String url = parseRequestUrl(inputStream);
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
             requestPath = uriInfo.path();
-            if ("/login".equals(uriInfo.path()) && uriInfo.hasQueryParameters()) {
-                User user = RequestHandler.findUser(uriInfo.queryParameters());
-                log.info("로그인 사용자: {}", user.getAccount());
-            }
 
             String resourceUrl = uriInfo.path();
             if ("/login".equals(resourceUrl)) {
@@ -52,18 +48,43 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String contentType = findContentType(resourceUrl);
-            byte[] responseBody = buildResponseBody(resourceUrl);
-            String response = buildResponse(responseBody, contentType);
-
-            outputStream.write(response.getBytes());
-            outputStream.write(responseBody);
-            outputStream.flush();
+            String responseHeader;
+            if ("/login".equals(uriInfo.path()) && uriInfo.hasQueryParameters()) {
+                responseHeader = buildLoginResponseHeader(uriInfo);
+                outputStream.write(responseHeader.getBytes());
+                outputStream.flush();
+            } else {
+                byte[] responseBody = buildResponseBody(resourceUrl);
+                responseHeader = buildResponseHeader(responseBody, contentType);
+                outputStream.write(responseHeader.getBytes());
+                outputStream.write(responseBody);
+                outputStream.flush();
+            }
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
     }
 
-    private String buildResponse(
+    private String buildLoginResponseHeader(UriInfo uriInfo) {
+        try {
+            User user = RequestHandler.findUser(uriInfo.queryParameters());
+            log.info("로그인 사용자: {}", user.getAccount());
+            return buildRedirectHeader("/index.html");
+        } catch (IllegalArgumentException e) {
+            return buildRedirectHeader("/401.html");
+        }
+    }
+
+    private String buildRedirectHeader(String redirectPath) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + redirectPath,
+                "Content-Length: 0",
+                "",
+                "");
+    }
+
+    private String buildResponseHeader(
             byte[] responseBody,
             String contentType
     ) {

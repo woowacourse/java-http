@@ -120,17 +120,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getRedirectResponse(String location, String contentType) {
         return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
                 contentType,
-                "Content-Length: " + 0,
+                "Content-Length: " + 0 + " ",
                 "",
                 "");
     }
 
     private String getOkResponse(String contentType, String body) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK",
+                "HTTP/1.1 200 OK ",
                 contentType,
                 "Content-Length: " + body.getBytes().length + " ",
                 "",

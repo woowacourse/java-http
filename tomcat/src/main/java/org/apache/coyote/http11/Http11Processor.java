@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
             OutputStream outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));) {
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             final var requestLine = reader.readLine();
             if (requestLine == null) {
@@ -45,34 +47,56 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String[] tokens = requestLine.split(" ");
-            final String requestTarget = tokens[1];
-
-            int index = requestTarget.indexOf("?");
-            String path = requestTarget;
-            String queryString = "";
-
-            if (index != -1) {
-                path = requestTarget.substring(0, index);
-                queryString = requestTarget.substring(index + 1);
-            }
+            final String method = tokens[0];
+            final String path = tokens[1];
+            int contentLength = 0;
+            String cookieHeader = "";
 
             log.debug("request line: {}", requestLine);
 
             String line;
-            while ((line = reader.readLine()) != null && !line.equals("")) {
+            while ((line = reader.readLine()) != null) {
+                if (line.isEmpty() || line.equals("\r") || line.equals("\n")) {
+                    break;
+                }
+
+                if (line.startsWith("Content-Length: ")) {
+                    contentLength = Integer.parseInt(line.split(":")[1].trim());
+                }
+
+                if (line.startsWith("Cookie: ")) {
+                    cookieHeader = line.split(":")[1].trim();
+                }
                 log.debug("header : {}", line);
             }
+
+            HttpCookie cookies = new HttpCookie(cookieHeader);
+
+            if (getSessionId(cookies) == null) {
+                cookies.add("JSESSIONID", UUID.randomUUID().toString());
+            }
+
+            char[] buffer = new char[contentLength];
+            int bytesRead = reader.read(buffer, 0, contentLength);
+            String requestBody = new String(buffer, 0, bytesRead);
 
             if (path.equals("/")) {
                 respondHelloWorld(outputStream);
                 return;
             }
-
-            if (path.equals("/login")) {
-                handleLogin(queryString, outputStream);
+            if (path.equals("/register") && method.equals("POST")) {
+                handleRegister(cookies, requestBody, outputStream);
                 return;
             }
-            respondStaticResource(path, outputStream);
+            if (path.equals("/login") && method.equals("GET")) {
+                handleLoginPage(cookies, outputStream);
+                return;
+            }
+            if (path.equals("/login") && method.equals("POST")) {
+                handleLogin(cookies, requestBody, outputStream);
+                return;
+            }
+            respondStaticResource(cookies, htmlParser(path), outputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -96,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondStaticResource(String requestTarget, OutputStream outputStream) {
+    private void respondStaticResource(HttpCookie cookies, String requestTarget, OutputStream outputStream) {
         try (final var resourceStream = getClass()
                 .getClassLoader()
                 .getResourceAsStream("static" + requestTarget)) {
@@ -108,6 +132,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
+                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
                     "Content-Type: " + contentType(requestTarget),
                     "Content-Length: " + responseBody.length + " ",
                     "",
@@ -120,25 +145,103 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLogin(String queryString, OutputStream outputStream) {
-        Map<String, String> params = parseQueryString(queryString);
-        String account = params.get("account");
-        String password = params.get("password");
+    private String htmlParser(String path) {
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+        return path;
+    }
 
-        if (account == null || password == null) {
-            log.debug("로그인 파라미터가 부족합니다.");
+    private void handleLoginPage(HttpCookie cookies, OutputStream outputStream) {
+        String sessionId = getSessionId(cookies);
+
+        Session session = SessionManager.getSession(sessionId);
+
+        boolean loggedIn = session.getAttribute("user") != null;
+
+        if (loggedIn) {
+            respondStaticResource(cookies, "/index.html", outputStream);
             return;
         }
 
-        final boolean authenticated = InMemoryUserRepository
-                .findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
+        respondStaticResource(cookies, "/login.html", outputStream);
+    }
 
-        if (authenticated) {
-            log.debug("로그인 성공: {}", account);
-        } else {
-            log.debug("비밀번호 불일치: {}", account);
+    private void handleLogin(HttpCookie cookies, String queryString, OutputStream outputStream) throws IOException {
+        Map<String, String> params = parseQueryString(queryString);
+
+        if (params.size() < 2) {
+            log.debug("로그인 파라미터가 부족합니다.");
+            respondStaticResource(cookies, "/login.html", outputStream);
+            return;
+        }
+        String account = params.get("account");
+        String password = params.get("password");
+
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(
+                        user -> {
+                            if (!user.checkPassword(password)) {
+                                log.debug("비밀번호 불일치: {}", account);
+                                respondStaticResource(cookies, "/401.html", outputStream);
+                                return;
+                            }
+
+                            Session session = SessionManager.getSession(getSessionId(cookies));
+
+                            session.setAttribute("user", user);
+
+                            log.debug("로그인 성공: {}", account);
+                            response302LoginSuccessHeader(cookies, outputStream);
+                        },
+                        () -> {
+                            log.debug("존재하지 않는 계정: {}", account);
+                            respondStaticResource(cookies, "/401.html", outputStream);
+                        }
+                );
+    }
+
+    private void handleRegister(HttpCookie cookies, String queryString, OutputStream outputStream) {
+        Map<String, String> params = parseQueryString(queryString);
+        if (params.size() < 3) {
+            log.debug("회원가입 파라미터가 부족합니다.");
+            respondStaticResource(cookies, "/register.html", outputStream);
+            return;
+        }
+        User user = new User(params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(user);
+        log.debug("User : {}", user);
+        response201UserCreatedHeader(cookies, outputStream);
+        respondStaticResource(cookies, "/index.html", outputStream);
+    }
+
+    private void response201UserCreatedHeader(HttpCookie cookies, OutputStream outputStream) {
+        try {
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 201 Created ",
+                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
+                    "Content-Type: application/json ",
+                    "");
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void response302LoginSuccessHeader(HttpCookie cookies, OutputStream outputStream) {
+        try {
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 302 Redirect ",
+                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
+                    "Location: /index.html ",
+                    "");
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -167,5 +270,9 @@ public class Http11Processor implements Runnable, Processor {
             return "image/svg+xml ";
         }
         return "text/html;charset=utf-8 ";
+    }
+
+    private String getSessionId(HttpCookie cookies) {
+        return cookies.getCookie("JSESSIONID");
     }
 }

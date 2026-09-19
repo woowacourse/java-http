@@ -29,6 +29,10 @@
   - [x] 로그인 버튼을 누르면 HTTP method를 POST로 요청한다.
   - [x] 성공하면 http status code를 302로 반환하고, `/index.html`로 리다이렉트 한다.
   - [x] 실패하면 `401.html`로 리다이렉트 한다.
+- [ ] 로그인 상태 유지
+  - [ ] `Cookie` 클래스를 추가한다.
+  - [ ] 요청 헤더의 `Cookie`에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 추가해서 전달한다. 값은 `JSESSIONID=...` 형태이다.
+  - [ ] 요청 헤더에 이미 `Cookie` 값이 있다면 ??
 - [x] 회원가입
   - [x] `http://localhost/register` 로 접속하면 GET 요청으로 `register.html`을 보여준다.
   - [x] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.

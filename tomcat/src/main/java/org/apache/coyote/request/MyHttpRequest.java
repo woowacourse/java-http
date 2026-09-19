@@ -20,6 +20,11 @@ public record MyHttpRequest(
     public static MyHttpRequest of(String rawRequest) {
         String requestLine = extractRequestLine(rawRequest);
         String[] split = requestLine.split(" ");
+
+        if (split.length != 3) {
+            throw new IllegalArgumentException("잘못된 Http request 입니다: " + requestLine);
+        }
+
         return new MyHttpRequest(
                 split[0],
                 split[1],

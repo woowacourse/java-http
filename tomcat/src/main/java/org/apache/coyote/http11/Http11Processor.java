@@ -64,6 +64,11 @@ public class Http11Processor implements Runnable, Processor {
             URL resource = getClass().getClassLoader()
                 .getResource(RESOURCE_FILE_PREFIX + requestUri);
 
+            if (requestUri.equals("login")) {
+                resource = getClass().getClassLoader()
+                    .getResource(RESOURCE_FILE_PREFIX + requestUri + HTML_EXTENSION);
+            }
+
             if (requestUri.contains(QUESTION_MARK)) {
                 int index = requestUri.indexOf(QUESTION_MARK);
                 part = requestUri.substring(0, index);
@@ -89,7 +94,6 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             Path path = new File(resource.getPath()).toPath();
-
             byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
 
             String response = createResponse(part, body, path);
@@ -124,9 +128,10 @@ public class Http11Processor implements Runnable, Processor {
         if (part.endsWith(JS_EXTENSION)) {
             return "text/javascript";
         }
-        if (part.endsWith(HTML_EXTENSION) || part.equals("login")) {
+        if (part.endsWith(HTML_EXTENSION) || part.equals("login") || part.equals("/login")) {
             return "text/html";
         }
+
         return null;
     }
 

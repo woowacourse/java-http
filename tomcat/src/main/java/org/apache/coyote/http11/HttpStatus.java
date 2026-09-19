@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
     OK("OK", 200),
     FOUND("Found", 302),
+    PERMANENT_REDIRECT("Permanent Redirect", 308),
     UNAUTHORIZED("Unauthorized", 401),
     NOT_FOUND("Not Found", 404);
 

@@ -17,9 +17,21 @@ public class Response {
         this.headers = new LinkedHashMap<>();
     }
 
-    public static Response found(final String filePath, final String redirect) {
-        final Response response = new Response(HttpStatus.FOUND, filePath);
+    public static Response ok(final String filePath) {
+        return new Response(HttpStatus.OK, filePath);
+    }
+
+    public static Response permanentRedirect(final String filePath, final String redirect) {
+        final Response response = new Response(HttpStatus.PERMANENT_REDIRECT, filePath);
         response.addHeader("Location", redirect);
+
+        return response;
+    }
+
+    public static Response unauthorized() {
+        final Response response = new Response(HttpStatus.UNAUTHORIZED, "/401.html");
+        response.addHeader("Location", "/401.html");
+
         return response;
     }
 

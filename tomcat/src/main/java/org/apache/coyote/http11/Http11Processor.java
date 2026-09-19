@@ -5,11 +5,11 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,14 +19,11 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<String> ALLOWED_PATHS = List.of(
-        "/", "/index.html", "/index", "/login.html", "/login", "/401.html",
+        "/", "/index.html", "/index", "/login.html", "/login", "/register", "/401.html",
         "/assets/chart-area.js", "/assets/chart-bar.js", "/assets/chart-pie.js",
         "/css/styles.css",
         "/js/scripts.js");
@@ -47,8 +44,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         final String charSetOption = ";charset=utf-8";
         try (final var inputStream = connection.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-             final var outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(inputStream));
+            final var outputStream = connection.getOutputStream()) {
             RequestTarget requestTarget = getRequestTarget(bufferedReader);
 
             Response response = dispatchRequest(requestTarget);
@@ -67,13 +65,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestTarget getRequestTarget(final BufferedReader bufferedReader) throws IOException {
-        final String uri = bufferedReader.readLine()
-            .split(" ")[1];
-        final Map<String, String> target = parseTarget(uri);
-        final String path = target.get("filePath");
-        final Map<String, String> queryParams = extractQueryParams(target.get("queryString"));
+        final String[] requestLineTokens = bufferedReader.readLine()
+            .split(" ");
+        final Map<String, String> headers = readRequestHeaders(bufferedReader);
+        final String requestBody =
+            readRequestBody(bufferedReader, headers.get("Content-Length"));
+        final Map<String, String> target = parseTarget(requestLineTokens[1]);
 
-        return new RequestTarget(path, queryParams);
+        return new RequestTarget(
+            HttpMethod.valueOf(requestLineTokens[0]),
+            target.get("filePath"),
+            extractQueryParams(target.get("queryString")),
+            headers,
+            requestBody);
     }
 
     private Map<String, String> parseTarget(String uri) {
@@ -94,6 +98,18 @@ public class Http11Processor implements Runnable, Processor {
             "queryString", queryString);
     }
 
+    private Map<String, String> readRequestHeaders(final BufferedReader bufferedReader)
+        throws IOException {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        String line;
+        while (!Objects.equals(line = bufferedReader.readLine(), "")) {
+            final String[] headerLineTokens = line.split(": ");
+            headers.put(headerLineTokens[0], headerLineTokens[1]);
+        }
+
+        return headers;
+    }
+
     private Map<String, String> extractQueryParams(final String queryString) {
         final Map<String, String> queryParams = new LinkedHashMap<>();
         if (queryString.isBlank()) {
@@ -106,13 +122,29 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
+    private String readRequestBody(final BufferedReader bufferedReader,
+        final String rawContentLength)
+        throws IOException {
+        if (rawContentLength == null || rawContentLength.isEmpty()) {
+            return "";
+        }
+        final int contentLength = Integer.parseInt(rawContentLength.trim());
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer).trim();
+    }
+
     private Response dispatchRequest(final RequestTarget requestTarget) {
         final List<String> indexPaths = List.of("/index", "/index.html");
         if (!ALLOWED_PATHS.contains(requestTarget.path())) {
             return new Response(HttpStatus.NOT_FOUND, "/404.html");
         }
         if (Objects.equals(requestTarget.path(), "/login")) {
-            return handleLogin(requestTarget.queryParams());
+            return handleLogin(requestTarget);
+        }
+        if (Objects.equals(requestTarget.path(), "/register")) {
+            return handleRegister(requestTarget);
         }
         if (indexPaths.contains(requestTarget.path())) {
             return new Response(HttpStatus.OK, "/index.html");
@@ -120,20 +152,55 @@ public class Http11Processor implements Runnable, Processor {
         return new Response(HttpStatus.OK, requestTarget.path());
     }
 
-    private Response handleLogin(final Map<String, String> queryParams) {
-        if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {
+    private Response handleLogin(final RequestTarget requestTarget) {
+        if (requestTarget.httpMethod() == HttpMethod.GET) {
             return new Response(HttpStatus.OK, "/login.html");
         }
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
-        final User user = InMemoryUserRepository.findByAccount(account)
+        final LoginRequest loginRequest = parseLoginRequest(requestTarget.requestBody());
+        final User user = InMemoryUserRepository.findByAccount(loginRequest.account())
             .orElseThrow();
-        if (user.checkPassword(password)) {
+        if (user.checkPassword(loginRequest.password())) {
             log.info("user: {}", user);
-            return Response.found("/index.html", "/index.html");
+            return Response.permanentRedirect("/index.html", "/index.html");
         }
 
-        return Response.found("/401.html", "/401.html");
+        return Response.unauthorized();
+    }
+
+    private LoginRequest parseLoginRequest(final String requestBody) {
+        final Map<String, String> loginParams = new LinkedHashMap<>();
+        Arrays.stream(requestBody.split("&"))
+            .map(paramToken -> paramToken.split("="))
+            .forEach(paramPair -> loginParams.put(paramPair[0], paramPair[1]));
+
+        return new LoginRequest(
+            loginParams.get("account"),
+            loginParams.get("password"));
+    }
+
+    private Response handleRegister(final RequestTarget requestTarget) {
+        if (requestTarget.httpMethod() == HttpMethod.GET) {
+            return Response.ok("/register.html");
+        }
+        final RegisterRequest registerRequest = parseRegisterRequest(requestTarget.requestBody());
+        final User newUser =
+            new User(registerRequest.account(), registerRequest.password(), registerRequest.email());
+        InMemoryUserRepository.save(newUser);
+        log.info("register: {}", newUser);
+
+        return Response.permanentRedirect("/index.html", "/index.html");
+    }
+
+    private RegisterRequest parseRegisterRequest(final String requestBody) {
+        final Map<String, String> registerParams = new LinkedHashMap<>();
+        Arrays.stream(requestBody.split("&"))
+            .map(paramToken -> paramToken.split("="))
+            .forEach(paramPair -> registerParams.put(paramPair[0], paramPair[1]));
+
+        return new RegisterRequest(
+            registerParams.get("account"),
+            registerParams.get("password"),
+            registerParams.get("email"));
     }
 
     private String getContentType(final String filePath) {
@@ -163,7 +230,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
     }
 
-    private String generateResponseMessage(final Response response)  {
+    private String generateResponseMessage(final Response response) {
         return String.join("\r\n",
             "HTTP/1.1 " + response.httpStatusCode() + " " + response.httpStatusName() + " ",
             response.headerString(),

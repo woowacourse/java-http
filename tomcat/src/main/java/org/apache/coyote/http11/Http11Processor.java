@@ -1,12 +1,21 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,21 +36,115 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            final String requestLine = bufferedReader.readLine();
+            final String[] requestLineParts = requestLine.split(" "); // 요청 첫 줄(Request Line) 분리
+            final String requestUri = requestLineParts[1];
 
-            final var responseBody = "Hello world!";
+            final String path = extractPath(requestUri);
+            final String queryString = extractQueryString(requestUri);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final Map<String, String> queryParams = parseQueryString(queryString);
 
-            outputStream.write(response.getBytes());
+            if ("/login".equals(path)) {
+                logLoginUser(queryParams);
+            }
+
+            final String responseBody;
+            final String contentType;
+
+            if ("/".equals(path)) {
+                responseBody = "Hello world!";
+                contentType = "text/html";
+            } else {
+                responseBody = readStaticFile(path);
+                contentType = resolveContentType(path);
+            }
+
+            final String response = buildResponse(contentType, responseBody);
+
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+
+    private String extractPath(final String requestUri) {
+        final int queryStartIndex = requestUri.indexOf('?');
+        if (queryStartIndex == -1) { // 쿼리가 없는 경우
+            return requestUri;
+        }
+        return requestUri.substring(0, queryStartIndex);
+    }
+
+    private String extractQueryString(String requestUri) {
+        final int queryStartIndex = requestUri.indexOf('?');
+        if (queryStartIndex == -1) { // 쿼리가 없는 경우
+            return "";
+        }
+        return requestUri.substring(queryStartIndex + 1);
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> queryParams = new HashMap<>();
+        if (queryString.isEmpty()) {
+            return queryParams;
+        }
+
+        for (final String pair : queryString.split("&")) { // "account=gugu", "password=password"
+            final String[] keyValue = pair.split("=", 2); // ["account", "gugu"]
+            if (keyValue.length == 2) {
+                queryParams.put(keyValue[0], keyValue[1]); // "account" -> "gugu"
+            }
+        }
+        return queryParams;
+    }
+
+    private void logLoginUser(final Map<String, String> queryParams) {
+        final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
+
+        if (account != null) {
+            InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .ifPresent(user -> log.info("user : {}", user));
+        }
+    }
+
+    private String readStaticFile(final String path) throws URISyntaxException, IOException {
+        final String fileName = "static" + resolveFileName(path);
+        final URL url = ClassLoader.getSystemResource(fileName); // 클래스패스에서 static/ 아래 파일을 찾아 실제 위치를 URL로 돌려 줌
+        final File file = new File(url.toURI());
+        return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+    }
+
+    // 요청 path를 받아서, 서버에서 찾을 파일 이름을 돌려 줌
+    private String resolveFileName(final String path) {
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+        return path;
+    }
+
+    private String resolveContentType(final String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
+    }
+
+    private String buildResponse(final String contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
     }
 }

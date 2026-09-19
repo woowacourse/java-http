@@ -32,14 +32,18 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX_HTML_PATH = "/index.html";
     private static final String UNAUTHORIZED_PAGE_PATH = "/401.html";
     private static final String HTML_EXTENSION = ".html";
+    private static final String CSS_EXTENSION = ".css";
+    private static final String JS_EXTENSION = ".js";
+    private static final String HTML_CONTENT_TYPE = "text/html";
+    private static final String CSS_CONTENT_TYPE = "text/css";
+    private static final String JS_CONTENT_TYPE = "text/javascript";
+    private static final String TEXT_CONTENT_TYPE = "text/plain";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
-    private static final String HTML_CONTENT_TYPE = "text/html";
-    private static final String CSS_CONTENT_TYPE = "text/css";
-    private static final String ACCEPT_HEADER_PREFIX = "Accept:";
     private static final String CRLF = "\r\n";
     private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK ";
+    private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found ";
     private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 FOUND ";
     private static final String CONTENT_TYPE_HEADER_PREFIX = "Content-Type: ";
     private static final String UTF_8_CHARSET_PARAMETER = ";charset=utf-8 ";
@@ -132,15 +136,27 @@ public class Http11Processor implements Runnable, Processor {
             // 경로 없음 -> Hello world!
             // 경로 존재하면 파일 읽기
             String responseBody;
-            if (url.equals(ROOT_PATH)) {
+            boolean isResourceNull = false;
+            if (urlPath.equals(ROOT_PATH)) {
                 responseBody = DEFAULT_RESPONSE_BODY;
             } else if (urlPath.equals(LOGIN_PATH) || urlPath.equals(REGISTER_PATH)) {
                 URL resource = getClass().getClassLoader()
                         .getResource(STATIC_RESOURCE_DIRECTORY + urlPath + HTML_EXTENSION);
-                responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+                if (resource == null) {
+                    isResourceNull = true;
+                    responseBody = "요청한 파일을 찾을 수 없습니다.";
+                } else {
+                    responseBody = Files.readString(
+                            Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+                }
             } else {
                 URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + urlPath);
-                responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+                if (resource == null) {
+                    isResourceNull = true;
+                    responseBody = "요청한 파일을 찾을 수 없습니다.";
+                } else {
+                    responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+                }
             }
 
             // 로그
@@ -157,17 +173,26 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            // 헤더를 하나씩 읽으면서 Accept 존재하면 확장자 설정
-            // Accept 존재하지 않으면 기본값 text/html로 설정
+            // 요청 경로 확장자로 Content-Type 결정
             String contentType = HTML_CONTENT_TYPE;
-            String accept = headerMap.getOrDefault("Accept", "");
 
-            if (accept.contains(CSS_CONTENT_TYPE)) {
+            if (isResourceNull) {
+                contentType = TEXT_CONTENT_TYPE;
+            } else if (urlPath.endsWith(CSS_EXTENSION)) {
                 contentType = CSS_CONTENT_TYPE;
+            } else if (urlPath.endsWith(JS_EXTENSION)) {
+                contentType = JS_CONTENT_TYPE;
             }
 
             String response;
-            if (urlPath.equals(LOGIN_PATH) && isQuery) {
+            if (isResourceNull) {
+                response = String.join(CRLF,
+                        NOT_FOUND_STATUS_LINE,
+                        CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER,
+                        CONTENT_LENGTH_HEADER_PREFIX + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                        "",
+                        responseBody);
+            } else if (urlPath.equals(LOGIN_PATH) && isQuery) {
                 String location = "";
                 if (isLoginSuccess) {
                     location += INDEX_HTML_PATH;
@@ -192,12 +217,12 @@ public class Http11Processor implements Runnable, Processor {
                 response = String.join(CRLF,
                         OK_STATUS_LINE,
                         CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER,
-                        CONTENT_LENGTH_HEADER_PREFIX + responseBody.getBytes().length + " ",
+                        CONTENT_LENGTH_HEADER_PREFIX + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                         "",
                         responseBody);
             }
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

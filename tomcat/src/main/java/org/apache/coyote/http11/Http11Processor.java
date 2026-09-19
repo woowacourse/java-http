@@ -44,49 +44,49 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestLine = bufferedReader.readLine();
             final String requestTarget = requestLine.split(" ")[1];
-            log.info("request uri: {}", requestTarget);
 
             final URI uri = URI.create(requestTarget);
+            log.info("request uri: {}", uri);
 
-            String responseBody;
-            if (requestTarget.equals("/")) {
-                responseBody = "Hello world!";
-            }
-            else if (requestTarget.startsWith("/login")) {
-                final URL url = getClass().getClassLoader().getResource("static/login.html");
-                if (url == null)
-                    return;
-                final Path path = Path.of(url.getPath());
+            final String uriPath = uri.getPath();
+            final Path filePath = getFilePath(uriPath);
 
+            if (uriPath.equals("/login")) {
                 final String query = uri.getQuery();
                 if (query != null) {
                     final Map<String, String> params = extractQueryParams(query);
                     login(params);
                 }
-
-                responseBody = Files.readString(path);
-            }
-            else {
-                final URL url = getClass().getClassLoader().getResource("static/" + uri.getPath());
-                if (url == null)
-                    return;
-                final Path path = Path.of(url.getPath());
-                responseBody = Files.readString(path);
             }
 
+            final String responseBody = getResponseBody(uriPath, filePath);
             final String contentType = getContentType(requestTarget);
+            final String httpStatus = "200 OK";
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponse(contentType, responseBody, httpStatus);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private Path getFilePath(final String uriPath) {
+        if (uriPath.equals("/")) {
+            return Path.of("/");
+        }
+        if (uriPath.equals("/login")) {
+            final URL url = getClass().getClassLoader().getResource("static/login.html");
+            if (url == null)
+                return Path.of("/");
+            return Path.of(url.getPath());
+        }
+        else {
+            final URL url = getClass().getClassLoader().getResource("static" + uriPath);
+            if (url == null)
+                return Path.of("/");
+            return Path.of(url.getPath());
         }
     }
 
@@ -119,6 +119,14 @@ public class Http11Processor implements Runnable, Processor {
         log.info("user : {}", userByAccount);
     }
 
+    private String getResponseBody(final String uriPath, final Path filePath) throws IOException {
+        if (uriPath.equals("/")) {
+            return  "Hello world!";
+        }
+
+        return Files.readString(filePath);
+    }
+
     private String getContentType(final String requestUri) {
         if (requestUri.endsWith(".css")) {
             return "text/css;charset=utf-8";
@@ -129,5 +137,14 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html;charset=utf-8";
+    }
+
+    private String createResponse(final String contentType, final String responseBody, final String httpStatus) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + httpStatus + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

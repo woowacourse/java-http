@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.Register;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.MyHttpRequest;
@@ -63,6 +64,23 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            // register
+            if (isRegisterRequest(httpRequest)) {
+                if (register(httpRequest)) {
+                    String response = build302FoundResponse("index.html");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                    return;
+                } else {
+                    String response = build302FoundResponse("login.html");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                    return;
+                }
+            }
+
             final var responseBody = readStaticResource(httpRequest, "Hello world!");
             final var response = buildHttpResponse(httpRequest, responseBody);
 
@@ -105,6 +123,12 @@ public class Http11Processor implements Runnable, Processor {
                 && httpRequest.hasRequestBody();
     }
 
+    private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
+        return httpRequest.resourcePath().contains("static/register.html")
+                && httpRequest.method().equalsIgnoreCase("POST")
+                && httpRequest.hasRequestBody();
+    }
+
     // TODO json도 처리 가능하도록
     private static boolean authenticate(MyHttpRequest httpRequest) {
         Map<String, String> params = new HashMap<>();
@@ -123,6 +147,23 @@ public class Http11Processor implements Runnable, Processor {
         }
         log.info("authenticate failed!");
         return false;
+    }
+
+    private static boolean register(MyHttpRequest httpRequest) {
+        Map<String, String> params = new HashMap<>();
+        for (String parameter : httpRequest.body().split("&")) {
+            String[] keyValue = parameter.split("=", 3);
+            params.put(keyValue[0], keyValue[1]);
+        }
+
+        try {
+            User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
+            log.info("registration succeed: {}", registeredUser);
+            return true;
+        } catch (IllegalArgumentException e) {
+            log.error("registration failed: ", e);
+            return false;
+        }
     }
 
     private static Optional<User> findUserByAccount(String account) {

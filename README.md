@@ -29,10 +29,11 @@
   - [x] 로그인 버튼을 누르면 HTTP method를 POST로 요청한다.
   - [x] 성공하면 http status code를 302로 반환하고, `/index.html`로 리다이렉트 한다.
   - [x] 실패하면 `401.html`로 리다이렉트 한다.
-- [ ] 회원가입
+- [x] 회원가입
   - [x] `http://localhost/register` 로 접속하면 GET 요청으로 `register.html`을 보여준다.
-  - [ ] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.
-  - [ ] 회원가입을 완료하면 `index.html`로 리다이렉트 한다.
+  - [x] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.
+  - [x] 성공하면 `index.html`로 리다이렉트 한다.
+  - [x] 실패하면 `login.html`로 리다이렉트 한다.
 
 ### 302 Found redirection response
 

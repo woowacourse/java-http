@@ -16,7 +16,13 @@ class Http11ProcessorTest {
 
     @Test
     void process() {
-        final var socket = new StubSocket();
+        final var httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=existing-session ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -37,6 +43,7 @@ class Http11ProcessorTest {
                 "GET /missing.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -60,6 +67,7 @@ class Http11ProcessorTest {
                 "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -90,6 +98,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
 
@@ -117,6 +126,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
 
@@ -149,6 +159,7 @@ class Http11ProcessorTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -224,11 +235,47 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Test
+    void responseSetsSessionCookieWhenRequestDoesNotHaveJSessionId() {
+        final var httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+    }
+
+    @Test
+    void responseDoesNotSetSessionCookieWhenRequestAlreadyHasSessionId() {
+        final var httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; JSESSIONID=existing-session ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
     private String postRequest(final String path, final String requestBody) {
         return String.join("\r\n",
                 "POST " + path + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",

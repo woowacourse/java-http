@@ -98,6 +98,11 @@ public class Http11Processor implements Runnable, Processor {
     private void writeStaticFile(final OutputStream outputStream, final String target)
             throws IOException, URISyntaxException {
         URL resource = getClass().getClassLoader().getResource("static" + target);
+        if (resource == null) {
+            URL notFound = getClass().getClassLoader().getResource("static/404.html");
+            writeResponse(outputStream, "404 Not Found", "text/html", Files.readString(Path.of(notFound.toURI())));
+            return;
+        }
         writeResponse(outputStream, "200 OK", contentTypeOf(target), Files.readString(Path.of(resource.toURI())));
     }
 

@@ -42,7 +42,9 @@ class RegisterControllerTest {
         final String response = post("account=newbie&email=newbie%40woowahan.com&password=secret");
 
         // then
-        assertThat(response).isEqualTo(redirectResponse("/index.html"));
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\nLocation: /index.html \r\n")
+                .containsPattern("\r\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \r\n");
         assertThat(InMemoryUserRepository.findByAccount("newbie"))
                 .hasValueSatisfying(user -> assertThat(user.checkPassword("secret")).isTrue());
     }
@@ -93,6 +95,7 @@ class RegisterControllerTest {
 
         // then
         assertRegisterPage(response);
+        assertThat(response).doesNotContain("Set-Cookie");
         final User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
         assertThat(gugu.checkPassword("password")).isTrue();
     }
@@ -111,15 +114,6 @@ class RegisterControllerTest {
 
     private String toString(HttpResponse response) {
         return new String(response.toBytes(), StandardCharsets.UTF_8);
-    }
-
-    private String redirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
-                "");
     }
 
     private String readResource(String resourceName) throws IOException {

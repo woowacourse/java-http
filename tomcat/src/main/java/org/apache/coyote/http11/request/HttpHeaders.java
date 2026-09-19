@@ -10,6 +10,7 @@ public class HttpHeaders {
     private static final String HEADER_DELIMITER = ":";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String COOKIE = "Cookie";
     private static final String PARAMETER_DELIMITER = ";";
 
     private final Map<String, String> headers;
@@ -35,6 +36,10 @@ public class HttpHeaders {
 
     public String get(String name) {
         return headers.get(normalize(name));
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.from(get(COOKIE));
     }
 
     public String getMediaType() {

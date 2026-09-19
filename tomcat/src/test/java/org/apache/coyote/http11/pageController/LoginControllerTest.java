@@ -15,6 +15,8 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginControllerTest {
+    private static final String SET_SESSION_COOKIE =
+            "\r\nSet-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} \r\n";
     private static final HttpHeaders FORM_HEADERS =
             HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
 
@@ -44,7 +46,28 @@ class LoginControllerTest {
         final String response = post("account=gugu&password=password");
 
         // then
-        assertThat(response).isEqualTo(redirectResponse("/index.html"));
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\nLocation: /index.html \r\n")
+                .containsPattern(SET_SESSION_COOKIE);
+    }
+
+    @Test
+    void newSessionCookieEvenIfRequestHasJSessionId() throws IOException {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of(
+                "Content-Type: application/x-www-form-urlencoded",
+                "Cookie: JSESSIONID=before-login"
+        ));
+        final HttpRequest request = HttpRequest.from(
+                "POST /login HTTP/1.1", headers, new HttpBody("account=gugu&password=password"));
+
+        // when
+        final String response = toString(loginController.run(request));
+
+        // then
+        assertThat(response)
+                .containsPattern(SET_SESSION_COOKIE)
+                .doesNotContain("before-login");
     }
 
     @Test
@@ -54,6 +77,7 @@ class LoginControllerTest {
 
         // then
         assertThat(response).isEqualTo(redirectResponse("/401.html"));
+        assertThat(response).doesNotContain("Set-Cookie");
     }
 
     @Test

@@ -57,4 +57,52 @@ class HttpResponseTest {
                 "body { }");
         assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
     }
+
+    @Test
+    void addCookie() {
+        // given
+        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "Hello world!");
+
+        // when
+        response.addCookie("JSESSIONID", "abc");
+
+        // then
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Set-Cookie: JSESSIONID=abc ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!");
+        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
+    }
+
+    @Test
+    void eachCookieIsWrittenAsSeparateSetCookieHeader() {
+        // given
+        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "");
+
+        // when
+        response.addCookie("JSESSIONID", "abc");
+        response.addCookie("theme", "dark");
+
+        // then
+        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8))
+                .contains("\r\nSet-Cookie: JSESSIONID=abc \r\nSet-Cookie: theme=dark \r\n");
+    }
+
+    @Test
+    void sameNameCookieIsReplaced() {
+        // given
+        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "");
+
+        // when
+        response.addCookie("JSESSIONID", "old");
+        response.addCookie("JSESSIONID", "new");
+
+        // then
+        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8))
+                .contains("Set-Cookie: JSESSIONID=new ")
+                .doesNotContain("JSESSIONID=old");
+    }
 }

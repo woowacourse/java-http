@@ -21,6 +21,9 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+    private static final String SET_SESSION_COOKIE =
+            "\r\nSet-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} \r\n";
+
     @Test
     void process() {
         // given
@@ -88,7 +91,9 @@ class Http11ProcessorTest {
         final LoginResult result = requestLogin(body);
 
         // then
-        assertThat(result.response()).isEqualTo(redirectResponse("/index.html"));
+        assertThat(result.response())
+                .startsWith("HTTP/1.1 302 Found \r\nLocation: /index.html \r\n")
+                .containsPattern(SET_SESSION_COOKIE);
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .anyMatch(message -> message.contains("login user: User{id=1, account='gugu'"));
@@ -104,6 +109,7 @@ class Http11ProcessorTest {
 
         // then
         assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
+        assertThat(result.response()).doesNotContain("Set-Cookie");
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .noneMatch(message -> message.startsWith("login user:"));
@@ -390,6 +396,19 @@ class Http11ProcessorTest {
 
     private HttpRequest indexRequest() {
         return HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+    }
+
+    @Test
+    void noSetCookieForStaticResource() {
+        // given
+        final StubSocket socket = new StubSocket();
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
     }
 
     private LoginResult requestLogin(String body) {

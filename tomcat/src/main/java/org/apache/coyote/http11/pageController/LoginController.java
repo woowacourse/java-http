@@ -40,7 +40,10 @@ public class LoginController extends AbstractController {
         }
 
         log.info("login user: {}", loginUser.get());
-        return redirect(SUCCESS_PAGE);
+        HttpResponse response = redirect(SUCCESS_PAGE);
+        response.addCookie(SESSION_COOKIE_NAME, newSessionId());
+
+        return response;
     }
 
     private boolean isBlank(String value) {

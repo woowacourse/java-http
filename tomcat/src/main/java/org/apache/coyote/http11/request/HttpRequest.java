@@ -9,12 +9,14 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpBody body;
     private final HttpParams bodyParams;
+    private final HttpCookie cookie;
 
     public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
         this.bodyParams = parseBodyParams(requestLine, headers, body);
+        this.cookie = headers.getCookie();
     }
 
     public static HttpRequest from(String requestLine, HttpHeaders headers, HttpBody body) {
@@ -30,6 +32,10 @@ public class HttpRequest {
         RequestLine parsedRequestLine = RequestLine.from(requestLine, supportedMethods);
 
         return new HttpRequest(parsedRequestLine, headers, body);
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 
     public HttpMethod getMethod() {

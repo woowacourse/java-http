@@ -91,4 +91,22 @@ class HttpHeadersTest {
         // when & then
         assertThat(headers.getMediaType()).isNull();
     }
+
+    @Test
+    void cookie() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("cookie: yummy_cookie=choco; JSESSIONID=abc"));
+
+        // when & then
+        assertThat(headers.getCookie().get("JSESSIONID")).isEqualTo("abc");
+    }
+
+    @Test
+    void emptyCookieWithoutCookieHeader() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Host: localhost:8080"));
+
+        // when & then
+        assertThat(headers.getCookie().get("JSESSIONID")).isNull();
+    }
 }

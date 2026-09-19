@@ -32,7 +32,10 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        return redirect(SUCCESS_PAGE);
+        HttpResponse response = redirect(SUCCESS_PAGE);
+        response.addCookie(SESSION_COOKIE_NAME, newSessionId());
+
+        return response;
     }
 
     private boolean isInvalidInput(String account, String email, String password) {

@@ -178,4 +178,31 @@ class HttpRequestTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("잘못된 쿼리 스트링입니다.");
     }
+
+    @Test
+    void cookieFromHeader() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: yummy_cookie=choco; JSESSIONID=abc"));
+
+        // when
+        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+
+        // then
+        assertThat(request.getCookie().get("JSESSIONID")).isEqualTo("abc");
+    }
+
+    @Test
+    void cookieIsParsedOnce() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=abc"));
+        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+
+        // when
+        request.getCookie().add("theme", "dark");
+
+        // then
+        assertThat(request.getCookie()).isSameAs(request.getCookie());
+        assertThat(request.getCookie().get("theme")).isEqualTo("dark");
+        assertThat(request.getCookie().get("JSESSIONID")).isEqualTo("abc");
+    }
 }

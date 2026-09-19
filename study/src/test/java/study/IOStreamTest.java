@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 /**
@@ -66,10 +67,8 @@ class IOStreamTest {
          * 효율적인 전송을 위해 스트림에서 버퍼링을 사용 할 수 있다.
          * BufferedOutputStream 필터를 연결하면 버퍼링이 가능하다.
          * 
-         * 버퍼링을 사용하면 OutputStream을 사용할 때 flush를 사용하자.
-         * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
-         * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
-         * 데드락(deadlock) 상태가 되기 때문에 flush로 해제해야 한다.
+         * 버퍼에 남은 데이터를 하위 스트림으로 보내야 할 때 flush를 사용하자.
+         * 상대의 응답을 기다리기 전에 요청을 flush하지 않으면 서로 기다리는 상황이 생길 수 있다.
          */
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
@@ -81,10 +80,26 @@ class IOStreamTest {
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
 
-            outputStream.flush();
+            try (outputStream) {
+                outputStream.flush();
+            }
 
             verify(outputStream, atLeastOnce()).flush();
-            outputStream.close();
+            verify(outputStream, atLeastOnce()).close();
+        }
+
+        @Test
+        void flush에_실패해도_OutputStream을_닫는다() throws IOException {
+            final OutputStream outputStream = mock(BufferedOutputStream.class);
+            doThrow(new IOException("flush failed")).when(outputStream).flush();
+
+            assertThatThrownBy(() -> {
+                try (outputStream) {
+                    outputStream.flush();
+                }
+            }).isInstanceOf(IOException.class);
+
+            verify(outputStream).close();
         }
 
         /**

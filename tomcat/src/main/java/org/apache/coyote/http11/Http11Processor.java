@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             String[] parts = requestLine.split(" ");
             String requestPath = parts[1];
-            var responseBody = ROOT_RESPONSE_BODY.getBytes();
+            byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
             if (!requestPath.equals("/")) {
                 String fileName = STATIC_RESOURCE_PREFIX + parts[1];
                 URL resource = getClass().getClassLoader().getResource(fileName);
@@ -51,10 +51,11 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = Files.readAllBytes(path);
                 }
             }
+            String contentType = contentTypeOf(requestPath);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + responseBody.length + " ",
                     "") + "\r\n";
 
@@ -64,5 +65,12 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String contentTypeOf(String requestPath) {
+        if (requestPath.endsWith(".css")) {
+            return "text/css;charset=utf-8 ";
+        }
+        return "text/html;charset=utf-8 ";
     }
 }

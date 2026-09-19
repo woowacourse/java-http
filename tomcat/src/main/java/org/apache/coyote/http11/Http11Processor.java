@@ -46,20 +46,9 @@ public class Http11Processor implements Runnable, Processor {
             log.info("요청 메소드: {}, 요청 URI: {}", requestMethod, requestLineParts[1]);
             Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
             HttpCookie httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
+            String cookieHeader = getCookieHeader(httpCookie);
             String sessionId = httpCookie.getJSessionId();
-            String cookieHeader = "";
-
-            if (sessionId == null) {
-                sessionId = httpCookie.createJSessionId();
-                cookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
-                log.info("세션 생성: {}", sessionId);
-            }
-            Session session = SessionManager.findSession(sessionId);
-            if (session == null) {
-                session = new Session(sessionId);
-                SessionManager.add(session);
-                log.info("세션 저장: {}", sessionId);
-            }
+            Session session = getSession(sessionId);
 
             String response = "";
             if (requestMethod.equals("GET")) {
@@ -88,6 +77,26 @@ public class Http11Processor implements Runnable, Processor {
             requestHeaders.put(header[0].trim(), header[1].trim());
         }
         return requestHeaders;
+    }
+
+    private String getCookieHeader(HttpCookie httpCookie) {
+        if (httpCookie.hasJSessionId()) {
+            log.info("기존 세션 확인: {}", httpCookie.getJSessionId());
+            return "";
+        }
+        String sessionId = httpCookie.createJSessionId();
+        log.info("세션 생성: {}", sessionId);
+        return "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
+    }
+
+    private Session getSession(String sessionId) {
+        Session session = SessionManager.findSession(sessionId);
+
+        if (session == null) {
+            session = new Session(sessionId);
+            SessionManager.add(session);
+        }
+        return session;
     }
 
     private String getPostResponse(BufferedReader bufferedReader, String requestUri,

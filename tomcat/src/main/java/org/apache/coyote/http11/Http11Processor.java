@@ -37,16 +37,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+            final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = reader.readLine();
-
-            if (requestLine == null) {
-                return;
-            }
-
-            HttpRequest request = HttpRequest.from(requestLine);
+            HttpRequest request = HttpRequest.from(reader);
 
             if (request.getPath().equals("/login") && !request.getQueryParams().isEmpty()) {
                 final boolean loginSucceed = login(request.getQueryParams());

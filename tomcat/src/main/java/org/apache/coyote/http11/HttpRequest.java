@@ -36,7 +36,11 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
-        final HttpRequest request = from(reader.readLine());
+        final String requestLine = reader.readLine();
+        if (requestLine == null) {
+            throw new IOException("HTTP 요청 줄을 읽을 수 없습니다.");
+        }
+        final HttpRequest request = from(requestLine);
 
         String headerLine;
         while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {

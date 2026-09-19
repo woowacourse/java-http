@@ -48,12 +48,11 @@ public class Http11Processor implements Runnable, Processor {
             final String path = resolvePath(requestUri);
 
             String responseBody = "Hello world!";
-            if ("/index.html".equals(path) || "/css/styles.css".equals(path) || "/login.html".equals(path)) {
+            if (!"/".equals(path)) {
                 final var resource = getClass().getClassLoader().getResource("static" + path);
-                if (resource == null) {
-                    throw new IOException("Resource not found: " + path);
+                if (resource != null) {
+                    responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
                 }
-                responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
             }
 
             String contentType = "text/html";

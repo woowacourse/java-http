@@ -71,18 +71,7 @@ public class Http11Processor implements Runnable, Processor {
                 filePath = "static/login.html";
 
                 if (!queryString.isBlank()) {
-                    final Map<String, String> params = parseQueryString(queryString);
-
-                    final String account = params.get("account");
-                    final String password = params.get("password");
-
-                    log.info("로그인 시도 - account: {}, password: {}", account, password);
-
-                    final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                    user.ifPresentOrElse(
-                            foundUser -> log.info("회원 조회 결과: {}", foundUser),
-                            () -> log.info("회원을 찾을 수 없습니다. account: {}", account)
-                    );
+                    login(parseQueryString(queryString));
                 }
             }
 
@@ -123,6 +112,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void login(final Map<String, String> params) {
+        final String account = params.get("account");
+        final String password = params.get("password");
+
+        if (account == null || password == null) {
+            log.info("아이디 또는 비밀번호가 입력되지 않았습니다.");
+            return;
+        }
+
+        log.info("로그인 시도 - account: {}, password: {}", account, password);
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        user.ifPresentOrElse(
+                foundUser -> log.info("회원 조회 결과: {}", foundUser),
+                () -> log.info("회원을 찾을 수 없습니다. account: {}", account)
+        );
+    }
+
     private String extractPath(final String requestTarget) {
         final int queryIndex = requestTarget.indexOf("?");
         if (queryIndex == -1) {
@@ -147,10 +154,13 @@ public class Http11Processor implements Runnable, Processor {
 
         final String[] pairs = queryString.split("&");
         for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=");
+            final String[] keyValue = pair.split("=", 2);
+            if (keyValue[0].isBlank()) {
+                continue;
+            }
             if (keyValue.length == 2) {
                 params.put(keyValue[0], keyValue[1]);
-            } else if (keyValue.length == 1) {
+            } else {
                 params.put(keyValue[0], "");
             }
         }

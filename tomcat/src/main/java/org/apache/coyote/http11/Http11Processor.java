@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
 
             var responseBody = "Hello world!";
 
-            var contentType = "text/html;charset=utf-8";
+            var contentType = "text/html";
 
             if (!requestUri.equals("/")) {
                 //클래스는 클래스로더에 대한 정보를 가짐
@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: "+ contentType + " ",
+                    "Content-Type: "+ contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);

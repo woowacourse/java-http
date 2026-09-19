@@ -130,4 +130,31 @@ class Http11ProcessorTest {
             }
         }
     }
+
+    @Test
+    void loginPageIsReturnedWithOrWithoutQueryString() throws IOException {
+        final var requestTargets = List.of(
+                "/login",
+                "/login?account=gugu&password=password");
+
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
+            assertThat(resource).isNotNull();
+            final byte[] html = resource.readAllBytes();
+            final String expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + html.length + " ",
+                    "",
+                    new String(html, StandardCharsets.UTF_8));
+
+            for (final String requestTarget : requestTargets) {
+                final var socket = new StubSocket("GET " + requestTarget + " HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+                final var processor = new Http11Processor(socket);
+
+                processor.process(socket);
+
+                assertThat(socket.output()).as(requestTarget).isEqualTo(expected);
+            }
+        }
+    }
 }

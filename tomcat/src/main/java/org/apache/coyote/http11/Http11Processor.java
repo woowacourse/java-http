@@ -19,6 +19,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final int REQUEST_LINE_PART_COUNT = 3;
     private static final int REQUEST_TARGET_INDEX = 1;
     private static final String INDEX_PATH = "/index.html";
+    private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PAGE_PATH = "/login.html";
     private static final String CSS_PATH = "/css/styles.css";
     private static final Set<String> JAVASCRIPT_PATHS = Set.of(
             "/js/scripts.js",
@@ -86,14 +88,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private ResponseContent createResponse(final String requestTarget) throws IOException {
-        if (INDEX_PATH.equals(requestTarget)) {
-            return new ResponseContent(HTML_CONTENT_TYPE, readResource(requestTarget));
+        final String path = requestTarget.split("\\?", 2)[0];
+        if (INDEX_PATH.equals(path)) {
+            return new ResponseContent(HTML_CONTENT_TYPE, readResource(path));
         }
-        if (CSS_PATH.equals(requestTarget)) {
-            return new ResponseContent(CSS_CONTENT_TYPE, readResource(requestTarget));
+        if (LOGIN_PATH.equals(path)) {
+            return new ResponseContent(HTML_CONTENT_TYPE, readResource(LOGIN_PAGE_PATH));
         }
-        if (JAVASCRIPT_PATHS.contains(requestTarget)) {
-            return new ResponseContent(JAVASCRIPT_CONTENT_TYPE, readResource(requestTarget));
+        if (CSS_PATH.equals(path)) {
+            return new ResponseContent(CSS_CONTENT_TYPE, readResource(path));
+        }
+        if (JAVASCRIPT_PATHS.contains(path)) {
+            return new ResponseContent(JAVASCRIPT_CONTENT_TYPE, readResource(path));
         }
         return new ResponseContent(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
     }

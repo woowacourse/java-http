@@ -84,8 +84,9 @@ public class Http11Processor implements Runnable, Processor {
                 respondHelloWorld(outputStream);
                 return;
             }
-            if (path.equals("/register")) {
+            if (path.equals("/register") && method.equals("POST")) {
                 handleRegister(cookies, requestBody, outputStream);
+                return;
             }
             if (path.equals("/login") && method.equals("GET")) {
                 handleLoginPage(cookies, outputStream);
@@ -93,6 +94,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (path.equals("/login") && method.equals("POST")) {
                 handleLogin(cookies, requestBody, outputStream);
+                return;
             }
             respondStaticResource(cookies, htmlParser(path), outputStream);
         } catch (IOException e) {
@@ -130,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Set-Cookie " + cookies.sessionConcatenate() + " ",
+                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
                     "Content-Type: " + contentType(requestTarget),
                     "Content-Length: " + responseBody.length + " ",
                     "",
@@ -170,42 +172,54 @@ public class Http11Processor implements Runnable, Processor {
 
         if (params.size() < 2) {
             log.debug("로그인 파라미터가 부족합니다.");
+            respondStaticResource(cookies, "/login.html", outputStream);
             return;
         }
         String account = params.get("account");
         String password = params.get("password");
 
-        final User user = InMemoryUserRepository.findByAccount(account).get();
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(
+                        user -> {
+                            if (!user.checkPassword(password)) {
+                                log.debug("비밀번호 불일치: {}", account);
+                                respondStaticResource(cookies, "/401.html", outputStream);
+                                return;
+                            }
 
-        if (user.checkPassword(password)) {
-            final var session = SessionManager.getSession(getSessionId(cookies));
-            session.setAttribute("user", user);
-            log.debug("로그인 성공: {}", account);
-            response302LoginSuccessHeader(cookies, outputStream);
-        } else {
-            log.debug("비밀번호 불일치: {}", account);
-            respondStaticResource(cookies,"/401.html", outputStream);
-        }
+                            Session session = SessionManager.getSession(getSessionId(cookies));
+
+                            session.setAttribute("user", user);
+
+                            log.debug("로그인 성공: {}", account);
+                            response302LoginSuccessHeader(cookies, outputStream);
+                        },
+                        () -> {
+                            log.debug("존재하지 않는 계정: {}", account);
+                            respondStaticResource(cookies, "/401.html", outputStream);
+                        }
+                );
     }
 
     private void handleRegister(HttpCookie cookies, String queryString, OutputStream outputStream) {
         Map<String, String> params = parseQueryString(queryString);
         if (params.size() < 3) {
             log.debug("회원가입 파라미터가 부족합니다.");
+            respondStaticResource(cookies, "/register.html", outputStream);
             return;
         }
         User user = new User(params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
         log.debug("User : {}", user);
-        response201UserCreatedHeader(outputStream);
-        response302LoginSuccessHeader(cookies, outputStream);
+        response201UserCreatedHeader(cookies, outputStream);
+        respondStaticResource(cookies, "/index.html", outputStream);
     }
 
-    private void response201UserCreatedHeader(OutputStream outputStream) {
+    private void response201UserCreatedHeader(HttpCookie cookies, OutputStream outputStream) {
         try {
             final var response = String.join("\r\n",
-                    "HTTP/1.1 302 Redirect ",
-                    "Location: /index.html ",
+                    "HTTP/1.1 201 Created ",
+                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
                     "Content-Type: application/json ",
                     "");
 

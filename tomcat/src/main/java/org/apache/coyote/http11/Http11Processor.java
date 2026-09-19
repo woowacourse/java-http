@@ -23,7 +23,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css";
     private static final String JAVASCRIPT_CONTENT_TYPE = "application/javascript";
-    private static final byte[] DEFAULT_BODY = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
     private final Socket connection;
 
@@ -83,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestParts.length != 3) {
             throw new UncheckedServletException(
-                    new IllegalArgumentException("Invalid request line: " + requestLine)
+                    new IllegalArgumentException("유효하지 않은 요청 라인입니다: " + requestLine)
             );
         }
 
@@ -114,17 +113,13 @@ public class Http11Processor implements Runnable, Processor {
             final var nameAndValue = parameter.split("=", 2);
             if (nameAndValue.length == 2) {
                 parameters.put(
-                        decode(nameAndValue[0]),
-                        decode(nameAndValue[1])
+                        URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8)
                 );
             }
         }
 
-        return Map.copyOf(parameters);
-    }
-
-    private String decode(final String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        return parameters;
     }
 
     private void logLoginUser(
@@ -149,17 +144,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private byte[] readResponseBody(final String requestPath) throws IOException {
         if ("/".equals(requestPath)) {
-            return DEFAULT_BODY.clone();
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
-        validateRequestUri(requestPath);
+        validateRequestPath(requestPath);
 
         final var resourcePath = findResourcePath(requestPath);
         final var classLoader = Http11Processor.class.getClassLoader();
 
         try (final var resource = classLoader.getResourceAsStream(resourcePath)) {
             if (resource == null) {
-                throw new IOException("Resource not found: " + resourcePath);
+                throw new IOException("리소스를 찾을 수 없습니다: " + resourcePath);
             }
 
             return resource.readAllBytes();
@@ -174,14 +169,10 @@ public class Http11Processor implements Runnable, Processor {
         return STATIC_ROOT + requestPath;
     }
 
-    private void validateRequestUri(final String requestUri) {
-        final var invalidPath = !requestUri.startsWith("/")
-                || requestUri.contains("..")
-                || requestUri.contains("\\");
-
-        if (invalidPath) {
+    private void validateRequestPath(final String requestPath) {
+        if (!requestPath.startsWith("/") || requestPath.contains("..")) {
             throw new UncheckedServletException(
-                    new IllegalArgumentException("Invalid request URI: " + requestUri)
+                    new IllegalArgumentException("유효하지 않은 요청 경로입니다: " + requestPath)
             );
         }
     }

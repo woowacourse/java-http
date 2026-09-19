@@ -3,7 +3,6 @@ package org.apache.coyote.http11.pageController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.StaticResourceLoader;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -42,9 +41,5 @@ public class LoginController extends AbstractController {
     private Optional<User> findLoginUser(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
-    }
-
-    private HttpResponse redirect(String location) {
-        return new HttpResponse(HttpStatus.FOUND, Map.of("Location", location), "");
     }
 }

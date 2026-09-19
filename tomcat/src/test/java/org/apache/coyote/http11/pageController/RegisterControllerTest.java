@@ -1,0 +1,122 @@
+package org.apache.coyote.http11.pageController;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.coyote.http11.request.HttpBody;
+import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class RegisterControllerTest {
+    private static final HttpHeaders FORM_HEADERS =
+            HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
+
+    private final RegisterController registerController = new RegisterController();
+
+    @Test
+    void registerPage() throws IOException {
+        // given
+        final HttpRequest request = HttpRequest.from("GET /register HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+
+        // when
+        final String response = toString(registerController.run(request));
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 200 OK ")
+                .endsWith(readResource("static/register.html"));
+    }
+
+    @Test
+    void registerAndRedirectToIndex() throws IOException {
+        // when
+        final String response = post("account=newbie&email=newbie%40woowahan.com&password=secret");
+
+        // then
+        assertThat(response).isEqualTo(redirectResponse("/index.html"));
+        assertThat(InMemoryUserRepository.findByAccount("newbie"))
+                .hasValueSatisfying(user -> assertThat(user.checkPassword("secret")).isTrue());
+    }
+
+    @Test
+    void registerPageWhenValueIsBlank() throws IOException {
+        // when
+        final String response = post("account=blank&email=&password=secret");
+
+        // then
+        assertRegisterPage(response);
+        assertThat(InMemoryUserRepository.findByAccount("blank")).isEmpty();
+    }
+
+    @Test
+    void registerPageWhenValueIsMissing() throws IOException {
+        // when
+        final String response = post("account=missing&password=secret");
+
+        // then
+        assertRegisterPage(response);
+        assertThat(InMemoryUserRepository.findByAccount("missing")).isEmpty();
+    }
+
+    @Test
+    void registerPageWhenBodyIsEmpty() throws IOException {
+        // when
+        final String response = post("");
+
+        // then
+        assertRegisterPage(response);
+    }
+
+    @Test
+    void registerPageWhenAccountIsDuplicated() throws IOException {
+        // when
+        final String response = post("account=gugu&email=other%40woowahan.com&password=changed");
+
+        // then
+        assertRegisterPage(response);
+        final User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
+        assertThat(gugu.checkPassword("password")).isTrue();
+    }
+
+    private String post(String body) throws IOException {
+        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", FORM_HEADERS, new HttpBody(body));
+
+        return toString(registerController.run(request));
+    }
+
+    private void assertRegisterPage(String response) throws IOException {
+        assertThat(response)
+                .startsWith("HTTP/1.1 200 OK ")
+                .endsWith(readResource("static/register.html"));
+    }
+
+    private String toString(HttpResponse response) {
+        return new String(response.toBytes(), StandardCharsets.UTF_8);
+    }
+
+    private String redirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+    }
+
+    private String readResource(String resourceName) throws IOException {
+        final InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourceName);
+
+        try (InputStream inputStream = Objects.requireNonNull(resourceStream)) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+}

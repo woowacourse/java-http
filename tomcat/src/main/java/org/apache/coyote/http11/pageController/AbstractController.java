@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.pageController;
 
 import java.io.IOException;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -21,6 +22,10 @@ public abstract class AbstractController implements PageController {
 
     protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
         return methodNotAllowed(httpRequest);
+    }
+
+    protected HttpResponse redirect(String location) {
+        return new HttpResponse(HttpStatus.FOUND, Map.of("Location", location), "");
     }
 
     private HttpResponse methodNotAllowed(HttpRequest httpRequest) {

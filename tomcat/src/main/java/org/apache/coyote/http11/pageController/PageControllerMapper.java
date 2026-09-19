@@ -5,7 +5,8 @@ import java.util.Map;
 public class PageControllerMapper {
     private static final PageController DEFAULT_CONTROLLER = new StaticResourceController();
     private static final Map<String, PageController> mapper = Map.of(
-            "/login", new LoginController()
+            "/login", new LoginController(),
+            "/register", new RegisterController()
     );
 
     private PageControllerMapper() {

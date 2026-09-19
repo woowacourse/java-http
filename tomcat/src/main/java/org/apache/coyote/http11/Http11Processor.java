@@ -166,7 +166,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addQueryParameter(Map<String, String> query, String parameter) {
-        String[] keyValue = parameter.split("=");
+        String[] keyValue = parameter.split("=", 2);
         String key = decodeParameter(keyValue[0]);
         String value = "";
 

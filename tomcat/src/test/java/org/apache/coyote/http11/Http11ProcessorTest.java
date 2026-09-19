@@ -47,6 +47,18 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void incompleteRequestIsIgnored() {
+        for (final String request : List.of("", "GET /index.html HTTP/1.1\r\nHost: localhost:8080")) {
+            final var socket = new StubSocket(request);
+            final var processor = new Http11Processor(socket);
+
+            processor.process(socket);
+
+            assertThat(socket.output()).as(request).isEmpty();
+        }
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
@@ -163,36 +175,50 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void onlyMatchingLoginUserIsLogged() {
+    void matchingLoginUserIsLogged() {
+        assertThat(loginMessages("/login?account=gugu&password=password"))
+                .containsExactly("login user found: gugu");
+    }
+
+    @Test
+    void equalsSignInQueryValueIsPreserved() {
+        assertThat(loginMessages("/login?account=gugu&password=password&note=a=b"))
+                .containsExactly("login user found: gugu");
+    }
+
+    @Test
+    void invalidLoginUserIsNotLogged() {
+        final var requestTargets = List.of(
+                "/login?account=gugu&password=wrong",
+                "/login?account=gugu&password",
+                "/login?account=gugu&password=pa=ss",
+                "/login?account=gugu&password=password&broken",
+                "/login?account=gugu&account=other&password=password");
+
+        for (final String requestTarget : requestTargets) {
+            assertThat(loginMessages(requestTarget)).as(requestTarget).isEmpty();
+        }
+    }
+
+    private List<String> loginMessages(final String requestTarget) {
         final var logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
         final var appender = new ListAppender<ILoggingEvent>();
         appender.start();
         logger.addAppender(appender);
 
         try {
-            final var requestTargets = List.of(
-                    "/login?account=gugu&password=password",
-                    "/login?account=gugu&password=wrong",
-                    "/login?account=gugu&password",
-                    "/login?account=gugu&password=pa=ss",
-                    "/login?account=gugu&password=password&broken",
-                    "/login?account=gugu&account=other&password=password");
+            final var socket = new StubSocket("GET " + requestTarget + " HTTP/1.1\r\n\r\n");
+            final var processor = new Http11Processor(socket);
 
-            for (final String requestTarget : requestTargets) {
-                final var socket = new StubSocket("GET " + requestTarget + " HTTP/1.1\r\n\r\n");
-                final var processor = new Http11Processor(socket);
+            processor.process(socket);
 
-                processor.process(socket);
-
-                assertThat(socket.output()).as(requestTarget).startsWith("HTTP/1.1 200 OK");
-            }
+            assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
+            return appender.list.stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .toList();
         } finally {
             logger.detachAppender(appender);
             appender.stop();
         }
-
-        assertThat(appender.list)
-                .extracting(ILoggingEvent::getFormattedMessage)
-                .containsExactly("login user found: gugu");
     }
 }

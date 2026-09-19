@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int REQUEST_LINE_PART_COUNT = 3;
     private static final int REQUEST_TARGET_INDEX = 1;
+    private static final int QUERY_PARAMETER_PART_COUNT = 2;
     private static final String INDEX_PATH = "/index.html";
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE_PATH = "/login.html";
@@ -111,14 +113,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> parseQueryParameters(final String queryString) {
-        final var pairs = Arrays.stream(queryString.split("&"))
-                .map(parameter -> parameter.split("=", 2))
+        final List<String[]> nameValuePairs = Arrays.stream(queryString.split("&"))
+                .map(parameter -> parameter.split("=", QUERY_PARAMETER_PART_COUNT))
                 .toList();
-        if (pairs.stream().anyMatch(pair -> pair.length != 2)) {
+        if (nameValuePairs.stream().anyMatch(pair -> pair.length != QUERY_PARAMETER_PART_COUNT)) {
             return Map.of();
         }
 
-        return pairs.stream().collect(Collectors.toMap(
+        return nameValuePairs.stream().collect(Collectors.toMap(
                 pair -> pair[0],
                 pair -> pair[1],
                 (previous, replacement) -> replacement));

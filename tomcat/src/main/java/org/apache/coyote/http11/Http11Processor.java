@@ -15,6 +15,8 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,31 +57,10 @@ public class Http11Processor implements Runnable, Processor {
                 if (url == null)
                     return;
                 final Path path = Path.of(url.getPath());
-                final String[] queryParams = uri.getQuery().split(QUERY_PARAM_DELIMITER);
 
-                String account = null;
-                String password = null;
-                for (int i = 0; i < queryParams.length; i++) {
-                    final String key = queryParams[i].split(QUERY_PARAM_VALUE_DELIMITER)[0];
-                    final String value = queryParams[i].split(QUERY_PARAM_VALUE_DELIMITER)[1];
+                final Map<String, String> params = extractQueryParams(uri);
 
-                    if (key.equals("account")) {
-                        account = value;
-                    }
-                    if (key.equals("password")) {
-                        password = value;
-                    }
-                }
-
-                User userByAccount = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(IllegalArgumentException::new);
-
-                if (!userByAccount.checkPassword(password)) {
-                    log.error("login error");
-                    throw new IllegalArgumentException();
-                }
-
-                log.info("user : {}", userByAccount);
+                login(params);
 
                 responseBody = Files.readString(path);
             }
@@ -105,6 +86,35 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> extractQueryParams(final URI uri) {
+        final String[] queryParams = uri.getQuery().split(QUERY_PARAM_DELIMITER);
+
+        final Map<String, String> params = new HashMap<>();
+
+        for (String queryParam : queryParams) {
+            final String key = queryParam.split(QUERY_PARAM_VALUE_DELIMITER)[0];
+            final String value = queryParam.split(QUERY_PARAM_VALUE_DELIMITER)[1];
+
+            params.put(key, value);
+        }
+        return params;
+    }
+
+    private void login(final Map<String, String> params) {
+        final String account = params.get("account");
+        final String password = params.get("password");
+
+        final User userByAccount = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(IllegalArgumentException::new);
+
+        if (!userByAccount.checkPassword(password)) {
+            log.error("login error");
+            throw new IllegalArgumentException();
+        }
+
+        log.info("user : {}", userByAccount);
     }
 
     private String getContentType(final String requestUri) {

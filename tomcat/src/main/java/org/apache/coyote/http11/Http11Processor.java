@@ -45,36 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String requestUri = requestLine.split(" ")[1];
-            final int queryIndex = requestUri.indexOf('?');
-            String path = requestUri;
-            if (queryIndex >= 0) {
-                path = requestUri.substring(0, queryIndex);
-            }
-
-            if ("/login".equals(path)) {
-                if (queryIndex >= 0) {
-                  
-                    final String queryString = requestUri.substring(queryIndex + 1);
-                    final Map<String, String> parameters = new HashMap<>();
-                    for (String parameter : queryString.split("&")) {
-                        final String[] pair = parameter.split("=", 2);
-                        if (pair.length == 2) {
-                            parameters.put(
-                                    URLDecoder.decode(pair[0], StandardCharsets.UTF_8),
-                                    URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
-                        }
-                    }
-
-                    final String account = parameters.get("account");
-                    final String password = parameters.get("password");
-                    if (account != null && password != null) {
-                        InMemoryUserRepository.findByAccount(account)
-                                .filter(user -> user.checkPassword(password))
-                                .ifPresent(user -> log.info("Login succeeded: account={}", user.getAccount()));
-                    }
-                }
-                path = "/login.html";
-            }
+            final String path = resolvePath(requestUri);
 
             String responseBody = "Hello world!";
             if ("/index.html".equals(path) || "/css/styles.css".equals(path) || "/login.html".equals(path)) {
@@ -85,7 +56,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
             }
 
-            final String contentType = requestUri.endsWith(".css") ? "text/css" : "text/html";
+            String contentType = "text/html";
+            if (path.endsWith(".css")) {
+                contentType = "text/css";
+            }
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -98,5 +72,50 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String resolvePath(final String requestUri) {
+        final int queryIndex = requestUri.indexOf('?');
+        String path = requestUri;
+        if (queryIndex >= 0) {
+            path = requestUri.substring(0, queryIndex);
+        }
+
+        if (!"/login".equals(path)) {
+            return path;
+        }
+
+        login(requestUri, queryIndex);
+        return "/login.html";
+    }
+
+    private void login(final String requestUri, final int queryIndex) {
+        if (queryIndex < 0) {
+            return;
+        }
+
+        final Map<String, String> parameters = parseQueryString(requestUri.substring(queryIndex + 1));
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("Login succeeded: account={}", user.getAccount()));
+    }
+
+    private Map<String, String> parseQueryString(final String queryString) {
+        final Map<String, String> parameters = new HashMap<>();
+        for (String parameter : queryString.split("&")) {
+            final String[] pair = parameter.split("=", 2);
+            if (pair.length == 2) {
+                parameters.put(
+                        URLDecoder.decode(pair[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
+            }
+        }
+        return parameters;
     }
 }

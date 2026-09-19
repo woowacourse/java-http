@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -143,14 +144,54 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginSuccessRedirectsToIndex() {
+    void registerPageIsServedWithGet() throws IOException {
         final var httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final var resource = getClass().getClassLoader().getResource("static/register.html");
+        final var body = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
+        final var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                body);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void registerWithPostSavesUserAndRedirectsToIndex() {
+        final var account = "new-user";
+        final var requestBody = "account=" + account + "&password=password&email=new-user%40woowahan.com";
+        final var socket = new StubSocket(postRequest("/register", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+    }
+
+    @Test
+    void loginSuccessRedirectsToIndex() {
+        final var requestBody = "account=gugu&password=password";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -167,13 +208,8 @@ class Http11ProcessorTest {
 
     @Test
     void loginFailureRedirectsToUnauthorizedPage() {
-        final var httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong-password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-        final var socket = new StubSocket(httpRequest);
+        final var requestBody = "account=gugu&password=wrong-password";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -186,6 +222,17 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String postRequest(final String path, final String requestBody) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
     }
 
 }

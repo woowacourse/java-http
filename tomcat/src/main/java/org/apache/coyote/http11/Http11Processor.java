@@ -2,12 +2,14 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.awt.image.PackedColorModel;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,12 +97,21 @@ public class Http11Processor implements Runnable, Processor {
             final var requestHeader = RequestHeader.from(reader);
             final var requestUri = RequestUri.from(requestHeader.path());
 
-            if (isLoginAttempt(requestUri)) {
-                final var responseHeader = loginRedirectResponseHeader(requestUri);
+            if (requestHeader.method().equals("POST")) {
+                final var requestBody = readRequestBody(reader, requestHeader);
+                final var parameters = RequestUri.parseParameters(requestBody);
 
-                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                return;
+                if (requestUri.path().equals("/register")) {
+                    register(parameters);
+                    redirect(outputStream, "/index.html");
+                    return;
+                }
+
+                if (requestUri.path().equals("/login")) {
+                    final var location = isLoginSuccess(parameters) ? "/index.html" : "/401.html";
+                    redirect(outputStream, location);
+                    return;
+                }
             }
 
             final var responseContent = responseContentFor(requestUri.path());
@@ -121,24 +132,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String loginRedirectResponseHeader(final RequestUri requestUri) {
-        final var location = isLoginSuccess(requestUri) ? "/index.html" : "/401.html";
+    private String readRequestBody(
+            final BufferedReader reader,
+            final RequestHeader requestHeader
+    ) throws IOException {
+        final var contentLength = Integer.parseInt(requestHeader.header("Content-Length"));
+        final var buffer = new char[contentLength];
 
-        return String.join("\r\n",
+        reader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
+    }
+
+    private void register(final Map<String, String> parameters) {
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
+        final var email = parameters.get("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
+
+    private void redirect(final OutputStream outputStream, final String location) throws IOException {
+        final var responseHeader = String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Location: " + location,
                 "Content-Length: 0",
                 "",
                 "");
+
+        outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
-    private boolean isLoginAttempt(final RequestUri requestUri) {
-        return requestUri.path().equals("/login") && !requestUri.queryParameters().isEmpty();
-    }
-
-    private boolean isLoginSuccess(final RequestUri requestUri) {
-        final var account = requestUri.queryParameter("account");
-        final var password = requestUri.queryParameter("password");
+    private boolean isLoginSuccess(final Map<String, String> parameters) {
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
 
         if (account == null || password == null) {
             return false;
@@ -147,25 +175,5 @@ public class Http11Processor implements Runnable, Processor {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .isPresent();
-    }
-
-    private void logLoginResult(final RequestUri requestUri) {
-        if (!requestUri.path().equals("/login")) {
-            return;
-        }
-
-        final var account = requestUri.queryParameter("account");
-        final var password = requestUri.queryParameter("password");
-
-        if (account == null || password == null) {
-            return;
-        }
-
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(
-                        user -> log.info("login succeeded: user={}", user),
-                        () -> log.warn("login failed: account={}", account)
-                );
     }
 }

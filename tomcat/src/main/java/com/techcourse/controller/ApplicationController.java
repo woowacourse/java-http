@@ -29,7 +29,7 @@ public class ApplicationController {
         if (account != null && password != null) {
             var user = applicationService.login(account, password);
             if (user.isPresent()) {
-                log.info("User :{}", user.get());
+                log.info("Login successful: account={}", user.get().getAccount());
                 session.setAttribute("user", user.get());
                 return new ControllerResult.Redirect("/index.html");
             }

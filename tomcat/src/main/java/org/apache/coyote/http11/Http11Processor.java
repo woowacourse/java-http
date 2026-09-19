@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -20,8 +21,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final Map<String, String> CONTENT_TYPES = Map.of(
-            ".html", "text/html;charset=utf-8",
+            ".html", DEFAULT_CONTENT_TYPE,
             ".css", "text/css;charset=utf-8",
             ".js", "application/javascript;charset=utf-8"
     );
@@ -41,9 +43,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
@@ -125,6 +127,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
+            log.info("account doesn't exist: {}", account);
             return;
         }
         User foundUser = user.get();
@@ -151,31 +154,37 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final String path, final InputStream resourceStream) throws IOException {
-        if (path.equals("/")) {
-            return "Hello world!";
+        try (InputStream stream = resourceStream) {
+            if (path.equals("/")) {
+                return "Hello world!";
+            }
+            return new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
         }
-        return new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
     }
+        private String createResponse ( final String status, final String resourcePath, final String responseBody){
+            final String contentType = getContentType(resourcePath);
+            byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+            return String.format(
+                    "HTTP/1.1 %s \r\n"
+                            + "Content-Type: %s \r\n"
+                            + "Content-Length: %d \r\n"
+                            + "\r\n"
+                            + "%s",
+                    status,
+                    contentType,
+                    responseBodyBytes.length,
+                    responseBody
+            );
+        }
 
-    private String createResponse(final String status, final String resourcePath, final String responseBody) {
-        String contentType = CONTENT_TYPES.entrySet()
-                .stream()
-                .filter(entry -> resourcePath.endsWith(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse("text/html;charset=utf-8");
+        private String getContentType ( final String resourcePath){
+            final int lastSlashIndex = resourcePath.lastIndexOf("/");
+            final int lastDotIndex = resourcePath.lastIndexOf(".");
 
-        byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-        return String.format(
-                "HTTP/1.1 %s \r\n"
-                        + "Content-Type: %s \r\n"
-                        + "Content-Length: %d \r\n"
-                        + "\r\n"
-                        + "%s",
-                status,
-                contentType,
-                responseBodyBytes.length,
-                responseBody
-        );
+            if (lastDotIndex <= lastSlashIndex) {
+                return DEFAULT_CONTENT_TYPE;
+            }
+            final String extension = resourcePath.substring(lastDotIndex).toLowerCase(Locale.ROOT);
+            return CONTENT_TYPES.getOrDefault(extension, DEFAULT_CONTENT_TYPE);
+        }
     }
-}

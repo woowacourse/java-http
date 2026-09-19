@@ -11,6 +11,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorRegisterTest {
 
     @Test
+    void GET_방식으로_회원가입_페이지를_조회한다() {
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("<title>회원가입</title>");
+    }
+
+    @Test
     void POST_방식으로_회원가입한다() {
         final String requestBody =
                 "account=new-user&password=password&email=new-user%40example.com";

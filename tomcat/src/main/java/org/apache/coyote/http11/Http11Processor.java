@@ -119,7 +119,10 @@ public class Http11Processor implements Runnable, Processor {
         if (path.equals("/")) {
             return "Hello world!".getBytes();
         }
-        final String resourcePath = path.equals("/login") ? "/login.html" : path;
+        String resourcePath = path;
+        if (path.equals("/login") || path.equals("/register")) {
+            resourcePath = path + ".html";
+        }
         final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
         if (resource == null) {
             return null;

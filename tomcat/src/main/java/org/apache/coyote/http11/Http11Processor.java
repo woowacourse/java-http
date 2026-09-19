@@ -22,7 +22,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
     private static final String CRLF = "\r\n";
-    private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
     private final Socket connection;
 
@@ -86,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         if (CSS_PATH.equals(requestTarget)) {
             return new HttpResponse(CSS_CONTENT_TYPE, readResource(requestTarget));
         }
-        return new HttpResponse(HTML_CONTENT_TYPE, HELLO_WORLD);
+        return new HttpResponse(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
     }
 
     private byte[] readResource(final String requestTarget) throws IOException {

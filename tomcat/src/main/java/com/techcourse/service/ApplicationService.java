@@ -28,8 +28,4 @@ public class ApplicationService {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
     }
-
-    public boolean isUser(User user) {
-        return InMemoryUserRepository.findByAccount(user.getAccount()).isPresent();
-    }
 }

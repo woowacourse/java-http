@@ -1,6 +1,5 @@
 package com.techcourse.controller;
 
-import com.techcourse.model.User;
 import com.techcourse.exception.DuplicateAccountException;
 import com.techcourse.service.ApplicationService;
 import java.util.Map;
@@ -22,12 +21,9 @@ public class ApplicationController {
         String account = params.get("account");
         String password = params.get("password");
 
-        if (session.getAttribute("user") != null) {
-            var user = session.getAttribute("user");
-            if(applicationService.isUser((User) user)){
-                return new ControllerResult.Redirect("/index.html");
-            }
-            return new ControllerResult.Redirect("/401.html");
+        var sessionUser = session.getAttribute("user");
+        if (sessionUser != null) {
+            return new ControllerResult.Redirect("/index.html");
         }
 
         if (account != null && password != null) {

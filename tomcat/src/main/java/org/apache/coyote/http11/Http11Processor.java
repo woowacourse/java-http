@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (request.getMethod().equals("POST") && request.getPath().equals("/login")) {
-                final boolean loginSucceed = login(request.getBodyParams());
+                final boolean loginSucceed = login(request);
                 final String location = loginSucceed ? "/index.html" : "/401.html";
                 response.sendRedirect(location);
                 return;
@@ -85,7 +85,8 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
     }
 
-    private boolean login(final Map<String, String> params) {
+    private boolean login(final HttpRequest request) {
+        final Map<String, String> params = request.getBodyParams();
         final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
         if (user.isEmpty()) {
             log.info("존재하지 않는 계정입니다.");
@@ -99,6 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info("로그인 성공! 아이디 : {}", foundUser.getAccount());
+        request.getSession(true).setAttribute("user", foundUser);
         return true;
     }
 

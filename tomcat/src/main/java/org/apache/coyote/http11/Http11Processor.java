@@ -3,12 +3,13 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,9 +19,6 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -29,12 +27,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PATH = "/login";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
     private static final String HTML_EXTENSION = ".html";
+    private static final String CSS_EXTENSION = ".css";
+    private static final String JS_EXTENSION = ".js";
+    private static final String HTML_CONTENT_TYPE = "text/html";
+    private static final String CSS_CONTENT_TYPE = "text/css";
+    private static final String JS_CONTENT_TYPE = "text/javascript";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
-    private static final String HTML_CONTENT_TYPE = "text/html";
-    private static final String CSS_CONTENT_TYPE = "text/css";
-    private static final String ACCEPT_HEADER_PREFIX = "Accept:";
     private static final String CRLF = "\r\n";
     private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK ";
     private static final String CONTENT_TYPE_HEADER_PREFIX = "Content-Type: ";
@@ -61,9 +61,11 @@ public class Http11Processor implements Runnable, Processor {
             // 요청 라인 분리, 헤더 리스트 생성
             String[] requestLine = bufferedReader.readLine().split(" ");
             List<String> header = new ArrayList<>();
-            while(true) {
+            while (true) {
                 String line = bufferedReader.readLine();
-                if(line == null || line.isEmpty()) break;
+                if (line == null || line.isEmpty()) {
+                    break;
+                }
                 header.add(line);
             }
 
@@ -78,25 +80,25 @@ public class Http11Processor implements Runnable, Processor {
             String urlPath = devidedUrlQuery[0];
             Map<String, String> queryMap = new LinkedHashMap<>();
 
-            if(isQuery) {
+            if (isQuery) {
                 String queryString = devidedUrlQuery[1];
-                if(queryString != null && !queryString.isBlank()) {
+                if (queryString != null && !queryString.isBlank()) {
                     String[] query = queryString.split("&");
-                    for(int i = 0; i < query.length; i++) {
+                    for (int i = 0; i < query.length; i++) {
                         String[] value = query[i].split("=");
                         queryMap.put(value[0], value[1]);
                     }
                 }
             }
 
-
             // 경로 없음 -> Hello world!
             // 경로 존재하면 파일 읽기
             String responseBody;
-            if(url.equals(ROOT_PATH)) {
+            if (url.equals(ROOT_PATH)) {
                 responseBody = DEFAULT_RESPONSE_BODY;
             } else if (urlPath.equals(LOGIN_PATH)) {
-                URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + urlPath + HTML_EXTENSION);
+                URL resource = getClass().getClassLoader()
+                        .getResource(STATIC_RESOURCE_DIRECTORY + urlPath + HTML_EXTENSION);
                 responseBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
             } else {
                 URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + urlPath);
@@ -104,22 +106,20 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 로그
-            if(urlPath.equals(LOGIN_PATH) && isQuery && queryMap.containsKey(ACCOUNT_PARAMETER) && queryMap.containsKey(PASSWORD_PARAMETER)) {
+            if (urlPath.equals(LOGIN_PATH) && isQuery && queryMap.containsKey(ACCOUNT_PARAMETER)
+                    && queryMap.containsKey(PASSWORD_PARAMETER)) {
                 InMemoryUserRepository.findByAccount(queryMap.get(ACCOUNT_PARAMETER))
                         .filter(user -> user.checkPassword(queryMap.get(PASSWORD_PARAMETER)))
                         .ifPresent(user -> log.info("회원 조회 성공: {}", user));
             }
 
-            // 헤더를 하나씩 읽으면서 Accept 존재하면 확장자 설정
-            // Accept 존재하지 않으면 기본값 text/html로 설정
+            // 요청 경로 확장자로 Content-Type 결정
             String contentType = HTML_CONTENT_TYPE;
-            for(String line : header) {
-                if(line.startsWith(ACCEPT_HEADER_PREFIX)) {
-                    if(line.contains(CSS_CONTENT_TYPE)) {
-                        contentType = CSS_CONTENT_TYPE;
-                    }
-                    break;
-                }
+
+            if (urlPath.endsWith(CSS_EXTENSION)) {
+                contentType = CSS_CONTENT_TYPE;
+            } else if (urlPath.endsWith(JS_EXTENSION)) {
+                contentType = JS_CONTENT_TYPE;
             }
 
             final var response = String.join(CRLF,

@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,7 +17,13 @@ class Http11ProcessorTest {
 
     @Test
     void process() {
-        final var socket = new StubSocket();
+        final var httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=existing-session ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -36,6 +44,7 @@ class Http11ProcessorTest {
                 "GET /missing.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -59,6 +68,7 @@ class Http11ProcessorTest {
                 "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -89,6 +99,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
 
@@ -116,6 +127,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
 
@@ -143,11 +155,12 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void registerPageIsServedWithGet() throws IOException {
         final var httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -155,7 +168,7 @@ class Http11ProcessorTest {
 
         processor.process(socket);
 
-        final var resource = getClass().getClassLoader().getResource("static/login.html");
+        final var resource = getClass().getClassLoader().getResource("static/register.html");
         final var body = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
         final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -165,6 +178,142 @@ class Http11ProcessorTest {
                 body);
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void registerWithPostSavesUserAndRedirectsToIndex() {
+        final var account = "new-user";
+        final var requestBody = "account=" + account + "&password=password&email=new-user%40woowahan.com";
+        final var socket = new StubSocket(postRequest("/register", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+    }
+
+    @Test
+    void loggedInUserIsRedirectedToIndexWhenAccessingLoginPage() {
+        final var requestBody = "account=gugu&password=password";
+        final var loginSocket = new StubSocket(postRequestWithoutSession("/login", requestBody));
+        final var loginProcessor = new Http11Processor(loginSocket);
+
+        loginProcessor.process(loginSocket);
+
+        assertThat(loginSocket.output()).contains("Location: /index.html");
+        final var sessionId = sessionIdFrom(loginSocket.output());
+        final var loginPageRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + sessionId + " ",
+                "",
+                "");
+        final var loginPageSocket = new StubSocket(loginPageRequest);
+        final var loginPageProcessor = new Http11Processor(loginPageSocket);
+
+        loginPageProcessor.process(loginPageSocket);
+
+        final var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+
+        assertThat(loginPageSocket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFailureRedirectsToUnauthorizedPage() {
+        final var requestBody = "account=gugu&password=wrong-password";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /401.html",
+                "Content-Length: 0",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void responseSetsSessionCookieWhenRequestDoesNotHaveJSessionId() {
+        final var httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+    }
+
+    @Test
+    void responseDoesNotSetSessionCookieWhenRequestAlreadyHasSessionId() {
+        final var httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; JSESSIONID=existing-session ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    private String postRequest(final String path, final String requestBody) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session ",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+    }
+
+    private String postRequestWithoutSession(final String path, final String requestBody) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+    }
+
+    private String sessionIdFrom(final String response) {
+        final var matcher = Pattern.compile("Set-Cookie: JSESSIONID=([^\\r\\n]+)")
+                .matcher(response);
+
+        assertThat(matcher.find()).isTrue();
+
+        return matcher.group(1);
     }
 
 }

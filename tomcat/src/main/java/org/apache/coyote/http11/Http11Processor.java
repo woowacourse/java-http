@@ -139,11 +139,21 @@ public class Http11Processor implements Runnable, Processor {
         final var queryString = uri.substring(queryIndex + 1);
 
         return Arrays.stream(queryString.split("&"))
-                .map(parameter -> parameter.split("=", 2))
+                .map(this::parseParameter)
                 .collect(Collectors.toMap(
                         pair -> pair[0],
                         pair -> pair[1]
                 ));
+    }
+
+    private String[] parseParameter(final String parameter) {
+        final var pair = parameter.split("=", 2);
+
+        if (pair.length != 2 || pair[0].isEmpty()) {
+            throw new IllegalArgumentException("잘못된 Query String 입니다. " + parameter);
+        }
+
+        return pair;
     }
 
     private boolean authenticate(Map<String, String> parameters) {

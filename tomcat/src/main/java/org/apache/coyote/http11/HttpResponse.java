@@ -30,13 +30,22 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse notFound(byte[] body) {
+        return new HttpResponse(
+                404,
+                "NOT FOUND",
+                "text/html;charset=utf-8",
+                body
+        );
+    }
+
     @Override
     public String toString() {
         return String.join(
                 "\r\n",
-                "HTTP/1.1 " + statusCode + " " + statusText,
-                "Content-Type: " + contentType,
-                "Content-Length: " + body.length,
+                "HTTP/1.1 " + statusCode + " " + statusText + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + body.length + " ",
                 "",
                 new String(body, StandardCharsets.UTF_8)
         );

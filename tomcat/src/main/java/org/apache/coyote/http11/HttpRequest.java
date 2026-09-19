@@ -40,7 +40,11 @@ public class HttpRequest {
         return new HttpRequest(HttpMethod.valueOf(method), path, params);
     }
 
-    public boolean isGetMethod() {
+    public boolean isMatched(HttpMethod method, String path) {
+        return this.method == method && this.path.equals(path);
+    }
+
+    public boolean isGet() {
         return this.method == HttpMethod.GET;
     }
 

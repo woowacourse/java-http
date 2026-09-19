@@ -43,31 +43,38 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequest.from(requestLine);
 
-            if (request.isGetMethod() && request.getPath().equals("/index.html")) {
-                writeStaticResource("static/index.html", "text/html;charset=utf-8", outputStream);
+            if (request.isMatched(HttpMethod.GET, "/login")) {
+                handleLogin(request);
+                writeStaticResource("/login.html", outputStream);
                 return;
             }
 
-            if (request.isGetMethod() && request.getPath().equals("/css/styles.css")) {
-                writeStaticResource("static/css/styles.css", "text/css;charset=utf-8", outputStream);
+            if (request.isMatched(HttpMethod.GET, "/")) {
+                handleRoot(outputStream);
                 return;
             }
 
-            if (request.isGetMethod() && request.getPath().equals("/login")) {
-                User user = findUserOrThrow(request);
-                validatePassword(user, request);
-
-                writeStaticResource("static/login.html", "text/html;charset=utf-8", outputStream);
-                log.info(user.toString());
+            if (request.isGet() && isStaticResource(request.getPath())) {
+                writeStaticResource(request.getPath(), outputStream);
                 return;
             }
 
-            byte[] body = "Hello World!".getBytes();
-            HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", body);
-            writeResponse(outputStream, response);
+            // 404
+            writeNotFoundResponse(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handleLogin(HttpRequest request) throws IOException {
+        User user = findUserOrThrow(request);
+        validatePassword(user, request);
+        log.info(user.toString());
+    }
+
+    private User findUserOrThrow(HttpRequest request) {
+        return InMemoryUserRepository.findByAccount(request.getParamValue("account"))
+                .orElseThrow(() -> new RuntimeException("아이디 또는 비밀번호가 틀렸습니다."));
     }
 
     private void validatePassword(User user, HttpRequest request) {
@@ -76,13 +83,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private User findUserOrThrow(HttpRequest request) {
-        return InMemoryUserRepository.findByAccount(request.getParamValue("account"))
-                .orElseThrow(() -> new RuntimeException("아이디 또는 비밀번호가 틀렸습니다."));
-    }
+    private void writeStaticResource(String path, OutputStream outputStream) throws IOException {
+        String resourcePath = "static" + path;
 
-    private void writeStaticResource(String path, String contentType, OutputStream outputStream) throws IOException {
-        byte[] body = getResourceFileBytes(path);
+        byte[] body = getResourceFileBytes(resourcePath);
+        String contentType = resolveContentType(path);
+
         HttpResponse response = HttpResponse.ok(contentType, body);
         writeResponse(outputStream, response);
     }
@@ -94,6 +100,40 @@ public class Http11Processor implements Runnable, Processor {
             }
             return fileStream.readAllBytes();
         }
+    }
+
+    private String resolveContentType(String path) {
+        if (path.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+
+        if (path.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
+
+        return "application/octet-stream";
+    }
+
+    private void handleRoot(OutputStream outputStream) throws IOException {
+        byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+        HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", body);
+        writeResponse(outputStream, response);
+    }
+
+    private boolean isStaticResource(String path) {
+        return path.endsWith(".html")
+                || path.endsWith(".css")
+                || path.endsWith(".js");
+    }
+
+    private void writeNotFoundResponse(OutputStream outputStream) throws IOException {
+        byte[] body = getResourceFileBytes("static/404.html");
+        HttpResponse response = HttpResponse.notFound(body);
+        writeResponse(outputStream, response);
     }
 
     private void writeResponse(

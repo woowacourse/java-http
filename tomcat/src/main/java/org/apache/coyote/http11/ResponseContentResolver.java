@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-final class ResponseContentResolver {
+class ResponseContentResolver {
 
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";

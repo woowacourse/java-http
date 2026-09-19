@@ -65,4 +65,33 @@ class HttpRequestTest {
                 .containsEntry("password", "password")
                 .containsEntry("email", "new-user@example.com");
     }
+
+    @Test
+    void Cookie_헤더에서_JSESSIONID를_조회한다() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: yummy_cookie=choco; JSESSIONID=session-id",
+                "",
+                "");
+        final BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+
+        final HttpRequest request = HttpRequest.from(reader);
+
+        assertThat(request.getCookies().getValue("JSESSIONID")).contains("session-id");
+    }
+
+    @Test
+    void Cookie_헤더가_없으면_JSESSIONID를_조회할_수_없다() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+
+        final HttpRequest request = HttpRequest.from(reader);
+
+        assertThat(request.getCookies().getValue("JSESSIONID")).isEmpty();
+    }
 }

@@ -123,4 +123,8 @@ public class HttpRequest {
     public Map<String, String> getBodyParams() {
         return bodyParams;
     }
+
+    public HttpCookie getCookies() {
+        return HttpCookie.from(getHeader("Cookie"));
+    }
 }

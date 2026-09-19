@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
-                if(user.isEmpty()){
+                if (user.isEmpty()) {
                     throw new NoSuchElementException("존재하지 않는 사용자입니다.");
                 }
                 User foundUser = user.get();
@@ -100,11 +101,11 @@ public class Http11Processor implements Runnable, Processor {
             final var response = String.join(CRLF,
                     HTTP_1_1_200_OK,
                     contentType,
-                    CONTENT_LENGTH + responseBody.getBytes().length + " ",
+                    CONTENT_LENGTH + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

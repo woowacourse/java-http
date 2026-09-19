@@ -40,7 +40,6 @@ public class Http11Processor implements Runnable, Processor {
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             final String requestLine = reader.readLine();
-            log.info("request line: {}", requestLine);
 
             if (requestLine == null) {
                 return;
@@ -57,8 +56,8 @@ public class Http11Processor implements Runnable, Processor {
             final String path = targetParts[0];
             final String httpVersion = parts[2];
 
-            log.info("method: {}, target: {}, version: {}",
-                    method, requestTarget, httpVersion);
+            log.info("method: {}, path: {}, version: {}",
+                    method, path, httpVersion);
 
             if ("/login".equals(path) && targetParts.length == 2) {
                 final Map<String, String> parameters = parseQuery(targetParts[1]);
@@ -104,6 +103,8 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
             outputStream.flush();
+        } catch (IllegalArgumentException e) {
+            log.warn("잘못된 쿼리 인코딩입니다.");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

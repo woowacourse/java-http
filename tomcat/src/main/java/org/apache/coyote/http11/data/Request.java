@@ -131,6 +131,7 @@ public class Request {
 
         return Arrays.stream(parameters)
                 .map(parameter -> parameter.split("="))
+                .filter(keyValue -> keyValue.length == 2)
                 .collect(
                         HashMap::new,
                         (map, keyValue) -> map.put(keyValue[0], keyValue[1]),

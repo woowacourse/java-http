@@ -1,12 +1,24 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.MyHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Map;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +41,72 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            MyHttpRequest httpRequest =
+                    MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
+            log.info("start request: {} {}", httpRequest.method(), httpRequest.uri());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (isLoginRequest(httpRequest)) {
+                authenticate(httpRequest);
+            }
+
+            final var responseBody = readStaticResource(httpRequest, "Hello world!");
+            final var response = buildHttpResponse(httpRequest, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String readHttpRequest(BufferedReader br) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        String line;
+        while (!(line = br.readLine()).isEmpty()) {
+            sb.append(line).append("\r\n");
+        }
+        return sb.toString();
+    }
+
+    private static boolean isLoginRequest(MyHttpRequest httpRequest) {
+        return httpRequest.resourcePath().equals("login")
+                && httpRequest.hasQueryParameter();
+    }
+
+    private static void authenticate(MyHttpRequest httpRequest) {
+        Map<String, String> queryParams = httpRequest.queryParameters();
+
+        User user = getUserByAccount(queryParams.get("account"));
+
+        if (user.checkPassword(queryParams.get("password"))) {
+            log.info("user matched={}", user);
+        }
+    }
+
+    private static User getUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+    }
+
+    private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)
+            throws IOException, URISyntaxException {
+        URL fileUrl = Http11Processor.class
+                .getClassLoader()
+                .getResource(httpRequest.resourcePath());
+        File file = new File(Objects.requireNonNull(fileUrl).toURI());
+        if (file.isFile()) {
+            return Files.readString(file.toPath(), StandardCharsets.UTF_8);
+        }
+        return defaultContent;
+    }
+
+    private static String buildHttpResponse(MyHttpRequest httpRequest, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + httpRequest.contentType() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
     }
 }

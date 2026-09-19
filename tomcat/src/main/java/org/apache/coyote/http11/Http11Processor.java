@@ -123,10 +123,11 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("로그인 시도 - account: {}, password: {}", account, password);
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(foundUser -> foundUser.checkPassword(password));
         user.ifPresentOrElse(
                 foundUser -> log.info("회원 조회 결과: {}", foundUser),
-                () -> log.info("회원을 찾을 수 없습니다. account: {}", account)
+                () -> log.info("아이디 또는 비밀번호가 일치하지 않습니다. account: {}", account)
         );
     }
 

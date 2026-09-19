@@ -41,10 +41,14 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             String[] parts = requestLine.split(" ");
-            String requestPath = parts[1];
+
+            String requestTarget = parts[1];
+            String requestPath = extractPath(requestTarget);
+            String resourcePath = resolveResourcePath(requestPath);
+
             byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
-            if (!requestPath.equals("/")) {
-                String fileName = STATIC_RESOURCE_PREFIX + parts[1];
+            if (!resourcePath.equals("/")) {
+                String fileName = STATIC_RESOURCE_PREFIX + resourcePath;
                 URL resource = getClass().getClassLoader().getResource(fileName);
                 if (resource != null) {
                     Path path = Paths.get(resource.toURI());
@@ -65,6 +69,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractPath(String requestTarget) {
+        int queryStart = requestTarget.indexOf("?");
+        if (queryStart == -1) {
+            return requestTarget;
+        }
+        return requestTarget.substring(0, queryStart);
+    }
+
+    private String resolveResourcePath(String requestPath) {
+        if (requestPath.equals("/login")) {
+            return "/login.html";
+        }
+        return requestPath;
     }
 
     private String contentTypeOf(String requestPath) {

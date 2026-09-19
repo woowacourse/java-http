@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -99,6 +101,57 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains("Content-Type: text/css;charset=utf-8");
+    }
+
+    @Test
+    void Query_String이_있는_로그인_요청에_로그인_페이지를_반환한다() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String expected = Files.readString(new File(resource.getFile()).toPath());
+
+        assertThat(socket.output()).endsWith("\r\n\r\n" + expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "/index.html, static/index.html",
+            "/css/styles.css, static/css/styles.css",
+            "/login, static/login.html",
+            "/login?account=gugu&password=password HTTP/1.1 , static/login.html"
+    })
+    void 요청_경로에_해당하는_정적_리소스를_반환한다(String requestTarget, String resourcePath) throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET " + requestTarget + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
+        final String expected = Files.readString(new File(resource.getFile()).toPath());
+
+        assertThat(socket.output()).endsWith("\r\n\r\n" + expected);
     }
 
 }

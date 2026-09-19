@@ -22,6 +22,10 @@ public class RequestHandler {
             return handleLogin(request);
         }
 
+        if (path.equals("/register")) {
+            return HttpResponse.ok("text/html", readResource(findResource("/register.html")));
+        }
+
         final var resource = findResource(path);
         if (resource == null) {
             return HttpResponse.notFound("text/html", readResource(findResource("/404.html")));

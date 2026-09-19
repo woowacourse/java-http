@@ -9,10 +9,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,12 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.from(line);
 
             String path = request.path();
-
-            final var responseBody = getResponseBody(request);
-            final var response = HttpResponse.ok(
-                    getContentType(path),
-                    responseBody
-            );
+            final var response = getResponse(request);
 
             outputStream.write(response.toBytes());
             outputStream.flush();
@@ -58,25 +51,36 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(final HttpRequest request) {
+    private HttpResponse getResponse(final HttpRequest request) {
         String path = request.path();
+        if (!path.equals("/") && isResourcePresent(path)) {
+            return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView(path));
+        }
 
         if (path.equals("/") && request.method().equals("GET")) {
-            return "Hello world!";
+            return new HttpResponse(HttpStatus.OK, getContentType(path), "Hello world");
         }
         if (path.equals("/login") && request.method().equals("GET")) {
+            String body = (modelToView("/login.html"));
             if (!request.hasParameters()) {
-                return modelToView("/login.html");
+                return new HttpResponse(HttpStatus.OK, getContentType(path), body);
             }
             String account = request.getParameter("account");
             String password = request.getParameter("password");
 
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user -> log.info(user.toString()));
-            return modelToView("/login.html");
+            if (isLoginSuccess(account, password)) {
+                return new HttpResponse(HttpStatus.FOUND, getContentType(path), body, URI.create("/index.html"));
+            }
+            return new HttpResponse(HttpStatus.FOUND, getContentType(path), body, URI.create("/401.html"));
         }
-        return modelToView(path);
+
+        return new HttpResponse(HttpStatus.BAD_REQUEST, getContentType(path), "Bad Request");
+    }
+
+    private boolean isLoginSuccess(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
     }
 
     private String getContentType(String path) {
@@ -89,12 +93,16 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html; charset=utf-8";
     }
 
-    @Nonnull
+    private boolean isResourcePresent(String path) {
+        final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + path);
+        return resource != null;
+    }
+
     private String modelToView(String path) {
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + path);
         if (resource == null) {
             log.info("존재하지 않는 파일 명입니다. 파일 경로를 확인해주세요. path: {}", path);
-            return "잘못된 주소입니다.";
+            return "";
         }
         try {
             URI uri = resource.toURI();
@@ -102,6 +110,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-        return "잘못된 주소입니다";
+        return "";
     }
 }

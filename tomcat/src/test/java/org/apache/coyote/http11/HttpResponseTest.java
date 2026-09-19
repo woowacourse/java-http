@@ -8,7 +8,7 @@ class HttpResponseTest {
 
     @Test
     void OK_응답을_바이트로_변환한다() {
-        HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", "Hello world!");
+        HttpResponse response = new HttpResponse(HttpStatus.OK,"text/html;charset=utf-8", "Hello world!");
 
         String actual = new String(response.toBytes());
 

@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
@@ -12,7 +13,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Dispatcher;
@@ -24,10 +29,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
     private final Dispatcher dispatcher;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final Dispatcher dispatcher) {
+    public Http11Processor(final Socket connection, final Dispatcher dispatcher, final SessionManager sessionManager) {
         this.connection = connection;
         this.dispatcher = dispatcher;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -38,11 +45,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
+             final var outputStream = connection.getOutputStream()) {
 
-            Optional<HttpResponse> response = handleRequest(reader);
+            Optional<HttpResponse> response = handleRequest(inputStream);
             if (response.isEmpty()) {
                 return;
             }
@@ -53,14 +59,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<HttpResponse> handleRequest(BufferedReader reader) throws IOException {
+    private Optional<HttpResponse> handleRequest(InputStream inputStream) throws IOException {
         try {
-            Optional<HttpRequest> request = parseRequest(reader);
+            Optional<HttpRequest> request = parseRequest(inputStream);
             if (request.isEmpty()) {
                 return Optional.empty();
             }
 
-            return Optional.of(dispatcher.dispatch(request.get()));
+            String sessionId = request.get().cookies().getCookie("JSESSIONID");
+            Session session = sessionManager.findSession(sessionId);
+            boolean created = session == null || !session.isValid();
+
+            if (created) {
+                if (session != null) {
+                    sessionManager.remove(session);
+                }
+                session = new Session(UUID.randomUUID().toString());
+                sessionManager.add(session);
+            }
+
+            HttpResponse response = dispatcher.dispatch(request.get(), session);
+
+            if (created) {
+                response = response.withCookie("JSESSIONID", session.getId());
+            }
+
+            return Optional.of(response);
         } catch (BadRequestException e) {
             return Optional.of(HttpResponse.badRequest(
                     "400 Bad Request".getBytes(StandardCharsets.UTF_8)
@@ -68,8 +92,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<HttpRequest> parseRequest(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
+    private Optional<HttpRequest> parseRequest(InputStream inputStream) throws IOException {
+        String requestLine = readline(inputStream);
         if (requestLine == null) {
             return Optional.empty();
         }
@@ -82,11 +106,41 @@ public class Http11Processor implements Runnable, Processor {
 
         URI uri = createUri(parts[1], requestLine);
 
+        Map<String, String> headers = readHeaders(inputStream);
+        String body = readBody(inputStream, headers);
+
+        Map<String, String> parameters = parseParameters(uri.getRawQuery());
+        if (isFormUrlEncoded(headers.get("content-type"))) {
+            parameters.putAll(parseParameters(body));
+        }
+
         return Optional.of(new HttpRequest(
                 parts[0],
                 uri.getPath(),
-                parseQueryParameters(uri.getRawQuery())
+                parameters,
+                parseCookies(headers.get("cookie"))
         ));
+    }
+
+    private boolean isFormUrlEncoded(String contentType) {
+        return contentType != null
+                && contentType.split(";", 2)[0].trim()
+                        .equalsIgnoreCase("application/x-www-form-urlencoded");
+    }
+
+    private HttpCookie parseCookies(String cookieHeader) {
+        Map<String, String> cookies = new HashMap<>();
+        if (cookieHeader == null || cookieHeader.isBlank()) {
+            return new HttpCookie(cookies);
+        }
+
+        for (String cookie : cookieHeader.split(";")) {
+            String[] parts = cookie.trim().split("=", 2);
+            if (parts.length == 2 && !parts[0].isBlank()) {
+                cookies.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+        return new HttpCookie(cookies);
     }
 
     private URI createUri(String target, String requestLine) {
@@ -97,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseQueryParameters(String rawQuery) {
+    private Map<String, String> parseParameters(String rawQuery) {
         Map<String, String> query = new HashMap<>();
 
         if (rawQuery == null || rawQuery.isBlank()) {
@@ -112,28 +166,98 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addQueryParameter(Map<String, String> query, String parameter) {
-        String[] keyValue = parameter.split("=");
-        String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+        String[] keyValue = parameter.split("=", 2);
+        String key = decodeParameter(keyValue[0]);
         String value = "";
 
         if (keyValue.length == 2) {
-            value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            value = decodeParameter(keyValue[1]);
         }
 
         query.put(key, value);
     }
 
+    private String decodeParameter(String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid URL encoding");
+        }
+    }
+
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-        String headers = String.join("\r\n",
+        StringBuilder headers = new StringBuilder(String.join("\r\n",
                 "HTTP/1.1 " + response.statusCode(),
                 "Content-Type: " + response.contentType(),
                 "Content-Length: " + response.contentLength(),
-                "",
                 ""
-        );
+        ));
+        response.headers().forEach((name, value) ->
+                headers.append(name).append(": ").append(value).append("\r\n"));
+        headers.append("\r\n");
 
-        outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(headers.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(response.body());
         outputStream.flush();
+    }
+
+    private String readline(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream line = new ByteArrayOutputStream();
+
+        while (true) {
+            int value = inputStream.read();
+
+            if (value == -1) {
+                if (line.size() == 0) {
+                    return null;
+                }
+                throw new BadRequestException("Incomplete HTTP line");
+            }
+
+            if (value == '\r') {
+                if (inputStream.read() != '\n') {
+                    throw new BadRequestException("Invalid line ending");
+                }
+                return line.toString(StandardCharsets.ISO_8859_1);
+            }
+
+            if (value == '\n') {
+                throw new BadRequestException("Invalid line ending");
+            }
+
+            line.write(value);
+        }
+    }
+
+    private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = readline(inputStream)) != null && !line.isBlank()) {
+            String[] parts = line.split(":", 2);
+            if (parts.length == 2) {
+                headers.put(parts[0].trim().toLowerCase(), parts[1].trim());
+            }
+        }
+        return headers;
+    }
+
+    private String readBody(InputStream inputStream, Map<String, String> headers) throws IOException {
+        if (headers.containsKey("content-length")) {
+            int contentLength = parseContentLength(headers.get("content-length"));
+            byte[] body = inputStream.readNBytes(contentLength);
+            return new String(body, StandardCharsets.UTF_8);
+        }
+        return "";
+    }
+
+    private int parseContentLength(String value) {
+        if (!value.matches("[0-9]+")) {
+            throw new BadRequestException("Invalid Content-Length");
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Content-Length is out of range");
+        }
     }
 }

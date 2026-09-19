@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -55,6 +56,92 @@ class Http11ProcessorTest {
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final String cssFile = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + cssFile.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                cssFile);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void js() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
+        final String cssFile = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + cssFile.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                cssFile);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 204 No Content \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

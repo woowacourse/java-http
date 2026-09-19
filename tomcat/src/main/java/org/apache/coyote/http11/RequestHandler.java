@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -14,40 +12,44 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-
     public HttpResponse handle(final HttpRequest request) throws IOException, URISyntaxException {
         final String path = request.getPath();
-
         if (path.equals("/")) {
-            return new HttpResponse(HttpStatus.OK, "text/html", "Hello world!");
+            return HttpResponse.ok("text/html", "Hello world!");
         }
 
         if (path.equals("/login")) {
-            login(request);
-            final var loginPage = findResource("/login.html");
-            return new HttpResponse(HttpStatus.OK, "text/html", readResource(loginPage));
+            return handleLogin(request);
         }
 
         final var resource = findResource(path);
         if (resource == null) {
-            final var notFound = findResource("/404.html");
-            return new HttpResponse(HttpStatus.NOT_FOUND, "text/html", readResource(notFound));
+            return HttpResponse.notFound("text/html", readResource(findResource("/404.html")));
         }
 
-        return new HttpResponse(HttpStatus.OK, contentType(path), readResource(resource));
+        return HttpResponse.ok(contentType(path), readResource(resource));
     }
 
-    private void login(final HttpRequest request) {
+    private HttpResponse handleLogin(final HttpRequest request) throws IOException, URISyntaxException {
         final String account = request.getQueryParameter("account");
         final String password = request.getQueryParameter("password");
-        if (account == null || password == null) {
-            return;
+        if (!isLoginAttempt(account, password)) {
+            return HttpResponse.ok("text/html", readResource(findResource("/login.html")));
         }
+        if (isValidUser(account, password)) {
+            return HttpResponse.redirect("/index.html");
+        }
+        return HttpResponse.redirect("/401.html");
+    }
 
-        InMemoryUserRepository.findByAccount(account)
+    private boolean isLoginAttempt(final String account, final String password) {
+        return account != null && password != null;
+    }
+
+    private boolean isValidUser(final String account, final String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("user : {}", user));
+                .isPresent();
     }
 
     private String readResource(final URL resource) throws IOException, URISyntaxException {

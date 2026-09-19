@@ -11,11 +11,11 @@ import java.nio.charset.StandardCharsets;
 
 public class StubSocket extends Socket {
 
-    private final String request;
+    private final ByteArrayInputStream inputStream;
     private final ByteArrayOutputStream outputStream;
 
     public StubSocket(final String request) {
-        this.request = request;
+        this.inputStream = new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8));
         this.outputStream = new ByteArrayOutputStream();
     }
 
@@ -36,16 +36,11 @@ public class StubSocket extends Socket {
     }
 
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(request.getBytes());
+        return inputStream;
     }
 
     public OutputStream getOutputStream() {
-        return new OutputStream() {
-            @Override
-            public void write(int b) {
-                outputStream.write(b);
-            }
-        };
+        return outputStream;
     }
 
     public String output() {

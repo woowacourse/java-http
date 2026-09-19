@@ -3,9 +3,12 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,12 +27,17 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    @DisplayName("클래스 로더로 리소스 파일의 경로를 찾는다")
+    void findsResourcePathUsingClassLoader() throws URISyntaxException {
+        // given
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        // when
+        final var resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(fileName), "테스트 리소스를 찾을 수 없습니다: " + fileName);
+        final String actual = Path.of(resource.toURI()).toString();
 
+        // then
         assertThat(actual).endsWith(fileName);
     }
 
@@ -40,15 +48,18 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    @DisplayName("리소스 파일의 내용을 줄 단위로 읽는다")
+    void readsResourceFileLineByLine() throws IOException, URISyntaxException {
+        // given
         final String fileName = "nextstep.txt";
+        final var resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(fileName), "테스트 리소스를 찾을 수 없습니다: " + fileName);
+        final Path path = Path.of(resource.toURI());
 
-        // todo
-        final Path path = null;
+        // when
+        final List<String> actual = Files.readAllLines(path);
 
-        // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        // then
+        assertThat(actual).containsExactly("nextstep");
     }
 }

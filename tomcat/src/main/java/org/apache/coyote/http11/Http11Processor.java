@@ -72,13 +72,14 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 User userByAccount = InMemoryUserRepository.findByAccount(account)
-                                        .orElseThrow();
+                        .orElseThrow(IllegalArgumentException::new);
+
                 if (!userByAccount.checkPassword(password)) {
                     log.error("login error");
                     throw new IllegalArgumentException();
                 }
 
-                log.info("user : " + userByAccount);
+                log.info("user : {}", userByAccount);
 
                 responseBody = Files.readString(path);
             }

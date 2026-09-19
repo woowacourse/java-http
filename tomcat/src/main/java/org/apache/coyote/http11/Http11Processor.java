@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER = "user";
 
     private final Socket connection;
 
@@ -80,6 +83,17 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpUrl.startsWith("/login") && httpMethod == HttpMethod.GET) {
+                if (httpCookie.get(JSESSIONID) != null) {
+                    HttpSession session = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
+                    if (session != null) {
+                        String response = createRedirectResponse("/index.html");
+                        outputStream.write(response.getBytes());
+                        outputStream.flush();
+
+                        return;
+                    }
+                }
+
                 final String body = readFile("static/login.html");
                 final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
@@ -102,10 +116,15 @@ public class Http11Processor implements Runnable, Processor {
                         User user = loginUser.get();
                         log.info("로그인 성공! 아이디 : {}", user.getAccount());
 
-                        if (httpCookie.get("JSESSIONID") == null) {
+                        if (httpCookie.get(JSESSIONID) == null) {
+                            String sessionId = UUID.randomUUID().toString();
+                            Session session = new Session(sessionId);
+                            session.setAttribute(USER, user);
+
+                            SessionManager.getInstance().add(session);
+
                             String response = createResponseWithCookieAndRedirect("/index.html",
-                                    new Cookie("JSESSIONID",
-                                            UUID.randomUUID().toString()));
+                                    new Cookie(JSESSIONID, sessionId));
                             outputStream.write(response.getBytes());
                             outputStream.flush();
                             return;

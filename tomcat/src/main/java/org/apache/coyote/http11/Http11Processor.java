@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
@@ -43,73 +44,104 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            Map<String, String> httpRequestHeaders = new HashMap<>();
             String requestLine = bufferedReader.readLine();
-
-            String line;
-            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                String[] headers = line.split(": ");
-                httpRequestHeaders.put(headers[0], headers[1]);
-            }
-
-            String requestBody = null;
-            if (httpRequestHeaders.containsKey("Content-Length")) {
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
-            }
+            Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
+            String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
 
             final String requestTarget = requestLine.split(" ")[1];
-
             final URI uri = URI.create(requestTarget);
             log.info("request uri: {}", uri);
 
-            final String uriPath = uri.getPath();
-            Path filePath = getFilePath(uriPath);
-            String httpStatus = "200 OK";
-            String location = null;
-
-            if (uriPath.equals("/login")) {
-                final String query = uri.getQuery();
-                boolean loginSuccess = false;
-                if (query != null) {
-                    loginSuccess = login(extractQueryParams(query));
-                }
-                if (requestBody != null) {
-                    loginSuccess = login(extractQueryParams(requestBody));
-                }
-
-                if (loginSuccess) {
-                    httpStatus = "302 Found";
-                    location = "/index.html";
-                }
-                else if (query == null && requestBody == null){
-                    httpStatus = "200 OK";
-                    filePath = resolveResourcePath("static/login.html");
-                }
-                else {
-                    httpStatus = "401 Unauthorized";
-                    filePath = resolveResourcePath("static/401.html");
-                }
-            }
-
-            if (uriPath.equals("/register")) {
-                if (requestBody != null) {
-                    createUser(extractQueryParams(requestBody));
-                }
-                filePath = resolveResourcePath("static/register.html");
-            }
-
-            final String contentType = getContentType(requestTarget);
-            final String responseBody = location == null ? getResponseBody(filePath) : "";
-            final String response = createResponse(contentType, responseBody, httpStatus, location);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            final HttpResponse response = handleRequest(uri, requestTarget, requestBody);
+            writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> readHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+        Map<String, String> httpRequestHeaders = new HashMap<>();
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            String[] headers = line.split(": ");
+            httpRequestHeaders.put(headers[0], headers[1]);
+        }
+
+        return httpRequestHeaders;
+    }
+
+    private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> httpRequestHeaders) throws IOException {
+        String requestBody = null;
+        if (httpRequestHeaders.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            requestBody = new String(buffer);
+        }
+
+        return requestBody;
+    }
+
+    private HttpResponse handleRequest(final URI uri, final String requestTarget, final String requestBody) throws IOException {
+        final String uriPath = uri.getPath();
+
+        if (uriPath.equals("/login")) {
+            return handleLogin(uri, requestTarget, requestBody);
+        }
+
+        if (uriPath.equals("/register")) {
+            return handleRegister(requestTarget, requestBody);
+        }
+
+        return createFileResponse(getFilePath(uriPath), requestTarget, "200 OK");
+    }
+
+    private HttpResponse handleLogin(final URI uri, final String requestTarget, final String requestBody) throws IOException {
+        final String uriPath = uri.getPath();
+        Path filePath = getFilePath(uriPath);
+        String httpStatus;
+        String location = null;
+
+        final String query = uri.getQuery();
+        boolean loginSuccess = false;
+        if (query != null) {
+            loginSuccess = login(extractQueryParams(query));
+        }
+        if (requestBody != null) {
+            loginSuccess = login(extractQueryParams(requestBody));
+        }
+
+        if (loginSuccess) {
+            httpStatus = "302 Found";
+            location = "/index.html";
+        }
+        else if (query == null && requestBody == null){
+            httpStatus = "200 OK";
+            filePath = resolveResourcePath("static/login.html");
+        }
+        else {
+            httpStatus = "401 Unauthorized";
+            filePath = resolveResourcePath("static/401.html");
+        }
+
+        final String contentType = getContentType(requestTarget);
+        final String responseBody = location == null ? getResponseBody(filePath) : "";
+        return new HttpResponse(httpStatus, contentType, responseBody, location);
+    }
+
+    private HttpResponse handleRegister(final String requestTarget, final String requestBody) throws IOException {
+        if (requestBody != null) {
+            createUser(extractQueryParams(requestBody));
+        }
+
+        return createFileResponse(resolveResourcePath("static/register.html"), requestTarget, "200 OK");
+    }
+
+    private HttpResponse createFileResponse(final Path filePath, final String requestTarget, final String httpStatus) throws IOException {
+        final String contentType = getContentType(requestTarget);
+        final String responseBody = getResponseBody(filePath);
+        return new HttpResponse(httpStatus, contentType, responseBody, null);
     }
 
     private Path getFilePath(final String uriPath) {
@@ -185,26 +217,34 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String createResponse(final String contentType, final String responseBody, final String httpStatus, final String location) {
-        log.info("response status  : {}", httpStatus);
-        StringBuilder response = new StringBuilder()
-                .append("HTTP/1.1 ").append(httpStatus).append("\r\n")
-                .append("Content-Type: ").append(contentType).append("\r\n")
-                .append("Content-Length: ").append(responseBody.getBytes().length).append("\r\n");
-
-        if (location != null) {
-            response.append("Location: ").append(location).append("\r\n");
-        }
-
-        return response.append("\r\n")
-                .append(responseBody)
-                .toString();
-    }
-
     private Path resolveResourcePath(final String name) {
         final URL url = getClass().getClassLoader().getResource(name);
         if (url == null)
             return Path.of("/");
         return Path.of(url.getPath());
+    }
+
+    private record HttpResponse(String status, String contentType, String body, String location) {
+    }
+
+    private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        outputStream.write(createResponse(response).getBytes());
+        outputStream.flush();
+    }
+
+    private String createResponse(final HttpResponse response) {
+        log.info("response status: {}", response.status());
+        StringBuilder httpResponse = new StringBuilder()
+                .append("HTTP/1.1 ").append(response.status()).append("\r\n")
+                .append("Content-Type: ").append(response.contentType()).append("\r\n")
+                .append("Content-Length: ").append(response.body().getBytes().length).append("\r\n");
+
+        if (response.location() != null) {
+            httpResponse.append("Location: ").append(response.location()).append("\r\n");
+        }
+
+        return httpResponse.append("\r\n")
+                .append(response.body())
+                .toString();
     }
 }

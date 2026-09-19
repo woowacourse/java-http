@@ -3,11 +3,8 @@ package org.apache.coyote.http11;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,12 +20,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        final String body = "Hello world!";
+        final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
-                "Hello world!");
+                body);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -50,14 +48,18 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+            assertThat(resource).isNotNull();
+            final byte[] html = resource.readAllBytes();
+            final String expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + html.length + " ",
+                    "",
+                    new String(html, StandardCharsets.UTF_8));
 
-        assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output()).isEqualTo(expected);
+        }
     }
 
     @Test

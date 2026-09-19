@@ -8,12 +8,21 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int MIN_REQUEST_LINE_PARTS = 3;
+    private static final int REQUEST_TARGET_INDEX = 1;
+    private static final String INDEX_PATH = "/index.html";
+    private static final String CSS_PATH = "/css/styles.css";
+    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
+    private static final String CRLF = "\r\n";
+    private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
     private final Socket connection;
 
@@ -33,50 +42,76 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final var requestLine = reader.readLine();
-            if (requestLine == null) {
+            final var requestTarget = readRequestTarget(reader);
+            if (requestTarget == null) {
                 return;
             }
 
-            final var requestParts = requestLine.split(" ");
-            if (requestParts.length < 3) {
-                return;
-            }
-            final var path = requestParts[1];
-
-            String headerLine;
-            while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
-                // Read through the blank line that ends the request headers.
-            }
-            if (headerLine == null) {
-                return;
-            }
-
-            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            final boolean isCss = "/css/styles.css".equals(path);
-            final String contentType = isCss ? "text/css;charset=utf-8" : "text/html;charset=utf-8";
-            if ("/index.html".equals(path) || isCss) {
-                final String resourcePath = "static" + path;
-                try (final var resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-                    if (resource == null) {
-                        throw new IOException(resourcePath + " not found");
-                    }
-                    responseBody = resource.readAllBytes();
-                }
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    "");
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
-            outputStream.flush();
+            writeResponse(outputStream, createResponse(requestTarget));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String readRequestTarget(final BufferedReader reader) throws IOException {
+        final var requestLine = reader.readLine();
+        if (requestLine == null) {
+            return null;
+        }
+
+        final var requestParts = requestLine.split(" ");
+        if (requestParts.length < MIN_REQUEST_LINE_PARTS) {
+            return null;
+        }
+        if (!consumeHeaders(reader)) {
+            return null;
+        }
+        return requestParts[REQUEST_TARGET_INDEX];
+    }
+
+    private boolean consumeHeaders(final BufferedReader reader) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private HttpResponse createResponse(final String requestTarget) throws IOException {
+        if (INDEX_PATH.equals(requestTarget)) {
+            return new HttpResponse(HTML_CONTENT_TYPE, readResource(requestTarget));
+        }
+        if (CSS_PATH.equals(requestTarget)) {
+            return new HttpResponse(CSS_CONTENT_TYPE, readResource(requestTarget));
+        }
+        return new HttpResponse(HTML_CONTENT_TYPE, HELLO_WORLD);
+    }
+
+    private byte[] readResource(final String requestTarget) throws IOException {
+        final var resourcePath = "static" + requestTarget;
+        try (final var resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (resource == null) {
+                throw new IOException(resourcePath + " not found");
+            }
+            return resource.readAllBytes();
+        }
+    }
+
+    private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        final var headers = String.join(CRLF,
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + response.contentType() + " ",
+                "Content-Length: " + response.body().length + " ",
+                "",
+                "");
+
+        outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(response.body());
+        outputStream.flush();
+    }
+
+    private record HttpResponse(String contentType, byte[] body) {
     }
 }

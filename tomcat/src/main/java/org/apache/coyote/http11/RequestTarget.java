@@ -7,7 +7,4 @@ public record RequestTarget(
     Map<String, String> queryParams
 ) {
 
-    public boolean hasQueryParams() {
-        return !queryParams.isEmpty();
-    }
 }

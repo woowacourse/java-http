@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 import java.io.File;
@@ -57,5 +59,40 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/index.html", "/css/styles.css", "/js/scripts.js"})
+    void get(String targetFilePath) throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+            String.format("GET %s HTTP/1.1", targetFilePath),
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static" + targetFilePath);
+        final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+        String expected = String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            String.format("Content-Type: text/%s;charset=utf-8 ", parseExtension(targetFilePath)),
+            String.format("Content-Length: %d ", body.getBytes().length),
+            "",
+            body);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String parseExtension(String filePath) {
+        final int startIndex = filePath.indexOf(".");
+        return filePath.substring(startIndex + 1);
     }
 }

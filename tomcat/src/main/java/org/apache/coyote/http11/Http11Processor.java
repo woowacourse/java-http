@@ -17,7 +17,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -45,54 +44,78 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String firstLine = bufferedReader.readLine();
-            if (firstLine == null) {
+            String requestLine = bufferedReader.readLine();
+            if (requestLine == null) {
                 return;
             }
-            String[] requestLine = firstLine.split(" ");
-            Map<String, String> header = new HashMap<>();
-            while (true) {
-                String line = bufferedReader.readLine();
-                if (line == null || line.isEmpty()) {
-                    break;
-                }
-                String[] headerLine = line.split(":");
-                header.put(headerLine[0], headerLine[1].trim());
-            }
-            String contentLength = header.get("Content-Length");
-            if (contentLength != null) {
-                char[] buffer = new char[Integer.parseInt(contentLength)];
-                int count = bufferedReader.read(buffer, 0, Integer.parseInt(contentLength));
-                String requestBody = new String(buffer, 0, count);
-            }
-            if ("/".equals(requestLine[1])) {
-                writeResponse(outputStream, "200 OK", "text/html", "Hello world!");
-            } else if (requestLine[1].startsWith("/login")) {
-                if (Arrays.asList(requestLine[1].split("")).contains("?")) {
-                    String queryString = requestLine[1].substring(requestLine[1].indexOf("?") + 1);
-                    String[] queryStringWithAndSplits = queryString.split("&");
-                    Map<String, String> queryStringMap = new HashMap<>();
-                    for (String queryStringWithAndSplit : queryStringWithAndSplits) {
-                        String[] split = queryStringWithAndSplit.split("=");
-                        queryStringMap.put(split[0], split[1]);
-                    }
-                    Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringMap.get("account"));
-                    if (optionalUser.isEmpty()) {
-                        return;
-                    }
-                    User user = optionalUser.get();
-                    if (!user.checkPassword(queryStringMap.get("password"))) {
-                        throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
-                    }
-                    log.info(user.toString());
-                }
-                writeStaticFile(outputStream, "/login.html");
-            } else {
-                writeStaticFile(outputStream, requestLine[1]);
-            }
+            Map<String, String> headers = readHeaders(bufferedReader);
+            String requestBody = readBody(bufferedReader, headers);
+
+            handle(outputStream, requestLine.split(" ")[1]);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> readHeaders(final BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        while (true) {
+            String line = bufferedReader.readLine();
+            if (line == null || line.isEmpty()) {
+                return headers;
+            }
+            String[] headerLine = line.split(":");
+            headers.put(headerLine[0], headerLine[1].trim());
+        }
+    }
+
+    private String readBody(final BufferedReader bufferedReader, final Map<String, String> headers)
+            throws IOException {
+        String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return "";
+        }
+        char[] buffer = new char[Integer.parseInt(contentLength)];
+        int count = bufferedReader.read(buffer, 0, buffer.length);
+        return new String(buffer, 0, count);
+    }
+
+    private void handle(final OutputStream outputStream, final String requestTarget)
+            throws IOException, URISyntaxException {
+        if ("/".equals(requestTarget)) {
+            writeResponse(outputStream, "200 OK", "text/html", "Hello world!");
+        } else if (requestTarget.startsWith("/login")) {
+            login(outputStream, requestTarget);
+        } else {
+            writeStaticFile(outputStream, requestTarget);
+        }
+    }
+
+    private void login(final OutputStream outputStream, final String requestTarget)
+            throws IOException, URISyntaxException {
+        if (requestTarget.contains("?")) {
+            Map<String, String> queryStringMap = parseQueryString(requestTarget);
+            Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringMap.get("account"));
+            if (optionalUser.isEmpty()) {
+                return;
+            }
+            User user = optionalUser.get();
+            if (!user.checkPassword(queryStringMap.get("password"))) {
+                throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
+            }
+            log.info(user.toString());
+        }
+        writeStaticFile(outputStream, "/login.html");
+    }
+
+    private Map<String, String> parseQueryString(final String requestTarget) {
+        String queryString = requestTarget.substring(requestTarget.indexOf("?") + 1);
+        Map<String, String> queryStringMap = new HashMap<>();
+        for (String queryStringWithAndSplit : queryString.split("&")) {
+            String[] split = queryStringWithAndSplit.split("=");
+            queryStringMap.put(split[0], split[1]);
+        }
+        return queryStringMap;
     }
 
     private void writeStaticFile(final OutputStream outputStream, final String target)

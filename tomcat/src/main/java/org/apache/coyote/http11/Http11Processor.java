@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -43,34 +44,12 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             String[] requestLineParts = bufferedReader.readLine().split(" ");
             final var requestMethod = requestLineParts[0].toUpperCase();
-            log.info("request method: {}", requestMethod);
             String response = "";
             if (requestMethod.equals("GET")) {
                 response = getResponse(requestLineParts[1]);
             }
             if (requestMethod.equals("POST")) {
-                String requestBody;
-                int length = 0;
-                while (!Objects.equals(requestBody = bufferedReader.readLine(), "")) {
-                    if (requestBody.contains("Content-Length:")) {
-                        length = Integer.parseInt(requestBody.split("Content-Length:")[1].trim());
-                    }
-                }
-                char[] buffer = new char[length];
-                bufferedReader.read(buffer, 0, length);
-                requestBody = new String(buffer);
-                getQuerySeparate(requestBody);
-                String[] split = requestBody.split("&");
-                Map<String, String> parameter = new HashMap<>();
-                for (String header : split) {
-                    String[] split1 = header.split("=", 2);
-                    parameter.put(split1[0], split1[1]);
-                }
-                if (InMemoryUserRepository.findByAccount(parameter.get("account")).isEmpty()) {
-                    User user = new User(parameter.get("account"), parameter.get("password"), parameter.get("email"));
-                    InMemoryUserRepository.save(user);
-                    response = getRedirectResponse("/index.html", getContentType(requestLineParts[1]));
-                }
+                response = getPostResponse(bufferedReader, requestLineParts[1]);
             }
 
             outputStream.write(response.getBytes());
@@ -80,6 +59,35 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String getPostResponse(BufferedReader bufferedReader, String requestUri)
+            throws IOException {
+        String requestBody = readRequestBody(bufferedReader);
+        Map<String, String> queryParameters = getQuerySeparate(requestBody);
+
+        if (InMemoryUserRepository.findByAccount(queryParameters.get("account")).isEmpty()) {
+            User user = new User(queryParameters.get("account"), queryParameters.get("password"),
+                    queryParameters.get("email"));
+            InMemoryUserRepository.save(user);
+            return getRedirectResponse("/index.html", getContentType(requestUri));
+        }
+        log.info("회원가입 실패! 아이디 : {}", queryParameters.get("account"));
+        return getRedirectResponse("/register.html", getContentType(requestUri));
+    }
+
+    @Nonnull
+    private String readRequestBody(BufferedReader bufferedReader) throws IOException {
+        String requestBody;
+        int length = 0;
+        while (!Objects.equals(requestBody = bufferedReader.readLine(), "")) {
+            if (requestBody.contains("Content-Length:")) {
+                length = Integer.parseInt(requestBody.split("Content-Length:")[1].trim());
+            }
+        }
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+        requestBody = new String(buffer);
+        return requestBody;
+    }
 
     private String getResponse(String requestUri) throws IOException {
         if (requestUri.contains("/login?")) {
@@ -95,6 +103,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info(user.toString());
 
             if (user.checkPassword(password)) {
+                log.info("로그인 성공! 아이디 : {}", user.getAccount());
                 return getRedirectResponse("/index.html", getContentType(requestUri));
             }
             return getRedirectResponse("/401.html", getContentType(requestUri));

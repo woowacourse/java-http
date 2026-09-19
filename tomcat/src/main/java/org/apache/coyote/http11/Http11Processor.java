@@ -43,7 +43,23 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
+            Map<String, String> httpRequestHeaders = new HashMap<>();
             String requestLine = bufferedReader.readLine();
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+                String[] headers = line.split(": ");
+                httpRequestHeaders.put(headers[0], headers[1]);
+            }
+
+            String requestBody = null;
+            if (httpRequestHeaders.containsKey("Content-Length")) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+            }
+
             final String requestTarget = requestLine.split(" ")[1];
 
             final URI uri = URI.create(requestTarget);
@@ -55,15 +71,33 @@ public class Http11Processor implements Runnable, Processor {
 
             if (uriPath.equals("/login")) {
                 final String query = uri.getQuery();
-                final boolean loginSuccess = query != null && login(extractQueryParams(query));
+                boolean loginSuccess = false;
+                if (query != null) {
+                    loginSuccess = login(extractQueryParams(query));
+                }
+                if (requestBody != null) {
+                    loginSuccess = login(extractQueryParams(requestBody));
+                }
 
                 if (loginSuccess) {
                     httpStatus = "302 Found";
                     filePath = resolveResourcePath("static/index.html");
-                } else {
+                }
+                else if (query == null && requestBody == null){
+                    httpStatus = "200 OK";
+                    filePath = resolveResourcePath("static/login.html");
+                }
+                else {
                     httpStatus = "401 Unauthorized";
                     filePath = resolveResourcePath("static/401.html");
                 }
+            }
+
+            if (uriPath.equals("/register")) {
+                if (requestBody != null) {
+                    createUser(extractQueryParams(requestBody));
+                }
+                filePath = resolveResourcePath("static/register.html");
             }
 
             final String contentType = getContentType(requestTarget);
@@ -116,6 +150,18 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("user : {}", user.get());
         return true;
+    }
+
+    private void createUser(final Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        User byAccount = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow();
+        log.info("byAccount = {}", byAccount);
     }
 
     private String getResponseBody(final Path filePath) throws IOException {

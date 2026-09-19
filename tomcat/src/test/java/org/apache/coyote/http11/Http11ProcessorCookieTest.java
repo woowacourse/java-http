@@ -1,11 +1,29 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorCookieTest {
+
+    private static final Pattern JSESSION_ID_PATTERN = Pattern.compile(
+            "Set-Cookie: JSESSIONID=([0-9a-f-]+)"
+    );
+
+    private String createdSessionId;
+
+    @AfterEach
+    void tearDown() {
+        if (createdSessionId != null) {
+            SessionManager.getInstance().remove(createdSessionId);
+        }
+    }
 
     @Test
     void JSESSIONID가_없으면_새로운_쿠키를_응답한다() {
@@ -23,6 +41,11 @@ class Http11ProcessorCookieTest {
                         "Set-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-"
                                 + "[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
                 );
+
+        final Matcher matcher = JSESSION_ID_PATTERN.matcher(socket.output());
+        assertThat(matcher.find()).isTrue();
+        createdSessionId = matcher.group(1);
+        assertThat(SessionManager.getInstance().findSession(createdSessionId)).isNotNull();
     }
 
     @Test

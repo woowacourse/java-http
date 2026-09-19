@@ -16,7 +16,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,7 +42,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.from(reader);
             HttpResponse response = new HttpResponse(outputStream);
             if (request.getCookies().getValue("JSESSIONID").isEmpty()) {
-                response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+                final var session = request.getSession(true);
+                response.addCookie("JSESSIONID", session.getId());
             }
 
             if (request.getMethod().equals("POST") && request.getPath().equals("/register")) {

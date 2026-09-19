@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
+import org.apache.coyote.http11.pageController.PageController;
+import org.apache.coyote.http11.pageController.PageControllerMapper;
 import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -26,14 +27,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET);
 
+    private static final String SERVER_ERROR_PAGE = "/500.html";
+    private static final StaticResourceLoader STATIC_RESOURCE_LOADER = new StaticResourceLoader();
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final StaticResourceLoader staticResourceLoader;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.staticResourceLoader = new StaticResourceLoader();
     }
 
     @Override
@@ -48,23 +50,40 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
 
             try {
-                HttpRequest requestTarget = getRequestTarget(inputStream);
-                String requestPath = requestTarget.getHttpPath();
+                HttpRequest request = getRequestTarget(inputStream);
+                PageController controller = PageControllerMapper.getPageController(request.getHttpPath());
 
-                if ("/login".equals(requestPath)) {
-                    logLoginUser(requestTarget);
-                }
-
-                StaticResource staticResource = staticResourceLoader.load(requestPath);
-                HttpResponse response = HttpResponse.of(HttpStatus.OK, staticResource);
-                writeResponse(outputStream, response);
+                writeResponse(outputStream, handle(request, controller));
             } catch (BadRequestException e) {
-                log.warn(e.getMessage());
-                HttpResponse response = HttpResponse.of(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
-                writeResponse(outputStream, response);
+                writeResponse(outputStream, badRequest(e));
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    HttpResponse handle(HttpRequest request, PageController controller) {
+        try {
+            return controller.run(request);
+        } catch (BadRequestException e) {
+            return badRequest(e);
+        } catch (IOException | RuntimeException e) {
+            log.error(e.getMessage(), e);
+            return internalServerError();
+        }
+    }
+
+    private HttpResponse badRequest(BadRequestException e) {
+        log.warn(e.getMessage());
+        return HttpResponse.of(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
+    }
+
+    private HttpResponse internalServerError() {
+        try {
+            return HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, STATIC_RESOURCE_LOADER.load(SERVER_ERROR_PAGE));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "text/plain", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         }
     }
 
@@ -120,18 +139,4 @@ public class Http11Processor implements Runnable, Processor {
 
         return new HttpBody(new String(buffer));
     }
-
-    private void logLoginUser(HttpRequest httpRequest) {
-        String account = httpRequest.getParams("account");
-        String password = httpRequest.getParams("password");
-
-        if (account == null || password == null) {
-            return;
-        }
-
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("login user: {}", user));
-    }
-
 }

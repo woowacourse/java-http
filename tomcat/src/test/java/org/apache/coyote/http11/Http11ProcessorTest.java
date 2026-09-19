@@ -2,6 +2,12 @@ package org.apache.coyote.http11;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.apache.coyote.http11.pageController.LoginController;
+import org.apache.coyote.http11.pageController.PageController;
+import org.apache.coyote.http11.request.HttpBody;
+import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import support.StubSocket;
@@ -187,6 +193,123 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Test
+    void loginWithAbsoluteForm() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET http://localhost:8080/login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void targetWithoutSchemeAndLeadingSlash() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET localhost:8080/login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse(
+                "400 Bad Request",
+                "text/plain",
+                "잘못된 요청 대상입니다: localhost:8080/login"
+        );
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /nothing.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse("404 Not Found", "text/html", readResource("static/404.html"));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void internalServerErrorWhenControllerThrowsIOException() throws IOException {
+        // given
+        final Http11Processor processor = new Http11Processor(new StubSocket());
+        final PageController controller = request -> {
+            throw new IOException("파일을 읽을 수 없습니다.");
+        };
+
+        // when
+        final HttpResponse response = processor.handle(indexRequest(), controller);
+
+        // then
+        final String expected = expectedResponse("500 Internal Server Error", "text/html", readResource("static/500.html"));
+        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
+    }
+
+    @Test
+    void internalServerErrorWhenControllerThrowsRuntimeException() throws IOException {
+        // given
+        final Http11Processor processor = new Http11Processor(new StubSocket());
+        final PageController controller = request -> {
+            throw new IllegalStateException("예상하지 못한 오류");
+        };
+
+        // when
+        final HttpResponse response = processor.handle(indexRequest(), controller);
+
+        // then
+        final String expected = expectedResponse("500 Internal Server Error", "text/html", readResource("static/500.html"));
+        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
+    }
+
+    @Test
+    void badRequestWhenControllerThrowsBadRequestException() {
+        // given
+        final Http11Processor processor = new Http11Processor(new StubSocket());
+        final PageController controller = request -> {
+            throw new BadRequestException("잘못된 정적 리소스 경로입니다: /../secret");
+        };
+
+        // when
+        final HttpResponse response = processor.handle(indexRequest(), controller);
+
+        // then
+        final String expected = expectedResponse(
+                "400 Bad Request",
+                "text/plain",
+                "잘못된 정적 리소스 경로입니다: /../secret"
+        );
+        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
+    }
+
+    private HttpRequest indexRequest() {
+        return HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+    }
+
     private LoginResult requestLogin(String queryString) {
         final String httpRequest = String.join("\r\n",
                 "GET /login?" + queryString + " HTTP/1.1",
@@ -197,7 +320,7 @@ class Http11ProcessorTest {
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         final ch.qos.logback.classic.Logger logger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Http11Processor.class);
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(LoginController.class);
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);

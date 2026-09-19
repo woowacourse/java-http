@@ -41,8 +41,8 @@ public class Http11Processor implements Runnable, Processor {
             String url = parseRequestUrl(inputStream);
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
             requestPath = uriInfo.path();
-            if ("/login".equals(uriInfo.path()) && !uriInfo.queryString().isBlank()) {
-                User user = RequestHandler.findUser(parseUserAccount(uriInfo.queryString()));
+            if ("/login".equals(uriInfo.path()) && uriInfo.hasQueryParameters()) {
+                User user = RequestHandler.findUser(uriInfo.queryParameters());
                 log.info("로그인 사용자: {}", user.getAccount());
             }
 
@@ -61,21 +61,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
-    }
-
-    private String parseUserAccount(String queryString) {
-        String[] parameters = queryString.split("&");
-
-        for (String parameter : parameters) {
-            String[] nameAndValue = parameter.split("=");
-
-            if ("account".equals(nameAndValue[0])) {
-                return nameAndValue[1];
-            }
-        }
-        throw new IllegalArgumentException(
-                "account 파라미터가 없습니다."
-        );
     }
 
     private String buildResponse(

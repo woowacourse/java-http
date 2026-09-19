@@ -1,5 +1,11 @@
 package org.apache.coyote.http11;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import java.nio.charset.StandardCharsets;
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -57,5 +63,110 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        final var socket = new StubSocket(
+                "GET /css/styles.css HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        try (var resource = getClass().getClassLoader()
+                .getResourceAsStream("static/css/styles.css")) {
+
+            assertThat(resource).isNotNull();
+            final byte[] expectedBody = resource.readAllBytes();
+            final String[] response = socket.output().split("\r\n\r\n", 2);
+
+            assertThat(response).hasSize(2);
+            assertThat(response[0].split("\r\n")).contains(
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + expectedBody.length + " ");
+            assertThat(response[1])
+                    .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
+        }
+    }
+
+    @Test
+    void login() throws IOException {
+        assertLoginResponse("/login");
+    }
+
+    @Test
+    void loginWithQuery() throws IOException {
+        assertLoginResponse("/login?account=gugu&password=password");
+    }
+
+    private void assertLoginResponse(String requestTarget) throws IOException {
+        final var socket = new StubSocket(
+                "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        try (var resource = getClass().getClassLoader()
+                .getResourceAsStream("static/login.html")) {
+
+            assertThat(resource).isNotNull();
+            final byte[] expectedBody = resource.readAllBytes();
+            final String[] response = socket.output().split("\r\n\r\n", 2);
+
+            assertThat(response).hasSize(2);
+            assertThat(response[0].split("\r\n")).contains(
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + expectedBody.length + " ");
+            assertThat(response[1])
+                    .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
+        }
+    }
+
+    private List<String> loginSuccessLogs(String requestTarget) {
+        final Logger logger =
+                (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.setContext(logger.getLoggerContext());
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            final var socket = new StubSocket(
+                    "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+            new Http11Processor(socket).process(socket);
+
+            return appender.list.stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .filter(message -> message.startsWith("회원 조회 성공: "))
+                    .toList();
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
+    void matchingCredentialsLogSuccess() {
+        assertThat(loginSuccessLogs("/login?account=gugu&password=password"))
+                .containsExactly("회원 조회 성공: gugu");
+    }
+
+    @Test
+    void wrongPasswordDoesNotLogSuccess() {
+        assertThat(loginSuccessLogs("/login?account=gugu&password=wrong"))
+                .isEmpty();
+    }
+
+    @Test
+    void encodedQueryInDifferentOrderLogsSuccess() {
+        assertThat(loginSuccessLogs("/login?password=pass%77ord&account=%67ugu"))
+                .containsExactly("회원 조회 성공: gugu");
+    }
+
+    @Test
+    void missingPasswordDoesNotLogSuccess() {
+        assertThat(loginSuccessLogs("/login?account=gugu"))
+                .isEmpty();
     }
 }

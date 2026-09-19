@@ -14,7 +14,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
@@ -23,21 +22,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final int REQUEST_LINE_PART_COUNT = 3;
     private static final int REQUEST_TARGET_INDEX = 1;
     private static final int QUERY_PARAMETER_PART_COUNT = 2;
-    private static final String INDEX_PATH = "/index.html";
     private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_PAGE_PATH = "/login.html";
-    private static final String CSS_PATH = "/css/styles.css";
-    private static final Set<String> JAVASCRIPT_PATHS = Set.of(
-            "/js/scripts.js",
-            "/assets/chart-area.js",
-            "/assets/chart-bar.js",
-            "/assets/chart-pie.js");
-    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
-    private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
-    private static final String JAVASCRIPT_CONTENT_TYPE = "text/javascript;charset=utf-8";
     private static final String CRLF = "\r\n";
 
     private final Socket connection;
+    private final ResponseContentResolver responseContentResolver = new ResponseContentResolver();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -66,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
                 logMatchingLoginUser(targetParts[1]);
             }
 
-            writeResponse(outputStream, createResponse(path));
+            writeResponse(outputStream, responseContentResolver.resolve(path));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -125,32 +114,6 @@ public class Http11Processor implements Runnable, Processor {
                 (previous, replacement) -> replacement));
     }
 
-    private ResponseContent createResponse(final String path) throws IOException {
-        if (INDEX_PATH.equals(path)) {
-            return new ResponseContent(HTML_CONTENT_TYPE, readResource(path));
-        }
-        if (LOGIN_PATH.equals(path)) {
-            return new ResponseContent(HTML_CONTENT_TYPE, readResource(LOGIN_PAGE_PATH));
-        }
-        if (CSS_PATH.equals(path)) {
-            return new ResponseContent(CSS_CONTENT_TYPE, readResource(path));
-        }
-        if (JAVASCRIPT_PATHS.contains(path)) {
-            return new ResponseContent(JAVASCRIPT_CONTENT_TYPE, readResource(path));
-        }
-        return new ResponseContent(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
-    }
-
-    private byte[] readResource(final String requestTarget) throws IOException {
-        final var resourcePath = "static" + requestTarget;
-        try (final var resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (resource == null) {
-                throw new IOException(resourcePath + " not found");
-            }
-            return resource.readAllBytes();
-        }
-    }
-
     private void writeResponse(final OutputStream outputStream, final ResponseContent response) throws IOException {
         final var headers = String.join(CRLF,
                 "HTTP/1.1 200 OK ",
@@ -162,8 +125,5 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
         outputStream.write(response.body());
         outputStream.flush();
-    }
-
-    private record ResponseContent(String contentType, byte[] body) {
     }
 }

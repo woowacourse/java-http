@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static boolean isLoginRequest(MyHttpRequest httpRequest) {
-        return httpRequest.resourcePath().equals("login")
+        return httpRequest.resourcePath().equals("static/login.html")
                 && httpRequest.hasQueryParameter();
     }
 

@@ -47,7 +47,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String path = requestLine.split(" ")[1];
+            final String requestTarget = requestLine.split(" ")[1];
+            final String path = extractPath(requestTarget);
+            final String queryString = extractQueryString(requestTarget);
 
             if (path.equals("/")) {
                 final var responseBody = "Hello world!";
@@ -65,11 +67,10 @@ public class Http11Processor implements Runnable, Processor {
             String filePath = "static" + path;
             String contentType = "text/html;charset=utf-8";
 
-            if (path.contains("?")) {
+            if (path.equals("/login")) {
                 filePath = "static/login.html";
 
-                if (path.contains("?")) {
-                    final String queryString = path.split("\\?")[1];
+                if (!queryString.isBlank()) {
                     final Map<String, String> params = parseQueryString(queryString);
 
                     final String account = params.get("account");
@@ -121,6 +122,23 @@ public class Http11Processor implements Runnable, Processor {
             throw new RuntimeException(e);
         }
     }
+
+    private String extractPath(final String requestTarget) {
+        final int queryIndex = requestTarget.indexOf("?");
+        if (queryIndex == -1) {
+            return requestTarget;
+        }
+        return requestTarget.substring(0, queryIndex);
+    }
+
+    private String extractQueryString(final String requestTarget) {
+        final int queryIndex = requestTarget.indexOf("?");
+        if (queryIndex == -1) {
+            return "";
+        }
+        return requestTarget.substring(queryIndex + 1);
+    }
+
     private Map<String, String> parseQueryString(final String queryString) {
         final Map<String, String> params = new HashMap<>();
         if (queryString == null || queryString.isBlank()) {

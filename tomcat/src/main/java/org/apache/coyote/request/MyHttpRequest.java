@@ -77,6 +77,8 @@ public record MyHttpRequest(
 
     private boolean hasExtension(String resourcePath) {
         String fileName = resourcePath.substring(resourcePath.lastIndexOf("/") + 1);
-        return fileName.contains(".");
+        int dotIndex = fileName.lastIndexOf(".");
+        return dotIndex > 0
+                && dotIndex != fileName.length() - 1;
     }
 }

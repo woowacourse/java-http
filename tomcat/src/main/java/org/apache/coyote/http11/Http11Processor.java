@@ -66,10 +66,11 @@ public class Http11Processor implements Runnable, Processor {
             if (requestUri.equals("/login")) {
                 Map<String, String> params = new HashMap<>();
                 for (String param : queryString.split("&")) {
-                    String[] keyValue = param.split("=");
-                    if (keyValue.length == 2) {
-                        params.put(keyValue[0], keyValue[1]);
+                    String[] keyValue = param.split("=", 2);
+                    if (keyValue.length != 2 || keyValue[1].isBlank()) {
+                        continue;
                     }
+                    params.put(keyValue[0], keyValue[1]);
                 }
 
                 InMemoryUserRepository.findByAccount(params.getOrDefault("account", ""))

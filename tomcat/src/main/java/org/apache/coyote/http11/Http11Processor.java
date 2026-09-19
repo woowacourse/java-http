@@ -105,9 +105,9 @@ public class Http11Processor implements Runnable, Processor {
             final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
 
             final var responseHeader = String.join("\r\n",
-                    "HTTP/1.1 200 OK",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + body.length,
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: " + contentType + " ",
+                    "Content-Length: " + body.length + " ",
                     "",
                     "");
 

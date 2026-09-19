@@ -6,6 +6,7 @@ import support.StubSocket;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,5 +58,34 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/css/styles.css")) {
+            assertThat(resource).isNotNull();
+            final byte[] css = resource.readAllBytes();
+            final String expectedHeaders = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + css.length + " ",
+                    "",
+                    "");
+
+            final String actual = socket.output();
+            assertThat(actual).startsWith(expectedHeaders);
+            assertThat(actual.substring(expectedHeaders.length()))
+                    .isEqualTo(new String(css, StandardCharsets.UTF_8));
+        }
     }
 }

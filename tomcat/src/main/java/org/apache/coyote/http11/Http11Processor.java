@@ -53,10 +53,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            if ("/index.html".equals(path)) {
-                try (final var resource = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+            final boolean isCss = "/css/styles.css".equals(path);
+            final String contentType = isCss ? "text/css;charset=utf-8" : "text/html;charset=utf-8";
+            if ("/index.html".equals(path) || isCss) {
+                final String resourcePath = "static" + path;
+                try (final var resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
                     if (resource == null) {
-                        throw new IOException("static/index.html not found");
+                        throw new IOException(resourcePath + " not found");
                     }
                     responseBody = resource.readAllBytes();
                 }
@@ -64,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     "");

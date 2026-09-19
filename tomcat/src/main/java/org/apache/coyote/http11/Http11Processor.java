@@ -99,6 +99,11 @@ public class Http11Processor implements Runnable, Processor {
     private void writeNotFoundResource(OutputStream outputStream) throws IOException {
         URL resource = getClass().getClassLoader().getResource(NOT_FOUND_FILE_PATH);
 
+        if (resource == null) {
+            writeHttpResponse(outputStream, "", "404 NOT FOUND");
+            return;
+        }
+
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         writeHttpResponse(outputStream, getContentType(resource.getPath()), responseBody);

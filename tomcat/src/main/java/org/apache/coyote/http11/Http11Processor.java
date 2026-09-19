@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.coyote.Processor;
@@ -41,7 +42,36 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             String[] requestLineParts = bufferedReader.readLine().split(" ");
-            final var response = getResponse(requestLineParts[1]);
+            final var requestMethod = requestLineParts[0].toUpperCase();
+            log.info("request method: {}", requestMethod);
+            String response = "";
+            if (requestMethod.equals("GET")) {
+                response = getResponse(requestLineParts[1]);
+            }
+            if (requestMethod.equals("POST")) {
+                String requestBody;
+                int length = 0;
+                while (!Objects.equals(requestBody = bufferedReader.readLine(), "")) {
+                    if (requestBody.contains("Content-Length:")) {
+                        length = Integer.parseInt(requestBody.split("Content-Length:")[1].trim());
+                    }
+                }
+                char[] buffer = new char[length];
+                bufferedReader.read(buffer, 0, length);
+                requestBody = new String(buffer);
+                getQuerySeparate(requestBody);
+                String[] split = requestBody.split("&");
+                Map<String, String> parameter = new HashMap<>();
+                for (String header : split) {
+                    String[] split1 = header.split("=", 2);
+                    parameter.put(split1[0], split1[1]);
+                }
+                if (InMemoryUserRepository.findByAccount(parameter.get("account")).isEmpty()) {
+                    User user = new User(parameter.get("account"), parameter.get("password"), parameter.get("email"));
+                    InMemoryUserRepository.save(user);
+                    response = getRedirectResponse("/index.html", getContentType(requestLineParts[1]));
+                }
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

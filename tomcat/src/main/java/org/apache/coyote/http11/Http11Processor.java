@@ -68,6 +68,7 @@ public class Http11Processor implements Runnable, Processor {
             final String uriPath = uri.getPath();
             Path filePath = getFilePath(uriPath);
             String httpStatus = "200 OK";
+            String location = null;
 
             if (uriPath.equals("/login")) {
                 final String query = uri.getQuery();
@@ -81,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (loginSuccess) {
                     httpStatus = "302 Found";
-                    filePath = resolveResourcePath("static/index.html");
+                    location = "/index.html";
                 }
                 else if (query == null && requestBody == null){
                     httpStatus = "200 OK";
@@ -101,8 +102,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String contentType = getContentType(requestTarget);
-            final String responseBody = getResponseBody(filePath);
-            final String response = createResponse(contentType, responseBody, httpStatus);
+            final String responseBody = location == null ? getResponseBody(filePath) : "";
+            final String response = createResponse(contentType, responseBody, httpStatus, location);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -184,14 +185,20 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String createResponse(final String contentType, final String responseBody, final String httpStatus) {
+    private String createResponse(final String contentType, final String responseBody, final String httpStatus, final String location) {
         log.info("response status  : {}", httpStatus);
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpStatus + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        StringBuilder response = new StringBuilder()
+                .append("HTTP/1.1 ").append(httpStatus).append("\r\n")
+                .append("Content-Type: ").append(contentType).append("\r\n")
+                .append("Content-Length: ").append(responseBody.getBytes().length).append("\r\n");
+
+        if (location != null) {
+            response.append("Location: ").append(location).append("\r\n");
+        }
+
+        return response.append("\r\n")
+                .append(responseBody)
+                .toString();
     }
 
     private Path resolveResourcePath(final String name) {

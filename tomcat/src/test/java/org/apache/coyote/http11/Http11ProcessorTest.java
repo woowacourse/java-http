@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -9,6 +12,7 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -124,6 +128,38 @@ class Http11ProcessorTest {
         final String expected = Files.readString(new File(resource.getFile()).toPath());
 
         assertThat(socket.output()).endsWith("\r\n\r\n" + expected);
+    }
+
+    @Test
+    void 전달된_계정_정보와_일치하는_회원_조회_결과를_로그로_남긴다() {
+        // given
+        final Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        try {
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(appender.list)
+                    .extracting(ILoggingEvent::getFormattedMessage)
+                    .contains("user : User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}");
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
     }
 
     @ParameterizedTest

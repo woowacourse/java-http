@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +45,16 @@ public class Http11Processor implements Runnable, Processor {
             }
             String[] parts = requestLine.split(" ");
 
-            String requestTarget = parts[1];
-            String requestPath = extractPath(requestTarget);
-            String resourcePath = resolveResourcePath(requestPath);
+            RequestTarget requestTarget = new RequestTarget(parts[1]);
+            if (requestTarget.isLogin()) {
+                Optional<String> account = requestTarget.queryParameter("account");
+                if (account.isPresent()) {
+                    Optional<User> user = InMemoryUserRepository.findByAccount(account.get());
+                    user.ifPresent(value -> log.info("user : {}", value));
+                }
+            }
+
+            String resourcePath = requestTarget.resourcePath();
 
             byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
             if (!resourcePath.equals("/")) {
@@ -55,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = Files.readAllBytes(path);
                 }
             }
-            String contentType = contentTypeOf(requestPath);
+            String contentType = contentTypeOf(requestTarget.extension());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -71,23 +81,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractPath(String requestTarget) {
-        int queryStart = requestTarget.indexOf("?");
-        if (queryStart == -1) {
-            return requestTarget;
-        }
-        return requestTarget.substring(0, queryStart);
-    }
-
-    private String resolveResourcePath(String requestPath) {
-        if (requestPath.equals("/login")) {
-            return "/login.html";
-        }
-        return requestPath;
-    }
-
-    private String contentTypeOf(String requestPath) {
-        if (requestPath.endsWith(".css")) {
+    private String contentTypeOf(String extension) {
+        if (extension.equals("css")) {
             return "text/css;charset=utf-8 ";
         }
         return "text/html;charset=utf-8 ";

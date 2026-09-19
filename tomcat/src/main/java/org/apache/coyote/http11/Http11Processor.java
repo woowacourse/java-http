@@ -59,11 +59,8 @@ public class Http11Processor implements Runnable, Processor {
             final StringBuilder stringBuilder = new StringBuilder();
 
             String line = bufferedReader.readLine();
-            while (!"".equals(line)) {
+            while (line != null && !line.isBlank()) {
                 stringBuilder.append(line).append(CRLF);
-                if (line == null) {
-                    return;
-                }
                 line = bufferedReader.readLine();
             }
 

@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -88,6 +89,18 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("로그인 성공! 아이디 : {}", foundUser.getAccount());
         return true;
+    }
+
+    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private byte[] createResponseBody(final String path) throws IOException {

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
              final var outputStream = connection.getOutputStream()) {
 
             Optional<HttpResponse> response = handleRequest(inputStream);

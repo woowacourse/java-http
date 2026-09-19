@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -65,63 +66,7 @@ public class Http11Processor implements Runnable, Processor {
                 String requestBody = new String(buffer, 0, count);
             }
             if ("/".equals(requestLine[1])) {
-                final var responseBody = "Hello world!";
-
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } else if ("/index.html".equals(requestLine[1])) {
-                URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
-                Path path = Path.of(resource.toURI());
-                String responseLine = "HTTP/1.1 200 OK ";
-                String contentType = "Content-Type: text/html;charset=utf-8 ";
-                String responseBody = Files.readString(path);
-                String length = "Content-Length: " + responseBody.getBytes().length + " ";
-
-                final var response = String.join("\r\n",
-                        responseLine,
-                        contentType,
-                        length,
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } else if ("/css/styles.css".equals(requestLine[1])) {
-                URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
-                Path path = Path.of(resource.toURI());
-                String responseLine = "HTTP/1.1 200 OK ";
-                String contentType = "Content-Type: text/css;charset=utf-8 ";
-                String responseBody = Files.readString(path);
-                String length = "Content-Length: " + responseBody.getBytes().length + " ";
-                final var response = String.join("\r\n",
-                        responseLine,
-                        contentType,
-                        length,
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } else if (requestLine[1].endsWith("js")) {
-                URL resource = getClass().getClassLoader().getResource("static" + requestLine[1]);
-                Path path = Path.of(resource.toURI());
-                String responseLine = "HTTP/1.1 200 OK ";
-                String contentType = "Content-Type: text/javascript;charset=utf-8 ";
-                String responseBody = Files.readString(path);
-                String length = "Content-Length: " + responseBody.getBytes().length + " ";
-                final var response = String.join("\r\n",
-                        responseLine,
-                        contentType,
-                        length,
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                writeResponse(outputStream, "200 OK", "text/html", "Hello world!");
             } else if (requestLine[1].startsWith("/login")) {
                 if (Arrays.asList(requestLine[1].split("")).contains("?")) {
                     String queryString = requestLine[1].substring(requestLine[1].indexOf("?") + 1);
@@ -141,24 +86,40 @@ public class Http11Processor implements Runnable, Processor {
                     }
                     log.info(user.toString());
                 }
-                URL resource = getClass().getClassLoader().getResource("static" + "/login.html");
-                Path path = Path.of(resource.toURI());
-                String responseLine = "HTTP/1.1 200 OK ";
-                String contentType = "Content-Type: text/html;charset=utf-8 ";
-                String responseBody = Files.readString(path);
-                String length = "Content-Length: " + responseBody.getBytes().length + " ";
-                final var response = String.join("\r\n",
-                        responseLine,
-                        contentType,
-                        length,
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-
+                writeStaticFile(outputStream, "/login.html");
+            } else {
+                writeStaticFile(outputStream, requestLine[1]);
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void writeStaticFile(final OutputStream outputStream, final String target)
+            throws IOException, URISyntaxException {
+        URL resource = getClass().getClassLoader().getResource("static" + target);
+        writeResponse(outputStream, "200 OK", contentTypeOf(target), Files.readString(Path.of(resource.toURI())));
+    }
+
+    private String contentTypeOf(final String target) {
+        if (target.endsWith(".css")) {
+            return "text/css";
+        }
+        if (target.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html";
+    }
+
+    private void writeResponse(final OutputStream outputStream, final String status, final String contentType,
+                               final String responseBody) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int MIN_REQUEST_LINE_PARTS = 3;
+    private static final int REQUEST_LINE_PART_COUNT = 3;
     private static final int REQUEST_TARGET_INDEX = 1;
     private static final String INDEX_PATH = "/index.html";
     private static final String CSS_PATH = "/css/styles.css";
@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final var requestParts = requestLine.split(" ");
-        if (requestParts.length < MIN_REQUEST_LINE_PARTS) {
+        if (requestParts.length != REQUEST_LINE_PART_COUNT) {
             return null;
         }
         if (!consumeHeaders(reader)) {
@@ -78,14 +78,14 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private HttpResponse createResponse(final String requestTarget) throws IOException {
+    private ResponseContent createResponse(final String requestTarget) throws IOException {
         if (INDEX_PATH.equals(requestTarget)) {
-            return new HttpResponse(HTML_CONTENT_TYPE, readResource(requestTarget));
+            return new ResponseContent(HTML_CONTENT_TYPE, readResource(requestTarget));
         }
         if (CSS_PATH.equals(requestTarget)) {
-            return new HttpResponse(CSS_CONTENT_TYPE, readResource(requestTarget));
+            return new ResponseContent(CSS_CONTENT_TYPE, readResource(requestTarget));
         }
-        return new HttpResponse(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
+        return new ResponseContent(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
     }
 
     private byte[] readResource(final String requestTarget) throws IOException {
@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
+    private void writeResponse(final OutputStream outputStream, final ResponseContent response) throws IOException {
         final var headers = String.join(CRLF,
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + response.contentType() + " ",
@@ -111,6 +111,6 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private record HttpResponse(String contentType, byte[] body) {
+    private record ResponseContent(String contentType, byte[] body) {
     }
 }

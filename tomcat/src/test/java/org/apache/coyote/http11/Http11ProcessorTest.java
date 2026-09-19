@@ -32,6 +32,16 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void requestLineWithExtraPartIsRejected() {
+        final var socket = new StubSocket("GET /index.html HTTP/1.1 EXTRA\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).isEmpty();
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",

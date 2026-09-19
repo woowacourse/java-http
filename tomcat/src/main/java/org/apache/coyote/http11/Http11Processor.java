@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
             final Headers headers = readHeaders(bufferedReader);
+            final Cookies cookies = new Cookies(headers.cookie());
+            final Session session = getSession(cookies);
 
             String path = requestLine.getPath();
             String code = "200";
@@ -67,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
                     code = "200";
                     status = "OK";
                 } else if ("/login".equals(path)) {
-                    if (login(parameters)) {
+                    if (login(parameters, session)) {
                         path = "/index";
                         code = "302";
                         status = "FOUND";
@@ -80,12 +83,15 @@ public class Http11Processor implements Runnable, Processor {
                 path += ".html";
             }
             if (requestLine.isGet()) {
+                if ("/login".equals(path) && session.getAttribute("user") != null) {
+                    path = "/";
+                    code = "302";
+                    status = "FOUND";
+                }
                 path = resolveGetPath(path);
             }
 
-            final Cookies cookies = new Cookies(headers.cookie());
-            final var response = makeResponse(path, code, status, cookies.getSessionId());
-
+            final var response = makeResponse(path, code, status, session.getId());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -102,11 +108,30 @@ public class Http11Processor implements Runnable, Processor {
         };
     }
 
+    private Session getSession(final Cookies cookies) throws IOException {
+        String sessionId = cookies.getSessionId();
+        if (sessionId == null) {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
+        }
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            session = new Session(sessionId);
+            sessionManager.add(session);
+            return session;
+        }
+
+        return session;
+    }
+
+    // TODO: 요청 헤더 쿠키에 JSESSIONID가 없었을 때만 Set-Cookie를 응답 헤더에 넣기
     private String makeResponse(
             final String path,
             final String code,
             final String status,
-            final Optional<String> sessionId
+            final String sessionId
     ) throws IOException {
         final String responseBody = getResponseBody(path);
         final String contentType = resolveContentType(path);
@@ -115,11 +140,7 @@ public class Http11Processor implements Runnable, Processor {
         responseLines.add("HTTP/1.1 " + code + " " + status);
         responseLines.add("Content-Type: " + contentType + ";charset=utf-8");
         responseLines.add("Content-Length: " + responseBody.getBytes().length);
-
-        if (sessionId.isEmpty()) {
-            responseLines.add("Set-Cookie: JSESSIONID=" + UUID.randomUUID());
-        }
-
+        responseLines.add("Set-Cookie: JSESSIONID=" + sessionId);
         responseLines.add("");
         responseLines.add(responseBody);
 
@@ -159,7 +180,7 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private boolean login(final Map<String, String> parameters) {
+    private boolean login(final Map<String, String> parameters, final Session session) {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
 
@@ -169,8 +190,8 @@ public class Http11Processor implements Runnable, Processor {
         if (loginUser.isEmpty()) {
             return false;
         }
-
         log.info("로그인 성공: {}", loginUser);
+        session.setAttribute("user", loginUser);
         return true;
     }
 

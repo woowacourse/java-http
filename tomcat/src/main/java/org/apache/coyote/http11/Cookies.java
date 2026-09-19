@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class Cookies {
 
@@ -22,7 +21,7 @@ public class Cookies {
         }
     }
 
-    public Optional<String> getSessionId() {
-        return Optional.ofNullable(cookies.get("JSESSIONID"));
+    public String getSessionId() {
+        return cookies.get("JSESSIONID");
     }
 }

@@ -28,7 +28,6 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
         final String actual = FileTest.class.getClassLoader().getResource("nextstep.txt").toString();
 
         assertThat(actual).endsWith(fileName);
@@ -44,10 +43,8 @@ class FileTest {
     void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
         final Path path = Paths.get(ClassLoader.getSystemClassLoader().getResource(fileName).getPath());
 
-        // todo
         final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");

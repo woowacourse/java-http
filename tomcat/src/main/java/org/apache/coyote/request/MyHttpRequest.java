@@ -23,10 +23,7 @@ public record MyHttpRequest(
         return new MyHttpRequest(
                 split[0],
                 split[1],
-                split[1].substring(
-                        split[1].indexOf("/"),
-                        split[1].lastIndexOf("?") == -1 ? split[1].length() : split[1].lastIndexOf("?")
-                ),
+                extractResourcePath(split[1]),
                 contentTypeOf(split[1]),
                 split[2]
         );
@@ -50,6 +47,16 @@ public record MyHttpRequest(
         return rawRequest.lines()
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("http 요청을 읽을 수 없습니다."));
+    }
+
+    private static String extractResourcePath(String uri) {
+        int startIndexOfPath = uri.indexOf("/");
+        int startIndexOfQueryString = uri.indexOf("?");
+
+        if (startIndexOfQueryString == -1) {
+            return uri.substring(startIndexOfPath);
+        }
+        return uri.substring(startIndexOfPath, startIndexOfQueryString);
     }
 
     private static String contentTypeOf(String url) {

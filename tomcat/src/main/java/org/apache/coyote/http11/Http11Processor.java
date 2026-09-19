@@ -5,17 +5,25 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.util.Optional;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestHandler requestHandler;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestHandler requestHandler) {
         this.connection = connection;
+        this.requestHandler = requestHandler;
     }
 
     @Override
@@ -27,20 +35,18 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8))) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final Optional<HttpRequest> request = HttpRequest.from(reader);
+            if (request.isEmpty()) {
+                return;
+            }
+            final HttpResponse response = requestHandler.handle(request.get());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException | HttpRequestParseException e) {
             log.error(e.getMessage(), e);
         }
     }

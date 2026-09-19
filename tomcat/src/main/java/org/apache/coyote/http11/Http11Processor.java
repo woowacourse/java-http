@@ -1,6 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,19 +35,41 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
+             final var streamReader = new InputStreamReader(inputStream);
+             final var bufferedReader = new BufferedReader(streamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String requestLine = bufferedReader.readLine();
+            String[] splitRequestLine = requestLine.split(" ");
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String method = splitRequestLine[0];
+            String requestTarget = splitRequestLine[1];
+            String protocol = splitRequestLine[2];
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            if (method.equals("GET")) {
+
+                final byte[] responseBody;
+                if (requestTarget.equals("/")) {
+                    responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                } else {
+                    final String resourceName = requestTarget.substring(1);
+                    final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
+                    final Path path = new File(resource.getFile()).toPath();
+                    responseBody = Files.readAllBytes(path);
+                }
+
+                final var header = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.length + " ",
+                        "",
+                        "");
+
+                outputStream.write(header.getBytes());
+                outputStream.write(responseBody);
+                outputStream.flush();
+            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

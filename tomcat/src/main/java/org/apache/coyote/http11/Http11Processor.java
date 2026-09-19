@@ -49,7 +49,10 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.from(requestLine);
 
             if (request.getPath().equals("/login") && !request.getQueryParams().isEmpty()) {
-                login(request.getQueryParams());
+                final boolean loginSucceed = login(request.getQueryParams());
+                final String location = loginSucceed ? "/index.html" : "/401.html";
+                sendRedirect(outputStream, location);
+                return;
             }
 
             String statusLine = "200 OK";

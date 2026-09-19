@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import java.awt.image.PackedColorModel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -94,7 +95,13 @@ public class Http11Processor implements Runnable, Processor {
             final var requestHeader = RequestHeader.from(reader);
             final var requestUri = RequestUri.from(requestHeader.path());
 
-            logLoginResult(requestUri);
+            if (isLoginAttempt(requestUri)) {
+                final var responseHeader = loginRedirectResponseHeader(requestUri);
+
+                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             final var responseContent = responseContentFor(requestUri.path());
             final var responseBody = responseContent.body();
@@ -112,6 +119,34 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String loginRedirectResponseHeader(final RequestUri requestUri) {
+        final var location = isLoginSuccess(requestUri) ? "/index.html" : "/401.html";
+
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
+    }
+
+    private boolean isLoginAttempt(final RequestUri requestUri) {
+        return requestUri.path().equals("/login") && !requestUri.queryParameters().isEmpty();
+    }
+
+    private boolean isLoginSuccess(final RequestUri requestUri) {
+        final var account = requestUri.queryParameter("account");
+        final var password = requestUri.queryParameter("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
     }
 
     private void logLoginResult(final RequestUri requestUri) {

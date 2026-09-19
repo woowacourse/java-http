@@ -63,18 +63,21 @@ public class Http11Processor implements Runnable, Processor {
             var responseBody = "Hello world!";
             int contentLength = responseBody.getBytes().length;
             String contentType = getContentType(path);
+            String statusLine = "HTTP/1.1 200 OK ";
 
             if (!path.equals("/")) {
                 String resourcePath = getResourcePath(path);
 
                 byte[] fileBytes = readResource(resourcePath);
 
-                if (path.equals("/login") && !queryString.isEmpty()) {
-                    login(queryString);
-                }
-
                 if (fileBytes == null) {
-                    return;
+                    fileBytes = readResource("static/404.html");
+                    if (fileBytes == null) {
+                        throw new IllegalArgumentException("404.html 리소스를 찾을 수 없습니다.");
+                    }
+                    statusLine = "HTTP/1.1 404 Not Found ";
+                } else if (path.equals("/login") && !queryString.isEmpty()) {
+                    login(queryString);
                 }
 
                 responseBody = new String(fileBytes, StandardCharsets.UTF_8);
@@ -82,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    statusLine,
                     "Content-Type: " + contentType + " ",
                     "Content-Length: " + contentLength + " ",
                     "",

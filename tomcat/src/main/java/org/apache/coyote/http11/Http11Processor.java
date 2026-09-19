@@ -38,8 +38,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
 
-            final var requestUri = parseRequestUri(inputStream);
+            final var requestUri = parseRequestUri(reader);
+            readHeaders(reader);
             final var requestPath = extractPath(requestUri);
             final var contentType = determineContentType(requestPath);
 
@@ -66,22 +68,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestUri(final InputStream inputStream) throws IOException {
-        final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
-
+    private String parseRequestUri(final BufferedReader reader) throws IOException {
         final var line = reader.readLine();
 
         if (line == null || line.isEmpty()) {
             throw new IllegalArgumentException("HTTP 요청 라인이 비어있습니다.");
         }
 
-        String[] token = line.trim().split("\\s+");
+        final var tokens = line.trim().split("\\s+");
 
-        if (token.length != 3) {
+        if (tokens.length != 3) {
             throw new IllegalArgumentException("올바르지 않은 HTTP 요청 라인입니다.");
         }
 
-        return token[1];
+        return tokens[1];
+    }
+
+    private void readHeaders(final BufferedReader reader) throws IOException {
+        String line;
+
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            log.debug("HTTP header: {}", line);
+        }
     }
 
     private byte[] readStaticResource(final String path) throws IOException {

@@ -41,105 +41,140 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var reader = new BufferedReader(new InputStreamReader(inputStream));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
             final String requestLine = reader.readLine();
+
             if (requestLine == null) {
                 return;
             }
-            final String[] tokens = requestLine.split(" ");
-            final String uri = tokens[1];
 
-            final int questionMarkIndex = uri.indexOf("?");
+            final String uri = extractUri(requestLine);
+            final String path = extractPath(uri);
+            final Map<String, String> queryParams = extractQueryParams(uri);
 
-            final String path;
-            final String queryString;
+            final String resourcePath = resolveResourcePath(path, queryParams);
+            final String responseBody = createResponseBody(path, resourcePath);
 
-            final Map<String, String> queryParams = new HashMap<>();
+            final String response = createResponse(uri, responseBody);
 
-            if (questionMarkIndex != -1) {
-                path = uri.substring(0, questionMarkIndex);
-                queryString = uri.substring(questionMarkIndex + 1);
-            } else {
-                path = uri;
-                queryString = "";
-            }
-
-
-            if (!queryString.isEmpty()) {
-                final String[] parameters = queryString.split("&");
-                for (String parameter : parameters) {
-                    final String[] keyValue = parameter.split("=", 2);
-
-                    final String key = keyValue[0];
-                    final String value = keyValue[1];
-                    queryParams.put(key, value);
-                }
-            }
-
-            final String responseBody;
-            final String resourcePath;
-
-            if ("/".equals(path)) {
-                responseBody = "Hello world!";
-                resourcePath = path;
-
-            } else {
-                if ("/login".equals(path)) {
-                    resourcePath = "/login.html";
-
-                    if (!queryString.isEmpty()) {
-                        final String account = queryParams.get("account");
-                        final String password = queryParams.get("password");
-
-                        InMemoryUserRepository.findByAccount(account)
-                                .filter(user -> user.checkPassword(password))
-                                .ifPresent(user ->
-                                        log.info("회원 조회 결과: {}", user)
-                                );
-                    }
-
-                } else {
-                    resourcePath = path;
-                }
-
-                final ClassLoader classLoader = getClass().getClassLoader();
-                final URL resource =
-                        classLoader.getResource("static" + resourcePath);
-
-                if (resource == null) {
-                    responseBody = "";
-                } else {
-                    final URI fileUri = resource.toURI();
-                    final Path filePath = Paths.get(fileUri);
-                    final byte[] fileBytes = Files.readAllBytes(filePath);
-
-                    responseBody =
-                            new String(fileBytes, StandardCharsets.UTF_8);
-                }
-            }
-
-            final String contentType;
-
-            if (uri.endsWith(".css")) {
-                contentType = "text/css ";
-            } else if (uri.endsWith(".js")) {
-                contentType = "application/javascript";
-            } else {
-                contentType = "text/html;charset=utf-8 ";
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String extractUri(final String requestLine) {
+        return requestLine.split(" ")[1];
+    }
+
+    private String extractPath(final String uri) {
+        final int index = uri.indexOf("?");
+
+        if (index == -1) {
+            return uri;
+        }
+
+        return uri.substring(0, index);
+    }
+
+    private Map<String, String> extractQueryParams(final String uri) {
+        final Map<String, String> queryParams = new HashMap<>();
+
+        final int index = uri.indexOf("?");
+
+        if (index == -1) {
+            return queryParams;
+        }
+
+        final String queryString = uri.substring(index + 1);
+
+        for (String parameter : queryString.split("&")) {
+            final String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length == 2) {
+                queryParams.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        return queryParams;
+    }
+
+    private String resolveResourcePath(
+            final String path,
+            final Map<String, String> queryParams
+    ) {
+        if (!"/login".equals(path)) {
+            return path;
+        }
+
+        if (!queryParams.isEmpty()) {
+            final String account = queryParams.get("account");
+            final String password = queryParams.get("password");
+
+            InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .ifPresent(user ->
+                            log.info("회원 조회 결과: {}", user)
+                    );
+        }
+
+        return "/login.html";
+    }
+
+    private String createResponseBody(
+            final String path,
+            final String resourcePath
+    ) throws IOException, URISyntaxException {
+
+        if ("/".equals(path)) {
+            return "Hello world!";
+        }
+
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final URL resource = classLoader.getResource("static" + resourcePath);
+
+        if (resource == null) {
+            return "";
+        }
+
+        final URI fileUri = resource.toURI();
+        final Path filePath = Paths.get(fileUri);
+        final byte[] fileBytes = Files.readAllBytes(filePath);
+
+        return new String(fileBytes, StandardCharsets.UTF_8);
+    }
+
+    private String createResponse(
+            final String uri,
+            final String responseBody
+    ) {
+        final String contentType = resolveContentType(uri);
+        final byte[] body = responseBody.getBytes(StandardCharsets.UTF_8);
+
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: " + contentType,
+                "Content-Length: " + body.length,
+                "",
+                responseBody
+        );
+    }
+
+    private String resolveContentType(final String uri) {
+        if (uri.endsWith(".css")) {
+            return "text/css";
+        }
+
+        if (uri.endsWith(".js")) {
+            return "application/javascript";
+        }
+
+        return "text/html;charset=utf-8";
     }
 }

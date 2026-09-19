@@ -23,4 +23,8 @@ public class Headers {
         return Integer.parseInt(length);
     }
 
+    public String cookie() {
+        return headers.getOrDefault("Cookie", "");
+    }
+
 }

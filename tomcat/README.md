@@ -91,10 +91,10 @@ email = hkkang%40woowahan.com
 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지한다.
 HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다.
 
-- [ ] 세션을 구현하기 전에 먼저 쿠키를 구현해본다.
-    - [ ] 자바 진영에서 세션 아이디를 전달하는 이름으로 JSESSIONID를 사용한다.
-    - [ ] HTTP 응답 헤더에 Set-Cookie를 추가하고 JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 형태로 값을 전달한다.
-    - [ ] 클라이언트 요청 헤더의 Cookie 필드에 값이 추가된다.
+- [x] 세션을 구현하기 전에 먼저 쿠키를 구현해본다.
+    - [x] 자바 진영에서 세션 아이디를 전달하는 이름으로 JSESSIONID를 사용한다.
+    - [x] HTTP 응답 헤더에 Set-Cookie를 추가하고 JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 형태로 값을 전달한다.
+    - [x] 클라이언트 요청 헤더의 Cookie 필드에 값이 추가된다.
 
 서버로부터 쿠키 설정된 클라이언트의 HTTP Request Header 예시
 
@@ -121,6 +121,3 @@ Content-Type: text/html;charset=utf-8;
 - [ ] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크한다.
 - [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
 - [ ] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
-
-
-

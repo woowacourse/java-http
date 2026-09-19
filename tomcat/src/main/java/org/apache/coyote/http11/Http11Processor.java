@@ -9,10 +9,13 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +80,9 @@ public class Http11Processor implements Runnable, Processor {
                 path = resolveGetPath(path);
             }
 
-            final var response = makeResponse(path, code, status);
+            final Cookies cookies = new Cookies(headers.cookie());
+            final var response = makeResponse(path, code, status, cookies.getSessionId());
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -97,18 +102,25 @@ public class Http11Processor implements Runnable, Processor {
     private String makeResponse(
             final String path,
             final String code,
-            final String status
+            final String status,
+            final Optional<String> sessionId
     ) throws IOException {
         final String responseBody = getResponseBody(path);
         final String contentType = resolveContentType(path);
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + code + " " + status + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
+        final List<String> responseLines = new ArrayList<>();
+        responseLines.add("HTTP/1.1 " + code + " " + status);
+        responseLines.add("Content-Type: " + contentType + ";charset=utf-8");
+        responseLines.add("Content-Length: " + responseBody.getBytes().length);
+
+        if (sessionId.isEmpty()) {
+            responseLines.add("Set-Cookie: JSESSIONID=" + UUID.randomUUID());
+        }
+
+        responseLines.add("");
+        responseLines.add(responseBody);
+
+        return String.join("\r\n", responseLines);
     }
 
     private String getResponseBody(final String path) throws IOException {

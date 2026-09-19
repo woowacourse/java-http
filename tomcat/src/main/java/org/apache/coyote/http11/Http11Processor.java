@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -19,8 +20,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final int REQUEST_TARGET_INDEX = 1;
     private static final String INDEX_PATH = "/index.html";
     private static final String CSS_PATH = "/css/styles.css";
+    private static final Set<String> JAVASCRIPT_PATHS = Set.of(
+            "/js/scripts.js",
+            "/assets/chart-area.js",
+            "/assets/chart-bar.js",
+            "/assets/chart-pie.js");
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
+    private static final String JAVASCRIPT_CONTENT_TYPE = "text/javascript;charset=utf-8";
     private static final String CRLF = "\r\n";
 
     private final Socket connection;
@@ -84,6 +91,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (CSS_PATH.equals(requestTarget)) {
             return new ResponseContent(CSS_CONTENT_TYPE, readResource(requestTarget));
+        }
+        if (JAVASCRIPT_PATHS.contains(requestTarget)) {
+            return new ResponseContent(JAVASCRIPT_CONTENT_TYPE, readResource(requestTarget));
         }
         return new ResponseContent(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
     }

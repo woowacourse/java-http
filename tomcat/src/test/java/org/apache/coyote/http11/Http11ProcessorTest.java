@@ -5,6 +5,7 @@ import support.StubSocket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,6 +99,35 @@ class Http11ProcessorTest {
             assertThat(actual).startsWith(expectedHeaders);
             assertThat(actual.substring(expectedHeaders.length()))
                     .isEqualTo(new String(css, StandardCharsets.UTF_8));
+        }
+    }
+
+    @Test
+    void javascriptFiles() throws IOException {
+        final var paths = List.of(
+                "/js/scripts.js",
+                "/assets/chart-area.js",
+                "/assets/chart-bar.js",
+                "/assets/chart-pie.js");
+
+        for (final String path : paths) {
+            final var socket = new StubSocket("GET " + path + " HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+            final var processor = new Http11Processor(socket);
+
+            processor.process(socket);
+
+            try (final var resource = getClass().getClassLoader().getResourceAsStream("static" + path)) {
+                assertThat(resource).isNotNull();
+                final byte[] javascript = resource.readAllBytes();
+                final String expected = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/javascript;charset=utf-8 ",
+                        "Content-Length: " + javascript.length + " ",
+                        "",
+                        new String(javascript, StandardCharsets.UTF_8));
+
+                assertThat(socket.output()).as(path).isEqualTo(expected);
+            }
         }
     }
 }

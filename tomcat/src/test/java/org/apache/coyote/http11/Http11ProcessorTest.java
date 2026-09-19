@@ -225,7 +225,7 @@ class Http11ProcessorTest {
             assertThat(responseBody(response)).isEqualTo(expectedBody);
         }
 
-        @ParameterizedTest(name = "요청 경로: {0}")
+        @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
                 "/js/scripts.js",
                 "/assets/chart-area.js",
@@ -244,7 +244,7 @@ class Http11ProcessorTest {
             assertThat(response).contains("\r\nContent-Type: " + expectedContentType + " \r\n");
         }
 
-        @ParameterizedTest(name = "요청 경로: {0}")
+        @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
                 "/js/scripts.js",
                 "/assets/chart-area.js",
@@ -268,7 +268,7 @@ class Http11ProcessorTest {
     @DisplayName("로그인 요청")
     class LoginTests {
 
-        @ParameterizedTest(name = "요청 경로: {0}")
+        @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
                 "/login",
                 "/login?account=gugu&password=password"
@@ -313,7 +313,7 @@ class Http11ProcessorTest {
                     .containsExactly("login user found: gugu");
         }
 
-        @ParameterizedTest(name = "요청 경로: {0}")
+        @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
                 "/login?account=gugu&password=wrong",
                 "/login?account=gugu&password=pa=ss"
@@ -329,7 +329,7 @@ class Http11ProcessorTest {
             assertThat(messages).isEmpty();
         }
 
-        @ParameterizedTest(name = "요청 경로: {0}")
+        @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
                 "/login?account=gugu&password",
                 "/login?account=gugu&password=password&broken"

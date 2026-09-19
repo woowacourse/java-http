@@ -22,6 +22,10 @@ public class RequestTarget {
         this.requestBody = requestBody;
     }
 
+    public String getHeaderValue(final String key) {
+        return headers.get(key);
+    }
+
     public HttpMethod httpMethod() {
         return httpMethod;
     }

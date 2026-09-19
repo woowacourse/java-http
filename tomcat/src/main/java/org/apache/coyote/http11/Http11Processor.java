@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,13 +48,18 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream));
             final var outputStream = connection.getOutputStream()) {
-            RequestTarget requestTarget = getRequestTarget(bufferedReader);
+            final RequestTarget requestTarget = getRequestTarget(bufferedReader);
+            final HttpCookie httpCookie = HttpCookie.from(requestTarget.getHeaderValue("Cookie"));
 
             Response response = dispatchRequest(requestTarget);
             response.addBody(readStaticResource(response.filePath()));
             response.addHeader("Content-Type", getContentType(response.filePath()) + charSetOption);
             response.addHeader("Content-Length", String.valueOf(response.body()
                 .getBytes().length));
+            if (!httpCookie.containsJSessionId()) {
+                final UUID uuid = UUID.randomUUID();
+                response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+            }
 
             final String message = generateResponseMessage(response);
 
@@ -184,7 +190,8 @@ public class Http11Processor implements Runnable, Processor {
         }
         final RegisterRequest registerRequest = parseRegisterRequest(requestTarget.requestBody());
         final User newUser =
-            new User(registerRequest.account(), registerRequest.password(), registerRequest.email());
+            new User(registerRequest.account(), registerRequest.password(),
+                registerRequest.email());
         InMemoryUserRepository.save(newUser);
         log.info("register: {}", newUser);
 

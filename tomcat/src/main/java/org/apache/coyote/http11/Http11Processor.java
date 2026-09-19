@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -82,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
                 if(user.isEmpty()){
-                    throw new RuntimeException("존재하지 않는 사용자입니다.");
+                    throw new NoSuchElementException("존재하지 않는 사용자입니다.");
                 }
                 User foundUser = user.get();
                 if (foundUser.checkPassword(queryParameters.get("password"))) {

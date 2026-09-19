@@ -75,6 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             } else if ("/login".equals(uriPath)) {
                 String rawQuery = uri.getRawQuery();
 
+                // 이 경우 로그인 여부 확인해서 302 index or 401 반환
                 if (rawQuery != null) {
                     Map<String, String> queryParameters = parseQueryParameters(uri);
 
@@ -83,48 +84,37 @@ public class Http11Processor implements Runnable, Processor {
 
                     InMemoryUserRepository.findByAccount(account)
                             .filter(user -> user.checkPassword(password))
-                            .ifPresent(user -> log.info("user : " + user.toString()));
-                }
-
-                String loginPath = uriPath + ".html";
-                InputStream resourceAsStream = getClass()
-                        .getClassLoader()
-                        .getResourceAsStream("static" + loginPath);
-
-                if (resourceAsStream == null) {
-                    String response = createResponse(
-                            "HTTP/1.1 404 Not Found",
-                            "Not Found",
-                            "text/plain");
-                    writeResponse(outputStream, response);
+                            .ifPresentOrElse(
+                                    user -> {
+                                        try {
+                                            sendRedirectResponse("/index.html", outputStream);
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    },
+                                    () -> {
+                                        try {
+                                            sendErrorResponse("/401.html", outputStream);
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+                            );
                     return;
                 }
 
-                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
+                // 이경우 그냥 login.html 보여주기
+                String loginPath = uriPath + ".html";
+                InputStream resourceAsStream = getResourceInputStream(loginPath, outputStream);
+                if (resourceAsStream == null) return;
 
-                    final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-
-                    final var response = createResponse("HTTP/1.1 200 OK ", responseBody, "text/html");
-
-                    writeResponse(outputStream, response);
-                }
-
+                sendResponse(resourceAsStream, "text/html", outputStream);
                 return;
             }
 
             // 클래스 로더에서 정적 파일 가져오기
-            InputStream resourceAsStream = getClass()
-                    .getClassLoader()
-                    .getResourceAsStream("static" + uriPath);
-
-            if (resourceAsStream == null) {
-                String response = createResponse(
-                        "HTTP/1.1 404 Not Found",
-                        "Not Found",
-                        "text/plain");
-                writeResponse(outputStream, response);
-                return;
-            }
+            InputStream resourceAsStream = getResourceInputStream(uriPath, outputStream);
+            if (resourceAsStream == null) return;
 
             // 확장자에 맞는 content-type 추출
             int pointIndex = uriPath.lastIndexOf('.');
@@ -132,17 +122,57 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = MIME_TYPES.get(fileExtension);
 
             // 정적 파일 반환
-            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
-
-                final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-
-                final var response = createResponse("HTTP/1.1 200 OK ", responseBody, contentType);
-
-                writeResponse(outputStream, response);
-            }
+            sendResponse(resourceAsStream, contentType, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendRedirectResponse(String fileName, OutputStream outputStream) throws IOException {
+        String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + fileName,
+                "Content-Length: 0",
+                "", ""
+        );
+        writeResponse(outputStream, response);
+    }
+
+    private void sendErrorResponse(String fileName, OutputStream outputStream) throws IOException {
+        String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + fileName,
+                "Content-Length: 0",
+                "", ""
+        );
+        writeResponse(outputStream, response);
+    }
+
+    private static void sendResponse(InputStream resourceAsStream, String contentType, OutputStream outputStream) throws IOException {
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
+
+            final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            final var response = createResponse("HTTP/1.1 200 OK ", responseBody, contentType);
+
+            writeResponse(outputStream, response);
+        }
+    }
+
+    private InputStream getResourceInputStream(String uriPath, OutputStream outputStream) throws IOException {
+        InputStream resourceAsStream = getClass()
+                .getClassLoader()
+                .getResourceAsStream("static" + uriPath);
+
+        if (resourceAsStream == null) {
+            String response = createResponse(
+                    "HTTP/1.1 404 Not Found",
+                    "Not Found",
+                    "text/plain");
+            writeResponse(outputStream, response);
+            return null;
+        }
+        return resourceAsStream;
     }
 
     private static Map<String, String> parseQueryParameters(URI uri) {

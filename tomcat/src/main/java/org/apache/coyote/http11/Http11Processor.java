@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +10,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -48,23 +46,8 @@ public class Http11Processor implements Runnable, Processor {
 
             String[] requestHeader = readLine.split(" ");
             String path = requestHeader[1];
-            String resourcePath = extractResourcePath(path);
 
-            byte[] bytes = resolveResponseBody(resourcePath);
-            String responseBody = new String(bytes, StandardCharsets.UTF_8);
-
-            String contentType = resolveContentType(resourcePath);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + bytes.length,
-                    "",
-                    responseBody
-            );
-
-            logUser(path);
-
+            final String response = handleRequest(path);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -72,28 +55,70 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logUser(String path) {
+    private String handleRequest(String path) throws IOException {
+        String resourcePath = extractResourcePath(path);
+        String queryString = extractQueryString(path);
+
+        if (resourcePath.equals("/login") && !queryString.isBlank()) {
+            return handleLoginRequest(path);
+        }
+
+        return serveStaticResource(resourcePath);
+    }
+
+    private String handleLoginRequest(String path) {
         String queryString = extractQueryString(path);
         Map<String, String> queryParams = parseQueryParams(queryString);
 
         String account = queryParams.get("account");
-        if (account == null || account.isBlank()) {
-            return;
-        }
-
         String password = queryParams.get("password");
+        boolean authenticated = authenticate(account, password);
+
+        if (!authenticated) {
+            return redirect("/401.html");
+        }
+
+        return redirect("/index.html");
+    }
+
+    private String redirect(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+    }
+
+    private boolean authenticate(String account, String password) {
+        if (account == null || account.isBlank()) {
+            return false;
+        }
+
         if (password == null || password.isBlank()) {
-            return;
+            return false;
         }
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchElementException("해당 계정을 찾을 수 없습니다"));
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
+    }
 
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("아이디 또는 패스워드가 일치하지 않습니다");
-        }
+    private String serveStaticResource(String resourcePath) throws IOException {
+        byte[] bytes = resolveResponseBody(resourcePath);
+        String responseBody = new String(bytes, StandardCharsets.UTF_8);
+        String contentType = resolveContentType(resourcePath);
 
-        log.info(String.valueOf(user));
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: " + contentType,
+                "Content-Length: " + bytes.length,
+                "",
+                responseBody
+        );
+
+        return response;
     }
 
     @Nonnull

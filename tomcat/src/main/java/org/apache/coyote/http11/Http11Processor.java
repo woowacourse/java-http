@@ -5,6 +5,8 @@ import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,28 +56,20 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 StaticResource staticResource = staticResourceLoader.load(requestPath);
-                writeResponse(outputStream, "200 OK", staticResource);
+                HttpResponse response = HttpResponse.of(HttpStatus.OK, staticResource);
+                writeResponse(outputStream, response);
             } catch (BadRequestException e) {
                 log.warn(e.getMessage());
-                StaticResource badRequest = new StaticResource(e.getMessage(), "text/plain");
-                writeResponse(outputStream, "400 Bad Request", badRequest);
+                HttpResponse response = HttpResponse.of(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
+                writeResponse(outputStream, response);
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void writeResponse(OutputStream outputStream, String status, StaticResource resource) throws IOException {
-        String responseBody = resource.getBody();
-
-        String response = String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + resource.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+    private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toBytes());
         outputStream.flush();
     }
 

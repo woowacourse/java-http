@@ -42,6 +42,12 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest request = HttpRequest.from(reader);
 
+            if (request.getMethod().equals("POST") && request.getPath().equals("/register")) {
+                register(request.getBodyParams());
+                sendRedirect(outputStream, "/index.html");
+                return;
+            }
+
             if (request.getPath().equals("/login") && !request.getQueryParams().isEmpty()) {
                 final boolean loginSucceed = login(request.getQueryParams());
                 final String location = loginSucceed ? "/index.html" : "/401.html";
@@ -69,6 +75,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void register(final Map<String, String> params) {
+        final User user = new User(
+                params.get("account"),
+                params.get("password"),
+                params.get("email")
+        );
+        InMemoryUserRepository.save(user);
     }
 
     private boolean login(final Map<String, String> params) {

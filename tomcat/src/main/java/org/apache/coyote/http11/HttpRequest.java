@@ -12,15 +12,18 @@ final class HttpRequest {
     private final URI uri;
     private final QueryParameters queryParameters;
     private final QueryParameters bodyParameters;
+    private final Cookie cookie;
 
     private HttpRequest(final String method,
                         final URI uri,
                         final QueryParameters queryParameters,
-                        final QueryParameters bodyParameters) {
+                        final QueryParameters bodyParameters,
+                        final Cookie cookie) {
         this.method = method;
         this.uri = uri;
         this.queryParameters = queryParameters;
         this.bodyParameters = bodyParameters;
+        this.cookie = cookie;
     }
 
     static HttpRequest from(final BufferedReader reader) {
@@ -57,11 +60,26 @@ final class HttpRequest {
         final URI uri = URI.create(requestLineParts[1]);
         final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
 
-        QueryParameters bodyParameters = QueryParameters.from(body);
+        final QueryParameters bodyParameters = QueryParameters.from(body);
+        final Cookie cookie = Cookie.from(findCookieHeader(headers));
 
-        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters);
+        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, cookie);
     }
 
+    private static String findCookieHeader(final List<String> headers) {
+        for (String header : headers) {
+            final int separatorIndex = header.indexOf(':');
+            if (separatorIndex <= 0) {
+                continue;
+            }
+
+            final String name = header.substring(0, separatorIndex).trim();
+            if (name.equalsIgnoreCase("Cookie")) {
+                return header.substring(separatorIndex + 1).trim();
+            }
+        }
+        return null;
+    }
 
     String getMethod() {
         return method;
@@ -77,5 +95,9 @@ final class HttpRequest {
 
     String getBodyParameter(final String name) {
         return bodyParameters.get(name).orElse(null);
+    }
+
+    Cookie getCookie() {
+        return cookie;
     }
 }

@@ -3,9 +3,27 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
+
+    @Test
+    @DisplayName("요청 헤더의 Cookie를 파싱한다")
+    void parsesCookieHeader() {
+        // given
+        final List<String> headers = List.of(
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: yummy_cookie=choco; JSESSIONID=abc-123"
+        );
+
+        // when
+        final HttpRequest request = HttpRequest.of(headers, null);
+
+        // then
+        assertThat(request.getCookie().get("JSESSIONID")).contains("abc-123");
+    }
 
     @Test
     void requestLine에서_method와_path를_분리한다() {

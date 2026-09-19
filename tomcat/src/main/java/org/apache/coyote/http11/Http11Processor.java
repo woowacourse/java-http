@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String RESOURCES_PREFIX = "static";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -44,13 +46,20 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest request = HttpRequest.from(reader);
 
-            final var response = getResponse(request);
+            final HttpResponse response = addSessionCookieIfMissing(request, getResponse(request));
 
             outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse addSessionCookieIfMissing(final HttpRequest request, final HttpResponse response) {
+        if (request.getCookie().get(JSESSIONID).isPresent()) {
+            return response;
+        }
+        return response.withCookie(Cookie.of(JSESSIONID, UUID.randomUUID().toString()));
     }
 
     private HttpResponse getResponse(final HttpRequest request) {

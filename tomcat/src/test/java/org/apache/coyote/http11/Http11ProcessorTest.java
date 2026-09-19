@@ -16,11 +16,62 @@ import support.StubSocket;
 @DisplayName("HTTP/1.1 요청 처리")
 class Http11ProcessorTest {
 
+    @Nested
+    @DisplayName("쿠키")
+    class CookieTest {
+
+        @Test
+        @DisplayName("요청에 JSESSIONID가 없으면 응답 쿠키에 새 JSESSIONID를 추가한다")
+        void addsJSessionIdWhenRequestDoesNotContainOne() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /index.html HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output())
+                    .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f\\-]{36}");
+        }
+
+        @Test
+        @DisplayName("요청에 JSESSIONID가 있으면 새로운 JSESSIONID를 추가하지 않는다")
+        void doesNotAddJSessionIdWhenRequestContainsOne() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /index.html HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Cookie: yummy_cookie=choco; JSESSIONID=existing-id ",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
+        }
+    }
+
     @Test
     @DisplayName("루트 경로 요청에 기본 응답을 반환한다")
     void respondsToRootRequest() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=existing-id ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when
@@ -45,6 +96,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-id ",
                 "",
                 "");
 

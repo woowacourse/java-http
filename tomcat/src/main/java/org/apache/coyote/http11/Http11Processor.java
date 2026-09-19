@@ -62,13 +62,13 @@ public class Http11Processor implements Runnable, Processor {
         if (requestParts.length != REQUEST_LINE_PART_COUNT) {
             return null;
         }
-        if (!consumeHeaders(reader)) {
+        if (!skipHeaders(reader)) {
             return null;
         }
         return requestParts[REQUEST_TARGET_INDEX];
     }
 
-    private boolean consumeHeaders(final BufferedReader reader) throws IOException {
+    private boolean skipHeaders(final BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {

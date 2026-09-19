@@ -56,11 +56,6 @@ public class Http11Processor implements Runnable, Processor {
     private RequestLine readRequestLine(InputStream inputStream) throws IOException {
         final BufferedReader reader = getReader(inputStream);
         String line = reader.readLine();
-
-        if (line == null) {
-            throw new IllegalArgumentException("HTTP request line must not be null");
-        }
-
         return RequestLine.from(line);
     }
 

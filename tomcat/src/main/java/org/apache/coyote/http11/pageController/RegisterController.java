@@ -16,6 +16,10 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+        if (isLogIn(httpRequest)) {
+            return redirect(SUCCESS_PAGE);
+        }
+
         return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(REGISTER_PAGE));
     }
 
@@ -32,10 +36,7 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        HttpResponse response = redirect(SUCCESS_PAGE);
-        response.addCookie(SESSION_COOKIE_NAME, newSessionId());
-
-        return response;
+        return loginAndRedirect(httpRequest, user, SUCCESS_PAGE);
     }
 
     private boolean isInvalidInput(String account, String email, String password) {

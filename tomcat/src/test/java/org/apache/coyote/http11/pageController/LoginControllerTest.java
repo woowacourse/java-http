@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.pageController;
 
+import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -11,6 +14,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -162,5 +167,64 @@ class LoginControllerTest {
         try (InputStream inputStream = Objects.requireNonNull(resourceStream)) {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
+    }
+
+    @Test
+    void userIsStoredInSessionWhenLoginSucceeds() throws IOException {
+        // when
+        final String response = post("account=gugu&password=password");
+
+        // then
+        final Session session = SessionManager.getInstance().findSession(sessionIdOf(response));
+        assertThat(session).isNotNull();
+        assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("gugu");
+    }
+
+    @Test
+    void redirectToIndexWhenAlreadyLoggedIn() throws IOException {
+        // given
+        final Session session = new Session("login-already-logged-in");
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+        SessionManager.getInstance().add(session);
+
+        // when
+        final String response = getWithCookie("JSESSIONID=login-already-logged-in");
+
+        // then
+        assertThat(response).isEqualTo(redirectResponse("/index.html"));
+    }
+
+    @Test
+    void loginPageWhenSessionHasNoUser() throws IOException {
+        // given
+        SessionManager.getInstance().add(new Session("login-session-without-user"));
+
+        // when
+        final String response = getWithCookie("JSESSIONID=login-session-without-user");
+
+        // then
+        assertLoginPage(response);
+    }
+
+    @Test
+    void loginPageWhenSessionIsUnknown() throws IOException {
+        // when
+        final String response = getWithCookie("JSESSIONID=login-unknown-session");
+
+        // then
+        assertLoginPage(response);
+    }
+
+    private String getWithCookie(String cookie) throws IOException {
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: " + cookie));
+        final HttpRequest request = HttpRequest.from("GET /login HTTP/1.1", headers, HttpBody.empty());
+
+        return toString(loginController.run(request));
+    }
+
+    private String sessionIdOf(String response) {
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=([0-9a-f-]{36})").matcher(response);
+        assertThat(matcher.find()).isTrue();
+        return matcher.group(1);
     }
 }

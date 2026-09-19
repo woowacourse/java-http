@@ -1,8 +1,12 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Set;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final RequestLine requestLine;
@@ -10,6 +14,7 @@ public class HttpRequest {
     private final HttpBody body;
     private final HttpParams bodyParams;
     private final HttpCookie cookie;
+    private Session session;
 
     public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
         this.requestLine = requestLine;
@@ -36,6 +41,21 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return cookie;
+    }
+
+    public Session getSession(boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        SessionManager sessionManager = SessionManager.getInstance();
+        session = sessionManager.findSession(cookie.get(JSESSIONID));
+        if (session == null && create) {
+            session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+        }
+
+        return session;
     }
 
     public HttpMethod getMethod() {

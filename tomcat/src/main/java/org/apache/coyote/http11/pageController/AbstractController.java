@@ -1,14 +1,16 @@
 package org.apache.coyote.http11.pageController;
 
+import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements PageController {
-    protected static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER_ATTRIBUTE = "user";
 
     @Override
     public HttpResponse run(HttpRequest httpRequest) throws IOException {
@@ -31,8 +33,24 @@ public abstract class AbstractController implements PageController {
         return new HttpResponse(HttpStatus.FOUND, Map.of("Location", location), "");
     }
 
-    protected String newSessionId() {
-        return UUID.randomUUID().toString();
+    protected boolean isLogIn(HttpRequest httpRequest) {
+        Session session = httpRequest.getSession(false);
+
+        return session != null && getUser(session) != null;
+    }
+
+    protected HttpResponse loginAndRedirect(HttpRequest httpRequest, User user, String location) {
+        Session session = httpRequest.getSession(true);
+        session.setAttribute(USER_ATTRIBUTE, user);
+
+        HttpResponse response = redirect(location);
+        response.addCookie(JSESSIONID, session.getId());
+
+        return response;
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute(USER_ATTRIBUTE);
     }
 
     private HttpResponse methodNotAllowed(HttpRequest httpRequest) {

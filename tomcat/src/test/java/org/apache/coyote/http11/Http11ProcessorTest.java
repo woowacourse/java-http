@@ -411,6 +411,32 @@ class Http11ProcessorTest {
         assertThat(socket.output()).doesNotContain("Set-Cookie");
     }
 
+    @Test
+    void loginPageRedirectsAfterLogin() {
+        // given
+        final LoginResult loginResult = requestLogin("account=gugu&password=password");
+        final String sessionCookie = loginResult.response().lines()
+                .filter(line -> line.startsWith("Set-Cookie: "))
+                .findFirst()
+                .orElseThrow()
+                .substring("Set-Cookie: ".length())
+                .trim();
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: " + sessionCookie,
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
+    }
+
     private LoginResult requestLogin(String body) {
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",

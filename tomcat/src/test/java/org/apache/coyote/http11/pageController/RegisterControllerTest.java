@@ -2,6 +2,8 @@ package org.apache.coyote.http11.pageController;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -13,6 +15,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -122,5 +126,35 @@ class RegisterControllerTest {
         try (InputStream inputStream = Objects.requireNonNull(resourceStream)) {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
+    }
+
+    @Test
+    void registeredUserIsLoggedIn() throws IOException {
+        // when
+        final String response = post("account=sessionuser&email=sessionuser%40woowahan.com&password=secret");
+
+        // then
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=([0-9a-f-]{36})").matcher(response);
+        assertThat(matcher.find()).isTrue();
+        final Session session = SessionManager.getInstance().findSession(matcher.group(1));
+        assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("sessionuser");
+    }
+
+    @Test
+    void redirectToIndexWhenAlreadyLoggedIn() throws IOException {
+        // given
+        final Session session = new Session("register-already-logged-in");
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+        SessionManager.getInstance().add(session);
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=register-already-logged-in"));
+        final HttpRequest request = HttpRequest.from("GET /register HTTP/1.1", headers, HttpBody.empty());
+
+        // when
+        final String response = toString(registerController.run(request));
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\nLocation: /index.html \r\n")
+                .doesNotContain("Set-Cookie");
     }
 }

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.BadRequestException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -204,5 +206,55 @@ class HttpRequestTest {
         assertThat(request.getCookie()).isSameAs(request.getCookie());
         assertThat(request.getCookie().get("theme")).isEqualTo("dark");
         assertThat(request.getCookie().get("JSESSIONID")).isEqualTo("abc");
+    }
+
+    @Test
+    void noSessionWithoutCookie() {
+        // given
+        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+
+        // when & then
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    @Test
+    void createSessionWhenRequested() {
+        // given
+        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+
+        // when
+        final Session session = request.getSession(true);
+
+        // then
+        assertThat(session.getId()).matches("[0-9a-f-]{36}");
+        assertThat(SessionManager.getInstance().findSession(session.getId())).isSameAs(session);
+        assertThat(request.getSession(false)).isSameAs(session);
+    }
+
+    @Test
+    void findSessionByJSessionIdCookie() {
+        // given
+        final Session session = new Session("request-existing-session");
+        SessionManager.getInstance().add(session);
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=request-existing-session"));
+
+        // when
+        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+
+        // then
+        assertThat(request.getSession(false)).isSameAs(session);
+        assertThat(request.getSession(true)).isSameAs(session);
+    }
+
+    @Test
+    void unknownSessionIdIsNotFound() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=request-unknown-session"));
+
+        // when
+        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+
+        // then
+        assertThat(request.getSession(false)).isNull();
     }
 }

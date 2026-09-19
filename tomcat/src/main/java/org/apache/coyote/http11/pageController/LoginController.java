@@ -22,6 +22,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+        if (isLogIn(httpRequest)) {
+            return redirect(SUCCESS_PAGE);
+        }
+
         return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));
     }
 
@@ -40,10 +44,7 @@ public class LoginController extends AbstractController {
         }
 
         log.info("login user: {}", loginUser.get());
-        HttpResponse response = redirect(SUCCESS_PAGE);
-        response.addCookie(SESSION_COOKIE_NAME, newSessionId());
-
-        return response;
+        return loginAndRedirect(httpRequest, loginUser.get(), SUCCESS_PAGE);
     }
 
     private boolean isBlank(String value) {

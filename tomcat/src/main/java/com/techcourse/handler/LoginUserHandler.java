@@ -3,7 +3,7 @@ package com.techcourse.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import java.util.UUID;
+import org.apache.catalina.Session;
 import org.apache.catalina.handler.ResourceHandler;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpServletRequest;
@@ -40,7 +40,9 @@ public class LoginUserHandler implements ResourceHandler {
         }
         log.info("login user: {}", user.get());
 
+        Session session = request.getSession(true);
+        session.setAttribute("user", user.get());
         return HttpServletResponse.redirect("/index.html")
-                .addCookie("JSESSIONID", UUID.randomUUID().toString());
+                .addCookie("JSESSIONID", session.getId());
     }
 }

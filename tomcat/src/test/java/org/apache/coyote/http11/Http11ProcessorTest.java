@@ -12,6 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class Http11ProcessorTest {
 
@@ -34,6 +37,22 @@ class Http11ProcessorTest {
                 body);
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void usesInjectedResponseContentResolver() throws IOException {
+        final var socket = new StubSocket("GET /custom HTTP/1.1\r\n\r\n");
+        final var resolver = mock(ResponseContentResolver.class);
+        when(resolver.resolve("/custom"))
+                .thenReturn(new ResponseContent("text/plain;charset=utf-8", "custom".getBytes(StandardCharsets.UTF_8)));
+        final var processor = new Http11Processor(socket, resolver);
+
+        processor.process(socket);
+
+        verify(resolver).resolve("/custom");
+        assertThat(socket.output())
+                .contains("Content-Type: text/plain;charset=utf-8")
+                .endsWith("\r\n\r\ncustom");
     }
 
     @Test

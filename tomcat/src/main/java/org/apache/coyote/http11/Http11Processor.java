@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
@@ -26,10 +27,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CRLF = "\r\n";
 
     private final Socket connection;
-    private final ResponseContentResolver responseContentResolver = new ResponseContentResolver();
+    private final ResponseContentResolver responseContentResolver;
 
     public Http11Processor(final Socket connection) {
+        this(connection, new ResponseContentResolver());
+    }
+
+    Http11Processor(final Socket connection, final ResponseContentResolver responseContentResolver) {
         this.connection = connection;
+        this.responseContentResolver = Objects.requireNonNull(responseContentResolver);
     }
 
     @Override

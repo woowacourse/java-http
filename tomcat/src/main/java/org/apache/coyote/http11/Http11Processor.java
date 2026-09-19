@@ -119,8 +119,16 @@ public class Http11Processor implements Runnable, Processor {
     @Nonnull
     private String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        int readLength = 0;
+
+        while (readLength < contentLength) {
+            int currentLength = bufferedReader.read(buffer, readLength, contentLength - readLength);
+            if (currentLength == -1) {
+                break;
+            }
+            readLength += currentLength;
+        }
+        return new String(buffer, 0, readLength);
     }
 
     private String getResponse(String requestUri, String cookieHeader, Session session) throws IOException {

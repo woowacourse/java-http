@@ -17,6 +17,7 @@ import java.net.URLDecoder;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.io.OutputStream;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -69,23 +70,31 @@ public class Http11Processor implements Runnable, Processor {
             if ("/".equals(requestUri)) {
                 responseBody = "Hello world!";
             } else if ("/login".equals(requestUri)) {
-                final Map<String, String> queryParams = parseQueryString(queryString);
+                if (!queryString.isBlank()) {
+                    final Map<String, String> queryParams = parseQueryString(queryString);
 
-                final String account = queryParams.get("account");
-                final String password = queryParams.get("password");
+                    final String account = queryParams.get("account");
+                    final String password = queryParams.get("password");
 
-                if (account != null && password != null) {
-                    InMemoryUserRepository.findByAccount(account)
+                    final boolean loginSuccess = account != null
+                            && password != null
+                            && InMemoryUserRepository.findByAccount(account)
                             .filter(user -> user.checkPassword(password))
-                            .ifPresent(user -> log.info("회원 조회 결과: {}", user));
+                            .map(user -> {
+                                log.info("회원 조회 결과: {}", user);
+                                return true;
+                            })
+                            .orElse(false);
+
+                    writeRedirectResponse(
+                            outputStream,
+                            loginSuccess ? "/index.html" : "/401.html"
+                    );
+                    return;
                 }
 
-                final String resourcePath = "/login".equals(requestUri)
-                        ? "/login.html"
-                        : requestUri;
-
-                final var resource =
-                        getClass().getClassLoader().getResource("static" + resourcePath);
+                final var resource = getClass().getClassLoader()
+                        .getResource("static/login.html");
 
                 if (resource == null) {
                     return;
@@ -159,5 +168,18 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryParams;
+    }
+
+    private void writeRedirectResponse(final OutputStream outputStream,
+                                       final String location) throws IOException {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

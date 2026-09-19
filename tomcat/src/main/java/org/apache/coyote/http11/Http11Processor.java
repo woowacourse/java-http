@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -100,10 +102,13 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
-    private String getResourcePath(String path) {
-        return getClass().getClassLoader()
-                .getResource(path)
-                .getPath();
+    private String getResourcePath(final String path) {
+        final URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            throw new UncheckedServletException(
+                    new FileNotFoundException("리소스를 찾을 수 없습니다: " + path));
+        }
+        return resource.getPath();
     }
 
     private String getContentType(final String requestUri) {

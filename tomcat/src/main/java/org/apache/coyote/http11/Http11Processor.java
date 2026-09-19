@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,10 +11,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +40,6 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final String request = readRequest(inputStream);
-            if (request.isBlank()) {
-                return;
-            }
 
             String uri = request.split(" ")[1];
             log.info("uri: {}", uri);
@@ -54,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             if (!queryString.isBlank()) {
                 uri = List.of(uri.split("\\?")).getFirst() + ".html";
                 final Map<String, String> pairs = findQueries(queryString);
-                userMatching(pairs);
+                userMatching(pairs.get("account"), pairs.get("password"));
             }
 
             final String responseBody = makeResponseBody(uri);
@@ -95,22 +90,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> findQueries(String queryString) {
         final List<String> queries = List.of(queryString.split("&"));
-        final Map<String, String> pairs = new LinkedHashMap<>();
+        final Map<String, String> pairs = new HashMap<>();
 
         for (String query : queries) {
             String[] pair = query.split("=", 2);
-            log.info("pair[0]: {}", pair[0]);
-            log.info("pair[1]: {}", pair[1]);
             pairs.put(pair[0], pair[1]);
         }
         return pairs;
     }
 
-    private void userMatching(Map<String, String> pairs) {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(pairs.get("account"));
-        if (user.isPresent() && user.get().checkPassword(pairs.get("password"))) {
-            log.info("user : {}", user.get());
-        }
+    private void userMatching(String account, String password) {
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("user : {}", user));
     }
 
     private String makeResponseBody(String uri) throws IOException {

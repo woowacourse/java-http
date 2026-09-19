@@ -48,6 +48,20 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String path = requestLine.split(" ")[1];
+
+            if (path.equals("/")) {
+                final var responseBody = "Hello world!";
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             String filePath = "static" + path;
             String contentType = "text/html;charset=utf-8";
 
@@ -69,11 +83,6 @@ public class Http11Processor implements Runnable, Processor {
                             () -> log.info("회원을 찾을 수 없습니다. account: {}", account)
                     );
                 }
-            }
-
-            if (path.equals("/") || path.equals("/index.html")) {
-                filePath = "static/index.html";
-                contentType = "text/html;charset=utf-8";
             }
 
             if (path.endsWith(".css")) {

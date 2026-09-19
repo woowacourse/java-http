@@ -199,7 +199,7 @@ class Http11ProcessorTest {
     void unsupportedMethod() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /index.html HTTP/1.1",
+                "PUT /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "",
                 "");
@@ -212,6 +212,29 @@ class Http11ProcessorTest {
         // then
         final String expected = expectedResponse(
                 "400 Bad Request",
+                "text/plain",
+                "지원하지 않는 HTTP 메서드입니다: PUT"
+        );
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void methodNotAllowedForStaticResource() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse(
+                "405 Method Not Allowed",
                 "text/plain",
                 "지원하지 않는 HTTP 메서드입니다: POST"
         );

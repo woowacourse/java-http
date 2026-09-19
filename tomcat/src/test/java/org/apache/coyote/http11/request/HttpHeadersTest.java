@@ -73,4 +73,22 @@ class HttpHeadersTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("잘못된 http 헤더 형태입니다: Host localhost");
     }
+
+    @Test
+    void mediaTypeWithoutParameters() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: Application/X-WWW-Form-Urlencoded; charset=UTF-8"));
+
+        // when & then
+        assertThat(headers.getMediaType()).isEqualTo("application/x-www-form-urlencoded");
+    }
+
+    @Test
+    void mediaTypeIsNullWithoutContentType() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Host: localhost:8080"));
+
+        // when & then
+        assertThat(headers.getMediaType()).isNull();
+    }
 }

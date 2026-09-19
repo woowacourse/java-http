@@ -9,6 +9,8 @@ import org.apache.coyote.http11.BadRequestException;
 public class HttpHeaders {
     private static final String HEADER_DELIMITER = ":";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String PARAMETER_DELIMITER = ";";
 
     private final Map<String, String> headers;
 
@@ -33,6 +35,15 @@ public class HttpHeaders {
 
     public String get(String name) {
         return headers.get(normalize(name));
+    }
+
+    public String getMediaType() {
+        String contentType = get(CONTENT_TYPE);
+        if (contentType == null) {
+            return null;
+        }
+
+        return contentType.split(PARAMETER_DELIMITER)[0].trim().toLowerCase(Locale.ROOT);
     }
 
     public int getContentLength() {

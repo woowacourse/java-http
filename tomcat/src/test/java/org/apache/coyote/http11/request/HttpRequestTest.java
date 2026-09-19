@@ -21,7 +21,7 @@ class HttpRequestTest {
         // then
         assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getHttpPath()).isEqualTo("/login");
-        assertThat(request.getParams("account")).isEqualTo("gugu");
+        assertThat(request.getQueryParams("account")).isEqualTo("gugu");
         assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
     }
 
@@ -98,5 +98,84 @@ class HttpRequestTest {
         // then
         assertThat(request.getHeader("host")).isEqualTo("localhost:8080");
         assertThat(request.getBody().getContent()).isEqualTo("account=gugu");
+    }
+
+    @Test
+    void formBodyParams() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
+        final HttpBody body = new HttpBody("account=gugu2&email=gugu2%40woowahan.com");
+
+        // when
+        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", headers, body);
+
+        // then
+        assertThat(request.getBodyParams("account")).isEqualTo("gugu2");
+        assertThat(request.getBodyParams("email")).isEqualTo("gugu2@woowahan.com");
+    }
+
+    @Test
+    void formBodyParamsWithCharset() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded; charset=UTF-8"));
+        final HttpBody body = new HttpBody("account=gugu2");
+
+        // when
+        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", headers, body);
+
+        // then
+        assertThat(request.getBodyParams("account")).isEqualTo("gugu2");
+    }
+
+    @Test
+    void queryParamsAndBodyParamsAreSeparated() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
+        final HttpBody body = new HttpBody("account=fromBody");
+
+        // when
+        final HttpRequest request = HttpRequest.from("POST /register?account=fromQuery HTTP/1.1", headers, body);
+
+        // then
+        assertThat(request.getQueryParams("account")).isEqualTo("fromQuery");
+        assertThat(request.getBodyParams("account")).isEqualTo("fromBody");
+    }
+
+    @Test
+    void bodyIsNotParsedWhenNotForm() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: application/json"));
+        final HttpBody body = new HttpBody("account=gugu2");
+
+        // when
+        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", headers, body);
+
+        // then
+        assertThat(request.getBodyParams("account")).isNull();
+    }
+
+    @Test
+    void bodyIsNotParsedWhenNotPost() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
+        final HttpBody body = new HttpBody("account=gugu2");
+
+        // when
+        final HttpRequest request = HttpRequest.from("GET /register HTTP/1.1", headers, body);
+
+        // then
+        assertThat(request.getBodyParams("account")).isNull();
+    }
+
+    @Test
+    void invalidFormBody() {
+        // given
+        final HttpHeaders headers = HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
+        final HttpBody body = new HttpBody("account=%");
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from("POST /register HTTP/1.1", headers, body))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("잘못된 쿼리 스트링입니다.");
     }
 }

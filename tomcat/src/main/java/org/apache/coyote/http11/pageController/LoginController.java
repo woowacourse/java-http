@@ -23,8 +23,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        String account = httpRequest.getParams("account");
-        String password = httpRequest.getParams("password");
+        String account = httpRequest.getQueryParams("account");
+        String password = httpRequest.getQueryParams("password");
 
         if (account == null || password == null) {
             return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));

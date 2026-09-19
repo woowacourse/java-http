@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.BadRequestException;
 
-public class HttpQueryParams {
+public class HttpParams {
     private final Map<String, String> queryParams;
 
-    public HttpQueryParams(Map<String, String> queryParams) {
+    public HttpParams(Map<String, String> queryParams) {
         this.queryParams = queryParams;
     }
 
-    public static HttpQueryParams from(String queryInfo) {
+    public static HttpParams from(String queryInfo) {
         if(queryInfo == null) {
-            return new HttpQueryParams(Map.of());
+            return new HttpParams(Map.of());
         }
 
         Map<String, String> params = Arrays.stream(queryInfo.split("&"))
@@ -27,7 +27,7 @@ public class HttpQueryParams {
                         parameter -> decode(parameter[1]),
                         (previous, replacement) -> replacement
                 ));
-        return new HttpQueryParams(params);
+        return new HttpParams(params);
     }
 
     public String get(String key) {

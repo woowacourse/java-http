@@ -14,9 +14,9 @@ public class HttpRequestTarget {
 
     private final String authority;
     private final String path;
-    private final HttpQueryParams queryParams;
+    private final HttpParams queryParams;
 
-    public HttpRequestTarget(String authority, String path, HttpQueryParams queryParams) {
+    public HttpRequestTarget(String authority, String path, HttpParams queryParams) {
         this.authority = authority;
         this.path = path;
         this.queryParams = queryParams;
@@ -68,7 +68,7 @@ public class HttpRequestTarget {
         String[] targetParts = originForm.split(QUERY_DELIMITER, 2);
         String queryString = extractQueryString(targetParts);
 
-        return new HttpRequestTarget(authority, targetParts[0], HttpQueryParams.from(queryString));
+        return new HttpRequestTarget(authority, targetParts[0], HttpParams.from(queryString));
     }
 
     private static String extractQueryString(String[] targetParts) {

@@ -3,14 +3,18 @@ package org.apache.coyote.http11.request;
 import java.util.Set;
 
 public class HttpRequest {
+    private static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
+
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpBody body;
+    private final HttpParams bodyParams;
 
     public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.bodyParams = parseBodyParams(requestLine, headers, body);
     }
 
     public static HttpRequest from(String requestLine, HttpHeaders headers, HttpBody body) {
@@ -36,8 +40,12 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getParams(String key) {
+    public String getQueryParams(String key) {
         return requestLine.getParams(key);
+    }
+
+    public String getBodyParams(String key) {
+        return bodyParams.get(key);
     }
 
     public String getVersion() {
@@ -58,5 +66,17 @@ public class HttpRequest {
 
     public HttpBody getBody() {
         return body;
+    }
+
+    private static HttpParams parseBodyParams(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
+        if (requestLine.getMethod() != HttpMethod.POST) {
+            return HttpParams.from(null);
+        }
+
+        if (!FORM_URLENCODED.equals(headers.getMediaType())) {
+            return HttpParams.from(null);
+        }
+
+        return HttpParams.from(body.getContent());
     }
 }

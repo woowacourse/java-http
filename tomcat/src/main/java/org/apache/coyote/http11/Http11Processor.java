@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Http11Processor implements Runnable, Processor {
-
-    private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET);
+    private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET, HttpMethod.POST);
 
     private static final String SERVER_ERROR_PAGE = "/500.html";
     private static final StaticResourceLoader STATIC_RESOURCE_LOADER = new StaticResourceLoader();

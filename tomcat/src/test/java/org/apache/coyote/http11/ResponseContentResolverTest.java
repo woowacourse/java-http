@@ -15,8 +15,21 @@ class ResponseContentResolverTest {
     private final ResponseContentResolver resolver = new ResponseContentResolver();
 
     @Test
-    @DisplayName("/login 요청은 로그인 페이지의 내용과 HTML 타입을 반환한다")
-    void loginPathResolvesToLoginPage() throws IOException {
+    @DisplayName("/login 요청은 HTML 타입을 반환한다")
+    void loginPathResolvesToHtmlType() throws IOException {
+        // given
+        final var path = "/login";
+
+        // when
+        final var response = resolver.resolve(path);
+
+        // then
+        assertThat(response.contentType()).isEqualTo("text/html;charset=utf-8");
+    }
+
+    @Test
+    @DisplayName("/login 요청은 로그인 페이지의 내용을 반환한다")
+    void loginPathResolvesToLoginPageBody() throws IOException {
         // given
         try (final var resource = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
             assertThat(resource).isNotNull();
@@ -26,7 +39,6 @@ class ResponseContentResolverTest {
             final var response = resolver.resolve("/login");
 
             // then
-            assertThat(response.contentType()).isEqualTo("text/html;charset=utf-8");
             assertThat(response.body()).isEqualTo(expectedBody);
         }
     }
@@ -36,8 +48,8 @@ class ResponseContentResolverTest {
     class UnrecognizedPath {
 
         @Test
-        @DisplayName("기본 응답을 반환한다")
-        void unknownPathKeepsDefaultResponse() throws IOException {
+        @DisplayName("기본 HTML 타입을 반환한다")
+        void unknownPathReturnsDefaultContentType() throws IOException {
             // given
             final var path = "/unknown.html";
 
@@ -46,6 +58,18 @@ class ResponseContentResolverTest {
 
             // then
             assertThat(response.contentType()).isEqualTo("text/html;charset=utf-8");
+        }
+
+        @Test
+        @DisplayName("기본 응답 본문을 반환한다")
+        void unknownPathReturnsDefaultBody() throws IOException {
+            // given
+            final var path = "/unknown.html";
+
+            // when
+            final var response = resolver.resolve(path);
+
+            // then
             assertThat(response.body()).isEqualTo("Hello world!".getBytes(StandardCharsets.UTF_8));
         }
 

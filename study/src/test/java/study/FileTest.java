@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,13 +28,13 @@ class FileTest {
      */
     @Test
     @DisplayName("클래스 로더로 리소스 파일의 경로를 찾는다")
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
+    void findsResourcePathUsingClassLoader() throws URISyntaxException {
         // given
         final String fileName = "nextstep.txt";
 
         // when
-        final var resource = getClass().getClassLoader().getResource(fileName);
-        assertThat(resource).isNotNull();
+        final var resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(fileName), "테스트 리소스를 찾을 수 없습니다: " + fileName);
         final String actual = Path.of(resource.toURI()).toString();
 
         // then
@@ -48,17 +49,17 @@ class FileTest {
      */
     @Test
     @DisplayName("리소스 파일의 내용을 줄 단위로 읽는다")
-    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
+    void readsResourceFileLineByLine() throws IOException, URISyntaxException {
         // given
         final String fileName = "nextstep.txt";
-        final var resource = getClass().getClassLoader().getResource(fileName);
-        assertThat(resource).isNotNull();
+        final var resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(fileName), "테스트 리소스를 찾을 수 없습니다: " + fileName);
         final Path path = Path.of(resource.toURI());
 
         // when
         final List<String> actual = Files.readAllLines(path);
 
         // then
-        assertThat(actual).containsOnly("nextstep");
+        assertThat(actual).containsExactly("nextstep");
     }
 }

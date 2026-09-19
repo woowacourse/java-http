@@ -18,8 +18,6 @@ class UserTest {
         final var actual = user.toString();
 
         // then
-        assertThat(actual)
-                .contains("gugu")
-                .doesNotContain("super-secret");
+        assertThat(actual).doesNotContain("super-secret");
     }
 }

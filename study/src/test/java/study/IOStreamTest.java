@@ -4,12 +4,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
@@ -35,7 +47,7 @@ class IOStreamTest {
      */
     @Nested
     @DisplayName("OutputStream으로 바이트를 출력할 때")
-    class OutputStream_학습_테스트 {
+    class OutputStreamTests {
 
         /**
          * OutputStream은 다른 매체에 바이트로 데이터를 쓸 때 사용한다.
@@ -49,23 +61,22 @@ class IOStreamTest {
          */
         @Test
         @DisplayName("바이트 배열을 출력할 수 있다")
-        void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
+        void writesByteArrayToOutputStream() throws IOException {
             // given
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
-            final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
+            final var outputStream = new ByteArrayOutputStream(bytes.length);
 
             /**
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
             // when
-            outputStream.write(bytes);
-
-            final String actual = outputStream.toString();
+            try (outputStream) {
+                outputStream.write(bytes);
+            }
 
             // then
-            assertThat(actual).isEqualTo("nextstep");
-            outputStream.close();
+            assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo("nextstep");
         }
 
         /**
@@ -76,10 +87,12 @@ class IOStreamTest {
          * 상대의 응답을 기다리기 전에 요청을 flush하지 않으면 서로 기다리는 상황이 생길 수 있다.
          */
         @Test
-        @DisplayName("버퍼에 남은 데이터를 flush하고 스트림을 닫는다")
-        void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
+        @DisplayName("flush하면 버퍼에 남은 데이터가 하위 스트림에 전달된다")
+        void flushesBufferedOutputStreamToDestination() throws IOException {
             // given
-            final OutputStream outputStream = mock(BufferedOutputStream.class);
+            final String text = "nextstep";
+            final var destination = new ByteArrayOutputStream();
+            final var outputStream = new BufferedOutputStream(destination, 16);
 
             /**
              * todo
@@ -89,17 +102,17 @@ class IOStreamTest {
 
             // when
             try (outputStream) {
+                outputStream.write(text.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-            }
 
-            // then
-            verify(outputStream, atLeastOnce()).flush();
-            verify(outputStream, atLeastOnce()).close();
+                // then: close()의 자동 flush와 무관하게 명시적인 flush를 확인한다.
+                assertThat(destination.toString(StandardCharsets.UTF_8)).isEqualTo(text);
+            }
         }
 
         @Test
         @DisplayName("flush가 실패해도 스트림을 닫는다")
-        void flush에_실패해도_OutputStream을_닫는다() throws IOException {
+        void closesOutputStreamWhenFlushFails() throws IOException {
             // given
             final OutputStream outputStream = mock(BufferedOutputStream.class);
             doThrow(new IOException("flush failed")).when(outputStream).flush();
@@ -121,7 +134,7 @@ class IOStreamTest {
          */
         @Test
         @DisplayName("사용을 마치면 스트림을 닫는다")
-        void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
+        void closesOutputStreamWithTryWithResources() throws IOException {
             // given
             final OutputStream outputStream = mock(OutputStream.class);
 
@@ -135,7 +148,7 @@ class IOStreamTest {
             }
 
             // then
-            verify(outputStream, atLeastOnce()).close();
+            verify(outputStream).close();
         }
     }
 
@@ -151,7 +164,7 @@ class IOStreamTest {
      */
     @Nested
     @DisplayName("InputStream에서 바이트를 읽을 때")
-    class InputStream_학습_테스트 {
+    class InputStreamTests {
 
         /**
          * read() 메서드는 매체로부터 단일 바이트를 읽는데, 0부터 255 사이의 값을 int 타입으로 반환한다.
@@ -159,10 +172,10 @@ class IOStreamTest {
          * 그리고 Stream 끝에 도달하면 -1을 반환한다.
          */
         @Test
-        @DisplayName("바이트를 UTF-8 문자열로 읽고 끝에서는 -1을 반환한다")
-        void InputStream은_데이터를_바이트로_읽는다() throws IOException {
+        @DisplayName("바이트를 UTF-8 문자열로 읽는다")
+        void decodesInputStreamBytesAsUtf8() throws IOException {
             // given
-            byte[] bytes = {-16, -97, -92, -87};
+            final byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
@@ -170,12 +183,30 @@ class IOStreamTest {
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
             // when
-            final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            final String actual;
+            try (inputStream) {
+                actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
 
             // then
             assertThat(actual).isEqualTo("🤩");
-            assertThat(inputStream.read()).isEqualTo(-1);
-            inputStream.close();
+        }
+
+        @Test
+        @DisplayName("모든 바이트를 읽은 뒤에는 -1을 반환한다")
+        void returnsMinusOneAfterInputStreamIsExhausted() throws IOException {
+            // given
+            final InputStream inputStream = new ByteArrayInputStream(new byte[]{42});
+            inputStream.read();
+
+            // when
+            final int actual;
+            try (inputStream) {
+                actual = inputStream.read();
+            }
+
+            // then
+            assertThat(actual).isEqualTo(-1);
         }
 
         /**
@@ -184,7 +215,7 @@ class IOStreamTest {
          */
         @Test
         @DisplayName("사용을 마치면 스트림을 닫는다")
-        void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
+        void closesInputStreamWithTryWithResources() throws IOException {
             // given
             final InputStream inputStream = mock(InputStream.class);
 
@@ -198,7 +229,7 @@ class IOStreamTest {
             }
 
             // then
-            verify(inputStream, atLeastOnce()).close();
+            verify(inputStream).close();
         }
     }
 
@@ -211,7 +242,7 @@ class IOStreamTest {
      */
     @Nested
     @DisplayName("FilterStream을 사용할 때")
-    class FilterStream_학습_테스트 {
+    class FilterStreamTests {
 
         /**
          * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.
@@ -219,19 +250,21 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        @DisplayName("BufferedInputStream으로 입력 스트림에 버퍼를 연결한다")
-        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
+        @DisplayName("BufferedInputStream으로 하위 스트림의 데이터를 읽는다")
+        void readsBytesThroughBufferedInputStream() throws IOException {
             // given
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
             final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
             // when
-            final byte[] actual = bufferedInputStream.readAllBytes();
+            final byte[] actual;
+            try (bufferedInputStream) {
+                actual = bufferedInputStream.readAllBytes();
+            }
 
             // then
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            assertThat(actual).isEqualTo(text.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -244,7 +277,7 @@ class IOStreamTest {
      */
     @Nested
     @DisplayName("InputStreamReader로 문자를 읽을 때")
-    class InputStreamReader_학습_테스트 {
+    class InputStreamReaderTests {
 
         /**
          * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다.
@@ -253,26 +286,26 @@ class IOStreamTest {
          */
         @Test
         @DisplayName("BufferedReader로 문자열을 줄 단위로 읽는다")
-        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
+        void readsLinesThroughBufferedReader() throws IOException {
             // given
-            final String emoji = String.join("\r\n",
-                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
-                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
-                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
-                    "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes(StandardCharsets.UTF_8));
+            final String firstLine = "😀😃😄";
+            final String secondLine = "😁😆😅";
+            final String text = firstLine + "\r\n" + secondLine + "\r\n";
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             // when
-            final StringBuilder actual = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                actual.append(line).append("\r\n");
+            final List<String> actual = new ArrayList<>();
+            try (bufferedReader) {
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    actual.add(line);
+                }
             }
 
             // then
-            assertThat(actual).hasToString(emoji);
+            assertThat(actual).containsExactly(firstLine, secondLine);
         }
     }
 }

@@ -11,20 +11,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StubSocketTest {
 
     @Test
+    @DisplayName("입력 스트림을 다시 가져오면 같은 객체를 반환한다")
+    void returnsTheSameInputStreamAcrossCalls() {
+        // given
+        final var socket = new StubSocket();
+        final var inputStream = socket.getInputStream();
+
+        // when
+        final var retrievedInputStream = socket.getInputStream();
+
+        // then
+        assertThat(retrievedInputStream).isSameAs(inputStream);
+    }
+
+    @Test
     @DisplayName("입력 스트림을 다시 가져와도 읽던 위치가 유지된다")
     void inputStreamKeepsItsPositionAcrossCalls() throws IOException {
         // given
         final var socket = new StubSocket("GET / HTTP/1.1\r\n\r\n");
-        final var inputStream = socket.getInputStream();
+        socket.getInputStream().read();
 
         // when
-        final var firstByte = inputStream.read();
-        final var retrievedInputStream = socket.getInputStream();
-        final var secondByte = retrievedInputStream.read();
+        final var secondByte = socket.getInputStream().read();
 
         // then
-        assertThat(firstByte).isEqualTo('G');
-        assertThat(retrievedInputStream).isSameAs(inputStream);
         assertThat(secondByte).isEqualTo('E');
     }
 }

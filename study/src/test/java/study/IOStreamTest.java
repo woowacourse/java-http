@@ -106,14 +106,10 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-            try {
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+            try (bufferedOutputStream) {
                 bufferedOutputStream.write("nextstep".getBytes());
-            } finally {
-                bufferedOutputStream.flush();
             }
-
-            bufferedOutputStream.close();
 
             verify(outputStream, atLeastOnce()).close();
         }

@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,18 +50,18 @@ public class Http11Processor implements Runnable, Processor {
             log.info("request uri: {}", uri);
 
             final String uriPath = uri.getPath();
-            final Path filePath = getFilePath(uriPath);
+            Path filePath = getFilePath(uriPath);
 
             if (uriPath.equals("/login")) {
                 final String query = uri.getQuery();
                 if (query != null) {
                     final Map<String, String> params = extractQueryParams(query);
-                    login(params);
+                    filePath = login(params);
                 }
             }
 
-            final String responseBody = getResponseBody(uriPath, filePath);
             final String contentType = getContentType(requestTarget);
+            final String responseBody = getResponseBody(filePath);
             final String httpStatus = "200 OK";
 
             final var response = createResponse(contentType, responseBody, httpStatus);
@@ -77,16 +78,10 @@ public class Http11Processor implements Runnable, Processor {
             return Path.of("/");
         }
         if (uriPath.equals("/login")) {
-            final URL url = getClass().getClassLoader().getResource("static/login.html");
-            if (url == null)
-                return Path.of("/");
-            return Path.of(url.getPath());
+            return resolveResourcePath("static/login.html");
         }
         else {
-            final URL url = getClass().getClassLoader().getResource("static" + uriPath);
-            if (url == null)
-                return Path.of("/");
-            return Path.of(url.getPath());
+            return resolveResourcePath("static" + uriPath);
         }
     }
 
@@ -96,32 +91,38 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> params = new HashMap<>();
 
         for (String queryParam : queryParams) {
-            final String key = queryParam.split(QUERY_PARAM_VALUE_DELIMITER)[0];
-            final String value = queryParam.split(QUERY_PARAM_VALUE_DELIMITER)[1];
+            String[] pair = queryParam.split(QUERY_PARAM_VALUE_DELIMITER, 2);
+            String key = pair[0];
+            String value = pair.length == 2 ? pair[1] : "";
 
             params.put(key, value);
         }
         return params;
     }
 
-    private void login(final Map<String, String> params) {
+    private Path login(final Map<String, String> params) {
         final String account = params.get("account");
         final String password = params.get("password");
 
-        final User userByAccount = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            log.error("login error");
+            return resolveResourcePath("static/401.html");
+        }
 
+        final User userByAccount = user.get();
         if (!userByAccount.checkPassword(password)) {
             log.error("login error");
-            throw new IllegalArgumentException();
+            return resolveResourcePath("static/401.html");
         }
 
         log.info("user : {}", userByAccount);
+        return resolveResourcePath("static/index.html");
     }
 
-    private String getResponseBody(final String uriPath, final Path filePath) throws IOException {
-        if (uriPath.equals("/")) {
-            return  "Hello world!";
+    private String getResponseBody(final Path filePath) throws IOException {
+        if (filePath.equals(Path.of("/"))) {
+            return "Hello world!";
         }
 
         return Files.readString(filePath);
@@ -146,5 +147,12 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private Path resolveResourcePath(final String name) {
+        final URL url = getClass().getClassLoader().getResource(name);
+        if (url == null)
+            return Path.of("/");
+        return Path.of(url.getPath());
     }
 }

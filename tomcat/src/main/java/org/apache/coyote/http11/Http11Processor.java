@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -11,7 +12,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,7 +59,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            writeResponse(outputStream, createResponse(requestTarget));
+            final String[] targetParts = requestTarget.split("\\?", 2);
+            final String path = targetParts[0];
+            if (LOGIN_PATH.equals(path) && targetParts.length == 2) {
+                logMatchingLoginUser(targetParts[1]);
+            }
+
+            writeResponse(outputStream, createResponse(path));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -87,8 +97,34 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private ResponseContent createResponse(final String requestTarget) throws IOException {
-        final String path = requestTarget.split("\\?", 2)[0];
+    private void logMatchingLoginUser(final String queryString) {
+        final Map<String, String> parameters = parseQueryParameters(queryString);
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("login user found: {}", user.getAccount()));
+    }
+
+    private Map<String, String> parseQueryParameters(final String queryString) {
+        final var pairs = Arrays.stream(queryString.split("&"))
+                .map(parameter -> parameter.split("=", 2))
+                .toList();
+        if (pairs.stream().anyMatch(pair -> pair.length != 2)) {
+            return Map.of();
+        }
+
+        return pairs.stream().collect(Collectors.toMap(
+                pair -> pair[0],
+                pair -> pair[1],
+                (previous, replacement) -> replacement));
+    }
+
+    private ResponseContent createResponse(final String path) throws IOException {
         if (INDEX_PATH.equals(path)) {
             return new ResponseContent(HTML_CONTENT_TYPE, readResource(path));
         }

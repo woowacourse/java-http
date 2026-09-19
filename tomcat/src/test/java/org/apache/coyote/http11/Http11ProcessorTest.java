@@ -1,6 +1,10 @@
 package org.apache.coyote.http11;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 import java.io.IOException;
@@ -156,5 +160,39 @@ class Http11ProcessorTest {
                 assertThat(socket.output()).as(requestTarget).isEqualTo(expected);
             }
         }
+    }
+
+    @Test
+    void onlyMatchingLoginUserIsLogged() {
+        final var logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            final var requestTargets = List.of(
+                    "/login?account=gugu&password=password",
+                    "/login?account=gugu&password=wrong",
+                    "/login?account=gugu&password",
+                    "/login?account=gugu&password=pa=ss",
+                    "/login?account=gugu&password=password&broken",
+                    "/login?account=gugu&account=other&password=password");
+
+            for (final String requestTarget : requestTargets) {
+                final var socket = new StubSocket("GET " + requestTarget + " HTTP/1.1\r\n\r\n");
+                final var processor = new Http11Processor(socket);
+
+                processor.process(socket);
+
+                assertThat(socket.output()).as(requestTarget).startsWith("HTTP/1.1 200 OK");
+            }
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+
+        assertThat(appender.list)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly("login user found: gugu");
     }
 }

@@ -32,4 +32,16 @@ class SessionTest {
 
         assertThat(session.getAttribute("user")).isNull();
     }
+
+    @Test
+    void 세션을_무효화하면_모든_속성을_삭제한다() {
+        final Session session = new Session("session-id");
+        session.setAttribute("user", new Object());
+        session.setAttribute("cart", new Object());
+
+        session.invalidate();
+
+        assertThat(session.getAttribute("user")).isNull();
+        assertThat(session.getAttribute("cart")).isNull();
+    }
 }

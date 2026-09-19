@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +60,14 @@ public class Http11Processor implements Runnable, Processor {
 
             String queryString;
             final int queryIndex = requestUri.indexOf('?');
-            if(queryIndex != -1) {
+            if (queryIndex != -1) {
                 queryString = requestUri.substring(queryIndex + 1);
                 requestUri = requestUri.substring(0, queryIndex);
                 String[] queryStringParts = queryString.split("&");
                 checkUser(queryStringParts);
             }
 
-            if(requestUri.equals(LOGIN)) {
+            if (requestUri.equals(LOGIN)) {
                 requestUri += DOT_HTML;
             }
 
@@ -126,11 +127,14 @@ public class Http11Processor implements Runnable, Processor {
         final String account = requestParts[0].split("=", 2)[1];
         String password = requestParts[1].split("=", 2)[1];
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalStateException("유저가 없습니다."));
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if(user.checkPassword(password)) {
-            System.out.println(user);
+        if (user.isEmpty()) {
+            return;
+        }
+
+        if (user.get().checkPassword(password)) {
+            System.out.println(user.get());
         }
     }
 }

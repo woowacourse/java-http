@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,6 +12,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +42,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = reader.readLine();
-            HttpRequest request = HttpRequest.from(line);
+            HttpRequest request = getHttpRequest(reader);
 
-            String path = request.path();
             final var response = getResponse(request);
 
             outputStream.write(response.toBytes());
@@ -51,30 +53,68 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    @Nonnull
+    private HttpRequest getHttpRequest(BufferedReader reader) throws IOException {
+        String line;
+        List<String> headers = new ArrayList<>();
+        int contentLength = 0;
+        String body = null;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            headers.add(line);
+            if (line.startsWith("Content-Length: ")) {
+                contentLength = Integer.parseInt(line.split(": ")[1].trim());
+            }
+        }
+        if (contentLength != 0) {
+            char[] bodyBuffer = new char[contentLength];
+            reader.read(bodyBuffer, 0, contentLength);
+            body = new String(bodyBuffer);
+        }
+
+        return HttpRequest.of(headers, body);
+    }
+
     private HttpResponse getResponse(final HttpRequest request) {
-        String path = request.path();
+        String path = request.getPath();
         if (!path.equals("/") && isResourcePresent(path)) {
             return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView(path));
         }
 
-        if (path.equals("/") && request.method().equals("GET")) {
+        if (path.equals("/") && request.getMethod().equals("GET")) {
             return new HttpResponse(HttpStatus.OK, getContentType(path), "Hello world");
         }
-        if (path.equals("/login") && request.method().equals("GET")) {
-            String body = (modelToView("/login.html"));
-            if (!request.hasParameters()) {
-                return new HttpResponse(HttpStatus.OK, getContentType(path), body);
-            }
+        if (path.equals("/register") && request.getMethod().equals("GET")) {
+            String body = modelToView("/register.html");
+            return new HttpResponse(HttpStatus.OK, getContentType(path), body);
+        }
+        if (path.equals("/register") && request.getMethod().equals("POST")) {
+            saveUser(request);
+
+            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/index.html"));
+        }
+        if (path.equals("/login") && request.getMethod().equals("GET")) {
+            return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView(path));
+        }
+        if (path.equals("/login") && request.getMethod().equals("POST")) {
             String account = request.getParameter("account");
             String password = request.getParameter("password");
 
             if (isLoginSuccess(account, password)) {
-                return new HttpResponse(HttpStatus.FOUND, getContentType(path), body, URI.create("/index.html"));
+                return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/index.html"));
             }
-            return new HttpResponse(HttpStatus.FOUND, getContentType(path), body, URI.create("/401.html"));
+            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/401.html"));
         }
 
         return new HttpResponse(HttpStatus.BAD_REQUEST, getContentType(path), "Bad Request");
+    }
+
+    private void saveUser(HttpRequest request) {
+        String name = request.getParameter("name");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        User user = new User(name, password, email);
+
+        InMemoryUserRepository.save(user);
     }
 
     private boolean isLoginSuccess(String account, String password) {

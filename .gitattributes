@@ -3,4 +3,5 @@
 #
 # These are explicitly windows files and should use crlf
 *.bat           text eol=crlf
+tomcat/src/main/resources/static/** text eol=lf
 

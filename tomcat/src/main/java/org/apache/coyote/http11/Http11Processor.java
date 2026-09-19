@@ -51,20 +51,24 @@ public class Http11Processor implements Runnable, Processor {
 
             final String uriPath = uri.getPath();
             Path filePath = getFilePath(uriPath);
+            String httpStatus = "200 OK";
 
             if (uriPath.equals("/login")) {
                 final String query = uri.getQuery();
-                if (query != null) {
-                    final Map<String, String> params = extractQueryParams(query);
-                    filePath = login(params);
+                final boolean loginSuccess = query != null && login(extractQueryParams(query));
+
+                if (loginSuccess) {
+                    httpStatus = "302 Found";
+                    filePath = resolveResourcePath("static/index.html");
+                } else {
+                    httpStatus = "401 Unauthorized";
+                    filePath = resolveResourcePath("static/401.html");
                 }
             }
 
             final String contentType = getContentType(requestTarget);
             final String responseBody = getResponseBody(filePath);
-            final String httpStatus = "200 OK";
-
-            final var response = createResponse(contentType, responseBody, httpStatus);
+            final String response = createResponse(contentType, responseBody, httpStatus);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -100,24 +104,18 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private Path login(final Map<String, String> params) {
+    private boolean login(final Map<String, String> params) {
         final String account = params.get("account");
         final String password = params.get("password");
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
             log.error("login error");
-            return resolveResourcePath("static/401.html");
+            return false;
         }
 
-        final User userByAccount = user.get();
-        if (!userByAccount.checkPassword(password)) {
-            log.error("login error");
-            return resolveResourcePath("static/401.html");
-        }
-
-        log.info("user : {}", userByAccount);
-        return resolveResourcePath("static/index.html");
+        log.info("user : {}", user.get());
+        return true;
     }
 
     private String getResponseBody(final Path filePath) throws IOException {
@@ -141,6 +139,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final String contentType, final String responseBody, final String httpStatus) {
+        log.info("response status  : {}", httpStatus);
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus + " ",
                 "Content-Type: " + contentType + " ",

@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,15 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
-    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String NOT_FOUND_PATH = "/404.html";
+    private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK";
+    private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String NOT_FOUND_RESPONSE_BODY = "404 Not Found";
 
     private final Socket connection;
 
@@ -42,12 +48,10 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final RequestLine requestLine = readRequestLine(inputStream);
             final String requestPath = extractRequestPath(requestLine.requestTarget());
-            final String requestQuery = extractQuery(requestLine.requestTarget());
-            final Map<String, String> requestQueryParameters = parseQuery(requestQuery);
-            logUserIfAuthenticated(requestPath, requestQueryParameters);
-            final String contentType = resolveContentType(requestPath);
-            final byte[] responseBody = readResponseBody(requestPath);
-            writeResponse(outputStream, contentType, responseBody);
+            final String queryString = extractQuery(requestLine.requestTarget());
+            final Map<String, String> queryParameters = parseQuery(queryString);
+            logUserIfAuthenticated(requestPath, queryParameters);
+            sendResponse(requestPath, outputStream);
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
@@ -64,43 +68,86 @@ public class Http11Processor implements Runnable, Processor {
         return new BufferedReader(inputStreamReader);
     }
 
-    private byte[] readResponseBody(final String requestPath) throws IOException {
-        if (requestPath.equals("/")) {
-            return defaultResponseBody();
+    private void sendResponse(final String requestPath, final OutputStream outputStream) throws IOException {
+        if (ROOT_PATH.equals(requestPath)) {
+            writeResponse(
+                    outputStream,
+                    OK_STATUS_LINE,
+                    HTML_CONTENT_TYPE,
+                    readDefaultResponseBody()
+            );
+            return;
         }
-        try (InputStream resourceStream = findResource(requestPath)) {
-            return readResource(resourceStream);
+
+        final Optional<byte[]> resourceBody = findResourceBody(requestPath);
+
+        if (resourceBody.isEmpty()) {
+            writeResponse(
+                    outputStream,
+                    NOT_FOUND_STATUS_LINE,
+                    HTML_CONTENT_TYPE,
+                    readNotFoundResponseBody()
+            );
+            return;
         }
+
+        writeResponse(
+                outputStream,
+                OK_STATUS_LINE,
+                resolveContentType(requestPath),
+                resourceBody.get()
+        );
     }
 
-    private InputStream findResource(final String requestPath) {
-        return getClass()
-                .getClassLoader()
-                .getResourceAsStream(resolveResourcePath(requestPath));
-    }
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String statusLine,
+            final String contentType,
+            final byte[] responseBody
+    ) throws IOException {
+        final String responseHead = createResponseHead(
+                statusLine,
+                contentType,
+                responseBody.length
+        );
 
-    private byte[] readResource(final InputStream resourceStream) throws IOException {
-        if (resourceStream == null) {
-            return defaultResponseBody();
-        }
-        return resourceStream.readAllBytes();
-    }
-
-    private byte[] defaultResponseBody() {
-        return DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private void writeResponse(final OutputStream outputStream, final String contentType, final byte[] responseBody)
-            throws IOException {
-        final String responseHead = createResponseHead(contentType, responseBody.length);
         outputStream.write(responseHead.getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
         outputStream.flush();
     }
 
-    private String createResponseHead(final String contentType, final int contentLength) {
+    private Optional<byte[]> findResourceBody(final String requestPath) throws IOException {
+        try (InputStream resourceStream = findResource(requestPath)) {
+            if (resourceStream == null) {
+                return Optional.empty();
+            }
+            return Optional.of(resourceStream.readAllBytes());
+        }
+    }
+
+    private InputStream findResource(final String requestPath) {
+        final String resourcePath = resolveResourcePath(requestPath);
+        return getClass()
+                .getClassLoader()
+                .getResourceAsStream(resourcePath);
+    }
+
+    private byte[] readNotFoundResponseBody() throws IOException {
+        return findResourceBody(NOT_FOUND_PATH)
+                .orElseGet(() -> NOT_FOUND_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private byte[] readDefaultResponseBody() {
+        return DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private String createResponseHead(
+            final String statusLine,
+            final String contentType,
+            final int contentLength
+    ) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                statusLine + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + contentLength + " ",
                 "",

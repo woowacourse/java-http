@@ -82,10 +82,10 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String queryString = "account=gugu&password=password";
+        final String body = "account=gugu&password=password";
 
         // when
-        final LoginResult result = requestLogin(queryString);
+        final LoginResult result = requestLogin(body);
 
         // then
         assertThat(result.response()).isEqualTo(redirectResponse("/index.html"));
@@ -97,10 +97,10 @@ class Http11ProcessorTest {
     @Test
     void loginFailure() throws IOException {
         // given
-        final String queryString = "account=gugu&password=invalid";
+        final String body = "account=gugu&password=invalid";
 
         // when
-        final LoginResult result = requestLogin(queryString);
+        final LoginResult result = requestLogin(body);
 
         // then
         assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
@@ -129,22 +129,33 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginPageWhenPasswordIsMissing() throws IOException {
+    void queryStringDoesNotLogin() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
         // when
-        final LoginResult result = requestLogin("account=gugu");
+        final LoginResult result = requestLoginWith(httpRequest);
 
         // then
         final String expected = expectedResponse("text/html", readResource("static/login.html"));
         assertThat(result.response()).isEqualTo(expected);
+        assertThat(result.loggingEvents())
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .noneMatch(message -> message.startsWith("login user:"));
     }
 
     @Test
-    void loginFailureWithEmptyValues() {
+    void loginPageWhenValuesAreEmpty() throws IOException {
         // when
         final LoginResult result = requestLogin("account=&password=");
 
         // then
-        assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
+        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        assertThat(result.response()).isEqualTo(expected);
     }
 
     @Test
@@ -381,13 +392,19 @@ class Http11ProcessorTest {
         return HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
     }
 
-    private LoginResult requestLogin(String queryString) {
+    private LoginResult requestLogin(String body) {
         final String httpRequest = String.join("\r\n",
-                "GET /login?" + queryString + " HTTP/1.1",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
                 "",
-                "");
+                body);
+        return requestLoginWith(httpRequest);
+    }
+
+    private LoginResult requestLoginWith(String httpRequest) {
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         final ch.qos.logback.classic.Logger logger =

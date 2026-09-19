@@ -58,6 +58,16 @@ class RegisterControllerTest {
     }
 
     @Test
+    void registerPageWhenValueIsWhitespace() throws IOException {
+        // when
+        final String response = post("account=whitespace&email=+++&password=secret");
+
+        // then
+        assertRegisterPage(response);
+        assertThat(InMemoryUserRepository.findByAccount("whitespace")).isEmpty();
+    }
+
+    @Test
     void registerPageWhenValueIsMissing() throws IOException {
         // when
         final String response = post("account=missing&password=secret");

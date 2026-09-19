@@ -22,10 +22,15 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        String account = httpRequest.getQueryParams("account");
-        String password = httpRequest.getQueryParams("password");
+        return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));
+    }
 
-        if (account == null || password == null) {
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
+        String account = httpRequest.getBodyParams("account");
+        String password = httpRequest.getBodyParams("password");
+
+        if (isBlank(account) || isBlank(password)) {
             return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));
         }
 
@@ -36,6 +41,10 @@ public class LoginController extends AbstractController {
 
         log.info("login user: {}", loginUser.get());
         return redirect(SUCCESS_PAGE);
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private Optional<User> findLoginUser(String account, String password) {

@@ -131,6 +131,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final URL resource = getClass().getClassLoader().getResource(STATIC + requestUri);
         if (resource == null) {
+            log.warn("존재하지 않는 경로 : {}", requestUri);
             return null;
         }
         final Path path = Paths.get(resource.toURI());

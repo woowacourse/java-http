@@ -27,10 +27,14 @@ class Http11ProcessorTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
+                "Set-Cookie: JSESSIONID=session-id",
                 "",
                 "Hello world!");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output().replaceAll(
+                "JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                "JSESSIONID=session-id");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -54,10 +58,14 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Set-Cookie: JSESSIONID=session-id\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output().replaceAll(
+                "JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                "JSESSIONID=session-id");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -81,10 +89,14 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: 211991 \r\n" +
+                "Set-Cookie: JSESSIONID=session-id\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output().replaceAll(
+                "JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                "JSESSIONID=session-id");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -108,8 +120,12 @@ class Http11ProcessorTest {
                 + "Location: /index.html \r\n"
                 + "Content-Type: text/html;charset=utf-8 \r\n"
                 + "Content-Length: 0 \r\n"
+                + "Set-Cookie: JSESSIONID=session-id\r\n"
                 + "\r\n";
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output().replaceAll(
+                "JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                "JSESSIONID=session-id");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -137,8 +153,12 @@ class Http11ProcessorTest {
                 + "Location: /index.html \r\n"
                 + "Content-Type: text/html;charset=utf-8 \r\n"
                 + "Content-Length: 0 \r\n"
+                + "Set-Cookie: JSESSIONID=session-id\r\n"
                 + "\r\n";
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output().replaceAll(
+                "JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                "JSESSIONID=session-id");
+        assertThat(actual).isEqualTo(expected);
         assertThat(InMemoryUserRepository.findByAccount(account)).hasValueSatisfying(user -> {
             assertThat(user.getAccount()).isEqualTo(account);
             assertThat(user.checkPassword(password)).isTrue();

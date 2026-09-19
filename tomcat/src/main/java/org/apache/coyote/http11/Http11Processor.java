@@ -3,11 +3,14 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,14 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final String STATIC_RESOURCE_ROOT = "static/";
+    private static final String CONTENT_TYPE_HTML = "text/html;charset=utf-8";
+    private static final String CONTENT_TYPE_CSS = "text/css;charset=utf-8";
+
+    private static final String INDEX_PATH = "/index.html";
+    private static final String CSS_PATH = "/css/styles.css";
+    private static final String LOGIN_PATH = "/login";
 
     private final Socket connection;
 
@@ -67,50 +78,26 @@ public class Http11Processor implements Runnable, Processor {
                 line = bufferedReader.readLine();
             }
 
-
             var responseBody = "Hello world!";
-            var contentType = "text/html;charset=utf-8";
+            var contentType = CONTENT_TYPE_HTML;
 
-            if (path.equals("/index.html")) {
-                URL resource = getClass().getClassLoader()
-                        .getResource("static/index.html");
-
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            if (path.equals(INDEX_PATH)) {
+                responseBody = readStaticFile(path.substring(1));
             }
 
-            if (path.equals("/css/styles.css")) {
-                URL resource = getClass().getClassLoader()
-                        .getResource("static/css/styles.css");
-
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                contentType = "text/css;charset=utf-8";
+            if (path.equals(CSS_PATH)) {
+                responseBody = readStaticFile(path.substring(1));
+                contentType = CONTENT_TYPE_CSS;
             }
 
-            if (path.equals("/login")) {
-                URL resource = getClass().getClassLoader()
-                        .getResource("static/login.html");
-
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            if (path.equals(LOGIN_PATH)) {
+                responseBody = readStaticFile("login.html");
 
                 if (!queryString.isEmpty()) {
-                    String[] parameters = queryString.split("&");
+                    Map<String, String> parameters = parseQueryString(queryString);
 
-                    String account = "";
-                    String password = "";
-
-                    for (String parameter : parameters) {
-                        String[] keyValue = parameter.split("=", 2);
-
-                        if (keyValue.length != 2) {
-                            continue;
-                        }
-
-                        if (keyValue[0].equals("account")) {
-                            account = keyValue[1];
-                        } else if (keyValue[0].equals("password")) {
-                            password = keyValue[1];
-                        }
-                    }
+                    String account = parameters.getOrDefault("account", "");
+                    String password = parameters.getOrDefault("password", "");
 
                     var user = InMemoryUserRepository.findByAccount(account);
 
@@ -122,17 +109,45 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> parameters = new HashMap<>();
+
+        for (String parameter : queryString.split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length != 2) {
+                continue;
+            }
+
+            parameters.put(keyValue[0], keyValue[1]);
+        }
+
+        return parameters;
+    }
+
+    private String readStaticFile(String fileName) throws IOException, URISyntaxException {
+        URL resource = getClass().getClassLoader()
+                .getResource(STATIC_RESOURCE_ROOT + fileName);
+
+        Path filePath = Path.of(resource.toURI());
+        return Files.readString(filePath, StandardCharsets.UTF_8);
+    }
+
+    private String createResponse(String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
     }
 }

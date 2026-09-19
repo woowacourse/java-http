@@ -53,19 +53,21 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = "Hello world!";
             }
             else if (requestTarget.startsWith("/login")) {
-                URL url = getClass().getClassLoader().getResource("static/login.html");
+                final URL url = getClass().getClassLoader().getResource("static/login.html");
                 if (url == null)
                     return;
                 final Path path = Path.of(url.getPath());
 
-                final Map<String, String> params = extractQueryParams(uri);
-
-                login(params);
+                final String query = uri.getQuery();
+                if (query != null) {
+                    final Map<String, String> params = extractQueryParams(query);
+                    login(params);
+                }
 
                 responseBody = Files.readString(path);
             }
             else {
-                URL url = getClass().getClassLoader().getResource("static/" + uri.getPath());
+                final URL url = getClass().getClassLoader().getResource("static/" + uri.getPath());
                 if (url == null)
                     return;
                 final Path path = Path.of(url.getPath());
@@ -88,8 +90,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> extractQueryParams(final URI uri) {
-        final String[] queryParams = uri.getQuery().split(QUERY_PARAM_DELIMITER);
+    private Map<String, String> extractQueryParams(final String query) {
+        final String[] queryParams = query.split(QUERY_PARAM_DELIMITER);
 
         final Map<String, String> params = new HashMap<>();
 

@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -40,14 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             String[] requestLineParts = bufferedReader.readLine().split(" ");
-            final var responseBody = getResponseBody(requestLineParts[1]);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    getContentType(requestLineParts[1]),
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = getResponse(requestLineParts[1]);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -56,26 +50,62 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String requestUri) throws IOException {
+
+    private String getResponse(String requestUri) throws IOException {
         if (requestUri.contains("/login?")) {
             Map<String, String> queryMap = getQuerySeparate(requestUri);
             String account = queryMap.get("account");
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+            String password = queryMap.get("password");
+            Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
+            if (foundUser.isEmpty()) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: /401.html",
+                        getContentType(requestUri),
+                        "Content-Length: " + 0,
+                        "",
+                        "");
+            }
+
+            User user = foundUser.get();
             log.info(user.toString());
 
-            String paths = getStaticResource("/login.html");
-            if (paths != null) {
-                return paths;
+            if (user.checkPassword(password)) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: /index.html",
+                        getContentType(requestUri),
+                        "Content-Length: " + 0,
+                        "",
+                        "");
             }
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found",
+                    "Location: /401.html",
+                    getContentType(requestUri),
+                    "Content-Length: " + 0,
+                    "",
+                    "");
         }
 
         if (!requestUri.equals("/")) {
             String paths = getStaticResource(requestUri);
             if (paths != null) {
-                return paths;
+                return String.join("\r\n",
+                        "HTTP/1.1 200 OK",
+                        getContentType(requestUri),
+                        "Content-Length: " + paths.getBytes().length + " ",
+                        "",
+                        paths);
             }
         }
-        return "Hello world!";
+        String empty = "Hello world!";
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                getContentType(requestUri),
+                "Content-Length: " + empty.getBytes().length + " ",
+                "",
+                empty);
     }
 
     private Map<String, String> getQuerySeparate(String requestUri) {

@@ -73,6 +73,9 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 path += ".html";
             }
+            if (requestLine.isGet()) {
+                path = resolveGetPath(path);
+            }
 
             final var response = makeResponse(path, code, status);
             outputStream.write(response.getBytes());
@@ -82,10 +85,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private static String resolveGetPath(final String requestPath) {
+        return switch (requestPath) {
+            case "/" -> "/index.html";
+            case "/login" -> "/login.html";
+            case "/register" -> "/register.html";
+            default -> requestPath;
+        };
+    }
+
     private String makeResponse(
-            String path,
-            String code,
-            String status
+            final String path,
+            final String code,
+            final String status
     ) throws IOException {
         final String responseBody = getResponseBody(path);
         final String contentType = resolveContentType(path);
@@ -99,10 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String getResponseBody(String path) throws IOException {
-        if ("/".equals(path)) {
-            return "Hello world!";
-        }
+    private String getResponseBody(final String path) throws IOException {
         final String resourceName = "static" + path;
         final String fileName = Objects.requireNonNull(
                 getClass().getClassLoader().getResource(resourceName),
@@ -161,7 +170,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("회원가입 성공: {}", user);
     }
 
-    private static Headers readHeaders(BufferedReader bufferedReader) throws IOException {
+    private static Headers readHeaders(final BufferedReader bufferedReader) throws IOException {
         final Headers headers = new Headers();
 
         String line = bufferedReader.readLine();

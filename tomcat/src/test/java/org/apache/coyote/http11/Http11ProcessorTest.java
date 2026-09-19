@@ -115,4 +115,34 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void login_post_fail() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 41",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "\r\n" +
+                        "account=failAccount&password=failPassword",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080/401.html \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 0 \r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

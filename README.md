@@ -25,10 +25,10 @@
 
 ### 기능 요구 사항
 
-- [ ] 로그인 성공 여부에 따라 리다이렉트 한다.
+- [x] 로그인 성공 여부에 따라 리다이렉트 한다.
   - [x] 로그인 버튼을 누르면 HTTP method를 POST로 요청한다.
   - [x] 성공하면 http status code를 302로 반환하고, `/index.html`로 리다이렉트 한다.
-  - [ ] 실패하면 `401.html`로 리다이렉틓 한다.
+  - [x] 실패하면 `401.html`로 리다이렉트 한다.
 - [ ] 회원가입
   - [ ] `http://localhost/register` 로 접속하면 GET 요청으로 `register.html`을 보여준다.
   - [ ] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.

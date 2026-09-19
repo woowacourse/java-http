@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,7 +49,13 @@ public class Http11Processor implements Runnable, Processor {
 
             if (isLoginRequest(httpRequest)) {
                 if (authenticate(httpRequest)) {
-                    String response = build302FoundResponse();
+                    String response = build302FoundResponse("index.html");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                    return;
+                } else {
+                    String response = build302FoundResponse("401.html");
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
@@ -98,7 +105,6 @@ public class Http11Processor implements Runnable, Processor {
                 && httpRequest.hasRequestBody();
     }
 
-    // TODO 유저 account 없는 경우에 fail 처리
     // TODO json도 처리 가능하도록
     private static boolean authenticate(MyHttpRequest httpRequest) {
         Map<String, String> params = new HashMap<>();
@@ -106,19 +112,21 @@ public class Http11Processor implements Runnable, Processor {
             String[] keyValue = parameter.split("=", 2);
             params.put(keyValue[0], keyValue[1]);
         }
-        User user = getUserByAccount(params.get("account"));
+        Optional<User> foundUser = findUserByAccount(params.get("account"));
+        if (foundUser.isEmpty()) {
+            return false;
+        }
 
-        if (user.checkPassword(params.get("password"))) {
-            log.info("user matched={}", user);
+        if (foundUser.get().checkPassword(params.get("password"))) {
+            log.info("user matched={}", foundUser.get());
             return true;
         }
         log.info("authenticate failed!");
         return false;
     }
 
-    private static User getUserByAccount(String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+    private static Optional<User> findUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account);
     }
 
     private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)
@@ -133,12 +141,11 @@ public class Http11Processor implements Runnable, Processor {
         return defaultContent;
     }
 
-    private static String build302FoundResponse() {
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
+    private static String build302FoundResponse(String redirectLocation) {
+        return "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080/" + redirectLocation + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 0 \r\n";
-        return expected;
     }
 
     private static String buildHttpResponse(MyHttpRequest httpRequest, String responseBody) {

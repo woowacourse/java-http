@@ -21,6 +21,13 @@ public class Response {
         return new Response(HttpStatus.OK, filePath);
     }
 
+    public static Response found(final String filePath, final String redirect) {
+        final Response response = new Response(HttpStatus.FOUND, filePath);
+        response.addHeader("Location", redirect);
+
+        return response;
+    }
+
     public static Response permanentRedirect(final String filePath, final String redirect) {
         final Response response = new Response(HttpStatus.PERMANENT_REDIRECT, filePath);
         response.addHeader("Location", redirect);

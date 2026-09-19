@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,10 +18,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private static final String SESSION_ID = "test-session-id";
+    private static final String SESSION_COOKIE = "Cookie: JSESSIONID=" + SESSION_ID;
+
+    static {
+    }
+
+    @BeforeEach
+    void setUp() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.remove(SESSION_ID);
+        sessionManager.add(new Session(SESSION_ID));
+    }
+
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join("\r\n",
+            "GET / HTTP/1.1",
+            "Host: localhost:8080",
+            SESSION_COOKIE,
+            "",
+            "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when
@@ -42,6 +64,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                SESSION_COOKIE,
                 "",
                 "");
 
@@ -70,6 +93,7 @@ class Http11ProcessorTest {
             String.format("GET %s HTTP/1.1", targetFilePath),
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            SESSION_COOKIE,
             "",
             "");
 
@@ -101,12 +125,13 @@ class Http11ProcessorTest {
     class Login {
 
         @Test
-        void get() throws IOException {
+        void get_not_login() throws IOException {
             // given
             final String httpRequest= String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                SESSION_COOKIE,
                 "",
                 "");
 
@@ -130,6 +155,43 @@ class Http11ProcessorTest {
         }
 
         @Test
+        void get_already_login() throws IOException {
+            // given
+            final User user = InMemoryUserRepository.findByAccount("gugu")
+                .orElseThrow();
+            final Session session = SessionManager.getInstance()
+                .findSession(SESSION_ID);
+            session.addAttribute("user", user);
+
+            final String httpRequest= String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                SESSION_COOKIE,
+                "",
+                "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index ",
+                "Content-Type: text/html;charset=utf-8 ",
+                String.format("Content-Length: %d ", body.getBytes().length),
+                "",
+                body);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @Test
         void post_success() throws IOException {
             // given
             final String httpRequest= String.join("\r\n",
@@ -139,6 +201,7 @@ class Http11ProcessorTest {
                 "Content-Length: 80 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept : */*",
+                SESSION_COOKIE,
                 "",
                 "account=gugu&password=password");
 
@@ -172,6 +235,7 @@ class Http11ProcessorTest {
                 "Content-Length: 80 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept : */*",
+                SESSION_COOKIE,
                 "",
                 "account=gugu&password=passwor");
 
@@ -206,6 +270,7 @@ class Http11ProcessorTest {
                 "GET /register HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                SESSION_COOKIE,
                 "",
                 "");
 
@@ -238,6 +303,7 @@ class Http11ProcessorTest {
                 "Content-Length: 58 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept : */*",
+                SESSION_COOKIE,
                 "",
                 "account=kios&password=password&email=kios%40woowahan.com");
 

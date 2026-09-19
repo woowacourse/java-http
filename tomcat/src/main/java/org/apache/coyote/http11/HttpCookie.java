@@ -32,4 +32,8 @@ public class HttpCookie {
         return cookieMap.containsKey("JSESSIONID");
     }
 
+    public String getValue(final String key) {
+        return cookieMap.get(key);
+    }
+
 }

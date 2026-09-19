@@ -58,14 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             String contentType = getContentType(requestUri);
 
-            String queryString;
-            final int queryIndex = requestUri.indexOf('?');
-            if (queryIndex != -1) {
-                queryString = requestUri.substring(queryIndex + 1);
-                requestUri = requestUri.substring(0, queryIndex);
-                String[] queryStringParts = queryString.split("&");
-                checkUser(queryStringParts);
-            }
+            requestUri = handleQueryString(requestUri);
 
             if (requestUri.equals(LOGIN)) {
                 requestUri += DOT_HTML;
@@ -121,6 +114,19 @@ public class Http11Processor implements Runnable, Processor {
             return "text/javascript";
         }
         return "text/html;charset=utf-8";
+    }
+
+    private String handleQueryString(final String requestUri) {
+        final int queryIndex = requestUri.indexOf('?');
+        if (queryIndex == -1) {
+            return requestUri;
+        }
+
+        final String queryString = requestUri.substring(queryIndex + 1);
+        final String path = requestUri.substring(0, queryIndex);
+        final String[] queryStringParts = queryString.split("&");
+        checkUser(queryStringParts);
+        return path;
     }
 
     private void checkUser(final String[] requestParts) {

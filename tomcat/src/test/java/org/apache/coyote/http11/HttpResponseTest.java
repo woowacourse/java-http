@@ -44,4 +44,17 @@ class HttpResponseTest {
                 "");
         assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo(expected);
     }
+
+    @Test
+    void 응답에_쿠키를_추가한다() throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse response = new HttpResponse(outputStream);
+        response.setStatus("200 OK");
+        response.addCookie("JSESSIONID", "session-id");
+
+        response.send();
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8))
+                .contains("Set-Cookie: JSESSIONID=session-id");
+    }
 }

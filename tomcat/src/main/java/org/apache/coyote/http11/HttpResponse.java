@@ -25,6 +25,10 @@ public class HttpResponse {
         headers.add(name + ": " + value);
     }
 
+    public void addCookie(final String name, final String value) {
+        addHeader("Set-Cookie", name + "=" + value);
+    }
+
     public void setBody(final byte[] body) {
         this.body = body;
     }

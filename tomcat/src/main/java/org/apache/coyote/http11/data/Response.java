@@ -39,6 +39,10 @@ public record Response(
         return new Response(404, Map.of(), "Not Found");
     }
 
+    public static Response badRequest() {
+        return new Response(400, Map.of(), "Bad Request");
+    }
+
     @Override
     public String toString() {
 

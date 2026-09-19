@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import java.util.Objects;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
 import org.slf4j.Logger;
@@ -14,6 +15,10 @@ public class LoginRequestHandler implements RequestHandler {
         final String account = request.getQueryParameters().get("account");
         final String password = request.getQueryParameters().get("password");
 
+        if (!isValidateData(account, password)) {
+            return Response.badRequest();
+        }
+
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .ifPresentOrElse(
@@ -22,6 +27,10 @@ public class LoginRequestHandler implements RequestHandler {
                 );
 
         return Response.noContent();
+    }
+
+    public boolean isValidateData(String account, String password) {
+        return !Objects.isNull(account) && !Objects.isNull(password);
     }
 
     @Override

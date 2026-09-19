@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest request = getHttpRequest(reader);
+            final HttpRequest request = HttpRequest.from(reader);
 
             final var response = getResponse(request);
 
@@ -53,27 +53,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    @Nonnull
-    private HttpRequest getHttpRequest(BufferedReader reader) throws IOException {
-        String line;
-        List<String> headers = new ArrayList<>();
-        int contentLength = 0;
-        String body = null;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headers.add(line);
-            if (line.startsWith("Content-Length: ")) {
-                contentLength = Integer.parseInt(line.split(": ")[1].trim());
-            }
-        }
-        if (contentLength != 0) {
-            char[] bodyBuffer = new char[contentLength];
-            reader.read(bodyBuffer, 0, contentLength);
-            body = new String(bodyBuffer);
-        }
-
-        return HttpRequest.of(headers, body);
-    }
-
     private HttpResponse getResponse(final HttpRequest request) {
         String path = request.getPath();
         if (!path.equals("/") && isResourcePresent(path)) {
@@ -81,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (path.equals("/") && request.getMethod().equals("GET")) {
-            return new HttpResponse(HttpStatus.OK, getContentType(path), "Hello world");
+            return new HttpResponse(HttpStatus.OK, getContentType(path), "Hello world!");
         }
         if (path.equals("/register") && request.getMethod().equals("GET")) {
             String body = modelToView("/register.html");
@@ -93,11 +72,11 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/index.html"));
         }
         if (path.equals("/login") && request.getMethod().equals("GET")) {
-            return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView(path));
+            return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView("/login.html"));
         }
         if (path.equals("/login") && request.getMethod().equals("POST")) {
-            String account = request.getParameter("account");
-            String password = request.getParameter("password");
+            String account = request.getBodyParameter("account");
+            String password = request.getBodyParameter("password");
 
             if (isLoginSuccess(account, password)) {
                 return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/index.html"));
@@ -130,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
         if (path.endsWith(".js")) {
             return "text/javascript";
         }
-        return "text/html; charset=utf-8";
+        return "text/html;charset=utf-8";
     }
 
     private boolean isResourcePresent(String path) {

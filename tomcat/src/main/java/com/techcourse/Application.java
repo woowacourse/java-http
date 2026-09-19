@@ -1,7 +1,9 @@
 package com.techcourse;
 
+import com.techcourse.handler.IndexPageHandler;
 import com.techcourse.handler.LoginPageHandler;
 import com.techcourse.handler.LoginUserHandler;
+import com.techcourse.handler.LogoutHandler;
 import com.techcourse.handler.RegisterPageHandler;
 import com.techcourse.handler.RegisterUserHandler;
 import com.techcourse.handler.StaticResourceHandler;
@@ -16,6 +18,8 @@ public class Application {
         final Adapter adapter = new ResourceResolver(List.of(
                 new LoginPageHandler(),
                 new LoginUserHandler(),
+                new LogoutHandler(),
+                new IndexPageHandler(),
                 new RegisterPageHandler(),
                 new RegisterUserHandler(),
                 new StaticResourceHandler()   // 가장 일반적인 핸들러는 마지막에

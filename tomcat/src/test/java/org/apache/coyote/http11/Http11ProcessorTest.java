@@ -88,8 +88,7 @@ class Http11ProcessorTest {
         final LoginResult result = requestLogin(queryString);
 
         // then
-        final String expected = expectedResponse("text/html", readResource("static/login.html"));
-        assertThat(result.response()).isEqualTo(expected);
+        assertThat(result.response()).isEqualTo(redirectResponse("/index.html"));
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .anyMatch(message -> message.contains("login user: User{id=1, account='gugu'"));
@@ -104,8 +103,57 @@ class Http11ProcessorTest {
         final LoginResult result = requestLogin(queryString);
 
         // then
+        assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
+        assertThat(result.loggingEvents())
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .noneMatch(message -> message.startsWith("login user:"));
+    }
+
+    @Test
+    void loginPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginPageWhenPasswordIsMissing() throws IOException {
+        // when
+        final LoginResult result = requestLogin("account=gugu");
+
+        // then
         final String expected = expectedResponse("text/html", readResource("static/login.html"));
         assertThat(result.response()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFailureWithEmptyValues() {
+        // when
+        final LoginResult result = requestLogin("account=&password=");
+
+        // then
+        assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
+    }
+
+    @Test
+    void loginFailureWithUnknownAccount() {
+        // when
+        final LoginResult result = requestLogin("account=unknown&password=password");
+
+        // then
+        assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .noneMatch(message -> message.startsWith("login user:"));
@@ -343,6 +391,15 @@ class Http11ProcessorTest {
         try (inputStream) {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
+    }
+
+    private String redirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
     }
 
     private String expectedResponse(String contentType, String responseBody) {

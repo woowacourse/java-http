@@ -26,13 +26,17 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
+    @DisplayName("클래스 로더로 리소스 파일의 경로를 찾는다")
     void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
+        // given
         final String fileName = "nextstep.txt";
 
+        // when
         final var resource = getClass().getClassLoader().getResource(fileName);
         assertThat(resource).isNotNull();
         final String actual = Path.of(resource.toURI()).toString();
 
+        // then
         assertThat(actual).endsWith(fileName);
     }
 
@@ -43,15 +47,18 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
+    @DisplayName("리소스 파일의 내용을 줄 단위로 읽는다")
     void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
+        // given
         final String fileName = "nextstep.txt";
-
         final var resource = getClass().getClassLoader().getResource(fileName);
         assertThat(resource).isNotNull();
         final Path path = Path.of(resource.toURI());
 
+        // when
         final List<String> actual = Files.readAllLines(path);
 
+        // then
         assertThat(actual).containsOnly("nextstep");
     }
 }

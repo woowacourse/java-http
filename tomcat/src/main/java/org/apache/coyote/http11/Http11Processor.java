@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -91,8 +90,10 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
-            log.error(e.getMessage(), e);
+        } catch (IOException | URISyntaxException e) {
+            log.error("HTTP 요청 처리 중 입출력 오류가 발생했습니다.", e);
+        } catch (RuntimeException e) {
+            log.error("HTTP 요청 처리 중 예상하지 못한 오류가 발생했습니다.", e);
         }
     }
 

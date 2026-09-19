@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -8,7 +10,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,15 +59,53 @@ public class Http11Processor implements Runnable, Processor {
                     contentType = "text/html;charset=utf-8 ";
                     responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
                 } else {
-                    final String resourceName = requestTarget.substring(1);
+                    int queryStartIndex = requestTarget.indexOf("?");
+
+                    String resourceName;
+                    String queryString;
+
+                    if (queryStartIndex >= 0) {
+                        resourceName = requestTarget.substring(0, queryStartIndex);
+                        queryString = requestTarget.substring(queryStartIndex + 1);
+                    } else {
+                        resourceName = requestTarget;
+                        queryString = "";
+                    }
+
+                    Map<String, String> queryParameters = new HashMap<>();
+
+                    if (!queryString.equals("")) {
+                        String[] parameters = queryString.split("&");
+
+                        for (String parameter : parameters) {
+                            String[] keyValue = parameter.split("=", 2);
+                            queryParameters.put(keyValue[0], keyValue[1]);
+                        }
+                    }
+
+                    if (resourceName.equals("/login")) {
+                        String account = queryParameters.get("account");
+                        String password = queryParameters.get("password");
+
+                        if (account != null && password != null) {
+                            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+                            if (user.isPresent() && user.get().checkPassword(password)) {
+                                log.info("user = {}", user);
+                            }
+                        }
+
+                        resourceName = "login.html";
+                    }
 
                     if (resourceName.endsWith(".css")) {
-                        contentType = "text.css;charset=utf-8 ";
+                        contentType = "text/css;charset=utf-8";
                     }
-                    if (resourceName.endsWith(".html")) {
-                        contentType = "text/html;charset=utf-8 ";
+                    else if (resourceName.endsWith(".html")) {
+                        contentType = "text/html;charset=utf-8";
                     }
 
+                    log.info(resourceName);
                     final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
                     final Path path = new File(resource.getFile()).toPath();
                     responseBody = Files.readAllBytes(path);

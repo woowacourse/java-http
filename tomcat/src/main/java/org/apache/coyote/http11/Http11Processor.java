@@ -13,7 +13,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -113,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> parseQueryParameters(final String queryString) {
-        final List<String[]> nameValuePairs = Arrays.stream(queryString.split("&"))
+        final var nameValuePairs = Arrays.stream(queryString.split("&"))
                 .map(parameter -> parameter.split("=", QUERY_PARAMETER_PART_COUNT))
                 .toList();
         if (nameValuePairs.stream().anyMatch(pair -> pair.length != QUERY_PARAMETER_PART_COUNT)) {

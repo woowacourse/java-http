@@ -153,6 +153,10 @@ public class HttpRequest {
         }
     }
 
+    public HttpCookie getCookie() {
+        return HttpCookie.from(headers.get("Cookie"));
+    }
+
     public HttpMethod getMethod() {
         return method;
     }

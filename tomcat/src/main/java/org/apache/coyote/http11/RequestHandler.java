@@ -8,10 +8,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RequestHandler {
+
+    private static final String JSESSIONID = "JSESSIONID";
 
     public HttpResponse handle(final HttpRequest request) throws IOException, URISyntaxException {
         final String path = request.getPath();
@@ -45,9 +48,17 @@ public class RequestHandler {
             return HttpResponse.redirect("/401.html");
         }
         if (isValidUser(account, password)) {
-            return HttpResponse.redirect("/index.html");
+            return loginSuccess(request);
         }
         return HttpResponse.redirect("/401.html");
+    }
+
+    private HttpResponse loginSuccess(final HttpRequest request) {
+        final HttpResponse response = HttpResponse.redirect("/index.html");
+        if (request.getCookie().get(JSESSIONID) == null) {
+            response.addHeader("Set-Cookie", JSESSIONID + "=" + UUID.randomUUID());
+        }
+        return response;
     }
 
     private HttpResponse handleRegister(final HttpRequest request) throws IOException, URISyntaxException {

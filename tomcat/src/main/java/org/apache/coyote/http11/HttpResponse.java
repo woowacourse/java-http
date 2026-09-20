@@ -34,6 +34,10 @@ public class HttpResponse {
         return new HttpResponse(HttpStatus.FOUND, headers, "");
     }
 
+    public void addHeader(final String name, final String value) {
+        headers.put(name, value);
+    }
+
     public byte[] getBytes() {
         final StringBuilder message = new StringBuilder(statusLine());
         headers.forEach((name, value) ->

@@ -2,31 +2,41 @@ package org.apache.coyote.http11;
 
 import static org.reflections.Reflections.log;
 
+import com.techcourse.exception.UncheckedServletException;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.SessionManager;
 
 final class HttpRequest {
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final String method;
     private final URI uri;
     private final QueryParameters queryParameters;
     private final QueryParameters bodyParameters;
     private final Cookie cookie;
+    private final Manager manager;
 
     private HttpRequest(final String method,
                         final URI uri,
                         final QueryParameters queryParameters,
                         final QueryParameters bodyParameters,
-                        final Cookie cookie) {
+                        final Cookie cookie,
+                        final Manager manager) {
         this.method = method;
         this.uri = uri;
         this.queryParameters = queryParameters;
         this.bodyParameters = bodyParameters;
         this.cookie = cookie;
+        this.manager = manager;
     }
 
-    static HttpRequest from(final BufferedReader reader) {
+    static HttpRequest from(final BufferedReader reader, final Manager manager) {
         String line;
         List<String> headerLines = new ArrayList<>();
         int contentLength = 0;
@@ -44,11 +54,11 @@ final class HttpRequest {
                 reader.read(bodyBuffer, 0, contentLength);
                 body = new String(bodyBuffer);
             }
-        }catch (Exception e) {
-            log.error(e.getMessage(),e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
 
-        return of(headerLines, body);
+        return of(headerLines, body, manager);
     }
 
     static HttpRequest from(final List<String> headerLines) {
@@ -56,6 +66,10 @@ final class HttpRequest {
     }
 
     static HttpRequest of(final List<String> headers, String body) {
+        return of(headers, body, new SessionManager());
+    }
+
+    static HttpRequest of(final List<String> headers, final String body, final Manager manager) {
         final String[] requestLineParts = headers.getFirst().split(" ", 3);
         final URI uri = URI.create(requestLineParts[1]);
         final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
@@ -63,7 +77,7 @@ final class HttpRequest {
         final QueryParameters bodyParameters = QueryParameters.from(body);
         final Cookie cookie = Cookie.from(findCookieHeader(headers));
 
-        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, cookie);
+        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, cookie, manager);
     }
 
     private static String findCookieHeader(final List<String> headers) {
@@ -99,5 +113,19 @@ final class HttpRequest {
 
     Cookie getCookie() {
         return cookie;
+    }
+
+    HttpSession getSession() {
+        return cookie.get(JSESSIONID)
+                .map(this::findSession)
+                .orElse(null);
+    }
+
+    private HttpSession findSession(final String id) {
+        try {
+            return manager.findSession(id);
+        } catch (IOException e) {
+            throw new UncheckedServletException(e);
+        }
     }
 }

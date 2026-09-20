@@ -2,11 +2,37 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
+
+    @Test
+    @DisplayName("Cookie의 JSESSIONID로 기존 세션을 조회한다")
+    void findsSessionByJSessionIdCookie() {
+        // given
+        final Manager manager = new SessionManager();
+        manager.removeAll();
+        final HttpSession session = new Session("request-session-id");
+        manager.add(session);
+
+        final List<String> headers = List.of(
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=request-session-id"
+        );
+
+        // when
+        final HttpRequest request = HttpRequest.of(headers, null, manager);
+
+        // then
+        assertThat(request.getSession()).isSameAs(session);
+    }
 
     @Test
     @DisplayName("요청 헤더의 Cookie를 파싱한다")

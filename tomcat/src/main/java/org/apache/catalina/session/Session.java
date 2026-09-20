@@ -53,7 +53,7 @@ public class Session implements HttpSession {
 
     @Override
     public Object getAttribute(String name) {
-        return null;
+        return values.get(name);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class Session implements HttpSession {
 
     @Override
     public void setAttribute(String name, Object value) {
-
+        values.put(name, value);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class Session implements HttpSession {
 
     @Override
     public void removeAttribute(String name) {
-
+        values.remove(name);
     }
 
     @Override

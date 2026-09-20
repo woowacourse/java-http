@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,10 +13,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nonnull;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,18 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String RESOURCES_PREFIX = "static";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String LOGIN_USER = "loginUser";
 
     private final Socket connection;
+    private final Manager manager;
 
     public Http11Processor(final Socket connection) {
+        this(connection, new SessionManager());
+    }
+
+    Http11Processor(final Socket connection, final Manager manager) {
         this.connection = connection;
+        this.manager = manager;
     }
 
     @Override
@@ -44,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final HttpRequest request = HttpRequest.from(reader);
+            final HttpRequest request = HttpRequest.from(reader, manager);
 
             final HttpResponse response = addSessionCookieIfMissing(request, getResponse(request));
 
@@ -59,7 +67,10 @@ public class Http11Processor implements Runnable, Processor {
         if (request.getCookie().get(JSESSIONID).isPresent()) {
             return response;
         }
-        return response.withCookie(Cookie.of(JSESSIONID, UUID.randomUUID().toString()));
+        return response.addHeader(
+                "Set-Cookie",
+                Cookie.of(JSESSIONID, UUID.randomUUID().toString()).toHeaderValue()
+        );
     }
 
     private HttpResponse getResponse(final HttpRequest request) {
@@ -78,7 +89,8 @@ public class Http11Processor implements Runnable, Processor {
         if (path.equals("/register") && request.getMethod().equals("POST")) {
             saveUser(request);
 
-            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/index.html"));
+            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
+                    .addHeader("Location", "/index.html");
         }
         if (path.equals("/login") && request.getMethod().equals("GET")) {
             return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView("/login.html"));
@@ -87,10 +99,17 @@ public class Http11Processor implements Runnable, Processor {
             String account = request.getBodyParameter("account");
             String password = request.getBodyParameter("password");
 
-            if (isLoginSuccess(account, password)) {
-                return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/index.html"));
+            final Optional<User> loginUser = authenticate(account, password);
+            if (loginUser.isPresent()) {
+                final HttpSession session = request.getSession();
+                if (session != null) {
+                    session.setAttribute(LOGIN_USER, loginUser.get());
+                }
+                return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
+                        .addHeader("Location", "/index.html");
             }
-            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ", URI.create("/401.html"));
+            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
+                    .addHeader("Location", "/401.html");
         }
 
         return new HttpResponse(HttpStatus.BAD_REQUEST, getContentType(path), "Bad Request");
@@ -105,10 +124,9 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
     }
 
-    private boolean isLoginSuccess(String account, String password) {
+    private Optional<User> authenticate(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
+                .filter(user -> user.checkPassword(password));
     }
 
     private String getContentType(String path) {

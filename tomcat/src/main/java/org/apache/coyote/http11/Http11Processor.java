@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.session.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,7 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             Map<String, String> requestInformations = requestParser.parse(bufferedReader);
+            HttpCookie cookie = new HttpCookie(requestParser.getCookie(requestInformations));
 
             String path = requestParser.getRequestPath(requestInformations);
 
@@ -64,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
                         processRootRequest()
                 );
             } else if (path.equals(LOGIN_PATH)) {
-                response = processLoginRequest(requestInformations);
+                response = processLoginRequest(requestInformations, cookie);
             } else if (path.equals(REGISTER_PATH)) {
                 response = processRegisterRequest(requestInformations);
             } else {
@@ -86,7 +88,8 @@ public class Http11Processor implements Runnable, Processor {
         return ROOT_RESPONSE_BODY;
     }
 
-    private String processLoginRequest(Map<String, String> requestHeaderInfos) throws URISyntaxException, IOException {
+    private String processLoginRequest(Map<String, String> requestHeaderInfos, HttpCookie cookie)
+            throws URISyntaxException, IOException {
         Map<String, String> queryParams = requestParser.getQueryParams(requestHeaderInfos);
 
         if (requestParser.getRequestMethod(requestHeaderInfos).equals(GET) && queryParams.isEmpty()) {
@@ -98,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (isLoginSuccessful(queryParams)) {
-            return responseBuilder.buildRedirect(HttpStatus.FOUND, "/index.html");
+            return responseBuilder.buildWithCookie(HttpStatus.FOUND, "/index.html", cookie);
         }
 
         return responseBuilder.buildRedirect(HttpStatus.FOUND, "/401.html");

@@ -63,6 +63,10 @@ public class RequestParser {
         return requestHeaderInfos.get(REQUEST_METHOD);
     }
 
+    public String getCookie(Map<String, String> requestHeaderInfos) {
+        return requestHeaderInfos.get("Cookie");
+    }
+
     private String readRequestBody(BufferedReader reader, Map<String, String> requestHeaderInfos) throws IOException {
         int contentLength = Integer.parseInt(requestHeaderInfos.getOrDefault("Content-Length", "0"));
         char[] requestBody = new char[contentLength];

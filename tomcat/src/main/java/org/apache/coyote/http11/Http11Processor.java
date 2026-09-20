@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
             readHeaders(reader);
 
-            String resourcePath = handleReqeust(uri);
+            String resourcePath = handleRequest(uri);
 
             writeResponse(outputStream, resourcePath);
 
@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleReqeust(URI uri) {
+    private String handleRequest(URI uri) {
         String path = uri.getPath();
 
         if ("/".equals(path)) {

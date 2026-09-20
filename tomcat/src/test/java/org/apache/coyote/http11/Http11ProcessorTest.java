@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -216,6 +219,69 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
         assertThat(InMemoryUserRepository.findByAccount("lower")).isPresent();
+    }
+
+    @Test
+    @DisplayName("로그인하면 세션에 사용자를 저장한다")
+    void storeUserInSession() {
+        // given
+        final var manager = new SessionManager();
+        final var socket = new StubSocket(getRequest("/login?account=gugu&password=password"));
+
+        // when
+        new Http11Processor(socket, manager).process(socket);
+
+        // then
+        final HttpSession session = manager.findSession(extractSessionId(socket.output()));
+        assertThat(session).isNotNull();
+        assertThat(session.getAttribute("user")).isInstanceOf(User.class);
+        assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("gugu");
+    }
+
+    @Test
+    @DisplayName("로그인된 상태로 로그인 페이지에 접근하면 index.html로 리다이렉트한다")
+    void redirectWhenAlreadyLoggedIn() {
+        // given
+        final var manager = new SessionManager();
+        final var loginSocket = new StubSocket(getRequest("/login?account=gugu&password=password"));
+        new Http11Processor(loginSocket, manager).process(loginSocket);
+        final String sessionId = extractSessionId(loginSocket.output());
+
+        final var socket = new StubSocket(getRequestWithCookie("/login", "JSESSIONID=" + sessionId));
+
+        // when
+        new Http11Processor(socket, manager).process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
+    }
+
+    @Test
+    @DisplayName("알 수 없는 세션 아이디로 접근하면 로그인 페이지를 보여준다")
+    void showLoginPageWhenSessionIsUnknown() throws IOException {
+        // given
+        final var socket = new StubSocket(getRequestWithCookie("/login", "JSESSIONID=unknown"));
+
+        // when
+        new Http11Processor(socket, new SessionManager()).process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticResponse("login.html", "text/html;charset=utf-8"));
+    }
+
+    private String extractSessionId(String response) {
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
+        assertThat(matcher.find()).isTrue();
+        return matcher.group(1);
+    }
+
+    private String getRequestWithCookie(String path, String cookie) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: " + cookie + " ",
+                "",
+                "");
     }
 
     private String getRequest(String path) {

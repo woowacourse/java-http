@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
+    public static final String SESSION_ID = "JSESSIONID";
     private final Map<String, HttpSession> sessionMap;
 
     public SessionManager() {

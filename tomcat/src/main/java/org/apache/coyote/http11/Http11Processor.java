@@ -3,7 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.Processor;
@@ -17,10 +20,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
     private static final byte[] DEFAULT_BODY = "Hello world!".getBytes();
+    private static final String USER_ATTRIBUTE = "user";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -100,22 +103,46 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> account = httpRequest.getParameter("account");
         Optional<String> password = httpRequest.getParameter("password");
         if (account.isEmpty() || password.isEmpty()) {
-            responseProcessor.sendStaticResource("/login.html");
+            showLoginPage(httpRequest, responseProcessor);
             return;
         }
 
-        if (login(account.get(), password.get())) {
-            Cookies cookies = Cookies.of(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
-            responseProcessor.sendRedirect("/index.html", cookies);
+        Optional<User> loginUser = login(account.get(), password.get());
+        if (loginUser.isEmpty()) {
+            responseProcessor.sendRedirect("/401.html");
             return;
         }
-        responseProcessor.sendRedirect("/401.html");
+        doNewLogin(responseProcessor, loginUser.get());
     }
 
-    private boolean login(String account, String password) {
-        Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
+    private void showLoginPage(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
+        if (findSession(httpRequest).isPresent()) {
+            responseProcessor.sendRedirect("/index.html");
+            return;
+        }
+        responseProcessor.sendStaticResource("/login.html");
+    }
+
+    private Optional<HttpSession> findSession(HttpRequest httpRequest) throws IOException {
+        Optional<String> sessionId = httpRequest.getCookie(SessionManager.SESSION_ID)
+                .map(Cookie::getValue);
+        if (sessionId.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(manager.findSession(sessionId.get()));
+    }
+
+    private void doNewLogin(HttpResponseProcessor responseProcessor, User user) throws IOException {
+        Session session = Session.create();
+        session.setAttribute(USER_ATTRIBUTE, user);
+        manager.add(session);
+
+        Cookies cookies = Cookies.of(new Cookie(SessionManager.SESSION_ID, session.getId()));
+        responseProcessor.sendRedirect("/index.html", cookies);
+    }
+
+    private Optional<User> login(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
-        loginUser.ifPresent(user -> log.info("user : {}", user));
-        return loginUser.isPresent();
     }
 }

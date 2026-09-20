@@ -10,7 +10,10 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,11 +77,24 @@ public class Http11Processor implements Runnable, Processor {
 
             // 2. Header 파싱 (Content-Length)
             String line;
+            String rawCookie = "";
             int contentLength = 0;
             while ((line = reader.readLine()) != null && !"".equals(line)) {
                 if (line.startsWith("Content-Length: ")) {
                     contentLength = Integer.parseInt(line.split(": ")[1]);
                 }
+                if(line.startsWith("Cookie: ")) {
+                    rawCookie = line.substring(8);  // "Cookie: " 이후 문자열
+                }
+            }
+
+            final HttpCookie cookies = new HttpCookie(rawCookie);
+            String jsessionId = cookies.getCookie("JSESSIONID");
+            boolean needSetCookie = false;
+
+            if(jsessionId==null) {
+                jsessionId = UUID.randomUUID().toString();
+                needSetCookie = true;
             }
 
             // 3. Body 파싱 (POST 방식 데이터)
@@ -98,9 +114,9 @@ public class Http11Processor implements Runnable, Processor {
 
                 // 회원 정보가 존재하고 비밀번호가 일치하는 경우
                 if (user.isPresent() && user.get().checkPassword(password)) {
-                    send302Redirect(outputStream, "/index.html");
+                    send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
                 } else {
-                    send302Redirect(outputStream, "/401.html");
+                    send302Redirect(outputStream, "/401.html", jsessionId, needSetCookie);
                 }
                 return; // 302 응답 후 종료
             }
@@ -113,10 +129,10 @@ public class Http11Processor implements Runnable, Processor {
                 String email = parseParam(requestBody, "email");
 
                 // 회원 저장
-                final User user = new User(account, password, email);
+                User user = new User(account, password, email);
                 InMemoryUserRepository.save(user);
 
-                send302Redirect(outputStream, "/index.html");
+                send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
                 return; // 302 응답 후 종료
             }
 
@@ -140,12 +156,17 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "text/html;charset=utf-8";
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    "");
+            List<String> headers = new ArrayList<>();
+            headers.add("HTTP/1.1 200 OK ");
+            if (needSetCookie) {
+                headers.add("Set-Cookie: JSESSIONID=" + jsessionId + " ");
+            }
+            headers.add("Content-Type: " + contentType + " ");
+            headers.add("Content-Length: " + body.length + " ");
+            headers.add("");
+            headers.add("");
+
+            final var response = String.join("\r\n", headers);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.write(body);
@@ -168,12 +189,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // 302 리다이렉트 응답 전송
-    private void send302Redirect(OutputStream outputStream, String redirectPath) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: "+redirectPath+" ",
-                "",
-                "");
+    private void send302Redirect(OutputStream outputStream, String redirectPath, String jsessionId, boolean needSetCookie) throws IOException {
+        List<String> headers = new ArrayList<>();
+        headers.add("HTTP/1.1 302 Found ");
+        headers.add("Location: " + redirectPath + " ");
+        if (needSetCookie) {
+            headers.add("Set-Cookie: JSESSIONID=" + jsessionId + " ");
+        }
+        headers.add("");
+        headers.add("");
+
+        final var response = String.join("\r\n", headers);
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }

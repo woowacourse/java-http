@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private final Socket connection;
 
@@ -38,10 +41,11 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            final HttpRequestLine requestLine = HttpRequestLine.from(inputStream);
-            log.info("requestLine = {}", requestLine);
 
-            HttpResponse httpResponse = handle(requestLine);
+            HttpRequest httpRequest = HttpRequest.from(inputStream);
+            log.info("httpReuest = {}", httpRequest);
+
+            HttpResponse httpResponse = handle(httpRequest);
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();
@@ -50,10 +54,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handle(final HttpRequestLine requestLine) throws IOException {
-        final String uri = requestLine.uri();
+    private HttpResponse handle(final HttpRequest request) throws IOException {
+        final String uri = request.requestLine().uri();
 
-        if ("/".equals(uri) && requestLine.isGet()) {
+        if ("/".equals(uri) && request.isGet()) {
             byte[] responseBody = "Hello world!".getBytes();
 
             Map<String, String> headers = new LinkedHashMap<>();
@@ -66,16 +70,20 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody
             );
         }
-
-        if ("/login".equals(uri) && requestLine.isGet()) {
-            return getLoginPage(requestLine.queryParameters());
+        if ("/login".equals(uri) && request.isGet()) {
+            return getStaticResource("/login.html");
+        }
+        if ("/login".equals(uri) && request.isPost()) {
+            return login(request);
+        }
+        if ("/register".equals(uri) && request.isGet()) {
+            return getStaticResource("/register.html");
+        }
+        if ("/register".equals(uri) && request.isPost()) {
+            return register(request);
         }
 
         return getStaticResource(uri);
-    }
-
-    private HttpResponse getLoginPage(final Map<String, String> queryParameters) throws IOException {
-        return getStaticResource("/login.html");
     }
 
     private HttpResponse getStaticResource(final String uri) throws IOException {
@@ -122,5 +130,49 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return contentType;
+    }
+
+    private HttpResponse login(final HttpRequest request) {
+        final String account = request.body().get("account");
+        final String password = request.body().get("password");
+
+        if (account != null && password != null) {
+            boolean isLoggedIn = InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password)).isPresent();
+
+            if (isLoggedIn) {
+                return redirect("/index.html");
+            }
+        }
+
+        return redirect("/401.html");
+    }
+
+    private HttpResponse register(HttpRequest request) {
+        String account = request.body().get("inputLoginId");
+        String email = request.body().get("inputEmail");
+        String password = request.body().get("inputPassword");
+
+        if (account == null || email == null || password == null) {
+            throw new IllegalArgumentException("잘못된 회원가입 요청입니다.");
+        }
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException("이미 가입된 계정입니다: " + account);
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        return redirect("/index.html");
+    }
+
+    private HttpResponse redirect(final String location) {
+        final Map<String, String> headers = Map.of(LOCATION, location);
+
+        return new HttpResponse(
+                new HttpStatusLine(HTTP_VERSION, 302, "Found"),
+                headers,
+                new byte[0]
+        );
     }
 }

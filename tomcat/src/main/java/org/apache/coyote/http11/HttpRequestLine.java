@@ -1,9 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15,29 +12,26 @@ public record HttpRequestLine(
         String uri,
         Map<String, String> queryParameters
 ) {
-    private static final String SP = " ";
-    private static final Charset REQUEST_LINE_CHARSET = StandardCharsets.US_ASCII;
-    private static final String QUERY_DELIMITER = "?";
-    private static final String PARAMETER_DELIMITER = "&";
-    private static final String KEY_VALUE_DELIMITER = "=";
+    public static final Charset CHARSET = StandardCharsets.US_ASCII;
 
+    private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int REQUEST_LINE_PARTS_COUNT = 3;
     private static final int METHOD_INDEX = 0;
     private static final int REQUEST_TARGET_INDEX = 1;
 
+    private static final String QUERY_DELIMITER = "?";
+    private static final String PARAMETER_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_VALUE_PARTS_COUNT = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    public static HttpRequestLine from(final InputStream inputStream) throws IOException {
-        final String requestLine = new BufferedReader(
-                new InputStreamReader(inputStream, REQUEST_LINE_CHARSET)).readLine();
-
+    public static HttpRequestLine from(final String requestLine) throws IOException {
         if (requestLine == null) {
             throw new IOException("클라이언트가 요청 없이 연결을 닫았습니다.");
         }
 
-        final String[] requestLineParts = requestLine.split(SP);
+        final String[] requestLineParts = requestLine.split(REQUEST_LINE_DELIMITER);
 
         if (requestLineParts.length != REQUEST_LINE_PARTS_COUNT) {
             throw new IOException("잘못된 HTTP Request Line 형식입니다: " + requestLine);
@@ -51,14 +45,16 @@ public record HttpRequestLine(
             return new HttpRequestLine(requestLineParts[METHOD_INDEX], requestTarget, Map.of());
         }
 
+        int startIndex = 0;
+
         return new HttpRequestLine(
                 requestLineParts[METHOD_INDEX],
-                requestTarget.substring(0, queryIndex),
-                parseQueryParameters(requestTarget.substring(queryIndex + QUERY_DELIMITER.length()))
+                requestTarget.substring(startIndex, queryIndex),
+                parseParameters(requestTarget.substring(queryIndex + QUERY_DELIMITER.length()))
         );
     }
 
-    private static Map<String, String> parseQueryParameters(final String queryString) {
+    static Map<String, String> parseParameters(final String queryString) {
         final Map<String, String> parameters = new HashMap<>();
 
         for (String parameter : queryString.split(PARAMETER_DELIMITER)) {
@@ -68,6 +64,7 @@ public record HttpRequestLine(
 
             final String[] keyValue = parameter.split(KEY_VALUE_DELIMITER, KEY_VALUE_PARTS_COUNT);
             String value = "";
+
             if (keyValue.length == KEY_VALUE_PARTS_COUNT) {
                 value = keyValue[VALUE_INDEX];
             }
@@ -80,9 +77,5 @@ public record HttpRequestLine(
 
     private static String decode(final String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
-    }
-
-    public boolean isGet() {
-        return "GET".equals(method);
     }
 }

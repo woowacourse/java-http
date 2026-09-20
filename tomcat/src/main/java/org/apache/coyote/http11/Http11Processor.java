@@ -12,11 +12,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -45,29 +47,8 @@ public class Http11Processor implements Runnable, Processor {
             String reqUri = headerFirstLine.split(" ")[1];
             int queryIndex = reqUri.indexOf("?");
 
-            String pathUri = reqUri;
-            String query = "";
-
-            if (queryIndex != -1) {
-                pathUri = reqUri.substring(0, queryIndex);
-                query = reqUri.substring(queryIndex + 1);
-            }
-
-            String responseBody;
-
-            if (pathUri.equals("/")) {
-                responseBody = "Hello world!";
-
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                        "",
-                        responseBody);
-
-                writeAndFlush(outputStream, response);
-                return;
-            }
+            String pathUri = getPathUri(reqUri, queryIndex);
+            String query = getQuery(reqUri, queryIndex);
 
             if (pathUri.equals("/login") && !query.isEmpty()) {
                 if (!login(query)) {
@@ -78,14 +59,12 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (!pathUri.contains(".")) {
-                pathUri = pathUri + ".html";
-            }
+            pathUri = normalizePathUri(pathUri);
+            Path path = getPath("static" + pathUri);
 
-            String staticUrl = "static" + pathUri;
-            Path path = getPath(staticUrl);
-            log.debug("staticPath: {}", path);
-            final var response = createStaticFileResponse(path);
+            String responseBody = findResponseBody(pathUri, path);
+            String contentType = extractType(path);
+            final var response = createStaticFileResponse(responseBody, contentType);
             writeAndFlush(outputStream, response);
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -111,32 +90,35 @@ public class Http11Processor implements Runnable, Processor {
                 .orElse(false);
     }
 
+    private static String findResponseBody(String pathUri, Path path) throws IOException {
+        if (pathUri.equals("/")) {
+            return "Hello World!";
+        }
+
+        return Files.readString(path, StandardCharsets.UTF_8);
+    }
+
     private static void writeAndFlush(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 
-    private static String createStaticFileResponse(Path path) throws IOException {
-        String responseBody = Files.readString(path);
-        String type = extractType(path);
-
-        final var response = String.join("\r\n",
+    private static String createStaticFileResponse(String responseBody, String type) {
+        return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
-        return response;
     }
 
-    private static String createRedirectResponse(String loaction) throws IOException {
-        final var response = String.join("\r\n",
+    private static String createRedirectResponse(String loaction) {
+        return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: " + loaction,
                 "Content-Length: 0",
                 "",
                 "");
-        return response;
     }
 
     private static String extractType(Path path) {
@@ -159,9 +141,36 @@ public class Http11Processor implements Runnable, Processor {
         return queries;
     }
 
-    private Path getPath(String filePath) throws URISyntaxException {
-        return Path.of(getClass().getClassLoader()
-                .getResource(filePath)
-                .toURI());
+    private static Path getPath(String filePath) throws URISyntaxException {
+        URL resource = Objects.requireNonNull(
+                Http11Processor.class.getClassLoader().getResource(filePath),
+                "리소스 못찾음"
+        );
+
+        return Path.of(resource.toURI());
+    }
+
+    private String getQuery(String reqUri, int queryIndex) {
+        if (queryIndex == -1) {
+            return "";
+        }
+        return reqUri.substring(queryIndex + 1);
+    }
+
+    private String getPathUri(String reqUri, int queryIndex) {
+        if (queryIndex == -1) {
+            return reqUri;
+        }
+        return reqUri.substring(0, queryIndex);
+    }
+
+    private String normalizePathUri(String pathUri) {
+        if (pathUri.equals("/")) {
+            return "/";
+        }
+        if (!pathUri.contains(".")) {
+            return pathUri + ".html";
+        }
+        return pathUri;
     }
 }

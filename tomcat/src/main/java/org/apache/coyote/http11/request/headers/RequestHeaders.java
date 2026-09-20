@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request.headers;
 
+import org.apache.coyote.http11.session.HttpCookie;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +41,8 @@ public class RequestHeaders {
         return headers.get("Content-Type");
     }
 
-    public String getCookie() {
-        return headers.get("Cookie");
+    public String getCookie(String cookieName) {
+        return new HttpCookie(headers.get("Cookie")).getAttribute(cookieName);
     }
 
 }

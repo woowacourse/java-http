@@ -49,7 +49,7 @@ class RequestHeadersTest {
         // when & then
         assertThat(requestHeaders.getValue("Host")).isNull();
         assertThat(requestHeaders.getContentType()).isNull();
-        assertThat(requestHeaders.getCookie()).isNull();
+        assertThat(requestHeaders.getCookie("JSESSIONID")).isNull();
         assertThat(requestHeaders.getContentLength()).isZero();
     }
 
@@ -111,16 +111,28 @@ class RequestHeadersTest {
     }
 
     @Test
-    @DisplayName("Cookie 헤더를 반환한다.")
+    @DisplayName("쿠키 이름으로 값을 조회한다.")
     void getCookie() {
         // given
-        RequestHeaders requestHeaders = RequestHeaders.from(List.of("Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"));
+        RequestHeaders requestHeaders = RequestHeaders.from(
+                List.of("Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46; theme=dark"));
+
+        // when & then
+        assertThat(requestHeaders.getCookie("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(requestHeaders.getCookie("theme")).isEqualTo("dark");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 쿠키를 조회하면 null을 반환한다.")
+    void invalidCookieNameReturnNull() {
+        // given
+        RequestHeaders requestHeaders = RequestHeaders.from(List.of("Cookie: theme=dark"));
 
         // when
-        String actual = requestHeaders.getCookie();
+        String actual = requestHeaders.getCookie("JSESSIONID");
 
         // then
-        assertThat(actual).isEqualTo("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(actual).isNull();
     }
 
 }

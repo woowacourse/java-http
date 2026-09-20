@@ -104,6 +104,36 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
     }
 
+    @Test
+    void 이미_로그인한_사용자가_GET_login_html을_요청하면_메인_페이지로_리다이렉트한다() {
+        final String sessionId = "logged-in-session-html";
+        final Session session = new Session(sessionId);
+        session.setAttribute("user", new User("gugu", "password", "gugu@example.com"));
+        sessionManager.add(session);
+        final var socket = new StubSocket(String.join("\r\n",
+                "GET /login.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                ""));
+        final var processor = new Http11Processor(socket, sessionManager);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
+    }
+
+    @Test
+    void 로그인하지_않은_사용자가_GET_login_html을_요청하면_login_html을_응답한다() throws Exception {
+        final var socket = new StubSocket("GET /login.html HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket, sessionManager);
+
+        processor.process(socket);
+
+        final String content = readResource("static/login.html");
+        assertThat(socket.output()).isEqualTo(response("200 OK", "text/html", content));
+    }
+
     private String readResource(final String name) throws Exception {
         final URL resource = getClass().getClassLoader().getResource(name);
         assertThat(resource).isNotNull();

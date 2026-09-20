@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
+import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
 
 import java.io.BufferedReader;
@@ -51,6 +52,35 @@ public class HttpRequest {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new RequestBody(new String(buffer), headers.getContentType());
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public String getPath() {
+        return requestLine
+                .getRequestUri()
+                .getPath();
+    }
+
+    public String getQueryParam(String key) {
+        return requestLine
+                .getRequestUri()
+                .getQueryParams()
+                .getValue(key);
+    }
+
+    public String getBodyValue(String key) {
+        return requestBody.getValue(key);
+    }
+
+    public String getCookie(String cookieName) {
+        return requestHeaders.getCookie(cookieName);
+    }
+
+    public String getContentType() {
+        return requestHeaders.getContentType();
     }
 
 }

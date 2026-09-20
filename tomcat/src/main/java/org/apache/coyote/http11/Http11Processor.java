@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -102,19 +103,19 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             Map<String, String> requestBodyMap = new LinkedHashMap<>();
-
-            if (httpMethod.equals(POST_METHOD) && url.equals(REGISTER_PATH) && contentLength > 0) {
+            if (httpMethod.equals(POST_METHOD) && (url.equals(REGISTER_PATH) || url.equals(LOGIN_PATH))
+                    && contentLength > 0) {
                 String[] body = requestBody.split("&");
                 for (int i = 0; i < body.length; i++) {
                     String[] value = body[i].split("=");
-                    requestBodyMap.put(value[0], value[1]);
+                    requestBodyMap.put(URLDecoder.decode(value[0], StandardCharsets.UTF_8), URLDecoder.decode(value[1], StandardCharsets.UTF_8));
                 }
-
-                User user = new User(requestBodyMap.get(ACCOUNT_PARAMETER), requestBodyMap.get(PASSWORD_PARAMETER), requestBodyMap.get("email"));
-                InMemoryUserRepository.save(user);
+                if (url.equals(REGISTER_PATH)) {
+                    User user = new User(requestBodyMap.get(ACCOUNT_PARAMETER), requestBodyMap.get(PASSWORD_PARAMETER),
+                            requestBodyMap.get("email"));
+                    InMemoryUserRepository.save(user);
+                }
             }
-
-
 
             // URL 쿼리 분리
             String[] devidedUrlQuery = url.split("\\?");
@@ -161,11 +162,12 @@ public class Http11Processor implements Runnable, Processor {
 
             // 로그
             boolean isLoginSuccess = false;
-            if (urlPath.equals(LOGIN_PATH) && isQuery && queryMap.containsKey(ACCOUNT_PARAMETER)
-                    && queryMap.containsKey(PASSWORD_PARAMETER)) {
+            if (urlPath.equals(LOGIN_PATH) && httpMethod.equals(POST_METHOD) && requestBodyMap.containsKey(
+                    ACCOUNT_PARAMETER)
+                    && requestBodyMap.containsKey(PASSWORD_PARAMETER)) {
                 Optional<User> matchedUser = InMemoryUserRepository
-                        .findByAccount(queryMap.get(ACCOUNT_PARAMETER))
-                        .filter(user -> user.checkPassword(queryMap.get(PASSWORD_PARAMETER)));
+                        .findByAccount(requestBodyMap.get(ACCOUNT_PARAMETER))
+                        .filter(user -> user.checkPassword(requestBodyMap.get(PASSWORD_PARAMETER)));
                 isLoginSuccess = matchedUser.isPresent();
 
                 if (isLoginSuccess) {
@@ -192,7 +194,7 @@ public class Http11Processor implements Runnable, Processor {
                         CONTENT_LENGTH_HEADER_PREFIX + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                         "",
                         responseBody);
-            } else if (urlPath.equals(LOGIN_PATH) && isQuery) {
+            } else if (urlPath.equals(LOGIN_PATH) && httpMethod.equals(POST_METHOD)) {
                 String location = "";
                 if (isLoginSuccess) {
                     location += INDEX_HTML_PATH;

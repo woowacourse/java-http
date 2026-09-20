@@ -3,9 +3,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.HttpResponse;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,45 +43,114 @@ public class Http11Processor implements Runnable, Processor {
                              new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            var responseBody = "Hello world!";
-            String contentType = "text/html;charset=utf-8 ";
-
             // 첫번째 라인 & 요청 url 구하기
             String requestLine = bufferedReader.readLine();
             String requestTarget = requestLine.split(" ")[1];
 
-            if (!requestTarget.equals("/")) {
+            // 리소스 경로 찾기
+            String requestPath = requestTarget.split("\\?")[0];
 
-                // 리소스 경로 찾기
-                String requestPath = requestTarget.split("\\?")[0];
-                Path filePath = resolveResourcePath(requestPath);
+            // 헤더 읽기
+            Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
 
-                // 헤더 읽기
-                Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
+            // 쿼리 파싱
+            Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-                // 쿼리 파싱
-                Map<String, String> queryParameters = parseQueryParameters(requestTarget);
-
-                // 응답 바디 생성
-                responseBody = Files.readString(filePath);
-
-                // 로그인 처리
-                authenticateUser(requestPath,  queryParameters);
-
-                // content-type 처리
-                contentType = resolveContentType(filePath.getFileName().toString());
-
+            HttpResponse httpResponse;
+            if (requestPath.equals("/")) {
+                httpResponse = new HttpResponse(
+                        "200 OK ",
+                        Map.of("Content-Type",  "text/html;charset=utf-8 "),
+                        "Hello world!".getBytes()
+                );
+            } else if (requestPath.startsWith("/login"))
+                httpResponse = handleLoginRequest(queryParameters);
+            else {
+                httpResponse = createResourceResponse(requestPath);
             }
 
-            final var response = buildHttpResponse(responseBody, contentType);
+        writeHttpResponse(outputStream, httpResponse);
+    } catch (IOException | UncheckedServletException e) {
+        log.error(e.getMessage(), e);
+    } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+    }
+}
+    private void writeHttpResponse(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
+        byte[] body = httpResponse.body();
+        StringBuilder header = new StringBuilder();
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+        header.append("HTTP/1.1 ")
+                .append(httpResponse.statusCode())
+                .append("\r\n");
+
+        httpResponse.headers().forEach((name, value) ->
+                header.append(name).append(": ")
+                        .append(value).append("\r\n"));
+
+        header.append("Content-Length: ")
+                .append(body.length)
+                .append(" ")
+                .append("\r\n\r\n");
+
+        outputStream.write(header.toString().getBytes());
+        outputStream.write(body);
+
+    }
+
+    private String buildHttpResponse(String statusCode, String responseBody, String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " ",
+                "Content-Type: " + contentType,
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private HttpResponse handleLoginRequest(Map<String, String> queryParameters)
+            throws URISyntaxException, IOException {
+
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
+
+        if (account == null || password == null) {
+            return createResourceResponse("/login.html");
         }
+
+        if (!authenticateUser(account, password)) {
+            return createUnauthorizedResponse();
+        }
+
+        return createLoginSuccessResponse();
+    }
+
+    private HttpResponse createLoginSuccessResponse() {
+        return new HttpResponse(
+                "302 FOUND ",
+                Map.of("Location", "/index.html"),
+                new byte[0]);
+    }
+
+    private HttpResponse createUnauthorizedResponse() throws URISyntaxException, IOException {
+        Path filePath = Path.of(getClass().getClassLoader().getResource("static/401.html").toURI());
+        byte[] body = Files.readAllBytes(filePath);
+
+        return new HttpResponse(
+                "401 Unauthorized ",
+                Map.of("Content-Type", "text/html; charset=UTF-8"),
+                body);
+    }
+
+    private HttpResponse createResourceResponse(String requestPath) throws URISyntaxException, IOException {
+        Path filePath = resolveResourcePath(requestPath);
+        byte[] body = Files.readAllBytes(filePath);
+
+        return new HttpResponse(
+                "200 OK ",
+                Map.of(
+                        "Content-Type",
+                        resolveContentType(filePath.getFileName().toString())
+                ), body);
     }
 
     // 리소스 경로 찾기
@@ -142,22 +213,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // 로그인
-    private void authenticateUser(String requestPath, Map<String, String> queryParameters) {
-        if (requestPath.startsWith("/login")
-                && queryParameters.containsKey("account")
-                && queryParameters.containsKey("password")
-        ) {
-            String account = queryParameters.get("account");
-            String password = queryParameters.get("password");
+    private boolean authenticateUser(String account, String password) {
 
-            User user = InMemoryUserRepository
-                    .findByAccount(account)
-                    .orElseThrow();
+        User user = InMemoryUserRepository
+                .findByAccount(account)
+                .orElseThrow();
 
-            if (user.checkPassword(password)) {
-                log.info("user : {}", user.toString());
-            }
+        if (user.checkPassword(password)) {
+            log.info("user : {}", user.toString());
+            return true;
         }
+        return false;
     }
 
     // content-type 결정
@@ -178,14 +244,5 @@ public class Http11Processor implements Runnable, Processor {
             return "image/jpeg";
         }
         return "text/plain";
-    }
-
-    private String buildHttpResponse(String responseBody, String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

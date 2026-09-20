@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+    public static final String JSESSIONID = "JSESSIONID";
+
     private static final String COOKIE_DELIMITER = ";";
     private static final String NAME_VALUE_DELIMITER = "=";
 

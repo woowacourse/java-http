@@ -6,7 +6,6 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final RequestLine requestLine;
@@ -48,14 +47,30 @@ public class HttpRequest {
             return session;
         }
 
-        SessionManager sessionManager = SessionManager.getInstance();
-        session = sessionManager.findSession(cookie.get(JSESSIONID));
+        session = SessionManager.getInstance().findSession(cookie.get(HttpCookie.JSESSIONID));
         if (session == null && create) {
-            session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
+            session = createSession();
         }
 
         return session;
+    }
+
+    public Session renewSession() {
+        Session previousSession = getSession(false);
+        if (previousSession != null) {
+            previousSession.invalidate();
+        }
+
+        session = createSession();
+
+        return session;
+    }
+
+    private Session createSession() {
+        Session created = new Session(UUID.randomUUID().toString());
+        SessionManager.getInstance().add(created);
+
+        return created;
     }
 
     public HttpMethod getMethod() {

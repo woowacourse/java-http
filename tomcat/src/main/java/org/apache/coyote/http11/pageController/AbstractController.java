@@ -4,12 +4,12 @@ import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import java.io.IOException;
 import java.util.Map;
+import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements PageController {
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String USER_ATTRIBUTE = "user";
 
     @Override
@@ -40,11 +40,11 @@ public abstract class AbstractController implements PageController {
     }
 
     protected HttpResponse loginAndRedirect(HttpRequest httpRequest, User user, String location) {
-        Session session = httpRequest.getSession(true);
+        Session session = httpRequest.renewSession();
         session.setAttribute(USER_ATTRIBUTE, user);
 
         HttpResponse response = redirect(location);
-        response.addCookie(JSESSIONID, session.getId());
+        response.addCookie(HttpCookie.JSESSIONID, session.getId());
 
         return response;
     }

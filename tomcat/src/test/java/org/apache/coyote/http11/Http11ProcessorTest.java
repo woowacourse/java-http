@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.pageController.LoginController;
 import org.apache.coyote.http11.pageController.PageController;
 import org.apache.coyote.http11.request.HttpBody;
@@ -15,14 +17,21 @@ import support.StubSocket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+    private static final String SESSION_ID_FORMAT =
+            "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final String SET_SESSION_COOKIE =
-            "\r\nSet-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} \r\n";
+            "\r\nSet-Cookie: JSESSIONID=" + SESSION_ID_FORMAT + " \r\n";
+    private static final Pattern SET_SESSION_COOKIE_PATTERN =
+            Pattern.compile("Set-Cookie: JSESSIONID=(" + SESSION_ID_FORMAT + ") ");
 
     @Test
     void process() {
@@ -34,7 +43,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = expectedResponse("text/html", "Hello world!");
+        final String expected =
+                expectedResponse("200 OK", "text/html", "Hello world!", issuedSessionId(socket.output()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -56,7 +66,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = expectedResponse("text/html", readResource("static/index.html"));
+        final String expected = expectedResponse(
+                "200 OK", "text/html", readResource("static/index.html"), issuedSessionId(socket.output()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -78,7 +89,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = expectedResponse("text/css", readResource("static/css/styles.css"));
+        final String expected = expectedResponse(
+                "200 OK", "text/css", readResource("static/css/styles.css"), issuedSessionId(socket.output()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -108,8 +120,9 @@ class Http11ProcessorTest {
         final LoginResult result = requestLogin(body);
 
         // then
-        assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
-        assertThat(result.response()).doesNotContain("Set-Cookie");
+        final String sessionId = issuedSessionId(result.response());
+        assertThat(result.response()).isEqualTo(redirectResponse("/401.html", sessionId));
+        assertThat(SessionManager.getInstance().findSession(sessionId).getAttribute("user")).isNull();
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .noneMatch(message -> message.startsWith("login user:"));
@@ -130,7 +143,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        final String expected = expectedResponse(
+                "200 OK", "text/html", readResource("static/login.html"), issuedSessionId(socket.output()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -147,7 +161,8 @@ class Http11ProcessorTest {
         final LoginResult result = requestLoginWith(httpRequest);
 
         // then
-        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        final String expected = expectedResponse(
+                "200 OK", "text/html", readResource("static/login.html"), issuedSessionId(result.response()));
         assertThat(result.response()).isEqualTo(expected);
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
@@ -160,7 +175,8 @@ class Http11ProcessorTest {
         final LoginResult result = requestLogin("account=&password=");
 
         // then
-        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        final String expected = expectedResponse(
+                "200 OK", "text/html", readResource("static/login.html"), issuedSessionId(result.response()));
         assertThat(result.response()).isEqualTo(expected);
     }
 
@@ -170,7 +186,8 @@ class Http11ProcessorTest {
         final LoginResult result = requestLogin("account=unknown&password=password");
 
         // then
-        assertThat(result.response()).isEqualTo(redirectResponse("/401.html"));
+        assertThat(result.response())
+                .isEqualTo(redirectResponse("/401.html", issuedSessionId(result.response())));
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .noneMatch(message -> message.startsWith("login user:"));
@@ -253,7 +270,8 @@ class Http11ProcessorTest {
         final String expected = expectedResponse(
                 "405 Method Not Allowed",
                 "text/plain",
-                "지원하지 않는 HTTP 메서드입니다: POST"
+                "지원하지 않는 HTTP 메서드입니다: POST",
+                issuedSessionId(socket.output())
         );
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -296,7 +314,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = expectedResponse("text/html", readResource("static/login.html"));
+        final String expected = expectedResponse(
+                "200 OK", "text/html", readResource("static/login.html"), issuedSessionId(socket.output()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -338,7 +357,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = expectedResponse("404 Not Found", "text/html", readResource("static/404.html"));
+        final String expected = expectedResponse(
+                "404 Not Found", "text/html", readResource("static/404.html"), issuedSessionId(socket.output()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -399,9 +419,17 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void noSetCookieForStaticResource() {
+    void noSetCookieWhenRequestAlreadyHasSession() {
         // given
-        final StubSocket socket = new StubSocket();
+        final Session session = new Session("processor-existing-session");
+        SessionManager.getInstance().add(session);
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + session.getId(),
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -409,6 +437,71 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void setCookieWhenSessionIdIsUnknown() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: yummy_cookie=choco; JSESSIONID=expired-session-id",
+                "",
+                "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .containsPattern(SET_SESSION_COOKIE)
+                .doesNotContain("expired-session-id");
+    }
+
+    @Test
+    void noSetCookieForBadRequest() {
+        // given
+        final StubSocket socket = new StubSocket(String.join("\r\n",
+                "GET /login?account=% HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                ""));
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void sessionIdIsRenewedWhenLoginSucceeds() {
+        // given
+        final Session beforeLogin = new Session("processor-before-login");
+        SessionManager.getInstance().add(beforeLogin);
+        final String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Cookie: JSESSIONID=" + beforeLogin.getId(),
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String sessionId = issuedSessionId(socket.output());
+        assertThat(sessionId).isNotEqualTo(beforeLogin.getId());
+        assertThat(SessionManager.getInstance().findSession(beforeLogin.getId())).isNull();
+        assertThat(SessionManager.getInstance().findSession(sessionId).getAttribute("user")).isNotNull();
     }
 
     @Test
@@ -479,12 +572,11 @@ class Http11ProcessorTest {
     }
 
     private String redirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
-                "");
+        return redirectResponse(location, null);
+    }
+
+    private String redirectResponse(String location, String sessionId) {
+        return response("302 Found", "Location: " + location + " ", sessionId, "");
     }
 
     private String expectedResponse(String contentType, String responseBody) {
@@ -492,12 +584,37 @@ class Http11ProcessorTest {
     }
 
     private String expectedResponse(String status, String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
+        return expectedResponse(status, contentType, responseBody, null);
+    }
+
+    private String expectedResponse(String status, String contentType, String responseBody, String sessionId) {
+        return response(status, "Content-Type: " + contentType + ";charset=utf-8 ", sessionId, responseBody);
+    }
+
+    private String response(String status, String header, String sessionId, String responseBody) {
+        List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 " + status + " ");
+        lines.add(header);
+        if (sessionId != null) {
+            lines.add("Set-Cookie: JSESSIONID=" + sessionId + " ");
+        }
+        lines.add("Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
+        lines.add("");
+        lines.add(responseBody);
+
+        return String.join("\r\n", lines);
+    }
+
+    /**
+     * 응답에 실린 Set-Cookie의 JSESSIONID 값을 꺼낸다. 값이 UUID 형태인지도 함께 검증한다.
+     */
+    private String issuedSessionId(String response) {
+        Matcher matcher = SET_SESSION_COOKIE_PATTERN.matcher(response);
+        assertThat(matcher.find())
+                .withFailMessage("응답에 JSESSIONID를 담은 Set-Cookie가 없습니다: %s", response)
+                .isTrue();
+
+        return matcher.group(1);
     }
 
     private record LoginResult(String response, List<ILoggingEvent> loggingEvents) {

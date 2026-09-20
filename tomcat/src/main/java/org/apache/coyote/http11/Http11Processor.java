@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.pageController.PageController;
 import org.apache.coyote.http11.pageController.PageControllerMapper;
 import org.apache.coyote.http11.request.HttpBody;
+import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -52,13 +54,25 @@ public class Http11Processor implements Runnable, Processor {
                 HttpRequest request = getRequestTarget(inputStream);
                 PageController controller = PageControllerMapper.getPageController(request.getHttpPath());
 
-                writeResponse(outputStream, handle(request, controller));
+                HttpResponse response = handle(request, controller);
+                issueSessionCookie(request, response);
+
+                writeResponse(outputStream, response);
             } catch (BadRequestException e) {
                 writeResponse(outputStream, badRequest(e));
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+    }
+    
+    private void issueSessionCookie(HttpRequest request, HttpResponse response) {
+        if (request.getSession(false) != null) {
+            return;
+        }
+
+        Session session = request.getSession(true);
+        response.addCookie(HttpCookie.JSESSIONID, session.getId());
     }
 
     HttpResponse handle(HttpRequest request, PageController controller) {

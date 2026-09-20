@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.Cookie;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpCookie;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
@@ -19,6 +21,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -44,15 +47,17 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            String requestLine = bufferedReader.readLine();
-            Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
-            String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
+            final String requestLine = bufferedReader.readLine();
+            final Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
+            final String sessionId = readRequestCookie(httpRequestHeaders);
+            final String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
 
             final String requestTarget = requestLine.split(" ")[1];
             final URI uri = URI.create(requestTarget);
             log.info("request uri: {}", uri);
 
-            final HttpResponse response = handleRequest(uri, requestTarget, requestBody);
+            final HttpResponse response = handleRequest(uri, requestTarget, sessionId, requestBody);
+
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -71,6 +76,23 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequestHeaders;
     }
 
+    private String readRequestCookie(final Map<String, String> httpRequestHeaders) {
+        final String cookieContent = httpRequestHeaders.get("Cookie");
+        if (cookieContent == null) {
+            return null;
+        }
+
+        for (String item : cookieContent.split(";")) {
+            final String[] pair = item.trim().split(QUERY_PARAM_VALUE_DELIMITER, 2);
+            if (pair.length == 2 && pair[0].equals("JSESSIONID")) {
+                log.info("JESSIONID: {}", pair[1]);
+                return pair[1];
+            }
+        }
+
+        return null;
+    }
+
     private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> httpRequestHeaders) throws IOException {
         String requestBody = null;
         if (httpRequestHeaders.containsKey("Content-Length")) {
@@ -83,11 +105,11 @@ public class Http11Processor implements Runnable, Processor {
         return requestBody;
     }
 
-    private HttpResponse handleRequest(final URI uri, final String requestTarget, final String requestBody) throws IOException {
+    private HttpResponse handleRequest(final URI uri, final String requestTarget, final String sessionId, final String requestBody) throws IOException {
         final String uriPath = uri.getPath();
 
         if (uriPath.equals("/login")) {
-            return handleLogin(uri, requestTarget, requestBody);
+            return handleLogin(uri, requestTarget, sessionId, requestBody);
         }
 
         if (uriPath.equals("/register")) {
@@ -97,11 +119,12 @@ public class Http11Processor implements Runnable, Processor {
         return createFileResponse(getFilePath(uriPath), requestTarget, "200 OK");
     }
 
-    private HttpResponse handleLogin(final URI uri, final String requestTarget, final String requestBody) throws IOException {
+    private HttpResponse handleLogin(final URI uri, final String requestTarget, final String sessionId, final String requestBody) throws IOException {
         final String uriPath = uri.getPath();
         Path filePath = getFilePath(uriPath);
         String httpStatus;
         String location = null;
+        HttpCookie jsessionId = null;
 
         final String query = uri.getQuery();
         boolean loginSuccess = false;
@@ -115,6 +138,9 @@ public class Http11Processor implements Runnable, Processor {
         if (loginSuccess) {
             httpStatus = "302 Found";
             location = "/index.html";
+            if (sessionId == null) {
+                jsessionId = new HttpCookie("JSESSIONID", UUID.randomUUID().toString());
+            }
         }
         else if (query == null && requestBody == null){
             httpStatus = "200 OK";
@@ -127,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final String contentType = getContentType(requestTarget);
         final String responseBody = location == null ? getResponseBody(filePath) : "";
-        return new HttpResponse(httpStatus, contentType, responseBody, location);
+        return new HttpResponse(httpStatus, contentType, responseBody, location, jsessionId);
     }
 
     private HttpResponse handleRegister(final String requestTarget, final String requestBody) throws IOException {
@@ -141,7 +167,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse createFileResponse(final Path filePath, final String requestTarget, final String httpStatus) throws IOException {
         final String contentType = getContentType(requestTarget);
         final String responseBody = getResponseBody(filePath);
-        return new HttpResponse(httpStatus, contentType, responseBody, null);
+        return new HttpResponse(httpStatus, contentType, responseBody, null, null);
     }
 
     private Path getFilePath(final String uriPath) {
@@ -224,9 +250,6 @@ public class Http11Processor implements Runnable, Processor {
         return Path.of(url.getPath());
     }
 
-    private record HttpResponse(String status, String contentType, String body, String location) {
-    }
-
     private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
         outputStream.write(createResponse(response).getBytes());
         outputStream.flush();
@@ -242,9 +265,14 @@ public class Http11Processor implements Runnable, Processor {
         if (response.location() != null) {
             httpResponse.append("Location: ").append(response.location()).append("\r\n");
         }
+        if (response.cookie() != null) {
+            httpResponse.append("Set-Cookie: ").append(response.cookie()).append("\r\n");
+        }
 
         return httpResponse.append("\r\n")
                 .append(response.body())
                 .toString();
     }
+
+    private record HttpResponse(String status, String contentType, String body, String location, HttpCookie cookie) { }
 }

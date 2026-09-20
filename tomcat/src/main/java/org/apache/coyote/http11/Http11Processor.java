@@ -149,14 +149,14 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n", responseLines);
     }
 
-    private String getResponseBody(final String path) throws IOException {
-        final String resourceName = "static" + path;
-        final String fileName = Objects.requireNonNull(
+    private String getResponseBody(final String requestPath) throws IOException {
+        final String resourceName = "static" + requestPath;
+        final String resourcePath = Objects.requireNonNull(
                 getClass().getClassLoader().getResource(resourceName),
                 "리소스를 찾을 수 없음: " + resourceName
         ).getPath();
 
-        return Files.readString(Path.of(fileName));
+        return Files.readString(Path.of(resourcePath));
     }
 
     private String resolveContentType(final String path) {

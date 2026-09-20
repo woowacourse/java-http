@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpStatus;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,13 +17,15 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("HTTP/1.1 요청 처리")
 class Http11ProcessorTest {
 
     @Test
+    @DisplayName("요청 경로가 /이면 기본 응답을 내려준다")
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -38,6 +42,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("정적 리소스를 응답한다")
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -48,7 +53,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -65,10 +70,11 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("확장자에 맞는 Content-Type으로 응답한다")
     void css() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/css/styles.css"));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -78,10 +84,11 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 리소스는 404로 응답한다")
     void notFound() {
         // given
         final var socket = new StubSocket(getRequest("/nothing.html"));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -91,10 +98,11 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("로그인 파라미터가 없으면 로그인 페이지를 보여준다")
     void loginPageWithoutParameters() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/login"));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -104,23 +112,30 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("로그인에 성공하면 세션 쿠키를 내려주고 index.html로 리다이렉트한다")
     void loginSuccessRedirectsToIndex() {
         // given
         final var socket = new StubSocket(getRequest("/login?account=gugu&password=password"));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n" +
+                        "Location: /index.html \r\n" +
+                        "Content-Length: 0 \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-fA-F-]{36} \r\n")
+                .endsWith("\r\n\r\n");
     }
 
     @Test
+    @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다")
     void loginFailureRedirectsToUnauthorized() {
         // given
         final var socket = new StubSocket(getRequest("/login?account=gugu&password=wrong"));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -130,10 +145,11 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("GET 요청이면 회원가입 페이지를 보여준다")
     void registerPage() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/register"));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -143,11 +159,12 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("회원가입에 성공하면 사용자를 저장하고 index.html로 리다이렉트한다")
     void registerSavesUserAndRedirectsToIndex() {
         // given
         final String body = "account=tester&password=secret&email=tester%40woowahan.com";
         final var socket = new StubSocket(postRequest("/register", body));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -162,11 +179,12 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("회원가입 파라미터가 누락되면 400으로 응답한다")
     void registerWithMissingParameterRespondsBadRequest() {
         // given
         final String body = "account=noemail&password=secret";
         final var socket = new StubSocket(postRequest("/register", body));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -177,6 +195,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("헤더 이름이 소문자여도 회원가입을 처리한다")
     void registerWithLowerCaseHeaderNames() {
         // given
         final String body = "account=lower&password=secret&email=lower%40woowahan.com";
@@ -189,7 +208,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);

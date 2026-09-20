@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Manager;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.Processor;
@@ -16,6 +17,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
     private static final byte[] DEFAULT_BODY = "Hello world!".getBytes();
@@ -23,9 +25,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager manager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Manager manager) {
         this.connection = connection;
+        this.manager = manager;
     }
 
     @Override
@@ -101,7 +105,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (login(account.get(), password.get())) {
-            responseProcessor.sendRedirect("/index.html");
+            Cookies cookies = Cookies.of(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
+            responseProcessor.sendRedirect("/index.html", cookies);
             return;
         }
         responseProcessor.sendRedirect("/401.html");

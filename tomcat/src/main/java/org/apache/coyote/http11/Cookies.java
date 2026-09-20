@@ -1,18 +1,59 @@
 package org.apache.coyote.http11;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-public class HttpCookies {
-    private static final String PARAMETER_DELIMITER = ";";
-    private static final String KEY_VALUE_DELIMITER = "=";
+public class Cookies {
+    private static final String PAIR_DELIMITER = ";";
 
-    private Map<String, String> cookies;
+    private final Map<String, Cookie> cookies;
 
-    private HttpCookies(Map<String, String> cookies) {
+    private Cookies(Map<String, Cookie> cookies) {
         this.cookies = cookies;
     }
 
-    public static HttpCookies from(String cookieHeaderValue) {
-        String
+    public static Cookies empty() {
+        return new Cookies(Map.of());
+    }
+
+    public static Cookies of(Cookie... cookies) {
+        return toCookies(List.of(cookies));
+    }
+
+    public static Cookies from(String cookieHeaderValue) {
+        if (cookieHeaderValue == null || cookieHeaderValue.isBlank()) {
+            return empty();
+        }
+
+        List<Cookie> cookiePairs = Stream.of(cookieHeaderValue.split(PAIR_DELIMITER))
+                .map(Cookie::fromCookiePair)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        return toCookies(cookiePairs);
+    }
+
+    private static Cookies toCookies(List<Cookie> cookiePairs) {
+        Map<String, Cookie> cookies = new LinkedHashMap<>();
+        for (Cookie cookie : cookiePairs) {
+            cookies.put(cookie.getName(), cookie);
+        }
+        return new Cookies(cookies);
+    }
+
+    public Optional<Cookie> find(String name) {
+        return Optional.ofNullable(cookies.get(name));
+    }
+
+    public Collection<Cookie> values() {
+        return cookies.values();
+    }
+
+    public boolean isEmpty() {
+        return cookies.isEmpty();
     }
 }

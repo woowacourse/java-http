@@ -11,8 +11,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class HttpResponseProcessor {
@@ -20,11 +18,9 @@ public class HttpResponseProcessor {
     private static final char LF = '\n';
     private static final String STATIC_RESOURCE_PREFIX = "static";
     private final OutputStream outputStream;
-    private final Map<String, String> cookies;
 
     public HttpResponseProcessor(OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.cookies = new HashMap<>();
     }
 
     public void sendStaticResource(String path) throws IOException, URISyntaxException {
@@ -85,15 +81,22 @@ public class HttpResponseProcessor {
     }
 
     public void sendRedirect(String path) throws IOException {
-        HttpStatus found = HttpStatus.FOUND;
-        final String head = String.join("\r\n",
-                "HTTP/1.1 " + found.getCode() + " " + found.getMessage() + " ",
-                "Location: " + path + " ",
-                "Content-Length: 0 ",
-                "",
-                "");
+        sendRedirect(path, Cookies.empty());
+    }
 
-        outputStream.write(head.getBytes(StandardCharsets.ISO_8859_1));
+    public void sendRedirect(String path, Cookies cookies) throws IOException {
+        HttpStatus found = HttpStatus.FOUND;
+        final StringBuilder head = new StringBuilder()
+                .append("HTTP/1.1 ").append(found.getCode()).append(" ").append(found.getMessage()).append(" \r\n")
+                .append("Location: ").append(path).append(" \r\n")
+                .append("Content-Length: 0 \r\n");
+
+        for (Cookie cookie : cookies.values()) {
+            head.append("Set-Cookie: ").append(cookie.toHeaderValue()).append(" \r\n");
+        }
+        head.append("\r\n");
+
+        outputStream.write(head.toString().getBytes(StandardCharsets.ISO_8859_1));
         outputStream.flush();
     }
 }

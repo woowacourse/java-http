@@ -30,14 +30,13 @@ public class Http11Processor implements Runnable, Processor {
         "/css/styles.css",
         "/js/scripts.js");
 
-    private final Map<Route, BiFunction<RequestTarget, HttpCookie, Response>> routeHandlerMap = Map.of(
+    private final Map<Route, BiFunction<Request, HttpCookie, Response>> routeHandlerMap = Map.of(
         new Route(HttpMethod.GET, "/index.html"), this::handleIndex,
         new Route(HttpMethod.GET, "/index"), this::handleIndex,
         new Route(HttpMethod.GET, "/login"), this::handleGetLogin,
         new Route(HttpMethod.POST, "/login"), this::handlePostLogin,
         new Route(HttpMethod.GET, "/register"), this::handleGetRegister,
         new Route(HttpMethod.POST, "/register"), this::handlePostRegister);
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -57,20 +56,15 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream));
             final var outputStream = connection.getOutputStream()) {
-            final RequestTarget requestTarget = getRequestTarget(bufferedReader);
-            final HttpCookie httpCookie = HttpCookie.from(requestTarget.getHeaderValue("Cookie"));
+            final Request request = readRequest(bufferedReader);
+            final HttpCookie httpCookie = HttpCookie.from(request.getHeaderValue("Cookie"));
 
-            Response response = dispatchRequest(requestTarget, httpCookie);
+            Response response = dispatchRequest(request, httpCookie);
             response.addBody(readStaticResource(response.filePath()));
             response.addHeader("Content-Type", getContentType(response.filePath()) + charSetOption);
             response.addHeader("Content-Length", String.valueOf(response.body()
                 .getBytes().length));
-            if (!httpCookie.containsJSessionId()) {
-                final UUID uuid = UUID.randomUUID();
-                SessionManager.getInstance()
-                    .add(new Session(uuid.toString()));
-                response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
-            }
+            createSessionIfAbsent(httpCookie, response);
 
             final String message = generateResponseMessage(response);
 
@@ -81,38 +75,39 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestTarget getRequestTarget(final BufferedReader bufferedReader) throws IOException {
+    private void createSessionIfAbsent(final HttpCookie httpCookie, final Response response) {
+        if (httpCookie.getValue("JSESSIONID") == null) {
+            final UUID uuid = UUID.randomUUID();
+            SessionManager.getInstance()
+                .add(new Session(uuid.toString()));
+            response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+        }
+    }
+
+    private Request readRequest(final BufferedReader bufferedReader) throws IOException {
         final String[] requestLineTokens = bufferedReader.readLine()
             .split(" ");
         final Map<String, String> headers = readRequestHeaders(bufferedReader);
         final String requestBody =
             readRequestBody(bufferedReader, headers.get("Content-Length"));
-        final Map<String, String> target = parseTarget(requestLineTokens[1]);
+        final ParsedTarget target = parseTarget(requestLineTokens[1]);
 
-        return new RequestTarget(
+        return new Request(
             HttpMethod.valueOf(requestLineTokens[0]),
-            target.get("filePath"),
-            extractQueryParams(target.get("queryString")),
+            target.path(),
+            extractQueryParams(target.queryString()),
             headers,
             requestBody);
     }
 
-    private Map<String, String> parseTarget(String uri) {
+    private ParsedTarget parseTarget(final String uri) {
         final String queryDelimiter = "?";
-        String path = "";
-        String queryString = "";
-        if (!uri.contains(queryDelimiter)) {
-            path = uri;
-            queryString = "";
+        final int queryIndex = uri.indexOf(queryDelimiter);
+        if (queryIndex == -1) {
+            return new ParsedTarget(uri, "");
         }
-        if (uri.contains(queryDelimiter)) {
-            final int queryIndex = uri.indexOf(queryDelimiter);
-            path = uri.substring(0, queryIndex);
-            queryString = uri.substring(queryIndex + 1);
-        }
-        return Map.of(
-            "filePath", path,
-            "queryString", queryString);
+
+        return new ParsedTarget(uri.substring(0, queryIndex), uri.substring(queryIndex + 1));
     }
 
     private Map<String, String> readRequestHeaders(final BufferedReader bufferedReader)
@@ -152,25 +147,25 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer).trim();
     }
 
-    private Response dispatchRequest(final RequestTarget requestTarget,
+    private Response dispatchRequest(final Request request,
         final HttpCookie httpCookie) {
-        final Route route = Route.from(requestTarget);
-        if (!ALLOWED_PATHS.contains(requestTarget.path())) {
+        final Route route = Route.from(request);
+        if (!ALLOWED_PATHS.contains(request.path())) {
             return new Response(HttpStatus.NOT_FOUND, "/404.html");
         }
         if (routeHandlerMap.containsKey(route)) {
             return routeHandlerMap.get(route)
-                .apply(requestTarget, httpCookie);
+                .apply(request, httpCookie);
         }
 
-        return new Response(HttpStatus.OK, requestTarget.path());
+        return new Response(HttpStatus.OK, request.path());
     }
 
-    private Response handleIndex(final RequestTarget requestTarget, final HttpCookie httpCookie) {
+    private Response handleIndex(final Request request, final HttpCookie httpCookie) {
         return new Response(HttpStatus.OK, "/index.html");
     }
 
-    private Response handleGetLogin(final RequestTarget requestTarget,
+    private Response handleGetLogin(final Request request,
         final HttpCookie httpCookie) {
         final Session session = SessionManager.getInstance()
             .findSession(httpCookie.getValue("JSESSIONID"));
@@ -180,9 +175,9 @@ public class Http11Processor implements Runnable, Processor {
         return new Response(HttpStatus.OK, "/login.html");
     }
 
-    private Response handlePostLogin(final RequestTarget requestTarget,
+    private Response handlePostLogin(final Request request,
         final HttpCookie httpCookie) {
-        final LoginRequest loginRequest = parseLoginRequest(requestTarget.requestBody());
+        final LoginRequest loginRequest = parseLoginRequest(request.requestBody());
         final User user = InMemoryUserRepository.findByAccount(loginRequest.account())
             .orElseThrow();
         if (user.checkPassword(loginRequest.password())) {
@@ -207,14 +202,14 @@ public class Http11Processor implements Runnable, Processor {
             loginParams.get("password"));
     }
 
-    private Response handleGetRegister(final RequestTarget requestTarget,
+    private Response handleGetRegister(final Request request,
         final HttpCookie httpCookie) {
         return Response.ok("/register.html");
     }
 
-    private Response handlePostRegister(final RequestTarget requestTarget,
+    private Response handlePostRegister(final Request request,
         final HttpCookie httpCookie) {
-        final RegisterRequest registerRequest = parseRegisterRequest(requestTarget.requestBody());
+        final RegisterRequest registerRequest = parseRegisterRequest(request.requestBody());
         final User newUser =
             new User(registerRequest.account(), registerRequest.password(),
                 registerRequest.email());

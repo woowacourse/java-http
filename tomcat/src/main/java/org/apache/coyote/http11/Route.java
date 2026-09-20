@@ -5,7 +5,7 @@ public record Route(
     String path
 ) {
 
-    public static Route from(final RequestTarget requestTarget) {
-        return new Route(requestTarget.httpMethod(), requestTarget.path());
+    public static Route from(final Request request) {
+        return new Route(request.httpMethod(), request.path());
     }
 }

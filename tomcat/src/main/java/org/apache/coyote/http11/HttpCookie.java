@@ -8,17 +8,13 @@ public class HttpCookie {
 
     private final Map<String, String> cookieMap;
 
-    private HttpCookie() {
-        this.cookieMap = Map.of();
-    }
-
     private HttpCookie(final Map<String, String> cookieMap) {
         this.cookieMap = cookieMap;
     }
 
     public static HttpCookie from(final String rawCookies) {
         if (rawCookies == null || rawCookies.isEmpty()) {
-            return new HttpCookie();
+            return new HttpCookie(Map.of());
         }
         final Map<String, String> cookieMap = new LinkedHashMap<>();
         Arrays.stream(rawCookies.trim().split("; "))
@@ -26,10 +22,6 @@ public class HttpCookie {
             .forEach(cookiePair -> cookieMap.put(cookiePair[0], cookiePair[1]));
 
         return new HttpCookie(cookieMap);
-    }
-
-    public boolean containsJSessionId() {
-        return cookieMap.containsKey("JSESSIONID");
     }
 
     public String getValue(final String key) {

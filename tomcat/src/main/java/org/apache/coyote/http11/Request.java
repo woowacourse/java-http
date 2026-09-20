@@ -1,10 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-public class RequestTarget {
+public class Request {
 
     private final HttpMethod httpMethod;
     private final String path;
@@ -12,7 +11,7 @@ public class RequestTarget {
     private final Map<String, String> headers;
     private String requestBody;
 
-    public RequestTarget(final HttpMethod httpMethod, final String path,
+    public Request(final HttpMethod httpMethod, final String path,
         final Map<String, String> queryParams, final Map<String, String> headers,
         final String requestBody) {
         this.httpMethod = httpMethod;

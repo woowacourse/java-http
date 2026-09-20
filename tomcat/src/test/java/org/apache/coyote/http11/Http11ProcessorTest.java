@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -142,6 +143,41 @@ class Http11ProcessorTest {
         );
 
         assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    void logged_in_user_redirect_to_index_with_get() throws IOException {
+        // given
+        final Session session = new Session("logged-in-session-id");
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+        sessionManager.add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + session.getId(),
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = List.of(
+                "HTTP/1.1 302 FOUND",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 5564",
+                "\r\n",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+
+        assertThat(socket.output()).contains(expected);
+        sessionManager.remove(session);
     }
 
     @Test

@@ -216,7 +216,7 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(newUser);
         log.info("register: {}", newUser);
 
-        return Response.permanentRedirect("/index.html", "/index");
+        return Response.seeOther("/index.html", "/index");
     }
 
     private RegisterRequest parseRegisterRequest(final String requestBody) {

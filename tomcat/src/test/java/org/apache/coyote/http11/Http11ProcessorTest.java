@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -167,6 +168,20 @@ class Http11ProcessorTest {
         // then
         assertThat(response)
                 .contains("<form method=\"post\" action=\"login\">");
+    }
+
+    @Test
+    @DisplayName("회원가입을 완료하면 사용자를 저장하고 index.html로 리다이렉트한다")
+    void postRegister() {
+        // when
+        String response = process("POST", "/register", "account=roro&password=java&email=roro%40example.com");
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found\r\n")
+                .contains("Location: /index.html");
+        assertThat(InMemoryUserRepository.findByAccount("roro"))
+                .isPresent();
     }
 
     private String process(String path) {

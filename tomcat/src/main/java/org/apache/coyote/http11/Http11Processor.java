@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,12 @@ public class Http11Processor implements Runnable, Processor {
             if (isPostLogin(method, resourcePath)) {
                 String requestBody = readRequestBody(reader, headers);
                 writeLoginResponse(outputStream, requestBody);
+                return;
+            }
+
+            if (isPostRegister(method, resourcePath)) {
+                String requestBody = readRequestBody(reader, headers);
+                writeRegisterResponse(outputStream, requestBody);
                 return;
             }
 
@@ -144,6 +151,10 @@ public class Http11Processor implements Runnable, Processor {
         return method.equals("POST") && resourcePath.equals("/login.html");
     }
 
+    private boolean isPostRegister(String method, String resourcePath) {
+        return method.equals("POST") && resourcePath.equals("/register.html");
+    }
+
     private void writeLoginResponse(OutputStream outputStream, String requestBody) throws IOException {
         Map<String, String> params = parseQueryString(requestBody);
         String account = params.get("account");
@@ -163,6 +174,16 @@ public class Http11Processor implements Runnable, Processor {
                         },
                         () -> writeRedirectResponse(outputStream, "/401.html")
                 );
+    }
+
+    private void writeRegisterResponse(OutputStream outputStream, String requestBody) {
+        Map<String, String> params = parseQueryString(requestBody);
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        writeRedirectResponse(outputStream, "/index.html");
     }
 
     private void logUserIfExists(String resourcePath, String queryString) {

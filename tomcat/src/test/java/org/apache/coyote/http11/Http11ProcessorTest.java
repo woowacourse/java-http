@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -57,5 +58,91 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+    @Test
+    void 로그인에_성공하면_index_html로_리다이렉트한다() {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + requestBody.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
+    }
+
+    @Test
+    void 로그인에_실패하면_401_html로_리다이렉트한다() {
+        // given
+        final String requestBody = "account=gugu&password=wrong";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + requestBody.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /401.html");
+    }
+
+    @Test
+    void 회원가입에_성공하면_회원을_저장하고_index_html로_리다이렉트한다() {
+        // given
+        final String requestBody = "account=rudy&email=rudy@woowa.com&password=1234";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + requestBody.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: /index.html");
+        assertThat(InMemoryUserRepository.findByAccount("rudy")).isPresent();
+    }
+
+    @Test
+    void 회원가입_페이지를_응답한다() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK", new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 }

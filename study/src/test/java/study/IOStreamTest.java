@@ -4,10 +4,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
@@ -32,7 +46,8 @@ class IOStreamTest {
      * <code>public abstract void write(int b) throws IOException;</code>
      */
     @Nested
-    class OutputStream_학습_테스트 {
+    @DisplayName("OutputStream으로 바이트를 출력할 때")
+    class OutputStreamTests {
 
         /**
          * OutputStream은 다른 매체에 바이트로 데이터를 쓸 때 사용한다.
@@ -45,33 +60,39 @@ class IOStreamTest {
          * 1바이트 이상을 한 번에 전송 할 수 있어 훨씬 효율적이다.
          */
         @Test
-        void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
+        @DisplayName("바이트 배열을 출력할 수 있다")
+        void writesByteArrayToOutputStream() throws IOException {
+            // given
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
-            final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
+            final var outputStream = new ByteArrayOutputStream(bytes.length);
 
             /**
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            // when
+            try (outputStream) {
+                outputStream.write(bytes);
+            }
 
-            final String actual = outputStream.toString();
-
-            assertThat(actual).isEqualTo("nextstep");
-            outputStream.close();
+            // then
+            assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo("nextstep");
         }
 
         /**
          * 효율적인 전송을 위해 스트림에서 버퍼링을 사용 할 수 있다.
          * BufferedOutputStream 필터를 연결하면 버퍼링이 가능하다.
          * 
-         * 버퍼링을 사용하면 OutputStream을 사용할 때 flush를 사용하자.
-         * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
-         * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
-         * 데드락(deadlock) 상태가 되기 때문에 flush로 해제해야 한다.
+         * 버퍼에 남은 데이터를 하위 스트림으로 보내야 할 때 flush를 사용하자.
+         * 상대의 응답을 기다리기 전에 요청을 flush하지 않으면 서로 기다리는 상황이 생길 수 있다.
          */
         @Test
-        void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
-            final OutputStream outputStream = mock(BufferedOutputStream.class);
+        @DisplayName("flush하면 버퍼에 남은 데이터가 하위 스트림에 전달된다")
+        void flushesBufferedOutputStreamToDestination() throws IOException {
+            // given
+            final String text = "nextstep";
+            final var destination = new ByteArrayOutputStream();
+            final var outputStream = new BufferedOutputStream(destination, 16);
 
             /**
              * todo
@@ -79,8 +100,32 @@ class IOStreamTest {
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
 
-            verify(outputStream, atLeastOnce()).flush();
-            outputStream.close();
+            // when
+            try (outputStream) {
+                outputStream.write(text.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+
+                // then: close()의 자동 flush와 무관하게 명시적인 flush를 확인한다.
+                assertThat(destination.toString(StandardCharsets.UTF_8)).isEqualTo(text);
+            }
+        }
+
+        @Test
+        @DisplayName("flush가 실패해도 스트림을 닫는다")
+        void closesOutputStreamWhenFlushFails() throws IOException {
+            // given
+            final OutputStream outputStream = mock(BufferedOutputStream.class);
+            doThrow(new IOException("flush failed")).when(outputStream).flush();
+
+            // when
+            assertThatThrownBy(() -> {
+                try (outputStream) {
+                    outputStream.flush();
+                }
+            }).isInstanceOf(IOException.class);
+
+            // then
+            verify(outputStream).close();
         }
 
         /**
@@ -88,7 +133,9 @@ class IOStreamTest {
          * 장시간 스트림을 닫지 않으면 파일, 포트 등 다양한 리소스에서 누수(leak)가 발생한다.
          */
         @Test
-        void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
+        @DisplayName("사용을 마치면 스트림을 닫는다")
+        void closesOutputStreamWithTryWithResources() throws IOException {
+            // given
             final OutputStream outputStream = mock(OutputStream.class);
 
             /**
@@ -96,8 +143,12 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            // when
+            try (outputStream) {
+            }
 
-            verify(outputStream, atLeastOnce()).close();
+            // then
+            verify(outputStream).close();
         }
     }
 
@@ -112,7 +163,8 @@ class IOStreamTest {
      * InputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 읽기 위해 read() 메서드를 사용한다.
      */
     @Nested
-    class InputStream_학습_테스트 {
+    @DisplayName("InputStream에서 바이트를 읽을 때")
+    class InputStreamTests {
 
         /**
          * read() 메서드는 매체로부터 단일 바이트를 읽는데, 0부터 255 사이의 값을 int 타입으로 반환한다.
@@ -120,19 +172,41 @@ class IOStreamTest {
          * 그리고 Stream 끝에 도달하면 -1을 반환한다.
          */
         @Test
-        void InputStream은_데이터를_바이트로_읽는다() throws IOException {
-            byte[] bytes = {-16, -97, -92, -87};
+        @DisplayName("바이트를 UTF-8 문자열로 읽는다")
+        void decodesInputStreamBytesAsUtf8() throws IOException {
+            // given
+            final byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            // when
+            final String actual;
+            try (inputStream) {
+                actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
 
+            // then
             assertThat(actual).isEqualTo("🤩");
-            assertThat(inputStream.read()).isEqualTo(-1);
-            inputStream.close();
+        }
+
+        @Test
+        @DisplayName("모든 바이트를 읽은 뒤에는 -1을 반환한다")
+        void returnsMinusOneAfterInputStreamIsExhausted() throws IOException {
+            // given
+            final InputStream inputStream = new ByteArrayInputStream(new byte[]{42});
+            inputStream.read();
+
+            // when
+            final int actual;
+            try (inputStream) {
+                actual = inputStream.read();
+            }
+
+            // then
+            assertThat(actual).isEqualTo(-1);
         }
 
         /**
@@ -140,7 +214,9 @@ class IOStreamTest {
          * 장시간 스트림을 닫지 않으면 파일, 포트 등 다양한 리소스에서 누수(leak)가 발생한다.
          */
         @Test
-        void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
+        @DisplayName("사용을 마치면 스트림을 닫는다")
+        void closesInputStreamWithTryWithResources() throws IOException {
+            // given
             final InputStream inputStream = mock(InputStream.class);
 
             /**
@@ -148,8 +224,12 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            // when
+            try (inputStream) {
+            }
 
-            verify(inputStream, atLeastOnce()).close();
+            // then
+            verify(inputStream).close();
         }
     }
 
@@ -161,7 +241,8 @@ class IOStreamTest {
      * reader, writer는 UTF-8, ISO 8859-1 같은 형식으로 인코딩된 텍스트를 처리하는 데 사용된다.
      */
     @Nested
-    class FilterStream_학습_테스트 {
+    @DisplayName("FilterStream을 사용할 때")
+    class FilterStreamTests {
 
         /**
          * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.
@@ -169,15 +250,21 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        @DisplayName("BufferedInputStream으로 하위 스트림의 데이터를 읽는다")
+        void readsBytesThroughBufferedInputStream() throws IOException {
+            // given
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            // when
+            final byte[] actual;
+            try (bufferedInputStream) {
+                actual = bufferedInputStream.readAllBytes();
+            }
 
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            // then
+            assertThat(actual).isEqualTo(text.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -189,7 +276,8 @@ class IOStreamTest {
      * 그리고 InputStreamReader를 사용하면 지정된 인코딩에 따라 유니코드 문자로 변환할 수 있다.
      */
     @Nested
-    class InputStreamReader_학습_테스트 {
+    @DisplayName("InputStreamReader로 문자를 읽을 때")
+    class InputStreamReaderTests {
 
         /**
          * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다.
@@ -197,17 +285,27 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
-            final String emoji = String.join("\r\n",
-                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
-                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
-                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
-                    "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+        @DisplayName("BufferedReader로 문자열을 줄 단위로 읽는다")
+        void readsLinesThroughBufferedReader() throws IOException {
+            // given
+            final String firstLine = "😀😃😄";
+            final String secondLine = "😁😆😅";
+            final String text = firstLine + "\r\n" + secondLine + "\r\n";
+            final InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final StringBuilder actual = new StringBuilder();
+            // when
+            final List<String> actual = new ArrayList<>();
+            try (bufferedReader) {
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    actual.add(line);
+                }
+            }
 
-            assertThat(actual).hasToString(emoji);
+            // then
+            assertThat(actual).containsExactly(firstLine, secondLine);
         }
     }
 }

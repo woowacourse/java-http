@@ -74,19 +74,50 @@ public class Http11Processor implements Runnable, Processor {
             String path = findPath(uri, index);
             Map<String, String> queryParams = findQueryString(uri, index);
 
+            HttpStatus httpStatus = HttpStatus.OK;
+
+            if (uri.contains("login")) {
+                httpStatus = findUser(queryParams);
+            }
+
+            if (httpStatus == HttpStatus.FOUND) {
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
+                        "Location: /index.html ",
+                        "Content-Length: 0 ",
+                        "",
+                        "");
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                return;
+            }
+
+            if (httpStatus == HttpStatus.UNAUTHORIZED) {
+                final Path filePath = getPath("static/401.html");
+                final String responseBody = findResponseBody(filePath);
+
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
+                        "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                return;
+            }
+
             final Path filePath = getPath(path);
             final String responseBody = findResponseBody(filePath);
 
             final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: "+ findContentType(filePath) + ";charset=utf-8 ",
+                    "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
+                    "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-
-            if (uri.contains("login")) {
-                loggingUser(queryParams);
-            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -164,32 +195,35 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(filePath);
     }
 
-    private void loggingUser(Map<String, String> queryParams) {
+    private HttpStatus findUser(Map<String, String> queryParams) {
         if (queryParams.isEmpty()) {
-            return;
+            return HttpStatus.OK;
         }
 
         final String account = queryParams.get("account");
         if (account == null || account.isBlank()) {
             log.info("아이디는 필수값입니다.");
-            return;
+            return HttpStatus.UNAUTHORIZED;
         }
 
         final String password = queryParams.get("password");
         if (password == null || password.isBlank()) {
             log.info("비밀번호는 필수값입니다.");
-            return;
+            return HttpStatus.UNAUTHORIZED;
         }
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            return;
+            return HttpStatus.UNAUTHORIZED;
         }
 
         User foundUser = user.get();
         if (checkPassword(queryParams, foundUser)) {
             log.info("user: {}", foundUser);
+            return HttpStatus.FOUND;
         }
+
+        return HttpStatus.UNAUTHORIZED;
     }
 
     private boolean checkPassword(Map<String, String> queryParams, User user) {
@@ -199,5 +233,24 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return true;
+    }
+
+    public enum HttpStatus {
+
+        OK(200, "OK"),
+        FOUND(302, "Found"),
+        UNAUTHORIZED(401, "Unauthorized");
+
+        int value;
+        String message;
+
+        HttpStatus(int value, String message) {
+            this.value = value;
+            this.message = message;
+        }
+
+        public String getHttpStatus() {
+            return this.value + " " + this.message;
+        }
     }
 }

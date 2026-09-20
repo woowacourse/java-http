@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
+
+import org.apache.coyote.http11.InvalidRequestException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 public class RequestHeaders {
     private static final String HEADER_DELIMITER = ":";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
     private static final int NOT_FOUND = -1;
 
     private final Map<String, String> headers;
@@ -48,5 +51,9 @@ public class RequestHeaders {
         } catch (NumberFormatException e) {
             throw new InvalidRequestException("Content-Length가 숫자가 아닙니다.");
         }
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.from(headers.getOrDefault(COOKIE, ""));
     }
 }

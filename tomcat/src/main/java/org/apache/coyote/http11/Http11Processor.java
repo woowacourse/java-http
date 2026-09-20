@@ -34,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
         "/css/styles.css",
         "/js/scripts.js");
 
-    private final Map<Route, BiFunction<Request, HttpCookie, Response>> routeHandlerMap = Map.of(
+    private final Map<Route, BiFunction<Request, SessionContext, Response>> routeHandlerMap = Map.of(
         new Route(HttpMethod.GET, "/index"), this::handleIndex,
         new Route(HttpMethod.GET, "/login"), this::handleGetLogin,
         new Route(HttpMethod.POST, "/login"), this::handlePostLogin,
@@ -60,21 +60,38 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
             final Request request = readRequest(bufferedReader);
             final HttpCookie httpCookie = HttpCookie.from(request.headerValue("Cookie"));
+            final SessionContext sessionContext = getOrCreateSession(httpCookie);
 
-            Response response = dispatchRequest(request, httpCookie);
-            completeResponse(response);
-            createSessionIfAbsent(httpCookie, response);
+            Response response = dispatchRequest(request, sessionContext);
+            completeResponse(response, sessionContext);
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void completeResponse(final Response response) throws IOException {
+    private SessionContext getOrCreateSession(final HttpCookie httpCookie) {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final String jSessionId = httpCookie.getValue("JSESSIONID");
+        if (sessionManager.findSession(jSessionId) != null) {
+            return SessionContext.notCreated(sessionManager.findSession(jSessionId));
+        }
+
+        final UUID uuid = UUID.randomUUID();
+        final Session newSession = new Session(uuid.toString());
+        sessionManager.add(newSession);
+
+        return SessionContext.created(newSession);
+    }
+
+    private void completeResponse(final Response response, final SessionContext sessionContext) throws IOException {
         response.addBody(readStaticResource(response.filePath()));
         response.addHeader("Content-Type", getContentType(response.filePath()) + ";charset=utf-8");
         response.addHeader("Content-Length", String.valueOf(response.body()
             .getBytes().length));
+        if (sessionContext.created()) {
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionContext.session().id());
+        }
 
     }
 
@@ -84,15 +101,6 @@ public class Http11Processor implements Runnable, Processor {
 
         outputStream.write(message.getBytes());
         outputStream.flush();
-    }
-
-    private void createSessionIfAbsent(final HttpCookie httpCookie, final Response response) {
-        if (httpCookie.getValue("JSESSIONID") == null) {
-            final UUID uuid = UUID.randomUUID();
-            SessionManager.getInstance()
-                .add(new Session(uuid.toString()));
-            response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
-        }
     }
 
     private Request readRequest(final BufferedReader bufferedReader) throws IOException {
@@ -145,12 +153,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer).trim();
     }
 
-    private Response dispatchRequest(final Request request,
-        final HttpCookie httpCookie) {
+    private Response dispatchRequest(final Request request, final SessionContext sessionContext) {
         final Route route = Route.from(request);
         if (routeHandlerMap.containsKey(route)) {
             return routeHandlerMap.get(route)
-                .apply(request, httpCookie);
+                .apply(request, sessionContext);
         }
         if (request.httpMethod() == HttpMethod.GET
             && STATIC_RESOURCE_PATHS.contains(request.path())) {
@@ -160,31 +167,27 @@ public class Http11Processor implements Runnable, Processor {
         return Response.notFound();
     }
 
-    private Response handleIndex(final Request request, final HttpCookie httpCookie) {
+    private Response handleIndex(final Request request, final SessionContext sessionContext) {
         return new Response(HttpStatus.OK, "/index.html");
     }
 
-    private Response handleGetLogin(final Request request,
-        final HttpCookie httpCookie) {
-        final Session session = SessionManager.getInstance()
-            .findSession(httpCookie.getValue("JSESSIONID"));
-        if (session.hasAttribute("user")) {
+    private Response handleGetLogin(final Request request, final SessionContext sessionContext) {
+        final Session session = sessionContext.session();
+        if (session != null && session.hasAttribute("user")) {
             return Response.found("/index.html", "/index");
         }
         return new Response(HttpStatus.OK, "/login.html");
     }
 
-    private Response handlePostLogin(final Request request,
-        final HttpCookie httpCookie) {
+    private Response handlePostLogin(final Request request, final SessionContext sessionContext) {
         final LoginRequest loginRequest = parseLoginRequest(request.requestBody());
+        final Session session = sessionContext.session();
         final User user = InMemoryUserRepository.findByAccount(loginRequest.account())
             .orElseThrow();
         if (user.checkPassword(loginRequest.password())) {
             log.info("user: {}", user);
-            final Session session = SessionManager.getInstance()
-                .findSession(httpCookie.getValue("JSESSIONID"));
             session.addAttribute("user", user);
-            return Response.permanentRedirect("/index.html", "/index.html");
+            return Response.seeOther("/index.html", "/index.html");
         }
 
         return Response.unauthorized();
@@ -201,13 +204,11 @@ public class Http11Processor implements Runnable, Processor {
             loginParams.get("password"));
     }
 
-    private Response handleGetRegister(final Request request,
-        final HttpCookie httpCookie) {
+    private Response handleGetRegister(final Request request, final SessionContext sessionContext) {
         return Response.ok("/register.html");
     }
 
-    private Response handlePostRegister(final Request request,
-        final HttpCookie httpCookie) {
+    private Response handlePostRegister(final Request request, final SessionContext sessionContext) {
         final RegisterRequest registerRequest = parseRegisterRequest(request.requestBody());
         final User newUser =
             new User(registerRequest.account(), registerRequest.password(),
@@ -215,7 +216,7 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(newUser);
         log.info("register: {}", newUser);
 
-        return Response.permanentRedirect("/index.html", "/index.html");
+        return Response.permanentRedirect("/index.html", "/index");
     }
 
     private RegisterRequest parseRegisterRequest(final String requestBody) {

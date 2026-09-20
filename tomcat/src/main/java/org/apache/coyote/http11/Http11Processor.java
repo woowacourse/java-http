@@ -53,9 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
             readHeaders(reader);
 
-            String resourcePath = handleRequest(uri);
-
-            writeResponse(outputStream, resourcePath);
+            handleRequest(uri, outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -77,30 +75,46 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(URI uri) {
+    private void handleRequest(URI uri, OutputStream outputStream) throws IOException {
         String path = uri.getPath();
 
         if ("/".equals(path)) {
-            return "static/index.html";
+            writeResponse(outputStream, "static/index.html");
+            return;
         }
 
         if ("/login".equals(path)) {
-            String query = uri.getRawQuery();
-            Map<String, String> params = parseQuery(query);
-
-            String account = params.get("account");
-            String password = params.get("password");
-
-            if (account != null && password != null) {
-                InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.checkPassword(password))
-                        .ifPresent(user -> log.info("user : {}", user));
+            if (uri.getRawQuery() == null) {
+                writeResponse(outputStream, "static/login.html");
+                return;
             }
 
-            return "static/login.html";
+            if (handleLogin(uri)) {
+                writeRedirectResponse(outputStream, "/index.html");
+                return;
+            }
+
+            writeRedirectResponse(outputStream, "/401.html");
+            return;
         }
 
-        return "static" + path;
+        writeResponse(outputStream, "static" + path);
+    }
+
+    private boolean handleLogin(URI uri) {
+        String query = uri.getRawQuery();
+        Map<String, String> params = parseQuery(query);
+
+        String account = params.get("account");
+        String password = params.get("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
     }
 
     private Map<String, String> parseQuery(String query) {
@@ -142,5 +156,18 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(responseBody);
             outputStream.flush();
         }
+    }
+
+    private void writeRedirectResponse(OutputStream outputStream, String location) throws IOException {
+        String responseHeaders = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+
+        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

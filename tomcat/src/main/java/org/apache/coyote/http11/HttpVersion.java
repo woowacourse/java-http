@@ -1,0 +1,24 @@
+package org.apache.coyote.http11;
+
+public enum HttpVersion {
+    HTTP_1_1("HTTP/1.1");
+
+    private final String value;
+
+    HttpVersion(String value) {
+        this.value = value;
+    }
+
+    public static HttpVersion getByString(String target) {
+        for (HttpVersion httpVersion : HttpVersion.values()) {
+            if (httpVersion.value.equals(target)) {
+                return httpVersion;
+            }
+        }
+        throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
+    }
+
+    public String getValue() {
+        return value;
+    }
+}

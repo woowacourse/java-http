@@ -60,7 +60,7 @@ class RegisterControllerTest {
         final String response = post("account=blank&email=&password=secret");
 
         // then
-        assertRegisterPage(response);
+        assertBadRequestRegisterPage(response);
         assertThat(InMemoryUserRepository.findByAccount("blank")).isEmpty();
     }
 
@@ -70,7 +70,7 @@ class RegisterControllerTest {
         final String response = post("account=whitespace&email=+++&password=secret");
 
         // then
-        assertRegisterPage(response);
+        assertBadRequestRegisterPage(response);
         assertThat(InMemoryUserRepository.findByAccount("whitespace")).isEmpty();
     }
 
@@ -80,7 +80,7 @@ class RegisterControllerTest {
         final String response = post("account=missing&password=secret");
 
         // then
-        assertRegisterPage(response);
+        assertBadRequestRegisterPage(response);
         assertThat(InMemoryUserRepository.findByAccount("missing")).isEmpty();
     }
 
@@ -90,7 +90,7 @@ class RegisterControllerTest {
         final String response = post("");
 
         // then
-        assertRegisterPage(response);
+        assertBadRequestRegisterPage(response);
     }
 
     @Test
@@ -99,7 +99,7 @@ class RegisterControllerTest {
         final String response = post("account=gugu&email=other%40woowahan.com&password=changed");
 
         // then
-        assertRegisterPage(response);
+        assertConflictRegisterPage(response);
         assertThat(response).doesNotContain("Set-Cookie");
         final User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
         assertThat(gugu.checkPassword("password")).isTrue();
@@ -111,9 +111,17 @@ class RegisterControllerTest {
         return toString(registerController.run(request));
     }
 
-    private void assertRegisterPage(String response) throws IOException {
+    private void assertBadRequestRegisterPage(String response) throws IOException {
+        assertRegisterPage(response, "400 Bad Request");
+    }
+
+    private void assertConflictRegisterPage(String response) throws IOException {
+        assertRegisterPage(response, "409 Conflict");
+    }
+
+    private void assertRegisterPage(String response, String status) throws IOException {
         assertThat(response)
-                .startsWith("HTTP/1.1 200 OK ")
+                .startsWith("HTTP/1.1 " + status + " ")
                 .endsWith(readResource("static/register.html"));
     }
 

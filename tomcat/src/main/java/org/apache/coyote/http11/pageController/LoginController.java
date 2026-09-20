@@ -35,7 +35,7 @@ public class LoginController extends AbstractController {
         String password = httpRequest.getBodyParams("password");
 
         if (isBlank(account) || isBlank(password)) {
-            return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));
+            return HttpResponse.of(HttpStatus.BAD_REQUEST, staticResourceLoader.load(LOGIN_PAGE));
         }
 
         Optional<User> loginUser = findLoginUser(account, password);

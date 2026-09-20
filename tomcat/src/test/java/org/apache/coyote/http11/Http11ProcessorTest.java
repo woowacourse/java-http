@@ -180,7 +180,7 @@ class Http11ProcessorTest {
 
         // then
         final String expected = expectedResponse(
-                "200 OK", "text/html", readResource("static/login.html"), issuedSessionId(result.response()));
+                "400 Bad Request", "text/html", readResource("static/login.html"), issuedSessionId(result.response()));
         assertThat(result.response()).isEqualTo(expected);
     }
 

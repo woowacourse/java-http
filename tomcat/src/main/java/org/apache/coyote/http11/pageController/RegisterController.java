@@ -29,8 +29,12 @@ public class RegisterController extends AbstractController {
         String email = httpRequest.getBodyParams("email");
         String password = httpRequest.getBodyParams("password");
 
-        if (isInvalidInput(account, email, password) || isDuplicated(account)) {
-            return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(REGISTER_PAGE));
+        if (isInvalidInput(account, email, password)) {
+            return HttpResponse.of(HttpStatus.BAD_REQUEST, staticResourceLoader.load(REGISTER_PAGE));
+        }
+
+        if (isDuplicated(account)) {
+            return HttpResponse.of(HttpStatus.CONFLICT, staticResourceLoader.load(REGISTER_PAGE));
         }
 
         User user = new User(account, password, email);

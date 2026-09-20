@@ -101,7 +101,7 @@ class LoginControllerTest {
         final String response = post("account=&password=");
 
         // then
-        assertLoginPage(response);
+        assertBadRequestLoginPage(response);
     }
 
     @Test
@@ -110,7 +110,7 @@ class LoginControllerTest {
         final String response = post("account=+++&password=+++");
 
         // then
-        assertLoginPage(response);
+        assertBadRequestLoginPage(response);
     }
 
     @Test
@@ -119,7 +119,7 @@ class LoginControllerTest {
         final String response = post("account=gugu");
 
         // then
-        assertLoginPage(response);
+        assertBadRequestLoginPage(response);
     }
 
     @Test
@@ -128,7 +128,7 @@ class LoginControllerTest {
         final String response = post("");
 
         // then
-        assertLoginPage(response);
+        assertBadRequestLoginPage(response);
     }
 
     private String get(String requestLine) throws IOException {
@@ -144,8 +144,16 @@ class LoginControllerTest {
     }
 
     private void assertLoginPage(String response) throws IOException {
+        assertLoginPage(response, "200 OK");
+    }
+
+    private void assertBadRequestLoginPage(String response) throws IOException {
+        assertLoginPage(response, "400 Bad Request");
+    }
+
+    private void assertLoginPage(String response, String status) throws IOException {
         assertThat(response)
-                .startsWith("HTTP/1.1 200 OK ")
+                .startsWith("HTTP/1.1 " + status + " ")
                 .endsWith(readResource("static/login.html"));
     }
 

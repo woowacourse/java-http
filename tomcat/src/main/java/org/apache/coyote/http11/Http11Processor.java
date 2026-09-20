@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,8 +47,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
     private static final String LOCATION = "Location";
     private static final String STATIC = "static";
-    private static final String COOKIE = "Set-Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
 
     private final Socket connection;
 
@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> headers = readHeaders(bufferedReader);
             String requestBody = readBody(bufferedReader, headers);
             String[] requestLines = requestLine.split(" ");
-            handle(outputStream, requestLines[0], requestLines[1], requestBody, headers.get(CONTENT_TYPE));
+            handle(outputStream, requestLines[0], requestLines[1], requestBody, headers.get(CONTENT_TYPE), headers.get(COOKIE));
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -105,11 +105,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, count);
     }
 
-    private void handle(final OutputStream outputStream, final String method, String path, String body, String contentType) throws IOException, URISyntaxException {
+    private void handle(final OutputStream outputStream, final String method, String path, String body, String contentType, String cookies) throws IOException, URISyntaxException {
         if ("/".equals(path)) {
             writeResponse(outputStream, HTTP_STATUS_OK, CONTENT_TYPE_TEXT_HTML, "Hello world!");
         } else if ("/login".equals(path)) {
-            login(outputStream, method, body, contentType);
+            login(outputStream, method, body, contentType, cookies);
         } else if ("/register".equals(path)) {
             register(outputStream, method, body);
         } else {
@@ -117,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(final OutputStream outputStream, final String method, String body, String contentType) throws IOException, URISyntaxException {
+    private void login(final OutputStream outputStream, final String method, String body, String contentType, String cookies) throws IOException, URISyntaxException {
         if (METHOD_GET.equals(method)) {
             writeStaticFile(outputStream, PATH_LOGIN_HTML);
         } else if (METHOD_POST.equals(method)) {
@@ -137,7 +137,8 @@ public class Http11Processor implements Runnable, Processor {
                     throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
                 }
                 log.info(user.toString());
-                String cookie = UUID.randomUUID().toString();
+                MyHttpCookie httpCookie = new MyHttpCookie(cookies);
+                String cookie = httpCookie.getOrCreateJSessionId();
                 cookieResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML, cookie);
             } catch (IllegalArgumentException exception) {
                 redirectResponse(outputStream, HTTP_STATUS_FOUND, contentTypeOf(CONTENT_TYPE_TEXT_HTML), "", PATH_401_HTML);
@@ -225,7 +226,7 @@ public class Http11Processor implements Runnable, Processor {
     private void cookieResponse(final OutputStream outputStream, final String status, final String contentType, final String responseBody, final String locationUrl, final String cookie) throws IOException {
         final var response = String.join("\r\n",
                 HTTP_VERSION_1_1 + " " + status + " ",
-                COOKIE + ": " + JSESSIONID + "=" + cookie + " ",
+                SET_COOKIE + ": " + JSESSIONID + "=" + cookie + " ",
                 CONTENT_TYPE + ": " + contentType + SEMI_COLON + " " + CHARSET_UTF_8,
                 CONTENT_LENGTH + ": " + responseBody.getBytes().length + " ",
                 LOCATION + ": " + locationUrl + " ",

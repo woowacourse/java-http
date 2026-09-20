@@ -108,23 +108,22 @@ public class Http11Processor implements Runnable, Processor {
                         final User user = loginUser.get();
                         log.info("로그인 성공! 아이디 : {}", user.getAccount());
 
-                        // 로그인 성공 시 JSESSIONID가 없었다면 새로 만들어 헤더에 포함시킨다.
-                        if (httpCookie.get(JSESSIONID) == null) {
-                            final Session session = new Session(UUID.randomUUID().toString());
-                            session.setAttribute(USER, user);
-
-                            SessionManager.getInstance().add(session);
-
-                            final String response = createResponseWithCookieAndRedirect("/index.html",
-                                    new Cookie(JSESSIONID, session.getId()));
-
-                            outputStream.write(response.getBytes());
-                            outputStream.flush();
-                            return;
+                        if (httpCookie.get(JSESSIONID) != null) {
+                            // 기존에 세션이 존재한다면, 세션을 삭제한다.
+                            HttpSession existedSession = SessionManager.getInstance()
+                                    .findSession(httpCookie.get(JSESSIONID));
+                            if (existedSession != null) {
+                                SessionManager.getInstance().remove(existedSession);
+                            }
                         }
 
-                        // JSESSIONID가 있었다면 index.html로 리다이렉트한다.
-                        final String response = createRedirectResponse("/index.html");
+                        final Session session = new Session(UUID.randomUUID().toString());
+                        session.setAttribute(USER, user);
+
+                        SessionManager.getInstance().add(session);
+
+                        final String response = createResponseWithCookieAndRedirect("/index.html",
+                                new Cookie(JSESSIONID, session.getId()));
 
                         outputStream.write(response.getBytes());
                         outputStream.flush();
@@ -133,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
 
                     // 로그인에 실패했다면 401 페이지로 리다이렉트한다.
                     final String response = createRedirectResponse("/401.html");
-                    
+
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;

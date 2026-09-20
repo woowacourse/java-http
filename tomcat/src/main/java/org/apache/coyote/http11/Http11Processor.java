@@ -26,10 +26,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE = "/login.html";
+    private static final String INDEX_PATH = "index";
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
 
     private static final String STATUS_OK = "200 OK";
+    private static final String STATUS_FOUND = "302 Found";
     private static final String STATUS_BAD_REQUEST = "400 Bad Request";
+    private static final String STATUS_UNAUTHORIZED = "401 Unauthorized";
     private static final String STATUS_NOT_FOUND = "404 Not Found";
 
     private static final String ACCOUNT = "account";
@@ -92,7 +97,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (LOGIN_PATH.equals(path)) {
-            logLoginUser(requestLine);
+            if (requestLine.hasQueryParameters()) {
+                String location = logLoginUser(requestLine);
+                writeRedirect(outputStream, location);
+                return;
+            }
+
             writeStaticFile(outputStream, LOGIN_PAGE);
             return;
         }
@@ -107,19 +117,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logLoginUser(final RequestLine requestLine) {
+    private String logLoginUser(final RequestLine requestLine) {
         final Optional<String> account = requestLine.getQueryParameter(ACCOUNT);
         final Optional<String> password = requestLine.getQueryParameter(PASSWORD);
         if (account.isEmpty() || password.isEmpty()) {
             log.info("login parameters are missing");
-            return;
+            return UNAUTHORIZED_PAGE;
         }
-        InMemoryUserRepository.findByAccount(account.get())
+        return InMemoryUserRepository.findByAccount(account.get())
                 .filter(user -> user.checkPassword(password.get()))
-                .ifPresentOrElse(
-                        user -> log.info("user: {}", user),
-                        () -> log.info("login failed. account: {}", account.get())
-                );
+                .map(user -> {
+                    log.info("user: {}", user);
+                    return INDEX_PAGE;
+                })
+                .orElseGet(() -> {
+                    log.info("login failed. account: {}", account.get());
+                    return UNAUTHORIZED_PAGE;
+                });
     }
 
     private void writeStaticFile(final OutputStream outputStream, final String filePath)
@@ -152,6 +166,22 @@ public class Http11Processor implements Runnable, Processor {
             return Files.readAllBytes(notFoundPage.get());
         }
         return "Not Found".getBytes(StandardCharsets.UTF_8);
+    }
+
+    private void writeRedirect(
+            final OutputStream outputStream,
+            final String location
+    ) throws IOException {
+        log.info("location: {}", location);
+
+        final String header = String.join("\r\n",
+                "HTTP/1.1 " + STATUS_FOUND + " ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+        outputStream.write(header.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private void writeResponse(

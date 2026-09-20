@@ -44,6 +44,10 @@ public class RequestLine {
         return requestUri.getPath();
     }
 
+    public boolean hasQueryParameters() {
+        return requestUri.hasQueryParameters();
+    }
+
     public Optional<String> getQueryParameter(final String name) {
         return requestUri.getQueryParameter(name);
     }

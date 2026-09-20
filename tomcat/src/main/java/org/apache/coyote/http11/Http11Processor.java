@@ -24,14 +24,16 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final List<String> ALLOWED_PATHS = List.of(
-        "/", "/index.html", "/index", "/login.html", "/login", "/register", "/401.html",
-        "/assets/chart-area.js", "/assets/chart-bar.js", "/assets/chart-pie.js",
+    private static final List<String> STATIC_RESOURCE_PATHS = List.of(
+        "/",
+        "/401.html",
+        "/assets/chart-area.js",
+        "/assets/chart-bar.js",
+        "/assets/chart-pie.js",
         "/css/styles.css",
         "/js/scripts.js");
 
     private final Map<Route, BiFunction<Request, HttpCookie, Response>> routeHandlerMap = Map.of(
-        new Route(HttpMethod.GET, "/index.html"), this::handleIndex,
         new Route(HttpMethod.GET, "/index"), this::handleIndex,
         new Route(HttpMethod.GET, "/login"), this::handleGetLogin,
         new Route(HttpMethod.POST, "/login"), this::handlePostLogin,
@@ -150,15 +152,16 @@ public class Http11Processor implements Runnable, Processor {
     private Response dispatchRequest(final Request request,
         final HttpCookie httpCookie) {
         final Route route = Route.from(request);
-        if (!ALLOWED_PATHS.contains(request.path())) {
-            return new Response(HttpStatus.NOT_FOUND, "/404.html");
-        }
         if (routeHandlerMap.containsKey(route)) {
             return routeHandlerMap.get(route)
                 .apply(request, httpCookie);
         }
+        if (request.httpMethod() == HttpMethod.GET
+            && STATIC_RESOURCE_PATHS.contains(request.path())) {
+            return Response.ok(request.path());
+        }
 
-        return new Response(HttpStatus.OK, request.path());
+        return Response.notFound();
     }
 
     private Response handleIndex(final Request request, final HttpCookie httpCookie) {

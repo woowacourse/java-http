@@ -42,6 +42,13 @@ public class Response {
         return response;
     }
 
+    public static Response notFound() {
+        final Response response = new Response(HttpStatus.NOT_FOUND, "/404.html");
+        response.addHeader("Location", "/404.html");
+
+        return response;
+    }
+
     public void addHeader(final String key, final String value) {
         headers.put(key, value);
     }

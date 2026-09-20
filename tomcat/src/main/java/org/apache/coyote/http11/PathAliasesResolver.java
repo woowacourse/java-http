@@ -13,4 +13,6 @@ public final class PathAliasesResolver {
     public static String normalize(final String path) {
         return PATH_ALIASES.getOrDefault(path, path);
     }
+
+    private PathAliasesResolver() {}
 }

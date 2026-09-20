@@ -8,7 +8,18 @@ public class HttpPath {
         this.path = path;
     }
 
+    @Override
+    public String toString() {
+        return "HttpPath{" +
+                "path='" + path + '\'' +
+                '}';
+    }
+
     public String getPath() {
         return path;
+    }
+
+    public boolean startsWith(String path) {
+        return this.path.startsWith(path);
     }
 }

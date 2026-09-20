@@ -56,22 +56,19 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            // Parse StartLine
-
-            HttpRequest httpRequest = new HttpRequest(bufferedReader.readLine());
-            String httpUrl = httpRequest.getRequestLine().getHttpPath().toString();
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            HttpPath httpUrl = httpRequest.getRequestLine().getHttpPath();
             HttpMethod httpMethod = httpRequest.getRequestLine().getHttpMethod();
 
-            // Parse Headers
-            final Map<String, String> headers = parseHeaders(bufferedReader);
-
-            // Prase Body
-            final String httpBody = parseBody(bufferedReader, headers.get(CONTENT_LENGTH));
+            HttpHeaders httpHeaders = httpRequest.getHttpHeaders();
+            String httpBody = httpRequest.getHttpBody().getValue();
 
             // Parse Cookie
-            final HttpCookie httpCookie = new HttpCookie(headers.get(COOKIE));
+            final HttpCookie httpCookie = new HttpCookie(httpHeaders.getHeaders().get(COOKIE));
 
+            log.info("{}, {}", httpUrl, httpMethod);
             if (httpUrl.startsWith("/login") && httpMethod == HttpMethod.GET) {
+                log.info("로그인 페이지 접속");
                 // 세션이 유효하면 index.html로 리다이렉트한다.
                 if (httpCookie.get(JSESSIONID) != null) {
                     final HttpSession session = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
@@ -234,47 +231,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
-        final HashMap<String, String> headers = new HashMap<>();
-
-        String line;
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
-            // 가장 왼쪽의 콜론을 기준으로 파싱한다.
-            final int firstColonIndex = line.indexOf(':');
-            if (firstColonIndex == -1) {
-                throw new IllegalArgumentException("헤더 포맷이 잘못되었습니다.");
-            }
-
-            final String key = line.substring(0, firstColonIndex).strip();
-            final String value = line.substring(firstColonIndex + 1).strip();
-            headers.put(key, value);
-        }
-        return headers;
-    }
-
-    private String parseBody(BufferedReader bufferedReader, String contentLengthString) throws IOException {
-        if (contentLengthString == null) {
-            return "";
-        }
-        final int contentLength = Integer.parseInt(contentLengthString);
-
-        if (contentLength > 0) {
-            final char[] buffer = new char[contentLength];
-            int totalRead = 0;
-
-            while (totalRead < contentLength) {
-                final int read = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
-                if (read == -1) {
-                    throw new IOException("Content-Length와 Body 길이가 일치하지 않습니다.");
-                }
-                totalRead += read;
-            }
-
-            return new String(buffer);
-        }
-        return "";
     }
 
     private String readFile(String path) throws IOException {

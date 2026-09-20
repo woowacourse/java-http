@@ -2,8 +2,7 @@ package org.apache.coyote.http11;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.pageController.PageController;
-import org.apache.coyote.http11.pageController.PageControllerMapper;
+import org.apache.coyote.http11.pageController.RequestDispatcher;
 import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
@@ -29,17 +28,20 @@ import java.util.Set;
 public class Http11Processor implements Runnable, Processor {
     private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET, HttpMethod.POST);
 
-    private static final String SERVER_ERROR_PAGE = "/500.html";
-    private static final StaticResourceLoader STATIC_RESOURCE_LOADER = new StaticResourceLoader();
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
     private final SessionManager sessionManager;
+    private final RequestDispatcher requestDispatcher;
 
-    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
+    public Http11Processor(
+            final Socket connection,
+            final SessionManager sessionManager,
+            final RequestDispatcher requestDispatcher
+    ) {
         this.connection = connection;
         this.sessionManager = sessionManager;
+        this.requestDispatcher = requestDispatcher;
     }
 
     @Override
@@ -52,23 +54,27 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
             final var outputStream = connection.getOutputStream()) {
+            HttpResponse response = createResponse(inputStream);
 
-            try {
-                HttpRequest request = getRequestTarget(inputStream);
-                PageController controller = PageControllerMapper.getPageController(request.getHttpPath());
-
-                HttpResponse response = handle(request, controller);
-                issueSessionCookie(request, response);
-
-                writeResponse(outputStream, response);
-            } catch (BadRequestException e) {
-                writeResponse(outputStream, badRequest(e));
-            }
+            writeResponse(outputStream, response);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
-    
+
+    private HttpResponse createResponse(InputStream inputStream) throws IOException {
+        try {
+            HttpRequest request = getRequestTarget(inputStream);
+
+            HttpResponse response = requestDispatcher.dispatch(request);
+            issueSessionCookie(request, response);
+
+            return response;
+        } catch (BadRequestException e) {
+            return badRequest(e);
+        }
+    }
+
     private void issueSessionCookie(HttpRequest request, HttpResponse response) {
         if (request.getSession(false) != null) {
             return;
@@ -78,29 +84,9 @@ public class Http11Processor implements Runnable, Processor {
         response.addCookie(HttpCookie.JSESSIONID, session.getId());
     }
 
-    HttpResponse handle(HttpRequest request, PageController controller) {
-        try {
-            return controller.run(request);
-        } catch (BadRequestException e) {
-            return badRequest(e);
-        } catch (IOException | RuntimeException e) {
-            log.error(e.getMessage(), e);
-            return internalServerError();
-        }
-    }
-
     private HttpResponse badRequest(BadRequestException e) {
         log.warn(e.getMessage());
         return HttpResponse.of(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
-    }
-
-    private HttpResponse internalServerError() {
-        try {
-            return HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, STATIC_RESOURCE_LOADER.load(SERVER_ERROR_PAGE));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "text/plain", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-        }
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {

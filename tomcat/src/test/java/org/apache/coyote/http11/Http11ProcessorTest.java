@@ -5,11 +5,11 @@ import ch.qos.logback.core.read.ListAppender;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.pageController.LoginController;
+import org.apache.coyote.http11.pageController.RequestDispatcher;
 import org.apache.coyote.http11.pageController.PageController;
 import org.apache.coyote.http11.request.HttpBody;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import support.StubSocket;
@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +35,7 @@ class Http11ProcessorTest {
             Pattern.compile("Set-Cookie: JSESSIONID=(" + SESSION_ID_FORMAT + ") ");
 
     private final SessionManager sessionManager = new SessionManager();
+    private final RequestDispatcher requestDispatcher = new RequestDispatcher();
 
     @Test
     void process() {
@@ -365,62 +367,6 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void internalServerErrorWhenControllerThrowsIOException() throws IOException {
-        // given
-        final Http11Processor processor = processor(new StubSocket());
-        final PageController controller = request -> {
-            throw new IOException("파일을 읽을 수 없습니다.");
-        };
-
-        // when
-        final HttpResponse response = processor.handle(indexRequest(), controller);
-
-        // then
-        final String expected = expectedResponse("500 Internal Server Error", "text/html", readResource("static/500.html"));
-        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
-    }
-
-    @Test
-    void internalServerErrorWhenControllerThrowsRuntimeException() throws IOException {
-        // given
-        final Http11Processor processor = processor(new StubSocket());
-        final PageController controller = request -> {
-            throw new IllegalStateException("예상하지 못한 오류");
-        };
-
-        // when
-        final HttpResponse response = processor.handle(indexRequest(), controller);
-
-        // then
-        final String expected = expectedResponse("500 Internal Server Error", "text/html", readResource("static/500.html"));
-        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
-    }
-
-    @Test
-    void badRequestWhenControllerThrowsBadRequestException() {
-        // given
-        final Http11Processor processor = processor(new StubSocket());
-        final PageController controller = request -> {
-            throw new BadRequestException("잘못된 정적 리소스 경로입니다: /../secret");
-        };
-
-        // when
-        final HttpResponse response = processor.handle(indexRequest(), controller);
-
-        // then
-        final String expected = expectedResponse(
-                "400 Bad Request",
-                "text/plain",
-                "잘못된 정적 리소스 경로입니다: /../secret"
-        );
-        assertThat(new String(response.toBytes(), StandardCharsets.UTF_8)).isEqualTo(expected);
-    }
-
-    private HttpRequest indexRequest() {
-        return request("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
-    }
-
-    @Test
     void noSetCookieWhenRequestAlreadyHasSession() {
         // given
         final Session session = new Session("processor-existing-session");
@@ -532,6 +478,31 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
     }
 
+    @Test
+    void badRequestWhenControllerThrowsBadRequestException() {
+        // given
+        final PageController controller = request -> {
+            throw new BadRequestException("잘못된 정적 리소스 경로입니다: /../secret");
+        };
+        final StubSocket socket = new StubSocket(String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                ""));
+        final Http11Processor processor = processor(socket, new RequestDispatcher(Map.of(), controller));
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = expectedResponse(
+                "400 Bad Request",
+                "text/plain",
+                "잘못된 정적 리소스 경로입니다: /../secret"
+        );
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     private LoginResult requestLogin(String body) {
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -626,7 +597,11 @@ class Http11ProcessorTest {
     }
 
     private Http11Processor processor(StubSocket socket) {
-        return new Http11Processor(socket, sessionManager);
+        return processor(socket, requestDispatcher);
+    }
+
+    private Http11Processor processor(StubSocket socket, RequestDispatcher dispatcher) {
+        return new Http11Processor(socket, sessionManager, dispatcher);
     }
 
 }

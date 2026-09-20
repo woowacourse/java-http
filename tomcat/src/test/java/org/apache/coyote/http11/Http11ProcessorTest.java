@@ -16,7 +16,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket("GET / HTTP/1.1\r\nCookie: JSESSIONID=existing\r\n\r\n");
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -44,7 +44,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -76,7 +76,7 @@ class Http11ProcessorTest {
                         + (hasCookie ? "Cookie: JSESSIONID=existing\r\n" : "")
                         + "\r\n" + body;
                 StubSocket socket = new StubSocket(request);
-                new Http11Processor(socket).process(socket);
+                new Http11Processor(socket, new SessionManager()).process(socket);
                 String response = socket.output();
                 String headers = response.substring(0, response.indexOf("\r\n\r\n"));
 

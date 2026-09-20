@@ -33,6 +33,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
     private static final String POST_METHOD = "POST";
+    private static final String GET_METHOD = "GET";
+    private static final String USER_SESSION_ATTRIBUTE = "user";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
     private static final String INDEX_HTML_PATH = "/index.html";
@@ -56,9 +58,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_LENGTH_HEADER_PREFIX = "Content-Length: ";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -182,6 +186,8 @@ public class Http11Processor implements Runnable, Processor {
                 isLoginSuccess = matchedUser.isPresent();
 
                 if (isLoginSuccess) {
+                    Session session = sessionManager.getOrCreateSession(cookie.getSessionId());
+                    session.addUser(USER_SESSION_ATTRIBUTE, matchedUser.get());
                     log.info("회원 조회 성공: {}", matchedUser);
                 }
             }
@@ -214,7 +220,11 @@ public class Http11Processor implements Runnable, Processor {
                 responseHeaders.add(FOUND_STATUS_LINE);
                 responseHeaders.add("Location: " + INDEX_HTML_PATH);
                 responseBody = "";
-            } else {
+            } else if (httpMethod.equals(GET_METHOD) && urlPath.equals(LOGIN_PATH) && sessionManager.isSessionContainsKey(cookie.getSessionId(), USER_SESSION_ATTRIBUTE)) {
+                responseHeaders.add(FOUND_STATUS_LINE);
+                responseHeaders.add("Location: " + INDEX_HTML_PATH);
+                responseBody = "";
+            }else {
                 responseHeaders.add(OK_STATUS_LINE);
             }
 

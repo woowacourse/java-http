@@ -152,7 +152,7 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            // InputStream가 읽은 것을 인코딩하여 String 객체로 만들면 된다.
+            // InputStream가 읽은 것을 디코딩하여 String 객체로 만들면 된다.
             // "🤩"는 4바이트가 모두 필요하기 때문에, readAllBytes()해야 이모지가 제대로 만들어진다.
             final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 

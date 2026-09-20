@@ -1,9 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.Application;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.qupring.Qupring;
 import org.qupring.mvc.ApplicationScanner;
 import org.qupring.mvc.QupringMvc;
 import org.qupring.mvc.handler.HandlerMapping;
@@ -12,11 +10,14 @@ import support.StubSocket;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    private static final String HELLO_WORLD = "Hello world!";
 
     private QupringMvc qupringMvc;
 
@@ -35,6 +36,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket, qupringMvc);
+        final int contentLength = HELLO_WORLD.getBytes(StandardCharsets.UTF_8).length;
 
         // when
         processor.process(socket);
@@ -43,9 +45,9 @@ class Http11ProcessorTest {
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: " + contentLength + " ",
                 "",
-                "Hello world!");
+                HELLO_WORLD);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -68,13 +70,13 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
 
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.length  + " \r\n" +
                 "\r\n"+
-                new String(body);
+                new String(body, StandardCharsets.UTF_8);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

@@ -32,6 +32,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String FOUND = "HTTP/1.1 302 Found ";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String POST = "POST";
+    private static final String REGISTER_PATH = "/register";
 
     private final Socket connection;
 
@@ -52,7 +54,9 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final String requestLine = bufferedReader.readLine();
-            final String response = createResponse(requestLine);
+            final Map<String, String> headers = readHeaders(bufferedReader);
+            final String body = readBody(bufferedReader, headers);
+            final String response = createResponse(requestLine, body);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -61,17 +65,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String requestLine) throws IOException {
+    private String createResponse(final String requestLine, final String body) throws IOException {
         if (requestLine == null) {
             return buildResponse(OK, DEFAULT_CONTENT_TYPE, DEFAULT_BODY);
         }
 
+        final String method = requestLine.split(" ")[0];
         final String uri = requestLine.split(" ")[1];
         final String path = parsePath(uri);
-        final String queryString = parseQueryString(uri);
 
-        if (path.equals(LOGIN_PATH) && !queryString.isEmpty()) {
-            return createLoginResponse(queryString);
+        if (method.equals(POST) && path.equals(REGISTER_PATH)) {
+            return createRegisterResponse(body);
+        }
+        if (method.equals(POST) && path.equals(LOGIN_PATH)) {
+            return createLoginResponse(body);
         }
 
         return createResourceResponse(path);
@@ -83,14 +90,6 @@ public class Http11Processor implements Runnable, Processor {
             return uri;
         }
         return uri.substring(0, index);
-    }
-
-    private String parseQueryString(final String uri) {
-        final int index = uri.indexOf("?");
-        if (index == -1) {
-            return "";
-        }
-        return uri.substring(index + 1);
     }
 
     private String buildRedirectResponse(final String location) {
@@ -108,12 +107,27 @@ public class Http11Processor implements Runnable, Processor {
         return buildRedirectResponse(UNAUTHORIZED_PAGE);
     }
 
+    private String createRegisterResponse(final String body) {
+        register(body);
+        return buildRedirectResponse(INDEX_PAGE);
+    }
+
     private boolean login(final String queryString) {
         final Map<String, String> params = parseParams(queryString);
         final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"))
                 .filter(it -> it.checkPassword(params.get("password")));
         user.ifPresent(it -> log.info("{}", it));
         return user.isPresent();
+    }
+
+    private void register(final String body) {
+        final Map<String, String> params = parseParams(body);
+        final User user = new User(
+                params.get("account"),
+                params.get("password"),
+                params.get("email"));
+        InMemoryUserRepository.save(user);
+        log.info("회원가입: {}", user);
     }
 
     private String createResourceResponse(final String path) throws IOException {
@@ -170,5 +184,27 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return params;
+    }
+
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            final String[] keyAndValue = line.split(": ", 2);
+            if (keyAndValue.length == 2) {
+                headers.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+        return headers;
+    }
+
+    private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
+        final String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return "";
+        }
+        final char[] buffer = new char[Integer.parseInt(contentLength)];
+        reader.read(buffer);
+        return new String(buffer);
     }
 }

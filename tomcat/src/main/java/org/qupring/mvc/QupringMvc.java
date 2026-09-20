@@ -20,12 +20,9 @@ public class QupringMvc {
     public void run(HttpRequest request, HttpResponse response) {
         System.out.println("Request URL: " + request.getUrl() + ", Method: " + request.getHttpMethod());
 
-        /*
         if (runController(request, response)) {
             return;
         }
-
-         */
 
         if (runStaticResources(request, response)) {
             return;
@@ -36,7 +33,6 @@ public class QupringMvc {
         response.setHeader("Content-Type", DEFAULT_CONTENT_TYPE);
     }
 
-    /*
     private boolean runController(HttpRequest request, HttpResponse response) {
         Method method = handlerMapping.getControllerMethod(request.getUrl(), request.getHttpMethod());
         if (method == null) {
@@ -74,8 +70,6 @@ public class QupringMvc {
         response.setStatus(404);
         response.setBody(HtmlReader.read(NOT_FOUND_PAGE));
     }
-
-     */
 
     private boolean runStaticResources(HttpRequest request, HttpResponse response) {
         if (request.getUrl().equals("/")) {

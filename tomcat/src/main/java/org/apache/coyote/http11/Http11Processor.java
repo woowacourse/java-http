@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -158,6 +159,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (account != null && email != null && password != null) {
                     InMemoryUserRepository.save(new User(account, password, email));
+                    log.info("가입 성공, account = {}, email = {}, password = {}", account, email, password);
                 }
 
                 outputStream.write(response.getBytes());
@@ -314,7 +316,8 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> queries = new HashMap<>();
         for (String param : params) {
             final String[] keyToken = param.split(KEY_VALUE_DELIMITER);
-            queries.put(keyToken[0], keyToken[1]);
+            queries.put(URLDecoder.decode(keyToken[0], StandardCharsets.UTF_8),
+                    URLDecoder.decode(keyToken[1], StandardCharsets.UTF_8));
         }
         return queries;
     }

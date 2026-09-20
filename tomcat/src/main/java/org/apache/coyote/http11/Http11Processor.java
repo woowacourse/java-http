@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -53,28 +54,36 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        final String charSetOption = ";charset=utf-8";
         try (final var inputStream = connection.getInputStream();
             final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream));
             final var outputStream = connection.getOutputStream()) {
             final Request request = readRequest(bufferedReader);
-            final HttpCookie httpCookie = HttpCookie.from(request.getHeaderValue("Cookie"));
+            final HttpCookie httpCookie = HttpCookie.from(request.headerValue("Cookie"));
 
             Response response = dispatchRequest(request, httpCookie);
-            response.addBody(readStaticResource(response.filePath()));
-            response.addHeader("Content-Type", getContentType(response.filePath()) + charSetOption);
-            response.addHeader("Content-Length", String.valueOf(response.body()
-                .getBytes().length));
+            completeResponse(response);
             createSessionIfAbsent(httpCookie, response);
-
-            final String message = generateResponseMessage(response);
-
-            outputStream.write(message.getBytes());
-            outputStream.flush();
+            writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void completeResponse(final Response response) throws IOException {
+        response.addBody(readStaticResource(response.filePath()));
+        response.addHeader("Content-Type", getContentType(response.filePath()) + ";charset=utf-8");
+        response.addHeader("Content-Length", String.valueOf(response.body()
+            .getBytes().length));
+
+    }
+
+    private void writeResponse(final OutputStream outputStream, final Response response)
+        throws IOException {
+        final String message = generateResponseMessage(response);
+
+        outputStream.write(message.getBytes());
+        outputStream.flush();
     }
 
     private void createSessionIfAbsent(final HttpCookie httpCookie, final Response response) {
@@ -97,7 +106,6 @@ public class Http11Processor implements Runnable, Processor {
         return new Request(
             HttpMethod.valueOf(requestLineTokens[0]),
             PathAliasesResolver.normalize(target.path()),
-            extractQueryParams(target.queryString()),
             headers,
             requestBody);
     }
@@ -122,18 +130,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return headers;
-    }
-
-    private Map<String, String> extractQueryParams(final String queryString) {
-        final Map<String, String> queryParams = new LinkedHashMap<>();
-        if (queryString.isBlank()) {
-            return queryParams;
-        }
-        Arrays.stream(queryString.split("&"))
-            .map(keyValue -> keyValue.split("="))
-            .forEach(split -> queryParams.put(split[0], split[1]));
-
-        return queryParams;
     }
 
     private String readRequestBody(final BufferedReader bufferedReader,

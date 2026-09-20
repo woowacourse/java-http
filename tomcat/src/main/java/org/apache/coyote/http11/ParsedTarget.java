@@ -4,5 +4,4 @@ public record ParsedTarget(
     String path,
     String queryString
 ) {
-
 }

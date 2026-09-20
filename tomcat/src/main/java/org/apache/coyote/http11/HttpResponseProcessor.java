@@ -11,6 +11,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class HttpResponseProcessor {
@@ -18,10 +20,11 @@ public class HttpResponseProcessor {
     private static final char LF = '\n';
     private static final String STATIC_RESOURCE_PREFIX = "static";
     private final OutputStream outputStream;
-
+    private final Map<String, String> cookies;
 
     public HttpResponseProcessor(OutputStream outputStream) {
         this.outputStream = outputStream;
+        this.cookies = new HashMap<>();
     }
 
     public void sendStaticResource(String path) throws IOException, URISyntaxException {

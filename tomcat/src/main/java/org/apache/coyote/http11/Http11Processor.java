@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.UUID;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             return response;
         }
 
-        String cookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + LINE_SEPARATOR;
+        String cookieHeader = "Set-Cookie: JSESSIONID=" + httpRequest.getOrCreateSession().getId() + LINE_SEPARATOR;
         int endOfStatusLine = response.indexOf(LINE_SEPARATOR) + LINE_SEPARATOR.length();
         return response.substring(0, endOfStatusLine)
                 + cookieHeader
@@ -102,11 +102,24 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String buildLoginResponse(HttpRequest httpRequest) {
+        Session session = httpRequest.findSession();
+        if ("GET".equals(httpRequest.getMethod()) && isLoggedIn(session)) {
+            return String.join(LINE_SEPARATOR,
+                    "HTTP/1.1 302 Found",
+                    "Location: /index.html",
+                    "",
+                    "");
+        }
+
         if (!"POST".equals(httpRequest.getMethod())) {
             return buildResourceResponse("/login.html");
         }
 
-        if (isLoginSuccessful(httpRequest)) {
+        String account = httpRequest.getBody().get("account");
+        String password = httpRequest.getBody().get("password");
+        var user = InMemoryUserRepository.findByAccountAndPassword(account, password);
+        if (user.isPresent()) {
+            httpRequest.getOrCreateSession().setAttribute("user", user.get());
             return String.join(LINE_SEPARATOR,
                     "HTTP/1.1 302 Found",
                     "Location: /index.html",
@@ -121,12 +134,8 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
-    private boolean isLoginSuccessful(HttpRequest httpRequest) {
-        String account = httpRequest.getBody().get("account");
-        String password = httpRequest.getBody().get("password");
-
-        return InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .isPresent();
+    private boolean isLoggedIn(Session session) {
+        return session != null && session.getAttribute("user") != null;
     }
 
     private String buildRegisterResponse(HttpRequest httpRequest) {

@@ -4,6 +4,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
@@ -11,9 +14,9 @@ public class HttpRequest {
 
     private final String method;
     private final String path;
-    private final Map<String, String> queryParams;
     private final Map<String, String> body;
     private final HttpCookie cookies;
+    private Session session;
 
     public HttpRequest(String rawHttpRequest) {
         String[] headerAndBody = rawHttpRequest.split(EMPTY_LINE);
@@ -25,7 +28,6 @@ public class HttpRequest {
 
         String uri = requestLineParts[1];
         this.path = extractPath(uri);
-        this.queryParams = extractQueryParams(uri);
         this.cookies = extractCookies(header);
 
         String body = headerAndBody.length < 2 ? "" : headerAndBody[1];
@@ -40,16 +42,35 @@ public class HttpRequest {
         return path;
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams;
-    }
-
     public Map<String, String> getBody() {
         return body;
     }
 
     public HttpCookie getCookies() {
         return cookies;
+    }
+
+    public Session findSession() {
+        if (session != null) {
+            return session;
+        }
+
+        if (cookies.hasSessionId()) {
+            session = SessionManager.findSession(cookies.getSessionId());
+        }
+        return session;
+    }
+
+    public Session getOrCreateSession() {
+        if (findSession() == null) {
+            String id = cookies.hasSessionId()
+                    ? cookies.getSessionId()
+                    : UUID.randomUUID().toString();
+            session = new Session(id);
+            SessionManager.add(session);
+        }
+
+        return session;
     }
 
     private HttpCookie extractCookies(String header) {
@@ -68,33 +89,6 @@ public class HttpRequest {
 
         int indexOfQueryDelimiter = uri.indexOf("?");
         return uri.substring(0, indexOfQueryDelimiter);
-    }
-
-    private Map<String, String> extractQueryParams(String uri) {
-        if (!uri.contains("?")) {
-            return Map.of();
-        }
-
-        int indexOfQueryDelimiter = uri.indexOf("?");
-        String rawParams = uri.substring(indexOfQueryDelimiter + 1);
-        if (rawParams.isEmpty()) {
-            return Map.of();
-        }
-
-        Map<String, String> params = new LinkedHashMap<>();
-        for (String rawParam : rawParams.split("&")) {
-            if (rawParam.isEmpty()) {
-                continue;
-            }
-
-            String[] nameAndValue = rawParam.split("=", 2);
-            if (nameAndValue.length < 2) {
-                params.put(nameAndValue[0], "");
-            } else {
-                params.put(nameAndValue[0], nameAndValue[1]);
-            }
-        }
-        return params;
     }
 
     private Map<String, String> parseEncodedFormData(String rawBody) {

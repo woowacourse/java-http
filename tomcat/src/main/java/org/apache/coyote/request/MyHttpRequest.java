@@ -6,20 +6,27 @@ import org.apache.coyote.cookie.HttpCookie;
 import java.util.HashMap;
 import java.util.Map;
 
-public record MyHttpRequest(
-        String method,
-        String uri,
-        String resourcePath,
-        ContentType contentType,
-        String version,
-        HttpCookie cookie,
-        String body
-) {
+public class MyHttpRequest {
 
     private static final String RESOURCE_PATH_PREFIX = "static";
 
-    public MyHttpRequest {
-        resourcePath = RESOURCE_PATH_PREFIX + resolveResourcePath(resourcePath);
+    private String method;
+    private String uri;
+    private String resourcePath;
+    private ContentType contentType;
+    private String version;
+    private HttpCookie cookie;
+    private String body;
+
+    public MyHttpRequest(String method, String uri, String resourcePath, ContentType contentType, String version,
+                         HttpCookie cookie, String body) {
+        this.method = method;
+        this.uri = uri;
+        this.resourcePath = RESOURCE_PATH_PREFIX + resolveResourcePath(resourcePath);
+        this.contentType = contentType;
+        this.version = version;
+        this.cookie = cookie;
+        this.body = body;
     }
 
     public static MyHttpRequest of(String rawRequest) {
@@ -125,5 +132,33 @@ public record MyHttpRequest(
         int dotIndex = fileName.lastIndexOf(".");
         return dotIndex > 0
                 && dotIndex != fileName.length() - 1;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

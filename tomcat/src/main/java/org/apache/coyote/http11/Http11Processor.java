@@ -51,8 +51,8 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpRequest httpRequest =
                     MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
             MyHttpResponse httpResponse = new MyHttpResponse();
-            httpResponse.addCookie(httpRequest.cookie());
-            log.info("start request: {} {}", httpRequest.method(), httpRequest.uri());
+            httpResponse.addCookie(httpRequest.getCookie());
+            log.info("start request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
                 httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
@@ -62,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
                 authenticate(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-                log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
                 return;
             }
 
@@ -71,18 +71,18 @@ public class Http11Processor implements Runnable, Processor {
                 register(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-                log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
                 return;
             }
 
             httpResponse.setStatusCode(StatusCode.OK);
-            httpResponse.setContentType(httpRequest.contentType());
+            httpResponse.setContentType(httpRequest.getContentType());
             final var responseBody = readStaticResource(httpRequest, "Hello world!");
             httpResponse.writeBody(responseBody);
 
             outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-            log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+            log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -114,21 +114,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static boolean isLoginRequest(MyHttpRequest httpRequest) {
-        return httpRequest.resourcePath().contains("static/login.html")
-                && httpRequest.method().equalsIgnoreCase("POST")
+        return httpRequest.getResourcePath().contains("static/login.html")
+                && httpRequest.getMethod().equalsIgnoreCase("POST")
                 && httpRequest.hasRequestBody();
     }
 
     private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
-        return httpRequest.resourcePath().contains("static/register.html")
-                && httpRequest.method().equalsIgnoreCase("POST")
+        return httpRequest.getResourcePath().contains("static/register.html")
+                && httpRequest.getMethod().equalsIgnoreCase("POST")
                 && httpRequest.hasRequestBody();
     }
 
     // TODO json도 처리 가능하도록
     private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
         Map<String, String> params = new HashMap<>();
-        for (String parameter : httpRequest.body().split("&")) {
+        for (String parameter : httpRequest.getBody().split("&")) {
             String[] keyValue = parameter.split("=", 2);
             params.put(keyValue[0], keyValue[1]);
         }
@@ -156,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
         Map<String, String> params = new HashMap<>();
-        for (String parameter : httpRequest.body().split("&")) {
+        for (String parameter : httpRequest.getBody().split("&")) {
             String[] keyValue = parameter.split("=", 3);
             params.put(keyValue[0], keyValue[1]);
         }
@@ -183,7 +183,7 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException, URISyntaxException {
         URL fileUrl = Http11Processor.class
                 .getClassLoader()
-                .getResource(httpRequest.resourcePath());
+                .getResource(httpRequest.getResourcePath());
         File file = new File(Objects.requireNonNull(fileUrl).toURI());
         if (file.isFile()) {
             return Files.readString(file.toPath(), StandardCharsets.UTF_8);

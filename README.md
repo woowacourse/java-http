@@ -33,6 +33,9 @@
   - [x] `Cookie` 클래스를 추가한다.
   - [x] 요청 헤더의 `Cookie`에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 추가해서 전달한다. 값은 `JSESSIONID=...` 형태이다.
   - [x] 요청 헤더에 이미 `Cookie` 값이 있다면 응답 헤더에 추가하지 않는다.
+  - [ ] 쿠키에서 전달 받은 `JSESSIONID` 값으로 로그인 여부를 체크한다.
+  - [ ] 로그인에 성공하면 `Session` 객체의 값으로 `User` 객체를 저장한다.
+  - [ ] 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 `index.html` 페이지로 리다이렉트 처리한다.
 - [x] 회원가입
   - [x] `http://localhost/register` 로 접속하면 GET 요청으로 `register.html`을 보여준다.
   - [x] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.

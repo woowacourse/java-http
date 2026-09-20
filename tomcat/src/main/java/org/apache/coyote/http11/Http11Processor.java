@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +72,9 @@ public class Http11Processor implements Runnable, Processor {
             if (pathUri.equals("/login") && !query.isEmpty()) {
                 if (!login(query)) {
                     pathUri = "/401.html";
+                } else {
+                    writeAndFlush(outputStream, createRedirectResponse("/index.html"));
+                    return;
                 }
             }
 
@@ -82,7 +84,8 @@ public class Http11Processor implements Runnable, Processor {
 
             String staticUrl = "static" + pathUri;
             Path path = getPath(staticUrl);
-            final var response = getResponse(path);
+            log.debug("staticPath: {}", path);
+            final var response = createStaticFileResponse(path);
             writeAndFlush(outputStream, response);
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -97,13 +100,15 @@ public class Http11Processor implements Runnable, Processor {
             return false;
         }
 
-        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
-        if (user.checkPassword(queryParams.get("password"))) {
-            log.info("user : {}", user.toString());
-            return true;
-        }
-        return false;
+        return InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                .map(user -> {
+                    if (user.checkPassword(queryParams.get("password"))) {
+                        log.info("user : {}", user.toString());
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
     }
 
     private static void writeAndFlush(OutputStream outputStream, String response) throws IOException {
@@ -111,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private static String getResponse(Path path) throws IOException {
+    private static String createStaticFileResponse(Path path) throws IOException {
         String responseBody = Files.readString(path);
         String type = extractType(path);
 
@@ -121,6 +126,16 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
+        return response;
+    }
+
+    private static String createRedirectResponse(String loaction) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + loaction,
+                "Content-Length: 0",
+                "",
+                "");
         return response;
     }
 

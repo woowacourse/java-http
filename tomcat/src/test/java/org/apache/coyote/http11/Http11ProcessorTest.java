@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -12,10 +15,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private static final String EXISTING_SESSION_ID = "existing-session-id";
+
+    @BeforeEach
+    void registerExistingSession() {
+        new SessionManager().add(new Session(EXISTING_SESSION_ID));
+    }
+
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + EXISTING_SESSION_ID,
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when
@@ -39,6 +55,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + EXISTING_SESSION_ID,
                 "",
                 "");
 

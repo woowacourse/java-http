@@ -2,9 +2,9 @@ package org.apache.coyote;
 
 import java.util.UUID;
 
-public class JSessionIdGenerator {
+public class UuidGenerator {
 
-    public static String generateUuid() {
+    public static String generate() {
         return UUID.randomUUID().toString();
     }
 }

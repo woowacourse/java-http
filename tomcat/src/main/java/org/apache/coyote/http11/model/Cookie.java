@@ -27,4 +27,8 @@ public record Cookie(
     public boolean hasCookie(String value) {
         return values.containsKey(value);
     }
+
+    public String getCookie(String value) {
+        return values.get(value);
+    }
 }

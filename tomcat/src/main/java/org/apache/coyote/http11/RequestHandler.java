@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.model.FormParameters;
 import org.apache.coyote.http11.model.UriInfo;
 import org.slf4j.Logger;
@@ -31,10 +32,22 @@ public class RequestHandler {
         return Files.readAllBytes(path);
     }
 
-    public static String post(UriInfo uriInfo, FormParameters formParameters) {
+    public static String findGetRedirectPath(String url, Session session) {
+        if ("/login".equals(url) && session.getAttribute("user") != null) {
+            return "/index.html";
+        }
+        return null;
+    }
+
+    public static String post(
+            UriInfo uriInfo,
+            FormParameters formParameters,
+            Session session
+    ) {
         if ("/login".equals(uriInfo.path()) && formParameters.hasQueryParameters()) {
             try {
                 User user = findUser(formParameters.values());
+                session.setAttribute("user", user);
                 log.info("로그인 사용자: {}", user.getAccount());
                 return "/index.html";
             } catch (IllegalArgumentException e) {

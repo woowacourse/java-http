@@ -47,9 +47,15 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String requestTarget = requestLine.split(" ")[1];
+            final String[] requestLineTokens = requestLine.split(" ");
+            final String method = requestLineTokens[0];
+            final String requestTarget = requestLineTokens[1];
             final String path = extractPath(requestTarget);
             final String queryString = extractQueryString(requestTarget);
+            final Map<String, String> headers = readHeaders(reader);
+            final String requestBody = readBody(reader, headers);
+
+            log.debug("{} {} 요청을 받았습니다. 본문 길이: {}", method, requestTarget, requestBody.length());
 
             if (path.equals("/")) {
                 final var responseBody = "Hello world!";
@@ -110,6 +116,37 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+
+        String line = reader.readLine();
+        while (line != null && !line.isEmpty()) {
+            final int separatorIndex = line.indexOf(":");
+            if (separatorIndex != -1) {
+                final String name = line.substring(0, separatorIndex).trim().toLowerCase();
+                final String value = line.substring(separatorIndex + 1).trim();
+                headers.put(name, value);
+            }
+            line = reader.readLine();
+        }
+        return headers;
+    }
+
+    private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
+        final String contentLength = headers.get("content-length");
+        if (contentLength == null) {
+            return "";
+        }
+
+        final int length = Integer.parseInt(contentLength);
+        final char[] buffer = new char[length];
+        final int readCount = reader.read(buffer, 0, length);
+        if (readCount == -1) {
+            return "";
+        }
+        return new String(buffer, 0, readCount);
     }
 
     private void login(final Map<String, String> params) {

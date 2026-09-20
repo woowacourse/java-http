@@ -28,7 +28,7 @@ public class RequestMapping {
         }
 
         if (httpUrl.startsWith("/assets/chart-bar.js")) {
-            return new CharBarController();
+            return new ChartBarController();
         }
 
         if (httpUrl.startsWith("/js/scripts.js")) {

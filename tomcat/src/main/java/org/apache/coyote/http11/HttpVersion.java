@@ -10,7 +10,7 @@ public enum HttpVersion {
         this.value = value;
     }
 
-    public static HttpVersion getByString(String target) {
+    public static HttpVersion from(String target) {
         for (HttpVersion httpVersion : HttpVersion.values()) {
             if (httpVersion.value.equals(target)) {
                 return httpVersion;

@@ -12,7 +12,6 @@ import org.apache.util.FileReader;
 public class ChartPieController extends AbstractController {
     private static final String CONTENT_TYPE_TEXT_JAVASCRIPT = "text/javascript;charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
@@ -27,7 +26,6 @@ public class ChartPieController extends AbstractController {
         response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
                 new ReasonPhrase("OK"));
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_JAVASCRIPT);
-        response.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         response.setHttpBody(new HttpBody(body));
         response.write();
     }

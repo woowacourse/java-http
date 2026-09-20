@@ -98,21 +98,18 @@ public class LoginController extends AbstractController {
                         new ReasonPhrase("Found"));
 
                 response.putHeader(LOCATION, "/index.html");
-                response.putHeader(CONTENT_LENGTH, "0");
 
                 response.write();
                 return;
             }
         }
 
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
-                new ReasonPhrase("OK"));
+        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200, new ReasonPhrase("OK"));
 
         FileReader fileReader = new FileReader();
         final String body = fileReader.readFile("static/login.html");
 
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
-        response.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         response.setHttpBody(new HttpBody(body));
 
         response.write();

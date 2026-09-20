@@ -5,9 +5,10 @@ import java.util.Map;
 
 public class HttpHeaders {
     // 요청과 응답에 모두 사용할 수 있는 클래스
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers;
 
     public HttpHeaders() {
+        headers = new HashMap<>();
     }
 
     public void put(String key, String value) {

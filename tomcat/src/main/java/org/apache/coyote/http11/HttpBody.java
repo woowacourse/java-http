@@ -10,4 +10,11 @@ public class HttpBody {
     public String getValue() {
         return value;
     }
+
+    public int getLength() {
+        if (value == null) {
+            return 0;
+        }
+        return value.getBytes().length;
+    }
 }

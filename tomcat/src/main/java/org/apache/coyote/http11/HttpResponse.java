@@ -5,8 +5,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 public class HttpResponse {
-    // ResponseLine: Protocol Version, Status Code, Status Message(반드시 Status Code와 일치해야 하는 건 아니다)
-    // HTTP 버전에 따라 분기하는 방법을 고민했으나.. 너무 어려워 보여서 일단 1.x 버전만 구현하기로 했어요.
+    private static final String CONTENT_LENGTH = "Content-Length";
     private OutputStream outputStream;
     private ResponseLine responseLine;
     private HttpHeaders httpHeaders = new HttpHeaders();
@@ -20,8 +19,8 @@ public class HttpResponse {
         return responseLine;
     }
 
-    public void setResponseLine(HttpVersion http11, HttpStatusCode httpStatus200, ReasonPhrase found) {
-        this.responseLine = new ResponseLine(http11, httpStatus200, found);
+    public void setResponseLine(HttpVersion httpVersion, HttpStatusCode httpStatus, ReasonPhrase reasonPhrase) {
+        this.responseLine = new ResponseLine(httpVersion, httpStatus, reasonPhrase);
     }
 
     public HttpHeaders getHttpHeaders() {
@@ -36,8 +35,8 @@ public class HttpResponse {
         return httpBody;
     }
 
-    public void setHttpBody(HttpBody httpBody) {
-        this.httpBody = httpBody;
+    public void setHttpBody(HttpBody body) {
+        this.httpBody = body;
     }
 
     public void putHeader(String key, String value) {
@@ -45,8 +44,16 @@ public class HttpResponse {
     }
 
     public void write() throws IOException {
+        setContentLength();
         outputStream.write(buildToResponse().getBytes());
         outputStream.flush();
+    }
+
+    private void setContentLength() {
+        if (httpBody == null) {
+            return;
+        }
+        httpHeaders.put(CONTENT_LENGTH, String.valueOf(httpBody.getLength()));
     }
 
     private String buildToResponse() {

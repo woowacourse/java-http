@@ -22,7 +22,6 @@ public class RegisterController extends AbstractController {
     private static final String PARAM_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
 
     @Override
@@ -42,7 +41,6 @@ public class RegisterController extends AbstractController {
                 new ReasonPhrase("Found"));
 
         response.putHeader(LOCATION, "/index.html");
-        response.putHeader(CONTENT_LENGTH, "0");
 
         response.write();
     }
@@ -56,7 +54,6 @@ public class RegisterController extends AbstractController {
         response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
                 new ReasonPhrase("OK"));
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
-        response.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         response.setHttpBody(new HttpBody(body));
         response.write();
     }

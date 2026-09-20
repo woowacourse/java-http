@@ -8,11 +8,8 @@ public class HttpPath {
         this.path = path;
     }
 
-    @Override
-    public String toString() {
-        return "HttpPath{" +
-                "path='" + path + '\'' +
-                '}';
+    public static HttpPath from(String param) {
+        return new HttpPath(param);
     }
 
     public String getPath() {

@@ -43,9 +43,9 @@ public class Http11Processor implements Runnable, Processor {
             final String[] tokens = line.split(" ", 3);
             final String uri = tokens[1];
 
-            final String path = getPath(uri);
+            String path = getPath(uri);
             final Optional<String> queryString = getQueryString(uri);
-            handleRequest(queryString, path);
+            path = handleRequest(queryString, path);
 
             final var responseBody = createResponseBody(path);
             final String contentType = getContentType(path);
@@ -88,18 +88,22 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private void handleRequest(Optional<String> queryString, String path) {
+    private String handleRequest(Optional<String> queryString, String path) {
         final RequestHandler requestHandler = handlers.get(path);
 
         if (requestHandler == null) {
-            return;
+            return path;
         }
 
         final Map<String, String> paramsMap = queryString
                 .map(this::getParamsMap)
                 .orElseGet(Collections::emptyMap);
 
-        requestHandler.handle(paramsMap);
+        if (paramsMap.isEmpty()){
+            return path;
+        }
+
+        return requestHandler.handle(paramsMap);
     }
 
     private Map<String, String> getParamsMap(String queryString) {

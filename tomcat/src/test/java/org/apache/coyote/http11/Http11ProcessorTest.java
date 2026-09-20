@@ -81,7 +81,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass()
                 .getClassLoader()
-                .getResource("static/login.html");
+                .getResource("static/index.html");
 
         final byte[] expectedBody = Files.readAllBytes(
                 Path.of(resource.toURI())

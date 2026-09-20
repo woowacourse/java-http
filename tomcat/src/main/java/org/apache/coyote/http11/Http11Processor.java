@@ -100,10 +100,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void processLogin(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
+        if (httpRequest.isGet()) {
+            showLoginPage(httpRequest, responseProcessor);
+            return;
+        }
+
         Optional<String> account = httpRequest.getParameter("account");
         Optional<String> password = httpRequest.getParameter("password");
         if (account.isEmpty() || password.isEmpty()) {
-            showLoginPage(httpRequest, responseProcessor);
+            responseProcessor.sendError(HttpStatus.BAD_REQUEST);
             return;
         }
 

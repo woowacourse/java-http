@@ -101,8 +101,8 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("로그인 파라미터가 없으면 로그인 페이지를 보여준다")
-    void loginPageWithoutParameters() throws IOException {
+    @DisplayName("로그인 페이지에 GET으로 접근하면 로그인 폼을 보여준다")
+    void showLoginPageOnGet() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/login"));
         final var processor = new Http11Processor(socket, new SessionManager());
@@ -115,10 +115,24 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("로그인 파라미터가 누락되면 400으로 응답한다")
+    void loginWithMissingParameterRespondsBadRequest() {
+        // given
+        final var socket = new StubSocket(postRequest("/login", "account=gugu"));
+        final var processor = new Http11Processor(socket, new SessionManager());
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(errorResponse(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
     @DisplayName("로그인에 성공하면 세션 쿠키를 내려주고 index.html로 리다이렉트한다")
     void loginSuccessRedirectsToIndex() {
         // given
-        final var socket = new StubSocket(getRequest("/login?account=gugu&password=password"));
+        final var socket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
         final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
@@ -137,7 +151,7 @@ class Http11ProcessorTest {
     @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다")
     void loginFailureRedirectsToUnauthorized() {
         // given
-        final var socket = new StubSocket(getRequest("/login?account=gugu&password=wrong"));
+        final var socket = new StubSocket(postRequest("/login", "account=gugu&password=wrong"));
         final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
@@ -226,7 +240,7 @@ class Http11ProcessorTest {
     void storeUserInSession() {
         // given
         final var manager = new SessionManager();
-        final var socket = new StubSocket(getRequest("/login?account=gugu&password=password"));
+        final var socket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
 
         // when
         new Http11Processor(socket, manager).process(socket);
@@ -243,7 +257,7 @@ class Http11ProcessorTest {
     void redirectWhenAlreadyLoggedIn() {
         // given
         final var manager = new SessionManager();
-        final var loginSocket = new StubSocket(getRequest("/login?account=gugu&password=password"));
+        final var loginSocket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
         new Http11Processor(loginSocket, manager).process(loginSocket);
         final String sessionId = extractSessionId(loginSocket.output());
 

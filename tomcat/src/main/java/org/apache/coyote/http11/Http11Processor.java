@@ -6,6 +6,8 @@ import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.line.HttpMethod;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.coyote.http11.session.HttpCookie;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -45,9 +47,16 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.from(inputStream);
             Session session = sessionManager.findSession(request.getCookie("JSESSIONID"));
 
-            String resourcePath = request.getPath();
+            String path = request.getPath();
             if (request.getHttpMethod().equals(HttpMethod.GET) && request.getPath().equals("/register")) {
-                resourcePath = "/register.html";
+                // FIXME HttpResponse.ok 형식 중복
+                path = "/register.html";
+                URL resourcePath = getClass().getClassLoader().getResource("static" + path);
+                final var contentType = ContentType.from(path);
+                final var content = Files.readString(Path.of(resourcePath.toURI()), StandardCharsets.UTF_8);
+                HttpResponse httpResponse = HttpResponse.ok(contentType, content);
+                httpResponse.write(outputStream);
+                return;
             }
 
             if (request.getHttpMethod().equals(HttpMethod.POST) && request.getPath().equals("/register")) {
@@ -58,24 +67,30 @@ public class Http11Processor implements Runnable, Processor {
                 User user = new User(account, password, email);
                 InMemoryUserRepository.save(user);
 
-                String responseBody = redirect("302 FOUND", "/index.html");
-                outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                // FIXME HttpResponse.redirect 형식 중복
+                HttpResponse httpResponse = HttpResponse.redirect("/index.html");
+                httpResponse.write(outputStream);
                 return;
             }
 
             // THINK 반복되는 엔드포인트 매핑 리팩터링 - P1
             if (request.getHttpMethod().equals(HttpMethod.GET)
                     && (request.getPath().equals("/login") || request.getPath().equals("/login.html"))) {
-                log.info("로그인 GET 요청");
                 if (session != null && session.getAttribute("user") != null) {
-                    log.info("로그인 세션 확인 됨.");
-                    String responseBody = redirect("302 FOUND", "/index.html");
-                    outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
+                    // FIXME HttpResponse.redirect 형식 중복
+                    HttpResponse httpResponse = HttpResponse.redirect("/index.html");
+                    httpResponse.write(outputStream);
                     return;
                 }
-                resourcePath = "/login.html";
+
+                // FIXME HttpResponse.ok 형식 중복
+                path = "/login.html";
+                URL resourcePath = getClass().getClassLoader().getResource("static" + path);
+                final var contentType = ContentType.from(path);
+                final var content = Files.readString(Path.of(resourcePath.toURI()), StandardCharsets.UTF_8);
+                HttpResponse httpResponse = HttpResponse.ok(contentType, content);
+                httpResponse.write(outputStream);
+                return;
             }
 
             if (request.getHttpMethod().equals(HttpMethod.POST) && request.getPath().equals("/login")) {
@@ -91,35 +106,42 @@ public class Http11Processor implements Runnable, Processor {
                     newSession.setAttribute("user", loginedUser.get());
                     sessionManager.add(newSession);
 
-                    String responseBody = redirect("302 FOUND", "/index.html", cookie);
-                    outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
+                    // FIXME HttpResponse.redirect 형식 중복
+                    HttpResponse httpResponse = HttpResponse.redirect("/index.html", cookie);
+                    httpResponse.write(outputStream);
                     return;
                 } else {
-                    String responseBody = redirect("302 FOUND", "/401.html");
-                    outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
+                    // FIXME HttpResponse.redirect 형식 중복
+                    HttpResponse httpResponse = HttpResponse.redirect("/401.html");
+                    httpResponse.write(outputStream);
                     return;
                 }
             }
 
             if (request.getPath().equals("/")) {
-                resourcePath = "/index.html";
+                // FIXME HttpResponse.ok 형식 중복
+                path = "/index.html";
+                URL resourcePath = getClass().getClassLoader().getResource("static" + path);
+                final var contentType = ContentType.from(path);
+                final var content = Files.readString(Path.of(resourcePath.toURI()), StandardCharsets.UTF_8);
+                HttpResponse httpResponse = HttpResponse.ok(contentType, content);
+                httpResponse.write(outputStream);
+                return;
             }
 
-            URL resourcePath1 = getClass().getClassLoader().getResource("static" + resourcePath);
-            if (resourcePath1 == null) {
+            // FIXME HttpResponse.ok 형식 중복
+            URL resourcePath = getClass().getClassLoader().getResource("static" + path); // 여기까지 온 path는 잘못된 경로일 수 있으므로 검증.
+            if (resourcePath == null) {
                 final var notFoundResponse = getResponseBody("404 Not Found", "text/html", "<h1>404 Not Found</h1>");
                 outputStream.write(notFoundResponse.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }
 
-            final var contentType = contentTypeOf(resourcePath);
-            final var content = Files.readString(Path.of(resourcePath1.toURI()), StandardCharsets.UTF_8);
-            final var responseBody = getResponseBody("200 OK", contentType, content);
-            outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            final var contentType = ContentType.from(path);
+            final var content = Files.readString(Path.of(resourcePath.toURI()), StandardCharsets.UTF_8);
+            HttpResponse httpResponse = HttpResponse.ok(contentType, content);
+            httpResponse.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -166,6 +188,14 @@ public class Http11Processor implements Runnable, Processor {
             case ".ico" -> "image/x-icon";
             default -> "text/html";
         };
+    }
+
+    private String readStaticResource(String path) throws IOException, URISyntaxException {
+        URL resource = getClass().getClassLoader().getResource("static" + path);
+        if (resource == null) {
+            return null;
+        }
+        return Files.readString(Path.of(resource.toURI()), StandardCharsets.UTF_8);
     }
 
 }

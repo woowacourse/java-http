@@ -188,12 +188,14 @@ public class Http11Processor implements Runnable, Processor {
 
         final Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
-
         if (loginUser.isEmpty()) {
             return false;
         }
-        log.info("로그인 성공: {}", loginUser);
-        session.setAttribute("user", loginUser);
+
+        final User user = loginUser.get();
+        log.info("로그인 성공: {}", user);
+        session.setAttribute("user", user);
+
         return true;
     }
 

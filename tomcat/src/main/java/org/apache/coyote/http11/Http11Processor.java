@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +17,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
+
+    private static final String GET = "GET";
+    private static final String POST = "POST";
 
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
@@ -30,6 +36,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String REGISTER_PATH = "/register";
+    private static final String REGISTER_PAGE = "/register.html";
 
     private static final String STATUS_OK = "200 OK";
     private static final String STATUS_FOUND = "302 Found";
@@ -39,6 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     private final Socket connection;
 
@@ -73,12 +82,14 @@ public class Http11Processor implements Runnable, Processor {
         if (rawRequestLine == null) {
             return;
         }
-        readHeaders(reader);
-        log.info("request: {}", rawRequestLine);
 
         try {
+            final RequestHeaders headers = RequestHeaders.from(readHeaders(reader));
+            final RequestBody body = RequestBody.from(readBody(reader, headers.getContentLength()));
+
+            log.info("request: {}", rawRequestLine);
             final RequestLine requestLine = RequestLine.from(rawRequestLine);
-            route(outputStream, requestLine);
+            route(outputStream, requestLine, body);
         } catch (InvalidRequestException e) {
             log.warn("bad request: {}", e.getMessage());
             writeResponse(outputStream, STATUS_BAD_REQUEST, ContentType.HTML,
@@ -86,7 +97,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void route(final OutputStream outputStream, final RequestLine requestLine)
+    private void route(
+            final OutputStream outputStream,
+            final RequestLine requestLine,
+            final RequestBody requestBody
+    )
             throws IOException, URISyntaxException {
         final String path = requestLine.getPath();
 
@@ -97,8 +112,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (LOGIN_PATH.equals(path)) {
-            if (requestLine.hasQueryParameters()) {
-                String location = logLoginUser(requestLine);
+            if (POST.equals(requestLine.getMethod())) {
+                String location = logLoginUser(requestBody);
                 writeRedirect(outputStream, location);
                 return;
             }
@@ -107,19 +122,65 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
+        if (REGISTER_PATH.equals(path)) {
+            if (POST.equals(requestLine.getMethod())) {
+                String location = registerUser(requestBody);
+                writeRedirect(outputStream, location);
+                return;
+            }
+            writeStaticFile(outputStream, REGISTER_PAGE);
+            return;
+        }
+
         writeStaticFile(outputStream, path);
     }
 
-    private void readHeaders(final BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        while (line != null && !line.isEmpty()) {
-            line = reader.readLine();
+    private String registerUser(RequestBody body) {
+        final Optional<String> account = body.getParameter(ACCOUNT);
+        final Optional<String> password = body.getParameter(PASSWORD);
+        final Optional<String> email = body.getParameter(EMAIL);
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            log.info("회원 가입을 하기위해서는 셋 다 입력이 되어야 합니다.");
+            return REGISTER_PAGE;
         }
+        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
+
+        return INDEX_PAGE;
     }
 
-    private String logLoginUser(final RequestLine requestLine) {
-        final Optional<String> account = requestLine.getQueryParameter(ACCOUNT);
-        final Optional<String> password = requestLine.getQueryParameter(PASSWORD);
+    private List<String> readHeaders(final BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        List<String> lists = new ArrayList<>();
+        while (line != null && !line.isEmpty()) {
+            lists.add(line);
+            line = reader.readLine();
+        }
+
+        return lists;
+    }
+
+    private String readBody(
+            final BufferedReader reader,
+            final int contentLength
+            ) throws IOException {
+        if (contentLength == 0) {
+            return "";
+        }
+        final char[] buffer = new char[contentLength];
+        int totalRead = 0;
+        while (totalRead < contentLength) {
+            final int read = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (read == -1) {
+                break;
+            }
+            totalRead += read;
+        }
+        return new String(buffer, 0, totalRead);
+    }
+
+    private String logLoginUser(final RequestBody body) {
+        final Optional<String> account = body.getParameter(ACCOUNT);
+        final Optional<String> password = body.getParameter(PASSWORD);
         if (account.isEmpty() || password.isEmpty()) {
             log.info("login parameters are missing");
             return UNAUTHORIZED_PAGE;

@@ -6,6 +6,8 @@ import com.techcourse.model.Register;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.MyHttpRequest;
+import org.apache.coyote.response.MyHttpResponse;
+import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,16 +49,24 @@ public class Http11Processor implements Runnable, Processor {
 
             MyHttpRequest httpRequest =
                     MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
+            MyHttpResponse httpResponse = new MyHttpResponse();
             log.info("start request: {} {}", httpRequest.method(), httpRequest.uri());
+
+            if (!httpRequest.hasCookie("JSESSIONID")) {
+                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            }
 
             if (isLoginRequest(httpRequest)) {
                 if (authenticate(httpRequest)) {
-                    String response = build302FoundResponse(httpRequest, "index.html");
-                    outputStream.write(response.getBytes());
+                    httpResponse.setStatusCode(StatusCode.FOUND);
+                    httpResponse.setContentType(ContentType.HTML);
+                    httpResponse.sendRedirect("index.html");
                 } else {
-                    String response = build302FoundResponse(httpRequest, "401.html");
-                    outputStream.write(response.getBytes());
+                    httpResponse.setStatusCode(StatusCode.FOUND);
+                    httpResponse.setContentType(ContentType.HTML);
+                    httpResponse.sendRedirect("401.html");
                 }
+                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
                 return;
@@ -65,22 +75,26 @@ public class Http11Processor implements Runnable, Processor {
             // register
             if (isRegisterRequest(httpRequest)) {
                 if (register(httpRequest)) {
-                    String response = build302FoundResponse(httpRequest, "index.html");
-                    outputStream.write(response.getBytes());
-
+                    httpResponse.setStatusCode(StatusCode.FOUND);
+                    httpResponse.setContentType(ContentType.HTML);
+                    httpResponse.sendRedirect("index.html");
                 } else {
-                    String response = build302FoundResponse(httpRequest, "login.html");
-                    outputStream.write(response.getBytes());
+                    httpResponse.setStatusCode(StatusCode.FOUND);
+                    httpResponse.setContentType(ContentType.HTML);
+                    httpResponse.sendRedirect("login.html");
                 }
+                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
                 return;
             }
 
+            httpResponse.setStatusCode(StatusCode.OK);
+            httpResponse.setContentType(httpRequest.contentType());
             final var responseBody = readStaticResource(httpRequest, "Hello world!");
-            final var response = buildHttpResponse(httpRequest, responseBody);
+            httpResponse.writeBody(responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
             log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -176,36 +190,5 @@ public class Http11Processor implements Runnable, Processor {
             return Files.readString(file.toPath(), StandardCharsets.UTF_8);
         }
         return defaultContent;
-    }
-
-    private static String build302FoundResponse(MyHttpRequest httpRequest, String redirectLocation) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HTTP/1.1 302 Found \r\n");
-        if (!httpRequest.hasCookie("JSESSIONID")) {
-            sb.append("Set-Cookie: JSESSIONID=")
-                    .append(UUID.randomUUID())
-                    .append(" \r\n");
-        }
-        String other =
-                "Location: http://localhost:8080/" + redirectLocation + " \r\n" +
-                        "Content-Type: text/html;charset=utf-8 \r\n" +
-                        "Content-Length: 0 \r\n";
-        return sb.append(other).toString();
-    }
-
-    private static String buildHttpResponse(MyHttpRequest httpRequest, String responseBody) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HTTP/1.1 200 OK \r\n");
-        if (!httpRequest.hasCookie("JSESSIONID")) {
-            sb.append("Set-Cookie: JSESSIONID=")
-                    .append(UUID.randomUUID())
-                    .append(" \r\n");
-        }
-        String other = String.join("\r\n",
-                "Content-Type: " + httpRequest.contentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
-        return sb.append(other).toString();
     }
 }

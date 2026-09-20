@@ -1,5 +1,6 @@
 package org.apache.coyote.request;
 
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.cookie.HttpCookie;
 
 import java.util.HashMap;
@@ -9,7 +10,7 @@ public record MyHttpRequest(
         String method,
         String uri,
         String resourcePath,
-        String contentType,
+        ContentType contentType,
         String version,
         HttpCookie cookie,
         String body
@@ -96,15 +97,15 @@ public record MyHttpRequest(
         return uri.substring(startIndexOfPath, startIndexOfQueryString);
     }
 
-    private static String contentTypeOf(String url) {
+    private static ContentType contentTypeOf(String url) {
         int lastDotIndex = url.lastIndexOf(".");
         String fileNameExtension = url.substring(lastDotIndex + 1);
         return switch (fileNameExtension) {
-            case "/", "html" -> "text/html";
-            case "css" -> "text/css";
-            case "js" -> "text/javascript";
-            case "ico" -> "image/x-icon";
-            default -> "text/html";
+            case "/", "html" -> ContentType.HTML;
+            case "css" -> ContentType.CSS;
+            case "js" -> ContentType.JAVASCRIPT;
+            case "ico" -> ContentType.ICO;
+            default -> ContentType.HTML;
         };
     }
 

@@ -82,8 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             readLength += nowReadLength;
         }
-        String requestBodyForm = new String(buffer);
-        return requestBodyForm;
+        return new String(buffer);
     }
 
     private void getProcess(

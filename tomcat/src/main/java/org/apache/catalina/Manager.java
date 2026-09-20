@@ -53,4 +53,6 @@ public interface Manager {
      * @param session Session to be removed
      */
     void remove(HttpSession session);
+
+    void removeAll();
 }

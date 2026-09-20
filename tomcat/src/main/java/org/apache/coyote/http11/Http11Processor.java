@@ -155,7 +155,7 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseThrow();
 
             if (user.checkPassword(password)) {
-                log.info("login ok");
+                log.info("user : {}", user.toString());
             }
         }
     }

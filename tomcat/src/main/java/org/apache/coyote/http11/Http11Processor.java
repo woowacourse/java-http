@@ -43,8 +43,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(HttpRequest request) throws IOException {
+        if (request.isMatched(HttpMethod.GET, "/login")) {
+            return createStaticResourceResponse("/login.html");
+        }
+
         if (request.isMatched(HttpMethod.POST, "/login")) {
             return handleLogin(request);
+        }
+
+        if (request.isMatched(HttpMethod.GET, "/register")) {
+            return createStaticResourceResponse("/register.html");
+        }
+
+        if (request.isMatched(HttpMethod.POST, "/register")) {
+            return handleRegister(request);
         }
 
         if (request.isMatched(HttpMethod.GET, "/")) {
@@ -58,12 +70,12 @@ public class Http11Processor implements Runnable, Processor {
         return createNotFoundResponse();
     }
 
-    private HttpResponse handleLogin(HttpRequest request) throws IOException {
+    private HttpResponse handleLogin(HttpRequest request) {
         if (!isAuthenticated(request.getBodyParamValue("account"), request.getBodyParamValue("password"))) {
-            return createUnauthorizedResponse();
+            return HttpResponse.redirect("/401.html");
         }
 
-        return createStaticResourceResponse("/index.html");
+        return HttpResponse.redirect("/index.html");
     }
 
     private boolean isAuthenticated(String account, String password) {
@@ -75,6 +87,26 @@ public class Http11Processor implements Runnable, Processor {
         return authenticatedUser.isPresent();
     }
 
+    private HttpResponse handleRegister(HttpRequest request) {
+        String account = request.getBodyParamValue("account");
+        String email = request.getBodyParamValue("email");
+        String password = request.getBodyParamValue("password");
+
+        saveUser(account, email, password);
+
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private void saveUser(String account, String email, String password) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 account 입니다: " + account);
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        log.info("회원가입 완료: {}", account);
+    }
+
     private HttpResponse createStaticResourceResponse(String path) throws IOException {
         String resourcePath = "static" + path;
 
@@ -82,11 +114,6 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = resolveContentType(path);
 
         return HttpResponse.ok(contentType, body);
-    }
-
-    private HttpResponse createUnauthorizedResponse() throws IOException {
-        byte[] body = readResourceBytes("static/401.html");
-        return HttpResponse.unauthorized(body);
     }
 
     private HttpResponse createRootResponse() {

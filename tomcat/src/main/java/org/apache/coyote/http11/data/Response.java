@@ -43,6 +43,10 @@ public record Response(
         return new Response(400, Map.of(), "Bad Request");
     }
 
+    public static Response redirect(final String location) {
+        return new Response(302, Map.of("Location", location), "");
+    }
+
     @Override
     public String toString() {
 

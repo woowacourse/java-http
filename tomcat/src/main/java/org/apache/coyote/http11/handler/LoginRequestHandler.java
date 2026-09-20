@@ -19,14 +19,15 @@ public class LoginRequestHandler implements RequestHandler {
             return Response.badRequest();
         }
 
-        InMemoryUserRepository.findByAccount(account)
+        final boolean canLogin = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(
-                        user -> log.info("User {} logged in successfully.", account),
-                        () -> log.info("Login failed for user {}.", account)
-                );
+                .isPresent();
 
-        return Response.noContent();
+        if (canLogin) {
+            return Response.redirect("/index.html");
+        }
+
+        return Response.redirect("/401.html");
     }
 
     public boolean isValidateData(String account, String password) {

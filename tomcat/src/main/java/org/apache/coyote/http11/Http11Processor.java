@@ -7,7 +7,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.JSessionIdGenerator;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.Cookie;
 import org.apache.coyote.http11.model.FormParameters;
 import org.apache.coyote.http11.model.RequestLine;
 import org.apache.coyote.http11.model.UriInfo;
@@ -40,12 +42,18 @@ public class Http11Processor implements Runnable, Processor {
             RequestLine requestLine = RequestLine.from(reader);
             String line;
             int requestContentLength = 0;
+            String cookieForm = "";
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 if (line.contains("Content-Length")) {
                     String[] contentLengthLine = line.split(":", 2);
                     requestContentLength = Integer.parseInt(contentLengthLine[1].trim());
                 }
+                if (line.contains("Cookie")) {
+                    String[] cookieLine = line.split(":", 2);
+                    cookieForm = cookieLine[1].trim();
+                }
             }
+            Cookie cookie = Cookie.from(cookieForm);
             int readLength = 0;
             char[] buffer = new char[requestContentLength];
             while (readLength < requestContentLength) {
@@ -55,7 +63,6 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 readLength += nowReadLength;
             }
-
             String requestBodyForm = new String(buffer);
 
             String url = requestLine.requestUrl();
@@ -63,10 +70,10 @@ public class Http11Processor implements Runnable, Processor {
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
 
             if ("GET".equals(method)) {
-                getProcess(outputStream, uriInfo);
+                getProcess(outputStream, uriInfo, cookie.hasCookie("JSESSIONID"));
             } else if ("POST".equals(method)) {
                 FormParameters requestBody = FormParameters.from(requestBodyForm);
-                postProcess(outputStream, uriInfo, requestBody);
+                postProcess(outputStream, uriInfo, requestBody, cookie.hasCookie("JSESSIONID"));
             }
 
         } catch (IOException | URISyntaxException | RuntimeException e) {
@@ -74,18 +81,34 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void getProcess(OutputStream outputStream, UriInfo uriInfo) throws IOException, URISyntaxException {
+    private void getProcess(
+            OutputStream outputStream,
+            UriInfo uriInfo,
+            boolean hasJSessionId
+    ) throws IOException, URISyntaxException {
         byte[] responseBody = RequestHandler.get(uriInfo.path());
         String responseHeader = buildResponseHeader(responseBody, findContentType(uriInfo.path()));
+        if (!hasJSessionId) {
+            responseHeader = addCookieToResponseHeader(responseHeader);
+        }
+        responseHeader = finishResponseHeader(responseHeader);
         outputStream.write(responseHeader.getBytes());
         outputStream.write(responseBody);
         outputStream.flush();
     }
 
-    private void postProcess(OutputStream outputStream, UriInfo uriInfo, FormParameters formParameters)
-            throws IOException, URISyntaxException {
+    private void postProcess(
+            OutputStream outputStream,
+            UriInfo uriInfo,
+            FormParameters formParameters,
+            boolean hasJSessionId
+    ) throws IOException, URISyntaxException {
         String redirectPath = RequestHandler.post(uriInfo, formParameters);
         String responseHeader = buildResponseHeader(redirectPath);
+        if (!hasJSessionId) {
+            responseHeader = addCookieToResponseHeader(responseHeader);
+        }
+        responseHeader = finishResponseHeader(responseHeader);
         outputStream.write(responseHeader.getBytes());
         outputStream.flush();
     }
@@ -94,9 +117,17 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: " + redirectPath,
-                "Content-Length: 0",
-                "",
-                "");
+                "Content-Length: 0");
+    }
+
+    private String addCookieToResponseHeader(String responseHeader) {
+        return responseHeader +
+                "\r\n" +
+                "Set-Cookie: JSESSIONID=" + JSessionIdGenerator.generateUuid();
+    }
+
+    private String finishResponseHeader(String responseHeader) {
+        return responseHeader + "\r\n\r\n";
     }
 
     private String buildResponseHeader(
@@ -106,9 +137,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "");
+                "Content-Length: " + responseBody.length + " ");
     }
 
     private String findContentType(String url) {

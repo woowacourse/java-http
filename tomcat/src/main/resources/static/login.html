@@ -60,6 +60,12 @@
                 </footer>
             </div>
         </div>
+        <script>
+            const queryParams = new URLSearchParams(window.location.search);
+            if (queryParams.get("error") === "invalid_credentials") {
+                alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+            }
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src="js/scripts.js"></script>
     </body>

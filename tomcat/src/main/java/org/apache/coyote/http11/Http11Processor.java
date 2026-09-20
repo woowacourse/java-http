@@ -8,10 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,96 +37,114 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+            final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final var resourcePath = extractResourcePath(reader.readLine());
+            final var requestUri = extractRequestUri(reader.readLine());
 
-            if ("/".equals(resourcePath)) {
-                writeResponse(outputStream, "text/html", "200 OK", "Hello world!".getBytes(StandardCharsets.UTF_8));
-                return;
-            }
-            writeResource(outputStream, STATIC_RESOURCE_PATH + appendHtmlExtension(resourcePath));
+            final var request = toRequest(requestUri);
+            handleRequest(request, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static String extractResourcePath(final String requestLine) {
-        String uri = requestLine.split(" ")[1];
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return uri;
-        }
-
-        String path = uri.substring(0, index);
-        Map<String, String> queryParams = parseQueries(uri.substring(index + 1));
-        InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .ifPresent(user -> {
-                    if (user.checkPassword(queryParams.get("password"))) {
-                        log.info("user : {}", user);
-                    }
-                });
-        return path;
+    private static String extractRequestUri(final String requestLine) {
+        log.info("request: {}", requestLine);
+        return requestLine.split(" ")[1];
     }
 
-    private static Map<String, String> parseQueries(String queryString) {
-        String[] queries = queryString.split("&");
-        Map<String, String> params = new HashMap<>();
-        for (String query : queries) {
-            String[] pair = query.split("=");
-            params.put(pair[0], pair[1]);
+    private static Request toRequest(final String requestUri) {
+        final int index = requestUri.indexOf("?");
+        if (index == -1) {
+            return new Request(requestUri, Map.of());
+        }
+
+        final String queryString = requestUri.substring(index + 1);
+        if (queryString.isEmpty()) {
+            return new Request(requestUri, Map.of());
+        }
+        return new Request(requestUri.substring(0, index), Map.copyOf(parseQueries(queryString)));
+    }
+
+    private static Map<String, String> parseQueries(final String queryString) {
+        final String[] queries = queryString.split("&");
+        final Map<String, String> params = new HashMap<>();
+        for (final String query : queries) {
+            final String[] pair = query.split("=", 2);
+            if (pair.length == 2) {
+                final String name = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
+                final String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+                params.put(name, value);
+            }
         }
         return params;
     }
 
+    private void handleRequest(final Request request, final OutputStream outputStream) throws IOException {
+        if ("/login".equals(request.path()) && !request.params().isEmpty()) {
+            if (isValidAuth(request.params())) {
+                writeResponse(outputStream, "302 Found", Map.of("Location", "/index.html"), new byte[0]);
+                return;
+            }
+            final String invalidRedirectUri = "/login.html?error=invalid_credentials";
+            writeResponse(outputStream, "302 Found", Map.of("Location", invalidRedirectUri), new byte[0]);
+        } else if ("/".equals(request.path())) {
+            final var body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+            writeResponse(outputStream, "200 OK", contentTypeHeader("text/html"), body);
+        } else {
+            writeResource(outputStream, "200 OK", STATIC_RESOURCE_PATH + appendHtmlExtension(request.path()));
+        }
+    }
+
+    private boolean isValidAuth(final Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        if (account == null || password == null) {
+            return false;
+        }
+
+        return InMemoryUserRepository.findByAccount(account)
+                        .filter(user -> user.checkPassword(password))
+                        .isPresent();
+    }
+
     private void writeResource(
             final OutputStream outputStream,
+            final String status,
             final String resourcePath
     ) throws IOException {
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resource == null) {
-                writeNotFoundResponse(outputStream);
+                writeResource(outputStream, "404 Not Found", NOT_FOUND_RESOURCE_PATH);
                 return;
             }
 
             final var contentType = MimeTypeResolver.resolve(resourcePath);
-            writeResponse(outputStream, contentType, "200 OK", resource.readAllBytes());
-        }
-    }
-
-    private void writeNotFoundResponse(final OutputStream outputStream) throws IOException {
-        try (InputStream resource = Objects.requireNonNull(
-                getClass().getClassLoader().getResourceAsStream(NOT_FOUND_RESOURCE_PATH),
-                "404 페이지를 찾을 수 없습니다."
-        )) {
-            writeResponse(outputStream, "text/html", "404 Not Found", resource.readAllBytes());
+            writeResponse(outputStream, status, contentTypeHeader(contentType), resource.readAllBytes());
         }
     }
 
     private void writeResponse(
             final OutputStream outputStream,
-            final String contentType,
             final String status,
+            final Map<String, String> headers,
             final byte[] responseBody
     ) throws IOException {
-        final var responseHeader = String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + toContentTypeHeader(contentType) + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "");
+        final var responseHeader = new StringBuilder().append("HTTP/1.1 %s \r\n".formatted(status));
+        headers.forEach((name, value) -> responseHeader.append("%s: %s \r\n".formatted(name, value)));
+        responseHeader.append("Content-Length: %d \r\n".formatted(responseBody.length)).append("\r\n");
 
-        outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
         outputStream.flush();
     }
 
-    private String toContentTypeHeader(final String contentType) {
+    private Map<String, String> contentTypeHeader(final String contentType) {
         if (contentType.startsWith("text/")) {
-            return contentType + ";charset=utf-8";
+            return Map.of("Content-Type", contentType + ";charset=utf-8");
         }
-        return contentType;
+        return Map.of("Content-Type", contentType);
     }
 
     private static String appendHtmlExtension(final String resourcePath) {

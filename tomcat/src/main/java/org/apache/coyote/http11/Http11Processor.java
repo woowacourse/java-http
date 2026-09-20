@@ -15,6 +15,9 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER_ATTRIBUTE = "user";
 
     private final Socket connection;
 
@@ -139,25 +144,36 @@ public class Http11Processor implements Runnable, Processor {
 
         if (account == null || email == null || password == null) {
             log.info("회원가입에 필요한 정보가 입력되지 않았습니다.");
-            sendRedirect(outputStream, UNAUTHORIZED_PAGE);
+            sendRedirect(outputStream, UNAUTHORIZED_PAGE, null);
             return;
         }
 
         InMemoryUserRepository.save(new User(account, password, email));
         log.info("회원가입이 완료되었습니다. account: {}", account);
-        sendRedirect(outputStream, INDEX_PAGE);
+        sendRedirect(outputStream, INDEX_PAGE, null);
     }
 
-    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "",
-                "");
+    private void sendRedirect(final OutputStream outputStream, final String location, final String sessionId)
+            throws IOException {
+        final StringBuilder response = new StringBuilder()
+                .append("HTTP/1.1 302 Found ").append("\r\n")
+                .append("Location: ").append(location).append(" ").append("\r\n");
 
-        outputStream.write(response.getBytes());
+        if (sessionId != null) {
+            response.append("Set-Cookie: ").append(JSESSIONID).append("=").append(sessionId).append(" ").append("\r\n");
+        }
+        response.append("\r\n");
+
+        outputStream.write(response.toString().getBytes());
         outputStream.flush();
     }
+
+    private Session createSession() {
+        final Session session = new Session(UUID.randomUUID().toString());
+        SessionManager.getInstance().add(session);
+        return session;
+    }
+
 
     private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
@@ -196,7 +212,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (account == null || password == null) {
             log.info("아이디 또는 비밀번호가 입력되지 않았습니다.");
-            sendRedirect(outputStream, UNAUTHORIZED_PAGE);
+            sendRedirect(outputStream, UNAUTHORIZED_PAGE, null);
             return;
         }
 
@@ -205,12 +221,15 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isEmpty()) {
             log.info("아이디 또는 비밀번호가 일치하지 않습니다. account: {}", account);
-            sendRedirect(outputStream, UNAUTHORIZED_PAGE);
+            sendRedirect(outputStream, UNAUTHORIZED_PAGE, null);
             return;
         }
 
         log.info("회원 조회 결과: {}", user.get());
-        sendRedirect(outputStream, INDEX_PAGE);
+
+        final Session session = createSession();
+        session.setAttribute(USER_ATTRIBUTE, user.get());
+        sendRedirect(outputStream, INDEX_PAGE, session.getId());
     }
 
     private String extractPath(final String requestTarget) {

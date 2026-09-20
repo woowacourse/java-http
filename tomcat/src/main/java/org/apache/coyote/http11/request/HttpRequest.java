@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Set;
-import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
@@ -13,29 +12,37 @@ public class HttpRequest {
     private final HttpBody body;
     private final HttpParams bodyParams;
     private final HttpCookie cookie;
+    private final SessionManager sessionManager;
     private Session session;
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, HttpBody body, SessionManager sessionManager) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
         this.bodyParams = parseBodyParams(requestLine, headers, body);
         this.cookie = headers.getCookie();
-    }
-
-    public static HttpRequest from(String requestLine, HttpHeaders headers, HttpBody body) {
-        return new HttpRequest(RequestLine.from(requestLine), headers, body);
+        this.sessionManager = sessionManager;
     }
 
     public static HttpRequest from(
             String requestLine,
             HttpHeaders headers,
             HttpBody body,
-            Set<HttpMethod> supportedMethods
+            SessionManager sessionManager
+    ) {
+        return new HttpRequest(RequestLine.from(requestLine), headers, body, sessionManager);
+    }
+
+    public static HttpRequest from(
+            String requestLine,
+            HttpHeaders headers,
+            HttpBody body,
+            Set<HttpMethod> supportedMethods,
+            SessionManager sessionManager
     ) {
         RequestLine parsedRequestLine = RequestLine.from(requestLine, supportedMethods);
 
-        return new HttpRequest(parsedRequestLine, headers, body);
+        return new HttpRequest(parsedRequestLine, headers, body, sessionManager);
     }
 
     public HttpCookie getCookie() {
@@ -47,9 +54,9 @@ public class HttpRequest {
             return session;
         }
 
-        session = SessionManager.getInstance().findSession(cookie.get(HttpCookie.JSESSIONID));
+        session = sessionManager.findSession(cookie.get(HttpCookie.JSESSIONID));
         if (session == null && create) {
-            session = createSession();
+            session = sessionManager.createSession();
         }
 
         return session;
@@ -58,19 +65,12 @@ public class HttpRequest {
     public Session renewSession() {
         Session previousSession = getSession(false);
         if (previousSession != null) {
-            previousSession.invalidate();
+            sessionManager.remove(previousSession);
         }
 
-        session = createSession();
+        session = sessionManager.createSession();
 
         return session;
-    }
-
-    private Session createSession() {
-        Session created = new Session(UUID.randomUUID().toString());
-        SessionManager.getInstance().add(created);
-
-        return created;
     }
 
     public HttpMethod getMethod() {

@@ -25,6 +25,7 @@ class LoginControllerTest {
     private static final HttpHeaders FORM_HEADERS =
             HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
 
+    private final SessionManager sessionManager = new SessionManager();
     private final LoginController loginController = new LoginController();
 
     @Test
@@ -63,7 +64,7 @@ class LoginControllerTest {
                 "Content-Type: application/x-www-form-urlencoded",
                 "Cookie: JSESSIONID=before-login"
         ));
-        final HttpRequest request = HttpRequest.from(
+        final HttpRequest request = request(
                 "POST /login HTTP/1.1", headers, new HttpBody("account=gugu&password=password"));
 
         // when
@@ -131,13 +132,13 @@ class LoginControllerTest {
     }
 
     private String get(String requestLine) throws IOException {
-        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty());
+        final HttpRequest request = request(requestLine, HttpHeaders.empty(), HttpBody.empty());
 
         return toString(loginController.run(request));
     }
 
     private String post(String body) throws IOException {
-        final HttpRequest request = HttpRequest.from("POST /login HTTP/1.1", FORM_HEADERS, new HttpBody(body));
+        final HttpRequest request = request("POST /login HTTP/1.1", FORM_HEADERS, new HttpBody(body));
 
         return toString(loginController.run(request));
     }
@@ -175,7 +176,7 @@ class LoginControllerTest {
         final String response = post("account=gugu&password=password");
 
         // then
-        final Session session = SessionManager.getInstance().findSession(sessionIdOf(response));
+        final Session session = sessionManager.findSession(sessionIdOf(response));
         assertThat(session).isNotNull();
         assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("gugu");
     }
@@ -185,7 +186,7 @@ class LoginControllerTest {
         // given
         final Session session = new Session("login-already-logged-in");
         session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
-        SessionManager.getInstance().add(session);
+        sessionManager.add(session);
 
         // when
         final String response = getWithCookie("JSESSIONID=login-already-logged-in");
@@ -197,7 +198,7 @@ class LoginControllerTest {
     @Test
     void loginPageWhenSessionHasNoUser() throws IOException {
         // given
-        SessionManager.getInstance().add(new Session("login-session-without-user"));
+        sessionManager.add(new Session("login-session-without-user"));
 
         // when
         final String response = getWithCookie("JSESSIONID=login-session-without-user");
@@ -217,7 +218,7 @@ class LoginControllerTest {
 
     private String getWithCookie(String cookie) throws IOException {
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: " + cookie));
-        final HttpRequest request = HttpRequest.from("GET /login HTTP/1.1", headers, HttpBody.empty());
+        final HttpRequest request = request("GET /login HTTP/1.1", headers, HttpBody.empty());
 
         return toString(loginController.run(request));
     }
@@ -227,4 +228,8 @@ class LoginControllerTest {
         assertThat(matcher.find()).isTrue();
         return matcher.group(1);
     }
+    private HttpRequest request(String requestLine, HttpHeaders headers, HttpBody body) {
+        return HttpRequest.from(requestLine, headers, body, sessionManager);
+    }
+
 }

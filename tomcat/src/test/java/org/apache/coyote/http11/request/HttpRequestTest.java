@@ -12,13 +12,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpRequestTest {
+    private final SessionManager sessionManager = new SessionManager();
+
     @Test
     void parseRequestLine() {
         // given
         final String requestLine = "GET /login?account=gugu HTTP/1.1";
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty());
+        final HttpRequest request = request(requestLine, HttpHeaders.empty(), HttpBody.empty());
 
         // then
         assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
@@ -33,7 +35,7 @@ class HttpRequestTest {
         final String requestLine = "GET /index.html ABC HTTP/1.1";
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty()))
+        assertThatThrownBy(() -> request(requestLine, HttpHeaders.empty(), HttpBody.empty()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("잘못된 http요청 형태입니다.");
     }
@@ -45,7 +47,7 @@ class HttpRequestTest {
         final Set<HttpMethod> supportedMethods = Set.of(HttpMethod.GET);
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods);
+        final HttpRequest request = request(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods);
 
         // then
         assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
@@ -59,7 +61,7 @@ class HttpRequestTest {
         final Set<HttpMethod> supportedMethods = Set.of(HttpMethod.GET);
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods))
+        assertThatThrownBy(() -> request(requestLine, HttpHeaders.empty(), HttpBody.empty(), supportedMethods))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("지원하지 않는 HTTP 메서드입니다: POST");
     }
@@ -70,7 +72,7 @@ class HttpRequestTest {
         final String requestLine = "POST /index.html HTTP/1.1";
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty());
+        final HttpRequest request = request(requestLine, HttpHeaders.empty(), HttpBody.empty());
 
         // then
         assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
@@ -82,7 +84,7 @@ class HttpRequestTest {
         final String requestLine = "GET /index.html ABC";
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from(requestLine, HttpHeaders.empty(), HttpBody.empty()))
+        assertThatThrownBy(() -> request(requestLine, HttpHeaders.empty(), HttpBody.empty()))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("지원하지 않는 HTTP 버전입니다: ABC");
     }
@@ -95,7 +97,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=gugu");
 
         // when
-        final HttpRequest request = HttpRequest.from(requestLine, headers, body);
+        final HttpRequest request = request(requestLine, headers, body);
 
         // then
         assertThat(request.getHeader("host")).isEqualTo("localhost:8080");
@@ -109,7 +111,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=gugu2&email=gugu2%40woowahan.com");
 
         // when
-        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", headers, body);
+        final HttpRequest request = request("POST /register HTTP/1.1", headers, body);
 
         // then
         assertThat(request.getBodyParams("account")).isEqualTo("gugu2");
@@ -123,7 +125,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=gugu2");
 
         // when
-        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", headers, body);
+        final HttpRequest request = request("POST /register HTTP/1.1", headers, body);
 
         // then
         assertThat(request.getBodyParams("account")).isEqualTo("gugu2");
@@ -136,7 +138,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=fromBody");
 
         // when
-        final HttpRequest request = HttpRequest.from("POST /register?account=fromQuery HTTP/1.1", headers, body);
+        final HttpRequest request = request("POST /register?account=fromQuery HTTP/1.1", headers, body);
 
         // then
         assertThat(request.getQueryParams("account")).isEqualTo("fromQuery");
@@ -150,7 +152,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=gugu2");
 
         // when
-        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", headers, body);
+        final HttpRequest request = request("POST /register HTTP/1.1", headers, body);
 
         // then
         assertThat(request.getBodyParams("account")).isNull();
@@ -163,7 +165,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=gugu2");
 
         // when
-        final HttpRequest request = HttpRequest.from("GET /register HTTP/1.1", headers, body);
+        final HttpRequest request = request("GET /register HTTP/1.1", headers, body);
 
         // then
         assertThat(request.getBodyParams("account")).isNull();
@@ -176,7 +178,7 @@ class HttpRequestTest {
         final HttpBody body = new HttpBody("account=%");
 
         // when & then
-        assertThatThrownBy(() -> HttpRequest.from("POST /register HTTP/1.1", headers, body))
+        assertThatThrownBy(() -> request("POST /register HTTP/1.1", headers, body))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("잘못된 쿼리 스트링입니다.");
     }
@@ -187,7 +189,7 @@ class HttpRequestTest {
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: yummy_cookie=choco; JSESSIONID=abc"));
 
         // when
-        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+        final HttpRequest request = request("GET /index.html HTTP/1.1", headers, HttpBody.empty());
 
         // then
         assertThat(request.getCookie().get("JSESSIONID")).isEqualTo("abc");
@@ -197,7 +199,7 @@ class HttpRequestTest {
     void cookieIsParsedOnce() {
         // given
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=abc"));
-        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+        final HttpRequest request = request("GET /index.html HTTP/1.1", headers, HttpBody.empty());
 
         // when
         request.getCookie().add("theme", "dark");
@@ -211,7 +213,7 @@ class HttpRequestTest {
     @Test
     void noSessionWithoutCookie() {
         // given
-        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+        final HttpRequest request = request("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
 
         // when & then
         assertThat(request.getSession(false)).isNull();
@@ -220,14 +222,14 @@ class HttpRequestTest {
     @Test
     void createSessionWhenRequested() {
         // given
-        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+        final HttpRequest request = request("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
 
         // when
         final Session session = request.getSession(true);
 
         // then
         assertThat(session.getId()).matches("[0-9a-f-]{36}");
-        assertThat(SessionManager.getInstance().findSession(session.getId())).isSameAs(session);
+        assertThat(sessionManager.findSession(session.getId())).isSameAs(session);
         assertThat(request.getSession(false)).isSameAs(session);
     }
 
@@ -235,11 +237,11 @@ class HttpRequestTest {
     void findSessionByJSessionIdCookie() {
         // given
         final Session session = new Session("request-existing-session");
-        SessionManager.getInstance().add(session);
+        sessionManager.add(session);
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=request-existing-session"));
 
         // when
-        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+        final HttpRequest request = request("GET /index.html HTTP/1.1", headers, HttpBody.empty());
 
         // then
         assertThat(request.getSession(false)).isSameAs(session);
@@ -252,9 +254,22 @@ class HttpRequestTest {
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=request-unknown-session"));
 
         // when
-        final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+        final HttpRequest request = request("GET /index.html HTTP/1.1", headers, HttpBody.empty());
 
         // then
         assertThat(request.getSession(false)).isNull();
     }
+    private HttpRequest request(String requestLine, HttpHeaders headers, HttpBody body) {
+        return HttpRequest.from(requestLine, headers, body, sessionManager);
+    }
+
+    private HttpRequest request(
+            String requestLine,
+            HttpHeaders headers,
+            HttpBody body,
+            Set<HttpMethod> supportedMethods
+    ) {
+        return HttpRequest.from(requestLine, headers, body, supportedMethods, sessionManager);
+    }
+
 }

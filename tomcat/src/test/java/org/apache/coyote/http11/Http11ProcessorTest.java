@@ -33,11 +33,13 @@ class Http11ProcessorTest {
     private static final Pattern SET_SESSION_COOKIE_PATTERN =
             Pattern.compile("Set-Cookie: JSESSIONID=(" + SESSION_ID_FORMAT + ") ");
 
+    private final SessionManager sessionManager = new SessionManager();
+
     @Test
     void process() {
         // given
         final StubSocket socket = new StubSocket();
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -60,7 +62,7 @@ class Http11ProcessorTest {
                 "");
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -83,7 +85,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -122,7 +124,7 @@ class Http11ProcessorTest {
         // then
         final String sessionId = issuedSessionId(result.response());
         assertThat(result.response()).isEqualTo(redirectResponse("/401.html", sessionId));
-        assertThat(SessionManager.getInstance().findSession(sessionId).getAttribute("user")).isNull();
+        assertThat(sessionManager.findSession(sessionId).getAttribute("user")).isNull();
         assertThat(result.loggingEvents())
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .noneMatch(message -> message.startsWith("login user:"));
@@ -137,7 +139,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -197,7 +199,7 @@ class Http11ProcessorTest {
     void emptyRequest() {
         // given
         final StubSocket socket = new StubSocket("");
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -215,7 +217,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -238,7 +240,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -261,7 +263,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -285,7 +287,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -308,7 +310,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -328,7 +330,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -351,7 +353,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -365,7 +367,7 @@ class Http11ProcessorTest {
     @Test
     void internalServerErrorWhenControllerThrowsIOException() throws IOException {
         // given
-        final Http11Processor processor = new Http11Processor(new StubSocket());
+        final Http11Processor processor = processor(new StubSocket());
         final PageController controller = request -> {
             throw new IOException("파일을 읽을 수 없습니다.");
         };
@@ -381,7 +383,7 @@ class Http11ProcessorTest {
     @Test
     void internalServerErrorWhenControllerThrowsRuntimeException() throws IOException {
         // given
-        final Http11Processor processor = new Http11Processor(new StubSocket());
+        final Http11Processor processor = processor(new StubSocket());
         final PageController controller = request -> {
             throw new IllegalStateException("예상하지 못한 오류");
         };
@@ -397,7 +399,7 @@ class Http11ProcessorTest {
     @Test
     void badRequestWhenControllerThrowsBadRequestException() {
         // given
-        final Http11Processor processor = new Http11Processor(new StubSocket());
+        final Http11Processor processor = processor(new StubSocket());
         final PageController controller = request -> {
             throw new BadRequestException("잘못된 정적 리소스 경로입니다: /../secret");
         };
@@ -415,14 +417,14 @@ class Http11ProcessorTest {
     }
 
     private HttpRequest indexRequest() {
-        return HttpRequest.from("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+        return request("GET /index.html HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
     }
 
     @Test
     void noSetCookieWhenRequestAlreadyHasSession() {
         // given
         final Session session = new Session("processor-existing-session");
-        SessionManager.getInstance().add(session);
+        sessionManager.add(session);
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
@@ -430,7 +432,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -449,7 +451,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -468,7 +470,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "",
                 ""));
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -481,7 +483,7 @@ class Http11ProcessorTest {
     void sessionIdIsRenewedWhenLoginSucceeds() {
         // given
         final Session beforeLogin = new Session("processor-before-login");
-        SessionManager.getInstance().add(beforeLogin);
+        sessionManager.add(beforeLogin);
         final String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -492,7 +494,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -500,8 +502,8 @@ class Http11ProcessorTest {
         // then
         final String sessionId = issuedSessionId(socket.output());
         assertThat(sessionId).isNotEqualTo(beforeLogin.getId());
-        assertThat(SessionManager.getInstance().findSession(beforeLogin.getId())).isNull();
-        assertThat(SessionManager.getInstance().findSession(sessionId).getAttribute("user")).isNotNull();
+        assertThat(sessionManager.findSession(beforeLogin.getId())).isNull();
+        assertThat(sessionManager.findSession(sessionId).getAttribute("user")).isNotNull();
     }
 
     @Test
@@ -521,7 +523,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -544,7 +546,7 @@ class Http11ProcessorTest {
 
     private LoginResult requestLoginWith(String httpRequest) {
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
         final ch.qos.logback.classic.Logger logger =
                 (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(LoginController.class);
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -619,4 +621,12 @@ class Http11ProcessorTest {
 
     private record LoginResult(String response, List<ILoggingEvent> loggingEvents) {
     }
+    private HttpRequest request(String requestLine, HttpHeaders headers, HttpBody body) {
+        return HttpRequest.from(requestLine, headers, body, sessionManager);
+    }
+
+    private Http11Processor processor(StubSocket socket) {
+        return new Http11Processor(socket, sessionManager);
+    }
+
 }

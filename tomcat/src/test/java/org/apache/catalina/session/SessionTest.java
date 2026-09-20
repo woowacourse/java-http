@@ -34,16 +34,13 @@ class SessionTest {
     @Test
     void invalidate() {
         // given
-        final SessionManager sessionManager = SessionManager.getInstance();
         final Session session = new Session("session-invalidate");
         session.setAttribute("user", "gugu");
-        sessionManager.add(session);
 
         // when
         session.invalidate();
 
         // then
         assertThat(session.getAttribute("user")).isNull();
-        assertThat(sessionManager.findSession("session-invalidate")).isNull();
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.pageController.PageController;
 import org.apache.coyote.http11.pageController.PageControllerMapper;
 import org.apache.coyote.http11.request.HttpBody;
@@ -34,9 +35,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -116,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpHeaders headers = readHeaders(reader);
         HttpBody body = readBody(reader, headers.getContentLength());
 
-        return HttpRequest.from(requestLine, headers, body, SUPPORTED_METHODS);
+        return HttpRequest.from(requestLine, headers, body, SUPPORTED_METHODS, sessionManager);
     }
 
     private HttpHeaders readHeaders(BufferedReader reader) throws IOException {

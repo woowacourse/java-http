@@ -24,12 +24,13 @@ class RegisterControllerTest {
     private static final HttpHeaders FORM_HEADERS =
             HttpHeaders.from(List.of("Content-Type: application/x-www-form-urlencoded"));
 
+    private final SessionManager sessionManager = new SessionManager();
     private final RegisterController registerController = new RegisterController();
 
     @Test
     void registerPage() throws IOException {
         // given
-        final HttpRequest request = HttpRequest.from("GET /register HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
+        final HttpRequest request = request("GET /register HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
 
         // when
         final String response = toString(registerController.run(request));
@@ -105,7 +106,7 @@ class RegisterControllerTest {
     }
 
     private String post(String body) throws IOException {
-        final HttpRequest request = HttpRequest.from("POST /register HTTP/1.1", FORM_HEADERS, new HttpBody(body));
+        final HttpRequest request = request("POST /register HTTP/1.1", FORM_HEADERS, new HttpBody(body));
 
         return toString(registerController.run(request));
     }
@@ -136,7 +137,7 @@ class RegisterControllerTest {
         // then
         final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=([0-9a-f-]{36})").matcher(response);
         assertThat(matcher.find()).isTrue();
-        final Session session = SessionManager.getInstance().findSession(matcher.group(1));
+        final Session session = sessionManager.findSession(matcher.group(1));
         assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("sessionuser");
     }
 
@@ -145,9 +146,9 @@ class RegisterControllerTest {
         // given
         final Session session = new Session("register-already-logged-in");
         session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
-        SessionManager.getInstance().add(session);
+        sessionManager.add(session);
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=register-already-logged-in"));
-        final HttpRequest request = HttpRequest.from("GET /register HTTP/1.1", headers, HttpBody.empty());
+        final HttpRequest request = request("GET /register HTTP/1.1", headers, HttpBody.empty());
 
         // when
         final String response = toString(registerController.run(request));
@@ -157,4 +158,8 @@ class RegisterControllerTest {
                 .startsWith("HTTP/1.1 302 Found \r\nLocation: /index.html \r\n")
                 .doesNotContain("Set-Cookie");
     }
+    private HttpRequest request(String requestLine, HttpHeaders headers, HttpBody body) {
+        return HttpRequest.from(requestLine, headers, body, sessionManager);
+    }
+
 }

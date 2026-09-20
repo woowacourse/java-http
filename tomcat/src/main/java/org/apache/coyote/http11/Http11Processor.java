@@ -85,9 +85,9 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 }
 
-                if (path.equals("/css/styles.css")) {
-                    responseBody = readFile("static/css/styles.css");
-                    contentType = "text/css";
+                if (path.endsWith(".css") || path.endsWith(".js")) {
+                    responseBody = readFile("static" + path);
+                    contentType = path.endsWith(".css") ? "text/css" : "text/javascript";
                 }
             }
 

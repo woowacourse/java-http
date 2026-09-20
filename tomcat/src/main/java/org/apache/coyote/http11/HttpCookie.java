@@ -39,6 +39,6 @@ public class HttpCookie {
     }
 
     public static String createJSessionId(String sessionId) {
-        return JSESSIONID + "=" + sessionId;
+        return JSESSIONID + "=" + sessionId + "; Path=/; HttpOnly; SameSite=Lax";
     }
 }

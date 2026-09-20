@@ -202,6 +202,24 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("JSESSIONID 쿠키는 전체 경로와 보안 속성을 포함한다")
+    void jSessionIdCookieAttributes() {
+        // given
+        final var socket = new StubSocket(httpRequestWithoutCookie("/index.html"));
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("Set-Cookie: JSESSIONID=")
+                .contains("Path=/")
+                .contains("HttpOnly")
+                .contains("SameSite=Lax");
+    }
+
+    @Test
     @DisplayName("로그인에 성공하면 세션에 사용자를 저장한다")
     void loginSuccessCreatesSession() {
         // when
@@ -214,6 +232,21 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("로그인에 성공하면 요청 쿠키와 다른 새 세션 ID를 발급한다")
+    void loginSuccessRenewsSessionId() {
+        // when
+        String response = processWithCookie("POST", "/login", "JSESSIONID=fixed-session-id", "account=gugu&password=password");
+
+        // then
+        String sessionId = extractJSessionId(response);
+        assertThat(sessionId).isNotEqualTo("fixed-session-id");
+        assertThat(SessionManager.findSession(sessionId).getAttribute("user"))
+                .isInstanceOf(User.class);
+        assertThat(SessionManager.findSession("fixed-session-id"))
+                .isNull();
+    }
+
+    @Test
     @DisplayName("로그인된 상태로 로그인 페이지에 접근하면 index.html로 리다이렉트한다")
     void getLoginWithLoggedInSession() {
         // given
@@ -223,6 +256,18 @@ class Http11ProcessorTest {
 
         // when
         String response = processWithCookie("/login", "JSESSIONID=logged-in-session");
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found\r\n")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    @DisplayName("HTTP 헤더 이름은 대소문자를 구분하지 않는다")
+    void headerNamesAreCaseInsensitive() {
+        // when
+        String response = processWithLowerCaseHeaders("POST", "/login", "account=gugu&password=password");
 
         // then
         assertThat(response)
@@ -266,11 +311,29 @@ class Http11ProcessorTest {
         return socket.output();
     }
 
+    private String processWithCookie(String method, String path, String cookie, String body) {
+        final var socket = new StubSocket(httpRequestWithCookie(method, path, cookie, body));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        return socket.output();
+    }
+
+    private String processWithLowerCaseHeaders(String method, String path, String body) {
+        final var socket = new StubSocket(httpRequestWithLowerCaseHeaders(method, path, body));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        return socket.output();
+    }
+
     private String httpRequest(String path) {
         return String.join("\r\n",
                 "GET " + path + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Cookie: JSESSIONID=" + UUID.randomUUID(),
+                "Cookie: JSESSIONID=" + createSessionId(),
                 "",
                 "");
     }
@@ -281,7 +344,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
-                "Cookie: JSESSIONID=" + UUID.randomUUID(),
+                "Cookie: JSESSIONID=" + createSessionId(),
                 "",
                 body);
     }
@@ -305,6 +368,28 @@ class Http11ProcessorTest {
                 "");
     }
 
+    private String httpRequestWithCookie(String method, String path, String cookie, String body) {
+        return String.join("\r\n",
+                method + " " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Cookie: " + cookie,
+                "",
+                body);
+    }
+
+    private String httpRequestWithLowerCaseHeaders(String method, String path, String body) {
+        return String.join("\r\n",
+                method + " " + path + " HTTP/1.1 ",
+                "host: localhost:8080 ",
+                "content-type: application/x-www-form-urlencoded",
+                "content-length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "cookie: JSESSIONID=" + createSessionId(),
+                "",
+                body);
+    }
+
     private String httpRequestWithoutCookie(String path) {
         return String.join("\r\n",
                 "GET " + path + " HTTP/1.1 ",
@@ -317,8 +402,16 @@ class Http11ProcessorTest {
         return response.lines()
                 .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
                 .map(line -> line.substring("Set-Cookie: JSESSIONID=".length()))
+                .map(value -> value.split(";", 2)[0])
                 .findFirst()
                 .orElseThrow();
+    }
+
+    private String createSessionId() {
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.add(new Session(sessionId));
+
+        return sessionId;
     }
 
     private String expectedResponse(String path, String contentType) throws IOException {

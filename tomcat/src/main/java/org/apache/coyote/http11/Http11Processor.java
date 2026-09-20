@@ -25,6 +25,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -78,7 +81,8 @@ public class Http11Processor implements Runnable, Processor {
                 filePath = "static/login.html";
 
                 if (!queryString.isBlank()) {
-                    login(parseQueryString(queryString));
+                    login(parseQueryString(queryString), outputStream);
+                    return;
                 }
             }
 
@@ -161,23 +165,27 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, readCount);
     }
 
-    private void login(final Map<String, String> params) {
+    private void login(final Map<String, String> params, final OutputStream outputStream) throws IOException {
         final String account = params.get("account");
         final String password = params.get("password");
 
         if (account == null || password == null) {
             log.info("아이디 또는 비밀번호가 입력되지 않았습니다.");
+            sendRedirect(outputStream, UNAUTHORIZED_PAGE);
             return;
         }
 
-        log.info("로그인 시도 - account: {}, password: {}", account, password);
-
         final Optional<User> user = InMemoryUserRepository.findByAccount(account)
                 .filter(foundUser -> foundUser.checkPassword(password));
-        user.ifPresentOrElse(
-                foundUser -> log.info("회원 조회 결과: {}", foundUser),
-                () -> log.info("아이디 또는 비밀번호가 일치하지 않습니다. account: {}", account)
-        );
+
+        if (user.isEmpty()) {
+            log.info("아이디 또는 비밀번호가 일치하지 않습니다. account: {}", account);
+            sendRedirect(outputStream, UNAUTHORIZED_PAGE);
+            return;
+        }
+
+        log.info("회원 조회 결과: {}", user.get());
+        sendRedirect(outputStream, INDEX_PAGE);
     }
 
     private String extractPath(final String requestTarget) {

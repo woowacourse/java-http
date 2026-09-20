@@ -26,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
 
@@ -52,20 +53,36 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            consumeHeaders(inputStream);
+            // POST /login HTTP/1.1
+            final String method = extractMethod(requestLine);
+            final String uri = extractUri(requestLine);
 
-            final String uri = extractUri(requestLine);    // GET /login?account=gugu&password=password HTTP/1.1
-            if (uri == null) {
+            if (method == null || uri == null) {
                 return;
             }
 
-            // 2. path와 query string 분리
+            // 2. HTTP Headers
+            final Map<String, String> headers =
+                    readHeaders(inputStream);
+
+            // 3. Request Body
+            final String requestBody =
+                    readRequestBody(inputStream, headers);
+
+
+            // 4. path와 query string 분리
             final String path = extractPath(uri);
             final String queryString = extractQueryString(uri);
 
 
-            // 3. 로그인 요청 + Query String이 있으면 회원 조회
-            logUserIfLoginRequest(path, queryString);
+            // 현재 GET 로그인도 유지하고,
+            // POST 요청이 들어오면 body에서도 파라미터를 읽을 수 있게 준비
+            logUserIfLoginRequest(
+                    method,
+                    path,
+                    queryString,
+                    requestBody
+            );
 
             // 4. Response Body 결정
             if ("/".equals(path)) {
@@ -108,13 +125,86 @@ public class Http11Processor implements Runnable, Processor {
         return buffer.toString(StandardCharsets.UTF_8);
     }
 
-    private void consumeHeaders(final BufferedInputStream inputStream) throws IOException {
+    private Map<String, String> readHeaders(
+            final BufferedInputStream inputStream
+    ) throws IOException {
+
+        final Map<String, String> headers =
+                new HashMap<>();
+
         String line;
+
         while ((line = readLine(inputStream)) != null) {
+
+            // Header와 Body 사이의 빈 줄
             if (line.isEmpty()) {
-                return;
+                break;
             }
+
+            final int colonIndex = line.indexOf(":");
+
+            if (colonIndex == -1) {
+                continue;
+            }
+
+            final String name =
+                    line.substring(0, colonIndex).trim();
+
+            final String value =
+                    line.substring(colonIndex + 1).trim();
+
+            headers.put(name, value);
         }
+
+        return headers;
+    }
+
+    private String readRequestBody(
+            final BufferedInputStream inputStream,
+            final Map<String, String> headers
+    ) throws IOException {
+
+        final String contentLengthValue =
+                headers.get(CONTENT_LENGTH);// 바이트 수
+
+        if (contentLengthValue == null) {
+            return "";
+        }
+
+        final int contentLength;
+
+        try {
+            contentLength =
+                    Integer.parseInt(contentLengthValue);
+        } catch (NumberFormatException e) {
+            return "";
+        }
+
+        if (contentLength <= 0) {
+            return "";
+        }
+
+        final byte[] body =
+                inputStream.readNBytes(contentLength);
+
+        return new String(
+                body,
+                StandardCharsets.UTF_8
+        );
+    }
+
+
+    private String extractMethod(
+            final String requestLine
+    ) {
+        final String[] parts =
+                requestLine.split(" ", 3);
+
+        if (parts.length < 3) {
+            return null;
+        }
+
+        return parts[0];
     }
 
 
@@ -149,19 +239,32 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void logUserIfLoginRequest(
+            final String method,
             final String path,
-            final String queryString
+            final String queryString,
+            final String requestBody
     ) {
         if (!"/login".equals(path)) {
             return;
         }
 
-        if (queryString == null || queryString.isBlank()) {
+
+        final String parameterString;
+
+        if ("POST".equals(method)) {
+            parameterString = requestBody;
+        } else {
+            parameterString = queryString;
+        }
+
+        if (parameterString == null
+                || parameterString.isBlank()) {
             return;
         }
 
+
         final Map<String, String> parameters =
-                parseQueryString(queryString);
+                parseParameters(parameterString);
 
         final String account = parameters.get("account");
         final String password = parameters.get("password");
@@ -176,10 +279,10 @@ public class Http11Processor implements Runnable, Processor {
         user.filter(foundUser ->
                         foundUser.checkPassword(password))
                 .ifPresent(foundUser ->
-                        log.info("user: {}", foundUser));
+                        log.info("login success account: {}", foundUser.getAccount()));
     }
 
-    private Map<String, String> parseQueryString(
+    private Map<String, String> parseParameters(
             final String queryString
     ) {
         final Map<String, String> parameters =

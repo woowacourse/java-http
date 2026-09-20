@@ -15,7 +15,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket("GET / HTTP/1.1\r\nCookie: JSESSIONID=existing\r\n\r\n");
         final var processor = new Http11Processor(socket);
 
         // when
@@ -39,6 +39,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing",
                 "",
                 "");
 
@@ -57,5 +58,45 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+    @Test
+    void issuesCookieOnlyWhenMissingForEachResponseType() {
+        String[] requests = {
+                "GET / HTTP/1.1",
+                "GET /missing-file HTTP/1.1",
+                "POST /login HTTP/1.1",
+                "POST /register HTTP/1.1"
+        };
+        String[] statuses = {"200", "404", "302", "302"};
+        String body = "account=cookietest&password=test&email=test@example.com";
+
+        for (int i = 0; i < requests.length; i++) {
+            for (boolean hasCookie : new boolean[]{false, true}) {
+                String request = requests[i] + "\r\nContent-Length: " + body.length() + "\r\n"
+                        + (hasCookie ? "Cookie: JSESSIONID=existing\r\n" : "")
+                        + "\r\n" + body;
+                StubSocket socket = new StubSocket(request);
+                new Http11Processor(socket).process(socket);
+                String response = socket.output();
+                String headers = response.substring(0, response.indexOf("\r\n\r\n"));
+
+                assertThat(response).startsWith("HTTP/1.1 " + statuses[i]);
+                if (hasCookie) {
+                    assertThat(headers).doesNotContain("Set-Cookie:");
+                } else {
+                    String cookieHeader = headers.lines()
+                            .filter(line -> line.startsWith("Set-Cookie: "))
+                            .findFirst().orElseThrow();
+                    assertThat(cookieHeader).startsWith("Set-Cookie: JSESSIONID=").endsWith("; Path=/");
+                    String id = cookieHeader.substring("Set-Cookie: JSESSIONID=".length(),
+                            cookieHeader.indexOf(";"));
+                    java.util.UUID.fromString(id);
+                }
+                if (statuses[i].equals("302")) {
+                    assertThat(headers).contains("Content-Length: 0");
+                    assertThat(response.substring(response.indexOf("\r\n\r\n") + 4)).isEmpty();
+                }
+            }
+        }
     }
 }

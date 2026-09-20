@@ -13,7 +13,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -24,6 +26,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String SET_COOKIE_HEADER_PREFIX = "Set-Cookie: ";
+    private static final String COOKIE_PATH_ATTRIBUTE = "; Path=/";
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
@@ -79,6 +84,12 @@ public class Http11Processor implements Runnable, Processor {
                 headerMap.put(parts[0], parts[1].trim());
             }
 
+            HttpCookie cookie = HttpCookie.create(headerMap.getOrDefault("Cookie", ""));
+            boolean shouldSetCookie = !cookie.isSessionId();
+            if (shouldSetCookie) {
+                cookie.setSessionId();
+            }
+
             // GET /css/styles.css HTTP/1.1 각각 분리
             final String httpMethod = requestLine[0];
             final String url = requestLine[1];
@@ -94,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
                 while (totalRead < contentLength) {
                     int count = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
 
-                    if(count == -1) {
+                    if (count == -1) {
                         throw new IOException("예상보다 짧음");
                     }
                     totalRead += count;
@@ -186,43 +197,36 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = JS_CONTENT_TYPE;
             }
 
-            String response;
+            List<String> responseHeaders = new ArrayList<>();
             if (isResourceNull) {
-                response = String.join(CRLF,
-                        NOT_FOUND_STATUS_LINE,
-                        CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER,
-                        CONTENT_LENGTH_HEADER_PREFIX + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                        "",
-                        responseBody);
+                responseHeaders.add(NOT_FOUND_STATUS_LINE);
             } else if (urlPath.equals(LOGIN_PATH) && httpMethod.equals(POST_METHOD)) {
-                String location = "";
+                String location;
                 if (isLoginSuccess) {
-                    location += INDEX_HTML_PATH;
+                    location = INDEX_HTML_PATH;
                 } else {
-                    location += UNAUTHORIZED_PAGE_PATH;
+                    location = UNAUTHORIZED_PAGE_PATH;
                 }
-
-                response = String.join(CRLF,
-                        FOUND_STATUS_LINE,
-                        "Location: " + location,
-                        "Content-Length: 0",
-                        "",
-                        "");
-            } else if(httpMethod.equals(POST_METHOD) && urlPath.equals(REGISTER_PATH)) {
-                response = String.join(CRLF,
-                        FOUND_STATUS_LINE,
-                        "Location: " + INDEX_HTML_PATH,
-                        "Content-Length: 0",
-                        "",
-                        "");
+                responseHeaders.add(FOUND_STATUS_LINE);
+                responseHeaders.add("Location: " + location);
+                responseBody = "";
+            } else if (httpMethod.equals(POST_METHOD) && urlPath.equals(REGISTER_PATH)) {
+                responseHeaders.add(FOUND_STATUS_LINE);
+                responseHeaders.add("Location: " + INDEX_HTML_PATH);
+                responseBody = "";
             } else {
-                response = String.join(CRLF,
-                        OK_STATUS_LINE,
-                        CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER,
-                        CONTENT_LENGTH_HEADER_PREFIX + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                        "",
-                        responseBody);
+                responseHeaders.add(OK_STATUS_LINE);
             }
+
+            responseHeaders.add(CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER);
+            responseHeaders.add(CONTENT_LENGTH_HEADER_PREFIX
+                    + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
+            if (shouldSetCookie) {
+                responseHeaders.add(SET_COOKIE_HEADER_PREFIX + cookie.getSessionIdCookieName() + "="
+                        + cookie.getSessionId() + COOKIE_PATH_ATTRIBUTE);
+            }
+
+            final String response = String.join(CRLF, responseHeaders) + CRLF + CRLF + responseBody;
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();

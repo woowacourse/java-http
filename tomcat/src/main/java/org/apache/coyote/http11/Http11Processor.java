@@ -48,10 +48,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            // 1. InputStream을 문자열 단위로 읽기 위해 BufferedReader로 감싼다.
+            // InputStream을 문자열 단위로 읽기 위해 BufferedReader로 감싼다.
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            // 2. Request Line 파싱(예: GET /index.html HTTP/1.1)
+            // Request Line 파싱(예: GET /index.html HTTP/1.1)
             final String requestLine = reader.readLine();
             log.info("request line 첫 줄: {}", requestLine);
             if (requestLine == null) {
@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
                 queryString = "";
             }
 
-            // 2. Header 파싱 (Content-Length)
+            // Header 파싱 (Content-Length)
             String line;
             String rawCookie = "";
             int contentLength = 0;
@@ -105,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
                 requestBody = new String(buffer);
             }
 
-            // 4. POST 로그인 처리
+            // POST 로그인 처리
             if ("POST".equals(method) && "/login".equals(path)) {
                 String account = parseParam(requestBody, "account");
                 String password = parseParam(requestBody, "password");
@@ -114,14 +114,22 @@ public class Http11Processor implements Runnable, Processor {
 
                 // 회원 정보가 존재하고 비밀번호가 일치하는 경우
                 if (user.isPresent() && user.get().checkPassword(password)) {
+                    // 1. 기존 세션을 찾거나 없으면 신규 세션 생성 후 저장
+                    Session session = SessionManager.findSession(jsessionId);
+                    if (session == null) {
+                        session = new Session(jsessionId);
+                        SessionManager.add(session);
+                    }
+                    // 2. 세션으로 유저 정보 보관
+                    session.setAttribute("user", user.get());
                     send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
                 } else {
                     send302Redirect(outputStream, "/401.html", jsessionId, needSetCookie);
                 }
-                return; // 302 응답 후 종료
+                return;
             }
 
-            // 5. POST 회원가입 처리
+            // POST 회원가입 처리
             if ("POST".equals(method) && "/register".equals(path)) {
                 // Long id = Long.parseLong(parseParam(requestBody, "id"));   // 일단 id는 null 처리로 user 생성
                 String account = parseParam(requestBody, "account");
@@ -136,8 +144,26 @@ public class Http11Processor implements Runnable, Processor {
                 return; // 302 응답 후 종료
             }
 
-            // 6. GET 정적 파일 응답 (200 OK)
-            String targetPath = "/".equals(path) ? "/index.html" : path;
+            // GET 로그인에 접근할 때, 세션에 user가 들어있는지 검사하여 이미 로그인했다면 index.html로 리다이렉트
+            if ("GET".equals(method) && ("/login".equals(path) || "/login.html".equals(path))) {
+                final Session session = SessionManager.findSession(jsessionId);
+
+                // 세션이 존재하고 로그인 유저 데이터가 있다면 바로 index.html로 리다이렉트
+                if (session != null && session.getAttribute("user") != null) {
+                    send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
+                    return;
+                }
+            }
+
+            // GET 정적 파일 응답 (200 OK)
+            String targetPath = path;
+            if ("/".equals(targetPath)) {
+                targetPath = "/index.html";
+            } else if ("/login".equals(targetPath)) {
+                targetPath = "/login.html";
+            } else if("/register".equals(targetPath)) {
+                targetPath = "/register.html";
+            }
             byte[] body;
             final String contentType;
             final var resourceUrl = getClass().getClassLoader().getResource("static" + targetPath);

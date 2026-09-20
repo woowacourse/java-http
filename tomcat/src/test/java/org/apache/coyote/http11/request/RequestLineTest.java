@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.request.line.HttpMethod;
-import org.apache.coyote.http11.request.line.HttpVersion;
+import org.apache.coyote.http11.HttpVersion;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request.line;
 
+import org.apache.coyote.http11.HttpVersion;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -20,7 +20,7 @@ class HttpCookieTest {
 
         HttpCookie httpCookie = HttpCookie.from(cookieHeader);
 
-        assertThatThrownBy(() -> httpCookie.get("tasty_cookie"))
+        assertThatThrownBy(() -> httpCookie.getValue("tasty_cookie"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -31,8 +31,8 @@ class HttpCookieTest {
         HttpCookie httpCookie = HttpCookie.from(validCookieHeader);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(httpCookie.get("yummy_cookie")).isEqualTo("choco");
-            softly.assertThat(httpCookie.get("tasty_cookie")).isEqualTo("strawberry");
+            softly.assertThat(httpCookie.getValue("yummy_cookie")).isEqualTo("choco");
+            softly.assertThat(httpCookie.getValue("tasty_cookie")).isEqualTo("strawberry");
         });
     }
 }

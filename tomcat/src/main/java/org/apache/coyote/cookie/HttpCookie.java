@@ -32,10 +32,14 @@ public class HttpCookie {
         return cookies.containsKey(name);
     }
 
-    public String get(String name) {
+    public String getValue(String name) {
         if (!has(name)) {
             throw new IllegalArgumentException("존재하지 않는 쿠키입니다.");
         }
         return cookies.get(name);
+    }
+
+    public Map<String, String> cookies() {
+        return Map.copyOf(cookies);
     }
 }

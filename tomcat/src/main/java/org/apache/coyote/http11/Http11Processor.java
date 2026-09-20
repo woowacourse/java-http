@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.Register;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
 import org.apache.coyote.response.StatusCode;
@@ -50,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpRequest httpRequest =
                     MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
             MyHttpResponse httpResponse = new MyHttpResponse();
+            httpResponse.addCookie(httpRequest.cookie());
             log.info("start request: {} {}", httpRequest.method(), httpRequest.uri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {

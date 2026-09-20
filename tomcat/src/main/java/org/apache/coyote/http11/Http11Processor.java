@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -69,9 +71,21 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        int index = queryString.indexOf("&");
-        String account = queryString.substring(0, index).split("=")[1];
-        String password = queryString.substring(index + 1).split("=")[1];
+        Map<String, String> parametersByName = new HashMap<>();
+        String[] parameters = queryString.split("&");
+        for (String parameter : parameters) {
+            String[] nameAndValue = parameter.split("=");
+            if (nameAndValue.length != 2) {
+                return;
+            }
+            parametersByName.put(nameAndValue[0], nameAndValue[1]);
+        }
+
+        String account = parametersByName.get("account");
+        String password = parametersByName.get("password");
+        if (account == null || password == null) {
+            return;
+        }
 
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

@@ -7,7 +7,6 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -67,28 +66,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
-        if (line ==null){
+        if (line == null) {
             throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
         }
         return line;
-    }
-
-    private void login(String queryString) {
-        Map<String, String> paramsMap = getParamsMap(queryString);
-        User user = getValidatedUser(paramsMap);
-        log.info("user: {}", user.toString());
-    }
-
-    private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {
-        String resourcePath = getResourcePath(requestTarget);
-
-        if (requestTarget.equals(DEFAULT_RESOURCE_PATH)) {
-            return DEFAULT_VALUE.getBytes();
-        }
-
-        final URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource(resourcePath));
-        final Path path = new File(resource.getFile()).toPath();
-        return Files.readAllBytes(path);
     }
 
     private String getPath(String uri) {
@@ -107,11 +88,10 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String getContentType(String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
+    private void login(String queryString) {
+        Map<String, String> paramsMap = getParamsMap(queryString);
+        User user = getValidatedUser(paramsMap);
+        log.info("user: {}", user.toString());
     }
 
     private Map<String, String> getParamsMap(String queryString) {
@@ -132,11 +112,31 @@ public class Http11Processor implements Runnable, Processor {
         return user;
     }
 
+    private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {
+        String resourcePath = getResourcePath(requestTarget);
+
+        if (requestTarget.equals(DEFAULT_RESOURCE_PATH)) {
+            return DEFAULT_VALUE.getBytes();
+        }
+
+        final URL resource = Objects.requireNonNull(
+                getClass().getClassLoader().getResource(resourcePath));
+        final Path path = new File(resource.getFile()).toPath();
+        return Files.readAllBytes(path);
+    }
+
     private String getResourcePath(String requestTarget) {
         String resourcePath = "static" + requestTarget;
         if (!requestTarget.contains(".")) {
             resourcePath = resourcePath.concat(".html");
         }
         return resourcePath;
+    }
+
+    private String getContentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 }

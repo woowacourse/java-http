@@ -7,11 +7,13 @@ import java.util.Map;
 public class HttpResponse {
     // ResponseLine: Protocol Version, Status Code, Status Message(반드시 Status Code와 일치해야 하는 건 아니다)
     // HTTP 버전에 따라 분기하는 방법을 고민했으나.. 너무 어려워 보여서 일단 1.x 버전만 구현하기로 했어요.
+    private OutputStream outputStream;
     private ResponseLine responseLine;
     private HttpHeaders httpHeaders = new HttpHeaders();
     private HttpBody httpBody;
 
-    public HttpResponse() {
+    public HttpResponse(OutputStream outputStream) {
+        this.outputStream = outputStream;
     }
 
     public ResponseLine getResponseLine() {
@@ -42,7 +44,7 @@ public class HttpResponse {
         httpHeaders.put(key, value);
     }
 
-    public void sendTo(OutputStream outputStream) throws IOException {
+    public void write() throws IOException {
         outputStream.write(buildToResponse().getBytes());
         outputStream.flush();
     }

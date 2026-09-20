@@ -11,3 +11,4 @@
 - [x] 로그인 한 상태에서 /login에 접근하면, /index.html로 리다이렉트 된다.
 - [x] HttpRequest로 요청 책임을 분리한다.
 - [x] HttpResponse로 응답 책임을 분리한다.
+- [x] Controller를 도입해 분기를 처리한다.

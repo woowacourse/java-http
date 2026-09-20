@@ -2,6 +2,7 @@ package org.apache.coyote.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpCookie {
 
@@ -32,11 +33,8 @@ public class HttpCookie {
         return cookies.containsKey(name);
     }
 
-    public String getValue(String name) {
-        if (!has(name)) {
-            throw new IllegalArgumentException("존재하지 않는 쿠키입니다.");
-        }
-        return cookies.get(name);
+    public Optional<String> getValue(String name) {
+        return Optional.ofNullable(cookies.get(name));
     }
 
     public Map<String, String> cookies() {

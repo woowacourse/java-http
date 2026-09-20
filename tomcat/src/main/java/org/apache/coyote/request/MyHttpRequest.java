@@ -1,15 +1,23 @@
 package org.apache.coyote.request;
 
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.cookie.HttpCookie;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class MyHttpRequest {
 
     private static final String RESOURCE_PATH_PREFIX = "static";
 
+    private Manager manager = SessionManager.getInstance();
+    private Session session;
+    private boolean isNewSession;
     private String method;
     private String uri;
     private String resourcePath;
@@ -46,6 +54,28 @@ public class MyHttpRequest {
                 extractCookie(rawRequest),
                 extractBody(rawRequest)
         );
+    }
+
+    public Session getSession(boolean create) throws IOException {
+        final String jSessionId = "JSESSIONID";
+        if (this.session != null) {
+            return this.session;
+        }
+        if (cookie.has(jSessionId)) {
+            Session existsingSession = manager.findSession(cookie.getValue(jSessionId).get());
+            if (existsingSession != null) {
+                return existsingSession;
+            }
+        }
+        if (!create) {
+            return null;
+        }
+
+        String newSessionId = UUID.randomUUID().toString();
+        this.session = new Session(newSessionId);
+        this.isNewSession = true;
+        manager.add(this.session);
+        return this.session;
     }
 
     private static HttpCookie extractCookie(String rawRequest) {
@@ -132,6 +162,10 @@ public class MyHttpRequest {
         int dotIndex = fileName.lastIndexOf(".");
         return dotIndex > 0
                 && dotIndex != fileName.length() - 1;
+    }
+
+    public boolean isNewSession() {
+        return isNewSession;
     }
 
     public String getMethod() {

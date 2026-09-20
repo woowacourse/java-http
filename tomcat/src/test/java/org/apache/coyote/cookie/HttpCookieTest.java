@@ -1,5 +1,6 @@
 package org.apache.coyote.cookie;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.assertj.core.api.SoftAssertions;
@@ -20,8 +21,7 @@ class HttpCookieTest {
 
         HttpCookie httpCookie = HttpCookie.from(cookieHeader);
 
-        assertThatThrownBy(() -> httpCookie.getValue("tasty_cookie"))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(httpCookie.getValue("tasty_cookie")).isEmpty();
     }
 
     @Test
@@ -31,8 +31,8 @@ class HttpCookieTest {
         HttpCookie httpCookie = HttpCookie.from(validCookieHeader);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(httpCookie.getValue("yummy_cookie")).isEqualTo("choco");
-            softly.assertThat(httpCookie.getValue("tasty_cookie")).isEqualTo("strawberry");
+            softly.assertThat(httpCookie.getValue("yummy_cookie")).hasValue("choco");
+            softly.assertThat(httpCookie.getValue("tasty_cookie")).hasValue("strawberry");
         });
     }
 }

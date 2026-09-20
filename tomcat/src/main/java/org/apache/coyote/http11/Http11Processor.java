@@ -4,8 +4,10 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.Register;
 import com.techcourse.model.User;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
 import org.apache.coyote.response.StatusCode;
@@ -30,6 +32,7 @@ import java.util.UUID;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Manager manager = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -51,11 +54,24 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpRequest httpRequest =
                     MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
             MyHttpResponse httpResponse = new MyHttpResponse();
-            httpResponse.addCookie(httpRequest.getCookie());
             log.info("start request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
-                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                String jSessionId = UUID.randomUUID().toString();
+                manager.add(new Session(jSessionId));
+                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+            }
+
+            if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null
+                    && httpRequest.getMethod().equals("GET")
+                    && httpRequest.getUri().endsWith("/login")) {
+                httpResponse.setStatusCode(StatusCode.FOUND);
+                httpResponse.setContentType(ContentType.HTML);
+                httpResponse.sendRedirect("index.html");
+                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                return;
             }
 
             if (isLoginRequest(httpRequest)) {
@@ -126,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // TODO json도 처리 가능하도록
-    private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
+    private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) throws IOException {
         Map<String, String> params = new HashMap<>();
         for (String parameter : httpRequest.getBody().split("&")) {
             String[] keyValue = parameter.split("=", 2);
@@ -143,6 +159,11 @@ public class Http11Processor implements Runnable, Processor {
 
         if (foundUser.get().checkPassword(params.get("password"))) {
             log.info("user matched={}", foundUser.get());
+            final var session = httpRequest.getSession(true);
+            if (httpRequest.isNewSession()) {
+                httpResponse.addHeader("Set-Cookie", String.join("=", "JSESSIONID", session.getId()));
+            }
+            session.setAttribute("user", foundUser.get());
             httpResponse.setStatusCode(StatusCode.FOUND);
             httpResponse.setContentType(ContentType.HTML);
             httpResponse.sendRedirect("index.html");

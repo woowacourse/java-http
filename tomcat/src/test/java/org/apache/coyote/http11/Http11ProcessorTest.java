@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -90,6 +93,36 @@ class Http11ProcessorTest {
                 "Content-Length: 3797 \r\n",
                 "\r\n" + new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );
+    }
+
+    @Test
+    @DisplayName("로그인된 상태에서 /login 페이지에 HTTP GET METHOD로 접근하면 index.html 페이지로 리다이렉트 처리한다")
+    void login_get_with_logged_in_session() throws IOException {
+        // given
+        final String SESSION_ID = "656cef62-e3c4-40bc-a8df-94732920ed46";
+        SessionManager manager = SessionManager.getInstance();
+        manager.add(new Session(SESSION_ID));
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: http://localhost:8080/index.html \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: 0 \r\n"
+        );
+        manager.remove(SESSION_ID);
     }
 
     @Test

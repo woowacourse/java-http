@@ -80,4 +80,17 @@ public class HttpResponseProcessor {
         outputStream.write(body);
         outputStream.flush();
     }
+
+    public void sendRedirect(String path) throws IOException {
+        HttpStatus found = HttpStatus.FOUND;
+        final String head = String.join("\r\n",
+                "HTTP/1.1 " + found.getCode() + " " + found.getMessage() + " ",
+                "Location: " + path + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        outputStream.write(head.getBytes(StandardCharsets.ISO_8859_1));
+        outputStream.flush();
+    }
 }

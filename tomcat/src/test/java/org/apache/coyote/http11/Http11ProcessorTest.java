@@ -108,6 +108,55 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 등록된_회원의_아이디와_비밀번호가_일치하면_index_html로_리다이렉트한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 302");
+        assertThat(socket.output()).contains("Location: /index.html");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "unknown, password",
+            "gugu, wrong"
+    })
+    void 등록된_회원의_아이디가_없거나_비밀번호가_일치하지_않으면_401_html로_리다이렉트한다(
+            String account,
+            String password
+    ) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=" + account + "&password=" + password + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 302");
+        assertThat(socket.output()).contains("Location: /401.html");
+    }
+
+    @Test
     void Query_String이_있는_로그인_요청에_로그인_페이지를_반환한다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

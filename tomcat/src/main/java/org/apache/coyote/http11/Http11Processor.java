@@ -48,16 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             String[] parts = requestLine.split(" ");
 
             RequestTarget requestTarget = new RequestTarget(parts[1]);
-            if (requestTarget.hasPath(LOGIN_PATH)) {
-                Optional<String> account = requestTarget.queryParameter("account");
-                if (account.isPresent()) {
-                    Optional<User> user = InMemoryUserRepository.findByAccount(account.get());
-                    user.ifPresent(value -> log.info("user : {}", value));
-                }
-            }
-
             String resourcePath = resolveResourcePath(requestTarget);
-
             byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
             if (!resourcePath.equals("/")) {
                 String fileName = STATIC_RESOURCE_PREFIX + resourcePath;
@@ -68,6 +59,33 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
             String contentType = contentTypeOf(requestTarget.getExtension());
+
+            if (requestTarget.hasPath(LOGIN_PATH) && requestTarget.hasQueryParameters()) {
+                String account = requestTarget.findQueryParameter("account")
+                        .orElseThrow(() -> new IllegalArgumentException("필수 Query Parameter 누락: account"));
+                String password = requestTarget.findQueryParameter("password")
+                        .orElseThrow(() -> new IllegalArgumentException("필수 Query Parameter 누락: password"));
+
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                user.ifPresent(value -> log.info("user : {}", value));
+
+                boolean loginSuccess = user
+                        .map(value -> value.checkPassword(password))
+                        .orElse(false);
+
+                String location = resolveLocation(loginSuccess);
+                final var loginResponse = String.join("\r\n",
+                        "HTTP/1.1 302 FOUND ",
+                        "Content-Type: " + contentType,
+                        "Content-Length: " + responseBody.length + " ",
+                        "Location: " + location,
+                        "") + "\r\n";
+
+                outputStream.write(loginResponse.getBytes());
+                outputStream.write(responseBody);
+                outputStream.flush();
+                return;
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -81,6 +99,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String resolveLocation(boolean loginSuccess) {
+        if (loginSuccess) {
+            return "/index.html";
+        }
+        return "/401.html";
     }
 
     private String resolveResourcePath(RequestTarget requestTarget) {

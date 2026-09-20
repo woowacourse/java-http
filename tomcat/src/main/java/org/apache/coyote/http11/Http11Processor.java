@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_VALUE = "Hello world!";
 
     private final Socket connection;
+    private final Map<String, RequestHandler> handlers;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.handlers = Map.of("/login", new LoginRequestHandler());
     }
 
     @Override
@@ -39,13 +39,13 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            String line = getHttpRequestLine(bufferedReader);
+            final String line = getHttpRequestLine(bufferedReader);
             final String[] tokens = line.split(" ", 3);
             final String uri = tokens[1];
 
-            String path = getPath(uri);
-            Optional<String> queryString = getQueryString(uri);
-            queryString.ifPresent(this::login);
+            final String path = getPath(uri);
+            final Optional<String> queryString = getQueryString(uri);
+            handleRequest(queryString, path);
 
             final var responseBody = createResponseBody(path);
             final String contentType = getContentType(path);
@@ -88,10 +88,18 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private void login(String queryString) {
-        Map<String, String> paramsMap = getParamsMap(queryString);
-        User user = getValidatedUser(paramsMap);
-        log.info("user: {}", user.toString());
+    private void handleRequest(Optional<String> queryString, String path) {
+        final RequestHandler requestHandler = handlers.get(path);
+
+        if (requestHandler == null) {
+            return;
+        }
+
+        final Map<String, String> paramsMap = queryString
+                .map(this::getParamsMap)
+                .orElseGet(Collections::emptyMap);
+
+        requestHandler.handle(paramsMap);
     }
 
     private Map<String, String> getParamsMap(String queryString) {
@@ -102,20 +110,6 @@ public class Http11Processor implements Runnable, Processor {
             paramsMap.put(param[0], param[1]);
         }
         return paramsMap;
-    }
-
-    private User getValidatedUser(Map<String, String> paramsMap) {
-        User user = InMemoryUserRepository.findByAccount(paramsMap.get("account"))
-                .orElseThrow(() -> {
-                    log.info("로그인 실패: 조건을 만족하는 회원 없음");
-                    return new IllegalArgumentException("회원 없음");
-                });
-
-        if (!user.checkPassword(paramsMap.get("password"))){
-            log.info("로그인 실패: 비밀번호 불일치");
-            throw new IllegalArgumentException("비밀번호 불일치");
-        }
-        return user;
     }
 
     private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {

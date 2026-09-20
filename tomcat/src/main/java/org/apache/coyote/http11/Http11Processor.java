@@ -21,7 +21,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_MESSAGE = "Hello world!";
+    private static final String BAD_REQUEST_MESSAGE = "잘못된 요청입니다.";
+
     private static final String ROOT_PATH = "/";
+    private static final String LOGIN_PATH = "/login";
+    private static final String NOT_FOUND_PATH = "/404.html";
+
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String HTML_EXTENSION = ".html";
     private static final String CSS_EXTENSION = ".css";
@@ -30,6 +35,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String JS_CONTENT_TYPE = "text/javascript";
     private static final int PATH_INDEX = 1;
     private static final String STATIC_PREFIX = "static";
+    private static final int REQUEST_LINE_SIZE = 3;
+
+    private static final String OK = "200 OK";
+    private static final String BAD_REQUEST = "400 Bad Request";
+    private static final String NOT_FOUND = "404 Not Found";
 
     private final Socket connection;
 
@@ -50,22 +60,12 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
             readHeaders(reader);
 
-            final String requestUri = parseUri(requestLine);
-            final String requestPath = parsePath(requestUri);
-
-            if (requestPath.equals("/login")) {
-                login(parseQueryParams(requestUri));
-            }
-            final String responseBody = resolveResponseBody(requestPath);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + resolveContentType(requestPath) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponse(requestLine);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -74,10 +74,38 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseUri(String requestLine) {
-        if (requestLine == null || requestLine.isBlank()) {
-            return ROOT_PATH;
+    private String createResponse(final String requestLine) throws IOException {
+        if (requestLine.isBlank() || requestLine.trim().split(" ").length != REQUEST_LINE_SIZE) {
+            return buildResponse(BAD_REQUEST, DEFAULT_CONTENT_TYPE, BAD_REQUEST_MESSAGE);
         }
+
+        final String requestUri = parseUri(requestLine);
+        final String requestPath = parsePath(requestUri);
+        log.info("requestPath = " + requestPath);
+
+        if (LOGIN_PATH.equals(requestPath)) {
+            login(parseQueryParams(requestUri));
+        }
+
+        try {
+            final String responseBody = resolveResponseBody(requestPath);
+            return buildResponse(OK, resolveContentType(requestPath), responseBody);
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+            return buildResponse(NOT_FOUND, DEFAULT_CONTENT_TYPE, resolveResponseBody(NOT_FOUND_PATH));
+        }
+    }
+
+    private String buildResponse(final String status, final String contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String parseUri(String requestLine) {
         return requestLine.trim().split(" ")[PATH_INDEX];
     }
 
@@ -145,19 +173,24 @@ public class Http11Processor implements Runnable, Processor {
         if (!requestPath.contains(".")) {
             requestPath += HTML_EXTENSION;
         }
-        final URL resource = getClass().getClassLoader().getResource(STATIC_PREFIX + requestPath);
+        return readStaticFile(requestPath);
+    }
+
+    private String readStaticFile(final String resourcePath) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(STATIC_PREFIX + resourcePath);
         if (resource == null) {
-            throw new RuntimeException("요청한 리소스를 찾을 수 없습니다: " + requestPath);
+            throw new RuntimeException("요청한 리소스를 찾을 수 없습니다: " + resourcePath);
         }
+
         try {
             final Path path = Path.of(resource.toURI());
 
             if (!Files.isRegularFile(path)) {
-                throw new RuntimeException("요청한 리소스를 찾을 수 없습니다: " + requestPath);
+                throw new RuntimeException("요청한 리소스를 찾을 수 없습니다: " + resourcePath);
             }
             return Files.readString(path);
         } catch (URISyntaxException e) {
-            throw new IOException("잘못된 리소스 경로입니다: " + requestPath, e);
+            throw new IOException("잘못된 리소스 경로입니다: " + resourcePath, e);
         }
     }
 }

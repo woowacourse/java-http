@@ -80,4 +80,27 @@ class Http11ProcessorTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css;charset=utf-8 "));
     }
+
+    @Test
+    void queryString() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith(String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 "))
+                .contains("<title>로그인</title>");
+    }
 }

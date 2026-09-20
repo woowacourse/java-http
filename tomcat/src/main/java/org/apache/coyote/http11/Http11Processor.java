@@ -14,9 +14,12 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,6 +37,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String POST = "POST";
     private static final String REGISTER_PATH = "/register";
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -56,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = bufferedReader.readLine();
             final Map<String, String> headers = readHeaders(bufferedReader);
             final String body = readBody(bufferedReader, headers);
-            final String response = createResponse(requestLine, body);
+            final String response = createResponse(requestLine, headers, body);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -65,9 +70,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String requestLine, final String body) throws IOException {
+    private String createResponse(final String requestLine, final Map<String, String> headers,
+                                  final String body) throws IOException {
+        final String setCookie = createSetCookie(headers);
         if (requestLine == null) {
-            return buildResponse(OK, DEFAULT_CONTENT_TYPE, DEFAULT_BODY);
+            return buildResponse(OK, DEFAULT_CONTENT_TYPE, DEFAULT_BODY, setCookie);
         }
 
         final String method = requestLine.split(" ")[0];
@@ -75,13 +82,21 @@ public class Http11Processor implements Runnable, Processor {
         final String path = parsePath(uri);
 
         if (method.equals(POST) && path.equals(REGISTER_PATH)) {
-            return createRegisterResponse(body);
+            return createRegisterResponse(body, setCookie);
         }
         if (method.equals(POST) && path.equals(LOGIN_PATH)) {
-            return createLoginResponse(body);
+            return createLoginResponse(body, setCookie);
         }
 
-        return createResourceResponse(path);
+        return createResourceResponse(path, setCookie);
+    }
+
+    private String createSetCookie(final Map<String, String> headers) {
+        final Cookie cookie = Cookie.from(headers.get(COOKIE_HEADER));
+        if (cookie.hasJSessionId()) {
+            return "";
+        }
+        return JSESSIONID + "=" + UUID.randomUUID();
     }
 
     private String parsePath(final String uri) {
@@ -92,24 +107,32 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(0, index);
     }
 
-    private String buildRedirectResponse(final String location) {
-        return String.join("\r\n",
-                FOUND,
-                "Location: " + location + " ",
-                "",
-                "");
+    private String buildRedirectResponse(final String location, final String setCookie) {
+        final List<String> lines = new ArrayList<>();
+        lines.add(FOUND);
+        lines.add("Location: " + location + " ");
+        addSetCookie(lines, setCookie);
+        lines.add("");
+        lines.add("");
+        return String.join("\r\n", lines);
     }
 
-    private String createLoginResponse(final String queryString) {
-        if (login(queryString)) {
-            return buildRedirectResponse(INDEX_PAGE);
+    private void addSetCookie(final List<String> lines, final String setCookie) {
+        if (!setCookie.isEmpty()) {
+            lines.add("Set-Cookie: " + setCookie + " ");
         }
-        return buildRedirectResponse(UNAUTHORIZED_PAGE);
     }
 
-    private String createRegisterResponse(final String body) {
+    private String createLoginResponse(final String body, final String setCookie) {
+        if (login(body)) {
+            return buildRedirectResponse(INDEX_PAGE, setCookie);
+        }
+        return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
+    }
+
+    private String createRegisterResponse(final String body, final String setCookie) {
         register(body);
-        return buildRedirectResponse(INDEX_PAGE);
+        return buildRedirectResponse(INDEX_PAGE, setCookie);
     }
 
     private boolean login(final String queryString) {
@@ -130,28 +153,31 @@ public class Http11Processor implements Runnable, Processor {
         log.info("회원가입: {}", user);
     }
 
-    private String createResourceResponse(final String path) throws IOException {
+    private String createResourceResponse(final String path, final String setCookie) throws IOException {
         if (path.equals(ROOT_PATH)) {
-            return buildResponse(OK, DEFAULT_CONTENT_TYPE, DEFAULT_BODY);
+            return buildResponse(OK, DEFAULT_CONTENT_TYPE, DEFAULT_BODY, setCookie);
         }
 
         final String resourcePath = toResourcePath(path);
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
         if (resource == null) {
             final URL notFound = getClass().getClassLoader().getResource(NOT_FOUND_PAGE);
-            return buildResponse(NOT_FOUND, DEFAULT_CONTENT_TYPE, readResource(notFound));
+            return buildResponse(NOT_FOUND, DEFAULT_CONTENT_TYPE, readResource(notFound), setCookie);
         }
 
-        return buildResponse(OK, getContentType(resourcePath), readResource(resource));
+        return buildResponse(OK, getContentType(resourcePath), readResource(resource), setCookie);
     }
 
-    private String buildResponse(final String statusLine, final String contentType, final String body) {
-        return String.join("\r\n",
-                statusLine,
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
+    private String buildResponse(final String statusLine, final String contentType,
+                                 final String body, final String setCookie) {
+        final List<String> lines = new ArrayList<>();
+        lines.add(statusLine);
+        addSetCookie(lines, setCookie);
+        lines.add("Content-Type: " + contentType + ";charset=utf-8 ");
+        lines.add("Content-Length: " + body.getBytes().length + " ");
+        lines.add("");
+        lines.add(body);
+        return String.join("\r\n", lines);
     }
 
     private String getContentType(final String resourcePath) {

@@ -34,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     private static final String PATH_INDEX_HTML = "/index.html";
     private static final String PATH_LOGIN_HTML = "/login.html";
+    private static final String PATH_REGISTER_HTML = "/register.html";
     private static final String PATH_401_HTML = "401.html";
     private static final String PATH_404_HTML = "static/404.html";
     private static final String METHOD_GET = "GET";
@@ -106,6 +107,8 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(outputStream, HTTP_STATUS_OK, CONTENT_TYPE_TEXT_HTML, "Hello world!");
         } else if ("/login".equals(path)) {
             login(outputStream, method, body, contentType);
+        } else if ("/register".equals(path)) {
+            register(outputStream, method, body);
         } else {
             writeStaticFile(outputStream, path);
         }
@@ -135,6 +138,18 @@ public class Http11Processor implements Runnable, Processor {
             } catch (IllegalArgumentException exception) {
                 redirectResponse(outputStream, HTTP_STATUS_FOUND, contentTypeOf(CONTENT_TYPE_TEXT_HTML), "", PATH_401_HTML);
             }
+        }
+    }
+
+    private void register(final OutputStream outputStream, final String method, String body) throws IOException, URISyntaxException {
+        if (METHOD_GET.equals(method)) {
+            writeStaticFile(outputStream, PATH_REGISTER_HTML);
+        } else if (METHOD_POST.equals(method)) {
+            Map<String, String> parameters = parseFormData(body);
+            User user = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
+            InMemoryUserRepository.save(user);
+            log.info(user.toString());
+            redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML);
         }
     }
 

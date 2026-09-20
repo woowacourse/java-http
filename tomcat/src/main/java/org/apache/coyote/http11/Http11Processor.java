@@ -111,8 +111,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestUri(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
+        if (requestLine == null) {
+            return null;
+        }
+
         while (true) {
             String headerLine = reader.readLine();
+            if (headerLine == null) {
+                return null;
+            }
+
             if (headerLine.isEmpty()) {
                 break;
             }

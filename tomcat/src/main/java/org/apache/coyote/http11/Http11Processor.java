@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,6 +53,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE = "Cookie";
+    private static final String USER = "user";
+
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
 
@@ -77,7 +83,9 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> headers = readHeaders(bufferedReader);
             String requestBody = readBody(bufferedReader, headers);
             String[] requestLines = requestLine.split(" ");
-            handle(outputStream, requestLines[0], requestLines[1], requestBody, headers.get(CONTENT_TYPE), headers.get(COOKIE));
+            MyHttpCookie httpCookie = new MyHttpCookie(headers.get(COOKIE));
+            Session session = SESSION_MANAGER.findSession(httpCookie.getJSessionId());
+            handle(outputStream, requestLines[0], requestLines[1], requestBody, headers.get(CONTENT_TYPE), session);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -105,11 +113,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, count);
     }
 
-    private void handle(final OutputStream outputStream, final String method, String path, String body, String contentType, String cookies) throws IOException, URISyntaxException {
+    private void handle(final OutputStream outputStream, final String method, String path, String body, String contentType, Session session) throws IOException, URISyntaxException {
         if ("/".equals(path)) {
             writeResponse(outputStream, HTTP_STATUS_OK, CONTENT_TYPE_TEXT_HTML, "Hello world!");
         } else if ("/login".equals(path)) {
-            login(outputStream, method, body, contentType, cookies);
+            login(outputStream, method, body, contentType, session);
         } else if ("/register".equals(path)) {
             register(outputStream, method, body);
         } else {
@@ -117,8 +125,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(final OutputStream outputStream, final String method, String body, String contentType, String cookies) throws IOException, URISyntaxException {
+    private void login(final OutputStream outputStream, final String method, String body, String contentType, Session session) throws IOException, URISyntaxException {
         if (METHOD_GET.equals(method)) {
+            if (session != null && session.getAttribute(USER) != null) {
+                redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML);
+                return;
+            }
             writeStaticFile(outputStream, PATH_LOGIN_HTML);
         } else if (METHOD_POST.equals(method)) {
             try {
@@ -137,11 +149,17 @@ public class Http11Processor implements Runnable, Processor {
                     throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
                 }
                 log.info(user.toString());
-                MyHttpCookie httpCookie = new MyHttpCookie(cookies);
-                String cookie = httpCookie.getOrCreateJSessionId();
-                cookieResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML, cookie);
+                if (session == null) {
+                    Session newSession = new Session(UUID.randomUUID().toString());
+                    newSession.setAttribute(USER, user);
+                    SESSION_MANAGER.add(newSession);
+                    cookieResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML, newSession.getId());
+                    return;
+                }
+                session.setAttribute(USER, user);
+                redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML);
             } catch (IllegalArgumentException exception) {
-                redirectResponse(outputStream, HTTP_STATUS_FOUND, contentTypeOf(CONTENT_TYPE_TEXT_HTML), "", PATH_401_HTML);
+                redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_401_HTML);
             }
         }
     }

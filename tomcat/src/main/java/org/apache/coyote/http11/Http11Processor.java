@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.Processor;
@@ -20,6 +20,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
 
@@ -53,10 +55,16 @@ public class Http11Processor implements Runnable, Processor {
         final String uri = requestLine.uri();
 
         if ("/".equals(uri)) {
+            byte[] responseBody = "Hello world!".getBytes();
+
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
+            headers.put(CONTENT_LENGTH, String.valueOf(responseBody.length));
+
             return new HttpResponse(
                     new HttpStatusLine(HTTP_VERSION, 200, "OK"),
-                    "text/html;charset=utf-8",
-                    "Hello world!".getBytes(StandardCharsets.UTF_8)
+                    headers,
+                    responseBody
             );
         }
 
@@ -101,9 +109,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse readResource(final URL resource, final HttpStatusLine statusLine) throws IOException {
-        try (InputStream body = resource.openStream()) {
-            return new HttpResponse(statusLine,
-                    contentTypeOf(resource.getPath()), body.readAllBytes());
+        try (InputStream inputStream = resource.openStream()) {
+            byte[] responseBody = inputStream.readAllBytes();
+
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put(CONTENT_TYPE, contentTypeOf(resource.getPath()));
+            headers.put(CONTENT_LENGTH, String.valueOf(responseBody.length));
+
+            return new HttpResponse(statusLine, headers, responseBody);
         }
     }
 

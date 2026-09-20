@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -23,22 +24,25 @@ public class RequestHandler {
         }
 
         if (path.equals("/register")) {
-            return HttpResponse.ok("text/html", readResource(findResource("/register.html")));
+            return handleRegister(request);
         }
 
         final var resource = findResource(path);
         if (resource == null) {
-            return HttpResponse.notFound("text/html", readResource(findResource("/404.html")));
+            return HttpResponse.notFound("text/html", page("/404.html"));
         }
 
         return HttpResponse.ok(contentType(path), readResource(resource));
     }
 
     private HttpResponse handleLogin(final HttpRequest request) throws IOException, URISyntaxException {
-        final String account = request.getQueryParameter("account");
-        final String password = request.getQueryParameter("password");
-        if (!isLoginAttempt(account, password)) {
-            return HttpResponse.ok("text/html", readResource(findResource("/login.html")));
+        if (request.getMethod() != HttpMethod.POST) {
+            return HttpResponse.ok("text/html", page("/login.html"));
+        }
+        final String account = request.getParameter("account");
+        final String password = request.getParameter("password");
+        if (isBlank(account) || isBlank(password)) {
+            return HttpResponse.redirect("/401.html");
         }
         if (isValidUser(account, password)) {
             return HttpResponse.redirect("/index.html");
@@ -46,8 +50,22 @@ public class RequestHandler {
         return HttpResponse.redirect("/401.html");
     }
 
-    private boolean isLoginAttempt(final String account, final String password) {
-        return account != null && password != null;
+    private HttpResponse handleRegister(final HttpRequest request) throws IOException, URISyntaxException {
+        if (request.getMethod() != HttpMethod.POST) {
+            return HttpResponse.ok("text/html", page("/register.html"));
+        }
+        final String account = request.getParameter("account");
+        final String password = request.getParameter("password");
+        final String email = request.getParameter("email");
+        if (isBlank(account) || isBlank(password) || isBlank(email)) {
+            return HttpResponse.ok("text/html", page("/register.html"));
+        }
+        InMemoryUserRepository.save(new User(account, password, email));
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private boolean isBlank(final String value) {
+        return value == null || value.isBlank();
     }
 
     private boolean isValidUser(final String account, final String password) {
@@ -58,6 +76,14 @@ public class RequestHandler {
 
     private String readResource(final URL resource) throws IOException, URISyntaxException {
         return Files.readString(Path.of(resource.toURI()), UTF_8);
+    }
+
+    private URL findResource(final String path) {
+        return getClass().getClassLoader().getResource("static" + path);
+    }
+
+    private String page(final String path) throws URISyntaxException, IOException {
+        return readResource(findResource(path));
     }
 
     private String contentType(final String path) {
@@ -71,9 +97,5 @@ public class RequestHandler {
             return "image/svg+xml";
         }
         return "text/html";
-    }
-
-    private URL findResource(final String path) {
-        return getClass().getClassLoader().getResource("static" + path);
     }
 }

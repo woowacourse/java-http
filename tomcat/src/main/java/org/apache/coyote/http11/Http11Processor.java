@@ -14,8 +14,10 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final String NOT_FOUND_RESOURCE_PATH = "static/404.html";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private final Socket connection;
 
@@ -55,8 +58,8 @@ public class Http11Processor implements Runnable, Processor {
         final String requestLine = reader.readLine();
         log.info("request: {}", requestLine);
         final String[] requestParts = requestLine.split(" ", 3);
-        final String method = requestParts[0];
-        final String requestUri = requestParts[1];
+        final String method = requestParts[0].strip();
+        final String requestUri = requestParts[1].strip();
         final Map<String, String> headers = readHeaders(reader);
 
         final int index = requestUri.indexOf("?");
@@ -64,9 +67,9 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> params = readParams(index, requestUri);
 
         if ("POST".equals(method)) {
-            return new Request(method, path, Map.copyOf(params), extractRequestBody(reader, headers));
+            return new Request(method, path, headers, Map.copyOf(params), extractRequestBody(reader, headers));
         }
-        return new Request(method, path, Map.copyOf(params), Map.of());
+        return new Request(method, path, headers, Map.copyOf(params), Map.of());
     }
 
     private static Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
@@ -150,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
         } else if ("POST".equals(request.method()) && "/login".equals(request.path())) {
             try {
                 validateAuth(request.body());
-                writeResponse(outputStream, "302 Found", Map.of("Location", "/index.html"), new byte[0]);
+                writeResponse(outputStream, "302 Found", loginSuccessHeaders(request), new byte[0]);
             } catch (final IllegalArgumentException e) {
                 final String invalidRedirectUri = "/login.html?error=" + URLEncoder.encode(e.getMessage(), UTF_8);
                 writeResponse(outputStream, "302 Found", Map.of("Location", invalidRedirectUri), new byte[0]);
@@ -161,6 +164,17 @@ public class Http11Processor implements Runnable, Processor {
         } else {
             writeResource(outputStream, "200 OK", STATIC_RESOURCE_PATH + appendHtmlExtension(request.path()));
         }
+    }
+
+    private Map<String, String> loginSuccessHeaders(final Request request) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", "/index.html");
+        HttpCookie cookie = new HttpCookie(headers.get("cookie"));
+        if (!cookie.contains(SESSION_COOKIE_NAME)) {
+            final String sessionCookie = SESSION_COOKIE_NAME + "=" + UUID.randomUUID();
+            headers.put("Set-Cookie", sessionCookie);
+        }
+        return headers;
     }
 
     private void register(final Map<String, String> params) {

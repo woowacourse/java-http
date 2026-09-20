@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,19 +21,22 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
+    private static final String GET = "GET";
+    private static final String POST = "POST";
     private static final String ROOT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
-    private final RequestHeaderParser requestHeaderParser;
+    private final RequestParser requestParser;
     private final ResponseBuilder responseBuilder;
 
     public Http11Processor(final Socket connection) {
-        this(connection, new RequestHeaderParser());
+        this(connection, new RequestParser());
     }
 
-    public Http11Processor(final Socket connection, RequestHeaderParser requestHeaderParser) {
+    public Http11Processor(final Socket connection, RequestParser requestParser) {
         this.connection = connection;
-        this.requestHeaderParser = requestHeaderParser;
+        this.requestParser = requestParser;
         this.responseBuilder = new ResponseBuilder();
     }
 
@@ -48,23 +52,25 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            Map<String, String> requestInformations = requestHeaderParser.parse(bufferedReader);
+            Map<String, String> requestInformations = requestParser.parse(bufferedReader);
 
-            String path = requestHeaderParser.getRequestPath(requestInformations);
+            String path = requestParser.getRequestPath(requestInformations);
 
             String response;
             if (path.equals(ROOT_PATH)) {
                 response = responseBuilder.build(
                         HttpStatus.OK,
-                        requestHeaderParser.getAccept(requestInformations),
+                        requestParser.getAccept(requestInformations),
                         processRootRequest()
                 );
             } else if (path.equals(LOGIN_PATH)) {
                 response = processLoginRequest(requestInformations);
+            } else if (path.equals(REGISTER_PATH)) {
+                response = processRegisterRequest(requestInformations);
             } else {
                 response = responseBuilder.build(
                         HttpStatus.OK,
-                        requestHeaderParser.getAccept(requestInformations),
+                        requestParser.getAccept(requestInformations),
                         processOtherRequest(path)
                 );
             }
@@ -81,12 +87,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String processLoginRequest(Map<String, String> requestHeaderInfos) throws URISyntaxException, IOException {
-        Map<String, String> queryParams = requestHeaderParser.getQueryParams(requestHeaderInfos);
+        Map<String, String> queryParams = requestParser.getQueryParams(requestHeaderInfos);
 
-        if (queryParams.isEmpty()) {
+        if (requestParser.getRequestMethod(requestHeaderInfos).equals(GET) && queryParams.isEmpty()) {
             return responseBuilder.build(
                     HttpStatus.OK,
-                    requestHeaderParser.getAccept(requestHeaderInfos),
+                    requestParser.getAccept(requestHeaderInfos),
                     readStaticResource(LOGIN_PATH + ".html")
             );
         }
@@ -96,6 +102,30 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return responseBuilder.buildRedirect(HttpStatus.FOUND, "/401.html");
+    }
+
+    private String processRegisterRequest(Map<String, String> requestHeaderInfos)
+            throws URISyntaxException, IOException {
+        String requestMethod = requestParser.getRequestMethod(requestHeaderInfos);
+
+        if (requestMethod.equals(GET)) {
+            return responseBuilder.build(
+                    HttpStatus.OK,
+                    requestParser.getAccept(requestHeaderInfos),
+                    readStaticResource(REGISTER_PATH + ".html")
+            );
+        }
+
+        if (requestMethod.equals(POST)) {
+            registerUser(requestParser.getQueryParams(requestHeaderInfos));
+            return responseBuilder.buildRedirect(HttpStatus.FOUND, "/index.html");
+        }
+
+        return responseBuilder.build(
+                HttpStatus.OK,
+                requestParser.getAccept(requestHeaderInfos),
+                ""
+        );
     }
 
     private String processOtherRequest(String path) throws URISyntaxException, IOException {
@@ -115,6 +145,18 @@ public class Http11Processor implements Runnable, Processor {
 
         user.ifPresent(foundUser -> log.info("{}", foundUser));
         return user.isPresent();
+    }
+
+    private void registerUser(Map<String, String> requestParams) {
+        String account = requestParams.get("account");
+        String password = requestParams.get("password");
+        String email = requestParams.get("email");
+
+        if (account == null || password == null || email == null) {
+            return;
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 
     private String readStaticResource(String path) throws URISyntaxException, IOException {

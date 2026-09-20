@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -60,10 +62,10 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인에_성공하면_index로_리다이렉트한다() {
+    void 로그인하지_않은_사용자가_login에_접근하면_로그인_페이지를_보여준다() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1",
+                "GET /login HTTP/1.1",
                 "Host: localhost:8080",
                 "",
                 "");
@@ -77,20 +79,25 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output())
-                .contains("HTTP/1.1 302 Found")
-                .contains("Location: /index.html")
-                .contains("Content-Length: 0");
+                .contains("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/html;charset=utf-8")
+                .contains("<title>로그인</title>");
     }
 
 
     @Test
-    void 로그인에_실패하면_401페이지로_리다이렉트한다() {
+    void POST_방식으로_로그인에_실패하면_401페이지로_리다이렉트한다() {
         // given
+        final String body = "account=gugu&password=wrong";
+
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong HTTP/1.1",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080",
+                "Content-Length: "
+                        + body.getBytes(StandardCharsets.UTF_8).length,
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(httpRequest);
 
@@ -200,11 +207,16 @@ class Http11ProcessorTest {
 
     @Test
     void JSESSIONID가_있으면_새로운_쿠키를_응답하지_않는다() {
+        // given
+        final Session session =
+                SessionManager.getInstance()
+                        .createSession();
+
         final String httpRequest =
                 String.join("\r\n",
                         "GET / HTTP/1.1",
                         "Host: localhost:8080",
-                        "Cookie: JSESSIONID=existing-session",
+                        "Cookie: JSESSIONID=" + session.getId(),
                         "",
                         ""
                 );
@@ -221,5 +233,80 @@ class Http11ProcessorTest {
                 .doesNotContain("Set-Cookie: JSESSIONID=");
     }
 
+    @Test
+    void 로그인된_사용자가_login에_접근하면_index로_리다이렉트한다() {
+        // given
+        final String loginBody =
+                "account=gugu&password=password";
 
+        final String loginRequest =
+                String.join("\r\n",
+                        "POST /login HTTP/1.1",
+                        "Host: localhost:8080",
+                        "Content-Length: "
+                                + loginBody
+                                .getBytes(StandardCharsets.UTF_8)
+                                .length,
+                        "Content-Type: application/x-www-form-urlencoded",
+                        "",
+                        loginBody
+                );
+
+        final var loginSocket =
+                new StubSocket(loginRequest);
+
+        final var processor =
+                new Http11Processor(loginSocket);
+
+        processor.process(loginSocket);
+
+        final String sessionId =
+                extractSessionId(
+                        loginSocket.output()
+                );
+
+        final String loginPageRequest =
+                String.join("\r\n",
+                        "GET /login HTTP/1.1",
+                        "Host: localhost:8080",
+                        "Cookie: JSESSIONID="
+                                + sessionId,
+                        "",
+                        ""
+                );
+
+        final var loginPageSocket =
+                new StubSocket(loginPageRequest);
+
+        final var nextProcessor =
+                new Http11Processor(loginPageSocket);
+
+        // when
+        nextProcessor.process(loginPageSocket);
+
+        // then
+        assertThat(loginPageSocket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+
+    private String extractSessionId(
+            final String response
+    ) {
+        return response.lines()
+                .filter(line ->
+                        line.startsWith(
+                                "Set-Cookie: JSESSIONID="
+                        )
+                )
+                .map(line ->
+                        line.substring(
+                                "Set-Cookie: JSESSIONID="
+                                        .length()
+                        ).trim()
+                )
+                .findFirst()
+                .orElseThrow();
+    }
 }

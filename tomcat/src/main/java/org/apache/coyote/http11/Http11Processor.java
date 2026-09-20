@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +21,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -35,8 +41,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String COOKIE = "Cookie";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER_SESSION_KEY = "user";
 
     private final Socket connection;
+    private static final SessionManager SESSION_MANAGER =
+            SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -70,30 +79,23 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 2. HTTP Headers
-            final Map<String, String> headers =
+            final Map<String, String> requestHeaders =
                     readHeaders(inputStream);
 
             // 3. Request Body
             final String requestBody =
-                    readRequestBody(inputStream, headers);
+                    readRequestBody(inputStream, requestHeaders);
 
-            // 4. Cookie / JSESSIONID
-            final HttpCookie cookies = HttpCookie.from(headers.get(COOKIE));
-
-            final Optional<String> existingSessionId =
-                    cookies.get(JSESSIONID);
-
-            final String jSessionId =
-                    existingSessionId.orElseGet(
-                            () -> UUID.randomUUID().toString()
-                    );
-
+            // 4. Response Headers
             final Map<String, String> responseHeaders =
-                    createCommonResponseHeaders(
-                            existingSessionId,
-                            jSessionId
-                    );
+                    new LinkedHashMap<>();
 
+            // 5. Cookie ->  SESSIONID
+            final HttpSession session =
+                    resolveSession(
+                            requestHeaders,
+                            responseHeaders
+                    );
 
             // 5. path와 query string 분리
             final String path = extractPath(uri);
@@ -107,6 +109,7 @@ public class Http11Processor implements Runnable, Processor {
                     path,
                     queryString,
                     requestBody,
+                    session,
                     responseHeaders
             )) {
                 return;
@@ -234,6 +237,37 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
+
+    private HttpSession resolveSession(
+            final Map<String, String> requestHeaders,
+            final Map<String, String> responseHeaders
+    ) {
+        final HttpCookie cookies =
+                HttpCookie.from(requestHeaders.get(COOKIE));
+
+        final Optional<String> sessionId = cookies.get(JSESSIONID);
+
+        if (sessionId.isPresent()) {
+            final HttpSession foundSession =
+                    SESSION_MANAGER.findSession(sessionId.get());
+
+            if (foundSession != null) {
+                return foundSession;
+            }
+        }
+
+        final Session newSession =
+                SESSION_MANAGER.createSession();
+
+        responseHeaders.put(
+                SET_COOKIE,
+                JSESSIONID + "="
+                        + newSession.getId()
+        );
+
+        return newSession;
+    }
+
     private Map<String, String> createCommonResponseHeaders(
             final Optional<String> existingSessionId,
             final String jSessionId
@@ -302,30 +336,33 @@ public class Http11Processor implements Runnable, Processor {
             final String path,
             final String queryString,
             final String requestBody,
+            final HttpSession session,
             final Map<String, String> responseHeaders
     ) throws IOException {
-        if (!"/login".equals(path)) {
+
+        if (!LOGIN_PATH.equals(path)) {
             return false;
         }
 
-
-        final String parameterString;
-
-        if ("POST".equals(method)) {
-            parameterString = requestBody;
-        } else {
-            parameterString = queryString;
+        // 이미 로그인한 사용자가 GET /login
+        if (GET.equals(method)) {
+            if (getUser(session) != null) {
+                writeRedirect(
+                        outputStream,
+                        "/index.html",
+                        responseHeaders
+                );
+                return true;
+            }
+            return false;    // 로그인하지 않았다면 login.html을 보여준다.
         }
 
-        // GET /login 처럼 로그인 정보 없이 로그인 페이지 자체를 요청한 경우
-        if (parameterString == null
-                || parameterString.isBlank()) {
+        if (!POST.equals(method)) {
             return false;
         }
-
 
         final Map<String, String> parameters =
-                parseParameters(parameterString);
+                parseParameters(requestBody);
 
         final String account = parameters.get("account");
         final String password = parameters.get("password");
@@ -341,35 +378,39 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final Optional<User> user =
-                InMemoryUserRepository.findByAccount(account);
+                InMemoryUserRepository
+                        .findByAccount(account)
+                        .filter(foundUser ->
+                                foundUser.checkPassword(
+                                        password
+                                )
+                        );
 
-        final boolean loginSuccess =
-                user.filter(foundUser ->
-                                foundUser.checkPassword(password))
-                        .isPresent();
 
-
-        if (loginSuccess) {
+        if (user.isEmpty()) {
             log.info(
-                    "login success account: {}",
+                    "login failed account: {}",
                     account
             );
 
             writeRedirect(
                     outputStream,
-                    "/index.html",
+                    "/401.html",
                     responseHeaders
             );
+
             return true;
         }
-        log.info(
-                "login failed account: {}",
-                account
-        );
+        final User loginUser = user.get();
+
+        // 서버 Session에 로그인 User 저장
+        session.setAttribute(USER_SESSION_KEY, loginUser);
+
+        log.info("login success account: {}", loginUser.getAccount());
 
         writeRedirect(
                 outputStream,
-                "/401.html",
+                "/index.html",
                 responseHeaders
         );
 
@@ -377,6 +418,17 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
+    private User getUser(
+            final HttpSession session
+    ) {
+        final Object value = session.getAttribute(USER_SESSION_KEY);
+
+        if (value instanceof User user) {
+            return user;
+        }
+
+        return null;
+    }
 
     private boolean handleRegister(
             final OutputStream outputStream,

@@ -18,6 +18,7 @@ import java.util.Map;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String NOT_FOUND_PAGE = "/404.html";
 
     private final Socket connection;
 
@@ -52,15 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             if ("/login".equals(path)) {
                 login(queryString);
             }
-            String responseBody = getResponseBody(path);
-            String contentType = getContentType(path);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
+            String response = createResponse(path);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -69,18 +62,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String path) throws IOException {
+    private String createResponse(String path) throws IOException {
         if ("/".equals(path)) {
-            return "Hello world!";
+            return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!");
         }
-        if ("/login".equals(path)) {
-            return readStaticResource("/login.html");
+        String resourcePath = "/login".equals(path) ? "/login.html" : path;
+        String responseBody = readStaticResource(resourcePath);
+        if (responseBody == null) {
+            return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), readStaticResource(NOT_FOUND_PAGE));
         }
-        return readStaticResource(path);
+        return buildResponse("HTTP/1.1 200 OK ", getContentType(resourcePath), responseBody);
+    }
+
+    private String buildResponse(String statusLine, String contentType, String responseBody) {
+        return String.join("\r\n",
+                statusLine,
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                responseBody);
     }
 
     private String readStaticResource(String path) throws IOException {
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream("static" + path)) {
+            if (resource == null) {
+                return null;
+            }
             return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
         }
     }

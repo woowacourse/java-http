@@ -67,11 +67,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResourcePath(String requestTarget) {
         String resourcePath = "static" + requestTarget;
-
         if (requestTarget.equals("/login") || requestTarget.equals("/register")) {
             resourcePath += ".html";
         }
-
         return resourcePath;
     }
 
@@ -100,9 +98,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(String resourcePath, String contentType, String status) throws URISyntaxException, IOException {
         String responseBody = createResponseBody(resourcePath);
+
+        String contentTypeHeader = "Content-Type: " + contentType;
+        if (contentType.startsWith("text/")) {
+            contentTypeHeader += ";charset=utf-8";
+        }
         return String.join("\r\n",
                 "HTTP/1.1 " + status,
-                "Content-Type: " + contentType + ";charset=utf-8 ",
+                contentTypeHeader,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

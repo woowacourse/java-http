@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -50,24 +51,39 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final var requestTarget = readRequestTarget(reader);
-            if (requestTarget == null) {
+            final URI requestUri;
+            try {
+                requestUri = readRequestUri(reader);
+            } catch (IOException e) {
+                log.warn("Failed to read HTTP request", e);
+                return;
+            }
+            if (requestUri == null) {
                 return;
             }
 
-            final String[] targetParts = requestTarget.split("\\?", 2);
-            final String path = targetParts[0];
-            if (LOGIN_PATH.equals(path) && targetParts.length == 2) {
-                logMatchingLoginUser(targetParts[1]);
+            final String path = requestUri.getPath();
+            if (path == null) {
+                return;
+            }
+            final String queryString = requestUri.getRawQuery();
+            if (LOGIN_PATH.equals(path) && queryString != null) {
+                logMatchingLoginUser(queryString);
             }
 
-            writeResponse(outputStream, responseContentResolver.resolve(path));
+            final var response = resolveResponse(path);
+
+            try {
+                writeResponse(outputStream, response);
+            } catch (IOException e) {
+                log.warn("Failed to write HTTP response", e);
+            }
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to handle HTTP connection", e);
         }
     }
 
-    private String readRequestTarget(final BufferedReader reader) throws IOException {
+    private URI readRequestUri(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
         if (requestLine == null) {
             return null;
@@ -80,7 +96,12 @@ public class Http11Processor implements Runnable, Processor {
         if (!skipHeaders(reader)) {
             return null;
         }
-        return requestParts[REQUEST_TARGET_INDEX];
+        try {
+            return URI.create(requestParts[REQUEST_TARGET_INDEX]);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid HTTP request target");
+            return null;
+        }
     }
 
     private boolean skipHeaders(final BufferedReader reader) throws IOException {
@@ -120,16 +141,26 @@ public class Http11Processor implements Runnable, Processor {
                 (previous, replacement) -> replacement));
     }
 
-    private void writeResponse(final OutputStream outputStream, final ResponseContent response) throws IOException {
+    private HttpResponse resolveResponse(final String path) {
+        try {
+            return HttpResponse.ok(responseContentResolver.resolve(path));
+        } catch (HttpException e) {
+            log.error(e.getMessage(), e);
+            return HttpResponse.error(e.status());
+        }
+    }
+
+    private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        final var content = response.content();
         final var headers = String.join(CRLF,
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + response.contentType() + " ",
-                "Content-Length: " + response.body().length + " ",
+                "HTTP/1.1 " + response.status().code() + " " + response.status().reasonPhrase() + " ",
+                "Content-Type: " + content.contentType() + " ",
+                "Content-Length: " + content.body().length + " ",
                 "",
                 "");
 
         outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(response.body());
+        outputStream.write(content.body());
         outputStream.flush();
     }
 }

@@ -5,9 +5,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayName("정적 리소스 응답 선택")
 class ResponseContentResolverTest {
@@ -40,6 +44,43 @@ class ResponseContentResolverTest {
 
             // then
             assertThat(response.body()).isEqualTo(expectedBody);
+        }
+    }
+
+    @Nested
+    @DisplayName("등록된 정적 리소스를 읽지 못한 경우")
+    class ResourceLoadingFailure {
+
+        @Test
+        @DisplayName("클래스패스에 파일이 없으면 500 상태의 예외를 던진다")
+        void missingResourceBecomesServerError() {
+            // given
+            final var classLoader = mock(ClassLoader.class);
+            when(classLoader.getResourceAsStream("static/index.html")).thenReturn(null);
+            final var failingResolver = new ResponseContentResolver(classLoader);
+
+            // when
+            final var exception = assertThrows(HttpException.class, () -> failingResolver.resolve("/index.html"));
+
+            // then
+            assertThat(exception.status()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        @Test
+        @DisplayName("파일을 읽다 실패하면 원인 예외를 보존한다")
+        void readFailurePreservesCause() throws IOException {
+            // given
+            final var failingStream = mock(InputStream.class);
+            when(failingStream.readAllBytes()).thenThrow(new IOException("resource read failed"));
+            final var classLoader = mock(ClassLoader.class);
+            when(classLoader.getResourceAsStream("static/index.html")).thenReturn(failingStream);
+            final var failingResolver = new ResponseContentResolver(classLoader);
+
+            // when
+            final var exception = assertThrows(HttpException.class, () -> failingResolver.resolve("/index.html"));
+
+            // then
+            assertThat(exception.getCause()).isInstanceOf(IOException.class);
         }
     }
 

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 class ResponseContentResolver {
 
@@ -19,17 +20,31 @@ class ResponseContentResolver {
             "/assets/chart-bar.js", new StaticResource("/assets/chart-bar.js", JAVASCRIPT_CONTENT_TYPE),
             "/assets/chart-pie.js", new StaticResource("/assets/chart-pie.js", JAVASCRIPT_CONTENT_TYPE));
 
-    ResponseContent resolve(final String path) throws IOException {
+    private final ClassLoader classLoader;
+
+    ResponseContentResolver() {
+        this(ResponseContentResolver.class.getClassLoader());
+    }
+
+    ResponseContentResolver(final ClassLoader classLoader) {
+        this.classLoader = Objects.requireNonNull(classLoader);
+    }
+
+    ResponseContent resolve(final String path) {
         final var resource = RESOURCES.get(path);
         if (resource == null) {
             return new ResponseContent(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));
         }
-        return new ResponseContent(resource.contentType(), readResource(resource.path()));
+        try {
+            return new ResponseContent(resource.contentType(), readResource(resource.path()));
+        } catch (IOException e) {
+            throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to load resource for path: " + path, e);
+        }
     }
 
     private byte[] readResource(final String path) throws IOException {
         final var resourcePath = "static" + path;
-        try (final var inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+        try (final var inputStream = classLoader.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
                 throw new IOException(resourcePath + " not found");
             }

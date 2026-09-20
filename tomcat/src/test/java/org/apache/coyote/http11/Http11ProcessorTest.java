@@ -12,11 +12,15 @@ import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,6 +111,114 @@ class Http11ProcessorTest {
     }
 
     @Nested
+    @DisplayName("요청 처리 실패")
+    class FailureTests {
+
+        @Test
+        @DisplayName("요청을 읽지 못하면 읽기 실패를 기록한다")
+        void logsRequestReadFailure() {
+            // given
+            final InputStream inputStream = new InputStream() {
+                @Override
+                public int read() throws IOException {
+                    throw new IOException("request read failed");
+                }
+            };
+            final var socket = new StubSocket() {
+                @Override
+                public InputStream getInputStream() {
+                    return inputStream;
+                }
+            };
+            final var processor = new Http11Processor(socket);
+
+            // when
+            final var events = processorLogs(() -> processor.process(socket));
+
+            // then
+            assertThat(events)
+                    .extracting(event -> event.getLevel() + ": " + event.getFormattedMessage())
+                    .containsExactly("WARN: Failed to read HTTP request");
+        }
+
+        @Test
+        @DisplayName("정적 리소스 준비 실패 시 500 상태를 응답한다")
+        void resourceFailureReturnsServerErrorStatus() {
+            // given
+            final var socket = new StubSocket("GET /index.html HTTP/1.1\r\n\r\n");
+            final var resolver = mock(ResponseContentResolver.class);
+            when(resolver.resolve("/index.html")).thenThrow(resourceLoadingFailure());
+            final var processor = new Http11Processor(socket, resolver);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output()).startsWith("HTTP/1.1 500 Internal Server Error ");
+        }
+
+        @Test
+        @DisplayName("정적 리소스 준비 실패 시 내부 정보를 노출하지 않는다")
+        void resourceFailureReturnsSafeErrorBody() {
+            // given
+            final var socket = new StubSocket("GET /index.html HTTP/1.1\r\n\r\n");
+            final var resolver = mock(ResponseContentResolver.class);
+            when(resolver.resolve("/index.html")).thenThrow(resourceLoadingFailure());
+            final var processor = new Http11Processor(socket, resolver);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(responseBody(socket.output())).isEqualTo("Internal Server Error");
+        }
+
+        @Test
+        @DisplayName("정적 리소스 읽기 실패를 요청 경로와 함께 기록한다")
+        void logsResourceReadFailureWithPath() {
+            // given
+            final var socket = new StubSocket("GET /index.html HTTP/1.1\r\n\r\n");
+            final var resolver = mock(ResponseContentResolver.class);
+            when(resolver.resolve("/index.html")).thenThrow(resourceLoadingFailure());
+            final var processor = new Http11Processor(socket, resolver);
+
+            // when
+            final var events = processorLogs(() -> processor.process(socket));
+
+            // then
+            assertThat(events)
+                    .extracting(event -> event.getLevel() + ": " + event.getFormattedMessage())
+                    .containsExactly("ERROR: Failed to load resource for path: /index.html");
+        }
+
+        @Test
+        @DisplayName("HTTP 응답 전송 실패를 기록한다")
+        void logsResponseWriteFailure() throws IOException {
+            // given
+            final OutputStream outputStream = mock(OutputStream.class);
+            doThrow(new IOException("client disconnected")).when(outputStream).write(any(byte[].class));
+            final var socket = new StubSocket("GET /index.html HTTP/1.1\r\n\r\n") {
+                @Override
+                public OutputStream getOutputStream() {
+                    return outputStream;
+                }
+            };
+            final var resolver = mock(ResponseContentResolver.class);
+            when(resolver.resolve("/index.html"))
+                    .thenReturn(new ResponseContent("text/html;charset=utf-8", new byte[0]));
+            final var processor = new Http11Processor(socket, resolver);
+
+            // when
+            final var events = processorLogs(() -> processor.process(socket));
+
+            // then
+            assertThat(events)
+                    .extracting(event -> event.getLevel() + ": " + event.getFormattedMessage())
+                    .containsExactly("WARN: Failed to write HTTP response");
+        }
+    }
+
+    @Nested
     @DisplayName("요청 형식 검사")
     class RequestParsingTests {
 
@@ -150,6 +262,19 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("잘못된 URI 형식의 요청 대상에는 응답하지 않는다")
+        void invalidRequestTargetIsRejected() {
+            // given
+            final var requestTarget = "/login?account=%ZZ";
+
+            // when
+            final var response = responseTo(requestTarget);
+
+            // then
+            assertThat(response).isEmpty();
         }
     }
 
@@ -313,6 +438,19 @@ class Http11ProcessorTest {
                     .containsExactly("login user found: gugu");
         }
 
+        @Test
+        @DisplayName("추가 쿼리 값의 인코딩된 앰퍼샌드는 파라미터 구분자로 취급하지 않는다")
+        void encodedAmpersandInAdditionalQueryValueDoesNotPreventLogin() {
+            // given
+            final var requestTarget = "/login?note=a%26b&account=gugu&password=password";
+
+            // when
+            final var messages = loginMessages(requestTarget);
+
+            // then
+            assertThat(messages).containsExactly("login user found: gugu");
+        }
+
         @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
                 "/login?account=gugu&password=wrong",
@@ -399,5 +537,25 @@ class Http11ProcessorTest {
             logger.detachAppender(appender);
             appender.stop();
         }
+    }
+
+    private List<ILoggingEvent> processorLogs(final Runnable action) {
+        final var logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            action.run();
+            return List.copyOf(appender.list);
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    private HttpException resourceLoadingFailure() {
+        return new HttpException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Failed to load resource for path: /index.html", new IOException("resource unavailable"));
     }
 }

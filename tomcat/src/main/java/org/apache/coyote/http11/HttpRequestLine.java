@@ -81,4 +81,8 @@ public record HttpRequestLine(
     private static String decode(final String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
+
+    public boolean isGet() {
+        return "GET".equals(method);
+    }
 }

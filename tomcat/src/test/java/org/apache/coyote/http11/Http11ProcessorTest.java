@@ -79,7 +79,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void loginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",

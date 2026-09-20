@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handle(final HttpRequestLine requestLine) throws IOException {
         final String uri = requestLine.uri();
 
-        if ("/".equals(uri)) {
+        if ("/".equals(uri) && requestLine.isGet()) {
             byte[] responseBody = "Hello world!".getBytes();
 
             Map<String, String> headers = new LinkedHashMap<>();
@@ -68,23 +67,14 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
 
-        if ("/login".equals(uri)) {
-            return login(requestLine.queryParameters());
+        if ("/login".equals(uri) && requestLine.isGet()) {
+            return getLoginPage(requestLine.queryParameters());
         }
 
         return getStaticResource(uri);
     }
 
-    private HttpResponse login(final Map<String, String> queryParameters) throws IOException {
-        final String account = queryParameters.get("account");
-        final String password = queryParameters.get("password");
-
-        if (account != null && password != null) {
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user -> log.info("user : {}", user));
-        }
-
+    private HttpResponse getLoginPage(final Map<String, String> queryParameters) throws IOException {
         return getStaticResource("/login.html");
     }
 

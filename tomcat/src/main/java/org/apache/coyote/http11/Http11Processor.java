@@ -54,16 +54,6 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
             Cookie cookie = Cookie.from(cookieForm);
-            int readLength = 0;
-            char[] buffer = new char[requestContentLength];
-            while (readLength < requestContentLength) {
-                int nowReadLength = reader.read(buffer, readLength, requestContentLength - readLength);
-                if (nowReadLength == -1) {
-                    throw new IOException("잘못된 요청");
-                }
-                readLength += nowReadLength;
-            }
-            String requestBodyForm = new String(buffer);
 
             String url = requestLine.requestUrl();
             String method = requestLine.httpMethod();
@@ -72,6 +62,7 @@ public class Http11Processor implements Runnable, Processor {
             if ("GET".equals(method)) {
                 getProcess(outputStream, uriInfo, cookie.hasCookie("JSESSIONID"));
             } else if ("POST".equals(method)) {
+                String requestBodyForm = extractRequestBodyForm(requestContentLength, reader);
                 FormParameters requestBody = FormParameters.from(requestBodyForm);
                 postProcess(outputStream, uriInfo, requestBody, cookie.hasCookie("JSESSIONID"));
             }
@@ -79,6 +70,20 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
+    }
+
+    private String extractRequestBodyForm(int requestContentLength, BufferedReader reader) throws IOException {
+        int readLength = 0;
+        char[] buffer = new char[requestContentLength];
+        while (readLength < requestContentLength) {
+            int nowReadLength = reader.read(buffer, readLength, requestContentLength - readLength);
+            if (nowReadLength == -1) {
+                throw new IOException("잘못된 요청");
+            }
+            readLength += nowReadLength;
+        }
+        String requestBodyForm = new String(buffer);
+        return requestBodyForm;
     }
 
     private void getProcess(

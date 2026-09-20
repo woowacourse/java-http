@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestTarget = httpRequest.getRequestTarget();
 
         if (requestTarget.equals("/")) {
-            return createResponse("static/index.html", "text/html", "200 OK");
+            return createResponse("Hello world!", "text/html", "200 OK");
         }
         if (httpRequest.isPath("/login")) {
             handleLogin(httpRequest);
@@ -59,10 +59,10 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = getContentType(requestTarget);
 
         if (ClassLoader.getSystemResource(resourcePath) == null) {
-            return createResponse("static/404.html", "text/html", "404 Not Found");
+            return createResponse(createResponseBody("static/404.html"), "text/html", "404 Not Found");
         }
 
-        return createResponse(resourcePath, contentType, "200 OK");
+        return createResponse(createResponseBody(resourcePath), contentType, "200 OK");
     }
 
     private String getResourcePath(String requestTarget) {
@@ -96,9 +96,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(String resourcePath, String contentType, String status) throws URISyntaxException, IOException {
-        String responseBody = createResponseBody(resourcePath);
-
+    private String createResponse(String responseBody, String contentType, String status) {
         String contentTypeHeader = "Content-Type: " + contentType;
         if (contentType.startsWith("text/")) {
             contentTypeHeader += ";charset=utf-8";

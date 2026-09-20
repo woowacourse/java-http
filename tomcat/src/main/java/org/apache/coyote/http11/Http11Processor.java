@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REGISTER_PATH = "/register";
     private static final String COOKIE_HEADER = "Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String GET = "GET";
+    private static final String USER_ATTRIBUTE = "user";
 
     private final Socket connection;
 
@@ -72,7 +76,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(final String requestLine, final Map<String, String> headers,
                                   final String body) throws IOException {
-        final String setCookie = createSetCookie(headers);
+        final HttpCookie cookie = HttpCookie.from(headers.get(COOKIE_HEADER));
+        final String setCookie = createSetCookie(cookie);
         if (requestLine == null) {
             return buildResponse(OK, DEFAULT_CONTENT_TYPE, DEFAULT_BODY, setCookie);
         }
@@ -85,18 +90,28 @@ public class Http11Processor implements Runnable, Processor {
             return createRegisterResponse(body, setCookie);
         }
         if (method.equals(POST) && path.equals(LOGIN_PATH)) {
-            return createLoginResponse(body, setCookie);
+            return createLoginResponse(body);
+        }
+        if (method.equals(GET) && path.equals(LOGIN_PATH) && isLoggedIn(cookie)) {
+            return buildRedirectResponse(INDEX_PAGE, "");
         }
 
         return createResourceResponse(path, setCookie);
     }
 
-    private String createSetCookie(final Map<String, String> headers) {
-        final HttpCookie cookie = HttpCookie.from(headers.get(COOKIE_HEADER));
+    private String createSetCookie(final HttpCookie cookie) {
         if (cookie.hasJSessionId()) {
             return "";
         }
         return JSESSIONID + "=" + UUID.randomUUID();
+    }
+
+    private boolean isLoggedIn(final HttpCookie cookie) {
+        if (!cookie.hasJSessionId()) {
+            return false;
+        }
+        final Session session = SessionManager.getInstance().findSession(cookie.getJSessionId());
+        return session != null && session.getAttribute(USER_ATTRIBUTE) != null;
     }
 
     private String parsePath(final String uri) {
@@ -123,11 +138,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createLoginResponse(final String body, final String setCookie) {
-        if (login(body)) {
-            return buildRedirectResponse(INDEX_PAGE, setCookie);
+    private String createLoginResponse(final String body) {
+        final Optional<User> user = login(body);
+        if (user.isEmpty()) {
+            return buildRedirectResponse(UNAUTHORIZED_PAGE, "");
         }
-        return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
+        final Session session = createSession(user.get());
+        return buildRedirectResponse(INDEX_PAGE, JSESSIONID + "=" + session.getId());
+    }
+
+    private Session createSession(final User user) {
+        final Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute(USER_ATTRIBUTE, user);
+        SessionManager.getInstance().add(session);
+        return session;
     }
 
     private String createRegisterResponse(final String body, final String setCookie) {
@@ -135,12 +159,12 @@ public class Http11Processor implements Runnable, Processor {
         return buildRedirectResponse(INDEX_PAGE, setCookie);
     }
 
-    private boolean login(final String queryString) {
-        final Map<String, String> params = parseParams(queryString);
+    private Optional<User> login(final String body) {
+        final Map<String, String> params = parseParams(body);
         final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"))
                 .filter(it -> it.checkPassword(params.get("password")));
         user.ifPresent(it -> log.info("{}", it));
-        return user.isPresent();
+        return user;
     }
 
     private void register(final String body) {

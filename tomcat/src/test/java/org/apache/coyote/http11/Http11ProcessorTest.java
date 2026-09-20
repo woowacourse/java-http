@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -78,5 +81,75 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK ")
                 .doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void 로그인에_성공하면_세션_아이디를_SetCookie로_반환한다() {
+        // given
+        final String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found ")
+                .contains("Location: /index.html ")
+                .contains("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void 로그인한_상태로_로그인_페이지에_접근하면_인덱스로_리다이렉트한다() {
+        // given
+        final String sessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+        final Session session = new Session(sessionId);
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+        SessionManager.getInstance().add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + sessionId + " ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found ")
+                .contains("Location: /index.html ");
+    }
+
+    @Test
+    void 로그인하지_않으면_로그인_페이지를_보여준다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK ");
     }
 }

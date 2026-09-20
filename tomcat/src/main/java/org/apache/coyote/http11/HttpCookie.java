@@ -32,4 +32,8 @@ public class HttpCookie {
     public boolean hasJSessionId() {
         return values.containsKey(JSESSIONID);
     }
+
+    public String getJSessionId() {
+        return values.get(JSESSIONID);
+    }
 }

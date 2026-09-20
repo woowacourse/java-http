@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.cookie.HttpCookie;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,8 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             String headerFirstLine = bufferedReader.readLine();
 
-            int contentLength = readContentLength(bufferedReader);
+            Map<String, String> headers = readHeaders(bufferedReader);
+            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
             String reqBody = readReqBody(bufferedReader, contentLength);
 
             String method = headerFirstLine.split(" ")[0];
@@ -62,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (pathUri.equals("/login") && method.equals("POST")) {
                 if (login(reqBody)) {
-                    writeAndFlush(outputStream, createRedirectResponse("/index.html"));
+                    writeAndFlush(outputStream, createLoginResponse(headers.get("Cookie")));
                     return;
                 }
                 pathUri = "/401.html";
@@ -89,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 reqBodyParams.get(("email"))
         ));
 
-        writeAndFlush(outputStream, createRedirectResponse("/index.html"));
+        writeAndFlush(outputStream, createRegisterResponse());
     }
 
     private static boolean login(String reqBody) {
@@ -132,10 +134,31 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private static String createRedirectResponse(String loaction) {
+    private static String createLoginResponse(String cookie) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookie(cookie);
+        String jsessionid = httpCookie.getCookieValue("JSESSIONID");
+
+        StringBuilder response = new StringBuilder()
+                .append("HTTP/1.1 302 Found\r\n");
+
+        if (jsessionid == null || jsessionid.isBlank()) {
+            response.append("Set-Cookie: JSESSIONID=")
+                    .append(httpCookie.generateCookie())
+                    .append("\r\n");
+        }
+
+        response.append("Location: /index.html\r\n")
+                .append("Content-Length: 0\r\n")
+                .append("\r\n");
+
+        return response.toString();
+    }
+
+    private static String createRegisterResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: " + loaction,
+                "Location: /index.html",
                 "Content-Length: 0",
                 "",
                 "");
@@ -189,16 +212,15 @@ public class Http11Processor implements Runnable, Processor {
         return new String(body);
     }
 
-    private static int readContentLength(BufferedReader bufferedReader) throws IOException {
+    private Map<String, String> readHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headerMaps = new HashMap<>();
         String line;
-        int contentLength = 0;
 
         while (!(line = bufferedReader.readLine()).isEmpty()) {
-            if (line.startsWith("Content-Length:")) {
-                contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
-            }
+            headerMaps.put(line.split(":")[0].trim(), line.split(":")[1].trim());
         }
-        return contentLength;
+
+        return headerMaps;
     }
 
     private String readQuery(String reqUri, int queryIndex) {

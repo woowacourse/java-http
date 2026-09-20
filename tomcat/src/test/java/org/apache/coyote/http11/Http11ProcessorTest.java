@@ -215,7 +215,7 @@ class Http11ProcessorTest {
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
-                "HTTP/1.1 308 Permanent Redirect ",
+                "HTTP/1.1 302 Found ",
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5564 ",
@@ -318,7 +318,7 @@ class Http11ProcessorTest {
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 308 Permanent Redirect ",
-                "Location: /index.html ",
+                "Location: /index ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5564 ",
                 "",

@@ -187,7 +187,7 @@ public class Http11Processor implements Runnable, Processor {
         if (user.checkPassword(loginRequest.password())) {
             log.info("user: {}", user);
             session.addAttribute("user", user);
-            return Response.seeOther("/index.html", "/index.html");
+            return Response.found("/index.html", "/index.html");
         }
 
         return Response.unauthorized();

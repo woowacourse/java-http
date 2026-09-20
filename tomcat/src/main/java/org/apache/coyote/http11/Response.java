@@ -28,13 +28,6 @@ public class Response {
         return response;
     }
 
-    public static Response seeOther(final String filePath, final String redirect) {
-        final Response response = new Response(HttpStatus.SEE_OTHER, filePath);
-        response.addHeader("Location", redirect);
-
-        return response;
-    }
-
     public static Response permanentRedirect(final String filePath, final String redirect) {
         final Response response = new Response(HttpStatus.PERMANENT_REDIRECT, filePath);
         response.addHeader("Location", redirect);

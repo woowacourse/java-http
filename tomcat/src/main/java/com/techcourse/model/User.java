@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import static java.util.Objects.requireNonNull;
+
 public class User {
 
     private final Long id;
@@ -9,9 +11,16 @@ public class User {
 
     public User(Long id, String account, String password, String email) {
         this.id = id;
-        this.account = account;
-        this.password = password;
-        this.email = email;
+        this.account = checkEmpty(account, "계정이 비어있다.");
+        this.password = checkEmpty(password, "비밀번호가 비어있다.");
+        this.email = checkEmpty(email, "이메일이 비어있다.");
+    }
+
+    private static String checkEmpty(String data, String message) {
+        if (requireNonNull(data, message).isBlank()) {
+            throw new IllegalArgumentException(message);
+        }
+        return data;
     }
 
     public User(String account, String password, String email) {

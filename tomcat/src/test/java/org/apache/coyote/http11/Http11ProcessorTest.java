@@ -42,6 +42,48 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void set_cookie_when_request_cookie_has_no_session_id() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void does_not_set_cookie_when_request_has_session_id() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session-id ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

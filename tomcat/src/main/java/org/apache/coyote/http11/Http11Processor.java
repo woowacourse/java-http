@@ -91,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 path = resolveGetPath(path);
             }
 
-            final var response = makeResponse(path, code, status, session.getId());
+            final var response = makeResponse(path, code, status, session.getId(), cookies.getSessionId());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -126,12 +126,12 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    // TODO: 요청 헤더 쿠키에 JSESSIONID가 없었을 때만 Set-Cookie를 응답 헤더에 넣기
     private String makeResponse(
             final String path,
             final String code,
             final String status,
-            final String sessionId
+            final String sessionId,
+            final String sessionIdFromCookie
     ) throws IOException {
         final String responseBody = getResponseBody(path);
         final String contentType = resolveContentType(path);
@@ -140,7 +140,9 @@ public class Http11Processor implements Runnable, Processor {
         responseLines.add("HTTP/1.1 " + code + " " + status);
         responseLines.add("Content-Type: " + contentType + ";charset=utf-8");
         responseLines.add("Content-Length: " + responseBody.getBytes().length);
-        responseLines.add("Set-Cookie: JSESSIONID=" + sessionId);
+        if (sessionIdFromCookie == null) {
+            responseLines.add("Set-Cookie: JSESSIONID=" + sessionId);
+        }
         responseLines.add("");
         responseLines.add(responseBody);
 
@@ -212,7 +214,7 @@ public class Http11Processor implements Runnable, Processor {
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             if (line == null) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("헤더가 올바르지 않습니다.");
             }
             headers.add(line);
             line = bufferedReader.readLine();

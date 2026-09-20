@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -233,11 +234,15 @@ public class Http11Processor implements Runnable, Processor {
                 continue;
             }
             if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
+                params.put(decode(keyValue[0]), decode(keyValue[1]));
             } else {
-                params.put(keyValue[0], "");
+                params.put(decode(keyValue[0]), "");
             }
         }
         return params;
+    }
+
+    private String decode(final String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

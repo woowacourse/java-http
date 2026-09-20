@@ -7,6 +7,7 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -39,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            String line = bufferedReader.readLine();
+            String line = getHttpRequestLine(bufferedReader);
             final String[] tokens = line.split(" ", 3);
             final String uri = tokens[1];
 
@@ -62,6 +63,14 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | URISyntaxException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
+        String line = bufferedReader.readLine();
+        if (line ==null){
+            throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
+        }
+        return line;
     }
 
     private void login(String queryString) {

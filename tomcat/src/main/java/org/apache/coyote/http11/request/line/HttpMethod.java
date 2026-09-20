@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.line;
 
 /**
  * @see <a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Methods">MDN HttpMethod</a>

@@ -1,4 +1,6 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.line;
+
+import org.apache.coyote.http11.request.vo.QueryParams;
 
 import java.net.URI;
 

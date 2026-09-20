@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.vo;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -8,10 +8,10 @@ import java.util.Map;
 
 public class QueryParams {
 
-    private final Map<String, String> queryParams;
+    private final Map<String, String> params;
 
     public QueryParams(String query) {
-        this.queryParams = parseQuery(query);
+        this.params = parseQuery(query);
     }
 
     private Map<String, String> parseQuery(String query) {
@@ -29,7 +29,7 @@ public class QueryParams {
     }
 
     public String getValue(String key) {
-        return queryParams.get(key);
+        return params.get(key);
     }
 
 }

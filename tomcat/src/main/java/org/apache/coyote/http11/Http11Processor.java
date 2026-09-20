@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createSetCookie(final Map<String, String> headers) {
-        final Cookie cookie = Cookie.from(headers.get(COOKIE_HEADER));
+        final HttpCookie cookie = HttpCookie.from(headers.get(COOKIE_HEADER));
         if (cookie.hasJSessionId()) {
             return "";
         }

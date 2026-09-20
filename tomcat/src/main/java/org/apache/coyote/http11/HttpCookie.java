@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cookie {
+public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_SEPARATOR = ";";
@@ -11,14 +11,14 @@ public class Cookie {
 
     private final Map<String, String> values;
 
-    private Cookie(final Map<String, String> values) {
+    private HttpCookie(final Map<String, String> values) {
         this.values = values;
     }
 
-    public static Cookie from(final String cookieHeader) {
+    public static HttpCookie from(final String cookieHeader) {
         final Map<String, String> values = new HashMap<>();
         if (cookieHeader == null) {
-            return new Cookie(values);
+            return new HttpCookie(values);
         }
         for (final String cookie : cookieHeader.split(COOKIE_SEPARATOR)) {
             final String[] keyAndValue = cookie.split(KEY_VALUE_SEPARATOR, 2);
@@ -26,7 +26,7 @@ public class Cookie {
                 values.put(keyAndValue[0].trim(), keyAndValue[1].trim());
             }
         }
-        return new Cookie(values);
+        return new HttpCookie(values);
     }
 
     public boolean hasJSessionId() {

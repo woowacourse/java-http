@@ -22,10 +22,13 @@ public class HttpRequest {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         final var requestLine = bufferedReader.readLine();
-        if (requestLine.isBlank()) {
+        if (requestLine == null || requestLine.isBlank()) {
             throw new IllegalArgumentException("Request line is blank");
         }
         final var requestLineParts = requestLine.trim().split(" ");
+        if (requestLineParts.length != 3) {
+            throw new IllegalArgumentException("Invalid request line");
+        }
         final String method = requestLineParts[0];
 
         final var requestTargetParts = requestLineParts[1].split("\\?", 2);

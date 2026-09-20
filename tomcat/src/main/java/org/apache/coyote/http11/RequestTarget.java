@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class RequestTarget {
-
-    private static final String LOGIN_PATH = "/login";
-
     private final String path;
     private final Map<String, String> queryParameters;
 
@@ -35,14 +32,11 @@ public class RequestTarget {
         return queryParameters;
     }
 
-    public boolean isLogin() {
-        return path.equals(LOGIN_PATH);
+    public boolean hasPath(String expectedPath) {
+        return path.equals(expectedPath);
     }
 
-    public String resourcePath() {
-        if (isLogin()) {
-            return "/login.html";
-        }
+    public String getPath() {
         return path;
     }
 
@@ -50,7 +44,7 @@ public class RequestTarget {
         return Optional.ofNullable(queryParameters.get(name));
     }
 
-    public String extension() {
+    public String getExtension() {
         int extensionStart = path.lastIndexOf(".");
         if (extensionStart < path.lastIndexOf("/")) {
             return "";

@@ -167,7 +167,7 @@ class Http11ProcessorTest {
             "/index.html, static/index.html",
             "/css/styles.css, static/css/styles.css",
             "/login, static/login.html",
-            "/login?account=gugu&password=password HTTP/1.1 , static/login.html"
+            "/login?account=gugu&password=password, static/login.html"
     })
     void 요청_경로에_해당하는_정적_리소스를_반환한다(String requestTarget, String resourcePath) throws IOException {
         // given
@@ -189,5 +189,4 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).endsWith("\r\n\r\n" + expected);
     }
-
 }

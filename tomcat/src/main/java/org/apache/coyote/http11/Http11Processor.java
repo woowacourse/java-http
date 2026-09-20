@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_RESOURCE_PREFIX = "static";
     private static final String ROOT_RESPONSE_BODY = "Hello world!";
+    private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_RESOURCE_PATH = "/login.html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -46,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             String[] parts = requestLine.split(" ");
 
             RequestTarget requestTarget = new RequestTarget(parts[1]);
-            if (requestTarget.isLogin()) {
+            if (requestTarget.hasPath(LOGIN_PATH)) {
                 Optional<String> account = requestTarget.queryParameter("account");
                 if (account.isPresent()) {
                     Optional<User> user = InMemoryUserRepository.findByAccount(account.get());
@@ -54,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            String resourcePath = requestTarget.resourcePath();
+            String resourcePath = resolveResourcePath(requestTarget);
 
             byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
             if (!resourcePath.equals("/")) {
@@ -65,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = Files.readAllBytes(path);
                 }
             }
-            String contentType = contentTypeOf(requestTarget.extension());
+            String contentType = contentTypeOf(requestTarget.getExtension());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -79,6 +81,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String resolveResourcePath(RequestTarget requestTarget) {
+        if (requestTarget.hasPath(LOGIN_PATH)) {
+            return LOGIN_RESOURCE_PATH;
+        }
+        return requestTarget.getPath();
     }
 
     private String contentTypeOf(String extension) {

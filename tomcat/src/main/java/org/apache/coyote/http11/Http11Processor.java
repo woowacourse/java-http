@@ -3,11 +3,13 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String PATH_QUERY_SEPARATOR = "?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_NAME_VALUE_SEPARATOR = "=";
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
 
@@ -52,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             final String requestTarget = extractRequestTarget(requestLine);
 
             String responseBody = resolveResponseBody(requestTarget);
-            String contentType = resolveContentType(requestTarget);
+            String contentType = resolveContentType(extractTargetPath(requestTarget));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -159,29 +162,46 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readResourceAsString(String resourceName) {
+        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + resourceName);
+        if (resource == null) {
+            return "";
+        }
+
         try {
-            URI uri = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + resourceName).toURI();
+            URI uri = resource.toURI();
 
             return Files.readString(Path.of(uri));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | URISyntaxException e) {
+            throw new UncheckedServletException(e);
         }
     }
 
-    private String resolveContentType(String targetPath) {
-        if (targetPath.contains(".")) {
-            if (targetPath.split("\\.")[1].equals("html")) {
-                return "text/html;charset=utf-8 ";
-            }
-            if (targetPath.split("\\.")[1].equals("css")) {
-                return "text/css;charset=utf-8 ";
-            }
-            if (targetPath.split("\\.")[1].equals("js")) {
-                return "text/js;charset=utf-8 ";
+    private String readResourceAsStringd(String resourceName) {
+        URL resource = getClass().getClassLoader()
+                .getResource(STATIC_RESOURCE_PATH + resourceName);
+
+        if (resource == null) {
+            try {
+                throw new FileNotFoundException(resourceName);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
-        return "text/html;charset=utf-8 ";
+
+        try {
+            return Files.readString(Path.of(resource.toURI()));
+        } catch (IOException | URISyntaxException e) {
+            throw new UncheckedServletException(e);
+        }
+    }
+
+    private String resolveContentType(String content) {
+        int index = content.lastIndexOf(FILE_EXTENSION_SEPARATOR);
+        if (index < 0) {
+            return "text/html;charset=utf-8 ";
+        }
+
+        String extension = content.substring(index + FILE_EXTENSION_SEPARATOR.length());
+        return "text/" + extension + ";charset=utf-8 ";
     }
 }

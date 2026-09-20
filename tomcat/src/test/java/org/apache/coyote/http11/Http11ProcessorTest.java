@@ -134,8 +134,52 @@ class Http11ProcessorTest {
         assertThat(response).isEqualTo(expectedResponse("404 Not Found", "/404.html", "text/html;charset=utf-8"));
     }
 
+    @Test
+    @DisplayName("로그인에 성공하면 index.html로 리다이렉트한다")
+    void postLoginSuccess() {
+        // when
+        String response = process("POST", "/login", "account=gugu&password=password");
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found\r\n")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다")
+    void postLoginFailure() {
+        // when
+        String response = process("POST", "/login", "account=gugu&password=wrong");
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found\r\n")
+                .contains("Location: /401.html");
+    }
+
+    @Test
+    @DisplayName("로그인 폼은 POST로 전송한다")
+    void loginFormMethod() {
+        // when
+        String response = process("/login");
+
+        // then
+        assertThat(response)
+                .contains("<form method=\"post\" action=\"login\">");
+    }
+
     private String process(String path) {
         final var socket = new StubSocket(httpRequest(path));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        return socket.output();
+    }
+
+    private String process(String method, String path, String body) {
+        final var socket = new StubSocket(httpRequest(method, path, body));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -149,6 +193,16 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "",
                 "");
+    }
+
+    private String httpRequest(String method, String path, String body) {
+        return String.join("\r\n",
+                method + " " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
     }
 
     private String expectedResponse(String path, String contentType) throws IOException {

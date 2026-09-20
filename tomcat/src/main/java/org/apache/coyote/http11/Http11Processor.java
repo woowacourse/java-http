@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -50,11 +51,19 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            String method = parseMethod(requestLine);
             String uri = parseUri(requestLine);
             String queryString = extractQueryString(uri);
             String resourcePath = normalizePath(parsePath(uri));
 
-            readHeaders(reader);
+            Map<String, String> headers = readHeaders(reader);
+
+            if (isPostLogin(method, resourcePath)) {
+                String requestBody = readRequestBody(reader, headers);
+                writeLoginResponse(outputStream, requestBody);
+                return;
+            }
+
             logUserIfExists(resourcePath, queryString);
 
             URL resource = findResource(resourcePath);
@@ -71,6 +80,11 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseMethod(String requestLine) {
+        String[] parts = requestLine.split(" ");
+        return parts[0];
     }
 
     private String parseUri(String requestLine) {
@@ -98,12 +112,57 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(queryIndex + 1);
     }
 
-    private void readHeaders(BufferedReader reader) throws IOException {
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
         String header;
 
         while ((header = reader.readLine()) != null && !header.isEmpty()) {
-            // Header는 현재 사용하지 않으므로 읽고 버린다.
+            String[] nameAndValue = header.split(":", 2);
+            if (nameAndValue.length == 2) {
+                headers.put(nameAndValue[0].trim(), nameAndValue[1].trim());
+            }
         }
+
+        return headers;
+    }
+
+    private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        String contentLengthHeader = headers.get("Content-Length");
+
+        if (contentLengthHeader == null) {
+            return "";
+        }
+
+        int contentLength = Integer.parseInt(contentLengthHeader);
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
+    }
+
+    private boolean isPostLogin(String method, String resourcePath) {
+        return method.equals("POST") && resourcePath.equals("/login.html");
+    }
+
+    private void writeLoginResponse(OutputStream outputStream, String requestBody) throws IOException {
+        Map<String, String> params = parseQueryString(requestBody);
+        String account = params.get("account");
+        String password = params.get("password");
+
+        if (account == null || password == null) {
+            writeRedirectResponse(outputStream, "/401.html");
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> {
+                            log.info("조회된 사용자: id={}, account={}", user.getId(), user.getAccount());
+                            writeRedirectResponse(outputStream, "/index.html");
+                        },
+                        () -> writeRedirectResponse(outputStream, "/401.html")
+                );
     }
 
     private void logUserIfExists(String resourcePath, String queryString) {
@@ -150,6 +209,23 @@ public class Http11Processor implements Runnable, Processor {
     private byte[] readBody(URL resource) throws IOException {
         try (InputStream resourceStream = resource.openStream()) {
             return resourceStream.readAllBytes();
+        }
+    }
+
+    private void writeRedirectResponse(OutputStream outputStream, String location) {
+        String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+
+        try {
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new UncheckedServletException(e);
         }
     }
 
@@ -206,7 +282,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String key = keyValue[0];
-            String value = keyValue[1];
+            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
 
             queryParams.put(key, value);
         }

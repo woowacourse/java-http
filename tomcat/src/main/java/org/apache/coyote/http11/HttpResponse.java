@@ -39,6 +39,15 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse unauthorized(byte[] body) {
+        return new HttpResponse(
+                401,
+                "UNAUTHORIZED",
+                "text/html;charset=utf-8",
+                body
+        );
+    }
+
     @Override
     public String toString() {
         return String.join(

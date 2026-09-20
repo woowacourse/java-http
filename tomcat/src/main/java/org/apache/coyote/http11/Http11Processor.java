@@ -75,16 +75,18 @@ public class Http11Processor implements Runnable, Processor {
             final String queryString = extractQueryString(uri);
 
 
-            // 현재 GET 로그인도 유지하고,
-            // POST 요청이 들어오면 body에서도 파라미터를 읽을 수 있게 준비
-            logUserIfLoginRequest(
+            // 5. 로그인 처리
+            if (handleLogin(
+                    outputStream,
                     method,
                     path,
                     queryString,
                     requestBody
-            );
+            )) {
+                return;
+            }
 
-            // 4. Response Body 결정
+            // 6. 기본
             if ("/".equals(path)) {
                 writeResponse(
                         outputStream,
@@ -94,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
                 );
                 return;
             }
-
+            // 7. 정적
             writeStaticResource(outputStream, path);
 
         } catch (IOException
@@ -238,14 +240,15 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(queryIndex + 1);
     }
 
-    private void logUserIfLoginRequest(
+    private boolean handleLogin(
+            final OutputStream outputStream,
             final String method,
             final String path,
             final String queryString,
             final String requestBody
-    ) {
+    ) throws IOException {
         if (!"/login".equals(path)) {
-            return;
+            return false;
         }
 
 
@@ -257,9 +260,10 @@ public class Http11Processor implements Runnable, Processor {
             parameterString = queryString;
         }
 
+        // GET /login 처럼 로그인 정보 없이 로그인 페이지 자체를 요청한 경우
         if (parameterString == null
                 || parameterString.isBlank()) {
-            return;
+            return false;
         }
 
 
@@ -270,16 +274,68 @@ public class Http11Processor implements Runnable, Processor {
         final String password = parameters.get("password");
 
         if (account == null || password == null) {
-            return;
+            writeRedirect(
+                    outputStream,
+                    "/401.html"
+            );
+            return true;
         }
 
         final Optional<User> user =
                 InMemoryUserRepository.findByAccount(account);
 
-        user.filter(foundUser ->
-                        foundUser.checkPassword(password))
-                .ifPresent(foundUser ->
-                        log.info("login success account: {}", foundUser.getAccount()));
+        final boolean loginSuccess =
+                user.filter(foundUser ->
+                                foundUser.checkPassword(password))
+                        .isPresent();
+
+
+        if (loginSuccess) {
+            log.info(
+                    "login success account: {}",
+                    account
+            );
+
+            writeRedirect(
+                    outputStream,
+                    "/index.html"
+            );
+            return true;
+        }
+        log.info(
+                "login failed account: {}",
+                account
+        );
+
+        writeRedirect(
+                outputStream,
+                "/401.html"
+        );
+
+        return true;
+
+    }
+    private void writeRedirect(
+            final OutputStream outputStream,
+            final String location
+    ) throws IOException {
+
+        final String responseHeaders =
+                String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: " + location + " ",
+                        "Content-Length: 0 ",
+                        "",
+                        ""
+                );
+
+        outputStream.write(
+                responseHeaders.getBytes(
+                        StandardCharsets.UTF_8
+                )
+        );
+
+        outputStream.flush();
     }
 
     private Map<String, String> parseParameters(

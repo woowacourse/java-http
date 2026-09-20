@@ -2,13 +2,15 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -40,6 +42,9 @@ public class RequestHandler {
 
     private HttpResponse handleLogin(final HttpRequest request) throws IOException, URISyntaxException {
         if (request.getMethod() != HttpMethod.POST) {
+            if (isLoggedIn(request)) {
+                return HttpResponse.redirect("/index.html");
+            }
             return HttpResponse.ok("text/html", page("/login.html"));
         }
         final String account = request.getParameter("account");
@@ -47,17 +52,30 @@ public class RequestHandler {
         if (isBlank(account) || isBlank(password)) {
             return HttpResponse.redirect("/401.html");
         }
-        if (isValidUser(account, password)) {
-            return loginSuccess(request);
+
+        final Optional<User> user = findUser(account, password);
+        if (user.isEmpty()) {
+            return HttpResponse.redirect("/401.html");
         }
-        return HttpResponse.redirect("/401.html");
+        return loginSuccess(user.get());
     }
 
-    private HttpResponse loginSuccess(final HttpRequest request) {
+    private boolean isLoggedIn(final HttpRequest request) {
+        final Session session = SessionManager.INSTANCE.findSession(request.getCookie().get(JSESSIONID));
+        return session != null && session.getAttribute("user") != null;
+    }
+
+    private Optional<User> findUser(final String account, final String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+    }
+
+    private HttpResponse loginSuccess(final User user) {
+        final Session session = SessionManager.INSTANCE.createSession();
+        session.setAttribute("user", user);
+
         final HttpResponse response = HttpResponse.redirect("/index.html");
-        if (request.getCookie().get(JSESSIONID) == null) {
-            response.addHeader("Set-Cookie", JSESSIONID + "=" + UUID.randomUUID());
-        }
+        response.addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
         return response;
     }
 
@@ -77,12 +95,6 @@ public class RequestHandler {
 
     private boolean isBlank(final String value) {
         return value == null || value.isBlank();
-    }
-
-    private boolean isValidUser(final String account, final String password) {
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
     }
 
     private String readResource(final URL resource) throws IOException, URISyntaxException {

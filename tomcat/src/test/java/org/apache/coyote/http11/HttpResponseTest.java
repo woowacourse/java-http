@@ -47,6 +47,15 @@ class HttpResponseTest {
         assertThat(toString(response)).isEqualTo(expected);
     }
 
+    @Test
+    void 추가한_헤더가_응답_메시지에_포함된다() {
+        final HttpResponse response = HttpResponse.redirect("/index.html");
+
+        response.addHeader("Set-Cookie", "JSESSIONID=656cef62");
+
+        assertThat(toString(response)).contains("Set-Cookie: JSESSIONID=656cef62 \r\n");
+    }
+
     private String toString(final HttpResponse response) {
         return new String(response.getBytes(), UTF_8);
     }

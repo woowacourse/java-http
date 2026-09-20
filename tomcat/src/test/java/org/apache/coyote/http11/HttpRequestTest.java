@@ -96,6 +96,39 @@ class HttpRequestTest {
     }
 
     @Test
+    void 같은_이름이_쿼리와_바디에_있으면_쿼리를_우선한다() throws IOException {
+        final HttpRequest request = parse(
+                "POST /login?account=admin HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 12",
+                "",
+                "account=gugu");
+
+        assertThat(request.getParameter("account")).isEqualTo("admin");
+    }
+
+    @Test
+    void 쿠키_헤더를_HttpCookie로_제공한다() throws IOException {
+        final HttpRequest request = parse(
+                "GET /index.html HTTP/1.1",
+                "Cookie: yummy_cookie=choco; JSESSIONID=656cef62",
+                "",
+                "");
+
+        assertThat(request.getCookie().get("JSESSIONID")).isEqualTo("656cef62");
+    }
+
+    @Test
+    void 쿠키_헤더가_없어도_빈_쿠키를_제공한다() throws IOException {
+        final HttpRequest request = parse(
+                "GET /index.html HTTP/1.1",
+                "",
+                "");
+
+        assertThat(request.getCookie().get("JSESSIONID")).isNull();
+    }
+
+    @Test
     void 지원하지_않는_메서드면_예외가_발생한다() {
         final BufferedReader reader = readerOf("DELETE / HTTP/1.1", "", "");
 

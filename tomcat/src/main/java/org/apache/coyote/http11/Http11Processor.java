@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,6 +29,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String NOT_FOUND_PAGE = "static/404.html";
     private static final String LOGIN_PATH = "/login";
     private static final String ROOT_PATH = "/";
+    private static final String FOUND = "HTTP/1.1 302 Found ";
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
 
     private final Socket connection;
 
@@ -65,7 +70,9 @@ public class Http11Processor implements Runnable, Processor {
         final String path = parsePath(uri);
         final String queryString = parseQueryString(uri);
 
-        login(path, queryString);
+        if (path.equals(LOGIN_PATH) && !queryString.isEmpty()) {
+            return createLoginResponse(queryString);
+        }
 
         return createResourceResponse(path);
     }
@@ -86,15 +93,27 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(index + 1);
     }
 
-    private void login(final String path, final String queryString) {
-        if (!path.equals(LOGIN_PATH) || queryString.isEmpty()) {
-            return;
-        }
+    private String buildRedirectResponse(final String location) {
+        return String.join("\r\n",
+                FOUND,
+                "Location: " + location + " ",
+                "",
+                "");
+    }
 
+    private String createLoginResponse(final String queryString) {
+        if (login(queryString)) {
+            return buildRedirectResponse(INDEX_PAGE);
+        }
+        return buildRedirectResponse(UNAUTHORIZED_PAGE);
+    }
+
+    private boolean login(final String queryString) {
         final Map<String, String> params = parseParams(queryString);
-        InMemoryUserRepository.findByAccount(params.get("account"))
-                .filter(user -> user.checkPassword(params.get("password")))
-                .ifPresent(user -> log.info("{}", user));
+        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"))
+                .filter(it -> it.checkPassword(params.get("password")));
+        user.ifPresent(it -> log.info("{}", it));
+        return user.isPresent();
     }
 
     private String createResourceResponse(final String path) throws IOException {

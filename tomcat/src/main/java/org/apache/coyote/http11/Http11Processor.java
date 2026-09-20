@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -50,13 +51,25 @@ public class Http11Processor implements Runnable, Processor {
                 queryString = uri.substring(index + 1);
             }
             HashMap<String, String> params = parseQueryString(queryString);
-
             if (path.equals("login")) {
                 path = "login.html";
                 if (params.containsKey("account")) {
-                    InMemoryUserRepository.findByAccount(params.get("account"))
+                    User existUser = InMemoryUserRepository.findByAccount(params.get("account"))
                             .filter(user -> user.checkPassword(params.get("password")))
-                            .ifPresent(user -> log.info("user : {}", user));
+                            .orElse(null);
+                    String location = "/401.html";
+                    if (existUser != null) {
+                        log.info("user : {}", existUser);
+                        location = "/index.html";
+                    }
+                    final var redirectResponse = String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: " + location + " ",
+                            "",
+                            "");
+                    outputStream.write(redirectResponse.getBytes());
+                    outputStream.flush();
+                    return;
                 }
             }
 

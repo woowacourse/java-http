@@ -61,6 +61,11 @@ public class Http11Processor implements Runnable, Processor {
 
             log.debug("{} {} 요청을 받았습니다. 본문 길이: {}", method, requestTarget, requestBody.length());
 
+            if (method.equals("POST") && path.equals("/register")) {
+                register(parseQueryString(requestBody), outputStream);
+                return;
+            }
+
             if (path.equals("/")) {
                 final var responseBody = "Hello world!";
                 final var response = String.join("\r\n",
@@ -125,6 +130,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void register(final Map<String, String> params, final OutputStream outputStream) throws IOException {
+        final String account = params.get("account");
+        final String email = params.get("email");
+        final String password = params.get("password");
+
+        if (account == null || email == null || password == null) {
+            log.info("회원가입에 필요한 정보가 입력되지 않았습니다.");
+            sendRedirect(outputStream, UNAUTHORIZED_PAGE);
+            return;
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        log.info("회원가입이 완료되었습니다. account: {}", account);
+        sendRedirect(outputStream, INDEX_PAGE);
     }
 
     private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {

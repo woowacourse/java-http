@@ -55,20 +55,46 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean processEndpoints(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
-        if ("/".equals(httpRequest.getPath())) {
+        String requestPath = httpRequest.getPath();
+        if ("/".equals(requestPath)) {
             responseProcessor.sendStaticResource(HttpStatus.OK, MimeType.TEXT_HTML, DEFAULT_BODY);
             return true;
         }
-        if ("/login".equals(httpRequest.getPath())) {
+        if ("/login".equals(requestPath)) {
             processLogin(httpRequest, responseProcessor);
             return true;
+        }
+        if ("/register".equals(requestPath)) {
+            if (httpRequest.isGet()) {
+                responseProcessor.sendStaticResource("/register.html");
+                return true;
+            }
+            if (httpRequest.isPost()) {
+                processRegister(httpRequest, responseProcessor);
+                return true;
+            }
         }
         return false;
     }
 
+    private void processRegister(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException {
+        Optional<String> account = httpRequest.getParameter("account");
+        Optional<String> password = httpRequest.getParameter("password");
+        Optional<String> email = httpRequest.getParameter("email");
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            responseProcessor.sendError(HttpStatus.BAD_REQUEST);
+            return;
+        }
+
+        User user = new User(account.get(), password.get(), email.get());
+        InMemoryUserRepository.save(user);
+        log.info("registered user : {}", user);
+        responseProcessor.sendRedirect("/index.html");
+    }
+
     private void processLogin(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
-        Optional<String> account = httpRequest.getQueryParameter("account");
-        Optional<String> password = httpRequest.getQueryParameter("password");
+        Optional<String> account = httpRequest.getParameter("account");
+        Optional<String> password = httpRequest.getParameter("password");
         if (account.isEmpty() || password.isEmpty()) {
             responseProcessor.sendStaticResource("/login.html");
             return;

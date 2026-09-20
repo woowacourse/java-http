@@ -36,4 +36,8 @@ public class QueryParam {
     public Optional<String> get(String key) {
         return Optional.ofNullable(storage.get(key));
     }
+
+    public boolean isEmpty() {
+        return storage.isEmpty();
+    }
 }

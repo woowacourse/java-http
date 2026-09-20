@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.handler.LoginHandler;
 import com.techcourse.handler.StaticResourceHandler;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +15,6 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     private static final Adapter ADAPTER = new ResourceResolver(List.of(
-            new LoginHandler(),
             new StaticResourceHandler()
     ));
 

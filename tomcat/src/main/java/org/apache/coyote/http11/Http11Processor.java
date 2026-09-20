@@ -86,6 +86,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            if (path.equals("/register")) {
+                filePath = "static/register.html";
+            }
+
             if (path.endsWith(".css")) {
                 contentType = "text/css;charset=utf-8";
             }

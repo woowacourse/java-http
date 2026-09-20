@@ -16,8 +16,11 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -58,6 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             String resourcePath = normalizePath(parsePath(uri));
 
             Map<String, String> headers = readHeaders(reader);
+            String setCookie = createJSessionIdCookie(headers);
 
             if (isPostLogin(method, resourcePath)) {
                 String requestBody = readRequestBody(reader, headers);
@@ -76,13 +80,13 @@ public class Http11Processor implements Runnable, Processor {
             URL resource = findResource(resourcePath);
 
             if (resource == null) {
-                writeNotFoundResponse(outputStream);
+                writeNotFoundResponse(outputStream, setCookie);
                 return;
             }
 
             byte[] body = readBody(resource);
 
-            String response = createResponse("200 OK", resourcePath, body);
+            String response = createResponse("200 OK", resourcePath, body, setCookie);
             writeResponse(outputStream, response, body);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -131,6 +135,16 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return headers;
+    }
+
+    private String createJSessionIdCookie(Map<String, String> headers) {
+        HttpCookie cookie = HttpCookie.parse(headers.get("Cookie"));
+
+        if (cookie.contains(HttpCookie.JSESSIONID)) {
+            return null;
+        }
+
+        return HttpCookie.createJSessionId(UUID.randomUUID().toString());
     }
 
     private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
@@ -250,7 +264,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeNotFoundResponse(OutputStream outputStream) throws IOException {
+    private void writeNotFoundResponse(OutputStream outputStream, String setCookie) throws IOException {
         String resourcePath = "/404.html";
         URL resource = findResource(resourcePath);
 
@@ -259,18 +273,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         byte[] body = readBody(resource);
-        String response = createResponse("404 Not Found", resourcePath, body);
+        String response = createResponse("404 Not Found", resourcePath, body, setCookie);
         writeResponse(outputStream, response, body);
     }
 
-    private String createResponse(String status, String resourcePath, byte[] body) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status,
-                "Content-Type: " + getContentType(resourcePath),
-                "Content-Length: " + body.length,
-                "",
-                ""
-        );
+    private String createResponse(String status, String resourcePath, byte[] body, String setCookie) {
+        List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 " + status);
+        if (setCookie != null) {
+            lines.add("Set-Cookie: " + setCookie);
+        }
+        lines.add("Content-Type: " + getContentType(resourcePath));
+        lines.add("Content-Length: " + body.length);
+        lines.add("");
+        lines.add("");
+
+        return String.join("\r\n", lines);
     }
 
     private void writeResponse(

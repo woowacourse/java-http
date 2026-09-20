@@ -184,6 +184,21 @@ class Http11ProcessorTest {
                 .isPresent();
     }
 
+    @Test
+    @DisplayName("JSESSIONID 쿠키가 없으면 응답에 Set-Cookie를 추가한다")
+    void setCookieWhenJSessionIdDoesNotExist() {
+        // given
+        final var socket = new StubSocket(httpRequestWithoutCookie("/index.html"));
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("Set-Cookie: JSESSIONID=");
+    }
+
     private String process(String path) {
         final var socket = new StubSocket(httpRequest(path));
         final var processor = new Http11Processor(socket);
@@ -206,6 +221,7 @@ class Http11ProcessorTest {
         return String.join("\r\n",
                 "GET " + path + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=test-session-id",
                 "",
                 "");
     }
@@ -216,8 +232,17 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Cookie: JSESSIONID=test-session-id",
                 "",
                 body);
+    }
+
+    private String httpRequestWithoutCookie(String path) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
     }
 
     private String expectedResponse(String path, String contentType) throws IOException {

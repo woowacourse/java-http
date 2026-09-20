@@ -18,9 +18,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -33,6 +31,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
+
+    private static final String COOKIE = "Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -75,46 +77,66 @@ public class Http11Processor implements Runnable, Processor {
             final String requestBody =
                     readRequestBody(inputStream, headers);
 
+            // 4. Cookie / JSESSIONID
+            final HttpCookie cookies = HttpCookie.from(headers.get(COOKIE));
 
-            // 4. path와 query string 분리
+            final Optional<String> existingSessionId =
+                    cookies.get(JSESSIONID);
+
+            final String jSessionId =
+                    existingSessionId.orElseGet(
+                            () -> UUID.randomUUID().toString()
+                    );
+
+            final Map<String, String> responseHeaders =
+                    createCommonResponseHeaders(
+                            existingSessionId,
+                            jSessionId
+                    );
+
+
+            // 5. path와 query string 분리
             final String path = extractPath(uri);
             final String queryString = extractQueryString(uri);
 
 
-            // 5. 로그인 처리
+            // 6. 로그인 처리
             if (handleLogin(
                     outputStream,
                     method,
                     path,
                     queryString,
-                    requestBody
+                    requestBody,
+                    responseHeaders
             )) {
                 return;
             }
 
-            // 6. 회원가입 처리
+            // 7. 회원가입 처리
             if (handleRegister(
                     outputStream,
                     method,
                     path,
-                    requestBody
+                    requestBody,
+                    responseHeaders
             )) {
                 return;
             }
 
 
-            // 7. 기본
+            // 8. 기본
             if ("/".equals(path)) {
                 writeResponse(
                         outputStream,
                         "200 OK",
                         "text/html;charset=utf-8",
-                        HELLO_WORLD
+                        HELLO_WORLD,
+                        responseHeaders
                 );
                 return;
             }
             // 8. 정적
-            writeStaticResource(outputStream, path);
+            writeStaticResource(outputStream, path, responseHeaders);
 
         } catch (IOException
                  | URISyntaxException
@@ -212,6 +234,23 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
+    private Map<String, String> createCommonResponseHeaders(
+            final Optional<String> existingSessionId,
+            final String jSessionId
+    ) {
+        final Map<String, String> responseHeaders =
+                new LinkedHashMap<>();
+
+        if (existingSessionId.isEmpty()) {
+            responseHeaders.put(
+                    SET_COOKIE,
+                    JSESSIONID + "=" + jSessionId
+            );
+        }
+
+        return responseHeaders;
+    }
+
 
     private String extractMethod(
             final String requestLine
@@ -262,7 +301,8 @@ public class Http11Processor implements Runnable, Processor {
             final String method,
             final String path,
             final String queryString,
-            final String requestBody
+            final String requestBody,
+            final Map<String, String> responseHeaders
     ) throws IOException {
         if (!"/login".equals(path)) {
             return false;
@@ -293,7 +333,9 @@ public class Http11Processor implements Runnable, Processor {
         if (account == null || password == null) {
             writeRedirect(
                     outputStream,
-                    "/401.html"
+                    "/401.html",
+                    responseHeaders
+
             );
             return true;
         }
@@ -315,7 +357,8 @@ public class Http11Processor implements Runnable, Processor {
 
             writeRedirect(
                     outputStream,
-                    "/index.html"
+                    "/index.html",
+                    responseHeaders
             );
             return true;
         }
@@ -326,7 +369,8 @@ public class Http11Processor implements Runnable, Processor {
 
         writeRedirect(
                 outputStream,
-                "/401.html"
+                "/401.html",
+                responseHeaders
         );
 
         return true;
@@ -338,7 +382,8 @@ public class Http11Processor implements Runnable, Processor {
             final OutputStream outputStream,
             final String method,
             final String path,
-            final String requestBody
+            final String requestBody,
+            final Map<String, String> responseHeaders
     ) throws IOException {
 
         if (!REGISTER_PATH.equals(path)) {
@@ -370,7 +415,7 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("register success account: {}", account);
 
-        writeRedirect(outputStream, "/index.html");
+        writeRedirect(outputStream, "/index.html", responseHeaders);
 
         return true;
     }
@@ -378,25 +423,26 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeRedirect(
             final OutputStream outputStream,
-            final String location
+            final String location,
+            final Map<String, String> commonHeaders
     ) throws IOException {
 
-        final String responseHeaders =
-                String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: " + location + " ",
-                        "Content-Length: 0 ",
-                        "",
-                        ""
+        final Map<String, String> responseHeaders =
+                new LinkedHashMap<>(
+                        commonHeaders
                 );
-
-        outputStream.write(
-                responseHeaders.getBytes(
-                        StandardCharsets.UTF_8
-                )
+        responseHeaders.put(
+                "Location",
+                location
         );
 
-        outputStream.flush();
+        writeResponse(
+                outputStream,
+                "302 Found",
+                null,
+                new byte[0],
+                responseHeaders
+        );
     }
 
     private Map<String, String> parseParameters(
@@ -429,7 +475,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeStaticResource(
             final OutputStream outputStream,
-            final String path
+            final String path,
+            final Map<String, String> responseHeaders
     ) throws IOException, URISyntaxException {
 
         final String resourcePath = resolveResourcePath(path);
@@ -438,7 +485,7 @@ public class Http11Processor implements Runnable, Processor {
                 .getClassLoader()
                 .getResource(resourcePath);
         if (resource == null) {
-            writeNotFound(outputStream);
+            writeNotFound(outputStream, responseHeaders);
             return;
         }
         final byte[] responseBody =
@@ -451,12 +498,14 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream,
                 "200 OK",
                 resolveContentType(path),
-                responseBody
+                responseBody,
+                responseHeaders
         );
     }
 
     private void writeNotFound(
-            final OutputStream outputStream
+            final OutputStream outputStream,
+            final Map<String, String> responseHeaders
     ) throws IOException {
 
         final byte[] responseBody =
@@ -468,7 +517,8 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream,
                 "404 Not Found",
                 "text/plain;charset=utf-8",
-                responseBody
+                responseBody,
+                responseHeaders
         );
     }
 
@@ -499,24 +549,47 @@ public class Http11Processor implements Runnable, Processor {
             final OutputStream outputStream,
             final String status,
             final String contentType,
-            final byte[] responseBody
+            final byte[] responseBody,
+            final Map<String, String> additionalHeaders
     ) throws IOException {
 
-        final String responseHeaders =
-                String.join("\r\n",
-                        "HTTP/1.1 " + status + " ",
-                        "Content-Type: "
-                                + contentType + " ",
-                        "Content-Length: "
-                                + responseBody.length + " ",
-                        "",
-                        ""
-                );
+        final StringBuilder responseHeaders =
+                new StringBuilder();
+
+        responseHeaders
+                .append("HTTP/1.1 ")
+                .append(status)
+                .append(" \r\n");
+
+        if (contentType != null) {
+            responseHeaders
+                    .append("Content-Type: ")
+                    .append(contentType)
+                    .append(" \r\n");
+        }
+
+        for (Map.Entry<String, String> header
+                : additionalHeaders.entrySet()) {
+
+            responseHeaders
+                    .append(header.getKey())
+                    .append(": ")
+                    .append(header.getValue())
+                    .append(" \r\n");
+        }
+
+        responseHeaders
+                .append("Content-Length: ")
+                .append(responseBody.length)
+                .append(" \r\n")
+                .append("\r\n");
 
         outputStream.write(
-                responseHeaders.getBytes(
-                        StandardCharsets.UTF_8
-                )
+                responseHeaders
+                        .toString()
+                        .getBytes(
+                                StandardCharsets.UTF_8
+                        )
         );
 
         outputStream.write(responseBody);

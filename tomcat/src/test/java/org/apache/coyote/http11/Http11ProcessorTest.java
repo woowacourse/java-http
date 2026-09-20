@@ -25,14 +25,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/html;charset=utf-8")
+                .contains("Content-Length: 12")
+                .contains("Hello world!");
     }
 
     @Test
@@ -53,13 +50,13 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(Path.of(resource.toURI())));
+        final byte[] expectedBody = Files.readAllBytes(Path.of(resource.toURI()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/html;charset=utf-8")
+                .contains("Content-Length: " + expectedBody.length)
+                .contains(new String(expectedBody, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -79,16 +76,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Length: 0 ",
-                "",
-                ""
-        );
-
         assertThat(socket.output())
-                .isEqualTo(expected);
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html")
+                .contains("Content-Length: 0");
     }
 
 
@@ -109,16 +100,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /401.html ",
-                "Content-Length: 0 ",
-                "",
-                ""
-        );
-
         assertThat(socket.output())
-                .isEqualTo(expected);
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /401.html")
+                .contains("Content-Length: 0");
     }
 
     @Test
@@ -190,5 +175,51 @@ class Http11ProcessorTest {
                 .contains("HTTP/1.1 302 Found")
                 .contains("Location: /index.html");
     }
+
+    @Test
+    void JSESSIONID가_없으면_새로운_쿠키를_응답한다() {
+        final String httpRequest =
+                String.join("\r\n",
+                        "GET / HTTP/1.1",
+                        "Host: localhost:8080",
+                        "",
+                        ""
+                );
+
+        final var socket =
+                new StubSocket(httpRequest);
+
+        final var processor =
+                new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void JSESSIONID가_있으면_새로운_쿠키를_응답하지_않는다() {
+        final String httpRequest =
+                String.join("\r\n",
+                        "GET / HTTP/1.1",
+                        "Host: localhost:8080",
+                        "Cookie: JSESSIONID=existing-session",
+                        "",
+                        ""
+                );
+
+        final var socket =
+                new StubSocket(httpRequest);
+
+        final var processor =
+                new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .doesNotContain("Set-Cookie: JSESSIONID=");
+    }
+
 
 }

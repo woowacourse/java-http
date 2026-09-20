@@ -13,18 +13,20 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> queryParams;
     private final Map<String, String> body;
+    private final HttpCookie cookies;
 
     public HttpRequest(String rawHttpRequest) {
         String[] headerAndBody = rawHttpRequest.split(EMPTY_LINE);
         String header = headerAndBody[0];
 
-        String requestLine = header.split(System.lineSeparator())[0];
+        String requestLine = header.split("\r\n")[0];
         String[] requestLineParts = requestLine.split(" ", 3);
         this.method = requestLineParts[0];
 
         String uri = requestLineParts[1];
         this.path = extractPath(uri);
         this.queryParams = extractQueryParams(uri);
+        this.cookies = extractCookies(header);
 
         String body = headerAndBody.length < 2 ? "" : headerAndBody[1];
         this.body = parseEncodedFormData(body);
@@ -44,6 +46,19 @@ public class HttpRequest {
 
     public Map<String, String> getBody() {
         return body;
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
+    }
+
+    private HttpCookie extractCookies(String header) {
+        for (String line : header.split("\r\n")) {
+            if (line.startsWith("Cookie:")) {
+                return new HttpCookie(line.substring("Cookie:".length()).trim());
+            }
+        }
+        return new HttpCookie("");
     }
 
     private String extractPath(String uri) {

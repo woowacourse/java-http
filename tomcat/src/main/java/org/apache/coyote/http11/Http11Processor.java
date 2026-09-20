@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final long DEFAULT_USER_ID = 999L;
+    private static final String LINE_SEPARATOR = "\r\n";
 
     private final Socket connection;
 
@@ -39,11 +41,24 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest httpRequest = readHttpRequest(inputStream);
             String response = buildResponse(httpRequest);
+            response = addSessionCookie(httpRequest, response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String addSessionCookie(HttpRequest httpRequest, String response) {
+        if (httpRequest.getCookies().hasSessionId()) {
+            return response;
+        }
+
+        String cookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + LINE_SEPARATOR;
+        int endOfStatusLine = response.indexOf(LINE_SEPARATOR) + LINE_SEPARATOR.length();
+        return response.substring(0, endOfStatusLine)
+                + cookieHeader
+                + response.substring(endOfStatusLine);
     }
 
     private HttpRequest readHttpRequest(InputStream inputStream) throws IOException {
@@ -54,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
 
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
-            request.append(line).append("\r\n");
+            request.append(line).append(LINE_SEPARATOR);
 
             if (line.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(
@@ -63,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        request.append("\r\n");
+        request.append(LINE_SEPARATOR);
 
         char[] body = new char[contentLength];
         reader.read(body);
@@ -92,14 +107,14 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (isLoginSuccessful(httpRequest)) {
-            return String.join("\r\n",
+            return String.join(LINE_SEPARATOR,
                     "HTTP/1.1 302 Found",
                     "Location: /index.html",
                     "",
                     "");
         }
 
-        return String.join("\r\n",
+        return String.join(LINE_SEPARATOR,
                 "HTTP/1.1 302 Found",
                 "Location: /401.html",
                 "",
@@ -121,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
 
         register(httpRequest.getBody());
 
-        return String.join("\r\n",
+        return String.join(LINE_SEPARATOR,
                 "HTTP/1.1 302 Found",
                 "Location: /index.html",
                 "",
@@ -140,7 +155,7 @@ public class Http11Processor implements Runnable, Processor {
     private String buildRootResponse() {
         String responseBody = "Hello world!";
 
-        return String.join("\r\n",
+        return String.join(LINE_SEPARATOR,
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
@@ -154,7 +169,7 @@ public class Http11Processor implements Runnable, Processor {
             throw new RuntimeException("자원을 찾을 수 없습니다.");
         }
 
-        return String.join("\r\n",
+        return String.join(LINE_SEPARATOR,
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + getContentType(path) + " ",
                 "Content-Length: " + resource.getBytes(StandardCharsets.UTF_8).length + " ",

@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,17 +24,18 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String START_LINE_DELIMITER = " ";
     private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
     private static final String CONTENT_TYPE_TEXT_CSS = "text/css;charset=utf-8";
     private static final String CONTENT_TYPE_TEXT_JAVASCRIPT = "text/javascript;charset=utf-8";
     private static final String PARAM_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String USER = "user";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Socket connection;
 
@@ -64,7 +64,10 @@ public class Http11Processor implements Runnable, Processor {
             String httpBody = httpRequest.getHttpBody().getValue();
 
             // Parse Cookie
+            // 이 부분은 추후 Header 속성을 Object로 바꾸고, Map<HttpCookie> 를 가지게 하면 될 거 같음.
             final HttpCookie httpCookie = new HttpCookie(httpHeaders.getHeaders().get(COOKIE));
+
+            HttpResponse httpResponse = new HttpResponse();
 
             log.info("{}, {}", httpUrl, httpMethod);
             if (httpUrl.startsWith("/login") && httpMethod == HttpMethod.GET) {
@@ -74,19 +77,27 @@ public class Http11Processor implements Runnable, Processor {
                     final HttpSession session = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
 
                     if (session != null) {
-                        final String response = createRedirectResponse("/index.html");
+                        httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
+                                new ReasonPhrase("Found"));
 
-                        outputStream.write(response.getBytes());
-                        outputStream.flush();
+                        httpResponse.putHeader(LOCATION, "/index.html");
+                        httpResponse.putHeader(CONTENT_LENGTH, "0");
+
+                        httpResponse.sendTo(outputStream);
                         return;
                     }
                 }
 
-                final String body = readFile("static/login.html");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                final String body = readFile("static/login.html");
+
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
@@ -115,37 +126,42 @@ public class Http11Processor implements Runnable, Processor {
 
                         final Session session = new Session(UUID.randomUUID().toString());
                         session.setAttribute(USER, user);
-
                         SessionManager.getInstance().add(session);
 
-                        final String response = createResponseWithCookieAndRedirect("/index.html",
-                                new Cookie(JSESSIONID, session.getId()));
+                        httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
+                                new ReasonPhrase("Found"));
 
-                        outputStream.write(response.getBytes());
-                        outputStream.flush();
+                        httpResponse.putHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
+                        httpResponse.putHeader(LOCATION, "/index.html");
+                        httpResponse.putHeader(CONTENT_LENGTH, "0");
+                        httpResponse.sendTo(outputStream);
                         return;
                     }
 
-                    // 로그인에 실패했다면 401 페이지로 리다이렉트한다.
-                    final String response = createRedirectResponse("/401.html");
+                    httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
+                            new ReasonPhrase("Found"));
 
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
+                    httpResponse.putHeader(LOCATION, "/401.html");
+                    httpResponse.putHeader(CONTENT_LENGTH, "0");
+
+                    httpResponse.sendTo(outputStream);
                     return;
                 }
             }
 
             if (httpUrl.startsWith("/register") && httpMethod == HttpMethod.GET) {
                 final String body = readFile("static/register.html");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/register") && httpMethod == HttpMethod.POST) {
-                final var response = createRedirectResponse("/index.html");
                 final Map<String, String> queryParams = parseQueryParam(httpBody);
 
                 final String account = queryParams.get("account");
@@ -157,77 +173,106 @@ public class Http11Processor implements Runnable, Processor {
                     log.info("가입 성공, account = {}, email = {}, password = {}", account, email, password);
                 }
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
+                        new ReasonPhrase("Found"));
+
+                httpResponse.putHeader(LOCATION, "/index.html");
+                httpResponse.putHeader(CONTENT_LENGTH, "0");
+
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/index.html")) {
                 final String body = readFile("static/index.html");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/401.html")) {
                 final String body = readFile("static/401.html");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_HTML);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/css/styles.css")) {
                 final String body = readFile("static/css/styles.css");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_CSS);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_CSS);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/assets/chart-bar.js")) {
                 final String body = readFile("static/assets/chart-bar.js");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_JAVASCRIPT);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/js/scripts.js")) {
                 final String body = readFile("static/js/scripts.js");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_JAVASCRIPT);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/assets/chart-pie.js")) {
                 final String body = readFile("static/assets/chart-pie.js");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_JAVASCRIPT);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
             if (httpUrl.startsWith("/assets/chart-area.js")) {
                 final String body = readFile("static/assets/chart-area.js");
-                final var response = createResponse(body, CONTENT_TYPE_TEXT_JAVASCRIPT);
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                        new ReasonPhrase("OK"));
+                httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_JAVASCRIPT);
+                httpResponse.putHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+                httpResponse.setHttpBody(new HttpBody(body));
+                httpResponse.sendTo(outputStream);
                 return;
             }
 
-            final var response = createResponse("Hello world!", CONTENT_TYPE_TEXT_HTML);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            httpResponse.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+                    new ReasonPhrase("OK"));
+            httpResponse.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
+            httpResponse.putHeader(CONTENT_LENGTH, String.valueOf("Hello world".getBytes().length));
+            httpResponse.setHttpBody(new HttpBody("Hello world"));
+            httpResponse.sendTo(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -236,32 +281,6 @@ public class Http11Processor implements Runnable, Processor {
     private String readFile(String path) throws IOException {
         final URL url = getClass().getClassLoader().getResource(path);
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()), StandardCharsets.UTF_8);
-    }
-
-    private String createResponse(String responseBody, String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                CONTENT_TYPE + ": " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String createRedirectResponse(String redirectUrl) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + redirectUrl + " ",
-                "Content-Length: 0 ",
-                "");
-    }
-
-    private String createResponseWithCookieAndRedirect(String redirectUrl, Cookie cookie) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Set-Cookie" + ": " + cookie.getName() + "=" + cookie.getValue() + " ",
-                "Location: " + redirectUrl + " ",
-                "Content-Length: 0 ",
-                "");
     }
 
     private Map<String, String> parseQueryParam(String queryLine) {

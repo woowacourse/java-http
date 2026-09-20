@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public class HttpRequest {
+    private static final String CONTENT_LENGTH = "Content-Length";
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final HttpBody httpBody;
@@ -33,7 +34,7 @@ public class HttpRequest {
     }
 
     private HttpBody requestBody(BufferedReader bufferedReader) throws IOException {
-        String contentLengthString = httpHeaders.get("Content-Length");
+        String contentLengthString = httpHeaders.get(CONTENT_LENGTH);
 
         if (contentLengthString == null) {
             return new HttpBody("");

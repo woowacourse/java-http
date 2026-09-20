@@ -65,7 +65,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void CSS_리소스_요청에_해당_파일의_내용으로_응답한다() throws IOException {
+    void CSS_리소스를_요청하면_CSS_내용을_반환한다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
@@ -108,7 +108,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 등록된_회원의_아이디와_비밀번호가_일치하면_index_html로_리다이렉트한다() {
+    void 로그인에_성공하면_index_html로_리다이렉트한다() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -133,7 +133,7 @@ class Http11ProcessorTest {
             "unknown, password",
             "gugu, wrong"
     })
-    void 등록된_회원의_아이디가_없거나_비밀번호가_일치하지_않으면_401_html로_리다이렉트한다(
+    void 로그인에_실패하면_401_html로_리다이렉트한다(
             String account,
             String password
     ) {
@@ -157,10 +157,10 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void Query_String이_있는_로그인_요청에_로그인_페이지를_반환한다() throws IOException {
+    void 로그인_페이지를_요청하면_로그인_페이지를_반환한다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -180,7 +180,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 전달된_계정_정보와_일치하는_회원_조회_결과를_로그로_남긴다() {
+    void 로그인_요청을_처리하면_회원_정보를_로그로_남긴다() {
         // given
         final Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
         final var appender = new ListAppender<ILoggingEvent>();

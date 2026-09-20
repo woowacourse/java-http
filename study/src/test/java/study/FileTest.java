@@ -47,8 +47,7 @@ class FileTest {
         final String fileName = "next.txt";
 
         // todo
-        assertThatThrownBy(() -> getClass().getClassLoader().getResource(fileName).getFile())
-                .isInstanceOf(NullPointerException.class);
+        assertThat(getClass().getClassLoader().getResource(fileName)).isNull();
     }
 
     /**

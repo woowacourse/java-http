@@ -1,13 +1,20 @@
 package study;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -28,9 +35,19 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final String actual = resource.getFile();
 
+        System.out.println("actual: " + actual);
         assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void resource_디렉터리에_있는_파일의_경로가_정확하지않다면_null을_반환한다() {
+        final String fileName = "next.txt";
+
+        // todo
+        assertThat(getClass().getClassLoader().getResource(fileName)).isNull();
     }
 
     /**
@@ -39,15 +56,17 @@ class FileTest {
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
+
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final Path path = Path.of(resource.toURI());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

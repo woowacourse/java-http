@@ -52,19 +52,22 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = requestHeaderParser.getRequestPath(requestInformations);
 
-            String responseBody;
+            String response;
             if (path.equals(ROOT_PATH)) {
-                responseBody = processRootRequest();
+                response = responseBuilder.build(
+                        HttpStatus.OK,
+                        requestHeaderParser.getAccept(requestInformations),
+                        processRootRequest()
+                );
             } else if (path.equals(LOGIN_PATH)) {
-                responseBody = processLoginRequest(requestInformations);
+                response = processLoginRequest(requestInformations);
             } else {
-                responseBody = processOtherRequest(path);
+                response = responseBuilder.build(
+                        HttpStatus.OK,
+                        requestHeaderParser.getAccept(requestInformations),
+                        processOtherRequest(path)
+                );
             }
-
-            final var response = responseBuilder.build(
-                    requestHeaderParser.getAccept(requestInformations),
-                    responseBody
-            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -78,26 +81,40 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String processLoginRequest(Map<String, String> requestHeaderInfos) throws URISyntaxException, IOException {
-        logFoundUser(requestHeaderParser.getQueryParams(requestHeaderInfos));
+        Map<String, String> queryParams = requestHeaderParser.getQueryParams(requestHeaderInfos);
 
-        return readStaticResource(LOGIN_PATH + ".html");
+        if (queryParams.isEmpty()) {
+            return responseBuilder.build(
+                    HttpStatus.OK,
+                    requestHeaderParser.getAccept(requestHeaderInfos),
+                    readStaticResource(LOGIN_PATH + ".html")
+            );
+        }
+
+        if (isLoginSuccessful(queryParams)) {
+            return responseBuilder.buildRedirect(HttpStatus.FOUND, "/index.html");
+        }
+
+        return responseBuilder.buildRedirect(HttpStatus.FOUND, "/401.html");
     }
 
     private String processOtherRequest(String path) throws URISyntaxException, IOException {
         return readStaticResource(path);
     }
 
-    private void logFoundUser(Map<String, String> queryParams) {
+    private boolean isLoginSuccessful(Map<String, String> queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
 
         if (account == null || password == null) {
-            return;
+            return false;
         }
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("{}", user));
+        var user = InMemoryUserRepository.findByAccount(account)
+                .filter(foundUser -> foundUser.checkPassword(password));
+
+        user.ifPresent(foundUser -> log.info("{}", foundUser));
+        return user.isPresent();
     }
 
     private String readStaticResource(String path) throws URISyntaxException, IOException {

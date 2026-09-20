@@ -57,10 +57,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             // Parse StartLine
-            final String[] startLineTokens = bufferedReader.readLine().split(START_LINE_DELIMITER);
-            final HttpMethod httpMethod = HttpMethod.valueOf(startLineTokens[0]);
-            final String httpUrl = startLineTokens[1];
-            final HttpVersion httpVersion = HttpVersion.getByString(startLineTokens[2]);
+
+            HttpRequest httpRequest = new HttpRequest(bufferedReader.readLine());
+            String httpUrl = httpRequest.getRequestLine().getHttpPath().toString();
+            HttpMethod httpMethod = httpRequest.getRequestLine().getHttpMethod();
 
             // Parse Headers
             final Map<String, String> headers = parseHeaders(bufferedReader);
@@ -70,8 +70,6 @@ public class Http11Processor implements Runnable, Processor {
 
             // Parse Cookie
             final HttpCookie httpCookie = new HttpCookie(headers.get(COOKIE));
-
-            log.info("HttpRequest method: {}, URL: {}, Version: {}", httpMethod.name(), httpUrl, httpVersion.name());
 
             if (httpUrl.startsWith("/login") && httpMethod == HttpMethod.GET) {
                 // 세션이 유효하면 index.html로 리다이렉트한다.

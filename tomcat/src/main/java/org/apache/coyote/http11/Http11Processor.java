@@ -94,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return new Request(
             HttpMethod.valueOf(requestLineTokens[0]),
-            target.path(),
+            PathAliasesResolver.normalize(target.path()),
             extractQueryParams(target.queryString()),
             headers,
             requestBody);

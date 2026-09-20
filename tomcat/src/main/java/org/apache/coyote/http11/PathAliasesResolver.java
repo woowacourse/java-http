@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 
-public final class PathNormalizer {
+public final class PathAliasesResolver {
 
     private static final Map<String, String> PATH_ALIASES = Map.of(
         "/index.html", "/index",

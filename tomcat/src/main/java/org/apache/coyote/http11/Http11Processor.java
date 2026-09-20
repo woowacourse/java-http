@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -116,6 +117,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "",
+                "");
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {

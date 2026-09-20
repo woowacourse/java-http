@@ -11,6 +11,8 @@ public class RequestUri {
     private static final String QUERY_DELIMITER = "?";
     private static final String PARAMETER_DELIMITER = "&";
     private static final String NAME_VALUE_DELIMITER = "=";
+    private static final String EMPTY_VALUE = "";
+    private static final int NOT_FOUND = -1;
 
     private final String path;
     private final Map<String, String> queryParameters;
@@ -22,8 +24,9 @@ public class RequestUri {
 
     public static RequestUri from(final String uri) {
         final int queryIndex = uri.indexOf(QUERY_DELIMITER);
-        if (queryIndex == -1) {
-            return new RequestUri(uri, Map.of());
+
+        if (queryIndex == NOT_FOUND) {
+            return new RequestUri(decodePath(uri), Map.of());
         }
         final String path = uri.substring(0, queryIndex);
         final String queryString = uri.substring(queryIndex + 1);
@@ -37,18 +40,29 @@ public class RequestUri {
                 continue;
             }
             final int delimiterIndex = pair.indexOf(NAME_VALUE_DELIMITER);
-            final String name = delimiterIndex == -1 ? pair : pair.substring(0, delimiterIndex);
-            final String value = delimiterIndex == -1 ? "" : pair.substring(delimiterIndex + 1);
-            parameters.putIfAbsent(decode(name), decode(value));
+            final String name = delimiterIndex == NOT_FOUND ? pair : pair.substring(0, delimiterIndex);
+            final String value = delimiterIndex == NOT_FOUND ? EMPTY_VALUE : pair.substring(delimiterIndex + 1);
+            parameters.putIfAbsent(decodeFormValue(name), decodeFormValue(value));
         }
         return Map.copyOf(parameters);
     }
 
-    private static String decode(final String value) {
+    private static String decodeFormValue(final String value) {
         try {
             return URLDecoder.decode(value, StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
-            return value;
+            throw new InvalidRequestException("잘못된 인코딩입니다: " + value, e);
+        }
+    }
+
+    private static String decodePath(final String path) {
+        if (!path.contains("%")) {
+            return path;
+        }
+        try {
+            return URLDecoder.decode(path.replace("+", "%2B"), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidRequestException("잘못된 인코딩입니다: " + path, e);
         }
     }
 

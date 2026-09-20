@@ -22,9 +22,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
+
+    private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
+
+    private static final String STATUS_OK = "200 OK";
+    private static final String STATUS_BAD_REQUEST = "400 Bad Request";
+    private static final String STATUS_NOT_FOUND = "404 Not Found";
+
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     private final Socket connection;
 
@@ -47,34 +56,48 @@ public class Http11Processor implements Runnable, Processor {
                  ));
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-            readHeaders(reader);
-            log.info("request: {}", requestLine);
-
-            final RequestUri requestUri = RequestUri.from(requestLine.split(" ")[1]);
-            final String path = requestUri.getPath();
-
-            if ("/".equals(path)) {
-                writeResponse(
-                        outputStream,
-                        "200 OK",
-                        ContentType.HTML,
-                        "Hello world!".getBytes(StandardCharsets.UTF_8));
-                return;
-            }
-
-            if (LOGIN_PATH.equals(path)) {
-                logLoginUser(requestUri);
-                writeStaticFile(outputStream, LOGIN_PAGE);
-                return;
-            }
-            writeStaticFile(outputStream, path);
+            handle(reader, outputStream);
         } catch (IOException | UncheckedServletException |URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handle(final BufferedReader reader, final OutputStream outputStream)
+            throws IOException, URISyntaxException {
+        final String rawRequestLine = reader.readLine();
+        if (rawRequestLine == null) {
+            return;
+        }
+        readHeaders(reader);
+        log.info("request: {}", rawRequestLine);
+
+        try {
+            final RequestLine requestLine = RequestLine.from(rawRequestLine);
+            route(outputStream, requestLine);
+        } catch (InvalidRequestException e) {
+            log.warn("bad request: {}", e.getMessage());
+            writeResponse(outputStream, STATUS_BAD_REQUEST, ContentType.HTML,
+                    "400 Bad Request".getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private void route(final OutputStream outputStream, final RequestLine requestLine)
+            throws IOException, URISyntaxException {
+        final String path = requestLine.getPath();
+
+        if (ROOT_PATH.equals(path)) {
+            writeResponse(outputStream, STATUS_OK, ContentType.HTML,
+                    "Hello world!".getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+
+        if (LOGIN_PATH.equals(path)) {
+            logLoginUser(requestLine);
+            writeStaticFile(outputStream, LOGIN_PAGE);
+            return;
+        }
+
+        writeStaticFile(outputStream, path);
     }
 
     private void readHeaders(final BufferedReader reader) throws IOException {
@@ -84,9 +107,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logLoginUser(final RequestUri requestUri) {
-        final Optional<String> account = requestUri.getQueryParameter("account");
-        final Optional<String> password = requestUri.getQueryParameter("password");
+    private void logLoginUser(final RequestLine requestLine) {
+        final Optional<String> account = requestLine.getQueryParameter(ACCOUNT);
+        final Optional<String> password = requestLine.getQueryParameter(PASSWORD);
         if (account.isEmpty() || password.isEmpty()) {
             log.info("login parameters are missing");
             return;
@@ -103,12 +126,12 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException, URISyntaxException {
         final Optional<Path> staticFile = findStaticFile(filePath);
         if (staticFile.isEmpty()) {
-            writeResponse(outputStream, "404 Not Found", ContentType.HTML, readNotFoundBody());
+            writeResponse(outputStream, STATUS_NOT_FOUND, ContentType.HTML, readNotFoundBody());
             return;
         }
-        writeResponse(outputStream, "200 OK", ContentType.from(filePath), Files.readAllBytes(staticFile.get()));
+        writeResponse(outputStream, STATUS_OK, ContentType.from(filePath),
+                Files.readAllBytes(staticFile.get()));
     }
-
 
     private Optional<Path> findStaticFile(final String url) throws URISyntaxException {
         final URL resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + url);
@@ -124,11 +147,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private byte[] readNotFoundBody() throws IOException, URISyntaxException {
-        final Optional<Path> notFoundPage = findStaticFile("/404.html");
+        final Optional<Path> notFoundPage = findStaticFile(NOT_FOUND_PAGE);
         if (notFoundPage.isPresent()) {
             return Files.readAllBytes(notFoundPage.get());
         }
-
         return "Not Found".getBytes(StandardCharsets.UTF_8);
     }
 

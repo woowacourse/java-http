@@ -60,6 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             String contentType = contentTypeOf(requestTarget.getExtension());
 
+            HttpResponse response;
             if (requestTarget.hasPath(LOGIN_PATH) && requestTarget.hasQueryParameters()) {
                 String account = requestTarget.findQueryParameter("account")
                         .orElseThrow(() -> new IllegalArgumentException("필수 Query Parameter 누락: account"));
@@ -74,27 +75,13 @@ public class Http11Processor implements Runnable, Processor {
                         .orElse(false);
 
                 String location = resolveLocation(loginSuccess);
-                final var loginResponse = String.join("\r\n",
-                        "HTTP/1.1 302 FOUND ",
-                        "Content-Type: " + contentType,
-                        "Content-Length: " + responseBody.length + " ",
-                        "Location: " + location,
-                        "") + "\r\n";
-
-                outputStream.write(loginResponse.getBytes());
-                outputStream.write(responseBody);
-                outputStream.flush();
-                return;
+                response = new HttpResponse("302 FOUND", contentType, responseBody)
+                        .addHeader("Location", location);
+            } else {
+                response = new HttpResponse("200 OK", contentType, responseBody);
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.length + " ",
-                    "") + "\r\n";
-
-            outputStream.write(response.getBytes());
-            outputStream.write(responseBody);
+            outputStream.write(response.toByteArray());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);

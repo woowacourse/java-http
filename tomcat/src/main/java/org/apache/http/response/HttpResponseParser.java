@@ -14,6 +14,7 @@ public class HttpResponseParser {
         for (Map.Entry<String, String> header : httpResponse.getHeaders().entrySet()) {
             responseBuilder.append(header.getKey()).append(": ").append(header.getValue()).append(" \r\n");
         }
+
         responseBuilder.append("\r\n");
         responseBuilder.append(httpResponse.getBody());
         return responseBuilder.toString();

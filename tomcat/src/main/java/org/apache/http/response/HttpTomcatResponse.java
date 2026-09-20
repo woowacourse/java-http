@@ -56,7 +56,7 @@ public class HttpTomcatResponse implements HttpResponse {
 
     @Override
     public Map<String, String> getHeaders() {
-        return Map.copyOf(headers);
+        return Collections.unmodifiableMap(new LinkedHashMap<>(headers));
     }
 
     @Override
@@ -73,4 +73,15 @@ public class HttpTomcatResponse implements HttpResponse {
 
         headers.put("Content-Length", String.valueOf(contentLength));
     }
+
+    @Override
+    public void setLocation(String path) {
+        headers.put("Location", path);
+    }
+
+    @Override
+    public void setCookie(String cookies) {
+        headers.put("Set-Cookie", cookies);
+    }
+
 }

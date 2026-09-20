@@ -8,7 +8,7 @@ import org.apache.http.response.HttpResponse;
 import org.qupring.annotation.Route;
 
 // 실험용 컨트롤러
-public class UserController {
+public class LoginController {
 
     @Route(path = "/login", method = HttpMethod.POST)
     public void login(HttpRequest request, HttpResponse response) {

@@ -18,4 +18,8 @@ public interface HttpResponse {
     String getBody();
 
     void setBody(String body);
+
+    void setLocation(String path);
+
+    void setCookie(String cookie);
 }

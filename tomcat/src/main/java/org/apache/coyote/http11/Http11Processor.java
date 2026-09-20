@@ -1,17 +1,15 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.FormParameters;
+import org.apache.coyote.http11.model.RequestLine;
 import org.apache.coyote.http11.model.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,45 +35,62 @@ public class Http11Processor implements Runnable, Processor {
         String requestPath = "unknown";
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String url = parseRequestUrl(inputStream);
+            RequestLine requestLine = RequestLine.from(reader);
+            String line;
+            int requestContentLength = 0;
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                if (line.contains("Content-Length")) {
+                    String[] contentLengthLine = line.split(":", 2);
+                    requestContentLength = Integer.parseInt(contentLengthLine[1].trim());
+                }
+            }
+            int readLength = 0;
+            char[] buffer = new char[requestContentLength];
+            while (readLength < requestContentLength) {
+                int nowReadLength = reader.read(buffer, readLength, requestContentLength - readLength);
+                if (nowReadLength == -1) {
+                    throw new IOException("잘못된 요청");
+                }
+                readLength += nowReadLength;
+            }
+
+            String requestBodyForm = new String(buffer);
+
+            String url = requestLine.requestUrl();
+            String method = requestLine.httpMethod();
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
-            requestPath = uriInfo.path();
 
-            String resourceUrl = uriInfo.path();
-            if ("/login".equals(resourceUrl)) {
-                resourceUrl = "/login.html";
+            if ("GET".equals(method)) {
+                getProcess(outputStream, uriInfo);
+            } else if ("POST".equals(method)) {
+                FormParameters requestBody = FormParameters.from(requestBodyForm);
+                postProcess(outputStream, uriInfo, requestBody);
             }
 
-            String contentType = findContentType(resourceUrl);
-            String responseHeader;
-            if ("/login".equals(uriInfo.path()) && uriInfo.hasQueryParameters()) {
-                responseHeader = buildLoginResponseHeader(uriInfo);
-                outputStream.write(responseHeader.getBytes());
-                outputStream.flush();
-            } else {
-                byte[] responseBody = buildResponseBody(resourceUrl);
-                responseHeader = buildResponseHeader(responseBody, contentType);
-                outputStream.write(responseHeader.getBytes());
-                outputStream.write(responseBody);
-                outputStream.flush();
-            }
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
     }
 
-    private String buildLoginResponseHeader(UriInfo uriInfo) {
-        try {
-            User user = RequestHandler.findUser(uriInfo.queryParameters());
-            log.info("로그인 사용자: {}", user.getAccount());
-            return buildRedirectHeader("/index.html");
-        } catch (IllegalArgumentException e) {
-            return buildRedirectHeader("/401.html");
-        }
+    private void getProcess(OutputStream outputStream, UriInfo uriInfo) throws IOException, URISyntaxException {
+        byte[] responseBody = RequestHandler.get(uriInfo.path());
+        String responseHeader = buildResponseHeader(responseBody, findContentType(uriInfo.path()));
+        outputStream.write(responseHeader.getBytes());
+        outputStream.write(responseBody);
+        outputStream.flush();
     }
 
-    private String buildRedirectHeader(String redirectPath) {
+    private void postProcess(OutputStream outputStream, UriInfo uriInfo, FormParameters formParameters)
+            throws IOException, URISyntaxException {
+        String redirectPath = RequestHandler.post(uriInfo, formParameters);
+        String responseHeader = buildResponseHeader(redirectPath);
+        outputStream.write(responseHeader.getBytes());
+        outputStream.flush();
+    }
+
+    private String buildResponseHeader(String redirectPath) {
         return String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: " + redirectPath,
@@ -94,22 +109,6 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 "");
-    }
-
-    private byte[] buildResponseBody(String url) throws URISyntaxException, IOException {
-        if ("/".equals(url)) {
-            return "Hello world!".getBytes(StandardCharsets.UTF_8);
-        }
-        String resourcePath = "static" + url;
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
-        Path path = Path.of(resource.toURI());
-        return Files.readAllBytes(path);
-    }
-
-    private String parseRequestUrl(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String[] request = reader.readLine().trim().split("\\s+");
-        return request[1];
     }
 
     private String findContentType(String url) {

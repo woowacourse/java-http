@@ -94,6 +94,11 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "text/html;charset=utf-8";
 
             if (path.equals("/login")) {
+                if (isLoggedIn(cookie)) {
+                    log.info("이미 로그인된 사용자입니다. index.html로 이동합니다.");
+                    sendRedirect(outputStream, INDEX_PAGE, null);
+                    return;
+                }
                 filePath = "static/login.html";
             }
 
@@ -172,6 +177,13 @@ public class Http11Processor implements Runnable, Processor {
 
         outputStream.write(response.toString().getBytes());
         outputStream.flush();
+    }
+
+    private boolean isLoggedIn(final Cookie cookie) {
+        return SessionManager.getInstance()
+                .findSession(cookie.getJSessionId())
+                .map(session -> session.getAttribute(USER_ATTRIBUTE) != null)
+                .orElse(false);
     }
 
     private Session createSession() {

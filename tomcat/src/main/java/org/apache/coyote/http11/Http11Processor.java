@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -47,6 +48,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
     private static final String LOCATION = "Location";
     private static final String STATIC = "static";
+    private static final String COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -134,7 +137,8 @@ public class Http11Processor implements Runnable, Processor {
                     throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
                 }
                 log.info(user.toString());
-                redirectResponse(outputStream, HTTP_STATUS_FOUND, contentTypeOf(CONTENT_TYPE_TEXT_HTML), "", PATH_INDEX_HTML);
+                String cookie = UUID.randomUUID().toString();
+                cookieResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML, cookie);
             } catch (IllegalArgumentException exception) {
                 redirectResponse(outputStream, HTTP_STATUS_FOUND, contentTypeOf(CONTENT_TYPE_TEXT_HTML), "", PATH_401_HTML);
             }
@@ -212,6 +216,19 @@ public class Http11Processor implements Runnable, Processor {
                 HTTP_VERSION_1_1 + " " + status + " ",
                 CONTENT_TYPE + ": " + contentType + SEMI_COLON + " " + CHARSET_UTF_8,
                 CONTENT_LENGTH + ": " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void cookieResponse(final OutputStream outputStream, final String status, final String contentType, final String responseBody, final String locationUrl, final String cookie) throws IOException {
+        final var response = String.join("\r\n",
+                HTTP_VERSION_1_1 + " " + status + " ",
+                COOKIE + ": " + JSESSIONID + "=" + cookie + " ",
+                CONTENT_TYPE + ": " + contentType + SEMI_COLON + " " + CHARSET_UTF_8,
+                CONTENT_LENGTH + ": " + responseBody.getBytes().length + " ",
+                LOCATION + ": " + locationUrl + " ",
                 "",
                 responseBody);
         outputStream.write(response.getBytes());

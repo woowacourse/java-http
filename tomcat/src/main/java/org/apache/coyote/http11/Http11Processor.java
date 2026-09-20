@@ -57,15 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (isLoginRequest(httpRequest)) {
-                if (authenticate(httpRequest)) {
-                    httpResponse.setStatusCode(StatusCode.FOUND);
-                    httpResponse.setContentType(ContentType.HTML);
-                    httpResponse.sendRedirect("index.html");
-                } else {
-                    httpResponse.setStatusCode(StatusCode.FOUND);
-                    httpResponse.setContentType(ContentType.HTML);
-                    httpResponse.sendRedirect("401.html");
-                }
+                authenticate(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
@@ -140,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // TODO json도 처리 가능하도록
-    private static boolean authenticate(MyHttpRequest httpRequest) {
+    private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
         Map<String, String> params = new HashMap<>();
         for (String parameter : httpRequest.body().split("&")) {
             String[] keyValue = parameter.split("=", 2);
@@ -148,15 +140,24 @@ public class Http11Processor implements Runnable, Processor {
         }
         Optional<User> foundUser = findUserByAccount(params.get("account"));
         if (foundUser.isEmpty()) {
-            return false;
+            log.info("authenticate failed: user not found");
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("401.html");
+            return;
         }
 
         if (foundUser.get().checkPassword(params.get("password"))) {
             log.info("user matched={}", foundUser.get());
-            return true;
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("index.html");
+            return;
         }
-        log.info("authenticate failed!");
-        return false;
+        log.info("authenticate failed: incorrectly password");
+        httpResponse.setStatusCode(StatusCode.FOUND);
+        httpResponse.setContentType(ContentType.HTML);
+        httpResponse.sendRedirect("401.html");
     }
 
     private static boolean register(MyHttpRequest httpRequest) {

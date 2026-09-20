@@ -105,10 +105,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private User getValidatedUser(Map<String, String> paramsMap) {
-        User user = InMemoryUserRepository.findByAccount(paramsMap.get("account")).orElseThrow(
-                () -> new IllegalArgumentException("회원 없음")
-        );
-        user.checkPassword(paramsMap.get("password"));
+        User user = InMemoryUserRepository.findByAccount(paramsMap.get("account"))
+                .orElseThrow(() -> {
+                    log.info("로그인 실패: 조건을 만족하는 회원 없음");
+                    return new IllegalArgumentException("회원 없음");
+                });
+
+        if (!user.checkPassword(paramsMap.get("password"))){
+            log.info("로그인 실패: 비밀번호 불일치");
+            throw new IllegalArgumentException("비밀번호 불일치");
+        }
         return user;
     }
 

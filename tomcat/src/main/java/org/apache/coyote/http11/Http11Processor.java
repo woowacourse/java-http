@@ -38,25 +38,25 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            String headerFirstLine = bufferedReader.readLine();
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String reqFirstLine = bufferedReader.readLine();
+            String reqUri = headerFirstLine.split(" ")[1];
+            int queryIndex = reqUri.indexOf("?");
 
-            String reqUrl = reqFirstLine.split(" ")[1];
-            int queryIndex = reqUrl.indexOf("?");
-
-            String pathUrl = reqUrl;
+            String pathUri = reqUri;
             String query = "";
 
             if (queryIndex != -1) {
-                pathUrl = reqUrl.substring(0, queryIndex);
-                query = reqUrl.substring(queryIndex + 1);
+                pathUri = reqUri.substring(0, queryIndex);
+                query = reqUri.substring(queryIndex + 1);
             }
 
             String responseBody;
 
-            if (pathUrl.equals("/")) {
+            if (pathUri.equals("/")) {
                 responseBody = "Hello world!";
 
                 final var response = String.join("\r\n",
@@ -70,15 +70,17 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (pathUrl.equals("/login") && !query.isEmpty()) {
-                login(query);
+            if (pathUri.equals("/login") && !query.isEmpty()) {
+                if (!login(query)) {
+                    pathUri = "/401.html";
+                }
             }
 
-            if (!pathUrl.contains(".")) {
-                pathUrl = pathUrl + ".html";
+            if (!pathUri.contains(".")) {
+                pathUri = pathUri + ".html";
             }
 
-            String staticUrl = "static" + pathUrl;
+            String staticUrl = "static" + pathUri;
             Path path = getPath(staticUrl);
             final var response = getResponse(path);
             writeAndFlush(outputStream, response);
@@ -88,18 +90,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void login(String query) {
+    private static boolean login(String query) {
         Map<String, String> queryParams = parseQueryParams(query);
 
         if (queryParams.get("account") == null || queryParams.get("password") == null) {
-            return;
+            return false;
         }
 
         User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
         if (user.checkPassword(queryParams.get("password"))) {
             log.info("user : {}", user.toString());
+            return true;
         }
+        return false;
     }
 
     private static void writeAndFlush(OutputStream outputStream, String response) throws IOException {

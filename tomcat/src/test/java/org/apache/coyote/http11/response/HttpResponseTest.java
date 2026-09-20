@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.coyote.http11.session.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class HttpResponseTest {
     void ok() throws IOException {
         // given
         String body = "<h1>Hello</h1>";
-        HttpResponse response = HttpResponse.ok("/index.html", body);
+        HttpResponse response = HttpResponse.ok(ContentType.HTML, body);
 
         // when
         String actual = write(response);
@@ -32,10 +33,10 @@ class HttpResponseTest {
     }
 
     @Test
-    @DisplayName("Content-Type은 경로의 확장자로 결정된다.")
-    void okWithCss() throws IOException {
+    @DisplayName("전달한 ContentType이 헤더에 들어간다.")
+    void okWithContentType() throws IOException {
         // given
-        HttpResponse response = HttpResponse.ok("/css/styles.css", "body {}");
+        HttpResponse response = HttpResponse.ok(ContentType.CSS, "body {}");
 
         // when
         String actual = write(response);
@@ -49,7 +50,7 @@ class HttpResponseTest {
     void contentLengthIsByteLength() throws IOException {
         // given
         String body = "안녕";
-        HttpResponse response = HttpResponse.ok("/index.html", body);
+        HttpResponse response = HttpResponse.ok(ContentType.HTML, body);
 
         // when
         String actual = write(response);

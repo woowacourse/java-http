@@ -26,9 +26,9 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse ok(String path, String body) {
+    public static HttpResponse ok(ContentType contentType, String body) {
         HttpResponse response = new HttpResponse(HttpStatus.OK, body);
-        response.addContentType(ContentType.from(path));
+        response.addContentType(contentType);
         response.addContentLength();
         return response;
     }

@@ -17,6 +17,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class RequestHandler {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String SESSION_USER_KEY = "user";
 
     public HttpResponse handle(final HttpRequest request) throws IOException, URISyntaxException {
         final String path = request.getPath();
@@ -54,15 +55,14 @@ public class RequestHandler {
         }
 
         final Optional<User> user = findUser(account, password);
-        if (user.isEmpty()) {
-            return HttpResponse.redirect("/401.html");
-        }
-        return loginSuccess(user.get());
+        return user.map(this::loginSuccess)
+                .orElseGet(() -> HttpResponse.redirect("/401.html"));
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
-        final Session session = SessionManager.INSTANCE.findSession(request.getCookie().get(JSESSIONID));
-        return session != null && session.getAttribute("user") != null;
+        final String SessionId = request.getCookie().get(JSESSIONID);
+        final Session session = SessionManager.INSTANCE.findSession(SessionId);
+        return session != null && session.getAttribute(SESSION_USER_KEY) != null;
     }
 
     private Optional<User> findUser(final String account, final String password) {
@@ -72,7 +72,7 @@ public class RequestHandler {
 
     private HttpResponse loginSuccess(final User user) {
         final Session session = SessionManager.INSTANCE.createSession();
-        session.setAttribute("user", user);
+        session.setAttribute(SESSION_USER_KEY, user);
 
         final HttpResponse response = HttpResponse.redirect("/index.html");
         response.addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());

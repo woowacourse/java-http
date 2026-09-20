@@ -66,15 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 
             // register
             if (isRegisterRequest(httpRequest)) {
-                if (register(httpRequest)) {
-                    httpResponse.setStatusCode(StatusCode.FOUND);
-                    httpResponse.setContentType(ContentType.HTML);
-                    httpResponse.sendRedirect("index.html");
-                } else {
-                    httpResponse.setStatusCode(StatusCode.FOUND);
-                    httpResponse.setContentType(ContentType.HTML);
-                    httpResponse.sendRedirect("login.html");
-                }
+                register(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
@@ -160,7 +152,7 @@ public class Http11Processor implements Runnable, Processor {
         httpResponse.sendRedirect("401.html");
     }
 
-    private static boolean register(MyHttpRequest httpRequest) {
+    private static void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
         Map<String, String> params = new HashMap<>();
         for (String parameter : httpRequest.body().split("&")) {
             String[] keyValue = parameter.split("=", 3);
@@ -170,10 +162,14 @@ public class Http11Processor implements Runnable, Processor {
         try {
             User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
             log.info("registration succeed: {}", registeredUser);
-            return true;
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("index.html");
         } catch (IllegalArgumentException e) {
             log.error("registration failed: ", e);
-            return false;
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("login.html");
         }
     }
 

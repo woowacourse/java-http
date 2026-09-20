@@ -120,11 +120,21 @@ public class Http11Processor implements Runnable, Processor {
     private String readStaticResource(String path) throws URISyntaxException, IOException {
         String fileName = path.replaceFirst(ROOT_PATH, "");
 
-        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
+        URL resource = findStaticResource(fileName);
         if (resource == null) {
+            log.info("해당 리소스를 찾을 수 없습니다. 사유 : null | URL = {}", resource);
             return "";
         }
-
         return Files.readString(Path.of(resource.toURI()));
+    }
+
+    private URL findStaticResource(String fileName) {
+        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
+
+        if (resource != null || fileName.endsWith(".html")) {
+            return resource;
+        }
+
+        return getClass().getClassLoader().getResource("static/" + fileName + ".html");
     }
 }

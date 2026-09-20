@@ -23,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_MESSAGE = "Hello world!";
     private static final String ROOT_PATH = "/";
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final String HTML_EXTENSION = ".html";
     private static final String CSS_EXTENSION = ".css";
     private static final String CSS_CONTENT_TYPE = "text/css";
     private static final String JS_EXTENSION = ".js";
@@ -46,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final String requestLine = reader.readLine();
             readHeaders(reader);
@@ -137,11 +138,13 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String resolveResponseBody(final String requestPath) throws IOException {
+    private String resolveResponseBody(String requestPath) throws IOException {
         if (ROOT_PATH.equals(requestPath)) {
             return DEFAULT_MESSAGE;
         }
-
+        if (!requestPath.contains(".")) {
+            requestPath += HTML_EXTENSION;
+        }
         final URL resource = getClass().getClassLoader().getResource(STATIC_PREFIX + requestPath);
         if (resource == null) {
             throw new RuntimeException("요청한 리소스를 찾을 수 없습니다: " + requestPath);

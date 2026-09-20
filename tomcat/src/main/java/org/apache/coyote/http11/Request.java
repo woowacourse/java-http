@@ -15,7 +15,7 @@ public class Request {
         final Map<String, String> queryParams, final Map<String, String> headers,
         final String requestBody) {
         this.httpMethod = httpMethod;
-        this.path = path;
+        this.path = PathNormalizer.normalize(path);
         this.queryParams = queryParams;
         this.headers = headers;
         this.requestBody = requestBody;

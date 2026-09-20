@@ -11,19 +11,18 @@ public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
 
     @Override
-    public String handle(Map<String, String> paramsMap) {
+    public ResponseInfo handle(Map<String, String> paramsMap) {
         try {
             login(paramsMap);
-        } catch (IllegalArgumentException e){
-            return "/401.html";
+        } catch (IllegalArgumentException e) {
+            return new ResponseInfo("/401.html", HttpStatus.UNAUTHORIZED);
         }
-        return "/index.html";
+        return new ResponseInfo("/index.html", HttpStatus.FOUND);
     }
 
     private void login(Map<String, String> paramsMap) {
         User user = getValidatedUser(paramsMap);
         log.info("user: {}", user.toString());
-
     }
 
     private User getValidatedUser(Map<String, String> paramsMap) {

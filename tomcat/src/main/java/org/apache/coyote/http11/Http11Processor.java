@@ -45,18 +45,19 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = getPath(uri);
             final Optional<String> queryString = getQueryString(uri);
-            path = handleRequest(queryString, path);
+            ResponseInfo responseInfo = handleRequest(queryString, path);
 
-            final var responseBody = createResponseBody(path);
-            final String contentType = getContentType(path);
+            final var responseBody = createResponseBody(responseInfo.path());
+            final String contentType = getContentType(responseInfo.path());
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + responseInfo.httpStatus() + " ",
                     "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     new String(responseBody));
 
+            log.info("path: {}, http status: {}", responseInfo.path(), responseInfo.httpStatus().getMessage());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException | UncheckedServletException e) {
@@ -88,19 +89,19 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String handleRequest(Optional<String> queryString, String path) {
+    private ResponseInfo handleRequest(Optional<String> queryString, String path) {
         final RequestHandler requestHandler = handlers.get(path);
 
         if (requestHandler == null) {
-            return path;
+            return new ResponseInfo(path, HttpStatus.OK);
         }
 
         final Map<String, String> paramsMap = queryString
                 .map(this::getParamsMap)
                 .orElseGet(Collections::emptyMap);
 
-        if (paramsMap.isEmpty()){
-            return path;
+        if (paramsMap.isEmpty()) {
+            return new ResponseInfo(path, HttpStatus.OK);
         }
 
         return requestHandler.handle(paramsMap);

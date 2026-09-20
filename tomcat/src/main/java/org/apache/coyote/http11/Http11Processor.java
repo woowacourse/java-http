@@ -55,11 +55,15 @@ public class Http11Processor implements Runnable, Processor {
             final String method = requestLineTokens[0];
             final String requestTarget = requestLineTokens[1];
             final String path = extractPath(requestTarget);
-            final String queryString = extractQueryString(requestTarget);
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readBody(reader, headers);
 
             log.debug("{} {} 요청을 받았습니다. 본문 길이: {}", method, requestTarget, requestBody.length());
+
+            if (method.equals("POST") && path.equals("/login")) {
+                login(parseQueryString(requestBody), outputStream);
+                return;
+            }
 
             if (method.equals("POST") && path.equals("/register")) {
                 register(parseQueryString(requestBody), outputStream);
@@ -84,11 +88,6 @@ public class Http11Processor implements Runnable, Processor {
 
             if (path.equals("/login")) {
                 filePath = "static/login.html";
-
-                if (!queryString.isBlank()) {
-                    login(parseQueryString(queryString), outputStream);
-                    return;
-                }
             }
 
             if (path.equals("/register")) {
@@ -219,14 +218,6 @@ public class Http11Processor implements Runnable, Processor {
             return requestTarget;
         }
         return requestTarget.substring(0, queryIndex);
-    }
-
-    private String extractQueryString(final String requestTarget) {
-        final int queryIndex = requestTarget.indexOf("?");
-        if (queryIndex == -1) {
-            return "";
-        }
-        return requestTarget.substring(queryIndex + 1);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

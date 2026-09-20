@@ -64,17 +64,37 @@ public class Http11Processor implements Runnable, Processor {
                 queryString = uri.substring(index + 1);
             }
 
+            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+
             if ("/login".equals(path) && !queryString.isEmpty()) {
                 final String[] parameters = queryString.split("&");
                 final String account = parameters[0].split("=", 2)[1];
                 final String password = parameters[1].split("=", 2)[1];
 
-                InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.checkPassword(password))
-                        .ifPresent(user -> log.info("login user: {}", user.getAccount()));
+                if(InMemoryUserRepository.findByAccount(account).filter(user -> user.checkPassword(password)).isPresent()) {
+                    final String responseHeader = String.join("\r\n",
+                            "HTTP/1.1 302 Found",
+                            "Location: /index.html",
+                            "Content-Length: 0",
+                            "",
+                            "");
+
+                    outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
+                }
+                final String responseHeader = String.join("\r\n",
+                        "HTTP/1.1 401 Unauthorized",
+                        "Location: /401.html",
+                        "Content-Length: 0",
+                        "",
+                        "");
+
+                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
             }
 
-            byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             if (!path.equals("/")) {
                 final String resourcePath = "/login".equals(path) ? "/login.html" : path;
 

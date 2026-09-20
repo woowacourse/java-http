@@ -63,6 +63,7 @@ public class Http11Processor implements Runnable, Processor {
             final String path = extractPath(requestTarget);
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readBody(reader, headers);
+            final Cookie cookie = Cookie.from(headers.get("cookie"));
 
             log.debug("{} {} 요청을 받았습니다. 본문 길이: {}", method, requestTarget, requestBody.length());
 
@@ -119,14 +120,19 @@ public class Http11Processor implements Runnable, Processor {
 
             final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
 
-            final var responseHeader = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    "");
+            final StringBuilder responseHeader = new StringBuilder()
+                    .append("HTTP/1.1 200 OK ").append("\r\n")
+                    .append("Content-Type: ").append(contentType).append(" ").append("\r\n")
+                    .append("Content-Length: ").append(body.length).append(" ").append("\r\n");
 
-            outputStream.write(responseHeader.getBytes());
+            if (path.equals("/login") && !cookie.hasJSessionId()) {
+                final Session session = createSession();
+                responseHeader.append("Set-Cookie: ").append(JSESSIONID).append("=").append(session.getId())
+                        .append(" ").append("\r\n");
+            }
+            responseHeader.append("\r\n");
+
+            outputStream.write(responseHeader.toString().getBytes());
             outputStream.write(body);
             outputStream.flush();
 

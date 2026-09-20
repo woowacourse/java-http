@@ -26,7 +26,7 @@ public class HttpCookie {
         return Map.copyOf(parsedCookies);
     }
 
-    public boolean contains(final String name) {
-        return cookies.containsKey(name);
+    public String get(final String name) {
+        return cookies.get(name);
     }
 }

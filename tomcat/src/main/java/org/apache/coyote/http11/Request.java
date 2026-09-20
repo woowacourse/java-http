@@ -7,6 +7,12 @@ public record Request(
         String path,
         Map<String, String> headers,
         Map<String, String> params,
-        Map<String, String> body
+        Map<String, String> body,
+        HttpCookie cookie
 ) {
+
+    public Request(String method, String path, Map<String, String> headers,
+                   Map<String, String> params, Map<String, String> body) {
+        this(method, path, headers, params, body, new HttpCookie(headers.get("cookie")));
+    }
 }

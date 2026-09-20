@@ -1,10 +1,12 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.nonNull;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +33,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final String NOT_FOUND_RESOURCE_PATH = "static/404.html";
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    private static final String USER_SESSION_ATTRIBUTE = "user";
+    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -152,8 +159,9 @@ public class Http11Processor implements Runnable, Processor {
             }
         } else if ("POST".equals(request.method()) && "/login".equals(request.path())) {
             try {
-                validateAuth(request.body());
-                writeResponse(outputStream, "302 Found", loginSuccessHeaders(request), new byte[0]);
+                final User user = authenticate(request.body());
+                final String sessionId = addAuthSession(request.cookie(), user);
+                writeResponse(outputStream, "302 Found", loginSuccessHeaders(sessionId), new byte[0]);
             } catch (final IllegalArgumentException e) {
                 final String invalidRedirectUri = "/login.html?error=" + URLEncoder.encode(e.getMessage(), UTF_8);
                 writeResponse(outputStream, "302 Found", Map.of("Location", invalidRedirectUri), new byte[0]);
@@ -162,19 +170,12 @@ public class Http11Processor implements Runnable, Processor {
             final var body = "Hello world!".getBytes(UTF_8);
             writeResponse(outputStream, "200 OK", contentTypeHeader("text/html"), body);
         } else {
+            if ("/login".equals(request.path()) && isLoggedIn(request.cookie())) {
+                writeResponse(outputStream, "302 Found", Map.of("Location", "/index.html"), new byte[0]);
+                return;
+            }
             writeResource(outputStream, "200 OK", STATIC_RESOURCE_PATH + appendHtmlExtension(request.path()));
         }
-    }
-
-    private Map<String, String> loginSuccessHeaders(final Request request) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", "/index.html");
-        HttpCookie cookie = new HttpCookie(headers.get("cookie"));
-        if (!cookie.contains(SESSION_COOKIE_NAME)) {
-            final String sessionCookie = SESSION_COOKIE_NAME + "=" + UUID.randomUUID();
-            headers.put("Set-Cookie", sessionCookie);
-        }
-        return headers;
     }
 
     private void register(final Map<String, String> params) {
@@ -188,34 +189,6 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("계정이 존재한다.");
         }
         InMemoryUserRepository.save(new User(account, password, email));
-    }
-
-    private void validateAuth(final Map<String, String> params) {
-        String account = params.get("account");
-        boolean invalid = account == null
-                || InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(params.get("password")))
-                .isEmpty();
-
-        if (invalid) {
-            throw new IllegalArgumentException("로그인 정보가 잘못됐다.");
-        }
-    }
-
-    private void writeResource(
-            final OutputStream outputStream,
-            final String status,
-            final String resourcePath
-    ) throws IOException {
-        try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (resource == null) {
-                writeResource(outputStream, "404 Not Found", NOT_FOUND_RESOURCE_PATH);
-                return;
-            }
-
-            final var contentType = MimeTypeResolver.resolve(resourcePath);
-            writeResponse(outputStream, status, contentTypeHeader(contentType), resource.readAllBytes());
-        }
     }
 
     private void writeResponse(
@@ -233,11 +206,66 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private User authenticate(final Map<String, String> params) {
+        final String account = params.get("account");
+        if (account == null) {
+            throw new IllegalArgumentException("로그인 정보가 잘못됐다.");
+        }
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(params.get("password")))
+                .orElseThrow(() -> new IllegalArgumentException("로그인 정보가 잘못됐다."));
+    }
+
+    private static String addAuthSession(
+            final HttpCookie cookie,
+            final User user
+    ) throws IOException {
+        final String sessionId = cookie.get(SESSION_COOKIE_NAME);
+        final HttpSession previousSession = SESSION_MANAGER.findSession(sessionId);
+        if (previousSession != null) {
+            SESSION_MANAGER.remove(previousSession);
+        }
+
+        final HttpSession newSession = new Session(UUID.randomUUID().toString());
+        newSession.setAttribute(USER_SESSION_ATTRIBUTE, user);
+        SESSION_MANAGER.add(newSession);
+        return newSession.getId();
+    }
+
+    private Map<String, String> loginSuccessHeaders(final String sessionId) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", "/index.html");
+        headers.put("Set-Cookie", SESSION_COOKIE_NAME + "=" + sessionId);
+        return headers;
+    }
+
     private Map<String, String> contentTypeHeader(final String contentType) {
         if (contentType.startsWith("text/")) {
             return Map.of("Content-Type", contentType + ";charset=utf-8");
         }
         return Map.of("Content-Type", contentType);
+    }
+
+    private boolean isLoggedIn(final HttpCookie cookie) throws IOException {
+        final String sessionId = cookie.get(SESSION_COOKIE_NAME);
+        final HttpSession session = SESSION_MANAGER.findSession(sessionId);
+        return nonNull(session) && nonNull(session.getAttribute(USER_SESSION_ATTRIBUTE));
+    }
+
+    private void writeResource(
+            final OutputStream outputStream,
+            final String status,
+            final String resourcePath
+    ) throws IOException {
+        try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (resource == null) {
+                writeResource(outputStream, "404 Not Found", NOT_FOUND_RESOURCE_PATH);
+                return;
+            }
+
+            final var contentType = MimeTypeResolver.resolve(resourcePath);
+            writeResponse(outputStream, status, contentTypeHeader(contentType), resource.readAllBytes());
+        }
     }
 
     private static String appendHtmlExtension(final String resourcePath) {

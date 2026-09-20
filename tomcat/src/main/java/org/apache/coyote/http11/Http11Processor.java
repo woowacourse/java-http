@@ -46,32 +46,43 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleRequest(HttpRequest httpRequest) throws URISyntaxException, IOException {
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/index.html")) {
-            return createResponseBody("static/index.html", "text/html");
+        String requestTarget = httpRequest.getRequestTarget();
+
+        if (requestTarget.equals("/")) {
+            return createResponse("static/index.html", "text/html", "200 OK");
         }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/login")) {
+        if (httpRequest.isPath("/login")) {
             handleLogin(httpRequest);
-            return createResponseBody("static/login.html", "text/html");
         }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/register")) {
-            return createResponseBody("static/register.html", "text/html");
+
+        String resourcePath = getResourcePath(requestTarget);
+        String contentType = getContentType(requestTarget);
+
+        if (ClassLoader.getSystemResource(resourcePath) == null) {
+            return createResponse("static/404.html", "text/html", "404 Not Found");
         }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/css/styles.css")) {
-            return createResponseBody("static/css/styles.css", "text/css");
+
+        return createResponse(resourcePath, contentType, "200 OK");
+    }
+
+    private String getResourcePath(String requestTarget) {
+        String resourcePath = "static" + requestTarget;
+
+        if (requestTarget.equals("/login") || requestTarget.equals("/register")) {
+            resourcePath += ".html";
         }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/js/scripts.js")) {
-            return createResponseBody("static/js/scripts.js", "text/javascript");
+
+        return resourcePath;
+    }
+
+    private String getContentType(String requestTarget){
+        if(requestTarget.endsWith(".css")){
+            return "text/css";
         }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/assets/chart-area.js")) {
-            return createResponseBody("static/assets/chart-area.js", "text/javascript");
+        if(requestTarget.endsWith(".js")){
+            return "text/javascript";
         }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/assets/chart-bar.js")) {
-            return createResponseBody("static/assets/chart-bar.js", "text/javascript");
-        }
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/assets/chart-pie.js")) {
-            return createResponseBody("static/assets/chart-pie.js", "text/javascript");
-        }
-        return createResponse("Hello world!", "text/html");
+        return "text/html";
     }
 
     private void handleLogin(HttpRequest httpRequest) {
@@ -87,20 +98,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponseBody(String resourcePath, String contentType) throws URISyntaxException, IOException {
-        final Path path = Path.of(ClassLoader.getSystemResource(resourcePath).toURI());
-        String responseBody = Files.readString(path);
-
-        return createResponse(responseBody, contentType);
-    }
-
-
-    private String createResponse(String responseBody, String contentType) {
+    private String createResponse(String resourcePath, String contentType, String status) throws URISyntaxException, IOException {
+        String responseBody = createResponseBody(resourcePath);
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status,
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String createResponseBody(String resourcePath) throws URISyntaxException, IOException {
+        final Path path = Path.of(ClassLoader.getSystemResource(resourcePath).toURI());
+        return Files.readString(path);
     }
 }

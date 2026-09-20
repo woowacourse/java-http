@@ -2,10 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,10 +27,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_RESOURCE_ROOT = "static/";
     private static final String CONTENT_TYPE_HTML = "text/html;charset=utf-8";
     private static final String CONTENT_TYPE_CSS = "text/css;charset=utf-8";
+    private static final String CONTENT_TYPE_JS = "text/javascript;charset=utf-8";
 
     private static final String INDEX_PATH = "/index.html";
     private static final String CSS_PATH = "/css/styles.css";
+    private static final String JOIN_PATH = "/register";
     private static final String LOGIN_PATH = "/login";
+
+    private static final String UNAUTHORIZED_FILE = "401.html";
 
     private final Socket connection;
 
@@ -56,23 +62,29 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String uri = requestLine.split(" ")[1];
-
+            String[] requestParts = requestLine.split(" ");
+            String method = requestParts[0];
+            String uri = requestParts[1];
             String path = uri;
-            String queryString = "";
 
             int index = uri.indexOf("?");
 
             if (index != -1) {
                 path = uri.substring(0, index);
-                queryString = uri.substring(index + 1);
             }
 
+            int contentLength = 0;
             String line = bufferedReader.readLine();
 
             while (!"".equals(line)) {
                 if (line == null) {
                     return;
+                }
+
+                String[] header = line.split(":", 2);
+
+                if (header.length == 2 && header[0].equalsIgnoreCase("Content-Length")) {
+                    contentLength = Integer.parseInt(header[1].trim());
                 }
 
                 line = bufferedReader.readLine();
@@ -90,11 +102,47 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = CONTENT_TYPE_CSS;
             }
 
-            if (path.equals(LOGIN_PATH)) {
-                responseBody = readStaticFile("login.html");
+            if (path.equals("/js/scripts.js")
+                    || path.equals("/assets/chart-area.js")
+                    || path.equals("/assets/chart-bar.js")
+                    || path.equals("/assets/chart-pie.js")) {
 
-                if (!queryString.isEmpty()) {
-                    Map<String, String> parameters = parseQueryString(queryString);
+                responseBody = readStaticFile(path.substring(1));
+                contentType = CONTENT_TYPE_JS;
+            }
+
+            if (method.equals("GET") && path.equals(JOIN_PATH)) {
+                responseBody = readStaticFile("register.html");
+            }
+
+            if (method.equals("POST") && path.equals(JOIN_PATH)) {
+                String requestBody = readRequestBody(bufferedReader, contentLength);
+
+                Map<String, String> parameters = parseFormData(requestBody);
+
+                String account = parameters.getOrDefault("account", "");
+                String email = parameters.getOrDefault("email", "");
+                String password = parameters.getOrDefault("password", "");
+
+                User newUser = new User(account, password, email);
+                InMemoryUserRepository.save(newUser);
+
+                String response = createRedirectResponse(INDEX_PATH);
+
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
+            if (method.equals("GET") && path.equals(LOGIN_PATH)) {
+                responseBody = readStaticFile("login.html");
+            }
+
+            if (method.equals("POST") && path.equals(LOGIN_PATH)) {
+                String requestBody = readRequestBody(bufferedReader, contentLength);
+
+                if (!requestBody.isEmpty()) {
+                    Map<String, String> parameters = parseFormData(requestBody);
 
                     String account = parameters.getOrDefault("account", "");
                     String password = parameters.getOrDefault("password", "");
@@ -104,6 +152,17 @@ public class Http11Processor implements Runnable, Processor {
                     if (user.isPresent()) {
                         if (user.get().checkPassword(password)) {
                             log.info("로그인 성공 : account={}", user.get().getAccount());
+
+                            String response = createRedirectResponse(INDEX_PATH);
+
+                            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                            outputStream.flush();
+                            return;
+
+                        }
+
+                        if (!user.get().checkPassword(password)) {
+                            responseBody = readStaticFile(UNAUTHORIZED_FILE);
                         }
                     }
                 }
@@ -118,7 +177,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
+    private String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] body = new char[contentLength];
+        int totalRead = 0;
+
+        while (totalRead < contentLength) {
+            int count = reader.read(
+                    body, totalRead, contentLength - totalRead
+            );
+
+            if (count == -1) {
+                throw new IOException("요청 본문이 끝까지 도착하지 않았습니다.");
+            }
+
+            totalRead += count;
+        }
+
+        return new String(body);
+    }
+
+    private Map<String, String> parseFormData(String queryString) {
         Map<String, String> parameters = new HashMap<>();
 
         for (String parameter : queryString.split("&")) {
@@ -128,7 +206,11 @@ public class Http11Processor implements Runnable, Processor {
                 continue;
             }
 
-            parameters.put(keyValue[0], keyValue[1]);
+            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+
+            parameters.put(key, value);
+
         }
 
         return parameters;
@@ -150,4 +232,14 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 responseBody);
     }
+
+    private String createRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
+    }
+
 }

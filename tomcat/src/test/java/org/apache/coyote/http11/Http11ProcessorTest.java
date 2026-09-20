@@ -5,8 +5,11 @@ import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +36,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() throws IOException, URISyntaxException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -54,13 +57,13 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(Path.of(resource.toURI())), StandardCharsets.UTF_8);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void css() throws IOException {
+    void css() throws IOException, URISyntaxException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
@@ -78,18 +81,18 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: " + body.length + " \r\n" +
                 "\r\n" +
-                new String(body);
+                new String(body, StandardCharsets.UTF_8);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void login() throws IOException {
+    void login() throws IOException, URISyntaxException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -105,7 +108,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
         final String expectedHeader = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.length + " \r\n" +

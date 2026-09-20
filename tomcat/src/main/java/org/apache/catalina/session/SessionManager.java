@@ -1,14 +1,15 @@
 package org.apache.catalina.session;
 
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.Manager;
+
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SessionManager {
+public class SessionManager implements Manager {
 
+    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
-
-    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -17,18 +18,21 @@ public class SessionManager {
         return INSTANCE;
     }
 
-    public void add(final Session session) {
-        sessions.put(session.getId(), session);
+    @Override
+    public void add(final HttpSession session) {
+        SESSIONS.put(session.getId(), session);
     }
 
-    public Optional<Session> findSession(final String id) {
+    @Override
+    public HttpSession findSession(final String id) {
         if (id == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(sessions.get(id));
+        return SESSIONS.get(id);
     }
 
-    public void remove(final Session session) {
-        sessions.remove(session.getId());
+    @Override
+    public void remove(final HttpSession session) {
+        SESSIONS.remove(session.getId());
     }
 }

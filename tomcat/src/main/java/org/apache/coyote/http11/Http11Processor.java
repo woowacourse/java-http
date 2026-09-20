@@ -81,14 +81,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getStaticResource(final String uri) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+        final URL resource = getClass()
+                .getClassLoader().getResource("static" + uri);
 
         if (resource == null) {
             return readResource(notFoundResource(), new HttpStatusLine(HTTP_VERSION,
                     404, "Not Found"));
         }
 
-        return readResource(resource, new HttpStatusLine(HTTP_VERSION, 200, "OK"));
+        return readResource(resource,
+                new HttpStatusLine(HTTP_VERSION, 200, "OK"));
     }
 
     private URL notFoundResource() {
@@ -100,7 +102,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse readResource(final URL resource, final HttpStatusLine statusLine) throws IOException {
         try (InputStream body = resource.openStream()) {
-            return new HttpResponse(statusLine, contentTypeOf(resource.getPath()), body.readAllBytes());
+            return new HttpResponse(statusLine,
+                    contentTypeOf(resource.getPath()), body.readAllBytes());
         }
     }
 

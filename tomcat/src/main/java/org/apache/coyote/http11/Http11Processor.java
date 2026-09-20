@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -49,20 +48,23 @@ public class Http11Processor implements Runnable, Processor {
 
             if (requestPath.equals("/")) {
                 responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                writeResponse(outputStream, responseBody, contentType);
             } else if (requestPath.equals("/login")) {
                 final var parameters = parseQueryString(requestUri);
                 final var authenticated = authenticate(parameters);
 
-                if (authenticated) {
-                    responseBody = readStaticResource("/index.html");
+                if (parameters.isEmpty()) {
+                    responseBody = readStaticResource("/login.html");
+                    writeResponse(outputStream, responseBody, contentType);
+                } else if (authenticated) {
+                    writeRedirectResponse(outputStream, "/index.html");
                 } else {
-                    responseBody = readStaticResource("/401.html");
+                    writeRedirectResponse(outputStream, "/401.html");
                 }
             } else {
                 responseBody = readStaticResource(requestPath);
+                writeResponse(outputStream, responseBody, contentType);
             }
-
-            writeResponse(outputStream, responseBody, contentType);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -114,6 +116,15 @@ public class Http11Processor implements Runnable, Processor {
                 "\r\n");
         outputStream.write(response.getBytes());
         outputStream.write(bytes);
+        outputStream.flush();
+    }
+
+    private void writeRedirectResponse(final OutputStream outputStream, final String location) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location,
+                "\r\n");
+        outputStream.write(response.getBytes());
         outputStream.flush();
     }
 

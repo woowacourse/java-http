@@ -163,7 +163,7 @@ public class Http11Processor implements Runnable, Processor {
     // content-type 결정
     private String resolveContentType(final String resourcePath) {
         if (resourcePath.endsWith(".html")) {
-            return "text/html";
+            return "text/html;charset=utf-8 ";
         }
         if (resourcePath.endsWith(".css")) {
             return "text/css; charset=UTF-8";

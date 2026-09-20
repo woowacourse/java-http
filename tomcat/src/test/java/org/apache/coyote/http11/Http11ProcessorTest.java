@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -117,6 +119,76 @@ class Http11ProcessorTest {
 
         assertThat(socket.output())
                 .isEqualTo(expected);
+    }
+
+    @Test
+    void POST_방식으로_로그인에_성공하면_index로_리다이렉트한다() {
+        // given
+        final String body =
+                "account=gugu&password=password";
+
+        final String httpRequest =
+                String.join("\r\n",
+                        "POST /login HTTP/1.1",
+                        "Host: localhost:8080",
+                        "Content-Length: "
+                                + body.getBytes(StandardCharsets.UTF_8).length,
+                        "Content-Type: application/x-www-form-urlencoded",
+                        "",
+                        body
+                );
+
+        final var socket =
+                new StubSocket(httpRequest);
+
+        final var processor =
+                new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    void POST_방식으로_회원가입한다() {
+        // given
+        //브라우저에서는 인코딩한 값으로 보내서 @ 가 아니라 %40으로씀. @를 쓰면 디코딩 감지 테스트가 안됨.
+        final String body =
+                "account=moca&password=1234&email=moca%40email.com";
+
+        final String httpRequest =
+                String.join("\r\n",
+                        "POST /register HTTP/1.1",
+                        "Host: localhost:8080",
+                        "Content-Length: "
+                                + body.getBytes(StandardCharsets.UTF_8).length,
+                        "Content-Type: application/x-www-form-urlencoded",
+                        "",
+                        body
+                );
+
+        final var socket =
+                new StubSocket(httpRequest);
+
+        final var processor =
+                new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(
+                InMemoryUserRepository
+                        .findByAccount("moca")
+        ).isPresent();
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
     }
 
 }

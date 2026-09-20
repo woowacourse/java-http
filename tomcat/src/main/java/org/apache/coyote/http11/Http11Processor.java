@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String GET = "GET";
+    private static final String POST = "POST";
+
+    private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
 
     private final Socket connection;
 
@@ -86,7 +92,18 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            // 6. 기본
+            // 6. 회원가입 처리
+            if (handleRegister(
+                    outputStream,
+                    method,
+                    path,
+                    requestBody
+            )) {
+                return;
+            }
+
+
+            // 7. 기본
             if ("/".equals(path)) {
                 writeResponse(
                         outputStream,
@@ -96,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
                 );
                 return;
             }
-            // 7. 정적
+            // 8. 정적
             writeStaticResource(outputStream, path);
 
         } catch (IOException
@@ -315,6 +332,50 @@ public class Http11Processor implements Runnable, Processor {
         return true;
 
     }
+
+
+    private boolean handleRegister(
+            final OutputStream outputStream,
+            final String method,
+            final String path,
+            final String requestBody
+    ) throws IOException {
+
+        if (!REGISTER_PATH.equals(path)) {
+            return false;
+        }
+
+        if (GET.equals(method)) {
+            return false;
+        }
+
+        if (!POST.equals(method)) {
+            return false;
+        }
+
+        final Map<String, String> parameters = parseParameters(requestBody);
+
+        final String account = parameters.get("account");
+
+        final String password = parameters.get("password");
+
+        final String email = parameters.get("email");
+
+        if (account == null || password == null || email == null) {
+            return false;
+        }
+
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        log.info("register success account: {}", account);
+
+        writeRedirect(outputStream, "/index.html");
+
+        return true;
+    }
+
+
     private void writeRedirect(
             final OutputStream outputStream,
             final String location
@@ -351,10 +412,19 @@ public class Http11Processor implements Runnable, Processor {
                 continue;
             }
 
-            parameters.put(pair[0], pair[1]);
+            parameters.put(decode(pair[0]), decode(pair[1]));
         }
 
         return parameters;
+    }
+
+    private String decode(
+            final String value
+    ) {
+        return URLDecoder.decode(
+                value,
+                StandardCharsets.UTF_8
+        );
     }
 
     private void writeStaticResource(
@@ -405,6 +475,9 @@ public class Http11Processor implements Runnable, Processor {
     private String resolveResourcePath(final String path) {
         if ("/login".equals(path)) {
             return "static/login.html";
+        }
+        if (REGISTER_PATH.equals(path)) {
+            return "static/register.html";
         }
 
         return "static" + path;

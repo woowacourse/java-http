@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,35 +51,30 @@ public class Http11Processor implements Runnable, Processor {
 
             if (isLoginRequest(httpRequest)) {
                 if (authenticate(httpRequest)) {
-                    String response = build302FoundResponse("index.html");
+                    String response = build302FoundResponse(httpRequest, "index.html");
                     outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
-                    return;
                 } else {
-                    String response = build302FoundResponse("401.html");
+                    String response = build302FoundResponse(httpRequest, "401.html");
                     outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
-                    return;
                 }
+                outputStream.flush();
+                log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                return;
             }
 
             // register
             if (isRegisterRequest(httpRequest)) {
                 if (register(httpRequest)) {
-                    String response = build302FoundResponse("index.html");
+                    String response = build302FoundResponse(httpRequest, "index.html");
                     outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
-                    return;
+
                 } else {
-                    String response = build302FoundResponse("login.html");
+                    String response = build302FoundResponse(httpRequest, "login.html");
                     outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
-                    return;
                 }
+                outputStream.flush();
+                log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+                return;
             }
 
             final var responseBody = readStaticResource(httpRequest, "Hello world!");
@@ -182,19 +178,34 @@ public class Http11Processor implements Runnable, Processor {
         return defaultContent;
     }
 
-    private static String build302FoundResponse(String redirectLocation) {
-        return "HTTP/1.1 302 Found \r\n" +
+    private static String build302FoundResponse(MyHttpRequest httpRequest, String redirectLocation) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("HTTP/1.1 302 Found \r\n");
+        if (!httpRequest.hasCookie("JSESSIONID")) {
+            sb.append("Set-Cookie: JSESSIONID=")
+                    .append(UUID.randomUUID())
+                    .append(" \r\n");
+        }
+        String other =
                 "Location: http://localhost:8080/" + redirectLocation + " \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 0 \r\n";
+                        "Content-Type: text/html;charset=utf-8 \r\n" +
+                        "Content-Length: 0 \r\n";
+        return sb.append(other).toString();
     }
 
     private static String buildHttpResponse(MyHttpRequest httpRequest, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+        StringBuilder sb = new StringBuilder();
+        sb.append("HTTP/1.1 200 OK \r\n");
+        if (!httpRequest.hasCookie("JSESSIONID")) {
+            sb.append("Set-Cookie: JSESSIONID=")
+                    .append(UUID.randomUUID())
+                    .append(" \r\n");
+        }
+        String other = String.join("\r\n",
                 "Content-Type: " + httpRequest.contentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
+        return sb.append(other).toString();
     }
 }

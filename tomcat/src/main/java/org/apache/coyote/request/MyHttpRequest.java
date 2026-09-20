@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import org.apache.coyote.cookie.HttpCookie;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ public record MyHttpRequest(
         String resourcePath,
         String contentType,
         String version,
+        HttpCookie cookie,
         String body
 ) {
 
@@ -32,8 +35,18 @@ public record MyHttpRequest(
                 extractResourcePath(split[1]),
                 contentTypeOf(split[1]),
                 split[2],
+                extractCookie(rawRequest),
                 extractBody(rawRequest)
         );
+    }
+
+    private static HttpCookie extractCookie(String rawRequest) {
+        return rawRequest.lines()
+                .filter(line -> line.startsWith("Cookie: "))
+                .map(line -> line.substring("Cookie: ".length()))
+                .map(HttpCookie::from)
+                .findFirst()
+                .orElse(HttpCookie.from(""));
     }
 
     private static String extractBody(String rawRequest) {
@@ -43,6 +56,10 @@ public record MyHttpRequest(
             return "";
         }
         return rawRequest.substring(startIndexOfBody + bodySeparator.length());
+    }
+
+    public boolean hasCookie(String cookieKeyName) {
+        return cookie.has(cookieKeyName);
     }
 
     public boolean hasRequestBody() {

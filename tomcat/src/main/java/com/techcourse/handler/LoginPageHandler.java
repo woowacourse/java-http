@@ -16,6 +16,9 @@ public class LoginPageHandler implements ResourceHandler {
 
     @Override
     public HttpServletResponse handle(HttpServletRequest request) throws IOException {
+        if(request.getSession(false) != null) {
+            return HttpServletResponse.redirect("/");
+        }
         return HttpServletResponse.ok(StaticResourceBody.from("/login.html"));
     }
 }

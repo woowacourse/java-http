@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 import java.util.Optional;
 
 public class HttpRequest {
@@ -35,5 +38,10 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return headers.getCookie();
+    }
+
+    public Optional<Session> getSession() {
+        return getCookie().get(HttpCookie.JSESSIONID)
+                .flatMap(SessionManager.getInstance()::findSession);
     }
 }

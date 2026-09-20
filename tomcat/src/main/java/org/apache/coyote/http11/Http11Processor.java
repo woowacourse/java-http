@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -31,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
+    private static final String USER = "user";
 
     private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
@@ -108,6 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         final String sessionId = UUID.randomUUID().toString();
         log.info("issue JSESSIONID: {}", sessionId);
         response.addCookie(JSESSIONID + "=" + sessionId);
+        SessionManager.getInstance().add(new Session(sessionId));
     }
 
     private HttpResponse route(final HttpRequest request)
@@ -122,6 +126,9 @@ public class Http11Processor implements Runnable, Processor {
             if (POST.equals(request.getMethod())) {
                 return HttpResponse.redirect(login(request));
             }
+            if (isLoggedIn(request)) {
+                return HttpResponse.redirect(INDEX_PAGE);
+            }
             return staticFile(LOGIN_PAGE);
         }
 
@@ -133,6 +140,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return staticFile(path);
+    }
+
+    private boolean isLoggedIn(final HttpRequest request) {
+        return request.getSession()
+                .map(session -> session.getAttribute(USER))
+                .isPresent();
     }
 
     private HttpResponse staticFile(final String filePath)
@@ -219,6 +232,9 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password.get()))
                 .map(user -> {
                     log.info("user: {}", user);
+                    log.info("session present: {}", request.getSession().isPresent());   // ← 추가
+                    request.getSession()
+                            .ifPresent(session -> session.setAttribute(USER, user));
                     return INDEX_PAGE;
                 })
                 .orElseGet(() -> {

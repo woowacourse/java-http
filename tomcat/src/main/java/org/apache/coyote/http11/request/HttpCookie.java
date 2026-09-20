@@ -7,7 +7,7 @@ import java.util.Optional;
 public class HttpCookie {
     private static final String COOKIE_DELIMITER = ";";
     private static final String NAME_VALUE_DELIMITER = "=";
-    private static final String JSESSIONID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
     private static final int NOT_FOUND = -1;
 
     private final Map<String, String> cookies;

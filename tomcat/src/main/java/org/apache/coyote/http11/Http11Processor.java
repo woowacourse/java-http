@@ -12,8 +12,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.session.HttpCookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestParser requestParser;
     private final ResponseBuilder responseBuilder;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this(connection, new RequestParser());
@@ -39,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
         this.requestParser = requestParser;
         this.responseBuilder = new ResponseBuilder();
+        this.sessionManager = new SessionManager();
     }
 
     @Override
@@ -100,8 +105,11 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
 
-        if (isLoginSuccessful(queryParams)) {
-            return responseBuilder.buildWithCookie(HttpStatus.FOUND, "/index.html", cookie);
+        User user = findLoginUser(queryParams);
+        if (user != null) {
+            Session session = getOrCreateSession(cookie);
+            session.setAttribute("user", user);
+            return responseBuilder.buildWithCookie(HttpStatus.FOUND, "/index.html", cookie, session.getId());
         }
 
         return responseBuilder.buildRedirect(HttpStatus.FOUND, "/401.html");
@@ -135,19 +143,28 @@ public class Http11Processor implements Runnable, Processor {
         return readStaticResource(path);
     }
 
-    private boolean isLoginSuccessful(Map<String, String> queryParams) {
+    private User findLoginUser(Map<String, String> queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
 
         if (account == null || password == null) {
-            return false;
+            return null;
         }
 
-        var user = InMemoryUserRepository.findByAccount(account)
-                .filter(foundUser -> foundUser.checkPassword(password));
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(foundUser -> foundUser.checkPassword(password))
+                .orElse(null);
+    }
 
-        user.ifPresent(foundUser -> log.info("{}", foundUser));
-        return user.isPresent();
+    private Session getOrCreateSession(HttpCookie cookie) {
+        Session session = sessionManager.findSession(cookie.getJSessionId());
+        if (session != null) {
+            return session;
+        }
+
+        Session newSession = new Session(UUID.randomUUID().toString());
+        sessionManager.add(newSession);
+        return newSession;
     }
 
     private void registerUser(Map<String, String> requestParams) {

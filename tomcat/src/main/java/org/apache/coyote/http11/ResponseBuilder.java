@@ -26,14 +26,14 @@ public class ResponseBuilder {
                 "");
     }
 
-    public String buildWithCookie(HttpStatus httpStatus, String location, HttpCookie cookie) {
-        if (cookie.hasJSessionId()) {
+    public String buildWithCookie(HttpStatus httpStatus, String location, HttpCookie cookie, String sessionId) {
+        if (sessionId.equals(cookie.getJSessionId())) {
             return buildRedirect(httpStatus, location);
         }
 
         return String.join("\r\n",
                 statusLine(httpStatus),
-                cookie.createSetCookieHeaderForResponse(),
+                cookie.createSetCookieHeaderForResponse(sessionId),
                 "Location: " + location + " ",
                 "Content-Length: 0 ",
                 "",

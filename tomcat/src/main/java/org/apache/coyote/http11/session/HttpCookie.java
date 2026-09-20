@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.session;
 
-import java.util.UUID;
-
 public class HttpCookie {
 
     private static final String COOKIE_NAME = "JSESSIONID";
@@ -12,26 +10,25 @@ public class HttpCookie {
         this.cookieHeader = cookieHeader;
     }
 
-    public boolean hasJSessionId() {
+    public String getJSessionId() {
         if (cookieHeader == null || cookieHeader.isBlank()) {
-            return false;
+            return null;
         }
 
         for (String cookie : cookieHeader.split(";")) {
-            String[] nameAndValue = cookie.trim().split("=");
+            String[] nameAndValue = cookie.trim().split("=", 2);
 
-            boolean isCookieNameExist = nameAndValue[0].equals(COOKIE_NAME);
-            boolean isCookieIDNotNull = !nameAndValue[1].isBlank();
-
-            if (isCookieNameExist && isCookieIDNotNull) {
-                return true;
+            if (nameAndValue.length == 2
+                    && nameAndValue[0].equals(COOKIE_NAME)
+                    && !nameAndValue[1].isBlank()) {
+                return nameAndValue[1];
             }
         }
 
-        return false;
+        return null;
     }
 
-    public String createSetCookieHeaderForResponse() {
-        return "Set-Cookie: " + COOKIE_NAME + "=" + UUID.randomUUID();
+    public String createSetCookieHeaderForResponse(String sessionId) {
+        return "Set-Cookie: " + COOKIE_NAME + "=" + sessionId;
     }
 }

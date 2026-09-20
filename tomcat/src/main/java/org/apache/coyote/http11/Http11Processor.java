@@ -216,9 +216,9 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            final String[] keyAndValue = line.split(": ", 2);
+            final String[] keyAndValue = line.split(":", 2);
             if (keyAndValue.length == 2) {
-                headers.put(keyAndValue[0], keyAndValue[1]);
+                headers.put(keyAndValue[0].trim(), keyAndValue[1].trim());
             }
         }
         return headers;

@@ -48,6 +48,22 @@ class ResponseContentResolverTest {
     }
 
     @Test
+    @DisplayName("/register 요청은 회원가입 페이지의 내용을 반환한다")
+    void registerPathResolvesToRegisterPageBody() throws IOException {
+        // given
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/register.html")) {
+            assertThat(resource).isNotNull();
+            final var expectedBody = resource.readAllBytes();
+
+            // when
+            final var response = resolver.resolve("/register");
+
+            // then
+            assertThat(response.body()).isEqualTo(expectedBody);
+        }
+    }
+
+    @Test
     @DisplayName("/401.html 요청은 인증 실패 페이지의 내용을 반환한다")
     void unauthorizedPathResolvesToUnauthorizedPageBody() throws IOException {
         // given

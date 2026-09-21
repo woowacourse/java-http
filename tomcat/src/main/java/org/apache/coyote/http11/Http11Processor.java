@@ -16,13 +16,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String POST_METHOD = "POST";
     private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
     private static final String INDEX_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final String CRLF = "\r\n";
 
     private final Socket connection;
@@ -66,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path == null) {
                 return;
             }
-            final var response = resolveResponse(path, requestUri.getRawQuery());
+            final var response = addSessionCookieIfAbsent(request, resolveResponse(request));
 
             try {
                 writeResponse(outputStream, response);
@@ -78,8 +84,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<User> findLoginUser(final String queryString) {
-        return UrlEncodedParameters.parse(queryString)
+    private Optional<User> findLoginUser(final String requestBody) {
+        return UrlEncodedParameters.parse(requestBody)
                 .flatMap(this::findLoginUser);
     }
 
@@ -94,15 +100,53 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password.get()));
     }
 
-    private HttpResponse resolveResponse(final String path, final String queryString) {
-        if (LOGIN_PATH.equals(path) && queryString != null) {
-            return resolveLoginResponse(queryString);
+    private HttpResponse resolveResponse(final HttpRequest request) {
+        final var path = request.uri().getPath();
+        if (LOGIN_PATH.equals(path) && POST_METHOD.equals(request.method())) {
+            return resolveLoginResponse(request.body());
+        }
+        if (REGISTER_PATH.equals(path) && POST_METHOD.equals(request.method())) {
+            return resolveRegisterResponse(request.body());
         }
         return resolveStaticResponse(path);
     }
 
-    private HttpResponse resolveLoginResponse(final String queryString) {
-        final var loginUser = findLoginUser(queryString);
+    private HttpResponse addSessionCookieIfAbsent(final HttpRequest request, final HttpResponse response) {
+        final var cookies = request.headers()
+                .firstValue(COOKIE_HEADER)
+                .map(HttpCookies::parse)
+                .orElseGet(HttpCookies::empty);
+        if (cookies.get(SESSION_COOKIE_NAME).isPresent()) {
+            return response;
+        }
+
+        final var sessionId = UUID.randomUUID().toString();
+        return response.addHeader(SET_COOKIE_HEADER, SESSION_COOKIE_NAME + "=" + sessionId);
+    }
+
+    private HttpResponse resolveRegisterResponse(final String requestBody) {
+        final var parameters = UrlEncodedParameters.parse(requestBody);
+        if (parameters.isEmpty()) {
+            return HttpResponse.error(HttpStatus.BAD_REQUEST);
+        }
+
+        return register(parameters.get());
+    }
+
+    private HttpResponse register(final UrlEncodedParameters parameters) {
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
+        final var email = parameters.get("email");
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            return HttpResponse.error(HttpStatus.BAD_REQUEST);
+        }
+
+        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
+        return HttpResponse.redirect(INDEX_PATH);
+    }
+
+    private HttpResponse resolveLoginResponse(final String requestBody) {
+        final var loginUser = findLoginUser(requestBody);
         if (loginUser.isEmpty()) {
             return HttpResponse.redirect(UNAUTHORIZED_PATH);
         }

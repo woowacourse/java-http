@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -423,17 +424,30 @@ class Http11ProcessorTest {
             assertThat(responseBody(response)).isEqualTo(expectedBody);
         }
 
-        @ParameterizedTest(name = "{displayName} | 요청: {0}")
-        @ValueSource(strings = {
-                "/login?account=gugu&password=password",
-                "/login?account=gugu&password=wrong"
-        })
-        @DisplayName("로그인을 시도하면 302 Found 상태를 응답한다")
-        void loginAttemptReturnsFoundStatus(final String requestTarget) {
-            // given: 각 요청 경로는 @ValueSource에서 전달된다.
+        @Test
+        @DisplayName("로그인 폼은 POST 방식으로 제출한다")
+        void loginFormUsesPostMethod() {
+            // given
+            final var requestTarget = "/login";
 
             // when
             final var response = responseTo(requestTarget);
+
+            // then
+            assertThat(responseBody(response)).contains("<form method=\"post\" action=\"login\">");
+        }
+
+        @ParameterizedTest(name = "{displayName} | 요청: {0}")
+        @ValueSource(strings = {
+                "account=gugu&password=password",
+                "account=gugu&password=wrong"
+        })
+        @DisplayName("로그인을 시도하면 302 Found 상태를 응답한다")
+        void loginAttemptReturnsFoundStatus(final String requestBody) {
+            // given: 각 요청 본문은 @ValueSource에서 전달된다.
+
+            // when
+            final var response = postResponseTo("/login", requestBody);
 
             // then
             assertThat(response).startsWith("HTTP/1.1 302 Found ");
@@ -441,15 +455,15 @@ class Http11ProcessorTest {
 
         @ParameterizedTest(name = "{displayName} | 요청: {0}, 이동 경로: {1}")
         @CsvSource({
-                "/login?account=gugu&password=password, /index.html",
-                "/login?account=gugu&password=wrong, /401.html"
+                "account=gugu&password=password, /index.html",
+                "account=gugu&password=wrong, /401.html"
         })
         @DisplayName("로그인 결과에 맞는 경로를 Location 헤더에 응답한다")
-        void loginAttemptRedirectsToExpectedLocation(final String requestTarget, final String expectedLocation) {
-            // given: 요청 경로와 예상 이동 경로는 @CsvSource에서 전달된다.
+        void loginAttemptRedirectsToExpectedLocation(final String requestBody, final String expectedLocation) {
+            // given: 요청 본문과 예상 이동 경로는 @CsvSource에서 전달된다.
 
             // when
-            final var response = responseTo(requestTarget);
+            final var response = postResponseTo("/login", requestBody);
 
             // then
             assertThat(response).contains("\r\nLocation: " + expectedLocation + " \r\n");
@@ -459,10 +473,10 @@ class Http11ProcessorTest {
         @DisplayName("계정과 비밀번호가 일치하면 사용자를 로그에 남긴다")
         void matchingLoginUserIsLogged() {
             // given
-            final String requestTarget = "/login?account=gugu&password=password";
+            final var requestBody = "account=gugu&password=password";
 
             // when
-            final var messages = loginMessages(requestTarget);
+            final var messages = loginMessages(requestBody);
 
             // then
             assertThat(messages)
@@ -470,13 +484,13 @@ class Http11ProcessorTest {
         }
 
         @Test
-        @DisplayName("추가 쿼리 값에 등호가 있어도 로그인할 수 있다")
-        void equalsSignInAdditionalQueryValueDoesNotPreventLogin() {
+        @DisplayName("추가 본문 값에 등호가 있어도 로그인할 수 있다")
+        void equalsSignInAdditionalBodyValueDoesNotPreventLogin() {
             // given
-            final String requestTarget = "/login?account=gugu&password=password&note=a=b";
+            final var requestBody = "account=gugu&password=password&note=a=b";
 
             // when
-            final var messages = loginMessages(requestTarget);
+            final var messages = loginMessages(requestBody);
 
             // then
             assertThat(messages)
@@ -484,13 +498,13 @@ class Http11ProcessorTest {
         }
 
         @Test
-        @DisplayName("추가 쿼리 값의 인코딩된 앰퍼샌드는 파라미터 구분자로 취급하지 않는다")
-        void encodedAmpersandInAdditionalQueryValueDoesNotPreventLogin() {
+        @DisplayName("추가 본문 값의 인코딩된 앰퍼샌드는 파라미터 구분자로 취급하지 않는다")
+        void encodedAmpersandInAdditionalBodyValueDoesNotPreventLogin() {
             // given
-            final var requestTarget = "/login?note=a%26b&account=gugu&password=password";
+            final var requestBody = "note=a%26b&account=gugu&password=password";
 
             // when
-            final var messages = loginMessages(requestTarget);
+            final var messages = loginMessages(requestBody);
 
             // then
             assertThat(messages).containsExactly("login user found: gugu");
@@ -498,15 +512,15 @@ class Http11ProcessorTest {
 
         @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
-                "/login?account=gugu&password=wrong",
-                "/login?account=gugu&password=pa=ss"
+                "account=gugu&password=wrong",
+                "account=gugu&password=pa=ss"
         })
         @DisplayName("비밀번호가 일치하지 않으면 로그인 로그를 남기지 않는다")
-        void mismatchedPasswordIsNotLogged(final String requestTarget) {
-            // given: 각 요청 경로는 @ValueSource에서 전달된다.
+        void mismatchedPasswordIsNotLogged(final String requestBody) {
+            // given: 각 요청 본문은 @ValueSource에서 전달된다.
 
             // when
-            final var messages = loginMessages(requestTarget);
+            final var messages = loginMessages(requestBody);
 
             // then
             assertThat(messages).isEmpty();
@@ -514,15 +528,15 @@ class Http11ProcessorTest {
 
         @ParameterizedTest(name = "{displayName} | 입력: {0}")
         @ValueSource(strings = {
-                "/login?account=gugu&password",
-                "/login?account=gugu&password=password&broken"
+                "account=gugu&password",
+                "account=gugu&password=password&broken"
         })
-        @DisplayName("이름과 값으로 구성되지 않은 쿼리에는 로그인 로그를 남기지 않는다")
-        void malformedQueryParameterIsNotLogged(final String requestTarget) {
-            // given: 각 요청 경로는 @ValueSource에서 전달된다.
+        @DisplayName("이름과 값으로 구성되지 않은 본문에는 로그인 로그를 남기지 않는다")
+        void malformedBodyParameterIsNotLogged(final String requestBody) {
+            // given: 각 요청 본문은 @ValueSource에서 전달된다.
 
             // when
-            final var messages = loginMessages(requestTarget);
+            final var messages = loginMessages(requestBody);
 
             // then
             assertThat(messages).isEmpty();
@@ -532,18 +546,163 @@ class Http11ProcessorTest {
         @DisplayName("중복된 계정 이름의 마지막 값이 다르면 로그인 로그를 남기지 않는다")
         void duplicatedAccountParameterWithWrongLastValueIsNotLogged() {
             // given
-            final var requestTarget = "/login?account=gugu&account=other&password=password";
+            final var requestBody = "account=gugu&account=other&password=password";
 
             // when
-            final var messages = loginMessages(requestTarget);
+            final var messages = loginMessages(requestBody);
 
             // then
             assertThat(messages).isEmpty();
         }
     }
 
+    @Nested
+    @DisplayName("회원가입 요청")
+    class RegistrationTests {
+
+        @Test
+        @DisplayName("GET /register 요청에 회원가입 페이지를 응답한다")
+        void registerPageIsReturned() throws IOException {
+            // given
+            final var expectedBody = new String(readResource("static/register.html"), StandardCharsets.UTF_8);
+
+            // when
+            final var response = responseTo("/register");
+
+            // then
+            assertThat(responseBody(response)).isEqualTo(expectedBody);
+        }
+
+        @Test
+        @DisplayName("회원가입에 성공하면 302 Found 상태를 응답한다")
+        void successfulRegistrationReturnsFoundStatus() {
+            // given
+            final var body = "account=new-user&password=secret&email=new-user%40example.com";
+
+            // when
+            final var response = postResponseTo("/register", body);
+
+            // then
+            assertThat(response).startsWith("HTTP/1.1 302 Found ");
+        }
+
+        @Test
+        @DisplayName("회원가입에 성공하면 인덱스 페이지로 이동시킨다")
+        void successfulRegistrationRedirectsToIndex() {
+            // given
+            final var body = "account=redirect-user&password=secret&email=redirect%40example.com";
+
+            // when
+            final var response = postResponseTo("/register", body);
+
+            // then
+            assertThat(response).contains("\r\nLocation: /index.html \r\n");
+        }
+
+        @Test
+        @DisplayName("회원가입 요청의 사용자를 저장한다")
+        void registrationSavesUser() {
+            // given
+            final var account = "saved-user";
+            final var body = "account=" + account + "&password=secret&email=saved%40example.com";
+
+            // when
+            postResponseTo("/register", body);
+
+            // then
+            assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+        }
+
+        @Test
+        @DisplayName("필수 회원 정보가 없으면 400 Bad Request 상태를 응답한다")
+        void missingRegistrationParameterReturnsBadRequest() {
+            // given
+            final var body = "account=incomplete-user&password=secret";
+
+            // when
+            final var response = postResponseTo("/register", body);
+
+            // then
+            assertThat(response).startsWith("HTTP/1.1 400 Bad Request ");
+        }
+    }
+
+    @Nested
+    @DisplayName("세션 쿠키")
+    class SessionCookieTests {
+
+        @Test
+        @DisplayName("요청에 JSESSIONID가 없으면 새 세션 쿠키를 응답한다")
+        void missingSessionCookieAddsSetCookieHeader() {
+            // given
+            final var requestTarget = "/index.html";
+
+            // when
+            final var response = responseTo(requestTarget);
+
+            // then
+            assertThat(response).containsPattern(
+                    "\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
+        }
+
+        @Test
+        @DisplayName("요청에 다른 쿠키만 있으면 새 세션 쿠키를 응답한다")
+        void unrelatedCookieAddsSetCookieHeader() {
+            // given
+            final var requestTarget = "/index.html";
+            final var cookieHeader = "Cookie: yummy_cookie=choco";
+
+            // when
+            final var response = responseTo(requestTarget, cookieHeader);
+
+            // then
+            assertThat(response).contains("\r\nSet-Cookie: JSESSIONID=");
+        }
+
+        @Test
+        @DisplayName("요청에 JSESSIONID가 있으면 새 세션 쿠키를 응답하지 않는다")
+        void existingSessionCookieDoesNotAddSetCookieHeader() {
+            // given
+            final var requestTarget = "/index.html";
+            final var cookieHeader = "Cookie: yummy_cookie=choco; JSESSIONID=existing-session";
+
+            // when
+            final var response = responseTo(requestTarget, cookieHeader);
+
+            // then
+            assertThat(response).doesNotContain("\r\nSet-Cookie:");
+        }
+    }
+
     private String responseTo(final String requestTarget) {
         final var socket = new StubSocket("GET " + requestTarget + " HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+        processor.process(socket);
+        return socket.output();
+    }
+
+    private String responseTo(final String requestTarget, final String header) {
+        final var request = String.join("\r\n",
+                "GET " + requestTarget + " HTTP/1.1",
+                "Host: localhost:8080",
+                header,
+                "",
+                "");
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+        processor.process(socket);
+        return socket.output();
+    }
+
+    private String postResponseTo(final String requestTarget, final String body) {
+        final var request = String.join("\r\n",
+                "POST " + requestTarget + " HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
+                "",
+                body);
+        final var socket = new StubSocket(request);
         final var processor = new Http11Processor(socket);
         processor.process(socket);
         return socket.output();
@@ -566,14 +725,14 @@ class Http11ProcessorTest {
         }
     }
 
-    private List<String> loginMessages(final String requestTarget) {
+    private List<String> loginMessages(final String requestBody) {
         final var logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
         final var appender = new ListAppender<ILoggingEvent>();
         appender.start();
         logger.addAppender(appender);
 
         try {
-            responseTo(requestTarget);
+            postResponseTo("/login", requestBody);
 
             return appender.list.stream()
                     .map(ILoggingEvent::getFormattedMessage)

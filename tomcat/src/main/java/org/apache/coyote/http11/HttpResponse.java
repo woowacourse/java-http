@@ -4,6 +4,10 @@ import java.nio.charset.StandardCharsets;
 
 record HttpResponse(HttpStatus status, HttpHeaders headers, ResponseContent content) {
 
+    HttpResponse addHeader(final String name, final String value) {
+        return new HttpResponse(status, headers.add(name, value), content);
+    }
+
     static HttpResponse ok(final ResponseContent content) {
         return new HttpResponse(HttpStatus.OK, HttpHeaders.empty(), content);
     }

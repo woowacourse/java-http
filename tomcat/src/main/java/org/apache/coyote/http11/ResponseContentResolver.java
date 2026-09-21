@@ -14,6 +14,7 @@ class ResponseContentResolver {
     private static final Map<String, StaticResource> RESOURCES = Map.of(
             "/index.html", new StaticResource("/index.html", HTML_CONTENT_TYPE),
             "/login", new StaticResource("/login.html", HTML_CONTENT_TYPE),
+            "/register", new StaticResource("/register.html", HTML_CONTENT_TYPE),
             "/401.html", new StaticResource("/401.html", HTML_CONTENT_TYPE),
             "/css/styles.css", new StaticResource("/css/styles.css", CSS_CONTENT_TYPE),
             "/js/scripts.js", new StaticResource("/js/scripts.js", JAVASCRIPT_CONTENT_TYPE),

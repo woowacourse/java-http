@@ -37,9 +37,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String NOT_FOUND_PATH = "/404.html";
     private static final String INDEX_PATH = "/index.html";
-    private static final String UNAUTHORIZED_PATH = "/401.html";
 
-    private static final String CONTENT_LENGTH_HEADER = "content-length";
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
     private static final String EMAIL_PARAMETER = "email";
@@ -49,10 +47,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String NOT_FOUND_RESPONSE_BODY = "404 Not Found";
-
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String LOCATION_HEADER = "Location";
-    private static final String SET_COOKIE_HEADER = "Set-Cookie";
 
     private static final String JSESSION_ID = "JSESSIONID";
     private static final String CRLF = "\r\n";
@@ -123,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private int parseContentLength(final Map<String, String> headers) {
-        final String contentLength = headers.getOrDefault(CONTENT_LENGTH_HEADER, "0");
+        final String contentLength = headers.getOrDefault("content-length", "0");
         final int parsedContentLength = Integer.parseInt(contentLength);
         if (parsedContentLength < 0) {
             throw new IllegalArgumentException("Content-Length must not be negative");
@@ -149,7 +143,7 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(
                     outputStream,
                     OK_STATUS_LINE,
-                    HTML_CONTENT_TYPE,
+                    Map.of("Content-Type", HTML_CONTENT_TYPE),
                     readDefaultResponseBody()
             );
             return;
@@ -161,7 +155,7 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(
                     outputStream,
                     OK_STATUS_LINE,
-                    HTML_CONTENT_TYPE,
+                    Map.of("Content-Type", HTML_CONTENT_TYPE),
                     responseBody
             );
             return;
@@ -169,7 +163,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (LOGIN_PATH.equals(requestPath) && HttpMethod.GET.equals(method)) {
             if (isLoggedIn(request)) {
-                sendRedirect(outputStream, INDEX_PATH);
+                sendRedirect(outputStream, Map.of("Location", INDEX_PATH));
                 return;
             }
 
@@ -177,7 +171,7 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(
                     outputStream,
                     OK_STATUS_LINE,
-                    HTML_CONTENT_TYPE,
+                    Map.of("Content-Type", HTML_CONTENT_TYPE),
                     responseBody
             );
             return;
@@ -186,7 +180,7 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> formParameters = parseFormParameters(request.body());
         if (REGISTER_PATH.equals(requestPath) && HttpMethod.POST.equals(method)) {
             register(formParameters);
-            sendRedirect(outputStream, INDEX_PATH);
+            sendRedirect(outputStream, Map.of("Location", INDEX_PATH));
             return;
         }
 
@@ -194,7 +188,7 @@ public class Http11Processor implements Runnable, Processor {
             final Optional<User> authenticatedUser = findAuthenticatedUser(formParameters);
 
             if (authenticatedUser.isEmpty()) {
-                sendRedirect(outputStream, UNAUTHORIZED_PATH);
+                sendRedirect(outputStream, Map.of("Location", "/401.html"));
                 return;
             }
 
@@ -205,11 +199,10 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseGet(this::createSession);
             session.setAttribute(SESSION_USER_ATTRIBUTE, user);
 
-            sendRedirect(
-                    outputStream,
-                    INDEX_PATH,
-                    Map.of(SET_COOKIE_HEADER, JSESSION_ID + "=" + session.getId())
-            );
+            final Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("Location", INDEX_PATH);
+            headers.put("Set-Cookie", JSESSION_ID + "=" + session.getId());
+            sendRedirect(outputStream, headers);
             return;
         }
 
@@ -219,7 +212,7 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(
                     outputStream,
                     NOT_FOUND_STATUS_LINE,
-                    HTML_CONTENT_TYPE,
+                    Map.of("Content-Type", HTML_CONTENT_TYPE),
                     readNotFoundResponseBody()
             );
             return;
@@ -228,7 +221,7 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(
                 outputStream,
                 OK_STATUS_LINE,
-                resolveContentType(requestPath),
+                Map.of("Content-Type", resolveContentType(requestPath)),
                 resourceBody.get()
         );
     }
@@ -254,35 +247,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void sendRedirect(
             final OutputStream outputStream,
-            final String location
+            final Map<String, String> headers
     ) throws IOException {
-        sendRedirect(outputStream, location, Map.of());
-    }
-
-    private void sendRedirect(
-            final OutputStream outputStream,
-            final String location,
-            final Map<String, String> additionalHeaders
-    ) throws IOException {
-        final Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(LOCATION_HEADER, location);
-        headers.putAll(additionalHeaders);
-
         writeResponse(outputStream, FOUND_STATUS_LINE, headers, new byte[0]);
-    }
-
-    private void writeResponse(
-            final OutputStream outputStream,
-            final String statusLine,
-            final String contentType,
-            final byte[] responseBody
-    ) throws IOException {
-        writeResponse(
-                outputStream,
-                statusLine,
-                Map.of(CONTENT_TYPE_HEADER, contentType),
-                responseBody
-        );
     }
 
     private void writeResponse(
@@ -407,13 +374,10 @@ public class Http11Processor implements Runnable, Processor {
         for (final String param : formData.split("&")) {
             final String[] keyAndValue = param.split("=", 2);
             validateQueryParameter(keyAndValue);
-            parameters.put(decode(keyAndValue[0]), decode(keyAndValue[1]));
+            final String value = URLDecoder.decode(keyAndValue[1], StandardCharsets.UTF_8);
+            parameters.put(keyAndValue[0], value);
         }
         return Map.copyOf(parameters);
-    }
-
-    private String decode(final String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
     private void validateQueryParameter(final String[] keyAndValue) {

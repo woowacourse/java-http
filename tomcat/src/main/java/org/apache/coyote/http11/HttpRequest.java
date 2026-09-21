@@ -11,7 +11,7 @@ public record HttpRequest(
         Map<String, String> headers,
         byte[] body
 ) {
-    private static final String HEAD_BODY_SEPARATOR = "";
+    private static final String EMPTY_LINE = "";
 
     public static HttpRequest of(final RequestLine requestLine, final Map<String, String> headers, final byte[] body) {
         return new HttpRequest(requestLine, headers, body);
@@ -49,7 +49,7 @@ public record HttpRequest(
     }
 
     private static int getSeparatorIndex(final List<String> requestLines) {
-        int separatorIndex = requestLines.indexOf(HEAD_BODY_SEPARATOR);
+        int separatorIndex = requestLines.indexOf(EMPTY_LINE);
 
         if (separatorIndex < 0) {
             throw new IllegalArgumentException(

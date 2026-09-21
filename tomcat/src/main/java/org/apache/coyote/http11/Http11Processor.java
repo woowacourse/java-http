@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -55,84 +56,131 @@ public class Http11Processor implements Runnable, Processor {
             String protocol = splitRequestLine[2];
 
             if (method.equals("GET")) {
-                String contentType = null;
-                final byte[] responseBody;
-
-                if (requestTarget.equals("/")) {
-                    contentType = "text/html;charset=utf-8 ";
-                    responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-                } else {
-                    int queryStartIndex = requestTarget.indexOf("?");
-
-                    String resourceName;
-                    String queryString;
-
-                    if (queryStartIndex >= 0) {
-                        resourceName = requestTarget.substring(0, queryStartIndex);
-                        queryString = requestTarget.substring(queryStartIndex + 1);
-                    } else {
-                        resourceName = requestTarget;
-                        queryString = "";
-                    }
-
-                    Map<String, String> queryParameters = new HashMap<>();
-
-                    if (!queryString.equals("")) {
-                        String[] parameters = queryString.split("&");
-
-                        for (String parameter : parameters) {
-                            String[] keyValue = parameter.split("=", 2);
-                            queryParameters.put(keyValue[0], keyValue[1]);
-                        }
-                    }
-
-                    if (resourceName.equals("/login")) {
-                        String account = queryParameters.get("account");
-                        String password = queryParameters.get("password");
-
-                        if (account != null && password != null) {
-                            Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-                            if (user.isPresent() && user.get().checkPassword(password)) {
-                                log.info("user = {}", user);
-                            }
-                        }
-
-                        resourceName = "login.html";
-                    }
-
-                    if (resourceName.endsWith(".css")) {
-                        contentType = "text/css;charset=utf-8 ";
-                    } else if (resourceName.endsWith(".html")) {
-                        contentType = "text/html;charset=utf-8 ";
-                    }
-
-                    log.info(resourceName);
-
-                    final URL resource = Objects.requireNonNull(
-                            getClass().getClassLoader()
-                                    .getResource("static/" + resourceName),
-                            "해당 리소스를 찾을 수 없습니다."
-                    );
-
-                    final Path path = new File(resource.getFile()).toPath();
-                    responseBody = Files.readAllBytes(path);
-                }
-
-                final var header = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType,
-                        "Content-Length: " + responseBody.length + " ",
-                        "",
-                        "");
-
-                outputStream.write(header.getBytes());
-                outputStream.write(responseBody);
-                outputStream.flush();
+                handleGetRequest(outputStream, requestTarget);
             }
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handleGetRequest(OutputStream outputStream, String requestTarget) throws IOException {
+        String contentType;
+        final byte[] responseBody;
+
+        // root 처리
+        if (requestTarget.equals("/")) {
+            writeResponse(outputStream,
+                    "text/html;charset=utf-8 ",
+                    "Hello world!".getBytes(StandardCharsets.UTF_8));
+
+            return;
+        }
+
+        ParsedTarget parsedTarget = parseRequestTarget(requestTarget);
+        String resourceName = parsedTarget.path();
+        Map<String, String> queryParameters = parsedTarget.queryParameters();
+
+        resourceName = handleLogin(resourceName, queryParameters);
+
+        contentType = resolveContentType(resourceName);
+        responseBody = readResponseBody(resourceName);
+
+        writeResponse(outputStream, contentType, responseBody);
+    }
+
+    private ParsedTarget parseRequestTarget(String requestTarget) {
+        int queryStartIndex = requestTarget.indexOf("?");
+
+        if (queryStartIndex < 0) {
+            return new ParsedTarget(
+                    requestTarget,
+                    new HashMap<>()
+            );
+        }
+
+        String path = requestTarget.substring(0, queryStartIndex);
+        String queryString = requestTarget.substring(queryStartIndex + 1);
+
+        return new ParsedTarget(path, parseQueryParameters(queryString));
+    }
+
+    private Map<String, String> parseQueryParameters(String queryString) {
+        Map<String, String> queryParameters = new HashMap<>();
+
+        if (queryString.isEmpty()) {
+            return queryParameters;
+        }
+
+        String[] parameters = queryString.split("&");
+
+        for (String parameter : parameters) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length == 2) {
+                queryParameters.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        return queryParameters;
+    }
+
+    private static String handleLogin(String resourceName, Map<String, String> queryParameters) {
+        if (resourceName.equals("/login")) {
+            String account = queryParameters.get("account");
+            String password = queryParameters.get("password");
+
+            if (account != null && password != null) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+                if (user.isPresent() && user.get().checkPassword(password)) {
+                    log.info("user = {}", user);
+                }
+            }
+
+            resourceName = "login.html";
+        }
+        return resourceName;
+    }
+
+    private static String resolveContentType(String resourceName) {
+        if (resourceName.endsWith(".css")) {
+            return "text/css;charset=utf-8 ";
+        }
+
+        if (resourceName.endsWith(".html")) {
+            return "text/html;charset=utf-8 ";
+        }
+
+        return "application/octet-stream";
+    }
+
+    private byte[] readResponseBody(String resourceName) throws IOException {
+        final byte[] responseBody;
+
+        final URL resource = Objects.requireNonNull(
+                getClass().getClassLoader()
+                        .getResource("static/" + resourceName),
+                "해당 리소스를 찾을 수 없습니다."
+        );
+        final Path path = new File(resource.getFile()).toPath();
+
+        responseBody = Files.readAllBytes(path);
+        return responseBody;
+    }
+
+    private void writeResponse(OutputStream outputStream,
+                                      String contentType,
+                                      byte[] responseBody) throws  IOException{
+        final var header = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType,
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                "");
+
+        outputStream.write(header.getBytes());
+        outputStream.write(responseBody);
+        outputStream.flush();
     }
 }

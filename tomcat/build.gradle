@@ -18,9 +18,9 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.5.18'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
 
+    testImplementation platform('org.junit:junit-bom:5.13.3')
     testImplementation 'org.assertj:assertj-core:3.27.3'
     testImplementation 'org.mockito:mockito-core:5.18.0'
-    testImplementation platform('org.junit:junit-bom:5.13.3')
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

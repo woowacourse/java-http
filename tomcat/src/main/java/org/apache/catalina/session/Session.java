@@ -93,7 +93,9 @@ public class Session implements HttpSession {
 
     @Override
     public ServletContext getServletContext() {
-        return null;
+        throw new UnsupportedOperationException(
+                "ServletContext는 지원하지 않습니다."
+        );
     }
 
     @Override
@@ -113,7 +115,10 @@ public class Session implements HttpSession {
     @Override
     @Deprecated
     public HttpSessionContext getSessionContext() {
-        return null;
+        throw new UnsupportedOperationException(
+                "HttpSessionContext는 지원하지 않습니다."
+        );
+
     }
 
     @Override

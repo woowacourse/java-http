@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
@@ -42,18 +44,44 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            final String method = requestLine.split(" ")[0];
             final String uri = requestLine.split(" ")[1];
 
             String line;
-            while (true) {
+            int contentLength = 0;
+            while(true) {
                 line = reader.readLine();
-                if (line == null) {
+                if(line == null) {
                     return;
                 }
-                if (line.isEmpty()) {
+                if(line.isEmpty()) {
                     break;
                 }
+
+                String[] header = line.split(":", 2);
+                if(header[0].equalsIgnoreCase("Content-Length")) {
+                    contentLength = Integer.parseInt(header[1].trim());
+                }
             }
+
+            char[] bodyBuffer = new char[contentLength];
+            int totalRead = 0;
+
+            while (totalRead < contentLength) {
+                int readCount = reader.read(
+                        bodyBuffer,
+                        totalRead,
+                        contentLength - totalRead
+                );
+
+                if (readCount == -1) {
+                    return;
+                }
+
+                totalRead += readCount;
+            }
+
+            String body = new String(bodyBuffer);
 
             final int index = uri.indexOf("?");
             String path = uri;
@@ -66,10 +94,11 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
-            if ("/login".equals(path) && !queryString.isEmpty()) {
-                final String[] parameters = queryString.split("&");
-                final String account = parameters[0].split("=", 2)[1];
-                final String password = parameters[1].split("=", 2)[1];
+            // 로그인 success/fail
+            if ("/login".equals(path) && method.equals("POST")) {
+                final String[] parameters = body.split("&");
+                String account = parameters[0].split("=")[1];
+                String password = parameters[1].split("=")[1];
 
                 if(InMemoryUserRepository.findByAccount(account).filter(user -> user.checkPassword(password)).isPresent()) {
                     final String responseHeader = String.join("\r\n",
@@ -95,9 +124,35 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (!path.equals("/")) {
-                final String resourcePath = "/login".equals(path) ? "/login.html" : path;
+            // 회원가입 처리
+            if ("/register".equals(path) && method.equals("POST")) {
+                String[] parameters = body.split("&");
+                String account = parameters[0].split("=")[1];
+                String email = URLDecoder.decode(parameters[1].split("=")[1], StandardCharsets.UTF_8);
+                String password = parameters[2].split("=")[1];
+                InMemoryUserRepository.save(new User(account, password, email));
 
+                final String responseHeader = String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: /index.html",
+                        "Content-Length: 0",
+                        "",
+                        "");
+
+                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
+            // login 페이지 반환 및 이외
+            if (!path.equals("/")) {
+                String resourcePath = path;
+                if(path.equals("/login")) {
+                    resourcePath = "/login.html";
+                }
+                if(path.equals("/register")) {
+                    resourcePath = "/register.html";
+                }
                 try (final InputStream resourceStream = getClass()
                         .getClassLoader()
                         .getResourceAsStream("static" + resourcePath)) {

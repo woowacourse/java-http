@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
                 response = buildRedirectResponse("/index.html");
             } else if ("POST".equals(requestMethod) && "/login".equals(path)) {
                 if (isLoginSuccess(requestParams)) {
-                    response = buildRedirectResponse("/index.html");
+                    response = buildRedirectResponseWithCookie("/index.html", UUID.randomUUID().toString());
                 } else {
                     response = buildRedirectResponse("/401.html");
                 }
@@ -192,6 +193,15 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Location: " + location,
+                "",
+                "");
+    }
+
+    private String buildRedirectResponseWithCookie(final String location, final String sessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Set-Cookie: JSESSIONID=" + sessionId,
                 "",
                 "");
     }

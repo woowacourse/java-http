@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -231,6 +233,162 @@ class Http11ProcessorTest {
         final Optional<User> saved = InMemoryUserRepository.findByAccount("decoded");
         assertThat(saved).isPresent();
         assertThat(saved.get().toString()).contains("hkkang@woowahan.com");
+    }
+
+    @Test
+    void loginStoresUserInSession() {
+        // given
+        final String httpRequest = postRequest("/login", "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String sessionId = extractJSessionId(socket.output());
+        final Session session = SessionManager.INSTANCE.findSession(sessionId);
+
+        assertThat(session).isNotNull();
+        assertThat((User) session.getAttribute("user"))
+                .isNotNull()
+                .extracting(User::getAccount)
+                .isEqualTo("gugu");
+    }
+
+    @Test
+    void loginFailDoesNotCreateSession() {
+        // given
+        final String httpRequest = postRequest("/login", "account=gugu&password=wrong");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void loggedInUserIsRedirectedFromLoginPage() {
+        // given
+        final String sessionId = extractJSessionId(
+                processAndGetOutput(postRequest("/login", "account=gugu&password=password")));
+
+        final String httpRequest = getRequestWithCookie("/login", "JSESSIONID=" + sessionId);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found\r\n" +
+                "Location: /index.html\r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loggedInUserIsFoundAmongOtherCookies() {
+        // given
+        final String sessionId = extractJSessionId(
+                processAndGetOutput(postRequest("/login", "account=gugu&password=password")));
+
+        final String httpRequest = getRequestWithCookie(
+                "/login", "yummy_cookie=choco; JSESSIONID=" + sessionId + "; tasty_cookie=strawberry");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+    }
+
+    @Test
+    void unknownSessionIdSeesLoginPage() throws IOException {
+        // given
+        final String httpRequest = getRequestWithCookie(
+                "/login", "JSESSIONID=" + UUID.randomUUID());
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/login.html", "text/html"));
+    }
+
+    @Test
+    void cookieWithoutJSessionIdSeesLoginPage() throws IOException {
+        // given
+        final String httpRequest = getRequestWithCookie(
+                "/login", "yummy_cookie=choco; tasty_cookie=strawberry");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/login.html", "text/html"));
+    }
+
+    @Test
+    void sessionWithoutUserSeesLoginPage() throws IOException {
+        // given
+        final Session emptySession = new Session(UUID.randomUUID().toString());
+        SessionManager.INSTANCE.add(emptySession);
+
+        final String httpRequest = getRequestWithCookie("/login", "JSESSIONID=" + emptySession.getId());
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/login.html", "text/html"));
+    }
+
+    @Test
+    void loggedInUserStillSeesOtherPages() throws IOException {
+        // given
+        final String sessionId = extractJSessionId(
+                processAndGetOutput(postRequest("/login", "account=gugu&password=password")));
+
+        final String httpRequest = getRequestWithCookie("/register", "JSESSIONID=" + sessionId);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/register.html", "text/html"));
+    }
+
+    private String getRequestWithCookie(final String path, final String cookie) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: " + cookie + " ",
+                "",
+                "");
     }
 
     private String processAndGetOutput(final String httpRequest) {

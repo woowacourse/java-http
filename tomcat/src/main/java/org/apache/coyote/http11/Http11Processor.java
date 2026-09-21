@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,11 +85,17 @@ public class Http11Processor implements Runnable, Processor {
                 register(requestParams);
                 response = buildRedirectResponse("/index.html");
             } else if ("POST".equals(requestMethod) && "/login".equals(path)) {
-                if (isLoginSuccess(requestParams)) {
-                    response = buildRedirectResponseWithCookie("/index.html", UUID.randomUUID().toString());
+                final Optional<User> user = findLoginUser(requestParams);
+                if (user.isPresent()) {
+                    final Session session = new Session(UUID.randomUUID().toString());
+                    session.setAttribute("user", user.get());
+                    SessionManager.INSTANCE.add(session);
+                    response = buildRedirectResponseWithCookie("/index.html", session.getId());
                 } else {
                     response = buildRedirectResponse("/401.html");
                 }
+            } else if ("GET".equals(requestMethod) && "/login".equals(path) && isLoggedIn(httpRequestHeaders)) {
+                response = buildRedirectResponse("/index.html");
             } else if ("/".equals(path)) {
                 response = buildOkResponse("text/html", "Hello world!");
             } else {
@@ -143,19 +151,38 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
     }
 
-    private boolean isLoginSuccess(final Map<String, String> queryParams) {
+    private Optional<User> findLoginUser(final Map<String, String> queryParams) {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
 
         if (account == null) {
-            return false;
+            return Optional.empty();
         }
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account)
                 .filter(u -> u.checkPassword(password));
         user.ifPresent(u -> log.info("로그인 성공! user: {}", u));
 
-        return user.isPresent();
+        return user;
+    }
+
+    private boolean isLoggedIn(final Map<String, String> httpRequestHeaders) {
+        final HttpCookie cookie = new HttpCookie(httpRequestHeaders.get("Cookie"));
+        final String sessionId = cookie.get("JSESSIONID");
+
+        if (sessionId == null) {
+            return false;
+        }
+
+        final Session session = SessionManager.INSTANCE.findSession(sessionId);
+
+        if (session == null) {
+            return false;
+        } else if (session.getAttribute("user") == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private String readStaticFile(final String path) throws URISyntaxException, IOException {

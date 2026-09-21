@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +11,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +36,22 @@ public class Http11Processor implements Runnable, Processor {
 
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            final var reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String readLine = bufferedReader.readLine();
+            String readLine = reader.readLine();
             if (readLine == null) {
                 return;
             }
 
-            String[] requestHeader = readLine.split(" ");
-            String path = requestHeader[1];
+            String[] requestParts = readLine.split(" ", 3);
+            String method = requestParts[0];
+            String target = requestParts[1];
 
-            final String response = handleRequest(path);
+            Map<String, String> headers = readHeaders(reader);
+            String body = readBody(reader, headers);
+
+            final String response = handleRequest(method, target, body);
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -55,23 +59,115 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(String path) throws IOException {
-        String resourcePath = extractResourcePath(path);
-        String queryString = extractQueryString(path);
+    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
 
-        if (resourcePath.equals("/login") && !queryString.isBlank()) {
-            return handleLoginRequest(path);
+        char[] body = new char[contentLength];
+        int current = 0;
+
+        while (current < contentLength) {
+            int read = reader.read(body, current, contentLength - current);
+
+            if (read == -1) {
+                throw new IOException("요청 body가 예상된 값보다 짧습니다.");
+            }
+
+            current += read;
         }
 
-        return serveStaticResource(resourcePath);
+        return new String(body);
     }
 
-    private String handleLoginRequest(String path) {
-        String queryString = extractQueryString(path);
-        Map<String, String> queryParams = parseQueryParams(queryString);
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
 
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            int colonIndex = line.indexOf(":");
+
+            if (colonIndex == -1) {
+                continue;
+            }
+
+            String name = line.substring(0, colonIndex)
+                    .trim()
+                    .toLowerCase();
+
+            String value = line.substring(colonIndex + 1).trim();
+
+            headers.put(name, value);
+        }
+
+        return headers;
+    }
+
+    private String handleRequest(String method, String target, String body) throws IOException {
+        String resourcePath = extractResourcePath(target);
+
+        if ("GET".equals(method)) {
+            return serveStaticResource(resourcePath);
+        }
+
+        if ("POST".equals(method)) {
+            Map<String, String> formData = parseFormData(body);
+
+            if (resourcePath.equals("/register")) {
+                return handleRegister(formData);
+            }
+
+            if (resourcePath.equals("/login")) {
+                return handleLogin(formData);
+            }
+        }
+
+        return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+    }
+
+    private Map<String, String> parseFormData(String body) {
+        Map<String, String> formData = new HashMap<>();
+
+        if (body == null || body.isBlank()) {
+            return formData;
+        }
+
+        String[] parameters = body.split("&");
+
+        for (String parameter : parameters) {
+            String[] values = parameter.split("=", 2);
+
+            if (values.length != 2) {
+                continue;
+            }
+
+            String key = java.net.URLDecoder.decode(values[0], StandardCharsets.UTF_8);
+            String value = java.net.URLDecoder.decode(values[1], StandardCharsets.UTF_8);
+
+            formData.put(key, value);
+        }
+
+        return formData;
+    }
+
+    private String handleRegister(Map<String, String> formData) {
+        String account = formData.get("account");
+        String email = formData.get("email");
+        String password = formData.get("password");
+
+        if (account == null || account.isBlank()
+                || email == null || email.isBlank()
+                || password == null || password.isBlank()) {
+            return emptyResponse("HTTP/1.1 400 Bad Request");
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        return redirect("/index.html");
+    }
+
+    private String handleLogin(Map<String, String> formData) {
+        String account = formData.get("account");
+        String password = formData.get("password");
+
         boolean authenticated = authenticate(account, password);
 
         if (!authenticated) {
@@ -121,22 +217,6 @@ public class Http11Processor implements Runnable, Processor {
         return response;
     }
 
-    @Nonnull
-    private static Map<String, String> parseQueryParams(String queryString) {
-        Map<String, String> queryParams = new HashMap<>();
-
-        String[] params = queryString.split("&");
-        for (String param : params) {
-            String[] values = param.split("=");
-
-            if (values.length == 2) {
-                queryParams.put(values[0], values[1]);
-            }
-        }
-
-        return queryParams;
-    }
-
     private String resolveContentType(String resourcePath) {
         if (resourcePath.endsWith(".css")) {
             return "text/css;charset=utf-8";
@@ -154,7 +234,7 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
-        if (resourcePath.equals("/login")) {
+        if (resourcePath.equals("/login") || resourcePath.equals("/register")) {
             return readResource("static" + resourcePath + ".html");
         }
 
@@ -170,15 +250,6 @@ public class Http11Processor implements Runnable, Processor {
         return path.substring(0, index);
     }
 
-    private String extractQueryString(String path) {
-        int index = path.indexOf("?");
-        if (index == -1) {
-            return "";
-        }
-
-        return path.substring(index + 1);
-    }
-
     private byte[] readResource(String resourcePath) throws IOException {
         try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
@@ -187,5 +258,14 @@ public class Http11Processor implements Runnable, Processor {
 
             return resourceStream.readAllBytes();
         }
+    }
+
+    private String emptyResponse(String statusLine) {
+        return String.join("\r\n",
+                statusLine,
+                "Content-Length: 0",
+                "",
+                ""
+        );
     }
 }

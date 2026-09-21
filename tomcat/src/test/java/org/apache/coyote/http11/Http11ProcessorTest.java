@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -39,7 +40,7 @@ class Http11ProcessorTest {
                 "",
                 "Hello world!");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertResponseIgnoringSetCookie(socket.output(), expected);
     }
 
     @Test
@@ -66,7 +67,7 @@ class Http11ProcessorTest {
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertResponseIgnoringSetCookie(socket.output(), expected);
     }
 
     @Test
@@ -105,7 +106,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).isEqualTo(
+        assertResponseIgnoringSetCookie(socket.output(),
                 "HTTP/1.1 302 Found\r\n"
                         + "Location: /index.html\r\n"
                         + "Content-Length: 0\r\n\r\n");
@@ -118,7 +119,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).isEqualTo(
+        assertResponseIgnoringSetCookie(socket.output(),
                 "HTTP/1.1 302 Found\r\n"
                         + "Location: /401.html\r\n"
                         + "Content-Length: 0\r\n\r\n");
@@ -143,7 +144,7 @@ class Http11ProcessorTest {
                             + "\r\n"
                             + new String(expectedBody, StandardCharsets.UTF_8);
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertResponseIgnoringSetCookie(socket.output(), expected);
         }
     }
 
@@ -236,6 +237,91 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEmpty();
     }
 
+    @Test
+    void issuesCookieWhenSessionIdIsMissing() {
+        for (String cookie : List.of(
+                "",
+                "theme=dark",
+                "JSESSIONID_OTHER=abc123",
+                "JSESSIONID="
+        )) {
+            final String response = getLoginResponse(cookie);
+
+            assertNewSessionCookie(response);
+        }
+    }
+
+    @Test
+    void doesNotReissueExistingSessionCookie() {
+        final String response = getLoginResponse(
+                "theme=dark; JSESSIONID=abc123; language=ko"
+        );
+
+        assertThat(responseHeaders(response))
+                .noneMatch(header -> header.startsWith("Set-Cookie:"));
+    }
+
+    @Test
+    void issuesCookieOnRedirect() {
+        final var socket = new StubSocket(
+                postLoginRequest("account=gugu&password=password")
+        );
+
+        assertRedirect(socket, "/index.html");
+        assertNewSessionCookie(socket.output());
+    }
+
+    @Test
+    void issuesDifferentIdsForSeparateRequestsWithoutCookies() {
+        final String firstId = assertNewSessionCookie(getLoginResponse(""));
+        final String secondId = assertNewSessionCookie(getLoginResponse(""));
+
+        assertThat(firstId).isNotEqualTo(secondId);
+    }
+
+    private String getLoginResponse(String cookie) {
+        final String cookieHeader = cookie.isEmpty() ? "" : "Cookie: " + cookie + "\r\n";
+        final var socket = new StubSocket(
+                "GET /login HTTP/1.1\r\nHost: localhost\r\n" + cookieHeader + "\r\n"
+        );
+
+        new Http11Processor(socket).process(socket);
+        return socket.output();
+    }
+
+    private String assertNewSessionCookie(String response) {
+        final List<String> cookies = responseHeaders(response).stream()
+                .filter(header -> header.startsWith("Set-Cookie:"))
+                .toList();
+
+        assertThat(cookies).hasSize(1);
+
+        final String cookie = cookies.get(0);
+        final String prefix = "Set-Cookie: JSESSIONID=";
+        final String suffix = "; Path=/";
+        assertThat(cookie).startsWith(prefix).endsWith(suffix);
+
+        final String id = cookie.substring(prefix.length(), cookie.length() - suffix.length());
+        assertThat(UUID.fromString(id).toString()).isEqualTo(id);
+        return id;
+    }
+
+    private List<String> responseHeaders(String response) {
+        final String[] parts = response.split("\r\n\r\n", 2);
+        assertThat(parts).hasSize(2);
+        return List.of(parts[0].split("\r\n"));
+    }
+
+    private void assertResponseIgnoringSetCookie(String actual, String expected) {
+        final List<String> headers = responseHeaders(actual).stream()
+                .filter(header -> !header.startsWith("Set-Cookie:"))
+                .toList();
+        final String body = actual.split("\r\n\r\n", 2)[1];
+
+        assertThat(String.join("\r\n", headers) + "\r\n\r\n" + body)
+                .isEqualTo(expected);
+    }
+
     private String postLoginRequest(String body) {
         return postRequest("/login", body);
     }
@@ -253,7 +339,7 @@ class Http11ProcessorTest {
     private void assertRedirect(StubSocket socket, String location) {
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).isEqualTo(
+        assertResponseIgnoringSetCookie(socket.output(),
                 "HTTP/1.1 302 Found\r\n"
                         + "Location: " + location + "\r\n"
                         + "Content-Length: 0\r\n\r\n");

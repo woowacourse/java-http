@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +23,6 @@ import java.util.stream.Collectors;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int REQUEST_LINE_PART_COUNT = 3;
-    private static final int REQUEST_TARGET_INDEX = 1;
     private static final int QUERY_PARAMETER_PART_COUNT = 2;
     private static final String LOGIN_PATH = "/login";
     private static final String INDEX_PATH = "/index.html";
@@ -56,17 +53,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final URI requestUri;
+            final Optional<HttpRequest> parsedRequest;
             try {
-                requestUri = readRequestUri(reader);
+                parsedRequest = HttpRequest.readFrom(reader);
             } catch (IOException e) {
                 log.warn("Failed to read HTTP request", e);
                 return;
             }
-            if (requestUri == null) {
+            if (parsedRequest.isEmpty()) {
                 return;
             }
 
+            final var request = parsedRequest.get();
+            final var requestUri = request.uri();
             final String path = requestUri.getPath();
             if (path == null) {
                 return;
@@ -81,37 +80,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error("Failed to handle HTTP connection", e);
         }
-    }
-
-    private URI readRequestUri(final BufferedReader reader) throws IOException {
-        final var requestLine = reader.readLine();
-        if (requestLine == null) {
-            return null;
-        }
-
-        final var requestParts = requestLine.split(" ");
-        if (requestParts.length != REQUEST_LINE_PART_COUNT) {
-            return null;
-        }
-        if (!skipHeaders(reader)) {
-            return null;
-        }
-        try {
-            return URI.create(requestParts[REQUEST_TARGET_INDEX]);
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid HTTP request target");
-            return null;
-        }
-    }
-
-    private boolean skipHeaders(final BufferedReader reader) throws IOException {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.isEmpty()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private Optional<User> findLoginUser(final String queryString) {

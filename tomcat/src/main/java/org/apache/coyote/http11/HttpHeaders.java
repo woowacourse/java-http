@@ -18,8 +18,12 @@ final class HttpHeaders implements Iterable<HttpHeader> {
     }
 
     HttpHeaders add(final String name, final String value) {
+        return add(new HttpHeader(name, value));
+    }
+
+    HttpHeaders add(final HttpHeader header) {
         final var added = new ArrayList<>(values);
-        added.add(new HttpHeader(name, value));
+        added.add(header);
         return new HttpHeaders(added);
     }
 

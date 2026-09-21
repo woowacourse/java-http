@@ -266,6 +266,21 @@ class Http11ProcessorTest {
         }
 
         @Test
+        @DisplayName("이름과 값으로 구성되지 않은 헤더가 있으면 응답하지 않는다")
+        void malformedHeaderIsRejected() {
+            // given
+            final var socket = new StubSocket(
+                    "GET /index.html HTTP/1.1\r\nContent-Length 80\r\n\r\n");
+            final var processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output()).isEmpty();
+        }
+
+        @Test
         @DisplayName("잘못된 URI 형식의 요청 대상에는 응답하지 않는다")
         void invalidRequestTargetIsRejected() {
             // given

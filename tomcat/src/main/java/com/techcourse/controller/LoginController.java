@@ -21,7 +21,6 @@ public class LoginController extends AbstractController {
         this.sessionManager = sessionManager;
     }
 
-
     @Override
     protected String doGet(HttpRequest request, HttpResponse response) throws IOException {
         Session session = sessionManager.findSession(request.getCookie("JSESSIONID"));

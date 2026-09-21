@@ -79,13 +79,16 @@ public class Http11Processor implements Runnable, Processor {
                     queryParameters.put(keyAndValue[0], keyAndValue[1]);
                 }
 
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
-                if (user.isEmpty()) {
-                    throw new NoSuchElementException("존재하지 않는 사용자입니다.");
-                }
-                User foundUser = user.get();
-                if (foundUser.checkPassword(queryParameters.get("password"))) {
-                    log.info("user : {}", foundUser);
+                if(requestUri.contains("/login")){
+                    Optional<User> user = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
+                    if (user.isEmpty()) {
+                        throw new NoSuchElementException("존재하지 않는 사용자입니다.");
+                    }
+
+                    User foundUser = user.get();
+                    if (foundUser.checkPassword(queryParameters.get("password"))) {
+                        log.info("user : {}", foundUser);
+                    }
                 }
             }
 

@@ -16,6 +16,10 @@ public class RequestLine {
         httpVersion = HttpVersion.from(params[2]);
     }
 
+    public boolean hasSamePath(String path) {
+        return httpPath.startsWith(path);
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

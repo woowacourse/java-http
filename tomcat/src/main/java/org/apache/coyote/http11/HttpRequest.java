@@ -62,6 +62,10 @@ public class HttpRequest {
         throw new IOException("Content-Length는 음수일 수 없습니다.");
     }
 
+    public boolean hasSamePath(String path) {
+        return requestLine.getHttpPath().startsWith(path);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

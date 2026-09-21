@@ -12,8 +12,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -59,21 +58,51 @@ public class Http11Processor implements Runnable, Processor {
             // 요청 경로 읽는 부분
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String requestFirstLine = bufferedReader.readLine();
-            String[] firstLineParts = requestFirstLine.trim().split("\\s+");
 
-            String method = firstLineParts[0];
-            String requestTarget = firstLineParts[1];
+            // 요청줄 읽기
+            String requestStartLine = bufferedReader.readLine();
+            String[] startLineParts = requestStartLine.trim().split("\\s+");
+
+            String method = startLineParts[0];
+            String requestTarget = startLineParts[1];
+
+            // 요청 헤더 읽기
+            String line;
+            int contentLength = 0;
+            boolean hasJsessionId = false;
+            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
+                }
+                if (line.startsWith("Cookie:")) {
+                    String cookieHeader = line.substring("Cookie:".length()).trim();
+                    String[] cookies = cookieHeader.trim().split(";");
+                    for (String cookie : cookies) {
+                        String[] parts = cookie.trim().split("=", 2);
+                        if ("JSESSIONID".equals(parts[0])) {
+                            hasJsessionId = true;
+                        }
+                    }
+                }
+            }
+
+            // 응답 헤더
+            Map<String, String> responseHeaders = new LinkedHashMap<>();
+            if (!hasJsessionId) {
+                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID() + "; Path=/");
+            }
 
             URI uri = URI.create(requestTarget);
             String uriPath = uri.getPath();
 
             // 요청 경로 없을 경우 문자열 반환
             if ("/".equals(uriPath)) {
-                final var responseBody = "Hello world!";
-                final var response = createResponse("HTTP/1.1 200 OK ", responseBody, "text/html");
+                String responseBody = "Hello world!";
+                responseHeaders.put("Content-Type", "text/html;charset=utf-8");
+                responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
 
-                writeResponse(outputStream, response);
+                String response = createResponse(responseHeaders, "HTTP/1.1 200 OK ", responseBody);
+                sendResponse(outputStream, response);
             } else if ("/login".equals(uriPath)) {
                 String rawQuery = uri.getRawQuery();
 
@@ -89,14 +118,22 @@ public class Http11Processor implements Runnable, Processor {
                             .ifPresentOrElse(
                                     user -> {
                                         try {
-                                            sendRedirectResponse("/index.html", outputStream);
+                                            String sessionId = UUID.randomUUID().toString();
+                                            responseHeaders.put("Location", "/index.html");
+                                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+                                            responseHeaders.put("Content-Length", "0");
+                                            String response = createResponse(responseHeaders, "HTTP/1.1 302 Found", null);
+                                            sendResponse(outputStream, response);
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
                                     },
                                     () -> {
                                         try {
-                                            sendErrorResponse("/401.html", outputStream);
+                                            responseHeaders.put("Location", "/401.html");
+                                            responseHeaders.put("Content-Length", "0");
+                                            String response = createResponse(responseHeaders, "HTTP/1.1 302 Found", null);
+                                            sendResponse(outputStream, response);
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
@@ -107,28 +144,53 @@ public class Http11Processor implements Runnable, Processor {
 
                 // 이경우 그냥 login.html 보여주기
                 String loginPath = uriPath + ".html";
-                InputStream resourceAsStream = getResourceInputStream(loginPath, outputStream);
-                sendResponse(resourceAsStream, "text/html", outputStream);
+                InputStream resourceAsStream = getResourceInputStream(responseHeaders, loginPath, outputStream);
+                if (resourceAsStream == null) {
+                    return;
+                }
+                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
+                    String responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
+                    responseHeaders.put("Content-Type", "text/html" + ";charset=utf-8");
+                    responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+                    String response = createResponse(responseHeaders, "HTTP/1.1 200 OK ", responseBody);
+                    sendResponse(outputStream, response);
+                }
             } else if ("/register".equals(uriPath)) {
                 if ("GET".equals(method)) {
                     String registerFileName = uriPath + ".html";
-                    InputStream resourceAsStream = getResourceInputStream(registerFileName, outputStream);
-                    sendResponse(resourceAsStream, "text/html", outputStream);
+                    InputStream resourceAsStream = getResourceInputStream(responseHeaders, registerFileName, outputStream);
+                    if (resourceAsStream == null) {
+                        return;
+                    }
+                    try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
+                        String responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
+                        responseHeaders.put("Content-Type", "text/html" + ";charset=utf-8");
+                        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+                        String response = createResponse(responseHeaders, "HTTP/1.1 200 OK ", responseBody);
+                        sendResponse(outputStream, response);
+                    }
                     return;
                 }
-                int contentLength = getContentLength(bufferedReader);
                 String requestBody = getRequestBody(contentLength, bufferedReader);
                 Map<String, String> bodyParameters = parseQueryParameters(requestBody);
                 saveUser(bodyParameters);
 
                 try {
-                    sendRedirectResponse("/index.html", outputStream);
+                    String sessionId = UUID.randomUUID().toString();
+                    responseHeaders.put("Location", "/index.html");
+                    responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+                    responseHeaders.put("Content-Length", "0");
+                    String response = createResponse(responseHeaders, "HTTP/1.1 302 Found", null);
+                    sendResponse(outputStream, response);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             } else {
                 // 클래스 로더에서 정적 파일 가져오기
-                InputStream resourceAsStream = getResourceInputStream(uriPath, outputStream);
+                InputStream resourceAsStream = getResourceInputStream(responseHeaders, uriPath, outputStream);
+                if (resourceAsStream == null) {
+                    return;
+                }
 
                 // 확장자에 맞는 content-type 추출
                 int pointIndex = uriPath.lastIndexOf('.');
@@ -136,7 +198,13 @@ public class Http11Processor implements Runnable, Processor {
                 String contentType = MIME_TYPES.get(fileExtension);
 
                 // 정적 파일 반환
-                sendResponse(resourceAsStream, contentType, outputStream);
+                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
+                    String responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
+                    responseHeaders.put("Content-Type", contentType + ";charset=utf-8");
+                    responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+                    String response = createResponse(responseHeaders, "HTTP/1.1 200 OK ", responseBody);
+                    sendResponse(outputStream, response);
+                }
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -160,60 +228,18 @@ public class Http11Processor implements Runnable, Processor {
             }
             totalRead += count;
         }
-        String requestBody = new String(requestBodyChars, 0, totalRead);
-        return requestBody;
+        return new String(requestBodyChars, 0, totalRead);
     }
 
-    private static int getContentLength(BufferedReader bufferedReader) throws IOException {
-        String line;
-        int contentLength = 0;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            if (line.startsWith("Content-Length: ")) {
-                contentLength = Integer.parseInt(line.substring("Content-Length: ".length()).trim());
-            }
-        }
-        return contentLength;
-    }
-
-    private void sendRedirectResponse(String fileName, OutputStream outputStream) throws IOException {
-        String response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + fileName,
-                "Content-Length: 0",
-                "", ""
-        );
-        writeResponse(outputStream, response);
-    }
-
-    private void sendErrorResponse(String fileName, OutputStream outputStream) throws IOException {
-        String response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + fileName,
-                "Content-Length: 0",
-                "", ""
-        );
-        writeResponse(outputStream, response);
-    }
-
-    private static void sendResponse(InputStream resourceAsStream, String contentType, OutputStream outputStream) throws IOException {
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
-            final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-            final var response = createResponse("HTTP/1.1 200 OK ", responseBody, contentType);
-            writeResponse(outputStream, response);
-        }
-    }
-
-    private InputStream getResourceInputStream(String uriPath, OutputStream outputStream) throws IOException {
+    private InputStream getResourceInputStream(Map<String, String> responseHeaders, String uriPath, OutputStream outputStream) throws IOException {
         InputStream resourceAsStream = getClass()
                 .getClassLoader()
                 .getResourceAsStream("static" + uriPath);
 
         if (resourceAsStream == null) {
-            String response = createResponse(
-                    "HTTP/1.1 404 Not Found",
-                    "Not Found",
-                    "text/plain");
-            writeResponse(outputStream, response);
+            responseHeaders.put("Content-Type", "text/plain;charset=utf-8");
+            String response = createResponse(responseHeaders, "HTTP/1.1 404 Not Found", "Not Found");
+            sendResponse(outputStream, response);
             return null;
         }
         return resourceAsStream;
@@ -228,16 +254,23 @@ public class Http11Processor implements Runnable, Processor {
                 ));
     }
 
-    private static String createResponse(String statusLine, String responseBody, String contentType) {
-        return String.join("\r\n",
-                statusLine,
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
+    private static String createResponse(Map<String, String> responseHeaders, String statusLine, String responseBody) {
+        StringBuilder response = new StringBuilder();
+        response.append(statusLine).append("\r\n");
+        responseHeaders.forEach((key, value) ->
+                response.append(key)
+                        .append(": ")
+                        .append(value)
+                        .append("\r\n"));
+
+        response.append("\r\n");
+        if (responseBody != null) {
+            response.append(responseBody);
+        }
+        return response.toString();
     }
 
-    private static void writeResponse(OutputStream outputStream, String response) throws IOException {
+    private static void sendResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }

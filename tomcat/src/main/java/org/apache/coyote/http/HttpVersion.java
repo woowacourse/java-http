@@ -18,4 +18,8 @@ public enum HttpVersion {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 버전입니다: " + source));
     }
+
+    public String getValue() {
+        return value;
+    }
 }

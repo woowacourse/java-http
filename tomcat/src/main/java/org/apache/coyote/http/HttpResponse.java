@@ -8,12 +8,14 @@ public class HttpResponse {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    private final HttpStatus status;
+    private static final HttpVersion DEFAULT_VERSION = HttpVersion.HTTP_1_1;
+
+    private final StatusLine statusLine;
     private final HttpHeaders headers;
     private final ResponseBody body;
 
     private HttpResponse(HttpStatus status, Map<String, String> headers, ResponseBody body) {
-        this.status = status;
+        this.statusLine = StatusLine.of(DEFAULT_VERSION, status);
         this.headers = HttpHeaders.from(withContentHeaders(headers, body));
         this.body = body;
     }
@@ -46,8 +48,8 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpStatus status() {
-        return status;
+    public StatusLine statusLine() {
+        return statusLine;
     }
 
     public HttpHeaders headers() {

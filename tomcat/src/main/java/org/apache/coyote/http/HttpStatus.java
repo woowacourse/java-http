@@ -8,14 +8,18 @@ public enum HttpStatus {
     NOT_FOUND(404, "Not Found");
 
     private final int code;
-    private final String reason;
+    private final String message;
 
-    HttpStatus(int code, String reason) {
+    HttpStatus(int code, String message) {
         this.code = code;
-        this.reason = reason;
+        this.message = message;
     }
 
-    public String statusLine() {
-        return "HTTP/1.1 " + code + " " + reason;
+    public int code() {
+        return code;
+    }
+
+    public String message() {
+        return message;
     }
 }

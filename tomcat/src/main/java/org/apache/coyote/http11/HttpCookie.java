@@ -23,7 +23,7 @@ public class HttpCookie {
         final Map<String, String> cookies = new HashMap<>();
 
         for (final String cookie : cookieHeader.split(COOKIE_PARTS_SEPARATOR)) {
-            final String[] cookieKeyValue = cookie.trim().split(COOKIE_SEPARATOR);
+            final String[] cookieKeyValue = cookie.trim().split(COOKIE_SEPARATOR, 2);
 
             validateCookie(cookieKeyValue, cookie);
 

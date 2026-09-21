@@ -57,6 +57,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String JSESSION_ID = "JSESSIONID";
     private static final String CRLF = "\r\n";
 
+    private static final String SESSION_USER_ATTRIBUTE = "user";
+
     private final Socket connection;
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -166,8 +168,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (LOGIN_PATH.equals(requestPath) && HttpMethod.GET.equals(method)) {
-            byte[] responseBody = findResourceBody(requestPath).get();
+            if (isLoggedIn(request)) {
+                sendRedirect(outputStream, INDEX_PATH);
+                return;
+            }
 
+            final byte[] responseBody = findResourceBody(requestPath).get();
             writeResponse(
                     outputStream,
                     OK_STATUS_LINE,
@@ -195,14 +201,14 @@ public class Http11Processor implements Runnable, Processor {
             final User user = authenticatedUser.get();
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
 
-            final Session newSession = new Session(UUID.randomUUID().toString());
-            newSession.setAttribute("user", user);
-            sessionManager.add(newSession);
+            final Session session = findSession(request)
+                    .orElseGet(this::createSession);
+            session.setAttribute(SESSION_USER_ATTRIBUTE, user);
 
             sendRedirect(
                     outputStream,
                     INDEX_PATH,
-                    Map.of(SET_COOKIE_HEADER, JSESSION_ID + "=" + newSession.getId())
+                    Map.of(SET_COOKIE_HEADER, JSESSION_ID + "=" + session.getId())
             );
             return;
         }
@@ -225,6 +231,25 @@ public class Http11Processor implements Runnable, Processor {
                 resolveContentType(requestPath),
                 resourceBody.get()
         );
+    }
+
+    private boolean isLoggedIn(final HttpRequest request) {
+        return findSession(request)
+                .map(session -> session.getAttribute(SESSION_USER_ATTRIBUTE))
+                .isPresent();
+    }
+
+    private Optional<Session> findSession(final HttpRequest request) {
+        final HttpCookie cookie = HttpCookie.from(request.headers().getOrDefault("cookie", ""));
+
+        return cookie.getValue(JSESSION_ID)
+                .map(sessionManager::findSession);
+    }
+
+    private Session createSession() {
+        final Session session = new Session(UUID.randomUUID().toString());
+        sessionManager.add(session);
+        return session;
     }
 
     private void sendRedirect(

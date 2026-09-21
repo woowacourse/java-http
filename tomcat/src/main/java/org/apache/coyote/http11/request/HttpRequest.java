@@ -17,6 +17,7 @@ public class HttpRequest {
     private final String version;
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
+
     private HttpRequest(HttpMethod method, String uri, String query, String version,
                         HttpRequestHeader header, HttpRequestBody body) {
         this.method = method;
@@ -94,6 +95,10 @@ public class HttpRequest {
 
     public HttpRequestBody getBody() {
         return body;
+    }
+
+    public String getBodyParameter(String key) {
+        return body.getParameter(key);
     }
 
     public HttpMethod getMethod() {

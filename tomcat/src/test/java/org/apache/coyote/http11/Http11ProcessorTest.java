@@ -82,4 +82,26 @@ class Http11ProcessorTest {
                 .contains("302")
                 .contains("Location: /index.html");
     }
+
+    @Test
+    void login_failure() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=gugu HTTP/1.1",
+                "Connection: keep-alive",
+                "",
+                ""
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("302")
+                .contains("Location: /401.html");
+    }
 }

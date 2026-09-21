@@ -1,12 +1,17 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,20 +33,84 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpRequest httpRequest = HttpRequest.parse(inputStream);
+            String response = handleRequest(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private String handleRequest(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        String requestTarget = httpRequest.getRequestTarget();
+
+        if (requestTarget.equals("/")) {
+            return createResponse("Hello world!", "text/html", "200 OK");
+        }
+        if (httpRequest.isPath("/login")) {
+            handleLogin(httpRequest);
+        }
+
+        String resourcePath = getResourcePath(requestTarget);
+        String contentType = getContentType(requestTarget);
+
+        if (ClassLoader.getSystemResource(resourcePath) == null) {
+            return createResponse(createResponseBody("static/404.html"), "text/html", "404 Not Found");
+        }
+
+        return createResponse(createResponseBody(resourcePath), contentType, "200 OK");
+    }
+
+    private String getResourcePath(String requestTarget) {
+        String resourcePath = "static" + requestTarget;
+        if (requestTarget.equals("/login") || requestTarget.equals("/register")) {
+            resourcePath += ".html";
+        }
+        return resourcePath;
+    }
+
+    private String getContentType(String requestTarget){
+        if(requestTarget.endsWith(".css")){
+            return "text/css";
+        }
+        if(requestTarget.endsWith(".js")){
+            return "text/javascript";
+        }
+        return "text/html";
+    }
+
+    private void handleLogin(HttpRequest httpRequest) {
+        String account = httpRequest.getQueryParameter("account");
+        String password = httpRequest.getQueryParameter("password");
+        if (account == null || password == null) {
+            return;
+        }
+
+        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+        if (user != null && user.checkPassword(password)) {
+            log.info(user.toString());
+        }
+    }
+
+    private String createResponse(String responseBody, String contentType, String status) {
+        String contentTypeHeader = "Content-Type: " + contentType;
+        if (contentType.startsWith("text/")) {
+            contentTypeHeader += ";charset=utf-8";
+        }
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                contentTypeHeader,
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String createResponseBody(String resourcePath) throws URISyntaxException, IOException {
+        final Path path = Path.of(ClassLoader.getSystemResource(resourcePath).toURI());
+        return Files.readString(path);
     }
 }

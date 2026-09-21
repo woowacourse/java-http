@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -42,7 +43,6 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
             final String requestLine = reader.readLine();
 
             if (requestLine == null) {
@@ -53,8 +53,13 @@ public class Http11Processor implements Runnable, Processor {
             final String path = extractPath(uri);
             final Map<String, String> queryParams = extractQueryParams(uri);
 
-            final String resourcePath = resolveResourcePath(path, queryParams);
-            final String responseBody = createResponseBody(path, resourcePath);
+            if ("/login".equals(path) && !queryParams.isEmpty()) {
+                handleLogin(queryParams, outputStream);
+                return;
+            }
+
+            final String responsePath = resolveResourcePath(path);
+            final String responseBody = createResponseBody(path, responsePath);
 
             final String response = createResponse(uri, responseBody);
 
@@ -66,6 +71,28 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void handleLogin(
+            final Map<String, String> queryParams,
+            final OutputStream outputStream
+    ) throws IOException {
+        final String location = resolveLoginRedirect(queryParams);
+        final String response = createRedirectResponse(location);
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private String resolveLoginRedirect(
+            final Map<String, String> queryParams
+    ) {
+        final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(user -> "/index.html")
+                .orElse("/401.html");
     }
 
     private String extractUri(final String requestLine) {
@@ -104,26 +131,12 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private String resolveResourcePath(
-            final String path,
-            final Map<String, String> queryParams
-    ) {
-        if (!"/login".equals(path)) {
-            return path;
+    private String resolveResourcePath(final String path) {
+        if ("/login".equals(path)) {
+            return "/login.html";
         }
 
-        if (!queryParams.isEmpty()) {
-            final String account = queryParams.get("account");
-            final String password = queryParams.get("password");
-
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user ->
-                            log.info("회원 조회 결과: {}", user)
-                    );
-        }
-
-        return "/login.html";
+        return path;
     }
 
     private String createResponseBody(
@@ -176,5 +189,16 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html;charset=utf-8";
+    }
+
+    private String createRedirectResponse(final String location) {
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
     }
 }

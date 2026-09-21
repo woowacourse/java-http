@@ -69,7 +69,7 @@ public class HttpRequest {
     }
 
     public boolean hasSamePath(String path) {
-        return requestLine.getHttpPath().startsWith(path);
+        return requestLine.hasSamePath(path);
     }
 
     public RequestLine getRequestLine() {
@@ -80,8 +80,8 @@ public class HttpRequest {
         return httpHeaders;
     }
 
-    public HttpBody getHttpBody() {
-        return httpBody;
+    public HttpCookie getCookies() {
+        return new HttpCookie(httpHeaders.get("Cookie"));
     }
 
     public Map<String, String> getParameters() {
@@ -95,9 +95,5 @@ public class HttpRequest {
                     URLDecoder.decode(keyToken[1], StandardCharsets.UTF_8));
         }
         return queries;
-    }
-
-    public HttpCookie getCookies() {
-        return new HttpCookie(httpHeaders.get("Cookie"));
     }
 }

@@ -32,7 +32,6 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        log.info("로그인 요청");
         final Map<String, String> queryParams = request.getParameters();
         HttpCookie httpCookie = request.getCookies();
 
@@ -81,7 +80,6 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        log.info("로그인 페이지 접속");
         HttpCookie httpCookie = new HttpCookie(request.getHttpHeaders().get("Cookie"));
 
         if (httpCookie.get(JSESSIONID) != null) {
@@ -98,10 +96,7 @@ public class LoginController extends AbstractController {
             }
         }
 
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200, new ReasonPhrase("OK"));
-
-        FileReader fileReader = new FileReader();
-        final String body = fileReader.readFile("static/login.html");
+        final String body = new FileReader().readFile("static/login.html");
 
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
         response.setHttpBody(new HttpBody(body));

@@ -40,12 +40,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        final String body = new FileReader().readFile("static/register.html");
 
-        FileReader fileReader = new FileReader();
-        final String body = fileReader.readFile("static/register.html");
-
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
-                new ReasonPhrase("OK"));
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
         response.setHttpBody(new HttpBody(body));
         response.write();

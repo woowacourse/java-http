@@ -4,9 +4,6 @@ import java.io.IOException;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.HttpVersion;
-import org.apache.coyote.http11.ReasonPhrase;
 import org.apache.util.FileReader;
 
 public class StyleController extends AbstractController {
@@ -20,11 +17,8 @@ public class StyleController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        FileReader fileReader = new FileReader();
-        final String body = fileReader.readFile("static/css/styles.css");
+        final String body = new FileReader().readFile("static/css/styles.css");
 
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
-                new ReasonPhrase("OK"));
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_CSS);
         response.setHttpBody(new HttpBody(body));
         response.write();

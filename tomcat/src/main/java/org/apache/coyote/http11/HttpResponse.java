@@ -2,13 +2,14 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 
 public class HttpResponse {
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CRLF = "\r\n";
 
     private final OutputStream outputStream;
-    private ResponseLine responseLine;
+    private ResponseLine responseLine = new ResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
+            new ReasonPhrase("OK"));
     private HttpHeaders httpHeaders = new HttpHeaders();
     private HttpBody httpBody = new HttpBody("");
 
@@ -18,7 +19,7 @@ public class HttpResponse {
 
     public void write() throws IOException {
         setContentLength();
-        outputStream.write(buildToResponse().getBytes());
+        outputStream.write(buildResponse().getBytes());
         outputStream.flush();
     }
 
@@ -38,28 +39,23 @@ public class HttpResponse {
         httpHeaders.put(CONTENT_LENGTH, String.valueOf(httpBody.getLength()));
     }
 
-    private String buildToResponse() {
-        if (httpBody == null) {
-            return String.join("\r\n",
-                    responseLine.getHttpVersion().getValue() + " " + responseLine.getHttpStatusCode().getValue() + " "
-                            + responseLine.getReasonPhrase().getValue() + " ",
-                    buildHeaderToResponse(),
-                    "");
-        }
-        return String.join("\r\n",
-                responseLine.getHttpVersion().getValue() + " " + responseLine.getHttpStatusCode().getValue() + " "
-                        + responseLine.getReasonPhrase().getValue() + " ",
-                buildHeaderToResponse(),
-                httpBody.getValue(),
-                "");
-    }
+    private String buildResponse() {
+        StringBuilder response = new StringBuilder();
 
-    private String buildHeaderToResponse() {
-        Map<String, String> headers = httpHeaders.getHeaders();
-        StringBuilder sb = new StringBuilder();
-        for (String key : headers.keySet()) {
-            sb.append(key + ": " + headers.get(key) + " \r\n");
+        response.append(responseLine.getHttpVersion().getValue()).append(' ')
+                .append(responseLine.getHttpStatusCode().getValue()).append(' ')
+                .append(responseLine.getReasonPhrase().getValue())
+                .append(CRLF);
+
+        for (String name : httpHeaders.getHeaders().keySet()) {
+            response.append(name).append(": ")
+                    .append(httpHeaders.getHeaders().get(name))
+                    .append(CRLF);
         }
-        return sb.toString();
+
+        response.append(CRLF);
+        response.append(httpBody.getValue());
+
+        return response.toString();
     }
 }

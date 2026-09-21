@@ -6,6 +6,7 @@ public enum HttpStatus {
     FOUND("302 FOUND"),
 
     UNAUTHORIZED("401 UNAUTHORIZED"),
+    LENGTH_REQUIRED("411 Length Required"),
     ;
 
     private final String status;

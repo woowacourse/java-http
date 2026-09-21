@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,15 @@ public class Http11Processor implements Runnable, Processor {
             Map.entry("text/css", ".css"),
             Map.entry("text/javascript", ".js")
     );
+
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
     private final SessionIdGenerator sessionIdGenerator;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -135,13 +142,8 @@ public class Http11Processor implements Runnable, Processor {
             return buildResponse(HttpStatus.OK, contentType, responseBody);
         }
 
-        if (header.path().contains("login") && header.hasContain("Content-Length")) {
-            String location = loginUser(body);
-            if (location.contains("401")) {
-                return redirectResponse(HttpStatus.FOUND, location);
-            }
-
-            return handleLogin(cookie, location);
+        if (header.path().contains("login")) {
+            return handleLogin(cookie, header, body);
         }
 
         if (header.path().contains("register") && header.hasContain("Content-Length")) {
@@ -179,7 +181,7 @@ public class Http11Processor implements Runnable, Processor {
         return getClass().getClassLoader().getResource(STATIC_ROOT + path + MIME_TYPE.get(contentType));
     }
 
-    private String loginUser(HttpRequestBody body) {
+    private User loginUser(HttpRequestBody body) {
         String[] formData = body.requestBody().split("&");
 
         List<String> data = Arrays.asList(formData);
@@ -190,17 +192,13 @@ public class Http11Processor implements Runnable, Processor {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
 
-        if (user == null) {
-            return "/401.html";
-        }
-
-        if (!user.checkPassword(password)) {
-            return "/401.html";
+        if (user == null || !user.checkPassword(password)) {
+            return null;
         }
 
         log.info("user : {}", user);
 
-        return "/index.html";
+        return user;
     }
 
     private String registerUser(HttpRequestBody body) {
@@ -230,12 +228,23 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String handleLogin(HttpCookie cookie, String location) {
-        if (cookie.hasJSessionId()) {
-            return redirectResponse(HttpStatus.FOUND, location);
+    private String handleLogin(HttpCookie cookie, HttpRequestHeader header, HttpRequestBody body) {
+        if (hasValidSession(cookie)) {
+            return redirectResponse(HttpStatus.FOUND, "/index.html");
         }
 
-        return redirectResponseWithCookie(HttpStatus.FOUND, location);
+        if (!header.hasContain("Content-Length")) {
+            return redirectResponse(HttpStatus.LENGTH_REQUIRED, "");
+        }
+
+        User user = loginUser(body);
+        if (user == null) {
+            return redirectResponse(HttpStatus.FOUND, UNAUTHORIZED_PAGE);
+        }
+
+        String sessionId = sessionIdGenerator.generate();
+        sessionManager.add(new Session(sessionId, "user", user));
+        return redirectResponseWithCookie(HttpStatus.FOUND, INDEX_PAGE, sessionId);
     }
 
     private String redirectResponse(HttpStatus status, String location) {
@@ -247,13 +256,21 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String redirectResponseWithCookie(HttpStatus status, String location) {
+    private String redirectResponseWithCookie(HttpStatus status, String location, String sessionId) {
         return String.join("\r\n",
                 "HTTP/1.1 " + status.status() + " ",
                 "Location: " + location + " ",
-                "Set-Cookie: " + "JSESSIONID=" + sessionIdGenerator.generate() + " ",
+                "Set-Cookie: " + "JSESSIONID=" + sessionId + " ",
                 "",
                 ""
         );
+    }
+
+    private boolean hasValidSession(HttpCookie cookie) {
+        if (!cookie.hasJSessionId()) {
+            return false;
+        }
+
+        return sessionManager.hasUser(cookie.getJSessionId());
     }
 }

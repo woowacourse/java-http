@@ -216,6 +216,58 @@ class Http11ProcessorTest {
         }
 
         @Test
+        @DisplayName("로그인한 사용자가 GET /login을 요청하면 index.html로 리다이렉트한다")
+        void redirectsToIndexWhenLoggedInUserRequestsLoginPage() throws IOException {
+            // given
+            final User loginUser = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
+            final HttpSession session = new Session("logged-in-session-id");
+            session.setAttribute("loginUser", loginUser);
+            manager.add(session);
+
+            final String httpRequest = String.join("\r\n",
+                    "GET /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Cookie: JSESSIONID=logged-in-session-id ",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket, manager);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output())
+                    .contains("HTTP/1.1 302 FOUND")
+                    .contains("Location: /index.html");
+        }
+
+        @Test
+        @DisplayName("JSESSIONID가 있어도 로그인 사용자가 없으면 로그인 페이지를 반환한다")
+        void respondsWithLoginPageWhenSessionHasNoLoginUser() throws IOException {
+            // given
+            final HttpSession session = new Session("anonymous-session-id");
+            manager.add(session);
+
+            final String httpRequest = String.join("\r\n",
+                    "GET /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Cookie: JSESSIONID=anonymous-session-id ",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket, manager);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output())
+                    .contains("HTTP/1.1 200 OK")
+                    .contains("<title>로그인</title>");
+        }
+
+        @Test
         @DisplayName("POST /login 요청의 비밀번호가 일치하지 않으면 401 페이지로 리다이렉트한다")
         void redirectsToUnauthorizedPageWhenPasswordDoesNotMatch() {
             // given

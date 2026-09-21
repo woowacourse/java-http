@@ -93,6 +93,10 @@ public class Http11Processor implements Runnable, Processor {
                     .addHeader("Location", "/index.html");
         }
         if (path.equals("/login") && request.getMethod().equals("GET")) {
+            if (isLoggedIn(request)) {
+                return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
+                        .addHeader("Location", "/index.html");
+            }
             return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView("/login.html"));
         }
         if (path.equals("/login") && request.getMethod().equals("POST")) {
@@ -125,6 +129,11 @@ public class Http11Processor implements Runnable, Processor {
     private Optional<User> authenticate(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
+    }
+
+    private boolean isLoggedIn(final HttpRequest request) {
+        final HttpSession session = request.getSession(false);
+        return session != null && session.getAttribute(LOGIN_USER) != null;
     }
 
     private String getContentType(String path) {

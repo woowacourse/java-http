@@ -51,8 +51,9 @@ public class Http11Processor implements Runnable, Processor {
         if (requestTarget.equals("/")) {
             return createResponse("Hello world!", "text/html", "200 OK");
         }
-        if (httpRequest.isPath("/login")) {
-            handleLogin(httpRequest);
+
+        if (isLoginAttempt(httpRequest)) {
+            return createLoginResponse(httpRequest);
         }
 
         String resourcePath = getResourcePath(requestTarget);
@@ -83,17 +84,46 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private void handleLogin(HttpRequest httpRequest) {
+    private boolean isLoginAttempt(HttpRequest httpRequest) {
         String account = httpRequest.getQueryParameter("account");
         String password = httpRequest.getQueryParameter("password");
-        if (account == null || password == null) {
-            return;
-        }
 
+        if(!httpRequest.isPath("/login")){
+            return false;
+        }
+        return account != null || password != null;
+    }
+
+    private String createLoginResponse(HttpRequest httpRequest) {
+        if (handleLogin(httpRequest)) {
+            return createRedirectResponse("/index.html");
+        }
+        return createRedirectResponse("/401.html");
+    }
+
+    private boolean handleLogin(HttpRequest httpRequest) {
+        String account = httpRequest.getQueryParameter("account");
+        String password = httpRequest.getQueryParameter("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
         User user = InMemoryUserRepository.findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
             log.info(user.toString());
+            return true;
         }
+        return false;
+    }
+
+    private String createRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
     }
 
     private String createResponse(String responseBody, String contentType, String status) {

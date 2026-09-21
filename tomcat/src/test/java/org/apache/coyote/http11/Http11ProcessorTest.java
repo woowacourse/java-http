@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -57,5 +59,27 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login_success() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Connection: keep-alive",
+                "",
+                ""
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("302")
+                .contains("Location: /index.html");
     }
 }

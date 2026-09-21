@@ -65,11 +65,14 @@ class Http11ProcessorTest {
     @Test
     void login_success() {
         // given
+        final String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
                 "Connection: keep-alive",
                 "",
-                ""
+                body
         );
 
         final var socket = new StubSocket(httpRequest);

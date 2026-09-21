@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,8 +102,19 @@ public class Http11Processor implements Runnable, Processor {
             Cookie sessionCookie = cookies.get("JSESSIONID");
             String setCookieHeader = "";
 
-            if (sessionCookie == null) {
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = null;
+
+            if (sessionCookie != null) {
+                session = sessionManager.findSession(sessionCookie.getValue());
+            }
+
+            if (session == null) {
                 String sessionId = UUID.randomUUID().toString();
+
+                session = new Session(sessionId);
+                sessionManager.add(session);
+
                 sessionCookie = new Cookie("JSESSIONID", sessionId);
 
                 setCookieHeader = "Set-Cookie: "
@@ -154,6 +167,16 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (method.equals("GET") && path.equals(LOGIN_PATH)) {
+                User loginUser = (User) session.getAttribute("user");
+
+                if (loginUser != null) {
+                    String response = createRedirectResponse(INDEX_PATH, setCookieHeader);
+
+                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
+                }
+
                 responseBody = readStaticFile("login.html");
             }
 
@@ -170,6 +193,8 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (user.isPresent()) {
                         if (user.get().checkPassword(password)) {
+                            session.setAttribute("user", user.get());
+
                             log.info("로그인 성공 : account={}", user.get().getAccount());
 
                             String response = createRedirectResponse(INDEX_PATH, setCookieHeader);

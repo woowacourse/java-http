@@ -201,6 +201,19 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void registerWithPostReadsBodyDeliveredInMultipleParts() {
+        final var account = "split-request-user";
+        final var requestBody = "account=" + account + "&password=password&email=split-request-user%40woowahan.com";
+        final var socket = new StubSocket(postRequest("/register", requestBody), 1);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).contains("Location: /index.html");
+        assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
+    }
+
+    @Test
     void loggedInUserIsRedirectedToIndexWhenAccessingLoginPage() {
         final var requestBody = "account=gugu&password=password";
         final var loginSocket = new StubSocket(postRequestWithoutSession("/login", requestBody));

@@ -163,8 +163,17 @@ public class Http11Processor implements Runnable, Processor {
     ) throws IOException {
         final var contentLength = Integer.parseInt(requestHeader.header("Content-Length"));
         final var buffer = new char[contentLength];
+        var totalRead = 0;
 
-        reader.read(buffer, 0, contentLength);
+        while (totalRead < contentLength) {
+            final var read = reader.read(buffer, totalRead, contentLength - totalRead);
+
+            if (read == -1) {
+                throw new IOException("Request body ended before Content-Length");
+            }
+
+            totalRead += read;
+        }
 
         return new String(buffer);
     }

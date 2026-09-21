@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -40,6 +41,68 @@ class Http11ProcessorTest {
                 "Content-Length: 12 \r\n",
                 "\r\n" + "Hello world!"
         );
+    }
+
+    @Nested
+    @DisplayName("header section의 끝에는 CRLF가 존재한다")
+    class end_of_the_header_section {
+
+        @Test
+        void message_body가_존재하는_경우() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET / HTTP/1.1",
+                    "Host: localhost:8080",
+                    "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            String output = socket.output();
+            assertThat(output).startsWith("HTTP/1.1 200 OK \r\n");
+            assertThat(output).contains(
+                    "Content-Type: text/html;charset=utf-8 \r\n",
+                    "Content-Length: 12 \r\n"
+            );
+            assertThat(output).endsWith(" \r\n\r\n" + "Hello world!");
+        }
+
+        @Test
+        void message_body가_존재하지_않는_경우() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                    "Connection: keep-alive ",
+                    "Content-Length: 30",
+                    "Content-Type: application/x-www-form-urlencoded",
+                    "Accept: */*",
+                    "\r\n" +
+                            "account=gugu&password=password",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            String output = socket.output();
+            assertThat(output).startsWith("HTTP/1.1 302 Found \r\n");
+            assertThat(output).contains(
+                    "Location: http://localhost:8080/index.html \r\n",
+                    "Content-Type: text/html;charset=utf-8 \r\n",
+                    "Content-Length: 0 \r\n"
+            );
+            assertThat(output).endsWith(" \r\n\r\n");
+        }
     }
 
     @Test

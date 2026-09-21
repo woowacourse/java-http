@@ -82,8 +82,8 @@ public class MyHttpResponse {
                     .append(entry.getValue()).append(" \r\n");
         }
 
+        sb.append("\r\n");
         if (body != null) {
-            sb.append("\r\n");
             sb.append(body);
         }
         return sb.toString();

@@ -1,11 +1,14 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -60,6 +63,11 @@ class Http11ProcessorTest {
 
     @Test
     void login_Success() {
+        String fixedUuid = UUID.fromString("12345678-1234-1234-1234-123456789abc").toString();
+
+        SessionIdGenerator generator = mock(SessionIdGenerator.class);
+        when(generator.generate()).thenReturn(fixedUuid);
+
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -70,16 +78,18 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, generator);
 
         // when
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /index.html " +
-                "\r\n" +
-                "\r\n";
+        var expected = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /index.html ",
+                "Set-Cookie: JSESSIONID=12345678-1234-1234-1234-123456789abc ",
+                "",
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

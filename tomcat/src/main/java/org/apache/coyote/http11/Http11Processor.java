@@ -20,12 +20,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_VALUE = "Hello world!";
 
     private final Socket connection;
-    private final Map<String, RequestHandler> handlers;
+    private final Map<Route, RequestHandler> handlers;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.handlers = Map.of(
-                "/login", new LoginRequestHandler());
+                new Route(HttpMethod.POST, "/login"), new LoginRequestHandler()
+                );
     }
 
     @Override
@@ -64,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(HttpRequest request) {
-        final RequestHandler requestHandler = handlers.get(request.path());
+        final RequestHandler requestHandler = handlers.get(new Route(request.httpMethod(), request.path()));
 
         if (requestHandler == null) {
             return new HttpResponse(request.path(), HttpStatus.OK);

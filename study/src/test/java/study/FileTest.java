@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +30,11 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        final String actual = getClass().getClassLoader()
-                .getResource(fileName)
-                .getPath();
+        final URL resource = Objects.requireNonNull(getClass().getClassLoader()
+                        .getResource(fileName)
+                , "해당 리소스를 사용할 수 없습니다.");
+
+        final String actual = resource.getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -46,7 +49,11 @@ class FileTest {
     void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        URL resource = getClass().getClassLoader().getResource(fileName);
+        URL resource = Objects.requireNonNull(
+                getClass()
+                        .getClassLoader()
+                        .getResource(fileName),
+                "해당 리소스를 사용할 수 없습니다.");
 
         final Path path = new File(resource.getPath()).toPath();
 

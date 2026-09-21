@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -97,14 +98,20 @@ public class Http11Processor implements Runnable, Processor {
                     }
 
                     if (resourceName.endsWith(".css")) {
-                        contentType = "text/css;charset=utf-8";
+                        contentType = "text/css;charset=utf-8 ";
                     }
                     else if (resourceName.endsWith(".html")) {
-                        contentType = "text/html;charset=utf-8";
+                        contentType = "text/html;charset=utf-8 ";
                     }
 
                     log.info(resourceName);
-                    final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
+
+                    final URL resource = Objects.requireNonNull(
+                            getClass().getClassLoader()
+                                    .getResource("static/" + resourceName),
+                            "해당 리소스를 찾을 수 없습니다."
+                    );
+
                     final Path path = new File(resource.getFile()).toPath();
                     responseBody = Files.readAllBytes(path);
                 }

@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final String STATIC_ROOT = "static";
+    private static final String ROOT_PATH = "/";
     private static final String MIME_TYPE_DEFAULT = "text/html";
     private static final String MIME_TYPES_WILDCARD = "*/*";
     private static final Map<String, String> MIME_TYPE = Map.ofEntries(
@@ -48,20 +50,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequestHeader header = extractHeader(inputStream);
-            String contentType = resolveContentType(header);
-            URL url = findStaticResource(header.path(), contentType);
-            final String responseBody = resolveContentOf(url);
-
-            verifyUser(header);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody
-            );
+            HttpRequest request = parseRequest(inputStream);
+            final String response = handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -70,8 +60,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestHeader extractHeader(InputStream inputStream) throws IOException {
+    private HttpRequest parseRequest(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpRequestHeader header = parseRequestHeader(br);
+
+        if (!header.hasContain("Content-Length")) {
+            return new HttpRequest(header, HttpRequestBody.empty());
+        }
+
+        int contentLength = Integer.parseInt(header.header().get("Content-Length"));
+        HttpRequestBody body = parseRequestBody(br, contentLength);
+        return new HttpRequest(header, body);
+    }
+
+    private HttpRequestHeader parseRequestHeader(BufferedReader br) throws IOException {
         Map<String, String> headers = new HashMap<>();
 
         String line = br.readLine();
@@ -89,12 +92,46 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequestHeader(firstLine, headers);
     }
 
-    private URL findStaticResource(String path, String contentType) {
-        if (path.contains(".")) {
-            return getClass().getClassLoader().getResource(STATIC_ROOT + path);
+    private HttpRequestBody parseRequestBody(BufferedReader br, int contentLength) throws IOException {
+        String requestBody;
+
+        char[] buffer = new char[contentLength];
+        int offset = 0;
+        while (offset < contentLength) {
+            int result = br.read(buffer, offset, contentLength - offset);
+            if (result == -1) {
+                break;
+            }
+            offset += result;
+        }
+        requestBody = new String(buffer);
+
+        return new HttpRequestBody(requestBody);
+    }
+
+    private String handle(HttpRequest request) throws IOException {
+        HttpRequestHeader header = request.requestHeader();
+        HttpRequestBody body = request.requestBody();
+
+        String responseBody;
+
+        String contentType = resolveContentType(header);
+        URL url = findStaticResource(header.path(), contentType);
+
+        if (url == null || url.getPath().endsWith(ROOT_PATH)) {
+            responseBody = "Hello world!";
+            return buildResponse(HttpStatus.OK, contentType, responseBody);
         }
 
-        return getClass().getClassLoader().getResource(STATIC_ROOT + path + MIME_TYPE.get(contentType));
+        if (header.path().contains("login") && header.hasContain("Content-Length")) {
+            String location = loginUser(body);
+            return redirectResponse(HttpStatus.FOUND, location);
+        }
+
+        Path path = new File(url.getFile()).toPath();
+        responseBody = Files.readString(path);
+
+        return buildResponse(HttpStatus.OK, contentType, responseBody);
     }
 
     private String resolveContentType(HttpRequestHeader header) {
@@ -113,34 +150,54 @@ public class Http11Processor implements Runnable, Processor {
         return preferred;
     }
 
-    private String resolveContentOf(URL fileUrl) {
-        if (fileUrl == null || fileUrl.getPath().endsWith("/")) {
-            return "Hello world!";
+    private URL findStaticResource(String path, String contentType) {
+        if (path.contains(".")) {
+            return getClass().getClassLoader().getResource(STATIC_ROOT + path);
         }
 
-        try {
-            Path path = new File(fileUrl.getFile()).toPath();
-            return Files.readString(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return getClass().getClassLoader().getResource(STATIC_ROOT + path + MIME_TYPE.get(contentType));
     }
 
-    private void verifyUser(HttpRequestHeader header) {
-        if (!header.firstLine().requestTarget().path().contains("login")) {
-            return;
+    private String loginUser(HttpRequestBody body) {
+        String[] formData = body.requestBody().split("&");
+
+        List<String> data = Arrays.asList(formData);
+
+        String account = data.get(0).split("=")[1];
+        String password = data.get(1).split("=")[1];
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElse(null);
+
+        if (user == null) {
+            return "/401.html";
         }
 
-        List<String> query = header.firstLine().requestTarget().query();
-        String account = query.get(0).split("=")[1];
-        String password = query.get(1).split("=")[1];
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 정보입니다."));
-
         if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("유저 정보가 일치하지 않습니다.");
+            return "/401.html";
         }
 
         log.info("user : {}", user);
+
+        return "/index.html";
+    }
+
+    private static String buildResponse(HttpStatus status, String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status.status() + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+    }
+
+    private String redirectResponse(HttpStatus status, String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status.status() + " ",
+                "Location: " + location + " ",
+                "",
+                ""
+        );
     }
 }

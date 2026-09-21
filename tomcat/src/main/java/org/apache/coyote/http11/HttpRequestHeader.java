@@ -12,4 +12,8 @@ public record HttpRequestHeader(
 
         return firstLine.path();
     }
+
+    public boolean hasContain(String string) {
+        return header.containsKey(string);
+    }
 }

@@ -12,33 +12,59 @@ public class HttpResponse {
     private static final String VERSION = "HTTP/1.1";
     private static final String CRLF = "\r\n";
     private static final String CHARSET = ";charset=utf-8";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
 
-    private final HttpStatus status;
-    private final Map<String, String> headers;
-    private final HttpCookie cookie;
-    private final String body;
-
-    public HttpResponse(HttpStatus status, Map<String, String> headers, String body) {
-        this.status = status;
-        this.headers = new LinkedHashMap<>(headers);
-        this.cookie = HttpCookie.empty();
-        this.body = body;
-    }
+    private final Map<String, String> headers = new LinkedHashMap<>();
+    private HttpCookie cookie = HttpCookie.empty();
+    private HttpStatus status = HttpStatus.OK;
+    private String body = "";
 
     public static HttpResponse of(HttpStatus status, String contentType, String body) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType + CHARSET);
+        HttpResponse response = new HttpResponse();
+        response.setStatus(status);
+        response.setBody(contentType, body);
 
-        return new HttpResponse(status, headers, body);
+        return response;
     }
 
     public static HttpResponse of(HttpStatus status, StaticResource staticResource) {
         return of(status, staticResource.getContentType(), staticResource.getBody());
     }
 
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
+    public void setBody(String contentType, String body) {
+        setHeader(CONTENT_TYPE, contentType + CHARSET);
+        this.body = body;
+    }
+
+    public void setStaticResource(HttpStatus status, StaticResource staticResource) {
+        setStatus(status);
+        setBody(staticResource.getContentType(), staticResource.getBody());
+    }
+
+    public void sendRedirect(String location) {
+        setStatus(HttpStatus.FOUND);
+        setHeader(LOCATION, location);
+    }
+
     public void addCookie(String name, String value) {
         cookie.add(name, value);
+    }
+
+    public void reset() {
+        headers.clear();
+        cookie = HttpCookie.empty();
+        status = HttpStatus.OK;
+        body = "";
     }
 
     public byte[] toBytes() {

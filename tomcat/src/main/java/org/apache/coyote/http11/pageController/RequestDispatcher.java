@@ -31,16 +31,16 @@ public class RequestDispatcher {
         this.defaultController = defaultController;
     }
 
-    public HttpResponse dispatch(HttpRequest request) {
+    public void dispatch(HttpRequest request, HttpResponse response) {
         PageController controller = getPageController(request.getHttpPath());
 
         try {
-            return controller.run(request);
+            controller.service(request, response);
         } catch (BadRequestException e) {
             throw e;
         } catch (IOException | RuntimeException e) {
             log.error(e.getMessage(), e);
-            return internalServerError();
+            internalServerError(response);
         }
     }
 
@@ -48,16 +48,15 @@ public class RequestDispatcher {
         return controllers.getOrDefault(path, defaultController);
     }
 
-    private HttpResponse internalServerError() {
+    private void internalServerError(HttpResponse response) {
+        response.reset();
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+
         try {
-            return HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, STATIC_RESOURCE_LOADER.load(SERVER_ERROR_PAGE));
+            response.setStaticResource(HttpStatus.INTERNAL_SERVER_ERROR, STATIC_RESOURCE_LOADER.load(SERVER_ERROR_PAGE));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return HttpResponse.of(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "text/plain",
-                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()
-            );
+            response.setBody("text/plain", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         }
     }
 }

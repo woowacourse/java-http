@@ -21,30 +21,33 @@ public class LoginController extends AbstractController {
     private final StaticResourceLoader staticResourceLoader = new StaticResourceLoader();
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (isLogIn(httpRequest)) {
-            return redirect(SUCCESS_PAGE);
+            httpResponse.sendRedirect(SUCCESS_PAGE);
+            return;
         }
 
-        return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));
+        httpResponse.setStaticResource(HttpStatus.OK, staticResourceLoader.load(LOGIN_PAGE));
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String account = httpRequest.getBodyParams("account");
         String password = httpRequest.getBodyParams("password");
 
         if (isBlank(account) || isBlank(password)) {
-            return HttpResponse.of(HttpStatus.BAD_REQUEST, staticResourceLoader.load(LOGIN_PAGE));
+            httpResponse.setStaticResource(HttpStatus.BAD_REQUEST, staticResourceLoader.load(LOGIN_PAGE));
+            return;
         }
 
         Optional<User> loginUser = findLoginUser(account, password);
         if (loginUser.isEmpty()) {
-            return redirect(UNAUTHORIZED_PAGE);
+            httpResponse.sendRedirect(UNAUTHORIZED_PAGE);
+            return;
         }
 
         log.info("login user: {}", loginUser.get());
-        return loginAndRedirect(httpRequest, loginUser.get(), SUCCESS_PAGE);
+        loginAndRedirect(httpRequest, httpResponse, loginUser.get(), SUCCESS_PAGE);
     }
 
     private boolean isBlank(String value) {

@@ -44,7 +44,8 @@ class RequestDispatcherTest {
         final RequestDispatcher dispatcher = dispatcherThrowing(new IOException("파일을 읽을 수 없습니다."));
 
         // when
-        final HttpResponse response = dispatcher.dispatch(indexRequest());
+        final HttpResponse response = new HttpResponse();
+        dispatcher.dispatch(indexRequest(), response);
 
         // then
         assertThat(toString(response)).isEqualTo(serverErrorResponse());
@@ -56,7 +57,8 @@ class RequestDispatcherTest {
         final RequestDispatcher dispatcher = dispatcherThrowing(new IllegalStateException("예상하지 못한 오류"));
 
         // when
-        final HttpResponse response = dispatcher.dispatch(indexRequest());
+        final HttpResponse response = new HttpResponse();
+        dispatcher.dispatch(indexRequest(), response);
 
         // then
         assertThat(toString(response)).isEqualTo(serverErrorResponse());
@@ -69,12 +71,12 @@ class RequestDispatcherTest {
         final RequestDispatcher dispatcher = dispatcherThrowing(exception);
 
         // when & then
-        assertThatThrownBy(() -> dispatcher.dispatch(indexRequest()))
+        assertThatThrownBy(() -> dispatcher.dispatch(indexRequest(), new HttpResponse()))
                 .isSameAs(exception);
     }
 
     private RequestDispatcher dispatcherThrowing(Exception exception) {
-        return new RequestDispatcher(Map.of(), request -> {
+        return new RequestDispatcher(Map.of(), (request, response) -> {
             if (exception instanceof IOException ioException) {
                 throw ioException;
             }

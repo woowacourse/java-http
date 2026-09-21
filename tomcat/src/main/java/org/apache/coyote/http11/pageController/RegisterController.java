@@ -15,32 +15,35 @@ public class RegisterController extends AbstractController {
     private final StaticResourceLoader staticResourceLoader = new StaticResourceLoader();
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (isLogIn(httpRequest)) {
-            return redirect(SUCCESS_PAGE);
+            httpResponse.sendRedirect(SUCCESS_PAGE);
+            return;
         }
 
-        return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(REGISTER_PAGE));
+        httpResponse.setStaticResource(HttpStatus.OK, staticResourceLoader.load(REGISTER_PAGE));
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String account = httpRequest.getBodyParams("account");
         String email = httpRequest.getBodyParams("email");
         String password = httpRequest.getBodyParams("password");
 
         if (isInvalidInput(account, email, password)) {
-            return HttpResponse.of(HttpStatus.BAD_REQUEST, staticResourceLoader.load(REGISTER_PAGE));
+            httpResponse.setStaticResource(HttpStatus.BAD_REQUEST, staticResourceLoader.load(REGISTER_PAGE));
+            return;
         }
 
         if (isDuplicated(account)) {
-            return HttpResponse.of(HttpStatus.CONFLICT, staticResourceLoader.load(REGISTER_PAGE));
+            httpResponse.setStaticResource(HttpStatus.CONFLICT, staticResourceLoader.load(REGISTER_PAGE));
+            return;
         }
 
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        return loginAndRedirect(httpRequest, user, SUCCESS_PAGE);
+        loginAndRedirect(httpRequest, httpResponse, user, SUCCESS_PAGE);
     }
 
     private boolean isInvalidInput(String account, String email, String password) {

@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public final class RequestLine {
 
-    private final String method;
+    private final HttpMethod method;
     private final RequestUri requestUri;
     private final String version;
 
@@ -16,12 +16,12 @@ public final class RequestLine {
             throw new IllegalArgumentException("잘못된 Request Line입니다.");
         }
 
-        this.method = parts[0];
+        this.method = HttpMethod.of(parts[0]);
         this.requestUri = new RequestUri(parts[1]);
         this.version = parts[2];
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

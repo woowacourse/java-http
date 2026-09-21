@@ -20,7 +20,7 @@ public final class HttpRequest {
         this.body = readBody(reader, this.headers);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 

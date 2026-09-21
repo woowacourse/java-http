@@ -27,8 +27,6 @@ import java.util.UUID;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String GET = "GET";
-    private static final String POST = "POST";
     private static final String SESSION_USER = "user";
 
     private final Socket connection;
@@ -89,20 +87,19 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (request.getMethod().equals(GET)) {
-            serveResource("/register.html", newSessionId, outputStream);
-            return;
-        }
+        switch (request.getMethod()) {
+            case HttpMethod.GET -> serveResource("/register.html", newSessionId, outputStream);
+            case HttpMethod.POST -> {
+                Map<String, String> parameters = parseFormBody(request.getBody());
+                InMemoryUserRepository.save(new User(
+                        parameters.get("account"),
+                        parameters.get("password"),
+                        parameters.get("email")
+                ));
 
-        if (request.getMethod().equals(POST)) {
-            Map<String, String> parameters = parseFormBody(request.getBody());
-            InMemoryUserRepository.save(new User(
-                    parameters.get("account"),
-                    parameters.get("password"),
-                    parameters.get("email")
-            ));
-
-            writeRedirect(outputStream, "/index.html", newSessionId);
+                writeRedirect(outputStream, "/index.html", newSessionId);
+            }
+            default -> writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
         }
     }
 
@@ -112,33 +109,33 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (request.getMethod().equals(GET)) {
-            if (getLoginUser(sessionId).isPresent()) {
-                writeRedirect(outputStream, "/index.html", newSessionId);
-                return;
+        switch (request.getMethod()) {
+            case HttpMethod.GET -> {
+                if (getLoginUser(sessionId).isPresent()) {
+                    writeRedirect(outputStream, "/index.html", newSessionId);
+                    return;
+                }
+                serveResource("/login.html", newSessionId, outputStream);
             }
+            case HttpMethod.POST -> {
+                Map<String, String> parameters = parseFormBody(request.getBody());
+                Optional<User> loginUser = login(parameters);
+                if (loginUser.isEmpty()) {
+                    writeRedirect(outputStream, "/401.html", newSessionId);
+                    return;
+                }
 
-            serveResource("/login.html", newSessionId, outputStream);
-            return;
-        }
-
-        if (request.getMethod().equals(POST)) {
-            Map<String, String> parameters = parseFormBody(request.getBody());
-            Optional<User> loginUser = login(parameters);
-            if (loginUser.isEmpty()) {
-                writeRedirect(outputStream, "/401.html", newSessionId);
-                return;
+                User user = loginUser.get();
+                log.info("회원 조회 성공: account={}", user.getAccount());
+                Session session = getOrCreateSession(sessionId);
+                session.setAttribute(SESSION_USER, user);
+                Optional<String> responseSessionId = newSessionId;
+                if (!session.getId().equals(sessionId)) {
+                    responseSessionId = Optional.of(session.getId());
+                }
+                writeRedirect(outputStream, "/index.html", responseSessionId);
             }
-
-            User user = loginUser.get();
-            log.info("회원 조회 성공: account={}", user.getAccount());
-            Session session = getOrCreateSession(sessionId);
-            session.setAttribute(SESSION_USER, user);
-            Optional<String> responseSessionId = newSessionId;
-            if (!session.getId().equals(sessionId)) {
-                responseSessionId = Optional.of(session.getId());
-            }
-            writeRedirect(outputStream, "/index.html", responseSessionId);
+            default -> writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
         }
     }
 
@@ -207,17 +204,17 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (!POST.equals(request.getMethod())) {
-            writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
-            return;
-        }
+        switch (request.getMethod()) {
+            case HttpMethod.POST -> {
+                Session session = sessionManager.findSession(sessionId);
+                if (session != null) {
+                    session.invalidate();
+                }
 
-        Session session = sessionManager.findSession(sessionId);
-        if (session != null) {
-            session.invalidate();
+                writeResponse(outputStream, "204 No Content", "", "text/plain", newSessionId);
+            }
+            default -> writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
         }
-
-        writeResponse(outputStream, "204 No Content", "", "text/plain", newSessionId);
     }
 
     private Map<String, String> parseFormBody(String body) {

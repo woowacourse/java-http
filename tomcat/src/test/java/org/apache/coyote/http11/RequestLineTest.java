@@ -12,7 +12,7 @@ class RequestLineTest {
         RequestLine requestLine =
                 new RequestLine("GET /login?next=home HTTP/1.1");
 
-        assertThat(requestLine.getMethod()).isEqualTo("GET");
+        assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(requestLine.getRequestUri().getPath()).isEqualTo("/login");
         assertThat(requestLine.getRequestUri().getQueryParameter("next"))
                 .isEqualTo("home");

@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +54,16 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> headers = resolveHeader(reader);
 
+            final Map<String, String> cookies = extractCookies(headers.get("Cookie"));
+
+            if (cookies.get("JSESSIONID") == null) {
+                cookies.put("JSESSIONID", UUID.randomUUID().toString());
+            }
+
+            final String jSessionId = cookies.get("JSESSIONID");
             final String method = extractMethod(requestLine);
             final String uri = extractUri(requestLine);
             final String path = extractPath(uri);
-            final Map<String, String> queryParams = extractQueryParams(uri);
 
             if ("/login".equals(path) && "POST".equals(method)) {
                 handleLogin(reader, headers, outputStream);
@@ -69,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
             final String responsePath = resolveResourcePath(path);
             final String responseBody = createResponseBody(path, responsePath);
 
-            final String response = createResponse(uri, responseBody);
+            final String response = createResponse(uri, responseBody, jSessionId);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -79,6 +86,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<String, String> extractCookies(final String cookieHeader) {
+        Map<String, String> cookies = new HashMap<>();
+
+        if (cookieHeader == null) {
+            return cookies;
+        }
+
+        for (String cookie : cookieHeader.split(";")) {
+            final String[] keyValue = cookie.trim().split("=", 2);
+
+            if (keyValue[0].equals("JSESSIONID") && keyValue.length == 2) {
+                cookies.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return cookies;
     }
 
     private void handleRegister(
@@ -197,28 +221,6 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(0, index);
     }
 
-    private Map<String, String> extractQueryParams(final String uri) {
-        final Map<String, String> queryParams = new HashMap<>();
-
-        final int index = uri.indexOf("?");
-
-        if (index == -1) {
-            return queryParams;
-        }
-
-        final String queryString = uri.substring(index + 1);
-
-        for (String parameter : queryString.split("&")) {
-            final String[] keyValue = parameter.split("=", 2);
-
-            if (keyValue.length == 2) {
-                queryParams.put(keyValue[0], keyValue[1]);
-            }
-        }
-
-        return queryParams;
-    }
-
     private String resolveResourcePath(final String path) {
         if ("/login".equals(path)) {
             return "/login.html";
@@ -256,7 +258,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(
             final String uri,
-            final String responseBody
+            final String responseBody,
+            final String jSessionId
     ) {
         final String contentType = resolveContentType(uri);
         final byte[] body = responseBody.getBytes(StandardCharsets.UTF_8);
@@ -266,6 +269,7 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 200 OK",
                 "Content-Type: " + contentType,
                 "Content-Length: " + body.length,
+                "Set-Cookie: JSESSIONID=" + jSessionId,
                 "",
                 responseBody
         );

@@ -145,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
                 StringBuilder responseHeader = new StringBuilder();
-                responseHeader.append("HTTP/1.1 401 Unauthorized").append("\r\n");
+                responseHeader.append("HTTP/1.1 302 Found").append("\r\n");
                 appendSetCookieIfMissing(responseHeader, shouldSetCookie, jSessionId);
                 responseHeader.append("Location: /401.html").append("\r\n");
                 responseHeader.append("Content-Length: 0").append("\r\n\r\n");

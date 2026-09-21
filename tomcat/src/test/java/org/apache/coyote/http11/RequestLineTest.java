@@ -9,7 +9,7 @@ class RequestLineTest {
     @Test
     void parsesRequestLine() {
         RequestLine requestLine = RequestLine.parse(
-                "GET /login?next=hello+world&email=user%40example.com HTTP/1.1"
+                "GET /login?next=hello+world&email=user%40example.com&tag=java&tag=http HTTP/1.1"
         );
 
         assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET);
@@ -18,6 +18,8 @@ class RequestLineTest {
                 .isEqualTo("hello world");
         assertThat(requestLine.getRequestUri().getQueryParameter("email"))
                 .isEqualTo("user@example.com");
+        assertThat(requestLine.getRequestUri().getQueryParameterValues("tag"))
+                .containsExactly("java", "http");
         assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1");
     }
 }

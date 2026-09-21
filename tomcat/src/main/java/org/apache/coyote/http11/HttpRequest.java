@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +18,7 @@ public final class HttpRequest {
     private final Map<String, String> headers;
     private final String body;
     private final HttpCookie cookies;
-    private final Map<String, String> bodyParameters;
+    private final HttpParameters bodyParameters;
 
     public HttpRequest(
             RequestLine requestLine,
@@ -67,11 +69,27 @@ public final class HttpRequest {
     }
 
     public String getParameter(String name) {
-        String queryParameter = requestLine.getRequestUri().getQueryParameter(name);
-        if (queryParameter != null) {
-            return queryParameter;
+        List<String> parameters = getParameterValues(name);
+        if (parameters.isEmpty()) {
+            return null;
         }
-        return bodyParameters.get(name);
+        return parameters.getFirst();
+    }
+
+    public List<String> getParameterValues(String name) {
+        List<String> queryParameters = requestLine.getRequestUri().getQueryParameterValues(name);
+        List<String> formParameters = bodyParameters.getAll(name);
+
+        if (queryParameters.isEmpty()) {
+            return formParameters;
+        }
+        if (formParameters.isEmpty()) {
+            return queryParameters;
+        }
+
+        List<String> parameters = new ArrayList<>(queryParameters);
+        parameters.addAll(formParameters);
+        return List.copyOf(parameters);
     }
 
     public Optional<String> getCookie(String name) {
@@ -144,13 +162,14 @@ public final class HttpRequest {
         return buffer.toString(StandardCharsets.UTF_8);
     }
 
-    private Map<String, String> parseBodyParameters(String body) {
+    private HttpParameters parseBodyParameters(String body) {
         String contentType = getHeader("content-type");
         if (contentType == null
-                || !contentType.startsWith("application/x-www-form-urlencoded")) {
-            return Map.of();
+                || !contentType.toLowerCase(Locale.ROOT)
+                .startsWith("application/x-www-form-urlencoded")) {
+            return HttpParameters.empty();
         }
 
-        return UrlEncodedParameters.parse(body);
+        return HttpParameters.parse(body);
     }
 }

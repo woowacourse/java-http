@@ -97,6 +97,24 @@ class HttpRequestTest {
         assertThat(request.getBody()).isEqualTo(body);
     }
 
+    @Test
+    void preservesRepeatedQueryAndFormParameters() throws IOException {
+        String body = "tag=body-one&tag=body-two";
+        InputStream inputStream = inputStreamOf(String.join("\r\n",
+                "POST /search?tag=query-one&tag=query-two HTTP/1.1",
+                "Content-Type: Application/X-Www-Form-Urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body
+        ));
+
+        HttpRequest request = HttpRequest.parse(inputStream);
+
+        assertThat(request.getParameter("tag")).isEqualTo("query-one");
+        assertThat(request.getParameterValues("tag"))
+                .containsExactly("query-one", "query-two", "body-one", "body-two");
+    }
+
     private InputStream inputStreamOf(String request) {
         return new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8));
     }

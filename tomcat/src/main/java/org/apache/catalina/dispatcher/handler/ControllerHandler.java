@@ -5,6 +5,8 @@ import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+import java.io.IOException;
+
 public class ControllerHandler implements Handler{
 
     private final RequestMapping requestMapping;
@@ -19,7 +21,7 @@ public class ControllerHandler implements Handler{
     }
 
     @Override
-    public String handle(HttpRequest request, HttpResponse response) {
+    public String handle(HttpRequest request, HttpResponse response) throws IOException {
         Controller controller = requestMapping.findController(request.getPath()).orElseThrow();
         return controller.doService(request, response);
     }

@@ -56,7 +56,13 @@ public class Http11Processor implements Runnable, Processor {
             String path = extractPath(requestUri);
             Map<String, String> queryParams = extractQueryParams(requestUri);
 
-            handleLogin(path, queryParams);
+            String redirectPath = handleLogin(path, queryParams);
+            if (redirectPath != null) {
+                String response = createRedirectResponse(redirectPath);
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             String resourcePath = resolveResourcePath(path);
             InputStream resourceStream = getResourceStream(resourcePath);
@@ -116,24 +122,35 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private void handleLogin(final String path, final Map<String, String> queryParams) {
-        if (!path.equals("/login")) {
-            return;
+    private String handleLogin(final String path, final Map<String, String> queryParams) {
+        if (!path.equals("/login") || queryParams.isEmpty()) {
+            return null;
         }
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         if (account == null || password == null) {
-            return;
+            return "/401.html";
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
             log.info("account doesn't exist: {}", account);
-            return;
+            return "/401.html";
         }
         User foundUser = user.get();
         if (foundUser.checkPassword(password)) {
             log.info("login user: {}", foundUser);
+            return "/index.html";
         }
+        return "/401.html";
+    }
+
+    private String createRedirectResponse(final String location) {
+        return String.format(
+                "HTTP/1.1 302 Found\r\n"
+                        + "Location: %s\r\n"
+                        + "\r\n",
+                location
+        );
     }
 
     private String resolveResourcePath(final String path) {
@@ -161,30 +178,31 @@ public class Http11Processor implements Runnable, Processor {
             return new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
-        private String createResponse ( final String status, final String resourcePath, final String responseBody){
-            final String contentType = getContentType(resourcePath);
-            byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-            return String.format(
-                    "HTTP/1.1 %s \r\n"
-                            + "Content-Type: %s \r\n"
-                            + "Content-Length: %d \r\n"
-                            + "\r\n"
-                            + "%s",
-                    status,
-                    contentType,
-                    responseBodyBytes.length,
-                    responseBody
-            );
-        }
 
-        private String getContentType ( final String resourcePath){
-            final int lastSlashIndex = resourcePath.lastIndexOf("/");
-            final int lastDotIndex = resourcePath.lastIndexOf(".");
-
-            if (lastDotIndex <= lastSlashIndex) {
-                return DEFAULT_CONTENT_TYPE;
-            }
-            final String extension = resourcePath.substring(lastDotIndex).toLowerCase(Locale.ROOT);
-            return CONTENT_TYPES.getOrDefault(extension, DEFAULT_CONTENT_TYPE);
-        }
+    private String createResponse(final String status, final String resourcePath, final String responseBody) {
+        final String contentType = getContentType(resourcePath);
+        byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        return String.format(
+                "HTTP/1.1 %s \r\n"
+                        + "Content-Type: %s \r\n"
+                        + "Content-Length: %d \r\n"
+                        + "\r\n"
+                        + "%s",
+                status,
+                contentType,
+                responseBodyBytes.length,
+                responseBody
+        );
     }
+
+    private String getContentType(final String resourcePath) {
+        final int lastSlashIndex = resourcePath.lastIndexOf("/");
+        final int lastDotIndex = resourcePath.lastIndexOf(".");
+
+        if (lastDotIndex <= lastSlashIndex) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+        final String extension = resourcePath.substring(lastDotIndex).toLowerCase(Locale.ROOT);
+        return CONTENT_TYPES.getOrDefault(extension, DEFAULT_CONTENT_TYPE);
+    }
+}

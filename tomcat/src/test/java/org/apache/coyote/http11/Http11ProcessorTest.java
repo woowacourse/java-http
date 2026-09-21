@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -103,5 +104,31 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .contains("302")
                 .contains("Location: /401.html");
+    }
+
+    @Test
+    void register_success() {
+        // given
+        final String body = "account=pobi&password=1234&email=pobi@test.com";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body
+        );
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("302")
+                .contains("Location: /index.html");
+
+        assertThat(InMemoryUserRepository.findByAccount("pobi"))
+                .isPresent();
     }
 }

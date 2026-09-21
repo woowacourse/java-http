@@ -1,5 +1,6 @@
 package org.apache.catalina.session;
 
+import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,12 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final String id) {
         SESSIONS.remove(id);
+    }
+
+    public Session createSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        add(session);
+        return session;
     }
 
     private SessionManager() {

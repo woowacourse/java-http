@@ -163,14 +163,14 @@ class Http11ProcessorTest {
     @DisplayName("로그인된 상태에서 /login 페이지에 HTTP GET METHOD로 접근하면 index.html 페이지로 리다이렉트 처리한다")
     void login_get_with_logged_in_session() throws IOException {
         // given
-        final String SESSION_ID = "656cef62-e3c4-40bc-a8df-94732920ed46";
         SessionManager manager = SessionManager.getInstance();
-        Session session = new Session(SESSION_ID);
+        Session session = manager.createSession();
+        String sessionId = session.getId();
         session.setAttribute("user", new User("sample", "sample", "sample@example.com"));
         manager.add(session);
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
-                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "Cookie: JSESSIONID=" + sessionId,
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -189,7 +189,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n",
                 "Content-Length: 0 \r\n"
         );
-        manager.remove(SESSION_ID);
+        manager.remove(sessionId);
     }
 
     @Test

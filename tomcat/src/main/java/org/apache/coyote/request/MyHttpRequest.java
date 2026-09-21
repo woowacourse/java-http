@@ -1,6 +1,5 @@
 package org.apache.coyote.request;
 
-import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.ContentType;
@@ -15,7 +14,7 @@ public class MyHttpRequest {
 
     private static final String RESOURCE_PATH_PREFIX = "static";
 
-    private Manager manager = SessionManager.getInstance();
+    private SessionManager manager = SessionManager.getInstance();
     private Session session;
     private boolean isNewSession;
     private Method method;
@@ -71,8 +70,7 @@ public class MyHttpRequest {
             return null;
         }
 
-        String newSessionId = UUID.randomUUID().toString();
-        this.session = new Session(newSessionId);
+        this.session = manager.createSession();
         this.isNewSession = true;
         manager.add(this.session);
         return this.session;

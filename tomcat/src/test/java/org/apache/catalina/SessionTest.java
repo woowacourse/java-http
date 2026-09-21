@@ -24,6 +24,7 @@ class SessionTest {
         SessionManager manager = SessionManager.getInstance();
         Session session = new Session(UUID.randomUUID().toString());
         manager.add(session);
+        session.setAttribute("name", "gugu");
 
         session.invalidate();
 

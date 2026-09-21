@@ -46,11 +46,36 @@ class Http11ProcessorTest {
     }
 
     private void assertLoginRedirect(String body, String location) {
-        final var socket = new StubSocket(postRequest("/login", body));
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.getInstance().add(new Session(sessionId));
+        final var socket = new StubSocket(postRequest("/login", body, sessionId));
 
         new Http11Processor(socket).process(socket);
 
         assertRedirect(socket, location);
+    }
+
+    @Test
+    void loginWithUnknownSessionIdUsesServerGeneratedSessionId() {
+        String unknownSessionId = UUID.randomUUID().toString();
+        String body = "account=gugu&password=password";
+        final var socket = new StubSocket(postRequest("/login", body, unknownSessionId));
+
+        new Http11Processor(socket).process(socket);
+
+        String issuedSessionId = socket.output()
+                .lines()
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .map(line -> line.substring("Set-Cookie: JSESSIONID=".length()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(issuedSessionId).isNotEqualTo(unknownSessionId);
+        assertThatCode(() -> UUID.fromString(issuedSessionId)).doesNotThrowAnyException();
+        assertThat(SessionManager.getInstance().findSession(unknownSessionId)).isNull();
+        Session session = SessionManager.getInstance().findSession(issuedSessionId);
+        assertThat(session).isNotNull();
+        assertThat(session.getAttribute("user")).isInstanceOf(User.class);
     }
 
     @Test
@@ -211,6 +236,7 @@ class Http11ProcessorTest {
     void successfulLoginStoresUserInSession() {
         String sessionId = UUID.randomUUID().toString();
         String body = "account=gugu&password=password";
+        SessionManager.getInstance().add(new Session(sessionId));
         final var socket = new StubSocket(postRequest("/login", body, sessionId));
 
         new Http11Processor(socket).process(socket);
@@ -227,6 +253,7 @@ class Http11ProcessorTest {
     void loggedInUserIsRedirectedWhenAccessingLoginPage() {
         String sessionId = UUID.randomUUID().toString();
         String body = "account=gugu&password=password";
+        SessionManager.getInstance().add(new Session(sessionId));
         final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
         new Http11Processor(loginSocket).process(loginSocket);
 
@@ -251,6 +278,7 @@ class Http11ProcessorTest {
     void sessionEndpointReturnsLoginState() {
         String sessionId = UUID.randomUUID().toString();
         String body = "account=gugu&password=password";
+        SessionManager.getInstance().add(new Session(sessionId));
         final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
         new Http11Processor(loginSocket).process(loginSocket);
 
@@ -264,6 +292,7 @@ class Http11ProcessorTest {
     void logoutInvalidatesSession() {
         String sessionId = UUID.randomUUID().toString();
         String body = "account=gugu&password=password";
+        SessionManager.getInstance().add(new Session(sessionId));
         final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
         new Http11Processor(loginSocket).process(loginSocket);
 

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -187,7 +188,11 @@ public class Http11Processor implements Runnable, Processor {
             log.info("회원 조회 성공: account={}", user.getAccount());
             Session session = getOrCreateSession(sessionId);
             session.setAttribute(SESSION_USER, user);
-            writeRedirect(outputStream, "/index.html", newSessionId);
+            Optional<String> responseSessionId = newSessionId;
+            if (!session.getId().equals(sessionId)) {
+                responseSessionId = Optional.of(session.getId());
+            }
+            writeRedirect(outputStream, "/index.html", responseSessionId);
         }
     }
 
@@ -197,7 +202,7 @@ public class Http11Processor implements Runnable, Processor {
             return session;
         }
 
-        Session newSession = new Session(sessionId);
+        Session newSession = new Session(UUID.randomUUID().toString());
         sessionManager.add(newSession);
         return newSession;
     }

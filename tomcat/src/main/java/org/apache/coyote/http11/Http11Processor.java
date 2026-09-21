@@ -2,12 +2,14 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,12 +51,18 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            final Map<String, String> headers = resolveHeader(reader);
+
+            final String method = extractMethod(requestLine);
             final String uri = extractUri(requestLine);
             final String path = extractPath(uri);
             final Map<String, String> queryParams = extractQueryParams(uri);
 
             if ("/login".equals(path) && !queryParams.isEmpty()) {
                 handleLogin(queryParams, outputStream);
+                return;
+            } else if ("/register".equals(path) && "POST".equals(method)) {
+                handleRegister(reader, headers, outputStream);
                 return;
             }
 
@@ -71,6 +79,73 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void handleRegister(
+            final BufferedReader reader,
+            final Map<String, String> headers,
+            final OutputStream outputStream
+    ) throws IOException {
+        int bodyLength = 0;
+        bodyLength = Integer.parseInt(headers.get("Content-Length"));
+        System.out.println("bodyLength: " + bodyLength);
+
+        final char[] buffer = new char[bodyLength];
+        reader.read(buffer, 0, bodyLength);
+
+        final String requestBody = new String(buffer);
+        final Map<String, String> bodyParams = extractBody(requestBody);
+
+        final User newUser = new User(
+                bodyParams.get("account"),
+                bodyParams.get("password"),
+                bodyParams.get("email")
+        );
+
+        InMemoryUserRepository.save(newUser);
+
+        final String response = createRedirectResponse("/index.html");
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private Map<String, String> extractBody(final String requestBody) {
+        final Map<String, String> bodyParams = new HashMap<>();
+
+        for (String parameter : requestBody.split("&")) {
+            final String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length == 2) {
+                final String key = URLDecoder.decode(
+                        keyValue[0],
+                        StandardCharsets.UTF_8
+                );
+
+                final String value = URLDecoder.decode(
+                        keyValue[1],
+                        StandardCharsets.UTF_8
+                );
+
+                bodyParams.put(key, value);
+            }
+        }
+
+        return bodyParams;
+    }
+
+    private Map<String, String> resolveHeader(
+            final BufferedReader reader
+    ) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line = reader.readLine();
+
+        while (line != null && !line.isEmpty()) {
+            final String[] header = line.split(":", 2);
+            headers.put(header[0].trim(), header[1].trim());
+            line = reader.readLine();
+        }
+        return headers;
     }
 
     private void handleLogin(
@@ -93,6 +168,10 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password))
                 .map(user -> "/index.html")
                 .orElse("/401.html");
+    }
+
+    private String extractMethod(final String requestLine) {
+        return requestLine.split(" ")[0];
     }
 
     private String extractUri(final String requestLine) {
@@ -134,6 +213,10 @@ public class Http11Processor implements Runnable, Processor {
     private String resolveResourcePath(final String path) {
         if ("/login".equals(path)) {
             return "/login.html";
+        }
+
+        if ("/register".equals(path)) {
+            return "/register.html";
         }
 
         return path;

@@ -2,10 +2,16 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequest {
-    private static final char PARAM_DELIMITER = ':';
+    private static final char HEADER_PARAM_DELIMITER = ':';
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String QUERY_PARAM_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
@@ -23,7 +29,7 @@ public class HttpRequest {
         String line;
         while (!(line = bufferedReader.readLine()).isEmpty()) {
             // 가장 왼쪽의 콜론을 기준으로 파싱한다.
-            final int firstColonIndex = line.indexOf(PARAM_DELIMITER);
+            final int firstColonIndex = line.indexOf(HEADER_PARAM_DELIMITER);
             if (firstColonIndex == -1) {
                 throw new IllegalArgumentException("헤더 포맷이 잘못되었습니다.");
             }
@@ -78,4 +84,20 @@ public class HttpRequest {
         return httpBody;
     }
 
+    public Map<String, String> getParameters() {
+        String queryLine = httpBody.getValue();
+        final String[] params = queryLine.split(QUERY_PARAM_DELIMITER);
+
+        final Map<String, String> queries = new HashMap<>();
+        for (String param : params) {
+            final String[] keyToken = param.split(KEY_VALUE_DELIMITER);
+            queries.put(URLDecoder.decode(keyToken[0], StandardCharsets.UTF_8),
+                    URLDecoder.decode(keyToken[1], StandardCharsets.UTF_8));
+        }
+        return queries;
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(httpHeaders.get("Cookie"));
+    }
 }

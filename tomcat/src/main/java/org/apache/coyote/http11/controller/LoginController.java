@@ -3,9 +3,6 @@ package org.apache.coyote.http11.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,16 +27,14 @@ public class LoginController extends AbstractController {
     private static final String JSESSIONID = "JSESSIONID";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
-    private static final String PARAM_DELIMITER = "&";
-    private static final String KEY_VALUE_DELIMITER = "=";
     private static final String USER = "user";
     private static final String SET_COOKIE = "Set-Cookie";
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         log.info("로그인 요청");
-        HttpCookie httpCookie = new HttpCookie(request.getHttpHeaders().get("Cookie"));
-        final Map<String, String> queryParams = parseQueryParam(request.getHttpBody().getValue());
+        final Map<String, String> queryParams = request.getParameters();
+        HttpCookie httpCookie = request.getCookies();
 
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
@@ -112,18 +107,5 @@ public class LoginController extends AbstractController {
         response.setHttpBody(new HttpBody(body));
 
         response.write();
-    }
-
-
-    private Map<String, String> parseQueryParam(String queryLine) {
-        final String[] params = queryLine.split(PARAM_DELIMITER);
-
-        final Map<String, String> queries = new HashMap<>();
-        for (String param : params) {
-            final String[] keyToken = param.split(KEY_VALUE_DELIMITER);
-            queries.put(URLDecoder.decode(keyToken[0], StandardCharsets.UTF_8),
-                    URLDecoder.decode(keyToken[1], StandardCharsets.UTF_8));
-        }
-        return queries;
     }
 }

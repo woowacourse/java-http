@@ -14,16 +14,12 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int QUERY_PARAMETER_PART_COUNT = 2;
     private static final String LOGIN_PATH = "/login";
     private static final String INDEX_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
@@ -83,29 +79,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Optional<User> findLoginUser(final String queryString) {
-        final Map<String, String> parameters = parseQueryParameters(queryString);
-        final String account = parameters.get("account");
-        final String password = parameters.get("password");
-        if (account == null || password == null) {
+        return UrlEncodedParameters.parse(queryString)
+                .flatMap(this::findLoginUser);
+    }
+
+    private Optional<User> findLoginUser(final UrlEncodedParameters parameters) {
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
+        if (account.isEmpty() || password.isEmpty()) {
             return Optional.empty();
         }
 
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
-    }
-
-    private Map<String, String> parseQueryParameters(final String queryString) {
-        final var nameValuePairs = Arrays.stream(queryString.split("&"))
-                .map(parameter -> parameter.split("=", QUERY_PARAMETER_PART_COUNT))
-                .toList();
-        if (nameValuePairs.stream().anyMatch(pair -> pair.length != QUERY_PARAMETER_PART_COUNT)) {
-            return Map.of();
-        }
-
-        return nameValuePairs.stream().collect(Collectors.toMap(
-                pair -> pair[0],
-                pair -> pair[1],
-                (previous, replacement) -> replacement));
+        return InMemoryUserRepository.findByAccount(account.get())
+                .filter(user -> user.checkPassword(password.get()));
     }
 
     private HttpResponse resolveResponse(final String path, final String queryString) {

@@ -8,6 +8,7 @@ import java.util.Optional;
 record HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, String body) {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final int END_OF_STREAM = -1;
 
     static Optional<HttpRequest> readFrom(final BufferedReader reader) throws IOException {
         final var requestLine = readRequestLine(reader);
@@ -83,7 +84,7 @@ record HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, String body
         var offset = 0;
         while (offset < contentLength) {
             final int readCount = reader.read(buffer, offset, contentLength - offset);
-            if (readCount == -1) {
+            if (readCount == END_OF_STREAM) {
                 return Optional.empty();
             }
             offset += readCount;

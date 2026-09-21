@@ -89,7 +89,22 @@ public class Http11Processor implements Runnable, Processor {
                         session
                 );
                 return;
-            } else if ("/register".equals(path) && "POST".equals(method)) {
+            }
+            if ("/login".equals(path)
+                    && "GET".equals(method)
+                    && session.getAttribute("user") != null) {
+
+                final String response = createRedirectResponse(
+                        "/index.html",
+                        jSessionId,
+                        shouldIssueJSessionId
+                );
+
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+            if ("/register".equals(path) && "POST".equals(method)) {
                 handleRegister(
                         reader,
                         headers,

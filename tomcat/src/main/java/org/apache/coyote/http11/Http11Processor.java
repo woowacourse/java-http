@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,9 @@ public class Http11Processor implements Runnable, Processor {
             final String[] requestParts = requestLine.split(" ", 3);
             final String method = requestParts[0];
             final String requestUri = requestParts[1];
-            final Optional<String> redirectLocation = resolveRedirect(method, requestUri);
+            final Map<String, String> headers = readHeaders(reader);
+            final String requestBody = readRequestBody(reader, headers);
+            final Optional<String> redirectLocation = resolveRedirect(method, requestUri, requestBody);
             if (redirectLocation.isPresent()) {
                 final String response = redirectResponse(redirectLocation.get());
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
@@ -84,16 +87,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<String> resolveRedirect(final String method, final String requestUri) {
+    private Optional<String> resolveRedirect(final String method, final String requestUri, final String requestBody) {
         final int queryIndex = requestUri.indexOf('?');
         final String path = queryIndex >= 0 ? requestUri.substring(0, queryIndex) : requestUri;
-        if (!"GET".equals(method) || !"/login".equals(path) || queryIndex < 0) {
-            return Optional.empty();
+
+        if ("/login".equals(path)) {
+            if ("POST".equals(method)) {
+                return Optional.of(login(requestBody)
+                        ? "/index.html"
+                        : "/401.html");
+            }
         }
 
-        return Optional.of(login(requestUri.substring(queryIndex + 1))
-                ? "/index.html"
-                : "/401.html");
+        if ("/register".equals(path) && "POST".equals(method)) {
+            register(requestBody);
+            return Optional.of("/index.html");
+        }
+
+        return Optional.empty();
     }
 
     private String redirectResponse(final String location) {
@@ -119,6 +130,38 @@ public class Http11Processor implements Runnable, Processor {
         return "/login.html";
     }
 
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String header;
+        while ((header = reader.readLine()) != null && !header.isEmpty()) {
+            final int separator = header.indexOf(':');
+            if (separator < 0) {
+                continue;
+            }
+            headers.put(header.substring(0, separator), header.substring(separator + 1).trim());
+        }
+        return headers;
+    }
+
+    private String readRequestBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
+        final String contentLengthHeader = headers.get("Content-Length");
+        if (contentLengthHeader == null) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(contentLengthHeader);
+        final char[] buffer = new char[contentLength];
+        int offset = 0;
+        while (offset < contentLength) {
+            final int read = reader.read(buffer, offset, contentLength - offset);
+            if (read < 0) {
+                break;
+            }
+            offset += read;
+        }
+        return new String(buffer, 0, offset);
+    }
+
     private boolean login(final String queryString) {
         final Map<String, String> parameters = parseQueryString(queryString);
         final String account = parameters.get("account");
@@ -134,6 +177,18 @@ public class Http11Processor implements Runnable, Processor {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    private void register(final String requestBody) {
+        final Map<String, String> parameters = parseQueryString(requestBody);
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+        final String email = parameters.get("email");
+        if (account == null || password == null || email == null) {
+            return;
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

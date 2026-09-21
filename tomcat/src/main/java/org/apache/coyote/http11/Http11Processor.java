@@ -45,15 +45,28 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = HttpRequest.from(inputStream);
-            log.info("httpReuest = {}", httpRequest);
-
-            HttpResponse httpResponse = handle(httpRequest);
+            HttpResponse httpResponse = createResponse(inputStream);
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse createResponse(final InputStream inputStream) throws IOException {
+        try {
+            final HttpRequest httpRequest = HttpRequest.from(inputStream);
+            log.info("httpRequest = {}", httpRequest);
+
+            return handle(httpRequest);
+        } catch (RuntimeException e) {
+            log.error("요청을 처리하지 못했습니다.", e);
+
+            return readResource(
+                    requiredResource("static/500.html"),
+                    new HttpStatusLine(HTTP_VERSION, 500, "Internal Server Error")
+            );
         }
     }
 
@@ -94,18 +107,18 @@ public class Http11Processor implements Runnable, Processor {
                 .getClassLoader().getResource("static" + uri);
 
         if (resource == null) {
-            return readResource(notFoundResource(), new HttpStatusLine(HTTP_VERSION,
-                    404, "Not Found"));
+            return readResource(requiredResource("static/404.html"),
+                    new HttpStatusLine(HTTP_VERSION, 404, "Not Found"));
         }
 
         return readResource(resource,
                 new HttpStatusLine(HTTP_VERSION, 200, "OK"));
     }
 
-    private URL notFoundResource() {
+    private URL requiredResource(final String path) {
         return Objects.requireNonNull(
-                getClass().getClassLoader().getResource("static/404.html"),
-                "static/404.html이 존재하지 않습니다."
+                getClass().getClassLoader().getResource(path),
+                path + "이 존재하지 않습니다."
         );
     }
 

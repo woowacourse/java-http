@@ -40,24 +40,21 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final String line = getHttpRequestLine(bufferedReader);
-            final String[] tokens = line.split(" ", 3);
-            final String uri = tokens[1];
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpRequest httpRequest = httpRequestParser.parseRequestLine(line);
+            HttpResponse httpResponse = handleRequest(httpRequest);
 
-            String path = getPath(uri);
-            final Optional<String> queryString = getQueryString(uri);
-            ResponseInfo responseInfo = handleRequest(queryString, path);
-
-            final var responseBody = createResponseBody(responseInfo.path());
-            final String contentType = getContentType(responseInfo.path());
+            final var responseBody = createResponseBody(httpResponse.path());
+            final String contentType = getContentType(httpResponse.path());
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 " + responseInfo.httpStatus() + " ",
+                    "HTTP/1.1 " + httpResponse.httpStatus().getMessage() + " ",
                     "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     new String(responseBody));
 
-            log.info("path: {}, http status: {}", responseInfo.path(), responseInfo.httpStatus().getMessage());
+            log.info("http method: {}, path: {}, http status: {}", httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException | UncheckedServletException e) {
@@ -73,48 +70,18 @@ public class Http11Processor implements Runnable, Processor {
         return line;
     }
 
-    private String getPath(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return uri.substring(0, index);
-        }
-        return uri;
-    }
-
-    private Optional<String> getQueryString(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return Optional.of(uri.substring(index + 1));
-        }
-        return Optional.empty();
-    }
-
-    private ResponseInfo handleRequest(Optional<String> queryString, String path) {
-        final RequestHandler requestHandler = handlers.get(path);
+    private HttpResponse handleRequest(HttpRequest request) {
+        final RequestHandler requestHandler = handlers.get(request.path());
 
         if (requestHandler == null) {
-            return new ResponseInfo(path, HttpStatus.OK);
+            return new HttpResponse(request.path(), HttpStatus.OK);
         }
 
-        final Map<String, String> paramsMap = queryString
-                .map(this::getParamsMap)
-                .orElseGet(Collections::emptyMap);
-
-        if (paramsMap.isEmpty()) {
-            return new ResponseInfo(path, HttpStatus.OK);
+        if (request.params().isEmpty()) {
+            return new HttpResponse(request.path(), HttpStatus.OK);
         }
 
-        return requestHandler.handle(paramsMap);
-    }
-
-    private Map<String, String> getParamsMap(String queryString) {
-        Map<String, String> paramsMap = new HashMap<>();
-        String[] data = queryString.split("\\&");
-        for (String d : data) {
-            String[] param = d.split("\\=");
-            paramsMap.put(param[0], param[1]);
-        }
-        return paramsMap;
+        return requestHandler.handle(request.params());
     }
 
     private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {

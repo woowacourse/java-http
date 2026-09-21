@@ -7,16 +7,19 @@ import org.apache.catalina.Manager;
 
 public class SimpleSessionManager implements Manager {
 
-    private final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(HttpSession session) {
-        sessions.put(session.getId(), session);
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
     public HttpSession findSession(String id) {
-        return sessions.getOrDefault(id, null);
+        if (id == null) {
+            return null;
+        }
+        return SESSIONS.get(id);
     }
 
     @Override
@@ -25,6 +28,6 @@ public class SimpleSessionManager implements Manager {
             return;
         }
 
-        sessions.remove(session.getId(), session);
+        SESSIONS.remove(session.getId());
     }
 }

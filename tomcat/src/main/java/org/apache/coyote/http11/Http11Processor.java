@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleRequest(HttpRequest request) throws IOException {
         if (request.isMatched(HttpMethod.GET, "/login")) {
-            return createStaticResourceResponse("/login.html");
+            return handleLoginPage(request);
         }
 
         if (request.isMatched(HttpMethod.POST, "/login")) {
@@ -71,6 +71,21 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return createNotFoundResponse();
+    }
+
+    private HttpResponse handleLoginPage(HttpRequest request) throws IOException {
+        if (isLoggedIn(request)) {
+            return HttpResponse.redirect("/index.html");
+        }
+
+        return createStaticResourceResponse("/login.html");
+    }
+
+    private boolean isLoggedIn(HttpRequest request) {
+        return request.getSessionId()
+                .map(sessionManager::findSession)
+                .map(session -> session.getAttribute("user") != null)
+                .orElse(false);
     }
 
     private HttpResponse handleLogin(HttpRequest request) {

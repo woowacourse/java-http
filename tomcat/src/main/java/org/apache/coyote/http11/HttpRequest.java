@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class HttpRequest {
@@ -26,6 +27,7 @@ public class HttpRequest {
     private final Map<String, List<String>> queryParams;
     private final Map<String, List<String>> bodyParams;
     private final String body;
+    private final HttpCookie cookie;
 
     private HttpRequest(
             HttpMethod method,
@@ -34,7 +36,8 @@ public class HttpRequest {
             Map<String, String> headers,
             Map<String, List<String>> queryParams,
             Map<String, List<String>> bodyParams,
-            String body
+            String body,
+            HttpCookie cookie
     ) {
         this.method = method;
         this.path = path;
@@ -43,6 +46,7 @@ public class HttpRequest {
         this.queryParams = copyParams(queryParams);
         this.bodyParams = copyParams(bodyParams);
         this.body = body;
+        this.cookie = cookie;
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
@@ -63,6 +67,7 @@ public class HttpRequest {
         int contentLength = parseContentLength(headers);
         String body = readBody(inputStream, contentLength);
         Map<String, List<String>> bodyParams = parseBodyParams(headers, body);
+        HttpCookie cookie = HttpCookie.from(headers.get("cookie"));
 
         return new HttpRequest(
                 method,
@@ -71,7 +76,8 @@ public class HttpRequest {
                 headers,
                 queryParams,
                 bodyParams,
-                body
+                body,
+                cookie
         );
     }
 
@@ -256,6 +262,14 @@ public class HttpRequest {
 
     public String getBodyParamValue(String name) {
         return getFirstValue(bodyParams, name);
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
+    }
+
+    public Optional<String> getSessionId() {
+        return cookie.getValue("JSESSIONID");
     }
 
     private String getFirstValue(Map<String, List<String>> params, String name) {

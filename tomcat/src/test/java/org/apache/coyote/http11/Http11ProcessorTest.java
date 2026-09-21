@@ -1,15 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
+import com.techcourse.AppConfig;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.dispatcher.Dispatcher;
-import org.apache.catalina.dispatcher.ViewResolver;
-import org.apache.catalina.dispatcher.handler.ControllerHandler;
-import org.apache.catalina.dispatcher.handler.HandlerMapping;
-import org.apache.catalina.dispatcher.handler.StaticHandler;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
@@ -19,30 +13,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
     private final SessionManager sessionManager = new SessionManager();
-    private final Dispatcher dispatcher = createDispatcher(sessionManager);
-
-    // Application.main과 같은 구성
-    private static Dispatcher createDispatcher(SessionManager sessionManager) {
-        LoginController loginController = new LoginController(sessionManager);
-        RequestMapping requestMapping = new RequestMapping(Map.of(
-                "/login", loginController,
-                "/login.html", loginController,
-                "/register", new RegisterController()
-        ));
-        HandlerMapping handlerMapping = new HandlerMapping(List.of(
-                new ControllerHandler(requestMapping),
-                new StaticHandler()
-        ));
-        return new Dispatcher(handlerMapping, new ViewResolver());
-    }
+    private final Dispatcher dispatcher = new AppConfig(sessionManager).dispatcher();
 
     @Test
     void 루트_경로로_요청하면_index_html을_응답한다() throws Exception {

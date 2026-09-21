@@ -13,9 +13,13 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,22 +30,35 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
-    private static final String NOT_FOUND_PATH = "/404.html";
+
     private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK";
     private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 Found";
     private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found";
+
+    private static final String NOT_FOUND_PATH = "/404.html";
     private static final String INDEX_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
+
     private static final String CONTENT_LENGTH_HEADER = "content-length";
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
     private static final String EMAIL_PARAMETER = "email";
+
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
+
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String NOT_FOUND_RESPONSE_BODY = "404 Not Found";
 
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String LOCATION_HEADER = "Location";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+
+    private static final String JSESSION_ID = "JSESSIONID";
+    private static final String CRLF = "\r\n";
+
     private final Socket connection;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -117,7 +134,11 @@ public class Http11Processor implements Runnable, Processor {
         return new BufferedReader(inputStreamReader);
     }
 
-    private void sendResponse(final HttpRequest request, final OutputStream outputStream) throws IOException {
+    private void sendResponse(
+            final HttpRequest request,
+            final OutputStream outputStream
+    ) throws IOException {
+
         final RequestLine requestLine = request.requestLine();
         final String requestPath = extractRequestPath(requestLine.requestTarget());
         final HttpMethod method = requestLine.method();
@@ -157,7 +178,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final Map<String, String> formParameters = parseFormParameters(request.body());
-
         if (REGISTER_PATH.equals(requestPath) && HttpMethod.POST.equals(method)) {
             register(formParameters);
             sendRedirect(outputStream, INDEX_PATH);
@@ -165,12 +185,25 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (LOGIN_PATH.equals(requestPath) && HttpMethod.POST.equals(method)) {
-            if (checkAuthentication(formParameters)) {
-                log.info("로그인 성공! 아이디 : {}", formParameters.get(ACCOUNT_PARAMETER));
-                sendRedirect(outputStream, INDEX_PATH);
+            final Optional<User> authenticatedUser = findAuthenticatedUser(formParameters);
+
+            if (authenticatedUser.isEmpty()) {
+                sendRedirect(outputStream, UNAUTHORIZED_PATH);
                 return;
             }
-            sendRedirect(outputStream, UNAUTHORIZED_PATH);
+
+            final User user = authenticatedUser.get();
+            log.info("로그인 성공! 아이디 : {}", user.getAccount());
+
+            final Session newSession = new Session(UUID.randomUUID().toString());
+            newSession.setAttribute("user", user);
+            sessionManager.add(newSession);
+
+            sendRedirect(
+                    outputStream,
+                    INDEX_PATH,
+                    Map.of(SET_COOKIE_HEADER, JSESSION_ID + "=" + newSession.getId())
+            );
             return;
         }
 
@@ -194,16 +227,23 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
-        final String response = String.join("\r\n",
-                FOUND_STATUS_LINE + " ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
-                "");
+    private void sendRedirect(
+            final OutputStream outputStream,
+            final String location
+    ) throws IOException {
+        sendRedirect(outputStream, location, Map.of());
+    }
 
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+    private void sendRedirect(
+            final OutputStream outputStream,
+            final String location,
+            final Map<String, String> additionalHeaders
+    ) throws IOException {
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(LOCATION_HEADER, location);
+        headers.putAll(additionalHeaders);
+
+        writeResponse(outputStream, FOUND_STATUS_LINE, headers, new byte[0]);
     }
 
     private void writeResponse(
@@ -212,9 +252,23 @@ public class Http11Processor implements Runnable, Processor {
             final String contentType,
             final byte[] responseBody
     ) throws IOException {
+        writeResponse(
+                outputStream,
+                statusLine,
+                Map.of(CONTENT_TYPE_HEADER, contentType),
+                responseBody
+        );
+    }
+
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String statusLine,
+            final Map<String, String> headers,
+            final byte[] responseBody
+    ) throws IOException {
         final String responseHead = createResponseHead(
                 statusLine,
-                contentType,
+                headers,
                 responseBody.length
         );
 
@@ -250,15 +304,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponseHead(
             final String statusLine,
-            final String contentType,
+            final Map<String, String> headers,
             final int contentLength
     ) {
-        return String.join("\r\n",
-                statusLine + " ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + contentLength + " ",
-                "",
-                "");
+        final StringBuilder head = new StringBuilder();
+        head.append(statusLine).append(" ").append(CRLF);
+        headers.forEach((name, value) ->
+                head.append(name).append(": ").append(value).append(" ").append(CRLF));
+        head.append("Content-Length: ").append(contentLength).append(" ").append(CRLF);
+        head.append(CRLF);
+
+        return head.toString();
     }
 
     private String resolveContentType(final String requestPath) {
@@ -284,21 +340,20 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + requestPath;
     }
 
-    private boolean checkAuthentication(final Map<String, String> queryParameters) {
-        if (!hasCredentials(queryParameters)) {
-            return false;
+    private Optional<User> findAuthenticatedUser(final Map<String, String> formParameters) {
+        if (!hasCredentials(formParameters)) {
+            return Optional.empty();
         }
 
-        final String account = queryParameters.get(ACCOUNT_PARAMETER);
-        final String password = queryParameters.get(PASSWORD_PARAMETER);
+        final String account = formParameters.get(ACCOUNT_PARAMETER);
+        final String password = formParameters.get(PASSWORD_PARAMETER);
 
         return InMemoryUserRepository.findByAccount(account)
-                .map(user -> user.checkPassword(password))
-                .orElse(false);
+                .filter(user -> user.checkPassword(password));
     }
 
-    private boolean hasCredentials(final Map<String, String> queryParameters) {
-        return queryParameters.containsKey(ACCOUNT_PARAMETER) && queryParameters.containsKey(PASSWORD_PARAMETER);
+    private boolean hasCredentials(final Map<String, String> formParameters) {
+        return formParameters.containsKey(ACCOUNT_PARAMETER) && formParameters.containsKey(PASSWORD_PARAMETER);
     }
 
     private void register(final Map<String, String> formParameters) {

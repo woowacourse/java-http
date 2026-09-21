@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
@@ -46,6 +47,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestLine = parseRequestLine(reader);
             final var headers = readHeaders(reader);
+
+            final var cookieHeader = headers.get("Cookie");
+            final var cookie = HttpCookie.parse(cookieHeader);
 
             final var method = requestLine.get(0);
             final var requestUri = requestLine.get(1);
@@ -77,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestPath.equals("/login")) {
-                handleLogin(method, requestParameters, outputStream, contentType);
+                handleLogin(method, requestParameters, outputStream, contentType, cookie);
                 return;
             }
 
@@ -93,8 +97,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLogin(final String method, final Map<String, String> parameters, final OutputStream outputStream, final String contentType
-    ) throws IOException {
+    private void handleLogin(final String method, final Map<String, String> parameters, final OutputStream outputStream, final String contentType, final HttpCookie cookie) throws IOException {
         if ("GET".equals(method)) {
             final var responseBody = readStaticResource("/login.html");
             writeResponse(outputStream, responseBody, contentType);
@@ -102,8 +105,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("POST".equals(method)) {
-            final var location = authenticate(parameters) ? "/index.html" : "/401.html";
-            writeRedirectResponse(outputStream, location);
+            if (!authenticate(parameters)) {
+                writeRedirectResponse(outputStream, "/401.html");
+                return;
+            }
+
+            final var sessionId = cookie.getValue("JSESSIONID");
+
+            if (sessionId.isPresent()) {
+                writeRedirectResponse(outputStream, "/index.html");
+                return;
+            }
+
+            writeRedirectResponse(outputStream, "/index.html", UUID.randomUUID().toString());
             return;
         }
 
@@ -204,6 +218,16 @@ public class Http11Processor implements Runnable, Processor {
                 "\r\n");
         outputStream.write(response.getBytes());
         outputStream.write(bytes);
+        outputStream.flush();
+    }
+
+    private void writeRedirectResponse(final OutputStream outputStream, final String location, final String sessionId) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location,
+                "Set-Cookie: JSESSIONID=" + sessionId,
+                "\r\n");
+        outputStream.write(response.getBytes());
         outputStream.flush();
     }
 

@@ -199,6 +199,8 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .contains("Set-Cookie: JSESSIONID=");
+        assertThat(SessionManager.findSession(extractJSessionId(socket.output())))
+                .isNotNull();
     }
 
     @Test
@@ -220,6 +222,39 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("로그인 전 발급한 JSESSIONID는 다음 요청에서 재사용한다")
+    void preLoginSessionIsReused() {
+        // given
+        String response = processWithoutCookie("/index.html");
+        String sessionId = extractJSessionId(response);
+
+        // when
+        String nextResponse = processWithCookie("/css/styles.css", "JSESSIONID=" + sessionId);
+
+        // then
+        assertThat(SessionManager.findSession(sessionId))
+                .isNotNull();
+        assertThat(nextResponse)
+                .doesNotContain("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    @DisplayName("서버에 없는 JSESSIONID 쿠키가 오면 새 세션을 발급한다")
+    void unknownJSessionIdIsReplaced() {
+        // when
+        String response = processWithCookie("/index.html", "JSESSIONID=unknown-session-id");
+
+        // then
+        String sessionId = extractJSessionId(response);
+        assertThat(sessionId)
+                .isNotEqualTo("unknown-session-id");
+        assertThat(SessionManager.findSession(sessionId))
+                .isNotNull();
+        assertThat(SessionManager.findSession("unknown-session-id"))
+                .isNull();
+    }
+
+    @Test
     @DisplayName("로그인에 성공하면 세션에 사용자를 저장한다")
     void loginSuccessCreatesSession() {
         // when
@@ -232,8 +267,11 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("로그인에 성공하면 요청 쿠키와 다른 새 세션 ID를 발급한다")
+    @DisplayName("로그인에 성공하면 기존 세션을 새 세션으로 교체한다")
     void loginSuccessRenewsSessionId() {
+        // given
+        SessionManager.add(new Session("fixed-session-id"));
+
         // when
         String response = processWithCookie("POST", "/login", "JSESSIONID=fixed-session-id", "account=gugu&password=password");
 
@@ -244,6 +282,20 @@ class Http11ProcessorTest {
                 .isInstanceOf(User.class);
         assertThat(SessionManager.findSession("fixed-session-id"))
                 .isNull();
+    }
+
+    @Test
+    @DisplayName("회원가입 필수 값이 비어 있으면 저장하지 않고 회원가입 페이지로 리다이렉트한다")
+    void postRegisterWithBlankValue() {
+        // when
+        String response = process("POST", "/register", "account=&password=&email=");
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found\r\n")
+                .contains("Location: /register.html");
+        assertThat(InMemoryUserRepository.findByAccount(""))
+                .isEmpty();
     }
 
     @Test
@@ -295,6 +347,15 @@ class Http11ProcessorTest {
 
     private String processWithoutCookie(String method, String path, String body) {
         final var socket = new StubSocket(httpRequestWithoutCookie(method, path, body));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        return socket.output();
+    }
+
+    private String processWithoutCookie(String path) {
+        final var socket = new StubSocket(httpRequestWithoutCookie(path));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);

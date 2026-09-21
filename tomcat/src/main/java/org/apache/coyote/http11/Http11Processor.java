@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (isPostLogin(method, resourcePath)) {
                 String requestBody = readRequestBody(reader, headers);
-                writeLoginResponse(outputStream, requestBody, setCookie);
+                writeLoginResponse(outputStream, requestBody, sessionId, setCookie);
                 return;
             }
 
@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (isPostRegister(method, resourcePath)) {
                 String requestBody = readRequestBody(reader, headers);
-                writeRegisterResponse(outputStream, requestBody);
+                writeRegisterResponse(outputStream, requestBody, setCookie);
                 return;
             }
 
@@ -157,16 +157,22 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        return UUID.randomUUID().toString();
+        return createSession().getId();
     }
 
     private String createJSessionIdCookie(HttpCookie cookie, String sessionId) {
-        if (cookie.contains(HttpCookie.JSESSIONID)
-                && SessionManager.findSession(cookie.get(HttpCookie.JSESSIONID)) != null) {
+        if (sessionId.equals(cookie.get(HttpCookie.JSESSIONID))) {
             return null;
         }
 
         return HttpCookie.createJSessionId(sessionId);
+    }
+
+    private Session createSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        SessionManager.add(session);
+
+        return session;
     }
 
     private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
@@ -213,6 +219,7 @@ public class Http11Processor implements Runnable, Processor {
     private void writeLoginResponse(
             OutputStream outputStream,
             String requestBody,
+            String sessionId,
             String setCookie
     ) throws IOException {
         Map<String, String> params = parseQueryString(requestBody);
@@ -228,29 +235,35 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password))
                 .ifPresentOrElse(
                         user -> {
-                            String newSessionId = UUID.randomUUID().toString();
-                            Session session = new Session(newSessionId);
+                            SessionManager.remove(sessionId);
+                            Session session = createSession();
                             session.setAttribute("user", user);
-                            SessionManager.add(session);
                             log.info("조회된 사용자: id={}, account={}", user.getId(), user.getAccount());
                             writeRedirectResponse(
                                     outputStream,
                                     "/index.html",
-                                    HttpCookie.createJSessionId(newSessionId)
+                                    HttpCookie.createJSessionId(session.getId())
                             );
                         },
                         () -> writeRedirectResponse(outputStream, "/401.html", setCookie)
                 );
     }
 
-    private void writeRegisterResponse(OutputStream outputStream, String requestBody) {
+    private void writeRegisterResponse(OutputStream outputStream, String requestBody, String setCookie) {
         Map<String, String> params = parseQueryString(requestBody);
         String account = params.get("account");
         String password = params.get("password");
         String email = params.get("email");
 
+        if (account == null || account.isBlank()
+                || password == null || password.isBlank()
+                || email == null || email.isBlank()) {
+            writeRedirectResponse(outputStream, "/register.html", setCookie);
+            return;
+        }
+
         InMemoryUserRepository.save(new User(account, password, email));
-        writeRedirectResponse(outputStream, "/index.html");
+        writeRedirectResponse(outputStream, "/index.html", setCookie);
     }
 
     private void logUserIfExists(String resourcePath, String queryString) {
@@ -298,10 +311,6 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream resourceStream = resource.openStream()) {
             return resourceStream.readAllBytes();
         }
-    }
-
-    private void writeRedirectResponse(OutputStream outputStream, String location) {
-        writeRedirectResponse(outputStream, location, null);
     }
 
     private void writeRedirectResponse(OutputStream outputStream, String location, String setCookie) {

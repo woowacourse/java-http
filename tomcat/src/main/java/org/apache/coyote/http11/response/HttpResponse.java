@@ -1,12 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.cookie.Cookie;
 
 public class HttpResponse {
 
-    private String startLine = "HTTP/1.1 200 OK\r\n";
+    private String startLine = "HTTP/1.1 200 OK \r\n";
     private HttpResponseHeader header;
     private HttpResponseBody body;
 
@@ -26,7 +27,7 @@ public class HttpResponse {
     }
 
     public void sendRedirect(String location) {
-        this.startLine = "HTTP/1.1 302 Found\r\n";
+        this.startLine = "HTTP/1.1 302 Found \r\n";
         if (header != null) {
             header.setHeaders("Location", location);
         }
@@ -45,7 +46,7 @@ public class HttpResponse {
             out.write(header.getResponseHeaderString().getBytes(StandardCharsets.UTF_8));
         }
         if (body != null) {
-            out.write(body.getBytes()); // HttpResponseBody가 byte[] getBytes()를 제공
+            out.write(body.getBytes());
         }
         return out.toByteArray();
     }

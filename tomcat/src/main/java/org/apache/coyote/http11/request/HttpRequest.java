@@ -1,8 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.UUID;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -44,7 +47,7 @@ public class HttpRequest {
         return header.getCookieValue(key);
     }
 
-    public Session getSession(boolean create) throws IOException {
+    public Session getSession(boolean create) {
         String jsessionid = getCookie("JSESSIONID");
         if(create && !hasSession()) {
             UUID uuid = UUID.randomUUID();
@@ -55,7 +58,7 @@ public class HttpRequest {
         return SessionManager.findSession(jsessionid);
     }
 
-    public boolean hasSession() throws IOException {
+    public boolean hasSession() {
         String jsessionid = getCookie("JSESSIONID");
         if (jsessionid == null || jsessionid.isEmpty()) {
            return false;

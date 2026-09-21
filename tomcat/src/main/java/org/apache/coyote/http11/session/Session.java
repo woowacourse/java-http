@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +28,7 @@ public class Session {
     }
 
     public void invalidate() {
-        
+        values.clear();
+        SessionManager.remove(this);
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.resolver;
 
 public enum ContentType {
     JS("application/javascript;charset=utf-8"),

@@ -8,6 +8,7 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.Method;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
 import org.apache.coyote.response.StatusCode;
@@ -63,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null
-                    && httpRequest.getMethod().equals("GET")
+                    && httpRequest.getMethod() == Method.GET
                     && httpRequest.getUri().endsWith("/login")) {
                 httpResponse.setStatusCode(StatusCode.FOUND);
                 httpResponse.setContentType(ContentType.HTML);
@@ -131,13 +132,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private static boolean isLoginRequest(MyHttpRequest httpRequest) {
         return httpRequest.getResourcePath().contains("static/login.html")
-                && httpRequest.getMethod().equalsIgnoreCase("POST")
+                && httpRequest.getMethod() == Method.POST
                 && httpRequest.hasRequestBody();
     }
 
     private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
         return httpRequest.getResourcePath().contains("static/register.html")
-                && httpRequest.getMethod().equalsIgnoreCase("POST")
+                && httpRequest.getMethod() == Method.POST
                 && httpRequest.hasRequestBody();
     }
 

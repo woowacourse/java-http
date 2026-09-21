@@ -18,7 +18,7 @@ public class MyHttpRequest {
     private Manager manager = SessionManager.getInstance();
     private Session session;
     private boolean isNewSession;
-    private String method;
+    private Method method;
     private String uri;
     private String resourcePath;
     private ContentType contentType;
@@ -26,7 +26,7 @@ public class MyHttpRequest {
     private HttpCookie cookie;
     private String body;
 
-    public MyHttpRequest(String method, String uri, String resourcePath, ContentType contentType, String version,
+    public MyHttpRequest(Method method, String uri, String resourcePath, ContentType contentType, String version,
                          HttpCookie cookie, String body) {
         this.method = method;
         this.uri = uri;
@@ -46,7 +46,7 @@ public class MyHttpRequest {
         }
 
         return new MyHttpRequest(
-                split[0],
+                Method.valueOf(split[0]),
                 split[1],
                 extractResourcePath(split[1]),
                 contentTypeOf(split[1]),
@@ -168,7 +168,7 @@ public class MyHttpRequest {
         return isNewSession;
     }
 
-    public String getMethod() {
+    public Method getMethod() {
         return method;
     }
 

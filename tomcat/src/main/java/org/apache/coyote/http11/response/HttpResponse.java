@@ -17,9 +17,13 @@ public class HttpResponse {
     private static final String DELIMITER = "\r\n";
     private static final String CHARSET = ";charset=utf-8";
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final ResponseHeaders headers = new ResponseHeaders();
-    private final String body;
+    private String body;
+
+    public HttpResponse() {
+        this(HttpStatus.OK, "");
+    }
 
     private HttpResponse(HttpStatus httpStatus, String body) {
         this.statusLine = StatusLine.from(httpStatus);
@@ -63,7 +67,26 @@ public class HttpResponse {
         headers.add("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 
+    public void setStatus(HttpStatus httpStatus) {
+        this.statusLine = StatusLine.from(httpStatus);
+    }
+
+    public void setBody(ContentType contentType, String body) {
+        headers.add("Content-Type", contentType.getValue() + CHARSET);
+        this.body = body;
+    }
+
+    public void sendRedirect(String location) {
+        setStatus(HttpStatus.FOUND);
+        headers.add("Location", location);
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        headers.add("Set-Cookie", cookie.serialize());
+    }
+
     public void write(OutputStream outputStream) throws IOException {
+        addContentLength();
         outputStream.write(serialize().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }

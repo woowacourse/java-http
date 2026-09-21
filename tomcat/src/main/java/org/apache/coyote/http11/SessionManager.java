@@ -12,17 +12,17 @@ public class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     @Override
-    public void add(HttpSession session) {
-
+    public void add(Session session) {
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public HttpSession findSession(String id) throws IOException {
-        return null;
+    public Session findSession(String id) throws IOException {
+        return SESSIONS.get(id);
     }
 
     @Override
-    public void remove(HttpSession session) {
-
+    public void remove(Session session) {
+        SESSIONS.remove(session.getId());
     }
 }

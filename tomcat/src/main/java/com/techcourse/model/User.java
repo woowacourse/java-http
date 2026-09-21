@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import org.apache.coyote.http11.Session;
+
 public class User {
 
     private final Long id;
@@ -34,5 +36,9 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 }

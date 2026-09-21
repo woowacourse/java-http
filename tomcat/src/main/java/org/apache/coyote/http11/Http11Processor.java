@@ -104,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addSessionCookie(final HttpRequest request, final HttpResponse response) {
         request.getNewSession().ifPresent(session -> {
-            log.info("issue JSESSIONID: {}", session.getId());
+            log.debug("issue JSESSIONID: {}", session.getId());
             response.addCookie(JSESSIONID + "=" + session.getId() + COOKIE_PATH);
         });
     }
@@ -226,7 +226,7 @@ public class Http11Processor implements Runnable, Processor {
         return InMemoryUserRepository.findByAccount(account.get())
                 .filter(user -> user.checkPassword(password.get()))
                 .map(user -> {
-                    log.info("user: {}", user);
+                    log.info("login success. account: {}", user.getAccount());
                     request.getSession().setAttribute(USER, user);
                     return INDEX_PAGE;
                 })

@@ -1,12 +1,25 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +39,148 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (
+                final var bufferedReader = new BufferedReader(
+                        new InputStreamReader(
+                                connection.getInputStream(),
+                                StandardCharsets.UTF_8
+                        )
+                );
+                final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String requestLine = bufferedReader.readLine();
+            String[] splitRequestLine = requestLine.split(" ");
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String method = splitRequestLine[0];
+            String requestTarget = splitRequestLine[1];
+            String protocol = splitRequestLine[2];
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            if (method.equals("GET")) {
+                handleGetRequest(outputStream, requestTarget);
+            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handleGetRequest(OutputStream outputStream, String requestTarget) throws IOException {
+        String contentType;
+        final byte[] responseBody;
+
+        // root 처리
+        if (requestTarget.equals("/")) {
+            writeResponse(outputStream,
+                    "text/html;charset=utf-8 ",
+                    "Hello world!".getBytes(StandardCharsets.UTF_8));
+
+            return;
+        }
+
+        ParsedTarget parsedTarget = parseRequestTarget(requestTarget);
+        String resourceName = parsedTarget.path();
+        Map<String, String> queryParameters = parsedTarget.queryParameters();
+
+        resourceName = handleLogin(resourceName, queryParameters);
+
+        contentType = resolveContentType(resourceName);
+        responseBody = readResponseBody(resourceName);
+
+        writeResponse(outputStream, contentType, responseBody);
+    }
+
+    private ParsedTarget parseRequestTarget(String requestTarget) {
+        int queryStartIndex = requestTarget.indexOf("?");
+
+        if (queryStartIndex < 0) {
+            return new ParsedTarget(
+                    requestTarget,
+                    new HashMap<>()
+            );
+        }
+
+        String path = requestTarget.substring(0, queryStartIndex);
+        String queryString = requestTarget.substring(queryStartIndex + 1);
+
+        return new ParsedTarget(path, parseQueryParameters(queryString));
+    }
+
+    private Map<String, String> parseQueryParameters(String queryString) {
+        Map<String, String> queryParameters = new HashMap<>();
+
+        if (queryString.isEmpty()) {
+            return queryParameters;
+        }
+
+        String[] parameters = queryString.split("&");
+
+        for (String parameter : parameters) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length == 2) {
+                queryParameters.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        return queryParameters;
+    }
+
+    private static String handleLogin(String resourceName, Map<String, String> queryParameters) {
+        if (resourceName.equals("/login")) {
+            String account = queryParameters.get("account");
+            String password = queryParameters.get("password");
+
+            if (account != null && password != null) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+                if (user.isPresent() && user.get().checkPassword(password)) {
+                    log.info("user = {}", user);
+                }
+            }
+
+            resourceName = "login.html";
+        }
+        return resourceName;
+    }
+
+    private static String resolveContentType(String resourceName) {
+        if (resourceName.endsWith(".css")) {
+            return "text/css;charset=utf-8 ";
+        }
+
+        if (resourceName.endsWith(".html")) {
+            return "text/html;charset=utf-8 ";
+        }
+
+        return "application/octet-stream";
+    }
+
+    private byte[] readResponseBody(String resourceName) throws IOException {
+        final byte[] responseBody;
+
+        final URL resource = Objects.requireNonNull(
+                getClass().getClassLoader()
+                        .getResource("static/" + resourceName),
+                "해당 리소스를 찾을 수 없습니다."
+        );
+        final Path path = new File(resource.getFile()).toPath();
+
+        responseBody = Files.readAllBytes(path);
+        return responseBody;
+    }
+
+    private void writeResponse(OutputStream outputStream,
+                                      String contentType,
+                                      byte[] responseBody) throws  IOException{
+        final var header = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType,
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                "");
+
+        outputStream.write(header.getBytes());
+        outputStream.write(responseBody);
+        outputStream.flush();
     }
 }

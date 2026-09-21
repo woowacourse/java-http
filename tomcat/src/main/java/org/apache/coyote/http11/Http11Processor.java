@@ -108,7 +108,6 @@ public class Http11Processor implements Runnable, Processor {
                 // 이경우 그냥 login.html 보여주기
                 String loginPath = uriPath + ".html";
                 InputStream resourceAsStream = getResourceInputStream(loginPath, outputStream);
-
                 sendResponse(resourceAsStream, "text/html", outputStream);
             } else if ("/register".equals(uriPath)) {
                 if ("GET".equals(method)) {
@@ -117,31 +116,11 @@ public class Http11Processor implements Runnable, Processor {
                     sendResponse(resourceAsStream, "text/html", outputStream);
                     return;
                 }
-                String line;
-                int contentLength = 0;
-                while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                    if (line.startsWith("Content-Length: ")) {
-                        contentLength = Integer.parseInt(line.substring("Content-Length: ".length()).trim());
-
-                    }
-                }
-
-                char[] requestBodyChars = new char[contentLength];
-                int totalRead = 0;
-                while (totalRead < contentLength) {
-                    int count = bufferedReader.read(requestBodyChars, totalRead, contentLength - totalRead);
-                    if (count == -1) {
-                        break;
-                    }
-                    totalRead += count;
-                }
-                String requestBody = new String(requestBodyChars, 0, totalRead);
+                int contentLength = getContentLength(bufferedReader);
+                String requestBody = getRequestBody(contentLength, bufferedReader);
                 Map<String, String> bodyParameters = parseQueryParameters(requestBody);
+                saveUser(bodyParameters);
 
-                String account = bodyParameters.get("account");
-                String email = bodyParameters.get("email");
-                String password = bodyParameters.get("password");
-                InMemoryUserRepository.save(new User(account, email, password));
                 try {
                     sendRedirectResponse("/index.html", outputStream);
                 } catch (IOException e) {
@@ -162,6 +141,38 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static void saveUser(Map<String, String> bodyParameters) {
+        String account = bodyParameters.get("account");
+        String email = bodyParameters.get("email");
+        String password = bodyParameters.get("password");
+        InMemoryUserRepository.save(new User(account, email, password));
+    }
+
+    private static String getRequestBody(int contentLength, BufferedReader bufferedReader) throws IOException {
+        char[] requestBodyChars = new char[contentLength];
+        int totalRead = 0;
+        while (totalRead < contentLength) {
+            int count = bufferedReader.read(requestBodyChars, totalRead, contentLength - totalRead);
+            if (count == -1) {
+                break;
+            }
+            totalRead += count;
+        }
+        String requestBody = new String(requestBodyChars, 0, totalRead);
+        return requestBody;
+    }
+
+    private static int getContentLength(BufferedReader bufferedReader) throws IOException {
+        String line;
+        int contentLength = 0;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            if (line.startsWith("Content-Length: ")) {
+                contentLength = Integer.parseInt(line.substring("Content-Length: ".length()).trim());
+            }
+        }
+        return contentLength;
     }
 
     private void sendRedirectResponse(String fileName, OutputStream outputStream) throws IOException {
@@ -186,11 +197,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static void sendResponse(InputStream resourceAsStream, String contentType, OutputStream outputStream) throws IOException {
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
-
             final var responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-
             final var response = createResponse("HTTP/1.1 200 OK ", responseBody, contentType);
-
             writeResponse(outputStream, response);
         }
     }

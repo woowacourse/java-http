@@ -222,4 +222,38 @@ class Http11ProcessorTest {
                 .contains("302")
                 .contains("Location: /index.html");
     }
+
+    @Test
+    void logged_in_user_access_login_redirect_index() {
+        // given
+        final String sessionId = "login-session";
+
+        final Session session = new Session(sessionId);
+        final User user = new User(
+                "gugu",
+                "password",
+                "gugu@email.com"
+        );
+
+        session.setAttribute("user", user);
+        SessionManager.getInstance().add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                ""
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("302")
+                .contains("Location: /index.html");
+    }
 }

@@ -1,7 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

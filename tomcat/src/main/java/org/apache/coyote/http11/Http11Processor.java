@@ -2,6 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.enums.HttpMethod;
+import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.handler.LoginRequestHandler;
+import org.apache.coyote.http11.handler.RegisterRequestHandler;
+import org.apache.coyote.http11.handler.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

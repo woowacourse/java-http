@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.enums.HttpMethod;
+
 import java.util.Map;
 import java.util.Objects;
 

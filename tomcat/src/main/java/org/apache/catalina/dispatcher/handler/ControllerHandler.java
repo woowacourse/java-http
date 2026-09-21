@@ -21,7 +21,7 @@ public class ControllerHandler implements Handler{
     @Override
     public String handle(HttpRequest request, HttpResponse response) {
         Controller controller = requestMapping.findController(request.getPath()).orElseThrow();
-        return controller.service(request, response);
+        return controller.doService(request, response);
     }
 
 }

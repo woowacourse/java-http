@@ -5,6 +5,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    String service(HttpRequest request, HttpResponse response);
+    String doService(HttpRequest request, HttpResponse response);
 
 }

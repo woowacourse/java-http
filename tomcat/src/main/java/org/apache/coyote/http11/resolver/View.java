@@ -17,7 +17,8 @@ public class View {
         byte[] content = readStaticResource(resourcePath);
         if (content == null) {
             response.setStatus(HttpStatus.NOT_FOUND);
-            content = readStaticResource("/404.html");
+            resourcePath = "/404.html";
+            content = readStaticResource(resourcePath);
         }
 
         response.setBody(new HttpResponseBody(content));

@@ -152,16 +152,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse register(HttpRequest request) {
-        String account = request.body().get("inputLoginId");
-        String email = request.body().get("inputEmail");
-        String password = request.body().get("inputPassword");
+        String account = request.body().get("account");
+        String email = request.body().get("email");
+        String password = request.body().get("password");
 
         if (account == null || email == null || password == null) {
-            throw new IllegalArgumentException("잘못된 회원가입 요청입니다.");
+            log.info("잘못된 회원가입 요청입니다.");
+
+            return redirectTo("/401.html");
         }
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new IllegalArgumentException("이미 가입된 계정입니다: " + account);
+            log.info("이미 가입된 계정입니다: {}", account);
+
+            return redirectTo("/401.html");
         }
 
         InMemoryUserRepository.save(new User(account, password, email));

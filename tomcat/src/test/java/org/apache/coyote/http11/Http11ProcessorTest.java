@@ -196,11 +196,11 @@ class Http11ProcessorTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive",
-                "Content-Length: 66 ",
+                "Content-Length: 51 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */*",
                 "",
-                "inputLoginId=hong&inputEmail=hong@woowa.com&inputPassword=password");
+                "account=hong&email=hong@woowa.com&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

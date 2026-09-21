@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -28,6 +27,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_PAGE = "index.html";
     private static final String LOGIN_PATH = "login";
     private static final String LOGIN_PAGE = "login.html";
+    private static final String REGISTER_PATH = "register";
+    private static final String REGISTER_PAGE = "register.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
 
@@ -48,12 +49,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String uri = readRequestUri(inputStream);
-            final String path = extractPath(uri);
-            final Map<String, String> params = parseQueryString(extractQueryString(uri));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            if (isLoginRequest(path, params)) {
-                write(outputStream, redirectResponse(loginLocation(params)));
+            final String uri = readRequestUri(reader);
+            final String path = extractPath(uri);
+            final Map<String, String> headers = readHeaders(reader);
+            final String body = readBody(reader, headers);
+            final Map<String, String> queryParams = parseQueryString(extractQueryString(uri));
+            final Map<String, String> formData = parseQueryString(body);
+
+            if (isLoginRequest(path, formData)) {
+                write(outputStream, redirectResponse(loginLocation(formData)));
+                return;
+            }
+            if (isRegisterRequest(path, formData)) {
+                write(outputStream, redirectResponse(registerLocation(formData)));
                 return;
             }
             write(outputStream, staticResourceResponse(resourcePath(path)));
@@ -64,10 +74,31 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestUri(final InputStream inputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        return bufferedReader.readLine().split(" ")[1].substring(1);
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line = reader.readLine();
+        while (line != null && !line.isEmpty()) {
+            final int index = line.indexOf(":");
+            if (index != -1) {
+                headers.put(line.substring(0, index).trim(), line.substring(index + 1).trim());
+            }
+            line = reader.readLine();
+        }
+        return headers;
+    }
+
+    private String readRequestUri(final BufferedReader reader) throws IOException {
+        return reader.readLine().split(" ")[1].substring(1);
+    }
+
+    private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
+        if (!headers.containsKey("Content-Length")) {
+            return "";
+        }
+        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, buffer.length);
+        return new String(buffer);
     }
 
     private String extractPath(final String uri) {
@@ -113,6 +144,16 @@ public class Http11Processor implements Runnable, Processor {
         return INDEX_PAGE;
     }
 
+    private boolean isRegisterRequest(String path, Map<String, String> params) {
+        return path.equals(REGISTER_PATH) && params.containsKey("account") && params.containsKey("password");
+    }
+
+    private String registerLocation(final Map<String, String> params) {
+        User registerUser = new User(params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(registerUser);
+        return INDEX_PAGE;
+    }
+
     private String redirectResponse(final String location) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
@@ -127,6 +168,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (path.equals(LOGIN_PATH)) {
             return LOGIN_PAGE;
+        }
+        if (path.equals(REGISTER_PATH)) {
+            return REGISTER_PAGE;
         }
         return path;
     }

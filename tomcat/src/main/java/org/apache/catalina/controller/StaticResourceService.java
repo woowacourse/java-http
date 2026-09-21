@@ -15,11 +15,24 @@ final class StaticResourceService {
         try {
             response.setBody(resourceLoader.load(path));
             response.setStatus(HttpStatus.OK);
-            response.setContentType(path.endsWith(".css") ? "text/css" : "text/html");
+            response.setContentType(contentType(path));
         } catch (FileNotFoundException e) {
             response.setStatus(HttpStatus.NOT_FOUND);
             response.setContentType("text/plain");
             response.setBody("Not Found");
         }
+    }
+
+    private String contentType(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+        if (path.endsWith(".svg")) {
+            return "image/svg+xml";
+        }
+        return "text/html";
     }
 }

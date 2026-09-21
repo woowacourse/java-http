@@ -207,6 +207,24 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void servesJavaScriptWithJavaScriptContentType() {
+        final var socket = new StubSocket(getRequest("/js/scripts.js"));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).contains("Content-Type: text/javascript;charset=utf-8");
+    }
+
+    @Test
+    void servesSvgWithSvgContentType() {
+        final var socket = new StubSocket(getRequest("/assets/img/error-404-monochrome.svg"));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).contains("Content-Type: image/svg+xml;charset=utf-8");
+    }
+
+    @Test
     void responseSetsJSessionIdWhenRequestDoesNotHaveOne() {
         final var socket = new StubSocket("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
 

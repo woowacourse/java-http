@@ -35,6 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final String SUCCESS_CODE = "200";
     public static final String SUCCESS_STATUS_RESPONSE = "OK";
     public static final String ERROR_STATUS_RESPONSE = "ERROR";
+    public static final String INDEX = "index";
 
     private final Socket connection;
 
@@ -92,6 +93,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (user.isMatchPassword(password)) {
                     statusCode = REDIRECTION_FOUND_CODE;
+                    resource = getClass().getClassLoader()
+                        .getResource(RESOURCE_FILE_PREFIX + INDEX + HTML_EXTENSION);
                     log.info("user : {}", user);
                 }
                 if (!user.isMatchPassword(password)) {

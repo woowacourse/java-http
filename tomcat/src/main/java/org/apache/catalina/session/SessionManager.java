@@ -5,10 +5,9 @@ import org.apache.catalina.Manager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class SessionManager implements Manager {
-//Http11Processor는 요청마다 새로 만들어지지만,
+    //Http11Processor는 요청마다 새로 만들어지지만,
 // 세션 데이터는 요청이 끝나도 살아 있어야 하기 때문에 stataic
     private static final SessionManager INSTANCE =
             new SessionManager();
@@ -23,10 +22,7 @@ public class SessionManager implements Manager {
         return INSTANCE;
     }
 
-    public Session createSession() {
-        final String id =
-                UUID.randomUUID().toString();
-
+    public Session createSession(final String id) {
         final Session session =
                 new Session(id);
 

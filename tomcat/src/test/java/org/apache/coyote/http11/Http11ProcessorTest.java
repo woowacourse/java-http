@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -208,15 +206,11 @@ class Http11ProcessorTest {
     @Test
     void JSESSIONID가_있으면_새로운_쿠키를_응답하지_않는다() {
         // given
-        final Session session =
-                SessionManager.getInstance()
-                        .createSession();
-
         final String httpRequest =
                 String.join("\r\n",
                         "GET / HTTP/1.1",
                         "Host: localhost:8080",
-                        "Cookie: JSESSIONID=" + session.getId(),
+                        "Cookie: JSESSIONID=existing-session",
                         "",
                         ""
                 );

@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,10 +20,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -90,32 +86,33 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> responseHeaders =
                     new LinkedHashMap<>();
 
-            // 5. Cookie ->  SESSIONID
-            final HttpSession session =
-                    resolveSession(
+            // 5. Cookie -> JSESSIONID 확인 또는 발급
+            // 서버 Session을 생성하지 않는다.
+            final String sessionId =
+                    resolveSessionId(
                             requestHeaders,
                             responseHeaders
                     );
 
-            // 5. path와 query string 분리
+            // 6. path와 query string 분리
             final String path = extractPath(uri);
             final String queryString = extractQueryString(uri);
 
 
-            // 6. 로그인 처리
+            // 7. 로그인 처리
             if (handleLogin(
                     outputStream,
                     method,
                     path,
                     queryString,
                     requestBody,
-                    session,
+                    sessionId,
                     responseHeaders
             )) {
                 return;
             }
 
-            // 7. 회원가입 처리
+            // 8. 회원가입 처리
             if (handleRegister(
                     outputStream,
                     method,
@@ -127,7 +124,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
 
-            // 8. 기본
+            // 9. 기본
             if ("/".equals(path)) {
                 writeResponse(
                         outputStream,
@@ -138,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
                 );
                 return;
             }
-            // 8. 정적
+            // 10. 정적
             writeStaticResource(outputStream, path, responseHeaders);
 
         } catch (IOException
@@ -237,35 +234,24 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-
-    private HttpSession resolveSession(
+    private String resolveSessionId(
             final Map<String, String> requestHeaders,
             final Map<String, String> responseHeaders
     ) {
-        final HttpCookie cookies =
-                HttpCookie.from(requestHeaders.get(COOKIE));
+        final HttpCookie cookies = HttpCookie.from(requestHeaders.get(COOKIE));
 
-        final Optional<String> sessionId = cookies.get(JSESSIONID);
+        final Optional<String> existingSessionId = cookies.get(JSESSIONID);
 
-        if (sessionId.isPresent()) {
-            final HttpSession foundSession =
-                    SESSION_MANAGER.findSession(sessionId.get());
-
-            if (foundSession != null) {
-                return foundSession;
-            }
+        if (existingSessionId.isPresent()
+                && !existingSessionId.get().isBlank()) {
+            return existingSessionId.get();
         }
 
-        final Session newSession =
-                SESSION_MANAGER.createSession();
+        final String newSessionId = UUID.randomUUID().toString();
 
-        responseHeaders.put(
-                SET_COOKIE,
-                JSESSIONID + "="
-                        + newSession.getId()
-        );
+        responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + newSessionId);
 
-        return newSession;
+        return newSessionId;
     }
 
     private Map<String, String> createCommonResponseHeaders(
@@ -336,7 +322,7 @@ public class Http11Processor implements Runnable, Processor {
             final String path,
             final String queryString,
             final String requestBody,
-            final HttpSession session,
+            final String sessionId,
             final Map<String, String> responseHeaders
     ) throws IOException {
 
@@ -346,7 +332,9 @@ public class Http11Processor implements Runnable, Processor {
 
         // 이미 로그인한 사용자가 GET /login
         if (GET.equals(method)) {
-            if (getUser(session) != null) {
+            final HttpSession session = SESSION_MANAGER.findSession(sessionId);
+
+            if (session != null && getUser(session) != null) {
                 writeRedirect(
                         outputStream,
                         "/index.html",
@@ -354,7 +342,9 @@ public class Http11Processor implements Runnable, Processor {
                 );
                 return true;
             }
-            return false;    // 로그인하지 않았다면 login.html을 보여준다.
+            // Session이 없거나 로그인하지 않았다면
+            // Session을 새로 만들지 않고 login.html을 보여준다.
+            return false;
         }
 
         if (!POST.equals(method)) {
@@ -403,6 +393,8 @@ public class Http11Processor implements Runnable, Processor {
         }
         final User loginUser = user.get();
 
+        // 로그인에 성공했을 때에만 Session을 조회하거나 생성한다.
+        final HttpSession session = getOrCreateSession(sessionId);
         // 서버 Session에 로그인 User 저장
         session.setAttribute(USER_SESSION_KEY, loginUser);
 
@@ -416,6 +408,18 @@ public class Http11Processor implements Runnable, Processor {
 
         return true;
 
+    }
+
+    private HttpSession getOrCreateSession(final String sessionId) {
+        final HttpSession session = SESSION_MANAGER.findSession(sessionId);
+
+        if (session != null) {
+            return session;
+        }
+
+        return SESSION_MANAGER.createSession(
+                sessionId
+        );
     }
 
     private User getUser(

@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,14 +53,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/index.html", "text/html"));
     }
 
     @Test
@@ -77,25 +74,33 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: 211991 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/css/styles.css", "text/css"));
+    }
 
-        assertThat(socket.output()).isEqualTo(expected);
+    @Test
+    void loginPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/login.html", "text/html"));
     }
 
     @Test
     void login() {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = postRequest("/login", "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -114,12 +119,7 @@ class Http11ProcessorTest {
     @Test
     void loginFail() {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = postRequest("/login", "account=gugu&password=wrong");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -133,5 +133,88 @@ class Http11ProcessorTest {
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void registerPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/register.html", "text/html"));
+    }
+
+    @Test
+    void register() {
+        // given
+        final String httpRequest = postRequest(
+                "/register", "account=lie&password=password&email=lie%40woowahan.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found\r\n" +
+                "Location: /index.html\r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+
+        final Optional<User> saved = InMemoryUserRepository.findByAccount("lie");
+        assertThat(saved).isPresent();
+        assertThat(saved.get().checkPassword("password")).isTrue();
+    }
+
+    @Test
+    void registerDecodesUrlEncodedValue() {
+        // given
+        final String httpRequest = postRequest(
+                "/register", "account=decoded&password=password&email=hkkang%40woowahan.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final Optional<User> saved = InMemoryUserRepository.findByAccount("decoded");
+        assertThat(saved).isPresent();
+        assertThat(saved.get().toString()).contains("hkkang@woowahan.com");
+    }
+
+    private String postRequest(final String path, final String body) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                body);
+    }
+
+    private String staticFileResponse(final String resourceName, final String contentType) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(resourceName);
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: " + contentType + ";charset=utf-8 \r\n" +
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " \r\n" +
+                "\r\n" +
+                body;
     }
 }

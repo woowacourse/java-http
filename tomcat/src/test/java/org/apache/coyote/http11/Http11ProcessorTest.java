@@ -1,8 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -181,5 +184,42 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .doesNotContain("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void login_success_save_user_in_session() {
+        // given
+        final String sessionId = "login-session-id";
+        final String body = "account=gugu&password=password";
+
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final Session session = new Session(sessionId);
+        sessionManager.add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Cookie: JSESSIONID=" + sessionId,
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final Session savedSession = sessionManager.findSession(sessionId);
+        final User user = (User) savedSession.getAttribute("user");
+
+        assertThat(user).isNotNull();
+        assertThat(user.getAccount()).isEqualTo("gugu");
+
+        assertThat(socket.output())
+                .contains("302")
+                .contains("Location: /index.html");
     }
 }

@@ -13,9 +13,9 @@
 - [x] 로그인 페이지 버튼 클릭 시 `POST` 요청 사용
 
 ## 3. Cookie에 JSESSIONID 값 저장
-- [ ] 로그인 성공 후 쿠키와 세션을 활용해 로그인 상태 유지하기
-- [ ] HTTP 서버에서 JSESSIONID 이름 세션 저장하기
-- [ ] 응답 전달 시 응답 헤더 `Set-Cookie` 추가
+- [x] 로그인 성공 후 쿠키와 세션을 활용해 로그인 상태 유지하기
+- [x] HTTP 서버에서 JSESSIONID 이름 세션 저장하기
+- [x] 응답 전달 시 응답 헤더 `Set-Cookie` 추가
 - HTTP Request Header 예시
     ```aiignore
     GET /index.html HTTP/1.1

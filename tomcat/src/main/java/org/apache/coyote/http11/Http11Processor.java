@@ -94,17 +94,14 @@ public class Http11Processor implements Runnable, Processor {
                             responseHeaders
                     );
 
-            // 6. path와 query string 분리
+            // 6. path
             final String path = extractPath(uri);
-            final String queryString = extractQueryString(uri);
-
 
             // 7. 로그인 처리
             if (handleLogin(
                     outputStream,
                     method,
                     path,
-                    queryString,
                     requestBody,
                     sessionId,
                     responseHeaders
@@ -254,24 +251,6 @@ public class Http11Processor implements Runnable, Processor {
         return newSessionId;
     }
 
-    private Map<String, String> createCommonResponseHeaders(
-            final Optional<String> existingSessionId,
-            final String jSessionId
-    ) {
-        final Map<String, String> responseHeaders =
-                new LinkedHashMap<>();
-
-        if (existingSessionId.isEmpty()) {
-            responseHeaders.put(
-                    SET_COOKIE,
-                    JSESSIONID + "=" + jSessionId
-            );
-        }
-
-        return responseHeaders;
-    }
-
-
     private String extractMethod(
             final String requestLine
     ) {
@@ -306,21 +285,10 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(0, queryIndex);
     }
 
-    private String extractQueryString(final String uri) {
-        final int queryIndex = uri.indexOf("?");
-
-        if (queryIndex == -1) {
-            return null;
-        }
-
-        return uri.substring(queryIndex + 1);
-    }
-
     private boolean handleLogin(
             final OutputStream outputStream,
             final String method,
             final String path,
-            final String queryString,
             final String requestBody,
             final String sessionId,
             final Map<String, String> responseHeaders

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.sun.net.httpserver.Request;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -52,18 +53,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
-            }
 
-            String[] tokens = requestLine.split(" ");
-            if (tokens.length < 2) {
-                return;
-            }
-
-            String method = tokens[0];
-            var requestUri = new RequestUri(tokens[1]);
+            RequestLine requestLine = new RequestLine(reader.readLine());
 
             Map<String, String> headers = readHeaders(reader);
             String body = readBody(reader, headers);
@@ -71,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();
             String sessionId = cookies.get(HttpCookie.JSESSION_ID).orElseThrow();
 
-            handleRequest(method, requestUri, body, sessionId, newSessionId, outputStream);
+            handleRequest(requestLine, body, sessionId, newSessionId, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -118,20 +109,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRequest(
-            String method,
-            RequestUri requestUri,
+            RequestLine requestLine,
             String body,
             String sessionId,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        String path = requestUri.getPath();
+        String path = requestLine.getRequestUri().getPath();
         switch (path) {
             case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html", newSessionId);
-            case "/register" -> handleRegister(method, body, newSessionId, outputStream);
-            case "/login" -> handleLogin(method, body, sessionId, newSessionId, outputStream);
+            case "/register" -> handleRegister(requestLine.getMethod(), body, newSessionId, outputStream);
+            case "/login" -> handleLogin(requestLine.getMethod(), body, sessionId, newSessionId, outputStream);
             case "/session" -> handleSession(sessionId, newSessionId, outputStream);
-            case "/logout" -> handleLogout(method, sessionId, newSessionId, outputStream);
+            case "/logout" -> handleLogout(requestLine.getMethod(), sessionId, newSessionId, outputStream);
             default -> serveResource(path, newSessionId, outputStream);
         }
     }

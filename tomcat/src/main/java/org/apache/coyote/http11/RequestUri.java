@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestUri {
+public final class RequestUri {
 
     private final String path;
     private final Map<String, String> queryParameters;

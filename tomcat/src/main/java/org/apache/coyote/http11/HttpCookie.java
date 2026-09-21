@@ -13,6 +13,10 @@ public class HttpCookie {
         cookies = parseCookies(Objects.requireNonNull(cookieLine));
     }
 
+    public HttpCookie() {
+        cookies = new HashMap<>();
+    }
+
     private Map<String, String> parseCookies(String cookieLine) {
         if (cookieLine == null) {
             return new HashMap<>();

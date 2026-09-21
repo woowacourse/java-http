@@ -10,6 +10,7 @@ import java.util.Map;
 public class HttpRequest {
     private static final char HEADER_PARAM_DELIMITER = ':';
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
     private static final String QUERY_PARAM_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
@@ -41,15 +42,15 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookies() {
-        return new HttpCookie(httpHeaders.get("Cookie"));
+        String cookie = httpHeaders.get(COOKIE);
+        if (cookie == null) {
+            return new HttpCookie();
+        }
+        return new HttpCookie(cookie);
     }
 
     public RequestLine getRequestLine() {
         return requestLine;
-    }
-
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
     }
 
     private HttpHeaders requestHeaders(BufferedReader bufferedReader) throws IOException {

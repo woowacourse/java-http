@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
@@ -23,12 +24,8 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
-    private static final String CONTENT_TYPE = "Content-Type";
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String LOCATION = "Location";
     private static final String USER = "user";
-    private static final String SET_COOKIE = "Set-Cookie";
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
@@ -65,9 +62,8 @@ public class LoginController extends AbstractController {
             final Session session = createSession(user);
 
             response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
-
-            response.putHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
-            response.putHeader(LOCATION, "/index.html");
+            response.setSession(session);
+            response.setLocation("/index.html");
             response.write();
             return;
         }
@@ -76,7 +72,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        HttpCookie httpCookie = new HttpCookie(request.getHttpHeaders().get("Cookie"));
+        HttpCookie httpCookie = request.getCookies();
 
         if (httpCookie.get(JSESSIONID) != null) {
             final HttpSession session = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
@@ -85,8 +81,7 @@ public class LoginController extends AbstractController {
                 response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
                         new ReasonPhrase("Found"));
 
-                response.putHeader(LOCATION, "/index.html");
-
+                response.setLocation("/index.html");
                 response.write();
                 return;
             }
@@ -94,7 +89,7 @@ public class LoginController extends AbstractController {
 
         final String body = new FileReader().readFile("static/login.html");
 
-        response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
+        response.setContentType(ContentType.TEXT_HTML);
         response.setHttpBody(new HttpBody(body));
 
         response.write();
@@ -102,7 +97,7 @@ public class LoginController extends AbstractController {
 
     private void redirectToUnauthorized(HttpResponse response) throws IOException {
         response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
-        response.putHeader(LOCATION, "/401.html");
+        response.setLocation("/401.html");
         response.write();
     }
 

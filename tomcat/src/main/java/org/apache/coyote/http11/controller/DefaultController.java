@@ -1,14 +1,12 @@
 package org.apache.coyote.http11.controller;
 
 import java.io.IOException;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class DefaultController extends AbstractController {
-    private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
-    private static final String CONTENT_TYPE = "Content-Type";
-
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         throw new IOException(ExceptionMessage.NOT_SUPPORT_HTTP_METHOD.getMessage());
@@ -16,8 +14,8 @@ public class DefaultController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
-        response.setHttpBody(new HttpBody("Hello world"));
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setHttpBody(new HttpBody("Hello world!"));
         response.write();
     }
 }

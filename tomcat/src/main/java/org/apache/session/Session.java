@@ -2,13 +2,14 @@ package org.apache.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
     private final String jsessionId;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String jsessionId) {
-        this.jsessionId = jsessionId;
+    public Session() {
+        this.jsessionId = UUID.randomUUID().toString();
     }
 
     public String getJsessionId() {

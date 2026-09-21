@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -60,16 +59,28 @@ public class Http11Processor implements Runnable, Processor {
             String pathUri = readPathUri(reqUri, queryIndex);
             String query = readQuery(reqUri, queryIndex);
 
+            String status = "200 OK";
+
             if (pathUri.equals("/register") && method.equals("POST")) {
+                if (isLogin(headers.get("Cookie"))) {
+                    writeAndFlush(outputStream, createForbiddenResponse("403 Forbidden"));
+                    return;
+                }
                 handleRegister(reqBody, outputStream);
                 return;
             }
 
             if (pathUri.equals("/login") && method.equals("GET")) {
                 if (isLogin(headers.get("Cookie"))) {
-                    writeAndFlush(outputStream, createRedirectResponse());
+                    writeAndFlush(outputStream, createRedirectResponse("302 Found"));
                     return;
                 }
+            }
+
+            if (pathUri.equals("/logout") && method.equals("POST")) {
+                handleLogout(headers.get("Cookie"));
+                writeAndFlush(outputStream, createLogoutResponse("302 Found"));
+                return;
             }
 
             if (pathUri.equals("/login") && method.equals("POST")) {
@@ -77,22 +88,30 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (user != null) {
                     SessionResult sessionResult = storeSession(headers, user);
+
                     writeAndFlush(
                             outputStream,
-                            createLoginResponse(sessionResult.getJsessionId(), sessionResult.isNew())
+                            createLoginResponse("302 Found", sessionResult.getJsessionId(), sessionResult.isNew())
                     );
                     return;
                 }
 
                 pathUri = "/401.html";
+                status = "401 Unauthorized";
             }
 
             pathUri = normalizePathUri(pathUri);
             Path path = getPath("static" + pathUri);
 
+            if (path == null) {
+                pathUri = "/404.html";
+                status = "404 Not Found";
+                path = getPath("static" + pathUri);
+            }
+
             String responseBody = findResponseBody(pathUri, path);
             String contentType = extractType(path);
-            writeAndFlush(outputStream, createStaticFileResponse(responseBody, contentType));
+            writeAndFlush(outputStream, createStaticFileResponse(status, responseBody, contentType));
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -100,32 +119,46 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static SessionResult storeSession(Map<String, String> headers, User user) {
-        String jsessionId = getOrCreateJsessionId(headers.get("Cookie"));
+        String jsessionId = getJsessionId(headers.get("Cookie"));
         SessionManager sessionManager = SessionManager.getInstance();
         Session session = sessionManager.findSession(jsessionId);
 
         boolean isNew = false;
 
         if (session == null) {
-            session = new Session(jsessionId);
+            session = new Session();
             sessionManager.add(session);
             isNew = true;
         }
 
         session.setAttribute("user", user);
-        return new SessionResult(jsessionId, isNew);
+        return new SessionResult(session.getJsessionId(), isNew);
+    }
+
+    private static String getJsessionId(String cookie) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookie(cookie);
+        return httpCookie.getCookieValue("JSESSIONID");
     }
 
     private static void handleRegister(String reqBody, OutputStream outputStream) throws IOException {
         Map<String, String> reqBodyParams = parseQueryParams(reqBody);
 
-        InMemoryUserRepository.save(new User(
-                reqBodyParams.get("account"),
-                reqBodyParams.get("password"),
-                reqBodyParams.get(("email"))
-        ));
+        String account = reqBodyParams.get("account");
+        String password = reqBodyParams.get("password");
+        String email = reqBodyParams.get("email");
 
-        writeAndFlush(outputStream, createRedirectResponse());
+        if (isBlank(account) || isBlank(password) || isBlank(email)) {
+            writeAndFlush(outputStream, createBadRequestResponse("400 Bad Request"));
+            return;
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        writeAndFlush(outputStream, createRedirectResponse("302 Found"));
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private static User login(String reqBody) {
@@ -153,18 +186,20 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private static String createStaticFileResponse(String responseBody, String type) {
+    private static String createStaticFileResponse(String status, String responseBody, String type) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status,
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
     }
 
-    private static String createLoginResponse(String jsessionId, boolean isNew) {
+    private static String createLoginResponse(String status, String jsessionId, boolean isNew) {
         StringBuilder response = new StringBuilder()
-                .append("HTTP/1.1 302 Found\r\n");
+                .append("HTTP/1.1 ")
+                .append(status)
+                .append("\r\n");
 
         if (isNew) {
             response.append("Set-Cookie: JSESSIONID=")
@@ -179,24 +214,48 @@ public class Http11Processor implements Runnable, Processor {
         return response.toString();
     }
 
-    private static String getOrCreateJsessionId(String cookie) {
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookie(cookie);
-        String jsessionid = httpCookie.getCookieValue("JSESSIONID");
-
-        if (jsessionid == null || jsessionid.isBlank()) {
-            return httpCookie.generateCookie();
-        }
-        return jsessionid;
+    private static String createLogoutResponse(String status) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                "Location: /login",
+                "Set-Cookie: JSESSIONID=; Max-Age=0; Path=/",
+                "Content-Length: 0",
+                "",
+                ""
+        );
     }
 
-    private static String createRedirectResponse() {
+    private static String createRedirectResponse(String status) {
         return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+                "HTTP/1.1 " + status,
                 "Location: /index.html",
                 "Content-Length: 0",
                 "",
                 "");
+    }
+
+    private static String createForbiddenResponse(String status) {
+        String responseBody = "권한이 없습니다.";
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                "Content-Type: text/plain; charset=utf-8",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                responseBody
+        );
+    }
+
+    private static String createBadRequestResponse(String status) {
+        String responseBody = "요청이 잘못되었습니다.";
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                "Content-Type: text/plain; charset=utf-8",
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                responseBody
+        );
     }
 
     private static String extractType(Path path) {
@@ -212,19 +271,28 @@ public class Http11Processor implements Runnable, Processor {
     private static Map<String, String> parseQueryParams(String queryParams) {
         Map<String, String> queries = new HashMap<>();
 
-        for (String s : queryParams.split("&")) {
-            queries.put(s.split("=")[0], s.split("=")[1]);
+        if (queryParams == null || queryParams.isBlank()) {
+            return queries;
+        }
+
+        for (String parameter : queryParams.split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length != 2) {
+                continue;
+            }
+            queries.put(keyValue[0], keyValue[1]);
         }
 
         return queries;
     }
 
     private static Path getPath(String filePath) throws URISyntaxException {
-        URL resource = Objects.requireNonNull(
-                Http11Processor.class.getClassLoader().getResource(filePath),
-                "리소스 못찾음"
-        );
+        URL resource = Http11Processor.class.getClassLoader().getResource(filePath);
 
+        if (resource == null) {
+            return null;
+        }
         return Path.of(resource.toURI());
     }
 
@@ -247,16 +315,25 @@ public class Http11Processor implements Runnable, Processor {
         return new String(body);
     }
 
+    private void handleLogout(String cookie) {
+        String jsessionId = getJsessionId(cookie);
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(jsessionId);
+
+        if (session != null) {
+            session.invalidate();
+            sessionManager.remove(jsessionId);
+        }
+    }
+
     private boolean isLogin(String cookie) {
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookie(cookie);
-        String jsessionId = httpCookie.getCookieValue("JSESSIONID");
+        String jsessionId = getJsessionId(cookie);
 
         if (jsessionId == null || jsessionId.isBlank()) {
             return false;
         }
-        Session session = SessionManager.getInstance().findSession(jsessionId);
 
+        Session session = SessionManager.getInstance().findSession(jsessionId);
         return session != null && session.getAttribute("user") != null;
     }
 

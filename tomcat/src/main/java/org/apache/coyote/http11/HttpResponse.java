@@ -63,6 +63,12 @@ public final class HttpResponse {
         setBody("");
     }
 
+    public void sendError(HttpStatus status, String message) {
+        setStatus(status);
+        setContentType("text/plain");
+        setBody(message);
+    }
+
     public void writeTo(OutputStream outputStream) throws IOException {
         Objects.requireNonNull(outputStream);
 

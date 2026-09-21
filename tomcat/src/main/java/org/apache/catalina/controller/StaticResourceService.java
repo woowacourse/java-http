@@ -17,9 +17,7 @@ final class StaticResourceService {
             response.setStatus(HttpStatus.OK);
             response.setContentType(contentType(path));
         } catch (FileNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setContentType("text/plain");
-            response.setBody("Not Found");
+            response.sendError(HttpStatus.NOT_FOUND, "Not Found");
         }
     }
 

@@ -46,4 +46,21 @@ class HttpResponseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Content-Length는 응답 본문으로부터 계산됩니다.");
     }
+
+    @Test
+    void writesErrorResponse() throws Exception {
+        HttpResponse response = new HttpResponse();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        response.sendError(HttpStatus.NOT_FOUND, "Not Found");
+        response.writeTo(outputStream);
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo(
+                "HTTP/1.1 404 Not Found\r\n"
+                        + "Content-Type: text/plain;charset=utf-8\r\n"
+                        + "Content-Length: 9\r\n"
+                        + "\r\n"
+                        + "Not Found"
+        );
+    }
 }

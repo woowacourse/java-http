@@ -24,8 +24,6 @@ public abstract class AbstractController implements Controller {
     }
 
     private void methodNotAllowed(HttpResponse response) {
-        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-        response.setContentType("text/plain");
-        response.setBody("Method Not Allowed");
+        response.sendError(HttpStatus.METHOD_NOT_ALLOWED, "Method Not Allowed");
     }
 }

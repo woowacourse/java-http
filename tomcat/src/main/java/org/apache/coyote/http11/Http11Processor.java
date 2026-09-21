@@ -114,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
         if ("/login".equals(uri) && request.isGet()) {
-            boolean isLoggedIn = sessionManager.find(request.cookie().get(JSESSIONID))
+            boolean isLoggedIn = sessionManager.find(request.cookies().get(JSESSIONID))
                     .map(session -> session.getAttribute(USER))
                     .isPresent();
 

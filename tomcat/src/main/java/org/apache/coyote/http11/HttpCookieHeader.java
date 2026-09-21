@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public record HttpCookie(
+public record HttpCookieHeader(
         Map<String, String> values
 ) {
 
@@ -13,11 +13,11 @@ public record HttpCookie(
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    public static HttpCookie empty() {
-        return new HttpCookie(Map.of());
-    }
+    public static HttpCookieHeader from(final String cookies) {
+        if (cookies == null) {
+            return new HttpCookieHeader(Map.of());
+        }
 
-    public static HttpCookie from(final String cookies) {
         final Map<String, String> values = new HashMap<>();
 
         for (String cookie : cookies.split(COOKIE_DELIMITER)) {
@@ -37,7 +37,7 @@ public record HttpCookie(
             values.putIfAbsent(keyValue[KEY_INDEX], value);
         }
 
-        return new HttpCookie(Map.copyOf(values));
+        return new HttpCookieHeader(Map.copyOf(values));
     }
 
     public boolean contains(final String name) {

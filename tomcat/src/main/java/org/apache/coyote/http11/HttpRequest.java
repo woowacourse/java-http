@@ -12,7 +12,7 @@ import java.util.Map;
 public record HttpRequest(
         HttpRequestLine requestLine,
         Map<String, String> headers,
-        HttpCookie cookie,
+        HttpCookieHeader cookies,
         Map<String, String> body
 ) {
     private static final String COLON = ":";
@@ -35,7 +35,7 @@ public record HttpRequest(
         return new HttpRequest(
                 requestLine,
                 headers,
-                readCookie(headers),
+                HttpCookieHeader.from(headers.get(COOKIE)),
                 readBody(bufferedInputStream, headers)
         );
     }
@@ -75,16 +75,6 @@ public record HttpRequest(
         }
 
         return Collections.unmodifiableMap(headers);
-    }
-
-    private static HttpCookie readCookie(final Map<String, String> headers) {
-        final String cookies = headers.get(COOKIE);
-
-        if (cookies == null) {
-            return HttpCookie.empty();
-        }
-
-        return HttpCookie.from(cookies);
     }
 
     private static Map<String, String> readBody(final InputStream inputStream,

@@ -77,13 +77,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> params = extractParams(method, requestUri, body);
 
-            String redirectPath = handleRegister(method, path, params);
-            if (redirectPath == null) {
-                redirectPath = handleLogin(method, path, params, session);
-            }
-            if (redirectPath == null) {
-                redirectPath = handleLoggedInLoginPage(method, path, session);
-            }
+            String redirectPath = getRedirectPath(method, path, params, session);
 
             if (redirectPath != null) {
                 String response = createRedirectResponse(redirectPath, sessionIdToSet);
@@ -178,6 +172,21 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
+    private String getRedirectPath(final String method, final String path, final Map<String, String> params,
+                                   final Session session) {
+        String redirectPath = handleRegister(method, path, params);
+        if (redirectPath != null) {
+            return redirectPath;
+        }
+
+        redirectPath = handleLogin(method, path, params, session);
+        if (redirectPath != null) {
+            return redirectPath;
+        }
+
+        return handleLoggedInLoginPage(method, path, session);
+    }
+
     private String handleRegister(final String method, final String path, final Map<String, String> params) {
         if (!method.equals("POST") || !path.equals("/register")) {
             return null;
@@ -238,19 +247,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createRedirectResponse(final String location, final String sessionId) {
-        String setCookieHeader = "";
-        if (sessionId != null) {
-            setCookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
-        }
-
         return String.format(
                 "HTTP/1.1 302 Found\r\n"
                         + "Location: %s\r\n"
                         + "%s"
                         + "\r\n",
                 location,
-                setCookieHeader
+                createSetCookieHeader(sessionId)
         );
+    }
+
+    private String createSetCookieHeader(final String sessionId) {
+        if (sessionId == null) {
+            return "";
+        }
+        return "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
     }
 
     private String resolveResourcePath(final String path) {
@@ -284,11 +295,6 @@ public class Http11Processor implements Runnable, Processor {
         final String contentType = getContentType(resourcePath);
         byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
 
-        String setCookieHeader = "";
-        if (sessionId != null) {
-            setCookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
-        }
-
         return String.format(
                 "HTTP/1.1 %s\r\n"
                         + "%s"
@@ -297,7 +303,7 @@ public class Http11Processor implements Runnable, Processor {
                         + "\r\n"
                         + "%s",
                 status,
-                setCookieHeader,
+                createSetCookieHeader(sessionId),
                 contentType,
                 responseBodyBytes.length,
                 responseBody

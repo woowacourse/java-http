@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.HttpCookie;
 import com.techcourse.model.HttpResponse;
 import com.techcourse.model.User;
 import java.io.InputStream;
@@ -70,11 +71,11 @@ public class Http11Processor implements Runnable, Processor {
                         "Hello world!".getBytes()
                 );
             } else if (requestPath.startsWith("/login")) {
-                httpResponse = handleLoginRequest(formParameters);
+                httpResponse = handleLoginRequest(formParameters, requestHeaders);
             } else if (requestPath.startsWith("/register") && requestMethod.equals("POST")) {
                 User user = new User(formParameters.get("account"), formParameters.get("password"), formParameters.get("email"));
                 InMemoryUserRepository.save(user);
-                httpResponse = createSuccessResponse();
+                httpResponse = createRegisterSuccessResponse();
                 log.info("회원가입 성공 : {}", user.toString());
             } else {
                 httpResponse = createResourceResponse(requestPath);
@@ -158,16 +159,7 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private String buildHttpResponse(String statusCode, String responseBody, String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + contentType,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private HttpResponse handleLoginRequest(Map<String, String> formParameters)
+    private HttpResponse handleLoginRequest(Map<String, String> formParameters, Map<String, String> requestHeaders)
             throws URISyntaxException, IOException {
 
         String account = formParameters.get("account");
@@ -181,10 +173,41 @@ public class Http11Processor implements Runnable, Processor {
             return createUnauthorizedResponse();
         }
 
-        return createSuccessResponse();
+        String cookieLine = requestHeaders.get("Cookie");
+        String httpCookie = findHttpCookie(cookieLine);
+
+        return createLoginSuccessResponse(httpCookie);
     }
 
-    private HttpResponse createSuccessResponse() {
+    private String findHttpCookie(String cookieLine) {
+        if (cookieLine == null) { return HttpCookie.makeJsessionid().toString(); }
+
+        Map<String, String> cookieParts = new HashMap<>();
+
+        String[] cookies = cookieLine.split(";");
+
+        for (String cookie : cookies) {
+            String[] parts = cookie.split("=", 2);
+            if (parts.length != 2) {
+                continue;
+            }
+            cookieParts.put(parts[0].trim(), parts[1].trim());
+        }
+        if (cookieParts.isEmpty() || cookieParts.get("JSESSIONID") == null) {
+            return HttpCookie.makeJsessionid().toString();
+        }
+        return cookieParts.get("JSESSIONID");
+    }
+
+    private HttpResponse createLoginSuccessResponse(String httpCookie) {
+        return new HttpResponse(
+                "302 FOUND ",
+                Map.of("Location", "/index.html",
+                        "Set-Cookie", httpCookie),
+                new byte[0]);
+    }
+
+    private HttpResponse createRegisterSuccessResponse() {
         return new HttpResponse(
                 "302 FOUND ",
                 Map.of("Location", "/index.html"),

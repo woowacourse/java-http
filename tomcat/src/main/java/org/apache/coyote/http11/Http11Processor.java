@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -58,9 +57,8 @@ public class Http11Processor implements Runnable, Processor {
             log.info("start request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
-                String jSessionId = UUID.randomUUID().toString();
-                manager.add(new Session(jSessionId));
-                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+                Session session = httpRequest.getSession(true);
+                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
 
             if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null

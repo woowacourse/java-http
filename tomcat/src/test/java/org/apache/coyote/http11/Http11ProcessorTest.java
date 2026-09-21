@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -27,23 +29,27 @@ class Http11ProcessorTest {
     class CookieTest {
 
         @Test
-        @DisplayName("요청에 JSESSIONID가 없으면 응답 쿠키에 새 JSESSIONID를 추가한다")
-        void addsJSessionIdWhenRequestDoesNotContainOne() {
+        @DisplayName("요청에 JSESSIONID가 없으면 새 세션을 등록하고 응답 쿠키에 ID를 추가한다")
+        void createsSessionAndAddsJSessionIdWhenRequestDoesNotContainOne() throws IOException {
             // given
+            final Manager manager = new SessionManager();
+            manager.removeAll();
             final String httpRequest = String.join("\r\n",
                     "GET /index.html HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "",
                     "");
             final var socket = new StubSocket(httpRequest);
-            final var processor = new Http11Processor(socket);
+            final var processor = new Http11Processor(socket, manager);
 
             // when
             processor.process(socket);
 
             // then
-            assertThat(socket.output())
-                    .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f\\-]{36}");
+            final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=([0-9a-f\\-]{36})")
+                    .matcher(socket.output());
+            assertThat(matcher.find()).isTrue();
+            assertThat(manager.findSession(matcher.group(1))).isNotNull();
         }
 
         @Test

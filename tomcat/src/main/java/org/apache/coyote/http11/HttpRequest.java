@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
 final class HttpRequest {
@@ -21,6 +23,7 @@ final class HttpRequest {
     private final QueryParameters bodyParameters;
     private final Cookie cookie;
     private final Manager manager;
+    private HttpSession session;
 
     private HttpRequest(final String method,
                         final URI uri,
@@ -116,9 +119,23 @@ final class HttpRequest {
     }
 
     HttpSession getSession() {
-        return cookie.get(JSESSIONID)
+        return getSession(true);
+    }
+
+    HttpSession getSession(final boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        session = cookie.get(JSESSIONID)
                 .map(this::findSession)
                 .orElse(null);
+
+        if (session == null && create) {
+            session = new Session(UUID.randomUUID().toString());
+            manager.add(session);
+        }
+        return session;
     }
 
     private HttpSession findSession(final String id) {

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.List;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
@@ -11,6 +12,45 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
+
+    @Test
+    @DisplayName("세션이 없을 때 getSession true를 호출하면 새 세션을 등록한다")
+    void createsAndRegistersSessionWhenRequested() throws IOException {
+        // given
+        final Manager manager = new SessionManager();
+        manager.removeAll();
+        final HttpRequest request = HttpRequest.of(
+                List.of("GET /index.html HTTP/1.1"),
+                null,
+                manager
+        );
+
+        // when
+        final HttpSession createdSession = request.getSession(true);
+
+        // then
+        assertThat(manager.findSession(createdSession.getId())).isSameAs(createdSession);
+        assertThat(request.getSession(true)).isSameAs(createdSession);
+    }
+
+    @Test
+    @DisplayName("세션이 없을 때 getSession false를 호출하면 세션을 생성하지 않는다")
+    void doesNotCreateSessionWhenNotRequested() {
+        // given
+        final Manager manager = new SessionManager();
+        manager.removeAll();
+        final HttpRequest request = HttpRequest.of(
+                List.of("GET /index.html HTTP/1.1"),
+                null,
+                manager
+        );
+
+        // when
+        final HttpSession session = request.getSession(false);
+
+        // then
+        assertThat(session).isNull();
+    }
 
     @Test
     @DisplayName("Cookie의 JSESSIONID로 기존 세션을 조회한다")

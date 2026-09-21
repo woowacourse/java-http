@@ -14,7 +14,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -67,9 +66,10 @@ public class Http11Processor implements Runnable, Processor {
         if (request.getCookie().get(JSESSIONID).isPresent()) {
             return response;
         }
+        final HttpSession session = request.getSession(true);
         return response.addHeader(
                 "Set-Cookie",
-                Cookie.of(JSESSIONID, UUID.randomUUID().toString()).toHeaderValue()
+                Cookie.of(JSESSIONID, session.getId()).toHeaderValue()
         );
     }
 
@@ -101,10 +101,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final Optional<User> loginUser = authenticate(account, password);
             if (loginUser.isPresent()) {
-                final HttpSession session = request.getSession();
-                if (session != null) {
-                    session.setAttribute(LOGIN_USER, loginUser.get());
-                }
+                final HttpSession session = request.getSession(true);
+                session.setAttribute(LOGIN_USER, loginUser.get());
                 return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
                         .addHeader("Location", "/index.html");
             }

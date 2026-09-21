@@ -74,7 +74,16 @@ public final class HttpResponse {
 
         outputStream.write(statusLine().getBytes(StandardCharsets.UTF_8));
         for (Map.Entry<String, String> header : headers.entrySet()) {
+            if (status == HttpStatus.NO_CONTENT
+                    && header.getKey().equalsIgnoreCase("Content-Type")) {
+                continue;
+            }
             outputStream.write(headerLine(header).getBytes(StandardCharsets.UTF_8));
+        }
+        if (status == HttpStatus.NO_CONTENT) {
+            outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            return;
         }
         outputStream.write(("Content-Length: " + body.length + "\r\n\r\n")
                 .getBytes(StandardCharsets.UTF_8));

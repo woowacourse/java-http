@@ -407,7 +407,7 @@ class Http11ProcessorTest {
         final var logoutSocket = new StubSocket(postRequest("/logout", "", sessionId));
         new Http11Processor(logoutSocket).process(logoutSocket);
 
-        assertThat(logoutSocket.output()).startsWith("HTTP/1.1 204 No Content");
+        assertThat(logoutSocket.output()).isEqualTo("HTTP/1.1 204 No Content\r\n\r\n");
         assertThat(SessionManager.getInstance().findSession(sessionId)).isNull();
 
         final var sessionSocket = new StubSocket(getRequest("/session", sessionId));

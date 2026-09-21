@@ -15,7 +15,5 @@ public final class LogoutController extends AbstractController {
         userSessions.invalidate(sessionId);
 
         response.setStatus(HttpStatus.NO_CONTENT);
-        response.setContentType("text/plain");
-        response.setBody("");
     }
 }

@@ -63,4 +63,18 @@ class HttpResponseTest {
                         + "Not Found"
         );
     }
+
+    @Test
+    void noContentResponseDoesNotWriteContentHeadersOrBody() throws Exception {
+        HttpResponse response = new HttpResponse();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        response.setStatus(HttpStatus.NO_CONTENT);
+        response.setContentType("text/plain");
+        response.setBody("must not be written");
+
+        response.writeTo(outputStream);
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8))
+                .isEqualTo("HTTP/1.1 204 No Content\r\n\r\n");
+    }
 }

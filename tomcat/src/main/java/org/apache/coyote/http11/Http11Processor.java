@@ -21,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -54,11 +56,25 @@ public class Http11Processor implements Runnable, Processor {
             URI uri = URI.create(str[1]);
             String path = uri.getRawPath();
 
+            Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            while ((line = br.readLine()) != null && !line.isEmpty()) {
+                String[] header = line.split(":", 2);
+                if (header.length == 2) {
+                    headers.put(header[0].trim(), header[1].trim());
+                }
+            }
+
+            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+            String cookieHeader = "";
+            if (cookie.get("JSESSIONID") == null) {
+                cookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "; Path=/\r\n";
+            }
+
             String responseBody = "Hello world!";
             String contentType = contentType(path);
 
             if (method.equals("POST")) {
-                handlePost(path, br, outputStream);
+                handlePost(path, br, outputStream, headers, cookieHeader);
                 return;
             }
 
@@ -66,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = handleGet(path);
             }
 
-            sendOk(outputStream, contentType, responseBody);
+            sendOk(outputStream, contentType, responseBody, cookieHeader);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -87,20 +103,14 @@ public class Http11Processor implements Runnable, Processor {
         return "Hello world!";
     }
 
-    private void handlePost(String path, BufferedReader reader, OutputStream outputStream) throws IOException {
+    private void handlePost(String path, BufferedReader reader, OutputStream outputStream,
+                            Map<String, String> headers, String cookieHeader) throws IOException {
         if (!path.equals("/login") && !path.equals("/register")) {
-            sendOk(outputStream, contentType(path), "Hello world!");
+            sendOk(outputStream, contentType(path), "Hello world!", cookieHeader);
             return;
         }
 
-        String line;
-        int contentLength = 0;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] header = line.split(":", 2);
-            if (header[0].equalsIgnoreCase("Content-Length")) {
-                contentLength = Integer.parseInt(header[1].trim());
-            }
-        }
+        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
         char[] buffer = new char[contentLength];
         int offset = 0;
@@ -126,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = formParams.get("password");
         if (path.equals("/register")) {
             InMemoryUserRepository.save(new User(account, password, formParams.get("email")));
-            sendRedirect(outputStream, "/index.html");
+            sendRedirect(outputStream, "/index.html", cookieHeader);
             return;
         }
 
@@ -139,27 +149,28 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String location = authenticated ? "/index.html" : "/401.html";
-        sendRedirect(outputStream, location);
+        sendRedirect(outputStream, location, cookieHeader);
     }
 
-    private void sendOk(OutputStream outputStream, String contentType, String responseBody) throws IOException {
+    private void sendOk(OutputStream outputStream, String contentType, String responseBody,
+                        String cookieHeader) throws IOException {
         String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
+                cookieHeader,
                 responseBody);
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 
-    private void sendRedirect(OutputStream outputStream, String location) throws IOException {
+    private void sendRedirect(OutputStream outputStream, String location, String cookieHeader) throws IOException {
         String response = String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Location: " + location,
                 "Content-Length: 0",
-                "",
+                cookieHeader,
                 "");
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));

@@ -102,6 +102,25 @@ class Http11ProcessorTest {
                 .hasValueSatisfying(user -> assertThat(user.checkPassword("pass=word")).isTrue());
     }
 
+    @Test
+    void duplicateAccountRegistrationReturnsConflictWithoutOverwritingUser() {
+        String body = "account=gugu&password=changed&email=changed%40example.com";
+        final var socket = new StubSocket(postRequest("/register", body));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo("HTTP/1.1 409 Conflict\r\n"
+                + "Content-Type: text/plain;charset=utf-8\r\n"
+                + "Content-Length: 22\r\n"
+                + "\r\n"
+                + "Account already exists");
+        assertThat(InMemoryUserRepository.findByAccount("gugu"))
+                .hasValueSatisfying(user -> {
+                    assertThat(user.checkPassword("password")).isTrue();
+                    assertThat(user.checkPassword("changed")).isFalse();
+                });
+    }
+
     private String postRequest(String path, String body) {
         return postRequest(path, body, UUID.randomUUID().toString());
     }

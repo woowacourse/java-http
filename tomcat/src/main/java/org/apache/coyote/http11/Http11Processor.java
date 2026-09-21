@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +14,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
@@ -25,6 +28,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final int REQUEST_TARGET_INDEX = 1;
     private static final int QUERY_PARAMETER_PART_COUNT = 2;
     private static final String LOGIN_PATH = "/login";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String CRLF = "\r\n";
 
     private final Socket connection;
@@ -66,12 +71,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path == null) {
                 return;
             }
-            final String queryString = requestUri.getRawQuery();
-            if (LOGIN_PATH.equals(path) && queryString != null) {
-                logMatchingLoginUser(queryString);
-            }
-
-            final var response = resolveResponse(path);
+            final var response = resolveResponse(path, requestUri.getRawQuery());
 
             try {
                 writeResponse(outputStream, response);
@@ -114,17 +114,16 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private void logMatchingLoginUser(final String queryString) {
+    private Optional<User> findLoginUser(final String queryString) {
         final Map<String, String> parameters = parseQueryParameters(queryString);
         final String account = parameters.get("account");
         final String password = parameters.get("password");
         if (account == null || password == null) {
-            return;
+            return Optional.empty();
         }
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("login user found: {}", user.getAccount()));
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
     }
 
     private Map<String, String> parseQueryParameters(final String queryString) {
@@ -141,7 +140,24 @@ public class Http11Processor implements Runnable, Processor {
                 (previous, replacement) -> replacement));
     }
 
-    private HttpResponse resolveResponse(final String path) {
+    private HttpResponse resolveResponse(final String path, final String queryString) {
+        if (LOGIN_PATH.equals(path) && queryString != null) {
+            return resolveLoginResponse(queryString);
+        }
+        return resolveStaticResponse(path);
+    }
+
+    private HttpResponse resolveLoginResponse(final String queryString) {
+        final var loginUser = findLoginUser(queryString);
+        if (loginUser.isEmpty()) {
+            return HttpResponse.redirect(UNAUTHORIZED_PATH);
+        }
+
+        log.info("login user found: {}", loginUser.get().getAccount());
+        return HttpResponse.redirect(INDEX_PATH);
+    }
+
+    private HttpResponse resolveStaticResponse(final String path) {
         try {
             return HttpResponse.ok(responseContentResolver.resolve(path));
         } catch (HttpException e) {
@@ -152,12 +168,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
         final var content = response.content();
-        final var headers = String.join(CRLF,
-                "HTTP/1.1 " + response.status().code() + " " + response.status().reasonPhrase() + " ",
-                "Content-Type: " + content.contentType() + " ",
-                "Content-Length: " + content.body().length + " ",
-                "",
-                "");
+        final var headerLines = new ArrayList<String>();
+        headerLines.add("HTTP/1.1 " + response.status().code() + " " + response.status().reasonPhrase() + " ");
+        for (final var header : response.headers()) {
+            headerLines.add(header.name() + ": " + header.value() + " ");
+        }
+        headerLines.add("Content-Type: " + content.contentType() + " ");
+        headerLines.add("Content-Length: " + content.body().length + " ");
+        headerLines.add("");
+        headerLines.add("");
+        final var headers = String.join(CRLF, headerLines);
 
         outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
         outputStream.write(content.body());

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import support.StubSocket;
@@ -393,14 +394,11 @@ class Http11ProcessorTest {
     @DisplayName("로그인 요청")
     class LoginTests {
 
-        @ParameterizedTest(name = "{displayName} | 입력: {0}")
-        @ValueSource(strings = {
-                "/login",
-                "/login?account=gugu&password=password"
-        })
-        @DisplayName("로그인 요청에는 쿼리 유무와 관계없이 로그인 페이지를 응답한다")
-        void loginPageIsReturnedWithOrWithoutQueryString(final String requestTarget) throws IOException {
+        @Test
+        @DisplayName("로그인 페이지 요청에 로그인 페이지를 응답한다")
+        void loginPageIsReturned() throws IOException {
             // given
+            final var requestTarget = "/login";
             final var expectedBody = new String(readResource("static/login.html"), StandardCharsets.UTF_8);
 
             // when
@@ -408,6 +406,38 @@ class Http11ProcessorTest {
 
             // then
             assertThat(responseBody(response)).isEqualTo(expectedBody);
+        }
+
+        @ParameterizedTest(name = "{displayName} | 요청: {0}")
+        @ValueSource(strings = {
+                "/login?account=gugu&password=password",
+                "/login?account=gugu&password=wrong"
+        })
+        @DisplayName("로그인을 시도하면 302 Found 상태를 응답한다")
+        void loginAttemptReturnsFoundStatus(final String requestTarget) {
+            // given: 각 요청 경로는 @ValueSource에서 전달된다.
+
+            // when
+            final var response = responseTo(requestTarget);
+
+            // then
+            assertThat(response).startsWith("HTTP/1.1 302 Found ");
+        }
+
+        @ParameterizedTest(name = "{displayName} | 요청: {0}, 이동 경로: {1}")
+        @CsvSource({
+                "/login?account=gugu&password=password, /index.html",
+                "/login?account=gugu&password=wrong, /401.html"
+        })
+        @DisplayName("로그인 결과에 맞는 경로를 Location 헤더에 응답한다")
+        void loginAttemptRedirectsToExpectedLocation(final String requestTarget, final String expectedLocation) {
+            // given: 요청 경로와 예상 이동 경로는 @CsvSource에서 전달된다.
+
+            // when
+            final var response = responseTo(requestTarget);
+
+            // then
+            assertThat(response).contains("\r\nLocation: " + expectedLocation + " \r\n");
         }
 
         @Test

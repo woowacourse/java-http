@@ -114,12 +114,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 // 회원 정보가 존재하고 비밀번호가 일치하는 경우
                 if (user.isPresent() && user.get().checkPassword(password)) {
-                    // 1. 기존 세션을 찾거나 없으면 신규 세션 생성 후 저장
-                    Session session = SessionManager.findSession(jsessionId);
-                    if (session == null) {
-                        session = new Session(jsessionId);
-                        SessionManager.add(session);
-                    }
+                    // 1. 기존 세션을 찾거나 없으면 신규 세션 생성 후 저장 (조회+생성을 원자적으로 수행)
+                    Session session = SessionManager.getOrCreate(jsessionId);
                     // 2. 세션으로 유저 정보 보관
                     session.setAttribute("user", user.get());
                     send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);

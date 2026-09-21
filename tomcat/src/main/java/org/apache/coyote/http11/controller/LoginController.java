@@ -3,6 +3,7 @@ package org.apache.coyote.http11.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +26,6 @@ public class LoginController extends AbstractController {
     private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
     private static final String USER = "user";
     private static final String SET_COOKIE = "Set-Cookie";
@@ -38,43 +38,61 @@ public class LoginController extends AbstractController {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
 
+        login(account, password, httpCookie, response);
+    }
+
+    private void login(String account, String password, HttpCookie httpCookie, HttpResponse response)
+            throws IOException {
         if (account != null && password != null) {
-            final Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password));
+            final Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
 
-            if (loginUser.isPresent()) {
-                final User user = loginUser.get();
-                log.info("로그인 성공! 아이디 : {}", user.getAccount());
-
-                if (httpCookie.get(JSESSIONID) != null) {
-                    // 기존에 세션이 존재한다면, 세션을 삭제한다.
-                    HttpSession existedSession = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
-                    if (existedSession != null) {
-                        SessionManager.getInstance().remove(existedSession);
-                    }
-                }
-
-                final Session session = new Session(UUID.randomUUID().toString());
-                session.setAttribute(USER, user);
-                SessionManager.getInstance().add(session);
-
-                response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
-                        new ReasonPhrase("Found"));
-
-                response.putHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
-                response.putHeader(LOCATION, "/index.html");
-                response.putHeader(CONTENT_LENGTH, "0");
-                response.write();
+            if (foundUser.isEmpty()) {
+                redirectToUnauthorized(response);
                 return;
             }
 
-            response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
-                    new ReasonPhrase("Found"));
+            final User user = foundUser.get();
 
-            response.putHeader(LOCATION, "/401.html");
-            response.putHeader(CONTENT_LENGTH, "0");
+            if (!user.checkPassword(password)) {
+                redirectToUnauthorized(response);
+                return;
+            }
 
+            log.info("로그인 성공! 아이디 : {}", user.getAccount());
+
+            removeSessionIfExists(httpCookie);
+
+            final Session session = createSession(user);
+
+            response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
+
+            response.putHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
+            response.putHeader(LOCATION, "/index.html");
             response.write();
+            return;
+        }
+        redirectToUnauthorized(response);
+    }
+
+    private void redirectToUnauthorized(HttpResponse response) throws IOException {
+        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
+        response.putHeader(LOCATION, "/401.html");
+        response.write();
+    }
+
+    private Session createSession(User user) {
+        final Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute(USER, user);
+        SessionManager.getInstance().add(session);
+        return session;
+    }
+
+    private static void removeSessionIfExists(HttpCookie httpCookie) {
+        if (httpCookie.get(JSESSIONID) != null) {
+            HttpSession existedSession = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
+            if (existedSession != null) {
+                SessionManager.getInstance().remove(existedSession);
+            }
         }
     }
 

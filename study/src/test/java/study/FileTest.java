@@ -1,5 +1,12 @@
 package study;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,12 +30,13 @@ class FileTest {
      * 자바 애플리케이션은 resource 디렉터리에 HTML, CSS 같은 정적 파일을 저장한다.
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
+    // ref: https://stackoverflow.com/questions/19414453/how-to-get-resources-directory-path-programmatically
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
+        URL fileUrl = this.getClass().getClassLoader().getResource(fileName);
 
-        // todo
-        final String actual = "";
+        final String actual = fileUrl.getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +48,20 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
         final String fileName = "nextstep.txt";
+        URL fileUrl = this.getClass().getClassLoader().getResource(fileName);
 
-        // todo
-        final Path path = null;
+        // sol 1
+        File file = new File(fileUrl.toURI());
+        final Path path = Path.of(file.getAbsolutePath());
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        // sol 2
+        // Avoid to throws IllegalArgumentExeption: Missing scheme
+        // ref: https://stackoverflow.com/questions/25167149/missing-scheme-illegalargumentexception-while-using-java-nio-file-paths-interf
+//        final Path path = Path.of(URI.create("file:///" + fileUrl.getPath()));
+
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

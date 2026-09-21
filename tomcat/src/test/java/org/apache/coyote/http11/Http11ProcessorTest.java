@@ -39,7 +39,7 @@ class Http11ProcessorTest {
         new Http11Processor(socket).process(socket);
 
         try (var resource = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
-            assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n")
+            assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n")
                     .doesNotContain("Location:")
                     .endsWith(new String(resource.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
         }
@@ -85,7 +85,7 @@ class Http11ProcessorTest {
         new Http11Processor(socket).process(socket);
 
         try (var resource = getClass().getClassLoader().getResourceAsStream("static/register.html")) {
-            assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n")
+            assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n")
                     .endsWith(new String(resource.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
         }
     }
@@ -146,9 +146,9 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         var expected = String.join("\r\n",
-                "HTTP/1.1 404 Not Found ",
-                "Content-Type: text/plain;charset=utf-8 ",
-                "Content-Length: 9 ",
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/plain;charset=utf-8",
+                "Content-Length: 9",
                 "",
                 "Not Found");
         assertThat(socket.output()).isEqualTo(expected);
@@ -165,9 +165,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -197,9 +197,9 @@ class Http11ProcessorTest {
                 Files.readAllBytes(new File(resource.getFile()).toPath()),
                 java.nio.charset.StandardCharsets.UTF_8
         );
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes(java.nio.charset.StandardCharsets.UTF_8).length + " \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: " + responseBody.getBytes(java.nio.charset.StandardCharsets.UTF_8).length + "\r\n" +
                 "\r\n"+
                 responseBody;
 
@@ -212,7 +212,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\nSet-Cookie: JSESSIONID=");
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\nSet-Cookie: JSESSIONID=");
 
         String sessionId = socket.output()
                 .lines()

@@ -16,11 +16,9 @@ class HttpResponseTest {
     void writesStatusLineHeadersAndBody() throws Exception {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Set-Cookie", "JSESSIONID=session-id");
-        headers.put("Content-Type", "text/plain;charset=utf-8 ");
+        headers.put("Content-Type", "text/plain;charset=utf-8");
         HttpResponse response = new HttpResponse(
-                "HTTP/1.1",
-                200,
-                "OK",
+                HttpStatus.OK,
                 headers,
                 "안녕"
         );
@@ -29,10 +27,10 @@ class HttpResponseTest {
         response.writeTo(outputStream);
 
         assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo(
-                "HTTP/1.1 200 OK \r\n"
+                "HTTP/1.1 200 OK\r\n"
                         + "Set-Cookie: JSESSIONID=session-id\r\n"
-                        + "Content-Type: text/plain;charset=utf-8 \r\n"
-                        + "Content-Length: 6 \r\n"
+                        + "Content-Type: text/plain;charset=utf-8\r\n"
+                        + "Content-Length: 6\r\n"
                         + "\r\n"
                         + "안녕"
         );
@@ -41,9 +39,7 @@ class HttpResponseTest {
     @Test
     void rejectsCallerProvidedContentLength() {
         assertThatThrownBy(() -> new HttpResponse(
-                "HTTP/1.1",
-                200,
-                "OK",
+                HttpStatus.OK,
                 Map.of("content-length", "1"),
                 "body"
         ))

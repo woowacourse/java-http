@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
     ) throws IOException {
         String path = request.getRequestUri().getPath();
         switch (path) {
-            case "/" -> writeResponse(outputStream, 200, "OK", "Hello world!", "text/html", newSessionId);
+            case "/" -> writeResponse(outputStream, HttpStatus.OK, "Hello world!", "text/html", newSessionId);
             case "/register" -> handleRegister(request, newSessionId, outputStream);
             case "/login" -> handleLogin(request, sessionId, newSessionId, outputStream);
             case "/session" -> handleSession(sessionId, newSessionId, outputStream);
@@ -101,8 +101,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             default -> writeResponse(
                     outputStream,
-                    405,
-                    "Method Not Allowed",
+                    HttpStatus.METHOD_NOT_ALLOWED,
                     "Method Not Allowed",
                     "text/plain",
                     newSessionId
@@ -144,8 +143,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             default -> writeResponse(
                     outputStream,
-                    405,
-                    "Method Not Allowed",
+                    HttpStatus.METHOD_NOT_ALLOWED,
                     "Method Not Allowed",
                     "text/plain",
                     newSessionId
@@ -186,7 +184,7 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = loginUser
                 .map(user -> "{\"loggedIn\":true,\"account\":\"" + escapeJson(user.getAccount()) + "\"}")
                 .orElse("{\"loggedIn\":false}");
-        writeResponse(outputStream, 200, "OK", responseBody, "application/json", newSessionId);
+        writeResponse(outputStream, HttpStatus.OK, responseBody, "application/json", newSessionId);
     }
 
     private String escapeJson(String value) {
@@ -225,12 +223,11 @@ public class Http11Processor implements Runnable, Processor {
                     session.invalidate();
                 }
 
-                writeResponse(outputStream, 204, "No Content", "", "text/plain", newSessionId);
+                writeResponse(outputStream, HttpStatus.NO_CONTENT, "", "text/plain", newSessionId);
             }
             default -> writeResponse(
                     outputStream,
-                    405,
-                    "Method Not Allowed",
+                    HttpStatus.METHOD_NOT_ALLOWED,
                     "Method Not Allowed",
                     "text/plain",
                     newSessionId
@@ -264,12 +261,12 @@ public class Http11Processor implements Runnable, Processor {
         try {
             responseBody = resourceLoader.load(path);
         } catch (FileNotFoundException e) {
-            writeResponse(outputStream, 404, "Not Found", "Not Found", "text/plain", newSessionId);
+            writeResponse(outputStream, HttpStatus.NOT_FOUND, "Not Found", "text/plain", newSessionId);
             return;
         }
 
         String contentType = path.endsWith(".css") ? "text/css" : "text/html";
-        writeResponse(outputStream, 200, "OK", responseBody, contentType, newSessionId);
+        writeResponse(outputStream, HttpStatus.OK, responseBody, contentType, newSessionId);
     }
 
     private Optional<User> login(Map<String, String> params) {
@@ -289,43 +286,33 @@ public class Http11Processor implements Runnable, Processor {
             String location,
             Optional<String> newSessionId
     ) throws IOException {
-        String response = "HTTP/1.1 302 Found\r\n"
-                + setCookieHeader(newSessionId)
-                + "Location: " + location + "\r\n"
-                + "Content-Length: 0\r\n\r\n";
-        write(outputStream, response);
+        Map<String, String> headers = responseHeaders(newSessionId);
+        headers.put("Location", location);
+
+        new HttpResponse(HttpStatus.FOUND, headers, "").writeTo(outputStream);
     }
 
     private void writeResponse(
             OutputStream outputStream,
-            int statusCode,
-            String statusMessage,
+            HttpStatus status,
             String responseBody,
             String contentType,
             Optional<String> newSessionId
     ) throws IOException {
-        Map<String, String> headers = new LinkedHashMap<>();
-        newSessionId.ifPresent(sessionId ->
-                headers.put("Set-Cookie", HttpCookie.JSESSION_ID + "=" + sessionId));
-        headers.put("Content-Type", contentType + ";charset=utf-8 ");
+        Map<String, String> headers = responseHeaders(newSessionId);
+        headers.put("Content-Type", contentType + ";charset=utf-8");
 
         new HttpResponse(
-                "HTTP/1.1",
-                statusCode,
-                statusMessage,
+                status,
                 headers,
                 responseBody
         ).writeTo(outputStream);
     }
 
-    private void write(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
-    }
-
-    private String setCookieHeader(Optional<String> newSessionId) {
-        return newSessionId
-                .map(sessionId -> "Set-Cookie: " + HttpCookie.JSESSION_ID + "=" + sessionId + "\r\n")
-                .orElse("");
+    private Map<String, String> responseHeaders(Optional<String> newSessionId) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        newSessionId.ifPresent(sessionId ->
+                headers.put("Set-Cookie", HttpCookie.JSESSION_ID + "=" + sessionId));
+        return headers;
     }
 }

@@ -34,9 +34,16 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionIdGenerator sessionIdGenerator;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionIdGenerator = new SessionIdGenerator();
+    }
+
+    public Http11Processor(final Socket connection, SessionIdGenerator sessionIdGenerator) {
+        this.connection = connection;
+        this.sessionIdGenerator = sessionIdGenerator;
     }
 
     @Override
@@ -76,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequestHeader parseRequestHeader(BufferedReader br) throws IOException {
         Map<String, String> headers = new HashMap<>();
-
+        HttpCookie cookie = HttpCookie.empty();
         String line = br.readLine();
         RequestLine firstLine = RequestLine.from(line);
 
@@ -85,11 +92,15 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
             String[] parts = line.split(": ", 2);
+            if (parts[0].equals("Cookie")) {
+                cookie = HttpCookie.from(parts[1]);
+                continue;
+            }
             if (parts.length == 2) {
                 headers.put(parts[0], parts[1]);
             }
         }
-        return new HttpRequestHeader(firstLine, headers);
+        return new HttpRequestHeader(firstLine, headers, cookie);
     }
 
     private HttpRequestBody parseRequestBody(BufferedReader br, int contentLength) throws IOException {
@@ -111,6 +122,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String handle(HttpRequest request) throws IOException {
         HttpRequestHeader header = request.requestHeader();
+        HttpCookie cookie = header.cookie();
         HttpRequestBody body = request.requestBody();
 
         String responseBody;
@@ -125,7 +137,11 @@ public class Http11Processor implements Runnable, Processor {
 
         if (header.path().contains("login") && header.hasContain("Content-Length")) {
             String location = loginUser(body);
-            return redirectResponse(HttpStatus.FOUND, location);
+            if (location.contains("401")) {
+                return redirectResponse(HttpStatus.FOUND, location);
+            }
+
+            return handleLogin(cookie, location);
         }
 
         if (header.path().contains("register") && header.hasContain("Content-Length")) {
@@ -214,10 +230,28 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
+    private String handleLogin(HttpCookie cookie, String location) {
+        if (cookie.hasJSessionId()) {
+            return redirectResponse(HttpStatus.FOUND, location);
+        }
+
+        return redirectResponseWithCookie(HttpStatus.FOUND, location);
+    }
+
     private String redirectResponse(HttpStatus status, String location) {
         return String.join("\r\n",
                 "HTTP/1.1 " + status.status() + " ",
                 "Location: " + location + " ",
+                "",
+                ""
+        );
+    }
+
+    private String redirectResponseWithCookie(HttpStatus status, String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status.status() + " ",
+                "Location: " + location + " ",
+                "Set-Cookie: " + "JSESSIONID=" + sessionIdGenerator.generate() + " ",
                 "",
                 ""
         );

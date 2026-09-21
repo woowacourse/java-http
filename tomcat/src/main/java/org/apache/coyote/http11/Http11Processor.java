@@ -233,7 +233,7 @@ public class Http11Processor implements Runnable, Processor {
         String account = bodyParameters.get("account");
         String email = bodyParameters.get("email");
         String password = bodyParameters.get("password");
-        return InMemoryUserRepository.save(new User(account, email, password));
+        return InMemoryUserRepository.save(new User(account, password, email));
     }
 
     private static String getRequestBody(int contentLength, BufferedReader bufferedReader) throws IOException {

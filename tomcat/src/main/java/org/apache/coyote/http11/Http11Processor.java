@@ -1,8 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Controller;
+import org.apache.catalina.RequestMapping;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
@@ -32,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final StaticResourceLoader resourceLoader = new StaticResourceLoader();
     private final SessionManager sessionManager = SessionManager.getInstance();
+    private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -56,14 +58,21 @@ public class Http11Processor implements Runnable, Processor {
             Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();
             String sessionId = cookies.get(HttpCookie.JSESSION_ID).orElseThrow();
 
+            Controller controller = requestMapping.getController(httpRequest);
+            if (controller != null) {
+                HttpResponse response = new HttpResponse();
+                newSessionId.ifPresent(id ->
+                        response.setHeader("Set-Cookie", HttpCookie.JSESSION_ID + "=" + id));
+                controller.service(httpRequest, response);
+                response.writeTo(outputStream);
+                return;
+            }
 
             handleRequest(httpRequest, sessionId, newSessionId, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
-
-
 
     private void handleRequest(
             HttpRequest request,
@@ -73,7 +82,6 @@ public class Http11Processor implements Runnable, Processor {
     ) throws IOException {
         String path = request.getRequestUri().getPath();
         switch (path) {
-            case "/" -> writeResponse(outputStream, HttpStatus.OK, "Hello world!", "text/html", newSessionId);
             case "/register" -> handleRegister(request, newSessionId, outputStream);
             case "/login" -> handleLogin(request, sessionId, newSessionId, outputStream);
             case "/session" -> handleSession(sessionId, newSessionId, outputStream);

@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -12,9 +11,13 @@ public final class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private final HttpStatus status;
+    private HttpStatus status;
     private final Map<String, String> headers;
-    private final byte[] body;
+    private byte[] body;
+
+    public HttpResponse() {
+        this(HttpStatus.OK, Map.of(), "");
+    }
 
     public HttpResponse(
             HttpStatus status,
@@ -22,11 +25,31 @@ public final class HttpResponse {
             String body
     ) {
         this.status = Objects.requireNonNull(status);
-        Map<String, String> copiedHeaders = new LinkedHashMap<>(Objects.requireNonNull(headers));
-        if (copiedHeaders.keySet().stream().anyMatch("Content-Length"::equalsIgnoreCase)) {
+        this.headers = new LinkedHashMap<>();
+        Objects.requireNonNull(headers).forEach(this::setHeader);
+        this.body = Objects.requireNonNull(body).getBytes(StandardCharsets.UTF_8);
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = Objects.requireNonNull(status);
+    }
+
+    public void setHeader(String name, String value) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+        if (name.equalsIgnoreCase("Content-Length")) {
             throw new IllegalArgumentException("Content-Length는 응답 본문으로부터 계산됩니다.");
         }
-        this.headers = Collections.unmodifiableMap(copiedHeaders);
+
+        headers.keySet().removeIf(name::equalsIgnoreCase);
+        headers.put(name, value);
+    }
+
+    public void setContentType(String contentType) {
+        setHeader("Content-Type", Objects.requireNonNull(contentType) + ";charset=utf-8");
+    }
+
+    public void setBody(String body) {
         this.body = Objects.requireNonNull(body).getBytes(StandardCharsets.UTF_8);
     }
 

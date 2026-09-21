@@ -248,15 +248,15 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/register".equals(path)) {
             if ("POST".equals(method)) {
-                final String location = register(parameters) ? "/index.html" : "/register";
-                writeRedirectResponse(outputStream, location, sessionIdToSet);
+                writeRedirectResponse(outputStream, "/register", sessionIdToSet);
                 return null;
             }
-
-            return readResource("/register.html");
+            if (register(parameters)) {
+                writeRedirectResponse(outputStream, "/index.html", sessionIdToSet);
+                return null;
+            }
         }
-
-        return readResource(path);
+        return readResource("/register.html");
     }
 
     private boolean register(final Map<String, String> parameters) {
@@ -315,7 +315,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public static final class SessionManager {
 
-        private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
+        private static final Map<String, Session> sessions = new HashMap<>();
 
         private SessionManager() {
         }

@@ -5,17 +5,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Cookie {
+public class HttpCookie {
 
     private final Map<String, String> values;
 
-    private Cookie(Map<String, String> values) {
+    private HttpCookie(Map<String, String> values) {
         this.values = Map.copyOf(values);
     }
 
-    public static Cookie from(String cookieHeader) {
+    public static HttpCookie from(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isBlank()) {
-            return new Cookie(Map.of());
+            return new HttpCookie(Map.of());
         }
 
         Map<String, String> values = Arrays.stream(cookieHeader.split(";"))
@@ -29,15 +29,11 @@ public class Cookie {
                         )
                 );
 
-        return new Cookie(values);
+        return new HttpCookie(values);
     }
 
     public Optional<String> get(String name) {
         return Optional.ofNullable(values.get(name));
-    }
-
-    public boolean contains(String name) {
-        return values.containsKey(name);
     }
 
 }

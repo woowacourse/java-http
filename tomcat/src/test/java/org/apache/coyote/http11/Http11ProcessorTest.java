@@ -15,10 +15,12 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
+        final Session session = SessionManager.createSession();
+
         final String rootRequest = String.join("\r\n",
                 "GET / HTTP/1.1",
                 "Host: localhost:8080",
-                "Cookie: JSESSIONID=test-session-id",
+                "Cookie: JSESSIONID=" + session.getId(),
                 "",
                 ""
         );
@@ -28,7 +30,7 @@ class Http11ProcessorTest {
         final String indexRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
-                "Cookie: JSESSIONID=test-session-id",
+                "Cookie: JSESSIONID=" + session.getId(),
                 "",
                 ""
         );
@@ -45,11 +47,13 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
+        final Session session = SessionManager.createSession();
+
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=test-session-id",
+                "Cookie: JSESSIONID=" + session.getId(),
                 "",
                 "");
 
@@ -66,7 +70,7 @@ class Http11ProcessorTest {
                 new File(resource.getFile()).toPath()
         );
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + expectedBody.length + " \r\n" +
                 "\r\n" +

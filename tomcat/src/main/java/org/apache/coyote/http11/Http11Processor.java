@@ -66,13 +66,17 @@ public class Http11Processor implements Runnable, Processor {
             if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null
                     && httpRequest.getMethod() == Method.GET
                     && httpRequest.getUri().endsWith("/login")) {
-                httpResponse.setStatusCode(StatusCode.FOUND);
-                httpResponse.setContentType(ContentType.HTML);
-                httpResponse.sendRedirect("index.html");
-                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
-                return;
+
+                Session session = manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").get());
+                if (getUser(session) != null) {
+                    httpResponse.setStatusCode(StatusCode.FOUND);
+                    httpResponse.setContentType(ContentType.HTML);
+                    httpResponse.sendRedirect("index.html");
+                    outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                    return;
+                }
             }
 
             if (isLoginRequest(httpRequest)) {
@@ -128,6 +132,10 @@ public class Http11Processor implements Runnable, Processor {
         }
         sb.append(cbuf, 0, read);
         return sb.toString();
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private static boolean isLoginRequest(MyHttpRequest httpRequest) {

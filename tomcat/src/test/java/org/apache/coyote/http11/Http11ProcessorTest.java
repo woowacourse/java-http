@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
@@ -101,7 +102,9 @@ class Http11ProcessorTest {
         // given
         final String SESSION_ID = "656cef62-e3c4-40bc-a8df-94732920ed46";
         SessionManager manager = SessionManager.getInstance();
-        manager.add(new Session(SESSION_ID));
+        Session session = new Session(SESSION_ID);
+        session.setAttribute("user", new User("sample", "sample", "sample@example.com"));
+        manager.add(session);
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
@@ -112,6 +115,7 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+
         // when
         processor.process(socket);
 

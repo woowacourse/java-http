@@ -1,17 +1,19 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.UuidGenerator;
+import org.apache.coyote.http11.model.Cookie;
+import org.apache.coyote.http11.model.FormParameters;
+import org.apache.coyote.http11.model.RequestLine;
 import org.apache.coyote.http11.model.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,73 +39,135 @@ public class Http11Processor implements Runnable, Processor {
         String requestPath = "unknown";
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            SessionManager sessionManager = new SessionManager();
 
-            String url = parseRequestUrl(inputStream);
+            RequestLine requestLine = RequestLine.from(reader);
+            String line;
+            int requestContentLength = 0;
+            String cookieForm = "";
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                if (line.contains("Content-Length")) {
+                    String[] contentLengthLine = line.split(":", 2);
+                    requestContentLength = Integer.parseInt(contentLengthLine[1].trim());
+                }
+                if (line.contains("Cookie")) {
+                    String[] cookieLine = line.split(":", 2);
+                    cookieForm = cookieLine[1].trim();
+                }
+            }
+            Cookie cookie = Cookie.from(cookieForm);
+            String jsessionid = cookie.getCookie("JSESSIONID");
+            boolean isGenerated = false;
+            Session session;
+            if (jsessionid == null) {
+                session = null;
+            } else {
+                session = sessionManager.findSession(jsessionid);
+            }
+            if (session == null) {
+                session = new Session(UuidGenerator.generate());
+                sessionManager.add(session);
+                isGenerated = true;
+            }
+
+            String url = requestLine.requestUrl();
+            String method = requestLine.httpMethod();
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
-            requestPath = uriInfo.path();
-            if ("/login".equals(uriInfo.path()) && !uriInfo.queryString().isBlank()) {
-                User user = RequestHandler.findUser(parseUserAccount(uriInfo.queryString()));
-                log.info("로그인 사용자: {}", user.getAccount());
+
+            if ("GET".equals(method)) {
+                getProcess(outputStream, uriInfo, isGenerated, session);
+            } else if ("POST".equals(method)) {
+                String requestBodyForm = extractRequestBodyForm(requestContentLength, reader);
+                FormParameters requestBody = FormParameters.from(requestBodyForm);
+                postProcess(outputStream, uriInfo, requestBody, isGenerated, session);
             }
 
-            String resourceUrl = uriInfo.path();
-            if ("/login".equals(resourceUrl)) {
-                resourceUrl = "/login.html";
-            }
-
-            String contentType = findContentType(resourceUrl);
-            byte[] responseBody = buildResponseBody(resourceUrl);
-            String response = buildResponse(responseBody, contentType);
-
-            outputStream.write(response.getBytes());
-            outputStream.write(responseBody);
-            outputStream.flush();
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
     }
 
-    private String parseUserAccount(String queryString) {
-        String[] parameters = queryString.split("&");
-
-        for (String parameter : parameters) {
-            String[] nameAndValue = parameter.split("=");
-
-            if ("account".equals(nameAndValue[0])) {
-                return nameAndValue[1];
+    private String extractRequestBodyForm(int requestContentLength, BufferedReader reader) throws IOException {
+        int readLength = 0;
+        char[] buffer = new char[requestContentLength];
+        while (readLength < requestContentLength) {
+            int nowReadLength = reader.read(buffer, readLength, requestContentLength - readLength);
+            if (nowReadLength == -1) {
+                throw new IOException("잘못된 요청");
             }
+            readLength += nowReadLength;
         }
-        throw new IllegalArgumentException(
-                "account 파라미터가 없습니다."
-        );
+        return new String(buffer);
     }
 
-    private String buildResponse(
+    private void getProcess(
+            OutputStream outputStream,
+            UriInfo uriInfo,
+            boolean isSessionGenerated,
+            Session session
+    ) throws IOException, URISyntaxException {
+        String redirectPath;
+        if ((redirectPath = RequestHandler.findGetRedirectPath(uriInfo.path(), session)) != null) {
+            String responseHeader = buildResponseHeader(redirectPath);
+            responseHeader = finishResponseHeader(responseHeader);
+            outputStream.write(responseHeader.getBytes());
+            outputStream.flush();
+            return;
+        }
+        byte[] responseBody = RequestHandler.get(uriInfo.path());
+        String responseHeader = buildResponseHeader(responseBody, findContentType(uriInfo.path()));
+        if (isSessionGenerated) {
+            responseHeader = addCookieToResponseHeader(responseHeader, session);
+        }
+        responseHeader = finishResponseHeader(responseHeader);
+        outputStream.write(responseHeader.getBytes());
+        outputStream.write(responseBody);
+        outputStream.flush();
+    }
+
+    private void postProcess(
+            OutputStream outputStream,
+            UriInfo uriInfo,
+            FormParameters formParameters,
+            boolean isSessionGenerated,
+            Session session
+    ) throws IOException, URISyntaxException {
+        String redirectPath = RequestHandler.post(uriInfo, formParameters, session);
+        String responseHeader = buildResponseHeader(redirectPath);
+        if (isSessionGenerated) {
+            responseHeader = addCookieToResponseHeader(responseHeader, session);
+        }
+        responseHeader = finishResponseHeader(responseHeader);
+        outputStream.write(responseHeader.getBytes());
+        outputStream.flush();
+    }
+
+    private String buildResponseHeader(String redirectPath) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + redirectPath,
+                "Content-Length: 0");
+    }
+
+    private String addCookieToResponseHeader(String responseHeader, Session session) {
+        return responseHeader +
+                "\r\n" +
+                "Set-Cookie: JSESSIONID=" + session.getId();
+    }
+
+    private String finishResponseHeader(String responseHeader) {
+        return responseHeader + "\r\n\r\n";
+    }
+
+    private String buildResponseHeader(
             byte[] responseBody,
             String contentType
     ) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "");
-    }
-
-    private byte[] buildResponseBody(String url) throws URISyntaxException, IOException {
-        if ("/".equals(url)) {
-            return "Hello world!".getBytes(StandardCharsets.UTF_8);
-        }
-        String resourcePath = "static" + url;
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
-        Path path = Path.of(resource.toURI());
-        return Files.readAllBytes(path);
-    }
-
-    private String parseRequestUrl(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String[] request = reader.readLine().trim().split("\\s+");
-        return request[1];
+                "Content-Length: " + responseBody.length + " ");
     }
 
     private String findContentType(String url) {

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,8 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> formData = parseQueryString(body);
 
             if (isLoginRequest(path, formData)) {
-                write(outputStream, redirectResponse(loginLocation(formData)));
+                String cookie = "JSESSIONID=" + UUID.randomUUID();
+                write(outputStream, redirectResponse(loginLocation(formData), cookie));
                 return;
             }
             if (isRegisterRequest(path, formData)) {
@@ -158,6 +160,15 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: " + location + " ",
+                "",
+                "");
+    }
+
+    private String redirectResponse(final String location, final String cookie) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Set-Cookie: " + cookie + " ",
                 "",
                 "");
     }

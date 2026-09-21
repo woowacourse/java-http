@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,11 +74,17 @@ public class Http11Processor implements Runnable, Processor {
 
                         String account = queryParams.get("account");
                         String password = queryParams.get("password");
-                        if (account != null && password != null) {
-                            InMemoryUserRepository.findByAccount(account)
-                                    .filter(user -> user.checkPassword(password))
-                                    .ifPresent(user -> log.info("회원 조회 성공: {}", user.getAccount()));
+                        boolean authenticated = account != null && password != null
+                                && InMemoryUserRepository.findByAccount(account)
+                                        .filter(user -> user.checkPassword(password))
+                                        .isPresent();
+                        if (authenticated) {
+                            log.info("회원 조회 성공: {}", account);
                         }
+
+                        String location = authenticated ? "/index.html" : "/401.html";
+                        sendRedirect(outputStream, location);
+                        return;
                     }
                 }
 
@@ -98,6 +105,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendRedirect(OutputStream outputStream, String location) throws IOException {
+        String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private String readFile(String fileName) throws IOException {

@@ -107,6 +107,43 @@ class Http11ProcessorTest {
                         + "Content-Length: 0\r\n\r\n");
     }
 
+    @Test
+    void wrongPasswordRedirectsToUnauthorized() {
+        final var socket = new StubSocket(
+                "GET /login?account=gugu&password=wrong HTTP/1.1\r\n"
+                        + "Host: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo(
+                "HTTP/1.1 302 Found\r\n"
+                        + "Location: /401.html\r\n"
+                        + "Content-Length: 0\r\n\r\n");
+    }
+
+    @Test
+    void unauthorizedPage() throws IOException {
+        final var socket = new StubSocket(
+                "GET /401.html HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        try (var resource = getClass().getClassLoader()
+                .getResourceAsStream("static/401.html")) {
+            assertThat(resource).isNotNull();
+            final byte[] expectedBody = resource.readAllBytes();
+
+            final String expected =
+                    "HTTP/1.1 200 OK \r\n"
+                            + "Content-Type: text/html;charset=utf-8 \r\n"
+                            + "Content-Length: " + expectedBody.length + " \r\n"
+                            + "\r\n"
+                            + new String(expectedBody, StandardCharsets.UTF_8);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+    }
+
     private void assertLoginResponse(String requestTarget) throws IOException {
         final var socket = new StubSocket(
                 "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");

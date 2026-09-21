@@ -72,18 +72,19 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (authenticated) {
                         log.info("회원 조회 성공: {}", account);
-
-                        final String response = String.join("\r\n",
-                                "HTTP/1.1 302 Found",
-                                "Location: /index.html",
-                                "Content-Length: 0",
-                                "",
-                                "");
-
-                        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                        outputStream.flush();
-                        return;
                     }
+
+                    final String location = authenticated ? "/index.html" : "/401.html";
+                    final String response = String.join("\r\n",
+                            "HTTP/1.1 302 Found",
+                            "Location: " + location,
+                            "Content-Length: 0",
+                            "",
+                            "");
+
+                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    return;
                 }
             }
 
@@ -91,6 +92,7 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "text/html;charset=utf-8";
 
             if ("/index.html".equals(path)
+                    || "/401.html".equals(path)
                     || "/css/styles.css".equals(path)
                     || path.endsWith(".js")
                     || "/login".equals(path)) {

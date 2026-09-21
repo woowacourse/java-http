@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,9 +61,11 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String requestFirstLine = bufferedReader.readLine();
             String[] firstLineParts = requestFirstLine.trim().split("\\s+");
-            String filePath = firstLineParts[1];
 
-            URI uri = URI.create(filePath);
+            String method = firstLineParts[0];
+            String requestTarget = firstLineParts[1];
+
+            URI uri = URI.create(requestTarget);
             String uriPath = uri.getPath();
 
             // 요청 경로 없을 경우 문자열 반환
@@ -71,13 +74,12 @@ public class Http11Processor implements Runnable, Processor {
                 final var response = createResponse("HTTP/1.1 200 OK ", responseBody, "text/html");
 
                 writeResponse(outputStream, response);
-                return;
             } else if ("/login".equals(uriPath)) {
                 String rawQuery = uri.getRawQuery();
 
                 // 이 경우 로그인 여부 확인해서 302 index or 401 반환
                 if (rawQuery != null) {
-                    Map<String, String> queryParameters = parseQueryParameters(uri);
+                    Map<String, String> queryParameters = parseQueryParameters(rawQuery);
 
                     String account = queryParameters.get("account");
                     String password = queryParameters.get("password");
@@ -106,23 +108,57 @@ public class Http11Processor implements Runnable, Processor {
                 // 이경우 그냥 login.html 보여주기
                 String loginPath = uriPath + ".html";
                 InputStream resourceAsStream = getResourceInputStream(loginPath, outputStream);
-                if (resourceAsStream == null) return;
 
                 sendResponse(resourceAsStream, "text/html", outputStream);
-                return;
+            } else if ("/register".equals(uriPath)) {
+                if ("GET".equals(method)) {
+                    String registerFileName = uriPath + ".html";
+                    InputStream resourceAsStream = getResourceInputStream(registerFileName, outputStream);
+                    sendResponse(resourceAsStream, "text/html", outputStream);
+                    return;
+                }
+                String line;
+                int contentLength = 0;
+                while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+                    if (line.startsWith("Content-Length: ")) {
+                        contentLength = Integer.parseInt(line.substring("Content-Length: ".length()).trim());
+
+                    }
+                }
+
+                char[] requestBodyChars = new char[contentLength];
+                int totalRead = 0;
+                while (totalRead < contentLength) {
+                    int count = bufferedReader.read(requestBodyChars, totalRead, contentLength - totalRead);
+                    if (count == -1) {
+                        break;
+                    }
+                    totalRead += count;
+                }
+                String requestBody = new String(requestBodyChars, 0, totalRead);
+                Map<String, String> bodyParameters = parseQueryParameters(requestBody);
+
+                String account = bodyParameters.get("account");
+                String email = bodyParameters.get("email");
+                String password = bodyParameters.get("password");
+                InMemoryUserRepository.save(new User(account, email, password));
+                try {
+                    sendRedirectResponse("/index.html", outputStream);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                // 클래스 로더에서 정적 파일 가져오기
+                InputStream resourceAsStream = getResourceInputStream(uriPath, outputStream);
+
+                // 확장자에 맞는 content-type 추출
+                int pointIndex = uriPath.lastIndexOf('.');
+                String fileExtension = uriPath.substring(pointIndex + 1);
+                String contentType = MIME_TYPES.get(fileExtension);
+
+                // 정적 파일 반환
+                sendResponse(resourceAsStream, contentType, outputStream);
             }
-
-            // 클래스 로더에서 정적 파일 가져오기
-            InputStream resourceAsStream = getResourceInputStream(uriPath, outputStream);
-            if (resourceAsStream == null) return;
-
-            // 확장자에 맞는 content-type 추출
-            int pointIndex = uriPath.lastIndexOf('.');
-            String fileExtension = uriPath.substring(pointIndex + 1);
-            String contentType = MIME_TYPES.get(fileExtension);
-
-            // 정적 파일 반환
-            sendResponse(resourceAsStream, contentType, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -175,10 +211,8 @@ public class Http11Processor implements Runnable, Processor {
         return resourceAsStream;
     }
 
-    private static Map<String, String> parseQueryParameters(URI uri) {
-        String rawQuery = uri.getRawQuery();
-
-        return Arrays.stream(rawQuery.split("&"))
+    private static Map<String, String> parseQueryParameters(String parameters) {
+        return Arrays.stream(parameters.split("&"))
                 .map(parameter -> parameter.split("=", 2))
                 .collect(Collectors.toMap(
                         parts -> decode(parts[0]),

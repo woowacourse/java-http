@@ -1,6 +1,5 @@
 package org.apache.catalina.session;
 
-import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
 
 import java.util.Map;
@@ -8,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
 
     private SessionManager() {
@@ -19,12 +18,12 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void add(final HttpSession session) {
+    public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public HttpSession findSession(final String id) {
+    public Session findSession(final String id) {
         if (id == null) {
             return null;
         }
@@ -32,7 +31,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(final HttpSession session) {
+    public void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }
 }

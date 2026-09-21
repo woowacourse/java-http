@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -181,7 +180,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(final Cookie cookie) {
-        final HttpSession session = SessionManager.getInstance().findSession(cookie.getJSessionId());
+        final Session session = SessionManager.getInstance().findSession(cookie.getJSessionId());
         return session != null && session.getAttribute(USER_ATTRIBUTE) != null;
     }
 

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -50,9 +51,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String EMAIL = "email";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -87,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
             final RequestLine requestLine = RequestLine.from(rawRequestLine);
             final RequestHeaders headers = RequestHeaders.from(readHeaders(reader));
             final RequestBody body = RequestBody.from(readBody(reader, headers.getContentLength()));
-            final HttpRequest request = HttpRequest.of(requestLine, headers, body);
+            final HttpRequest request = HttpRequest.of(requestLine, headers, body, sessionManager);
 
             log.info("request: {}", rawRequestLine);
 

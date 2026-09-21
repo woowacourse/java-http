@@ -9,21 +9,29 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeaders headers;
     private final RequestBody body;
+    private final SessionManager sessionManager;
 
     private Session newSession;
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestBody body) {
+    public HttpRequest(
+            final RequestLine requestLine,
+            final RequestHeaders headers,
+            final RequestBody body,
+            final SessionManager sessionManager
+    ) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.sessionManager = sessionManager;
     }
 
     public static HttpRequest of(
             final RequestLine requestLine,
             final RequestHeaders headers,
-            final RequestBody body
+            final RequestBody body,
+            final SessionManager sessionManager
     ) {
-        return new HttpRequest(requestLine, headers, body);
+        return new HttpRequest(requestLine, headers, body, sessionManager);
     }
 
     public String getMethod() {
@@ -47,7 +55,7 @@ public class HttpRequest {
             return Optional.of(newSession);
         }
         return getCookie().get(HttpCookie.JSESSIONID)
-                .flatMap(SessionManager.getInstance()::findSession);
+                .flatMap(sessionManager::findSession);
     }
 
     public Session getSession() {
@@ -59,7 +67,7 @@ public class HttpRequest {
     }
 
     private Session createSession() {
-        newSession = SessionManager.getInstance().create();
+        newSession = sessionManager.create();
         return newSession;
     }
 }

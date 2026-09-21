@@ -6,11 +6,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private SessionManager() {
-    }
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public static SessionManager getInstance() {
         return INSTANCE;
@@ -18,15 +17,15 @@ public class SessionManager {
 
     public Session create() {
         final Session session = new Session(UUID.randomUUID().toString());
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
         return session;
     }
 
     public Optional<Session> findSession(final String id) {
-        return Optional.ofNullable(SESSIONS.get(id));
+        return Optional.ofNullable(sessions.get(id));
     }
 
     public void remove(final String id) {
-        SESSIONS.remove(id);
+        sessions.remove(id);
     }
 }

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.SessionManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -17,11 +19,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private SessionManager sessionManager;
+
+    @BeforeEach
+    void setUp() {
+        sessionManager = new SessionManager();
+    }
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
@@ -48,7 +57,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
@@ -76,7 +85,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
@@ -103,7 +112,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
@@ -131,7 +140,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
@@ -158,7 +167,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var loginSocket = new StubSocket(loginRequest);
-        new Http11Processor(loginSocket).process(loginSocket);
+        new Http11Processor(loginSocket, sessionManager).process(loginSocket);
 
         final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(.+?); Path=/")
                 .matcher(loginSocket.output());
@@ -173,7 +182,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, sessionManager).process(socket);
 
         // then
         final String expected = String.join("\r\n",
@@ -195,13 +204,39 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void 알_수_없는_세션_아이디로_요청하면_로그인_페이지를_반환한다() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=unknown-session-id ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
+        final String expectedHeader = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).startsWith(expectedHeader);
     }
 
     @Test
@@ -215,7 +250,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         processor.process(socket);
 
@@ -237,7 +272,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         processor.process(socket);
 
@@ -262,7 +297,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         processor.process(socket);
 

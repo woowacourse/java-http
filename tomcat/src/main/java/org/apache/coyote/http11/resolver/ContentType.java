@@ -1,31 +1,29 @@
 package org.apache.coyote.http11.resolver;
 
 public enum ContentType {
-    JS("application/javascript;charset=utf-8"),
-    CSS("text/css;charset=utf-8"),
-    HTML("text/html;charset=utf-8"),
-    PLAIN("text/plain;charset=utf-8");
+    HTML("text/html;charset=utf-8", ".html"),
+    CSS("text/css;charset=utf-8", ".css"),
+    JS("application/javascript;charset=utf-8", ".js"),
+    SVG("image/svg+xml;charset=utf-8", ".svg"),
+    PNG("image/png", ".png"),
+    JPG("image/jpeg", ".jpg"),
+    ICO("image/x-icon", ".ico"),
+    PLAIN("text/plain;charset=utf-8", null);
 
-    private String contentType;
+    private final String contentType;
+    private final String extension;
 
-    ContentType(String contentType) {
+    ContentType(String contentType, String extension) {
         this.contentType = contentType;
+        this.extension = extension;
     }
 
     public static String from(String path) {
-        if (path.endsWith(".html")) {
-            return HTML.getContentType();
+        for (ContentType type : values()) {
+            if (type.extension != null && path.endsWith(type.extension)) {
+                return type.contentType;
+            }
         }
-        if (path.endsWith(".css")) {
-            return CSS.getContentType();
-        }
-        if (path.endsWith(".js")) {
-            return JS.getContentType();
-        }
-        return PLAIN.getContentType();
-    }
-
-    public String getContentType() {
-        return contentType;
+        return PLAIN.contentType;
     }
 }

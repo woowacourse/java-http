@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -44,7 +45,17 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String requestUri = requestLine.split(" ")[1];
+            final String[] requestParts = requestLine.split(" ", 3);
+            final String method = requestParts[0];
+            final String requestUri = requestParts[1];
+            final Optional<String> redirectLocation = resolveRedirect(method, requestUri);
+            if (redirectLocation.isPresent()) {
+                final String response = redirectResponse(redirectLocation.get());
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
             final String path = resolvePath(requestUri);
 
             String responseBody = "Hello world!";
@@ -73,6 +84,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private Optional<String> resolveRedirect(final String method, final String requestUri) {
+        final int queryIndex = requestUri.indexOf('?');
+        final String path = queryIndex >= 0 ? requestUri.substring(0, queryIndex) : requestUri;
+        if (!"GET".equals(method) || !"/login".equals(path) || queryIndex < 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(login(requestUri.substring(queryIndex + 1))
+                ? "/index.html"
+                : "/401.html");
+    }
+
+    private String redirectResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+    }
+
     private String resolvePath(final String requestUri) {
         final int queryIndex = requestUri.indexOf('?');
         String path = requestUri;
@@ -84,25 +116,24 @@ public class Http11Processor implements Runnable, Processor {
             return path;
         }
 
-        login(requestUri, queryIndex);
         return "/login.html";
     }
 
-    private void login(final String requestUri, final int queryIndex) {
-        if (queryIndex < 0) {
-            return;
-        }
-
-        final Map<String, String> parameters = parseQueryString(requestUri.substring(queryIndex + 1));
+    private boolean login(final String queryString) {
+        final Map<String, String> parameters = parseQueryString(queryString);
         final String account = parameters.get("account");
         final String password = parameters.get("password");
         if (account == null || password == null) {
-            return;
+            return false;
         }
 
-        InMemoryUserRepository.findByAccount(account)
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("Login succeeded: account={}", user.getAccount()));
+                .map(user -> {
+                    log.info("Login succeeded: account={}", user.getAccount());
+                    return true;
+                })
+                .orElse(false);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

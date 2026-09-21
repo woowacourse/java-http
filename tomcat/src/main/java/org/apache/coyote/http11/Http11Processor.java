@@ -98,11 +98,20 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 3. Body 파싱 (POST 방식 데이터)
+            // Content-Length는 바이트 수이므로, read()가 한 번에 다 채워준다고 가정하지 않고
+            // 실제 읽은 만큼(totalRead)만 문자열로 변환한다. (한글 등 멀티바이트 문자, 패킷 분할 대응)
             String requestBody = "";
             if (contentLength > 0) {
                 char[] buffer = new char[contentLength];
-                reader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
+                int totalRead = 0;
+                while (totalRead < contentLength) {
+                    int read = reader.read(buffer, totalRead, contentLength - totalRead);
+                    if (read == -1) {
+                        break;
+                    }
+                    totalRead += read;
+                }
+                requestBody = new String(buffer, 0, totalRead);
             }
 
             // POST 로그인 처리

@@ -16,12 +16,12 @@ class SessionTest {
     }
 
     @Test
-    void 무효화하면_저장된_값이_모두_사라진다() {
+    void 값을_비우면_저장된_값이_모두_사라진다() {
         final Session session = new Session("656cef62");
         session.setAttribute("user", "gugu");
         session.setAttribute("locale", "ko");
 
-        session.invalidate();
+        session.clear();
 
         assertThat(session.getAttribute("user")).isNull();
         assertThat(session.getAttribute("locale")).isNull();

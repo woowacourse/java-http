@@ -28,7 +28,7 @@ public class Session {
         values.remove(name);
     }
 
-    public void invalidate() {
+    void clear() {
         values.clear();
     }
 }

@@ -38,4 +38,11 @@ public class SessionManager implements Manager {
     public void remove(final String id) {
         SESSIONS.remove(id);
     }
+
+    public void invalidate(final String id) {
+        final Session session = SESSIONS.remove(id);
+        if (session != null) {
+            session.clear();
+        }
+    }
 }

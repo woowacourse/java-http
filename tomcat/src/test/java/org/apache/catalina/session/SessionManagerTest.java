@@ -41,4 +41,23 @@ class SessionManagerTest {
 
         assertThat(sessionManager.findSession(session.getId())).isNull();
     }
+
+    @Test
+    void 무효화한_세션은_찾을_수_없다() {
+        final Session session = sessionManager.createSession();
+
+        sessionManager.invalidate(session.getId());
+
+        assertThat(sessionManager.findSession(session.getId())).isNull();
+    }
+
+    @Test
+    void 무효화하면_이미_참조하고_있던_세션의_값도_비워진다() {
+        final Session session = sessionManager.createSession();
+        session.setAttribute("user", "gugu");
+
+        sessionManager.invalidate(session.getId());
+
+        assertThat(session.getAttribute("user")).isNull();
+    }
 }

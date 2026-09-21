@@ -26,16 +26,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String COOKIE_HEADER = "Cookie";
     private static final String SET_COOKIE_HEADER_PREFIX = "Set-Cookie: ";
     private static final String COOKIE_PATH_ATTRIBUTE = "; Path=/";
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
-    private static final String POST_METHOD = "POST";
-    private static final String GET_METHOD = "GET";
     private static final String USER_SESSION_ATTRIBUTE = "user";
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
     private static final String INDEX_HTML_PATH = "/index.html";
     private static final String UNAUTHORIZED_PAGE_PATH = "/401.html";
@@ -53,7 +49,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK ";
     private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found ";
     private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 FOUND ";
-    private static final String CONFLICT_STATUS_LINE = "HTTP/1.1 409 Conflict ";
     private static final String CONTENT_TYPE_HEADER_PREFIX = "Content-Type: ";
     private static final String UTF_8_CHARSET_PARAMETER = ";charset=utf-8 ";
     private static final String CONTENT_LENGTH_HEADER_PREFIX = "Content-Length: ";
@@ -77,77 +72,29 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            // 요청 라인 분리, 헤더 리스트 생성
-            String[] requestLine = bufferedReader.readLine().split(" ");
-            Map<String, String> headerMap = new LinkedHashMap<>();
-            while (true) {
-                String line = bufferedReader.readLine();
-                if (line == null || line.isEmpty()) {
-                    break;
-                }
-                String[] parts = line.split(":", 2);
-                headerMap.put(parts[0], parts[1].trim());
-            }
+            HttpRequest request = HttpRequest.from(bufferedReader);
 
-            HttpCookie cookie = HttpCookie.create(headerMap.getOrDefault("Cookie", ""));
-            boolean shouldIssueSessionCookie = !cookie.isSessionId();
-            if (shouldIssueSessionCookie) {
+            HttpCookie cookie = HttpCookie.create(request.getHeader("Cookie"));
+            HttpMethod method = request.getMethod();
+            String urlPath = request.getUri().getPath();
+            String requestBody = request.getBody();
+            boolean shouldSetCookie = !cookie.isSessionId();
+            if (shouldSetCookie) {
                 cookie.setSessionId();
             }
 
-            // GET /css/styles.css HTTP/1.1 각각 분리
-            final String httpMethod = requestLine[0];
-            final String url = requestLine[1];
-            final String httpVersion = requestLine[2];
-            final int contentLength = Integer.parseInt(headerMap.getOrDefault(CONTENT_LENGTH_HEADER, "0"));
-
-            String requestBody = "";
-
-            if (POST_METHOD.equals(httpMethod) && contentLength > 0) {
-                char[] buffer = new char[contentLength];
-                int totalRead = 0;
-
-                while (totalRead < contentLength) {
-                    int count = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
-
-                    if (count == -1) {
-                        throw new IOException("예상보다 짧음");
-                    }
-                    totalRead += count;
-                }
-                requestBody = new String(buffer);
-            }
-
             Map<String, String> requestBodyMap = new LinkedHashMap<>();
-            boolean isDuplicateRegistration = false;
-            if (httpMethod.equals(POST_METHOD) && (url.equals(REGISTER_PATH) || url.equals(LOGIN_PATH))
-                    && contentLength > 0) {
+            if (method == HttpMethod.POST && (urlPath.equals(REGISTER_PATH) || urlPath.equals(LOGIN_PATH))
+                    && !requestBody.isEmpty()) {
                 String[] body = requestBody.split("&");
                 for (int i = 0; i < body.length; i++) {
                     String[] value = body[i].split("=");
                     requestBodyMap.put(URLDecoder.decode(value[0], StandardCharsets.UTF_8), URLDecoder.decode(value[1], StandardCharsets.UTF_8));
                 }
-                if (url.equals(REGISTER_PATH)) {
+                if (urlPath.equals(REGISTER_PATH)) {
                     User user = new User(requestBodyMap.get(ACCOUNT_PARAMETER), requestBodyMap.get(PASSWORD_PARAMETER),
                             requestBodyMap.get("email"));
-                    isDuplicateRegistration = !InMemoryUserRepository.saveIfAbsent(user);
-                }
-            }
-
-            // URL 쿼리 분리
-            String[] devidedUrlQuery = url.split("\\?");
-            boolean isQuery = devidedUrlQuery.length > 1;
-            String urlPath = devidedUrlQuery[0];
-            Map<String, String> queryMap = new LinkedHashMap<>();
-
-            if (isQuery) {
-                String queryString = devidedUrlQuery[1];
-                if (queryString != null && !queryString.isBlank()) {
-                    String[] query = queryString.split("&");
-                    for (int i = 0; i < query.length; i++) {
-                        String[] value = query[i].split("=");
-                        queryMap.put(value[0], value[1]);
-                    }
+                    InMemoryUserRepository.save(user);
                 }
             }
 
@@ -179,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
 
             // 로그
             boolean isLoginSuccess = false;
-            if (urlPath.equals(LOGIN_PATH) && httpMethod.equals(POST_METHOD) && requestBodyMap.containsKey(
+            if (urlPath.equals(LOGIN_PATH) && method == HttpMethod.POST && requestBodyMap.containsKey(
                     ACCOUNT_PARAMETER)
                     && requestBodyMap.containsKey(PASSWORD_PARAMETER)) {
                 Optional<User> matchedUser = InMemoryUserRepository
@@ -208,7 +155,7 @@ public class Http11Processor implements Runnable, Processor {
             List<String> responseHeaders = new ArrayList<>();
             if (isResourceNull) {
                 responseHeaders.add(NOT_FOUND_STATUS_LINE);
-            } else if (urlPath.equals(LOGIN_PATH) && httpMethod.equals(POST_METHOD)) {
+            } else if (urlPath.equals(LOGIN_PATH) && method == HttpMethod.POST) {
                 String location;
                 if (isLoginSuccess) {
                     location = INDEX_HTML_PATH;
@@ -218,17 +165,11 @@ public class Http11Processor implements Runnable, Processor {
                 responseHeaders.add(FOUND_STATUS_LINE);
                 responseHeaders.add("Location: " + location);
                 responseBody = "";
-            } else if (httpMethod.equals(POST_METHOD) && urlPath.equals(REGISTER_PATH)) {
-                if (isDuplicateRegistration) {
-                    responseHeaders.add(CONFLICT_STATUS_LINE);
-                    contentType = TEXT_CONTENT_TYPE;
-                    responseBody = "이미 존재하는 회원입니다.";
-                } else {
-                    responseHeaders.add(FOUND_STATUS_LINE);
-                    responseHeaders.add("Location: " + INDEX_HTML_PATH);
-                    responseBody = "";
-                }
-            } else if (httpMethod.equals(GET_METHOD) && urlPath.equals(LOGIN_PATH) && sessionManager.isSessionContainsKey(cookie.getSessionId(), USER_SESSION_ATTRIBUTE)) {
+            } else if (method == HttpMethod.POST && urlPath.equals(REGISTER_PATH)) {
+                responseHeaders.add(FOUND_STATUS_LINE);
+                responseHeaders.add("Location: " + INDEX_HTML_PATH);
+                responseBody = "";
+            } else if (method == HttpMethod.GET && urlPath.equals(LOGIN_PATH) && sessionManager.isSessionContainsKey(cookie.getSessionId(), USER_SESSION_ATTRIBUTE)) {
                 responseHeaders.add(FOUND_STATUS_LINE);
                 responseHeaders.add("Location: " + INDEX_HTML_PATH);
                 responseBody = "";
@@ -239,7 +180,7 @@ public class Http11Processor implements Runnable, Processor {
             responseHeaders.add(CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER);
             responseHeaders.add(CONTENT_LENGTH_HEADER_PREFIX
                     + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
-            if (shouldIssueSessionCookie) {
+            if (shouldSetCookie) {
                 responseHeaders.add(SET_COOKIE_HEADER_PREFIX + cookie.getSessionIdCookieName() + "="
                         + cookie.getSessionId() + COOKIE_PATH_ATTRIBUTE);
             }

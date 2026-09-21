@@ -16,7 +16,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
             final boolean shouldIssueJSessionId = !cookie.contains("JSESSIONID");
             final String jSessionId;
+            SessionManager sessionManager = SessionManager.getInstance();
 
             if (cookie.contains("JSESSIONID")) {
                 jSessionId = cookie.get("JSESSIONID");
@@ -64,15 +68,35 @@ public class Http11Processor implements Runnable, Processor {
                 jSessionId = UUID.randomUUID().toString();
             }
 
+            Session session = sessionManager.findSession(jSessionId);
+
+            if (session == null) {
+                session = new Session(jSessionId);
+                sessionManager.add(session);
+            }
+
             final String method = extractMethod(requestLine);
             final String uri = extractUri(requestLine);
             final String path = extractPath(uri);
 
             if ("/login".equals(path) && "POST".equals(method)) {
-                handleLogin(reader, headers, outputStream, jSessionId, shouldIssueJSessionId);
+                handleLogin(
+                        reader,
+                        headers,
+                        outputStream,
+                        jSessionId,
+                        shouldIssueJSessionId,
+                        session
+                );
                 return;
             } else if ("/register".equals(path) && "POST".equals(method)) {
-                handleRegister(reader, headers, outputStream, jSessionId, shouldIssueJSessionId);
+                handleRegister(
+                        reader,
+                        headers,
+                        outputStream,
+                        jSessionId,
+                        shouldIssueJSessionId
+                );
                 return;
             }
 
@@ -168,10 +192,10 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers,
             final OutputStream outputStream,
             final String jSessionId,
-            final boolean shouldIssueJSessionId
+            final boolean shouldIssueJSessionId,
+            final Session session
     ) throws IOException {
-        int bodyLength = 0;
-        bodyLength = Integer.parseInt(headers.get("Content-Length"));
+        final int bodyLength = Integer.parseInt(headers.get("Content-Length"));
 
         final char[] buffer = new char[bodyLength];
         reader.read(buffer, 0, bodyLength);
@@ -179,27 +203,34 @@ public class Http11Processor implements Runnable, Processor {
         final String requestBody = new String(buffer);
         final Map<String, String> bodyParams = extractBody(requestBody);
 
-        final String location = resolveLoginRedirect(bodyParams);
+        final String account = bodyParams.get("account");
+        final String password = bodyParams.get("password");
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(it -> it.checkPassword(password));
+
+        if (user.isPresent()) {
+            session.setAttribute("user", user.get());
+
+            final String response = createRedirectResponse(
+                    "/index.html",
+                    jSessionId,
+                    shouldIssueJSessionId
+            );
+
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            return;
+        }
+
         final String response = createRedirectResponse(
-                location,
+                "/401.html",
                 jSessionId,
                 shouldIssueJSessionId
         );
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
-    }
-
-    private String resolveLoginRedirect(
-            final Map<String, String> bodyParams
-    ) {
-        final String account = bodyParams.get("account");
-        final String password = bodyParams.get("password");
-
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .map(user -> "/index.html")
-                .orElse("/401.html");
     }
 
     private String extractMethod(final String requestLine) {

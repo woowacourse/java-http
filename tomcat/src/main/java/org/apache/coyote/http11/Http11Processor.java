@@ -13,9 +13,12 @@ import java.net.URI;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String JSESSIONID = "JSESSIONID";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -60,7 +64,8 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> headers = readHeaders(reader);
             String body = readBody(reader, headers);
 
-            handleRequest(method, uri, body, outputStream);
+            Cookie cookie = Cookie.from(headers.get("cookie"));
+            handleRequest(method, uri, body, cookie, outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -101,44 +106,44 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, totalRead);
     }
 
-    private void handleRequest(String method, URI uri, String body, OutputStream outputStream) throws IOException {
+    private void handleRequest(String method, URI uri, String body, Cookie cookie, OutputStream outputStream) throws IOException {
         String path = uri.getPath();
 
         if ("/".equals(path)) {
-            writeResponse(outputStream, "static/index.html");
+            writeResponse(outputStream, "static/index.html", cookie);
             return;
         }
 
         if ("/login".equals(path)) {
             if ("GET".equals(method)) {
-                writeResponse(outputStream, "static/login.html");
+                writeResponse(outputStream, "static/login.html", cookie);
                 return;
             }
 
             if ("POST".equals(method)) {
                 handleLogin(body);
-                writeRedirectResponse(outputStream, "/index.html");
+                writeRedirectResponse(outputStream, "/index.html", cookie);
                 return;
             }
 
-            writeRedirectResponse(outputStream, "/401.html");
+            writeRedirectResponse(outputStream, "/401.html", cookie);
             return;
         }
 
         if ("/register".equals(path)) {
             if ("GET".equals(method)) {
-                writeResponse(outputStream, "static/register.html");
+                writeResponse(outputStream, "static/register.html", cookie);
                 return;
             }
 
             if ("POST".equals(method)) {
                 handleRegister(body);
-                writeRedirectResponse(outputStream, "/index.html");
+                writeRedirectResponse(outputStream, "/index.html", cookie);
                 return;
             }
         }
 
-        writeResponse(outputStream, "static" + path);
+        writeResponse(outputStream, "static" + path, cookie);
     }
 
     private void handleLogin(String body) {
@@ -184,7 +189,19 @@ public class Http11Processor implements Runnable, Processor {
                 ));
     }
 
-    private void writeResponse(OutputStream outputStream, String resourcePath) throws IOException {
+    private void setCookieHeader(List<String> responseHeader, Cookie cookie) {
+        if (cookie.contains(JSESSIONID)) {
+            return;
+        }
+
+        String sessionId = UUID.randomUUID().toString();
+
+        responseHeader.add(
+                "Set-Cookie: " + JSESSIONID + "=" + sessionId
+        );
+    }
+
+    private void writeResponse(OutputStream outputStream, String resourcePath, Cookie cookie) throws IOException {
         String contentType = URLConnection.guessContentTypeFromName(resourcePath);
 
         try (InputStream resource = getClass()
@@ -198,30 +215,38 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] responseBody = resource.readAllBytes();
 
-            String responseHeaders = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    ""
-            );
+            List<String> responseHeaders = new ArrayList<>();
 
-            outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+            responseHeaders.add("HTTP/1.1 200 OK");
+            setCookieHeader(responseHeaders, cookie);
+            responseHeaders.add("Content-Type: " + contentType + ";charset=utf-8 ");
+            responseHeaders.add("Content-Length: " + responseBody.length + " ");
+            responseHeaders.add("");
+            responseHeaders.add("");
+
+            outputStream.write(
+                    String.join("\r\n", responseHeaders)
+                            .getBytes(StandardCharsets.UTF_8)
+            );
             outputStream.write(responseBody);
             outputStream.flush();
         }
     }
 
-    private void writeRedirectResponse(OutputStream outputStream, String location) throws IOException {
-        String responseHeaders = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                ""
-        );
+    private void writeRedirectResponse(OutputStream outputStream, String location, Cookie cookie) throws IOException {
+        List<String> responseHeaders = new ArrayList<>();
 
-        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+        responseHeaders.add("HTTP/1.1 302 Found");
+        setCookieHeader(responseHeaders, cookie);
+        responseHeaders.add("Location: " + location);
+        responseHeaders.add("Content-Length: 0");
+        responseHeaders.add("");
+        responseHeaders.add("");
+
+        outputStream.write(
+                String.join("\r\n", responseHeaders)
+                        .getBytes(StandardCharsets.UTF_8)
+        );
         outputStream.flush();
     }
 

@@ -15,11 +15,20 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var rootSocket = new StubSocket();
+        final String rootRequest = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=test-session-id",
+                "",
+                ""
+        );
+
+        final var rootSocket = new StubSocket(rootRequest);
 
         final String indexRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=test-session-id",
                 "",
                 ""
         );
@@ -40,6 +49,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=test-session-id",
                 "",
                 "");
 

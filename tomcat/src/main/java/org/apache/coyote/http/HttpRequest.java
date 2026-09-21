@@ -12,13 +12,19 @@ public record HttpRequest(
 ) {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final String COOKIE = "Cookie";
+    private static final String SESSION_ID = "JSESSIONID";
 
     public String path() {
         return requestLine.getUri().getPath();
     }
 
     public Optional<String> cookie(String key) {
-        return headers.getCookie(key);
+        return cookies().get(key);
+    }
+
+    private HttpCookie cookies() {
+        return HttpCookie.from(headers.get(COOKIE).orElse(null));
     }
 
     public HttpMethod method() {
@@ -26,7 +32,7 @@ public record HttpRequest(
     }
 
     public Session getSession(boolean create) {
-        Optional<String> sessionId = headers.getCookie("JSESSIONID");
+        Optional<String> sessionId = cookie(SESSION_ID);
 
         if(sessionId.isPresent()) {
             Session found = SessionManager.findSession(sessionId.get());

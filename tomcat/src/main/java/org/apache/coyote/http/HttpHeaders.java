@@ -1,6 +1,5 @@
 package org.apache.coyote.http;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,16 +56,6 @@ public class HttpHeaders {
 
     public String contentType() {
         return get("Content-Type").orElse("");
-    }
-
-    public Optional<String> getCookie(String key) {
-        return get("Cookie").stream()
-                .flatMap(header -> Arrays.stream(header.split(";")))
-                .map(String::trim)
-                .map(pair -> pair.split("=", 2))
-                .filter(pair -> pair.length == 2 && pair[0].equals(key))
-                .map(pair -> pair[1])
-                .findFirst();
     }
 
     public void setCookie(String key, String value) {

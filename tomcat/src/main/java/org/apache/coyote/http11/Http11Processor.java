@@ -17,7 +17,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATUS_NOT_FOUND = "HTTP/1.1 404 Not Found ";
 
     private static final String POST = "POST";
+    private static final String GET = "GET";
+
+    private static final String USER_ATTRIBUTE = "user";
 
     private final Socket connection;
 
@@ -84,18 +90,13 @@ public class Http11Processor implements Runnable, Processor {
             final var method = parseMethod(requestLine);
             final var pathAndQueryString = splitPathAndQueryString(uri);
             final var path = pathAndQueryString[0];
-            var queryString = "";
-            if (pathAndQueryString.length == 2) {
-                queryString = pathAndQueryString[1];
-            }
-            final var queryParameters = parseQueryParameters(queryString);
 
             var statusLine = STATUS_OK;
             var location = "";
             final byte[] responseBody;
-            if (path.equals("/")) {
+            if (path.equals("/")) { // Hello World
                 responseBody = "Hello world!".getBytes();
-            } else if (method.equals(POST) && path.equals(REGISTER_PATH)) {
+            } else if (method.equals(POST) && path.equals(REGISTER_PATH)) { // 회원가입
                 final var requestBody = readBody(bufferedReader, requestHeaders);
                 final var formParameters = parseQueryParameters(requestBody);
                 register(formParameters);
@@ -103,16 +104,25 @@ public class Http11Processor implements Runnable, Processor {
                 statusLine = STATUS_FOUND;
                 location = INDEX_PAGE;
                 responseBody = new byte[0];
-            } else if (method.equals(POST) && path.equals(LOGIN_PATH)) {
+            } else if (method.equals(POST) && path.equals(LOGIN_PATH)) {  // 로그인
                 final var requestBody = readBody(bufferedReader, requestHeaders);
                 final var formParameters = parseQueryParameters(requestBody);
 
                 statusLine = STATUS_FOUND;
-                if (login(formParameters)) {
+                final var loginUser = login(formParameters);
+                if (loginUser.isPresent()) {
+                    final var session = SessionManager.getInstance().createSession();
+                    session.setAttribute(USER_ATTRIBUTE, loginUser.get());
+                    setCookie = HttpCookie.JSESSIONID + "=" + session.getId();
                     location = INDEX_PAGE;
+                    log.info("Session id: {} -> {}",session.getId(),session.getAttribute(USER_ATTRIBUTE));
                 } else {
                     location = UNAUTHORIZED_PAGE;
                 }
+                responseBody = new byte[0];
+            } else if (method.equals(GET) && path.equals(LOGIN_PATH) && isLoggedIn(cookie)) { // GET 로그인
+                statusLine = STATUS_FOUND;
+                location = INDEX_PAGE;
                 responseBody = new byte[0];
             } else {
                 var resourceUrl = findResource(path);
@@ -134,6 +144,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean isLoggedIn(HttpCookie cookie) {
+        if(!cookie.hasJSessionId()) {
+            return false;
+        }
+        final var jSessionId = cookie.getJSessionId();
+        final var session = SessionManager.getInstance().findSession(jSessionId);
+        if(session == null) {
+            return false;
+        }
+        return session.getAttribute(USER_ATTRIBUTE) != null;
+    }
+
     private String readRequestLine(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
         log.info("requestLine: {}", requestLine);
@@ -147,7 +169,7 @@ public class Http11Processor implements Runnable, Processor {
             final String[] nameAndValue = headerLine.split(":", 2);
             headers.put(nameAndValue[0], nameAndValue[1].trim());
         }
-        log.info("headers: {}", headers);
+        log.info("requestHeaders: {}", headers);
         return headers;
     }
 
@@ -203,13 +225,13 @@ public class Http11Processor implements Runnable, Processor {
         log.info("register success: {}", user);
     }
 
-    private boolean login(final Map<String, String> formParameters) {
+    private Optional<User> login(final Map<String, String> formParameters) {
         final var account = formParameters.get(ACCOUNT_PARAMETER);
         final var password = formParameters.get(PASSWORD_PARAMETER);
         final var user = InMemoryUserRepository.findByAccount(account)
                 .filter(found -> found.checkPassword(password));
         user.ifPresent(found -> log.info("login success: {}", found));
-        return user.isPresent();
+        return user;
     }
 
     private URL findResource(final String path) {

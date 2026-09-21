@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
         String account = request.getBodyValue("account");
         String email = request.getBodyValue("email");
         String password = request.getBodyValue("password");
-        User user = new User(account, email, password);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return "redirect:/index.html";
     }

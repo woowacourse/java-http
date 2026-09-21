@@ -18,7 +18,7 @@ public class HttpCookie {
 
         String[] pairs = rawCookie.split("; ");
         for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
+            String[] keyValue = pair.split("=", 2);
             if(keyValue.length == 2) {
                 map.put(keyValue[0].trim(), keyValue[1].trim());
             }

@@ -1,7 +1,8 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.Session;
@@ -15,16 +16,16 @@ import org.apache.coyote.http.RequestLine;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
-class LogoutHandlerTest {
+class LogoutControllerTest {
 
-    private final LogoutHandler logoutHandler = new LogoutHandler();
+    private final LogoutController logoutController = new LogoutController();
 
     @Test
-    void 로그아웃하면_세션을_제거하고_index로_이동한다() {
+    void 로그아웃하면_세션을_제거하고_index로_이동한다() throws IOException {
         Session session = loggedInSession();
         HttpRequest request = request("/logout", session.getId());
 
-        HttpResponse response = logoutHandler.handle(request);
+        HttpResponse response = logoutController.service(request);
 
         assertThat(SessionManager.findSession(session.getId())).isNull();
         assertThat(response.headers().get("Location"))

@@ -1,5 +1,6 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.coyote.http.ContentType;
@@ -12,16 +13,16 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
-class RegisterUserHandlerTest {
+class RegisterControllerTest {
 
-    RegisterUserHandler registerUserHandler = new RegisterUserHandler();
+    private final RegisterController registerController = new RegisterController();
 
     @Test
-    void 회원가입에_성공한다() {
+    void 회원가입에_성공한다() throws IOException {
         HttpRequest request = registerRequest(
                 "account=gyubin&password=password&email=gyubin%40woowahan.com");
 
-        HttpResponse response = registerUserHandler.handle(request);
+        HttpResponse response = registerController.service(request);
 
         Assertions.assertThat(response.headers().get("Location"))
                 .isPresent()

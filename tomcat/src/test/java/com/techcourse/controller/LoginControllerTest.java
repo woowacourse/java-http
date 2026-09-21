@@ -1,8 +1,9 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.db.InMemoryUserRepository;
+import java.io.IOException;
 import com.techcourse.model.User;
 import java.util.List;
 import java.util.UUID;
@@ -17,15 +18,15 @@ import org.apache.coyote.http.RequestLine;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
-class LoginUserHandlerTest {
+class LoginControllerTest {
 
-    private final LoginUserHandler loginHandler = new LoginUserHandler();
+    private final LoginController loginController = new LoginController();
 
     @Test
-    void 로그인에_성공한_경우_쿠키를_설정한다() {
+    void 로그인에_성공한_경우_쿠키를_설정한다() throws IOException {
         HttpRequest request = loginRequest("account=gugu&password=password");
 
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = loginController.service(request);
 
         assertThat(response.headers().get("Set-Cookie"))
                 .isPresent()
@@ -34,10 +35,10 @@ class LoginUserHandlerTest {
     }
 
     @Test
-    void 로그인에_실패한_경우_401_페이지로_이동한다() {
+    void 로그인에_실패한_경우_401_페이지로_이동한다() throws IOException {
         HttpRequest request = loginRequest("account=gugu&password=wrongPassword");
 
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = loginController.service(request);
 
         assertThat(response.headers().get("Location"))
                 .isPresent()
@@ -46,20 +47,20 @@ class LoginUserHandlerTest {
     }
 
     @Test
-    void 로그인에_성공하면_발급한_세션이_SessionManager에_저장된다() {
+    void 로그인에_성공하면_발급한_세션이_SessionManager에_저장된다() throws IOException {
         HttpRequest request = loginRequest("account=gugu&password=password");
 
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = loginController.service(request);
 
         String sessionId = sessionIdOf(response);
         assertThat(SessionManager.findSession(sessionId)).isNotNull();
     }
 
     @Test
-    void 로그인에_성공하면_발급한_세션에_로그인한_사용자를_담는다() {
+    void 로그인에_성공하면_발급한_세션에_로그인한_사용자를_담는다() throws IOException {
         HttpRequest request = loginRequest("account=gugu&password=password");
 
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = loginController.service(request);
 
         User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
         Session session = SessionManager.findSession(sessionIdOf(response));
@@ -67,22 +68,22 @@ class LoginUserHandlerTest {
     }
 
     @Test
-    void 로그인에_실패하면_세션을_발급하지_않는다() {
+    void 로그인에_실패하면_세션을_발급하지_않는다() throws IOException {
         HttpRequest request = loginRequest("account=gugu&password=wrongPassword");
 
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = loginController.service(request);
 
         assertThat(response.headers().get("Set-Cookie")).isEmpty();
     }
 
     @Test
-    void 이미_세션이_있으면_새로_발급하지_않고_재사용한다() {
+    void 이미_세션이_있으면_새로_발급하지_않고_재사용한다() throws IOException {
         Session existing = new Session(UUID.randomUUID().toString());
         SessionManager.add(existing);
         HttpRequest request = loginRequestWithSession(
                 "account=gugu&password=password", existing.getId());
 
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = loginController.service(request);
 
         assertThat(sessionIdOf(response)).isEqualTo(existing.getId());
     }

@@ -1,29 +1,30 @@
 package com.techcourse;
 
-import com.techcourse.handler.IndexPageHandler;
-import com.techcourse.handler.LoginPageHandler;
-import com.techcourse.handler.LoginUserHandler;
-import com.techcourse.handler.LogoutHandler;
-import com.techcourse.handler.RegisterPageHandler;
-import com.techcourse.handler.RegisterUserHandler;
-import com.techcourse.handler.StaticResourceHandler;
-import java.util.List;
-import org.apache.catalina.handler.ResourceResolver;
+import com.techcourse.controller.IndexController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.LogoutController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
+import java.util.Map;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.Dispatcher;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.Adapter;
 
 public class Application {
 
     public static void main(String[] args) {
-        final Adapter adapter = new ResourceResolver(List.of(
-                new LoginPageHandler(),
-                new LoginUserHandler(),
-                new LogoutHandler(),
-                new IndexPageHandler(),
-                new RegisterPageHandler(),
-                new RegisterUserHandler(),
-                new StaticResourceHandler()   // 가장 일반적인 핸들러는 마지막에
+        final Controller indexController = new IndexController();
+        final RequestMapping requestMapping = new RequestMapping(Map.of(
+                "/", indexController,
+                "/index.html", indexController,
+                "/login", new LoginController(),
+                "/logout", new LogoutController(),
+                "/register", new RegisterController()
         ));
+
+        final Adapter adapter = new Dispatcher(requestMapping, new StaticResourceController());
 
         final var tomcat = new Tomcat(adapter);
         tomcat.start();

@@ -1,28 +1,32 @@
-package com.techcourse.handler;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.Optional;
 import org.apache.catalina.Session;
-import org.apache.catalina.handler.ResourceHandler;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.RequestBody;
+import org.apache.coyote.http.StaticResourceBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginUserHandler implements ResourceHandler {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginUserHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public boolean canHandle(HttpRequest request) {
-        return request.method() == HttpMethod.POST && request.path().equals("/login");
+    protected HttpResponse doGet(HttpRequest request) throws IOException {
+        if (request.getSession(false) != null) {
+            return HttpResponse.redirect("/");
+        }
+        return HttpResponse.ok(StaticResourceBody.from("/login.html"));
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    protected HttpResponse doPost(HttpRequest request) {
         RequestBody body = request.body();
 
         Optional<String> account = body.get("account");

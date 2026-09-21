@@ -3,6 +3,7 @@ package study;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +58,7 @@ class FileTest {
 
         final Path path = new File(resource.getPath()).toPath();
 
-        final List<String> actual = Files.readAllLines(path);
+        final List<String> actual = Files.readAllLines(path, StandardCharsets.UTF_8);
 
         assertThat(actual).containsOnly("nextstep");
     }

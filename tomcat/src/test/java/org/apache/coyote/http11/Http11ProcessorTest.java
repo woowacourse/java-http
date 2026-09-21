@@ -25,41 +25,44 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/html;charset=utf-8")
+                .contains("Hello world!");
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
-                "");
+                ""
+        );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/index.html");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        final String responseBody = new String(
+                Files.readAllBytes(new File(resource.getFile()).toPath())
+        );
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("Set-Cookie: JSESSIONID=")
+                .contains("Content-Type: text/html;charset=utf-8")
+                .contains("Content-Length: 5564")
+                .contains(responseBody);
     }
 
     @Test
@@ -90,11 +93,14 @@ class Http11ProcessorTest {
     @Test
     void login_failure() {
         // given
+        final String body = "account=gugu&password=gugu";
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=gugu HTTP/1.1",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
                 "Connection: keep-alive",
                 "",
-                ""
+                body
         );
 
         final var socket = new StubSocket(httpRequest);

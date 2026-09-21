@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             if (cookie != null) {
                 jSessionId = cookie.getJsessionId();
             }
-            final boolean shouldSetCookie = jSessionId == null;
+            boolean shouldSetCookie = jSessionId == null;
             if (shouldSetCookie) {
                 jSessionId = UUID.randomUUID().toString();
             }
@@ -130,6 +130,10 @@ public class Http11Processor implements Runnable, Processor {
                 if (user != null) {
                     Session session = SessionManager.findSession(jSessionId);
                     if (session == null) {
+                        if (!shouldSetCookie) {
+                            jSessionId = UUID.randomUUID().toString();
+                            shouldSetCookie = true;
+                        }
                         session = new Session(jSessionId);
                         SessionManager.add(session);
                     }

@@ -50,20 +50,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             final List<String> requestHead = readRequestHead(reader);
-            final String requestLine = extractRequestLine(requestHead);
 
-            final String requestTarget = extractRequestTarget(requestLine);
-
-            String responseBody = resolveResponseBody(requestTarget);
-            String contentType = resolveContentType(extractTargetPath(requestTarget));
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody
-            );
+            final var response = resolveResponse(requestHead);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -85,6 +73,26 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeader;
     }
 
+    private String resolveResponse(List<String> requestHead) {
+        final String requestLine = extractRequestLine(requestHead);
+        final String requestTarget = extractRequestTarget(requestLine);
+        final String requestPath = extractTargetPath(requestTarget);
+
+        if (requestTarget.equals(ROOT_RESOURCE_PATH)) {
+            return createOkResponse(requestTarget);
+        }
+
+        if (requestPath.equals("/login")) {
+            return handleLogin(requestTarget);
+        }
+
+        try {
+            return createOkResponse(requestPath);
+        } catch (UncheckedServletException e) {
+            return createErrorResponse();
+        }
+    }
+
     private String extractRequestLine(List<String> requestHead) {
         if (requestHead.isEmpty()) {
             return "";
@@ -97,21 +105,6 @@ public class Http11Processor implements Runnable, Processor {
         return requestLine.split(REQUEST_LINE_ELEMENT_SEPARATOR)[REQUEST_TARGET_INDEX];
     }
 
-    private String resolveResponseBody(String requestTarget) {
-        if (requestTarget.equals(ROOT_RESOURCE_PATH)) {
-            return DEFAULT_MESSAGE;
-        }
-        String targetPath = extractTargetPath(requestTarget);
-
-        if (targetPath.equals("/login")) {
-            handleLogin(requestTarget);
-
-            return readResourceAsString("/login.html");
-        }
-
-        return readResourceAsString(targetPath);
-    }
-
     private String extractTargetPath(String requestTarget) {
         if (requestTarget.contains(PATH_QUERY_SEPARATOR)) {
             int delimiterIndex = requestTarget.indexOf(PATH_QUERY_SEPARATOR);
@@ -120,16 +113,23 @@ public class Http11Processor implements Runnable, Processor {
         return requestTarget;
     }
 
-    private void handleLogin(String requestTarget) {
+    private String handleLogin(String requestTarget) {
         String targetQueryString = extractTargetQueryString(requestTarget);
+
+        if (targetQueryString.isBlank()) {
+            return createOkResponse("/login.html");
+        }
+
         Map<String, String> queryParameters = parseQueryParameters(targetQueryString);
 
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
+        String account = queryParameters.getOrDefault("account", "");
+        String password = queryParameters.getOrDefault("password", "");
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info(String.valueOf(user)));
+        if (areCredentialsValid(account, password)) {
+            return createRedirectResponse("/index.html");
+        }
+
+        return createRedirectResponse("/401.html");
     }
 
     private String extractTargetQueryString(String requestTarget) {
@@ -161,35 +161,69 @@ public class Http11Processor implements Runnable, Processor {
         return queryParameters;
     }
 
+    private boolean areCredentialsValid(String account, String password) {
+        if (account.isBlank() || password.isBlank()) {
+            return false;
+        }
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
+    }
+
+    private String createOkResponse(String resource) {
+        String responseBody = resolveResponseBody(resource);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + resolveContentType(resource),
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+    }
+
+    private String createRedirectResponse(String resource) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + resource,
+                "Content-Length: 0",
+                ""
+        );
+    }
+
+    private String createErrorResponse() {
+        String responseBody = resolveResponseBody("/404.html");
+
+        return String.join("\r\n",
+                "HTTP/1.1 404 NotFound",
+                "Content-Type: " + resolveContentType("/404.html"),
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+    }
+
+    private String resolveResponseBody(String resource) {
+        if (resource.equals(ROOT_RESOURCE_PATH)) {
+            return DEFAULT_MESSAGE;
+        }
+
+        return readResourceAsString(resource);
+    }
+
     private String readResourceAsString(String resourceName) {
         URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + resourceName);
         if (resource == null) {
-            return "";
+            throw new UncheckedServletException(
+                    new FileNotFoundException()
+            );
         }
 
         try {
             URI uri = resource.toURI();
 
             return Files.readString(Path.of(uri));
-        } catch (IOException | URISyntaxException e) {
-            throw new UncheckedServletException(e);
-        }
-    }
-
-    private String readResourceAsStringd(String resourceName) {
-        URL resource = getClass().getClassLoader()
-                .getResource(STATIC_RESOURCE_PATH + resourceName);
-
-        if (resource == null) {
-            try {
-                throw new FileNotFoundException(resourceName);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        try {
-            return Files.readString(Path.of(resource.toURI()));
         } catch (IOException | URISyntaxException e) {
             throw new UncheckedServletException(e);
         }
@@ -202,6 +236,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String extension = content.substring(index + FILE_EXTENSION_SEPARATOR.length());
+
+        if (extension.equals("svg")) {
+            return "image/svg+xml";
+        }
         return "text/" + extension + ";charset=utf-8 ";
     }
 }

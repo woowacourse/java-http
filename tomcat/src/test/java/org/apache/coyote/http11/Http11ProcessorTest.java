@@ -23,14 +23,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n"
+                        + "Content-Type: text/html;charset=utf-8 \r\n"
+                        + "Set-Cookie: JSESSIONID=")
+                .contains("\r\nContent-Length: 12 \r\n\r\nHello world!");
     }
 
     @Test
@@ -51,13 +48,12 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n"
+                        + "Content-Type: text/html;charset=utf-8 \r\n"
+                        + "Set-Cookie: JSESSIONID=")
+                .contains("\r\nContent-Length: 5564 \r\n\r\n" + responseBody);
     }
 
     @Test
@@ -77,13 +73,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Length: 0 ",
-                "",
-                "");
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n"
+                        + "Location: /index.html \r\n"
+                        + "Set-Cookie: JSESSIONID=")
+                .endsWith("\r\nContent-Length: 0 \r\n\r\n");
     }
 
     @Test
@@ -103,13 +97,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /401.html ",
-                "Content-Length: 0 ",
-                "",
-                "");
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n"
+                        + "Location: /401.html \r\n"
+                        + "Set-Cookie: JSESSIONID=")
+                .endsWith("\r\nContent-Length: 0 \r\n\r\n");
     }
 
     @Test
@@ -129,13 +121,30 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Length: 0 ",
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n"
+                        + "Location: /index.html \r\n"
+                        + "Set-Cookie: JSESSIONID=")
+                .endsWith("\r\nContent-Length: 0 \r\n\r\n");
+        assertThat(InMemoryUserRepository.findByAccount("new-user")).isPresent();
+    }
+
+    @Test
+    void doesNotSetCookieWhenRequestAlreadyHasJSessionId() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session",
                 "",
                 "");
-        assertThat(socket.output()).isEqualTo(expected);
-        assertThat(InMemoryUserRepository.findByAccount("new-user")).isPresent();
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie:");
     }
 }

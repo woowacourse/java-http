@@ -15,6 +15,7 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -51,9 +52,12 @@ public class Http11Processor implements Runnable, Processor {
             final String requestUri = requestParts[1];
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readRequestBody(reader, headers);
+            final HttpCookie cookies = HttpCookie.parse(headers.get("Cookie"));
+            final String setCookie = cookies.get(HttpCookie.JSESSIONID)
+                    .isPresent() ? null : HttpCookie.newJSessionId();
             final Optional<String> redirectLocation = resolveRedirect(method, requestUri, requestBody);
             if (redirectLocation.isPresent()) {
-                final String response = redirectResponse(redirectLocation.get());
+                final String response = redirectResponse(redirectLocation.get(), setCookie);
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
@@ -73,12 +77,14 @@ public class Http11Processor implements Runnable, Processor {
             if (path.endsWith(".css")) {
                 contentType = "text/css";
             }
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
+            final var responseHeaders = new ArrayList<String>();
+            responseHeaders.add("HTTP/1.1 200 OK ");
+            responseHeaders.add("Content-Type: " + contentType + ";charset=utf-8 ");
+            addSetCookieHeader(responseHeaders, setCookie);
+            responseHeaders.add("Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
+            responseHeaders.add("");
+            responseHeaders.add(responseBody);
+            final var response = String.join("\r\n", responseHeaders);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -107,13 +113,21 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String redirectResponse(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
-                "");
+    private String redirectResponse(final String location, final String setCookie) {
+        final var responseHeaders = new ArrayList<String>();
+        responseHeaders.add("HTTP/1.1 302 Found ");
+        responseHeaders.add("Location: " + location + " ");
+        addSetCookieHeader(responseHeaders, setCookie);
+        responseHeaders.add("Content-Length: 0 ");
+        responseHeaders.add("");
+        responseHeaders.add("");
+        return String.join("\r\n", responseHeaders);
+    }
+
+    private void addSetCookieHeader(final ArrayList<String> responseHeaders, final String setCookie) {
+        if (setCookie != null) {
+            responseHeaders.add("Set-Cookie: " + setCookie + " ");
+        }
     }
 
     private String resolvePath(final String requestUri) {

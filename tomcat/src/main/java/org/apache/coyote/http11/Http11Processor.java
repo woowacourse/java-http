@@ -23,7 +23,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PATH = "/login";
     private static final String NOT_FOUND_PATH = "/404.html";
     private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK";
+    private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 Found";
     private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
@@ -47,11 +50,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             final RequestLine requestLine = readRequestLine(inputStream);
-            final String requestPath = extractRequestPath(requestLine.requestTarget());
-            final String queryString = extractQuery(requestLine.requestTarget());
-            final Map<String, String> queryParameters = parseQuery(queryString);
-            logUserIfAuthenticated(requestPath, queryParameters);
-            sendResponse(requestPath, outputStream);
+            sendResponse(requestLine, outputStream);
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
@@ -68,7 +67,9 @@ public class Http11Processor implements Runnable, Processor {
         return new BufferedReader(inputStreamReader);
     }
 
-    private void sendResponse(final String requestPath, final OutputStream outputStream) throws IOException {
+    private void sendResponse(final RequestLine requestLine, final OutputStream outputStream) throws IOException {
+        final String requestPath = extractRequestPath(requestLine.requestTarget());
+
         if (ROOT_PATH.equals(requestPath)) {
             writeResponse(
                     outputStream,
@@ -76,6 +77,18 @@ public class Http11Processor implements Runnable, Processor {
                     HTML_CONTENT_TYPE,
                     readDefaultResponseBody()
             );
+            return;
+        }
+
+        final String queryString = extractQuery(requestLine.requestTarget());
+        if (LOGIN_PATH.equals(requestPath) && !queryString.isBlank()) {
+            final Map<String, String> queryParameters = parseQuery(queryString);
+
+            if (checkAuthentication(queryParameters)) {
+                sendRedirect(outputStream, INDEX_PATH);
+                return;
+            }
+            sendRedirect(outputStream, UNAUTHORIZED_PATH);
             return;
         }
 
@@ -97,6 +110,18 @@ public class Http11Processor implements Runnable, Processor {
                 resolveContentType(requestPath),
                 resourceBody.get()
         );
+    }
+
+    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
+        final String response = String.join("\r\n",
+                FOUND_STATUS_LINE + " ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private void writeResponse(
@@ -186,15 +211,17 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + requestPath;
     }
 
-    private void logUserIfAuthenticated(final String requestPath, final Map<String, String> queryParameters) {
-        if (!requestPath.equals(LOGIN_PATH) || !hasCredentials(queryParameters)) {
-            return;
+    private boolean checkAuthentication(final Map<String, String> queryParameters) {
+        if (!hasCredentials(queryParameters)) {
+            return false;
         }
+
         final String account = queryParameters.get("account");
         final String password = queryParameters.get("password");
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("User: {}", user));
+
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
     }
 
     private boolean hasCredentials(final Map<String, String> queryParameters) {

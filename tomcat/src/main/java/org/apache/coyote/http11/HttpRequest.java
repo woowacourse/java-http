@@ -61,8 +61,15 @@ public class HttpRequest {
             return "";
         }
         final char[] buffer = new char[toContentLength(contentLength)];
-        reader.read(buffer, 0, buffer.length);
-        return new String(buffer);
+        int total = 0;
+        while (total < buffer.length) {
+            final int read = reader.read(buffer, total, buffer.length - total);
+            if (read == -1) {
+                break;
+            }
+            total += read;
+        }
+        return new String(buffer, 0, total);
     }
 
     private static int toContentLength(final String contentLength) {

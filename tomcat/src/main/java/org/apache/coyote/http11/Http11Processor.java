@@ -54,15 +54,11 @@ public class Http11Processor implements Runnable, Processor {
             String query = uri.getRawQuery();
 
             String responseBody = "Hello world!";
-            String contentType = "text/html";
+            String contentType = contentType(path);
 
             if (method.equals("GET")) {
-                if (path.equals("/index.html")) {
-                    responseBody = readFile("static/index.html");
-                }
-
                 if (path.equals("/login") || path.equals("/login.html")) {
-                    responseBody = readFile("static/login.html");
+                    path = "/login.html";
 
                     if (query != null) {
                         Map<String, String> queryParams = new HashMap<>();
@@ -85,9 +81,8 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 }
 
-                if (path.endsWith(".css") || path.endsWith(".js")) {
+                if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
                     responseBody = readFile("static" + path);
-                    contentType = path.endsWith(".css") ? "text/css" : "text/javascript";
                 }
             }
 
@@ -118,5 +113,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new IOException("리소스 경로 변환에 실패했습니다: " + fileName, e);
         }
+    }
+
+    private String contentType(String path) {
+        if (path.endsWith(".html")) {
+            return "text/html";
+        }
+
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+
+        return "text/html";
     }
 }

@@ -22,7 +22,7 @@ public final class HttpRequest {
             String body
     ) {
         this.requestLine = Objects.requireNonNull(requestLine);
-        this.headers = Map.copyOf(headers);
+        this.headers = normalizeHeaders(headers);
         this.body = Objects.requireNonNull(body);
         this.cookies = new HttpCookie(getHeader("cookie"));
         this.bodyParameters = parseBodyParameters(body);
@@ -34,6 +34,17 @@ public final class HttpRequest {
         String body = readBody(reader, headers);
 
         return new HttpRequest(requestLine, headers, body);
+    }
+
+    private static Map<String, String> normalizeHeaders(Map<String, String> headers) {
+        Map<String, String> normalizedHeaders = new HashMap<>();
+        Objects.requireNonNull(headers).forEach((name, value) ->
+                normalizedHeaders.put(
+                        Objects.requireNonNull(name).toLowerCase(Locale.ROOT),
+                        Objects.requireNonNull(value)
+                )
+        );
+        return Map.copyOf(normalizedHeaders);
     }
 
     public HttpMethod getMethod() {

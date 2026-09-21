@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -62,6 +63,21 @@ class HttpRequestTest {
 
         assertThat(request.getParameter("email")).isEqualTo("user@example.com");
         assertThat(request.getParameter("nickname")).isEqualTo("hello world");
+    }
+
+    @Test
+    void normalizesHeaderNamesPassedToConstructor() {
+        HttpRequest request = new HttpRequest(
+                RequestLine.parse("POST /login HTTP/1.1"),
+                Map.of("Content-Type", "application/x-www-form-urlencoded"),
+                "account=junior"
+        );
+
+        assertThat(request.getHeader("content-type"))
+                .isEqualTo("application/x-www-form-urlencoded");
+        assertThat(request.getHeader("CONTENT-TYPE"))
+                .isEqualTo("application/x-www-form-urlencoded");
+        assertThat(request.getParameter("account")).isEqualTo("junior");
     }
 
     private BufferedReader readerOf(String request) {

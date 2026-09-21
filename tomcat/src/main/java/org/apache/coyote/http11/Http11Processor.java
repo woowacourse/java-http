@@ -55,8 +55,9 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = resolveHeader(reader);
 
             final Map<String, String> cookies = extractCookies(headers.get("Cookie"));
+            final boolean shouldIssueJSessionId = !cookies.containsKey("JSESSIONID");
 
-            if (cookies.get("JSESSIONID") == null) {
+            if (shouldIssueJSessionId) {
                 cookies.put("JSESSIONID", UUID.randomUUID().toString());
             }
 
@@ -66,17 +67,17 @@ public class Http11Processor implements Runnable, Processor {
             final String path = extractPath(uri);
 
             if ("/login".equals(path) && "POST".equals(method)) {
-                handleLogin(reader, headers, outputStream);
+                handleLogin(reader, headers, outputStream, jSessionId, shouldIssueJSessionId);
                 return;
             } else if ("/register".equals(path) && "POST".equals(method)) {
-                handleRegister(reader, headers, outputStream);
+                handleRegister(reader, headers, outputStream, jSessionId, shouldIssueJSessionId);
                 return;
             }
 
             final String responsePath = resolveResourcePath(path);
             final String responseBody = createResponseBody(path, responsePath);
 
-            final String response = createResponse(uri, responseBody, jSessionId);
+            final String response = createResponse(uri, responseBody, jSessionId, shouldIssueJSessionId);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -89,26 +90,31 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> extractCookies(final String cookieHeader) {
-        Map<String, String> cookies = new HashMap<>();
+        final Map<String, String> cookies = new HashMap<>();
 
         if (cookieHeader == null) {
             return cookies;
         }
 
         for (String cookie : cookieHeader.split(";")) {
-            final String[] keyValue = cookie.trim().split("=", 2);
+            final String[] keyValue =
+                    cookie.trim().split("=", 2);
 
-            if (keyValue[0].equals("JSESSIONID") && keyValue.length == 2) {
+            if (keyValue.length == 2
+                    && keyValue[0].equals("JSESSIONID")) {
                 cookies.put(keyValue[0], keyValue[1]);
             }
         }
+
         return cookies;
     }
 
     private void handleRegister(
             final BufferedReader reader,
             final Map<String, String> headers,
-            final OutputStream outputStream
+            final OutputStream outputStream,
+            final String jSessionId,
+            final boolean shouldIssueJSessionId
     ) throws IOException {
         int bodyLength = 0;
         bodyLength = Integer.parseInt(headers.get("Content-Length"));
@@ -127,7 +133,11 @@ public class Http11Processor implements Runnable, Processor {
 
         InMemoryUserRepository.save(newUser);
 
-        final String response = createRedirectResponse("/index.html");
+        final String response = createRedirectResponse(
+                "/index.html",
+                jSessionId,
+                shouldIssueJSessionId
+        );
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
@@ -174,7 +184,9 @@ public class Http11Processor implements Runnable, Processor {
     private void handleLogin(
             final BufferedReader reader,
             final Map<String, String> headers,
-            final OutputStream outputStream
+            final OutputStream outputStream,
+            final String jSessionId,
+            final boolean shouldIssueJSessionId
     ) throws IOException {
         int bodyLength = 0;
         bodyLength = Integer.parseInt(headers.get("Content-Length"));
@@ -186,7 +198,12 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> bodyParams = extractBody(requestBody);
 
         final String location = resolveLoginRedirect(bodyParams);
-        final String response = createRedirectResponse(location);
+        final String response = createRedirectResponse(
+                location,
+                jSessionId,
+                shouldIssueJSessionId
+        );
+
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
@@ -259,17 +276,29 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(
             final String uri,
             final String responseBody,
-            final String jSessionId
+            final String jSessionId,
+            final boolean shouldIssueJSessionId
     ) {
         final String contentType = resolveContentType(uri);
         final byte[] body = responseBody.getBytes(StandardCharsets.UTF_8);
+
+        if (shouldIssueJSessionId) {
+            return String.join(
+                    "\r\n",
+                    "HTTP/1.1 200 OK",
+                    "Set-Cookie: JSESSIONID=" + jSessionId,
+                    "Content-Type: " + contentType,
+                    "Content-Length: " + body.length,
+                    "",
+                    responseBody
+            );
+        }
 
         return String.join(
                 "\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Type: " + contentType,
                 "Content-Length: " + body.length,
-                "Set-Cookie: JSESSIONID=" + jSessionId,
                 "",
                 responseBody
         );
@@ -287,7 +316,23 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String createRedirectResponse(final String location) {
+    private String createRedirectResponse(
+            final String location,
+            final String jSessionId,
+            final boolean shouldIssueJSessionId
+    ) {
+
+        if (shouldIssueJSessionId) {
+            return String.join(
+                    "\r\n",
+                    "HTTP/1.1 302 Found",
+                    "Set-Cookie: JSESSIONID=" + jSessionId,
+                    "Location: " + location,
+                    "Content-Length: 0",
+                    "",
+                    ""
+            );
+        }
         return String.join(
                 "\r\n",
                 "HTTP/1.1 302 Found",

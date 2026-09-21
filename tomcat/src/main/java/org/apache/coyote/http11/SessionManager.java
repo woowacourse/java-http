@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
 
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.util.Map;
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final SessionManager INSTANCE = new SessionManager();
 
     @Override
     public void add(Session session) {
@@ -25,4 +25,10 @@ public class SessionManager implements Manager {
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
     }
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
+
+    private SessionManager() {}
 }

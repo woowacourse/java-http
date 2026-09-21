@@ -3,10 +3,13 @@ package org.apache.coyote.http11;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +36,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() throws IOException, URISyntaxException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -55,7 +58,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -98,5 +101,66 @@ class Http11ProcessorTest {
                 }
             }
         }
+    }
+
+    @Test
+    void successfulLoginKeepsOnlyThatSessionLoggedIn() {
+        String account = "user-" + UUID.randomUUID();
+        String registration = "account=" + account + "&password=test&email=test@example.com";
+        send(postRequest("/register", registration));
+
+        String login = send(postRequest("/login", "account=" + account + "&password=test"));
+        assertThat(login).startsWith("HTTP/1.1 302");
+        assertThat(headers(login)).contains("Location: /index.html");
+
+        String sessionCookie = headers(login).lines()
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .findFirst().orElseThrow()
+                .substring("Set-Cookie: ".length())
+                .split(";", 2)[0];
+
+        String sameSession = send("GET /login HTTP/1.1\r\nCookie: " + sessionCookie + "\r\n\r\n");
+        assertThat(sameSession).startsWith("HTTP/1.1 302");
+        assertThat(headers(sameSession)).contains("Location: /index.html");
+
+        String otherSession = send("GET /login HTTP/1.1\r\nCookie: JSESSIONID=" + UUID.randomUUID() + "\r\n\r\n");
+        assertThat(otherSession).startsWith("HTTP/1.1 200");
+        assertThat(headers(otherSession)).doesNotContain("Location:");
+    }
+
+    @Test
+    void failedLoginRedirectsToUnauthorizedPageWithoutLoggingIn() {
+        String account = "user-" + UUID.randomUUID();
+        send(postRequest("/register", "account=" + account + "&password=test&email=test@example.com"));
+
+        String sessionCookie = "JSESSIONID=" + UUID.randomUUID();
+        String failure = send(postRequest("/login", "account=" + account + "&password=wrong", sessionCookie));
+        assertThat(failure).startsWith("HTTP/1.1 302");
+        assertThat(headers(failure)).contains("Location: /401.html");
+
+        String nextRequest = send("GET /login HTTP/1.1\r\nCookie: " + sessionCookie + "\r\n\r\n");
+        assertThat(nextRequest).startsWith("HTTP/1.1 200");
+        assertThat(headers(nextRequest)).doesNotContain("Location:");
+    }
+
+    private String send(String request) {
+        StubSocket socket = new StubSocket(request);
+        new Http11Processor(socket, new SessionManager()).process(socket);
+        return socket.output();
+    }
+
+    private String postRequest(String path, String body) {
+        return postRequest(path, body, null);
+    }
+
+    private String postRequest(String path, String body, String cookie) {
+        return "POST " + path + " HTTP/1.1\r\nContent-Length: "
+                + body.getBytes(StandardCharsets.UTF_8).length + "\r\n"
+                + (cookie == null ? "" : "Cookie: " + cookie + "\r\n")
+                + "\r\n" + body;
+    }
+
+    private String headers(String response) {
+        return response.substring(0, response.indexOf("\r\n\r\n"));
     }
 }

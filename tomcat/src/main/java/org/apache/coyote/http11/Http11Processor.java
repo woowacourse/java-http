@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,6 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String line;
             int contentLength = 0;
+            boolean hasJsessionId = false;
             while(true) {
                 line = reader.readLine();
                 if(line == null) {
@@ -62,6 +64,12 @@ public class Http11Processor implements Runnable, Processor {
                 if(header[0].equalsIgnoreCase("Content-Length")) {
                     contentLength = Integer.parseInt(header[1].trim());
                 }
+                if(header[0].equalsIgnoreCase("Cookie")) {
+                    HttpCookie cookie = new HttpCookie(header[1]);
+                    if(cookie.hasJsessionId()) {
+                        hasJsessionId = true;
+                    }
+                }
             }
 
             char[] bodyBuffer = new char[contentLength];
@@ -73,11 +81,9 @@ public class Http11Processor implements Runnable, Processor {
                         totalRead,
                         contentLength - totalRead
                 );
-
                 if (readCount == -1) {
                     return;
                 }
-
                 totalRead += readCount;
             }
 
@@ -95,31 +101,28 @@ public class Http11Processor implements Runnable, Processor {
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
             // 로그인 success/fail
-            if ("/login".equals(path) && method.equals("POST")) {
+            if ("/login".equals(path) && "POST".equals(method)) {
                 final String[] parameters = body.split("&");
                 String account = parameters[0].split("=")[1];
                 String password = parameters[1].split("=")[1];
 
                 if(InMemoryUserRepository.findByAccount(account).filter(user -> user.checkPassword(password)).isPresent()) {
-                    final String responseHeader = String.join("\r\n",
-                            "HTTP/1.1 302 Found",
-                            "Location: /index.html",
-                            "Content-Length: 0",
-                            "",
-                            "");
-
-                    outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                    StringBuilder responseHeader = new StringBuilder();
+                    responseHeader.append("HTTP/1.1 302 Found").append("\r\n");
+                    appendSetCookieIfMissing(responseHeader, hasJsessionId);
+                    responseHeader.append("Location: /index.html").append("\r\n");
+                    responseHeader.append("Content-Length: 0").append("\r\n\r\n");
+                    outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
                     outputStream.flush();
                     return;
                 }
-                final String responseHeader = String.join("\r\n",
-                        "HTTP/1.1 401 Unauthorized",
-                        "Location: /401.html",
-                        "Content-Length: 0",
-                        "",
-                        "");
+                StringBuilder responseHeader = new StringBuilder();
+                responseHeader.append("HTTP/1.1 401 Unauthorized").append("\r\n");
+                appendSetCookieIfMissing(responseHeader, hasJsessionId);
+                responseHeader.append("Location: /401.html").append("\r\n");
+                responseHeader.append("Content-Length: 0").append("\r\n\r\n");
 
-                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }
@@ -132,14 +135,13 @@ public class Http11Processor implements Runnable, Processor {
                 String password = parameters[2].split("=")[1];
                 InMemoryUserRepository.save(new User(account, password, email));
 
-                final String responseHeader = String.join("\r\n",
-                        "HTTP/1.1 302 Found",
-                        "Location: /index.html",
-                        "Content-Length: 0",
-                        "",
-                        "");
+                StringBuilder responseHeader = new StringBuilder();
+                responseHeader.append("HTTP/1.1 302 Found").append("\r\n");
+                appendSetCookieIfMissing(responseHeader, hasJsessionId);
+                responseHeader.append("Location: /index.html").append("\r\n");
+                responseHeader.append("Content-Length: 0").append("\r\n\r\n");
 
-                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }
@@ -166,14 +168,13 @@ public class Http11Processor implements Runnable, Processor {
 
             final String contentType = getContentType(path);
 
-            final var responseHeader = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    "");
+            StringBuilder responseHeader = new StringBuilder();
+            responseHeader.append("HTTP/1.1 200 OK \r\n");
+            appendSetCookieIfMissing(responseHeader, hasJsessionId);
+            responseHeader.append("Content-Type: ").append(contentType).append("\r\n");
+            responseHeader.append("Content-Length: ").append(responseBody.length).append(" \r\n\r\n");
 
-            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -192,5 +193,13 @@ public class Http11Processor implements Runnable, Processor {
             return "image/svg+xml;charset=utf-8 ";
         }
         return "text/html;charset=utf-8 ";
+    }
+
+    private void appendSetCookieIfMissing(final StringBuilder responseHeader, final boolean hasJsessionId) {
+        if (!hasJsessionId) {
+            responseHeader.append("Set-Cookie: JSESSIONID=")
+                    .append(UUID.randomUUID())
+                    .append("\r\n");
+        }
     }
 }

@@ -3,34 +3,36 @@ package org.apache.coyote.http11.response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.cookie.Cookies;
 
 public class HttpResponse {
 
-    private String startLine = "HTTP/1.1 200 OK \r\n";
-    private HttpResponseHeader header;
+    private final HttpResponseHeader header;
+
+    private String version = "HTTP/1.1";
+    private HttpStatus status;
     private HttpResponseBody body;
 
     public HttpResponse() {
+        this.header = new HttpResponseHeader(new Cookies(), new LinkedHashMap<>());
+        this.status = HttpStatus.OK;
     }
 
-    public void setStartLine(String startLine) {
-        this.startLine = startLine;
-    }
-
-    public void setHeader(HttpResponseHeader header) {
-        this.header = header;
+    public void setHeader(String key, String value) {
+        header.setHeader(key, value);
     }
 
     public void setBody(HttpResponseBody body) {
         this.body = body;
+        header.setHeader("Content-Length", String.valueOf(body.length()));
     }
 
     public void sendRedirect(String location) {
-        this.startLine = "HTTP/1.1 302 Found \r\n";
-        if (header != null) {
-            header.setHeaders("Location", location);
-        }
+        setStatus(HttpStatus.FOUND);
+        header.setHeader("Location", location);
     }
 
     public void addCookie(Cookie cookie) {
@@ -41,10 +43,8 @@ public class HttpResponse {
 
     public byte[] getResponseBytes() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(startLine.getBytes(StandardCharsets.UTF_8));
-        if (header != null) {
-            out.write(header.getResponseHeaderString().getBytes(StandardCharsets.UTF_8));
-        }
+        out.write(startLine().getBytes(StandardCharsets.UTF_8));
+        out.write(header.getResponseHeaderString().getBytes(StandardCharsets.UTF_8));
         if (body != null) {
             out.write(body.getBytes());
         }
@@ -53,5 +53,17 @@ public class HttpResponse {
 
     public boolean hasCookie(String key) {
         return header.hasCookie(key);
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    private String startLine() {
+        return version + " " + status + "\r\n";
     }
 }

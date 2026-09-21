@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSessionContext;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Session implements HttpSession {
 
@@ -13,7 +14,7 @@ public class Session implements HttpSession {
     private final Map<String, Object> values = new HashMap<>();
 
     public Session(final String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id);
     }
 
     @Override
@@ -33,17 +34,14 @@ public class Session implements HttpSession {
 
     @Override
     public void invalidate() {
-
     }
 
     @Override
     public void putValue(String name, Object value) {
-
     }
 
     @Override
     public void removeValue(String name) {
-
     }
 
     @Override
@@ -74,7 +72,6 @@ public class Session implements HttpSession {
 
     @Override
     public void setMaxInactiveInterval(int interval) {
-
     }
 
     @Override

@@ -54,8 +54,7 @@ public class LoginController extends AbstractController {
 
                 if (httpCookie.get(JSESSIONID) != null) {
                     // 기존에 세션이 존재한다면, 세션을 삭제한다.
-                    HttpSession existedSession = SessionManager.getInstance()
-                            .findSession(httpCookie.get(JSESSIONID));
+                    HttpSession existedSession = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
                     if (existedSession != null) {
                         SessionManager.getInstance().remove(existedSession);
                     }

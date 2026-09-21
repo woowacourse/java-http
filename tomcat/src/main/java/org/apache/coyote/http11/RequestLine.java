@@ -12,7 +12,7 @@ public class RequestLine {
         String[] params = line.split(START_LINE_DELIMITER);
 
         httpMethod = HttpMethod.from(params[0]);
-        httpPath = HttpPath.from(params[1]);
+        httpPath = new HttpPath(params[1]);
         httpVersion = HttpVersion.from(params[2]);
     }
 
@@ -22,9 +22,5 @@ public class RequestLine {
 
     public HttpPath getHttpPath() {
         return httpPath;
-    }
-
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
     }
 }

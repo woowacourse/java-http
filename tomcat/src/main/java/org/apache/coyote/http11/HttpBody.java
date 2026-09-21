@@ -1,10 +1,12 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
+
 public class HttpBody {
     private final String value;
 
     public HttpBody(String value) {
-        this.value = value;
+        this.value = Objects.requireNonNull(value);
     }
 
     public String getValue() {
@@ -12,9 +14,6 @@ public class HttpBody {
     }
 
     public int getLength() {
-        if (value == null) {
-            return 0;
-        }
         return value.getBytes().length;
     }
 }

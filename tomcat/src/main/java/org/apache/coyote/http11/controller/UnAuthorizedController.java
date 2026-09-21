@@ -23,8 +23,7 @@ public class UnAuthorizedController extends AbstractController {
         FileReader fileReader = new FileReader();
         final String body = fileReader.readFile("static/401.html");
 
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200,
-                new ReasonPhrase("OK"));
+        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_200, new ReasonPhrase("OK"));
         response.putHeader(CONTENT_TYPE, CONTENT_TYPE_TEXT_HTML);
         response.setHttpBody(new HttpBody(body));
         response.write();

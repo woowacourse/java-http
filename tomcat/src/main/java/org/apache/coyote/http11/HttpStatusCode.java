@@ -2,9 +2,7 @@ package org.apache.coyote.http11;
 
 public enum HttpStatusCode {
     HTTP_STATUS_200("200"),
-    HTTP_STATUS_302("302"),
-    HTTP_STATUS_401("401"),
-    HTTP_STATUS_404("404");
+    HTTP_STATUS_302("302");
 
     private final String value;
 

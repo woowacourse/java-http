@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpCookie {
     private static final String PARAM_DELIMITER = ";";
@@ -9,7 +10,7 @@ public class HttpCookie {
     private final Map<String, String> cookies;
 
     public HttpCookie(String cookieLine) {
-        cookies = parseCookies(cookieLine);
+        cookies = parseCookies(Objects.requireNonNull(cookieLine));
     }
 
     private Map<String, String> parseCookies(String cookieLine) {

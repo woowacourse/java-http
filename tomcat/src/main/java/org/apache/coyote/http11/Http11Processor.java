@@ -60,6 +60,23 @@ public class Http11Processor implements Runnable, Processor {
 
             readHeaders(bufferedReader);
 
+            if (path.equals("/login") && !queryString.isEmpty()) {
+                boolean loginSuccess = login(queryString);
+
+                String redirectPath = loginSuccess ? "/index.html" : "/401.html";
+
+                String response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: " + redirectPath,
+                        "Content-Length: 0",
+                        "",
+                        "");
+
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
             var responseBody = "Hello world!";
             int contentLength = responseBody.getBytes().length;
             String contentType = getContentType(path);
@@ -76,8 +93,6 @@ public class Http11Processor implements Runnable, Processor {
                         throw new IllegalArgumentException("404.html 리소스를 찾을 수 없습니다.");
                     }
                     statusLine = "HTTP/1.1 404 Not Found ";
-                } else if (path.equals("/login") && !queryString.isEmpty()) {
-                    login(queryString);
                 }
 
                 responseBody = new String(fileBytes, StandardCharsets.UTF_8);
@@ -128,25 +143,30 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + path;
     }
 
-    private void login(String queryString) {
+    private boolean login(String queryString) {
         Map<String, String> loginInfo = parseQueryString(queryString);
 
         String account = loginInfo.get("account");
         String password = loginInfo.get("password");
 
         if (account == null || account.isBlank() || password == null || password.isBlank()) {
-            return;
+            return false;
         }
 
         var optionalUser = InMemoryUserRepository.findByAccount(account);
 
-        if (optionalUser.isPresent()) {
-            var user = optionalUser.get();
-
-            if (user.checkPassword(password)) {
-                log.info("login user: {}", user);
-            }
+        if (optionalUser.isEmpty()) {
+            return false;
         }
+
+        var user = optionalUser.get();
+
+        if (!user.checkPassword(password)) {
+            return false;
+        }
+
+        log.info("login user: {}", user);
+        return true;
     }
 
     private Map<String, String> parseQueryString(String queryString) {

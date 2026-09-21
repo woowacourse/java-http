@@ -191,6 +191,52 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void redirectToRegisterWhenRegistrationDataIsBlank() {
+        // given
+        final String account = "blank-user";
+        final String requestBody =
+                "account=" + account + "&password=%20%20%20&email=blank-user%40woowahan.com";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                requestBody);
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /register");
+    }
+
+    @Test
+    void doesNotRegisterUserForGetRequest() {
+        // given
+        final String account = "get-user";
+        final String httpRequest = String.join("\r\n",
+                "GET /register?account=" + account + "&password=password&email=get-user%40woowahan.com HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK");
+    }
+
+    @Test
     void keepLoginStateWithJsessionId() {
         // given
         final String requestBody = "account=gugu&password=password";

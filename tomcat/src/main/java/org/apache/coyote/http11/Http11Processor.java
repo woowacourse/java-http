@@ -247,26 +247,31 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/register".equals(path)) {
-            if ("GET".equals(method)) {
-                return readResource("/register.html");
+            if ("POST".equals(method)) {
+                final String location = register(parameters) ? "/index.html" : "/register";
+                writeRedirectResponse(outputStream, location, sessionIdToSet);
+                return null;
             }
 
-            register(parameters);
-            writeRedirectResponse(outputStream, "/index.html", sessionIdToSet);
-            return null;
+            return readResource("/register.html");
         }
 
         return readResource(path);
     }
 
-    private void register(final Map<String, String> parameters) {
+    private boolean register(final Map<String, String> parameters) {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
         final String email = parameters.get("email");
-        if (account == null || password == null || email == null) {
-            return;
+        if (isBlank(account) || isBlank(password) || isBlank(email)) {
+            return false;
         }
         InMemoryUserRepository.save(new User(account, password, email));
+        return true;
+    }
+
+    private boolean isBlank(final String value) {
+        return value == null || value.isBlank();
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

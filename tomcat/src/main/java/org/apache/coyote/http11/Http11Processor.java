@@ -53,6 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK ";
     private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found ";
     private static final String FOUND_STATUS_LINE = "HTTP/1.1 302 FOUND ";
+    private static final String CONFLICT_STATUS_LINE = "HTTP/1.1 409 Conflict ";
     private static final String CONTENT_TYPE_HEADER_PREFIX = "Content-Type: ";
     private static final String UTF_8_CHARSET_PARAMETER = ";charset=utf-8 ";
     private static final String CONTENT_LENGTH_HEADER_PREFIX = "Content-Length: ";
@@ -89,8 +90,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpCookie cookie = HttpCookie.create(headerMap.getOrDefault("Cookie", ""));
-            boolean shouldSetCookie = !cookie.isSessionId();
-            if (shouldSetCookie) {
+            boolean shouldIssueSessionCookie = !cookie.isSessionId();
+            if (shouldIssueSessionCookie) {
                 cookie.setSessionId();
             }
 
@@ -118,6 +119,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             Map<String, String> requestBodyMap = new LinkedHashMap<>();
+            boolean isDuplicateRegistration = false;
             if (httpMethod.equals(POST_METHOD) && (url.equals(REGISTER_PATH) || url.equals(LOGIN_PATH))
                     && contentLength > 0) {
                 String[] body = requestBody.split("&");
@@ -128,7 +130,7 @@ public class Http11Processor implements Runnable, Processor {
                 if (url.equals(REGISTER_PATH)) {
                     User user = new User(requestBodyMap.get(ACCOUNT_PARAMETER), requestBodyMap.get(PASSWORD_PARAMETER),
                             requestBodyMap.get("email"));
-                    InMemoryUserRepository.save(user);
+                    isDuplicateRegistration = !InMemoryUserRepository.saveIfAbsent(user);
                 }
             }
 
@@ -217,9 +219,15 @@ public class Http11Processor implements Runnable, Processor {
                 responseHeaders.add("Location: " + location);
                 responseBody = "";
             } else if (httpMethod.equals(POST_METHOD) && urlPath.equals(REGISTER_PATH)) {
-                responseHeaders.add(FOUND_STATUS_LINE);
-                responseHeaders.add("Location: " + INDEX_HTML_PATH);
-                responseBody = "";
+                if (isDuplicateRegistration) {
+                    responseHeaders.add(CONFLICT_STATUS_LINE);
+                    contentType = TEXT_CONTENT_TYPE;
+                    responseBody = "이미 존재하는 회원입니다.";
+                } else {
+                    responseHeaders.add(FOUND_STATUS_LINE);
+                    responseHeaders.add("Location: " + INDEX_HTML_PATH);
+                    responseBody = "";
+                }
             } else if (httpMethod.equals(GET_METHOD) && urlPath.equals(LOGIN_PATH) && sessionManager.isSessionContainsKey(cookie.getSessionId(), USER_SESSION_ATTRIBUTE)) {
                 responseHeaders.add(FOUND_STATUS_LINE);
                 responseHeaders.add("Location: " + INDEX_HTML_PATH);
@@ -231,7 +239,7 @@ public class Http11Processor implements Runnable, Processor {
             responseHeaders.add(CONTENT_TYPE_HEADER_PREFIX + contentType + UTF_8_CHARSET_PARAMETER);
             responseHeaders.add(CONTENT_LENGTH_HEADER_PREFIX
                     + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
-            if (shouldSetCookie) {
+            if (shouldIssueSessionCookie) {
                 responseHeaders.add(SET_COOKIE_HEADER_PREFIX + cookie.getSessionIdCookieName() + "="
                         + cookie.getSessionId() + COOKIE_PATH_ATTRIBUTE);
             }

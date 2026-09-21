@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -71,10 +72,10 @@ class Http11ProcessorTest {
                 "POST /register HTTP/1.1"
         };
         String[] statuses = {"200", "404", "302", "302"};
-        String body = "account=cookietest&password=test&email=test@example.com";
-
         for (int i = 0; i < requests.length; i++) {
             for (boolean hasCookie : new boolean[]{false, true}) {
+                String body = "account=cookietest-" + i + "-" + hasCookie
+                        + "&password=test&email=test@example.com";
                 String request = requests[i] + "\r\nContent-Length: " + body.length() + "\r\n"
                         + (hasCookie ? "Cookie: JSESSIONID=existing\r\n" : "")
                         + "\r\n" + body;
@@ -141,6 +142,18 @@ class Http11ProcessorTest {
         String nextRequest = send("GET /login HTTP/1.1\r\nCookie: " + sessionCookie + "\r\n\r\n");
         assertThat(nextRequest).startsWith("HTTP/1.1 200");
         assertThat(headers(nextRequest)).doesNotContain("Location:");
+    }
+
+    @Test
+    void duplicateRegistrationDoesNotReplaceExistingUser() {
+        String account = "user-" + UUID.randomUUID();
+        String registration = "account=" + account + "&password=original&email=test@example.com";
+        assertThat(send(postRequest("/register", registration))).startsWith("HTTP/1.1 302");
+
+        String duplicate = "account=" + account + "&password=replaced&email=other@example.com";
+        assertThat(send(postRequest("/register", duplicate))).startsWith("HTTP/1.1 409");
+        assertThat(InMemoryUserRepository.findByAccount(account).orElseThrow().checkPassword("original")).isTrue();
+        assertThat(InMemoryUserRepository.findByAccount(account).orElseThrow().checkPassword("replaced")).isFalse();
     }
 
     private String send(String request) {

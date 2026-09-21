@@ -1,8 +1,10 @@
 # 2단계 - 로그인 구현하기
 
 ## 1. 로그인 후 다른 페이지 이동시키기
-- [ ] 로그인 성공 시 302 반환 및 `/index.html`로 리다이렉트
-- [ ] 로그인 실패 시 `/401.html`로 리다이렉트
+- [x] 로그인 성공 시 302 반환 및 `/index.html`로 리다이렉트
+![img_1.png](img_1.png)
+- [x] 로그인 실패 시 `/401.html`로 리다이렉트
+![img.png](img.png)
 
 ## 2. POST 방식 도입
 - [ ] `http://localhost:8080/register` 접속 시 `register.html` 보여주고 GET 사용

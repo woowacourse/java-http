@@ -6,6 +6,7 @@ import support.StubSocket;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +16,14 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=test-session ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when
@@ -39,6 +47,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=test-session ",
                 "",
                 "");
 
@@ -66,6 +75,7 @@ class Http11ProcessorTest {
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=test-session ",
                 "",
                 "");
 
@@ -84,5 +94,62 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void setsSessionCookieWhenRequestDoesNotHaveCookie() {
+        // given
+        final var socket = new StubSocket();
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36} ");
+    }
+
+    @Test
+    void loggedInUserIsRedirectedFromLoginPage() {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final String loginRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                requestBody);
+
+        final var loginSocket = new StubSocket(loginRequest);
+
+        // when
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final String sessionCookie = loginSocket.output().lines()
+                .filter(line -> line.startsWith("Set-Cookie: "))
+                .findFirst()
+                .orElseThrow()
+                .substring("Set-Cookie: ".length());
+
+        final String loginPageRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: " + sessionCookie,
+                "",
+                "");
+        final var loginPageSocket = new StubSocket(loginPageRequest);
+
+        new Http11Processor(loginPageSocket).process(loginPageSocket);
+
+        // then
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+
+        assertThat(loginPageSocket.output()).isEqualTo(expected);
     }
 }

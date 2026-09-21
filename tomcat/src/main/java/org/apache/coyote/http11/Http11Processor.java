@@ -10,9 +10,14 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URLDecoder;
@@ -63,7 +68,11 @@ public class Http11Processor implements Runnable, Processor {
                     ? targetParts[1]
                     : "";
 
+            /**
+             * header
+             */
             int contentLength = 0;
+            String cookieHeader = null;
             //null: 연결이 끊겼거나 입력이 끝남
             //"": HTTP 헤더가 끝났다는 뜻
             String line;
@@ -73,8 +82,19 @@ public class Http11Processor implements Runnable, Processor {
                             line.substring("Content-Length:".length()).trim()
                     );
                 }
+                if (line.regionMatches(true, 0, "Cookie:", 0, "Cookie:".length())) {
+                    cookieHeader = line.substring("Cookie:".length()).trim();
+                }
             }
+            final String requestSessionId = Cookie.getValue(cookieHeader, "JSESSIONID");
+            final Session session = SessionManager.findOrCreate(requestSessionId);
+            final String sessionCookie = requestSessionId == null || requestSessionId.isBlank()
+                    ? "JSESSIONID=" + session.getId()
+                    : null;
 
+            /**
+             * body
+             */
             final String requestBody = readRequestBody(bufferedReader, contentLength);
 
             final String responseBody;
@@ -84,6 +104,12 @@ public class Http11Processor implements Runnable, Processor {
                 final String resourcePath;
 
                 if ("/login".equals(requestUri)) {
+                    if ("GET".equalsIgnoreCase(method)
+                            && session.getAttribute("user") != null) {
+                        writeRedirectResponse(outputStream, "/index.html", sessionCookie);
+                        return;
+                    }
+
                     final boolean hasLoginRequest = "POST".equalsIgnoreCase(method)
                             || !queryString.isBlank();
 
@@ -97,19 +123,24 @@ public class Http11Processor implements Runnable, Processor {
                         final String account = queryParams.get("account");
                         final String password = queryParams.get("password");
 
-                        final boolean loginSuccess = account != null
-                                && password != null
-                                && InMemoryUserRepository.findByAccount(account)
-                                .filter(user -> user.checkPassword(password))
-                                .map(user -> {
-                                    log.info("회원 조회 결과: {}", user);
-                                    return true;
-                                })
+                        final Optional<User> optionalUser = account == null
+                                ? Optional.empty()
+                                : InMemoryUserRepository.findByAccount(account);
+                        final boolean loginSuccess = password != null
+                                && optionalUser
+                                .map(user -> user.checkPassword(password))
                                 .orElse(false);
+
+                        if (loginSuccess) {
+                            final User user = optionalUser.orElseThrow();
+                            session.setAttribute("user", user);
+                            log.info("회원 조회 결과: {}", user);
+                        }
 
                         writeRedirectResponse(
                                 outputStream,
-                                loginSuccess ? "/index.html" : "/401.html"
+                                loginSuccess ? "/index.html" : "/401.html",
+                                sessionCookie
                         );
                         return;
                     }
@@ -128,7 +159,7 @@ public class Http11Processor implements Runnable, Processor {
                             log.info("회원가입 결과: {}", user);
                         }
 
-                        writeRedirectResponse(outputStream, "/index.html");
+                        writeRedirectResponse(outputStream, "/index.html", sessionCookie);
                         return;
                     }
 
@@ -161,14 +192,22 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "text/html;charset=utf-8";
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final List<String> responseHeaders = new ArrayList<>();
+            responseHeaders.add("HTTP/1.1 200 OK ");
 
-            outputStream.write(response.getBytes());
+            if (sessionCookie != null) {
+                responseHeaders.add("Set-Cookie: " + sessionCookie + " ");
+            }
+
+            responseHeaders.add("Content-Type: " + contentType + " ");
+            responseHeaders.add("Content-Length: "
+                    + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
+            responseHeaders.add("");
+            responseHeaders.add(responseBody);
+
+            final String response = String.join("\r\n", responseHeaders);
+
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -219,13 +258,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeRedirectResponse(final OutputStream outputStream,
-                                       final String location) throws IOException {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
+                                       final String location,
+                                       final String sessionCookie) throws IOException {
+        final List<String> responseHeaders = new ArrayList<>();
+        responseHeaders.add("HTTP/1.1 302 Found");
+
+        if (sessionCookie != null) {
+            responseHeaders.add("Set-Cookie: " + sessionCookie);
+        }
+
+        responseHeaders.add("Location: " + location);
+        responseHeaders.add("Content-Length: 0");
+        responseHeaders.add("");
+        responseHeaders.add("");
+
+        final String response = String.join("\r\n", responseHeaders);
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();

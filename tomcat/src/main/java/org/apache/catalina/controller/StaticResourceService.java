@@ -1,8 +1,8 @@
 package org.apache.catalina.controller;
 
+import org.apache.catalina.resource.StaticResourceLoader;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.StaticResourceLoader;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

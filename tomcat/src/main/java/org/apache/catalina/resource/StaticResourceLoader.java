@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.resource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class StaticResourceLoader {
-
 
     private File getResourceFile(String fileName) throws FileNotFoundException {
         URL resource = getClass()

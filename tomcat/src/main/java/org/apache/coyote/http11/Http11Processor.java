@@ -36,8 +36,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CSS_PATH = "/css/styles.css";
     private static final String JOIN_PATH = "/register";
     private static final String LOGIN_PATH = "/login";
-
-    private static final String UNAUTHORIZED_FILE = "401.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
 
     private final Socket connection;
 
@@ -143,13 +142,16 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = CONTENT_TYPE_JS;
             }
 
+            if (method.equals("GET") && path.equals(UNAUTHORIZED_PATH)) {
+                responseBody = readStaticFile(UNAUTHORIZED_PATH.substring(1));
+            }
+
             if (method.equals("GET") && path.equals(JOIN_PATH)) {
                 responseBody = readStaticFile("register.html");
             }
 
             if (method.equals("POST") && path.equals(JOIN_PATH)) {
                 String requestBody = readRequestBody(bufferedReader, contentLength);
-
                 Map<String, String> parameters = parseFormData(requestBody);
 
                 String account = parameters.getOrDefault("account", "");
@@ -182,34 +184,28 @@ public class Http11Processor implements Runnable, Processor {
 
             if (method.equals("POST") && path.equals(LOGIN_PATH)) {
                 String requestBody = readRequestBody(bufferedReader, contentLength);
+                Map<String, String> parameters = parseFormData(requestBody);
 
-                if (!requestBody.isEmpty()) {
-                    Map<String, String> parameters = parseFormData(requestBody);
+                String account = parameters.getOrDefault("account", "");
+                String password = parameters.getOrDefault("password", "");
 
-                    String account = parameters.getOrDefault("account", "");
-                    String password = parameters.getOrDefault("password", "");
+                var user = InMemoryUserRepository.findByAccount(account);
 
-                    var user = InMemoryUserRepository.findByAccount(account);
+                String location = UNAUTHORIZED_PATH;
 
-                    if (user.isPresent()) {
-                        if (user.get().checkPassword(password)) {
-                            session.setAttribute("user", user.get());
+                if (user.isPresent() && user.get().checkPassword(password)) {
+                    session.setAttribute("user", user.get());
 
-                            log.info("로그인 성공 : account={}", user.get().getAccount());
+                    log.info("로그인 성공 : account={}", user.get().getAccount());
 
-                            String response = createRedirectResponse(INDEX_PATH, setCookieHeader);
-
-                            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                            outputStream.flush();
-                            return;
-
-                        }
-
-                        if (!user.get().checkPassword(password)) {
-                            responseBody = readStaticFile(UNAUTHORIZED_FILE);
-                        }
-                    }
+                    location = INDEX_PATH;
                 }
+
+                String response = createRedirectResponse(location, setCookieHeader);
+
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
             }
 
             final var response = createResponse(contentType, responseBody, setCookieHeader);

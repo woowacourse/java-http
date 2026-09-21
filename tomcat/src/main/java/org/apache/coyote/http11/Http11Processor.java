@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.Controller;
-import org.apache.catalina.ControllerMapping;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ControllerMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

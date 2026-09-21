@@ -1,6 +1,6 @@
 package org.apache.catalina.startup;
 
-import org.apache.catalina.ControllerMapping;
+import org.apache.catalina.controller.ControllerMapping;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

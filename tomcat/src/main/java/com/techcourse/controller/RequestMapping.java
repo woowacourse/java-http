@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.Controller;
-import org.apache.catalina.ControllerMapping;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ControllerMapping;
 import org.apache.catalina.resource.StaticResourceController;
 import org.apache.coyote.http11.HttpRequest;
 

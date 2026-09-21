@@ -30,7 +30,7 @@ class FileTest {
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
-        final String actual = ClassLoader.getSystemResource(fileName).toExternalForm();;
+        final String actual = ClassLoader.getSystemResource(fileName).toExternalForm();
 
         assertThat(actual).endsWith(fileName);
     }

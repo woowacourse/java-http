@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import javassist.NotFoundException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,60 +42,44 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = br.readLine();
+            HttpRequest request = HttpRequest.parseFrom(br);
 
-            var responseBody = "Hello world!";
-            String contentType = CONTENT_TYPE_HTML;
+            HttpResponse response = createResponse(request);
 
-            if (requestLine != null) {
-                String[] words = requestLine.split(" ");
-
-                if (!"/".equals(words[1])) {
-                    String uri = words[1];
-                    String uriForPath = uri;
-                    int index = uri.indexOf("?");
-
-                    if (uri.startsWith("/login")) {
-                        uriForPath = "/login.html";
-                    }
-
-                    if (index != -1) {
-                        String pathFromUri = uri.substring(0, index);
-                        String queryString = uri.substring(index + 1);
-
-                        if(pathFromUri.equals("/login") && !"".equals(queryString)) {
-                            login(queryString);
-                        }
-                    }
-
-                    var resource = ClassLoader.getSystemResource(ROOT + uriForPath);
-                    Path path = Path.of(resource.toURI());
-                    responseBody = Files.readString(path);
-
-                    String[] splitUrl = uriForPath.split("\\.");
-                    if (splitUrl.length > 1) {
-                        contentType = findContentType(splitUrl[1]);
-                    }
-                }
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.convertString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void login(String query) {
-        String account = parseLoginQuery(query, "account");
-        String password = parseLoginQuery(query, "password");
+    private HttpResponse createResponse(HttpRequest request) throws IOException, URISyntaxException {
+        if ("/".equals(request.getPath())) {
+            return HttpResponse.isOk(CONTENT_TYPE_HTML, "Hello world!");
+        }
+
+        String resourcePath = request.getPath();
+
+        if ("/login".equals(resourcePath)) {
+            resourcePath = "/login.html";
+
+            if (!request.getQueries().isEmpty()) {
+                login(request.getQueries());
+            }
+        }
+
+        var resource = ClassLoader.getSystemResource(ROOT + resourcePath);
+        Path path = Path.of(resource.toURI());
+
+        String responseBody = Files.readString(path);
+        String contentType = findContentType(resourcePath);
+
+        return HttpResponse.isOk(contentType, responseBody);
+    }
+
+    private void login(Map<String, String> queries) {
+        String account = queries.getOrDefault("account", "");
+        String password = queries.getOrDefault("password", "");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
@@ -105,24 +89,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseLoginQuery(String query, String target) {
-        String[] splitQuery = query.split("\\&");
-        for (String q : splitQuery) {
-            String[] keyAndValue = q.split("=");
-            if (keyAndValue[0].startsWith(target)) {
-                return keyAndValue[1];
-            }
-        }
-
-        throw new IllegalArgumentException();
-    }
-
-    private String findContentType(String extension) {
-        if (extension.equals("css")) {
+    private String findContentType(String resourcePath) {
+        if (resourcePath.endsWith(".css")) {
             return CONTENT_TYPE_CSS;
         }
 
-        if (extension.equals("js")) {
+        if (resourcePath.endsWith(".js")) {
             return CONTENT_TYPE_JS;
         }
 

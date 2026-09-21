@@ -1,5 +1,7 @@
 package org.apache.coyote;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -29,6 +31,18 @@ public record HttpResponse(
     @Override
     public byte[] body() {
         return body.clone();
+    }
+
+    public byte[] toBytes() {
+        StringBuilder head = new StringBuilder(version).append(" ").append(statusCode).append("\r\n");
+        headers.forEach((name, value) ->
+                head.append(name).append(": ").append(value).append("\r\n"));
+        head.append("\r\n");
+
+        byte[] headBytes = head.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] responseBytes = Arrays.copyOf(headBytes, headBytes.length + body.length);
+        System.arraycopy(body, 0, responseBytes, headBytes.length, body.length);
+        return responseBytes;
     }
 
     public static HttpResponse ok(String contentType, byte[] body) {

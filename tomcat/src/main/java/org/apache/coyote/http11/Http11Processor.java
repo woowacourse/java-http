@@ -7,17 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Dispatcher;
@@ -61,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Optional<HttpResponse> handleRequest(InputStream inputStream) throws IOException {
         try {
-            Optional<HttpRequest> request = parseRequest(inputStream);
+            Optional<HttpRequest> request = readRequest(inputStream);
             if (request.isEmpty()) {
                 return Optional.empty();
             }
@@ -92,114 +90,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<HttpRequest> parseRequest(InputStream inputStream) throws IOException {
+    private Optional<HttpRequest> readRequest(InputStream inputStream) throws IOException {
         String requestLine = readline(inputStream);
         if (requestLine == null) {
             return Optional.empty();
         }
 
-        String[] parts = requestLine.split(" ",3);
-
-        if (parts.length != 3) {
-            throw new BadRequestException("Invalid request line: " + requestLine);
-        }
-
-        URI uri = createUri(parts[1], requestLine);
-
-        Map<String, String> headers = readHeaders(inputStream);
-        String body = readBody(inputStream, headers);
-
-        Map<String, String> queryParameters = parseParameters(uri.getRawQuery());
-        Map<String, String> formParameters = isFormUrlEncoded(headers.get("content-type"))
-                ? parseParameters(body)
-                : Map.of();
-
-        return Optional.of(new HttpRequest(
-                parts[0],
-                uri.getPath(),
-                parts[2],
-                headers,
-                queryParameters,
-                formParameters,
-                body,
-                parseCookies(headers.get("cookie"))
-        ));
-    }
-
-    private boolean isFormUrlEncoded(String contentType) {
-        return contentType != null
-                && contentType.split(";", 2)[0].trim()
-                        .equalsIgnoreCase("application/x-www-form-urlencoded");
-    }
-
-    private HttpCookie parseCookies(String cookieHeader) {
-        Map<String, String> cookies = new HashMap<>();
-        if (cookieHeader == null || cookieHeader.isBlank()) {
-            return new HttpCookie(cookies);
-        }
-
-        for (String cookie : cookieHeader.split(";")) {
-            String[] parts = cookie.trim().split("=", 2);
-            if (parts.length == 2 && !parts[0].isBlank()) {
-                cookies.put(parts[0].trim(), parts[1].trim());
-            }
-        }
-        return new HttpCookie(cookies);
-    }
-
-    private URI createUri(String target, String requestLine) {
-        try {
-            return URI.create(target);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid request line: " + requestLine);
-        }
-    }
-
-    private Map<String, String> parseParameters(String rawQuery) {
-        Map<String, String> query = new HashMap<>();
-
-        if (rawQuery == null || rawQuery.isBlank()) {
-            return query;
-        }
-
-        for (String parameter : rawQuery.split("&")) {
-            addQueryParameter(query, parameter);
-        }
-
-        return query;
-    }
-
-    private void addQueryParameter(Map<String, String> query, String parameter) {
-        String[] keyValue = parameter.split("=", 2);
-        String key = decodeParameter(keyValue[0]);
-        String value = "";
-
-        if (keyValue.length == 2) {
-            value = decodeParameter(keyValue[1]);
-        }
-
-        query.put(key, value);
-    }
-
-    private String decodeParameter(String value) {
-        try {
-            return URLDecoder.decode(value, StandardCharsets.UTF_8);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid URL encoding");
-        }
+        Map<String, String> headers = HttpRequest.parseHeaders(readHeaderLines(inputStream));
+        byte[] body = readBody(inputStream, headers);
+        return Optional.of(HttpRequest.parse(requestLine, headers, body));
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-        StringBuilder headers = new StringBuilder(String.join("\r\n",
-                response.version() + " " + response.statusCode(),
-                ""
-        ));
-        response.headers().forEach((name, value) ->
-                headers.append(name).append(": ").append(value).append("\r\n"));
-        headers.append("\r\n");
-
-        outputStream.write(headers.toString().getBytes(StandardCharsets.UTF_8));
-        outputStream.write(response.body());
+        outputStream.write(response.toBytes());
         outputStream.flush();
     }
 
@@ -231,25 +134,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private List<String> readHeaderLines(InputStream inputStream) throws IOException {
+        List<String> headerLines = new ArrayList<>();
         String line;
         while ((line = readline(inputStream)) != null && !line.isBlank()) {
-            String[] parts = line.split(":", 2);
-            if (parts.length == 2) {
-                headers.put(parts[0].trim().toLowerCase(), parts[1].trim());
-            }
+            headerLines.add(line);
         }
-        return headers;
+        return headerLines;
     }
 
-    private String readBody(InputStream inputStream, Map<String, String> headers) throws IOException {
+    private byte[] readBody(InputStream inputStream, Map<String, String> headers) throws IOException {
         if (headers.containsKey("content-length")) {
             int contentLength = parseContentLength(headers.get("content-length"));
-            byte[] body = inputStream.readNBytes(contentLength);
-            return new String(body, StandardCharsets.UTF_8);
+            return inputStream.readNBytes(contentLength);
         }
-        return "";
+        return new byte[0];
     }
 
     private int parseContentLength(String value) {

@@ -6,11 +6,9 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -31,11 +29,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            HttpRequest request = HttpRequest.parse(reader);
+            HttpRequest request = HttpRequest.parse(inputStream);
             HttpResponse response = new HttpResponse();
 
             request.createJSessionIdIfAbsent().ifPresent(sessionId -> response.setCookie(HttpCookie.JSESSION_ID, sessionId));

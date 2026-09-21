@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -28,10 +30,11 @@ public final class HttpRequest {
         this.bodyParameters = parseBodyParameters(body);
     }
 
-    public static HttpRequest parse(BufferedReader reader) throws IOException {
-        RequestLine requestLine = RequestLine.parse(reader.readLine());
-        Map<String, String> headers = readHeaders(reader);
-        String body = readBody(reader, headers);
+    public static HttpRequest parse(InputStream inputStream) throws IOException {
+        Objects.requireNonNull(inputStream);
+        RequestLine requestLine = RequestLine.parse(readLine(inputStream));
+        Map<String, String> headers = readHeaders(inputStream);
+        String body = readBody(inputStream, headers);
 
         return new HttpRequest(requestLine, headers, body);
     }
@@ -79,11 +82,11 @@ public final class HttpRequest {
         return cookies.createJSessionIdIfAbsent();
     }
 
-    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+    private static Map<String, String> readHeaders(InputStream inputStream) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
 
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+        while ((line = readLine(inputStream)) != null && !line.isEmpty()) {
             String[] pair = line.split(":", 2);
 
             if (pair.length == 2) {
@@ -95,28 +98,38 @@ public final class HttpRequest {
     }
 
     private static String readBody(
-            BufferedReader reader,
+            InputStream inputStream,
             Map<String, String> headers
     ) throws IOException {
         int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
-        char[] buffer = new char[contentLength];
-        int totalRead = 0;
-
-        while (totalRead < contentLength) {
-            int readCount = reader.read(
-                    buffer,
-                    totalRead,
-                    contentLength - totalRead
-            );
-
-            if (readCount == -1) {
-                throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
-            }
-
-            totalRead += readCount;
+        byte[] body = inputStream.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
         }
 
-        return new String(buffer);
+        return new String(body, StandardCharsets.UTF_8);
+    }
+
+    private static String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int value;
+
+        while ((value = inputStream.read()) != -1) {
+            if (value == '\n') {
+                byte[] line = buffer.toByteArray();
+                int length = line.length;
+                if (length > 0 && line[length - 1] == '\r') {
+                    length--;
+                }
+                return new String(line, 0, length, StandardCharsets.UTF_8);
+            }
+            buffer.write(value);
+        }
+
+        if (buffer.size() == 0) {
+            return null;
+        }
+        return buffer.toString(StandardCharsets.UTF_8);
     }
 
     private Map<String, String> parseBodyParameters(String body) {

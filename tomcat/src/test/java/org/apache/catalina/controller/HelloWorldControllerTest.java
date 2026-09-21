@@ -4,9 +4,8 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,9 +14,9 @@ class HelloWorldControllerTest {
 
     @Test
     void respondsWithHelloWorldForGetRequest() throws Exception {
-        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(
-                "GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n"
-        )));
+        HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(
+                "GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n".getBytes(StandardCharsets.UTF_8)
+        ));
         HttpResponse response = new HttpResponse();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -35,9 +34,9 @@ class HelloWorldControllerTest {
 
     @Test
     void respondsWithMethodNotAllowedForPostRequest() throws Exception {
-        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(
-                "POST / HTTP/1.1\r\nContent-Length: 0\r\n\r\n"
-        )));
+        HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(
+                "POST / HTTP/1.1\r\nContent-Length: 0\r\n\r\n".getBytes(StandardCharsets.UTF_8)
+        ));
         HttpResponse response = new HttpResponse();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 

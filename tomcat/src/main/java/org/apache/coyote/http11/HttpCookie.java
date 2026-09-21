@@ -17,7 +17,7 @@ public record HttpCookie(
         return new HttpCookie(Map.of());
     }
 
-    public static HttpCookie from(String cookies) {
+    public static HttpCookie from(final String cookies) {
         final Map<String, String> values = new HashMap<>();
 
         for (String cookie : cookies.split(COOKIE_DELIMITER)) {

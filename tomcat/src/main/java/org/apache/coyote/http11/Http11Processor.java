@@ -12,7 +12,9 @@ import java.net.URLConnection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +29,25 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER = "user";
+
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String LOGIN_PAGE = "/login.html";
+    private static final String REGISTER_PAGE = "/register.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String NOT_FOUND_PAGE = "static/404.html";
+    private static final String SERVER_ERROR_PAGE = "static/500.html";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -98,13 +114,21 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
         if ("/login".equals(uri) && request.isGet()) {
-            return getStaticResource("/login.html");
+            boolean isLoggedIn = sessionManager.find(request.cookie().get(JSESSIONID))
+                    .map(session -> session.getAttribute(USER))
+                    .isPresent();
+
+            if (isLoggedIn) {
+                return redirectTo(INDEX_PAGE);
+            }
+
+            return getStaticResource(LOGIN_PAGE);
         }
         if ("/login".equals(uri) && request.isPost()) {
             return login(request);
         }
         if ("/register".equals(uri) && request.isGet()) {
-            return getStaticResource("/register.html");
+            return getStaticResource(REGISTER_PAGE);
         }
         if ("/register".equals(uri) && request.isPost()) {
             return register(request);
@@ -118,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
                 .getClassLoader().getResource("static" + uri);
 
         if (resource == null) {
-            return readResource(requiredResource("static/404.html"),
+            return readResource(requiredResource(NOT_FOUND_PAGE),
                     new HttpStatusLine(HTTP_VERSION, 404, "Not Found"));
         }
 
@@ -160,41 +184,44 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse login(final HttpRequest request) {
-        final String account = request.body().get("account");
-        final String password = request.body().get("password");
+        return findUser(request.body())
+                .map(this::redirectToHomeWithLoggedIn)
+                .orElseGet(() -> redirectTo(UNAUTHORIZED_PAGE));
+    }
 
-        if (account != null && password != null) {
-            boolean isLoggedIn = InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password)).isPresent();
+    private Optional<User> findUser(final Map<String, String> body) {
+        final String account = body.get(ACCOUNT);
+        final String password = body.get(PASSWORD);
 
-            if (isLoggedIn) {
-                return redirectToHomeWithLoggedIn();
-            }
+        if (account == null || password == null) {
+            return Optional.empty();
         }
 
-        return redirectTo("/401.html");
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
     }
 
     private HttpResponse register(HttpRequest request) {
-        String account = request.body().get("account");
-        String email = request.body().get("email");
-        String password = request.body().get("password");
+        String account = request.body().get(ACCOUNT);
+        String email = request.body().get(EMAIL);
+        String password = request.body().get(PASSWORD);
 
         if (account == null || email == null || password == null) {
             log.info("잘못된 회원가입 요청입니다.");
 
-            return redirectTo("/401.html");
+            return redirectTo(UNAUTHORIZED_PAGE);
         }
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             log.info("이미 가입된 계정입니다: {}", account);
 
-            return redirectTo("/401.html");
+            return redirectTo(UNAUTHORIZED_PAGE);
         }
 
-        InMemoryUserRepository.save(new User(account, password, email));
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
 
-        return redirectToHomeWithLoggedIn();
+        return redirectToHomeWithLoggedIn(user);
     }
 
     private HttpResponse serverError() {
@@ -202,7 +229,7 @@ public class Http11Processor implements Runnable, Processor {
                 new HttpStatusLine(HTTP_VERSION, 500, "Internal Server Error");
 
         try {
-            return readResource(requiredResource("static/500.html"), statusLine);
+            return readResource(requiredResource(SERVER_ERROR_PAGE), statusLine);
         } catch (IOException | RuntimeException e) {
             log.error("500.html을 읽지 못했습니다.", e);
 
@@ -218,10 +245,13 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private HttpResponse redirectToHomeWithLoggedIn() {
+    private HttpResponse redirectToHomeWithLoggedIn(final User user) {
+        final Session session = sessionManager.create();
+        session.setAttribute(USER, user);
+
         final Map<String, String> headers = Map.of(
-                LOCATION, "/index.html",
-                SET_COOKIE, JSESSIONID + "=" + UUID.randomUUID()
+                LOCATION, INDEX_PAGE,
+                SET_COOKIE, JSESSIONID + "=" + session.getId()
         );
 
         return new HttpResponse(
@@ -230,4 +260,5 @@ public class Http11Processor implements Runnable, Processor {
                 new byte[0]
         );
     }
+
 }

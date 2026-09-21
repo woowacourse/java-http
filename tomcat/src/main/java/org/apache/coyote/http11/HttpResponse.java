@@ -8,6 +8,8 @@ public class HttpResponse {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private final int statusCode;
     private final String statusText;
@@ -44,6 +46,26 @@ public class HttpResponse {
                 "Found",
                 Map.of(
                         LOCATION, location,
+                        CONTENT_LENGTH, "0"
+                ),
+                new byte[0]
+        );
+    }
+
+    public static HttpResponse redirectWithSession(String location, String sessionId) {
+        String cookie = SESSION_COOKIE_NAME
+                + "="
+                + sessionId
+                + "; Path=/"
+                + "; HttpOnly"
+                + "; SameSite=Lax";
+
+        return new HttpResponse(
+                302,
+                "Found",
+                Map.of(
+                        LOCATION, location,
+                        SET_COOKIE, cookie,
                         CONTENT_LENGTH, "0"
                 ),
                 new byte[0]

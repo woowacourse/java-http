@@ -17,7 +17,7 @@ public class HttpRequest {
     private static final String CONTENT_LENGTH = "content-length";
     private static final String CONTENT_TYPE = "content-type";
     private static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
-    private static final Set VERSIONS = Set.of("HTTP/1.0", "HTTP/1.1");
+    private static final Set<String> VERSIONS = Set.of("HTTP/1.0", "HTTP/1.1");
 
     private final HttpMethod method;
     private final String path;
@@ -51,6 +51,7 @@ public class HttpRequest {
         HttpMethod method = HttpMethod.valueOf(tokens[0]);
         String target = tokens[1];
         String version = tokens[2];
+
         if (!VERSIONS.contains(version)) {
             throw new IllegalArgumentException("지원하지 않는 HTTP Version입니다: " + version);
         }
@@ -59,10 +60,8 @@ public class HttpRequest {
 
         Map<String, List<String>> queryParams = parseQueryParams(target);
         Map<String, String> headers = parseHeaders(inputStream);
-
         int contentLength = parseContentLength(headers);
         String body = readBody(inputStream, contentLength);
-
         Map<String, List<String>> bodyParams = parseBodyParams(headers, body);
 
         return new HttpRequest(
@@ -162,10 +161,7 @@ public class HttpRequest {
         return new String(body, StandardCharsets.UTF_8);
     }
 
-    private static Map<String, List<String>> parseBodyParams(
-            Map<String, String> headers,
-            String body
-    ) {
+    private static Map<String, List<String>> parseBodyParams(Map<String, String> headers, String body) {
         if (body.isBlank() || !isFormUrlEncoded(headers)) {
             return Map.of();
         }
@@ -184,9 +180,7 @@ public class HttpRequest {
             String[] pair = param.split("=", 2);
 
             String key = decode(pair[0]);
-            String value = pair.length == 2
-                    ? decode(pair[1])
-                    : "";
+            String value = pair.length == 2 ? decode(pair[1]) : "";
 
             params.computeIfAbsent(key, ignored -> new ArrayList<>())
                     .add(value);
@@ -252,54 +246,19 @@ public class HttpRequest {
         return method == HttpMethod.GET;
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public String getHeaderValue(String name) {
-        return headers.get(
-                name.toLowerCase(Locale.ROOT)
-        );
     }
 
     public String getQueryParamValue(String name) {
         return getFirstValue(queryParams, name);
     }
 
-    public List<String> getQueryParamValues(String name) {
-        return queryParams.getOrDefault(
-                name,
-                List.of()
-        );
-    }
-
     public String getBodyParamValue(String name) {
         return getFirstValue(bodyParams, name);
     }
 
-    public List<String> getBodyParamValues(String name) {
-        return bodyParams.getOrDefault(
-                name,
-                List.of()
-        );
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    private static String getFirstValue(
-            Map<String, List<String>> params,
-            String name
-    ) {
+    private String getFirstValue(Map<String, List<String>> params, String name) {
         List<String> values = params.get(name);
 
         if (values == null || values.isEmpty()) {

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -17,9 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SimpleSessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionManager = new SimpleSessionManager();
     }
 
     @Override
@@ -71,20 +74,30 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleLogin(HttpRequest request) {
-        if (!isAuthenticated(request.getBodyParamValue("account"), request.getBodyParamValue("password"))) {
+        final String account = request.getBodyParamValue("account");
+        final String password = request.getBodyParamValue("password");
+
+        Optional<User> authenticatedUser = authenticate(account, password);
+
+        if (authenticatedUser.isEmpty()) {
             return HttpResponse.redirect("/401.html");
         }
 
-        return HttpResponse.redirect("/index.html");
+        User user = authenticatedUser.get();
+
+        HttpSession session = SimpleSession.create();
+        session.setAttribute("user", user);
+
+        sessionManager.add(session);
+
+        log.info(user.toString());
+
+        return HttpResponse.redirectWithSession("/index.html", session.getId());
     }
 
-    private boolean isAuthenticated(String account, String password) {
-        Optional<User> authenticatedUser = InMemoryUserRepository.findByAccount(account)
+    private Optional<User> authenticate(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
-
-        authenticatedUser.ifPresent(user -> log.info(user.toString()));
-
-        return authenticatedUser.isPresent();
     }
 
     private HttpResponse handleRegister(HttpRequest request) {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -39,38 +44,90 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
 
-            final var requestUri = parseRequestUri(reader);
-            readHeaders(reader);
+            final var requestLine = parseRequestLine(reader);
+            final var headers = readHeaders(reader);
+
+            final var method = requestLine.get(0);
+            final var requestUri = requestLine.get(1);
+
+            final Map<String, String> requestParameters;
+            if ("POST".equals(method)) {
+                final var contentLengthHeader = headers.get("Content-Length");
+
+                if (contentLengthHeader == null) {
+                    throw new IllegalArgumentException("Content-Length 헤더가 없습니다.");
+                }
+
+                final var contentLength = Integer.parseInt(contentLengthHeader);
+                final var requestBody = readRequestBody(reader, contentLength);
+                requestParameters = requestBody.isEmpty()
+                        ? Map.of()
+                        : parseParameters(requestBody);
+            } else {
+                requestParameters = parseQueryString(requestUri);
+            }
+
             final var requestPath = extractPath(requestUri);
             final var contentType = determineContentType(requestPath);
 
-            final byte[] responseBody;
-
             if (requestPath.equals("/")) {
-                responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
+                final var responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
                 writeResponse(outputStream, responseBody, contentType);
-            } else if (requestPath.equals("/login")) {
-                final var parameters = parseQueryString(requestUri);
-                final var authenticated = authenticate(parameters);
-
-                if (parameters.isEmpty()) {
-                    responseBody = readStaticResource("/login.html");
-                    writeResponse(outputStream, responseBody, contentType);
-                } else if (authenticated) {
-                    writeRedirectResponse(outputStream, "/index.html");
-                } else {
-                    writeRedirectResponse(outputStream, "/401.html");
-                }
-            } else {
-                responseBody = readStaticResource(requestPath);
-                writeResponse(outputStream, responseBody, contentType);
+                return;
             }
+
+            if (requestPath.equals("/login")) {
+                handleLogin(method, requestParameters, outputStream, contentType);
+                return;
+            }
+
+            if (requestPath.equals("/register")) {
+                handleRegister(method, requestParameters, outputStream, contentType);
+                return;
+            }
+
+            final var responseBody = readStaticResource(requestPath);
+            writeResponse(outputStream, responseBody, contentType);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String parseRequestUri(final BufferedReader reader) throws IOException {
+    private void handleLogin(final String method, final Map<String, String> parameters, final OutputStream outputStream, final String contentType
+    ) throws IOException {
+        if ("GET".equals(method)) {
+            final var responseBody = readStaticResource("/login.html");
+            writeResponse(outputStream, responseBody, contentType);
+            return;
+        }
+
+        if ("POST".equals(method)) {
+            final var location = authenticate(parameters) ? "/index.html" : "/401.html";
+            writeRedirectResponse(outputStream, location);
+            return;
+        }
+
+        throw new IllegalArgumentException("지원하지 않는 HTTP 메서드입니다: " + method);
+    }
+
+    private void handleRegister(final String method, final Map<String, String> parameters, final OutputStream outputStream, final String contentType) throws IOException {
+        if ("GET".equals(method)) {
+            final var responseBody = readStaticResource("/register.html");
+            writeResponse(outputStream, responseBody, contentType);
+            return;
+        }
+
+        if ("POST".equals(method)) {
+            register(parameters);
+            writeRedirectResponse(outputStream, "/index.html");
+            return;
+        }
+
+        throw new IllegalArgumentException("지원하지 않는 HTTP 메서드입니다: " + method);
+    }
+
+    private List<String> parseRequestLine(final BufferedReader reader) throws IOException {
+        List<String> resultLines = new ArrayList<>();
         final var line = reader.readLine();
 
         if (line == null || line.isEmpty()) {
@@ -83,15 +140,46 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("올바르지 않은 HTTP 요청 라인입니다.");
         }
 
-        return tokens[1];
+        resultLines.add(tokens[0]);
+        resultLines.add(tokens[1]);
+
+        return resultLines;
     }
 
-    private void readHeaders(final BufferedReader reader) throws IOException {
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final var resultMap = new HashMap<String, String>();
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            log.debug("HTTP header: {}", line);
+            String[] split = line.trim().split(":", 2);
+
+            if (split.length != 2) {
+                throw new IllegalArgumentException("올바르지 않은 HTTP 요청입니다.");
+            }
+            resultMap.put(split[0].trim(), split[1].trim());
         }
+        return resultMap;
+    }
+
+    private String readRequestBody(final BufferedReader reader, final int contentLength) throws IOException {
+        if (contentLength < 0) {
+            throw new IllegalArgumentException("Content-Length는 음수일 수 없습니다.");
+        }
+
+        final var buffer = new char[contentLength];
+        var offset = 0;
+
+        while (offset < contentLength) {
+            final var readLength = reader.read(buffer, offset, contentLength - offset);
+
+            if (readLength == -1) {
+                throw new IllegalArgumentException("요청 Body가 Content-Length보다 짧습니다.");
+            }
+
+            offset += readLength;
+        }
+
+        return new String(buffer);
     }
 
     private byte[] readStaticResource(final String path) throws IOException {
@@ -149,11 +237,15 @@ public class Http11Processor implements Runnable, Processor {
 
         final var queryString = uri.substring(queryIndex + 1);
 
-        return Arrays.stream(queryString.split("&"))
+        return parseParameters(queryString);
+    }
+
+    private Map<String, String> parseParameters(final String parameters) {
+        return Arrays.stream(parameters.split("&"))
                 .map(this::parseParameter)
                 .collect(Collectors.toMap(
-                        pair -> pair[0],
-                        pair -> pair[1]
+                        pair -> decodeParameter(pair[0]),
+                        pair -> decodeParameter(pair[1])
                 ));
     }
 
@@ -161,10 +253,14 @@ public class Http11Processor implements Runnable, Processor {
         final var pair = parameter.split("=", 2);
 
         if (pair.length != 2 || pair[0].isEmpty()) {
-            throw new IllegalArgumentException("잘못된 Query String 입니다. " + parameter);
+            throw new IllegalArgumentException("잘못된 요청 파라미터입니다. " + parameter);
         }
 
         return pair;
+    }
+
+    private String decodeParameter(final String parameter) {
+        return URLDecoder.decode(parameter, StandardCharsets.UTF_8);
     }
 
     private boolean authenticate(Map<String, String> parameters) {
@@ -178,5 +274,17 @@ public class Http11Processor implements Runnable, Processor {
         return InMemoryUserRepository.findByAccount(account)
                 .map(user -> user.checkPassword(password))
                 .orElse(false);
+    }
+
+    private void register(final Map<String, String> parameters) {
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
+        final var email = parameters.get("email");
+
+        if (account == null || password == null || email == null) {
+            throw new IllegalArgumentException("회원가입 정보가 올바르지 않습니다.");
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 }

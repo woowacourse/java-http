@@ -2,15 +2,22 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +27,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -38,47 +47,51 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream();
                 final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                return;
-            }
+            final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
+            final Headers headers = readHeaders(bufferedReader);
+            final Cookies cookies = new Cookies(headers.cookie());
+            final Session session = getSession(cookies);
 
-            if (!validateHeaders(bufferedReader)) {
-                return;
-            }
+            String path = requestLine.getPath();
+            String code = "200";
+            String status = "OK";
 
-            final String[] requestComponents = requestLine.split(" ");
-            final String requestUri = requestComponents[1];
+            if (requestLine.isPost()) {
+                final int contentLength = headers.contentLength();
+                final char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
 
-            final int queryIndex = requestUri.indexOf('?');
-            String path;
-            final String queryString;
-            if (queryIndex >= 0) {
-                path = requestUri.substring(0, queryIndex);
-                queryString = requestUri.substring(queryIndex + 1);
-            } else {
-                path = requestUri;
-                queryString = "";
-            }
+                final String requestBody = new String(buffer);
+                final Map<String, String> parameters = parseQueryString(requestBody);
 
-            if ("/login".equals(path)) {
-                if (!queryString.isBlank()) {
-                    final Map<String, String> parameters = parseQueryString(queryString);
-                    login(parameters);
+                if ("/register".equals(path)) {
+                    register(parameters);
+                    path = "/index";
+                    code = "200";
+                    status = "OK";
+                } else if ("/login".equals(path)) {
+                    if (login(parameters, session)) {
+                        path = "/index";
+                        code = "302";
+                        status = "FOUND";
+                    } else {
+                        path = "/401";
+                        code = "401";
+                        status = "UNAUTHORIZED";
+                    }
                 }
                 path += ".html";
             }
+            if (requestLine.isGet()) {
+                if ("/login".equals(path) && session.getAttribute("user") != null) {
+                    path = "/";
+                    code = "302";
+                    status = "FOUND";
+                }
+                path = resolveGetPath(path);
+            }
 
-            final String responseBody = getResponseBody(path);
-            final String contentType = resolveContentType(requestUri);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            final var response = makeResponse(path, code, status, session.getId(), cookies.getSessionId());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -86,21 +99,68 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String path) throws IOException {
-        if ("/".equals(path)) {
-            return "Hello world!";
+    private static String resolveGetPath(final String requestPath) {
+        return switch (requestPath) {
+            case "/" -> "/index.html";
+            case "/login" -> "/login.html";
+            case "/register" -> "/register.html";
+            default -> requestPath;
+        };
+    }
+
+    private Session getSession(final Cookies cookies) throws IOException {
+        String sessionId = cookies.getSessionId();
+        if (sessionId == null) {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
         }
-        final String resourceName = "static" + path;
-        final String fileName = Objects.requireNonNull(
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            session = new Session(sessionId);
+            sessionManager.add(session);
+            return session;
+        }
+
+        return session;
+    }
+
+    private String makeResponse(
+            final String path,
+            final String code,
+            final String status,
+            final String sessionId,
+            final String sessionIdFromCookie
+    ) throws IOException {
+        final String responseBody = getResponseBody(path);
+        final String contentType = resolveContentType(path);
+
+        final List<String> responseLines = new ArrayList<>();
+        responseLines.add("HTTP/1.1 " + code + " " + status);
+        responseLines.add("Content-Type: " + contentType + ";charset=utf-8");
+        responseLines.add("Content-Length: " + responseBody.getBytes().length);
+        if (sessionIdFromCookie == null) {
+            responseLines.add("Set-Cookie: JSESSIONID=" + sessionId);
+        }
+        responseLines.add("");
+        responseLines.add(responseBody);
+
+        return String.join("\r\n", responseLines);
+    }
+
+    private String getResponseBody(final String requestPath) throws IOException {
+        final String resourceName = "static" + requestPath;
+        final String resourcePath = Objects.requireNonNull(
                 getClass().getClassLoader().getResource(resourceName),
                 "리소스를 찾을 수 없음: " + resourceName
         ).getPath();
 
-        return Files.readString(Path.of(fileName));
+        return Files.readString(Path.of(resourcePath));
     }
 
-    private String resolveContentType(final String requestUri) {
-        if (requestUri.endsWith(".css")) {
+    private String resolveContentType(final String path) {
+        if (path.endsWith(".css")) {
             return "text/css";
         }
         return "text/html";
@@ -117,28 +177,50 @@ public class Http11Processor implements Runnable, Processor {
             if (nameAndValue.length != 2) {
                 continue;
             }
-            parameters.put(nameAndValue[0], nameAndValue[1]);
+            parameters.put(nameAndValue[0].trim(), nameAndValue[1].trim());
         }
         return parameters;
     }
 
-    private void login(final Map<String, String> parameters) {
+    private boolean login(final Map<String, String> parameters, final Session session) {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("로그인 성공: {}", user));
+        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+        if (loginUser.isEmpty()) {
+            return false;
+        }
+
+        final User user = loginUser.get();
+        log.info("로그인 성공: {}", user);
+        session.setAttribute("user", user);
+
+        return true;
     }
 
-    private static boolean validateHeaders(BufferedReader bufferedReader) throws IOException {
+    private void register(final Map<String, String> parameters) {
+        final User user = new User(
+                parameters.get("account"),
+                parameters.get("password"),
+                parameters.get("email")
+        );
+
+        InMemoryUserRepository.save(user);
+        log.info("회원가입 성공: {}", user);
+    }
+
+    private static Headers readHeaders(final BufferedReader bufferedReader) throws IOException {
+        final Headers headers = new Headers();
+
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             if (line == null) {
-                return false;
+                throw new IllegalArgumentException("헤더가 올바르지 않습니다.");
             }
+            headers.add(line);
             line = bufferedReader.readLine();
         }
-        return true;
+        return headers;
     }
 }

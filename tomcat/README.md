@@ -38,6 +38,86 @@ Connection: keep-alive
 
 #### 3. Query String 파싱
 
-- [ ] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여준다.
-- [ ] 로그인 페이지 접속 시 Query String을 파싱해서 아이디, 비밀번호 일치를 검사한다.
-- [ ] 일치 한다면 콘솔창에 로그로 회원을 조회한 결과가 나오게 한다.
+- [x] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여준다.
+- [x] 로그인 페이지 접속 시 Query String을 파싱해서 아이디, 비밀번호 일치를 검사한다.
+- [x] 일치 한다면 콘솔창에 로그로 회원을 조회한 결과가 나오게 한다.
+
+## 2단계 - 로그인 구현하기
+
+> 1단계에서 HTML 파일을 출력하는 간단한 웹서버를 만들었다.
+> 이제 로그인과 회원가입 기능을 추가해보자.
+> 로그인에 필요한 쿠키와 세션도 같이 구현해보자.
+
+### 기능 요구 사항
+
+#### 1. HTTP Status Code 302
+
+- [x] 로그인 여부에 따라 다른 페이지로 이동한다.
+    - [x] 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
+    - [x] 로그인에 실패하면 401.html로 리다이렉트한다.
+
+`InMemoryUserRepository`에는 다음과 같은 정보가 들어있다.
+
+```text
+account: "gugu",
+password: "password"
+```
+
+#### 2. POST 방식으로 회원가입
+
+- [x] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+    - [x] 회원가입 페이지를 보여줄 때는 GET을 사용한다.
+    - [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+    - [x] 회원가입을 완료하면 index.html로 리다이렉트한다.
+- [x] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
+
+브라우저에서 HTTP 요청을 다음과 같이 보낸다.
+
+```http request
+POST /register HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 80
+Content-Type: application/x-www-form-urlencoded
+Accept: */*
+
+account = gugu &
+password = password &
+email = hkkang%40woowahan.com
+```
+
+#### 3. Cookie에 JSESSIONID 값 저장하기
+
+로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지한다.
+HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다.
+
+- [x] 세션을 구현하기 전에 먼저 쿠키를 구현해본다.
+    - [x] 자바 진영에서 세션 아이디를 전달하는 이름으로 JSESSIONID를 사용한다.
+    - [x] HTTP 응답 헤더에 Set-Cookie를 추가하고 JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 형태로 값을 전달한다.
+    - [x] 클라이언트 요청 헤더의 Cookie 필드에 값이 추가된다.
+
+서버로부터 쿠키 설정된 클라이언트의 HTTP Request Header 예시
+
+```http request
+GET /index.html HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Accept: */*
+Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
+```
+
+Cookie 클래스를 추가하고 HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.
+
+```http request
+
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
+Content-Length: 5571
+Content-Type: text/html;charset=utf-8;
+```
+
+#### 4. Session 구현하기
+
+- [x] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크한다.
+- [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
+- [x] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.

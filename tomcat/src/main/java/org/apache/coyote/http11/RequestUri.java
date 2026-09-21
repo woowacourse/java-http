@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public final class RequestUri {
@@ -18,21 +17,7 @@ public final class RequestUri {
         }
 
         this.path = uri.substring(0, queryIndex);
-        this.queryParameters = parseQueryString(uri.substring(queryIndex + 1));
-    }
-
-    private Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> parameters = new HashMap<>();
-
-        for (String query : queryString.split("&")) {
-            String[] pair = query.split("=", 2);
-
-            if (pair.length == 2) {
-                parameters.put(pair[0], pair[1]);
-            }
-        }
-
-        return parameters;
+        this.queryParameters = UrlEncodedParameters.parse(uri.substring(queryIndex + 1));
     }
 
     public String getPath() {

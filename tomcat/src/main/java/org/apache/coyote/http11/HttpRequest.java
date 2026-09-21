@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -117,18 +115,6 @@ public final class HttpRequest {
             return Map.of();
         }
 
-        Map<String, String> parameters = new HashMap<>();
-
-        for (String parameter : body.split("&")) {
-            String[] pair = parameter.split("=", 2);
-            if (pair.length != 2) {
-                continue;
-            }
-
-            String name = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
-            String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
-            parameters.put(name, value);
-        }
-        return Map.copyOf(parameters);
+        return UrlEncodedParameters.parse(body);
     }
 }

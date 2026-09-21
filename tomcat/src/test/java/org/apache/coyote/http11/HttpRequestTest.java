@@ -45,6 +45,23 @@ class HttpRequestTest {
                 .hasMessage("요청 본문이 Content-Length보다 짧습니다.");
     }
 
+    @Test
+    void parsesUrlEncodedBodyParameters() throws IOException {
+        String body = "email=user%40example.com&nickname=hello+world";
+        BufferedReader reader = readerOf(String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
+                "",
+                body
+        ));
+
+        HttpRequest request = HttpRequest.parse(reader);
+
+        assertThat(request.getParameter("email")).isEqualTo("user@example.com");
+        assertThat(request.getParameter("nickname")).isEqualTo("hello world");
+    }
+
     private BufferedReader readerOf(String request) {
         return new BufferedReader(new StringReader(request));
     }

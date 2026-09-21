@@ -1,38 +1,22 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import org.apache.catalina.Controller;
 import org.apache.catalina.RequestMapping;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String SESSION_USER = "user";
 
     private final Socket connection;
-
-    private final StaticResourceLoader resourceLoader = new StaticResourceLoader();
-    private final SessionManager sessionManager = SessionManager.getInstance();
     private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
@@ -50,277 +34,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            HttpRequest request = HttpRequest.parse(reader);
+            HttpResponse response = new HttpResponse();
 
-            HttpRequest httpRequest = HttpRequest.parse(reader);
-            HttpCookie cookies = new HttpCookie(httpRequest.getHeader("cookie"));
+            request.createJSessionIdIfAbsent().ifPresent(sessionId -> response.setCookie(HttpCookie.JSESSION_ID, sessionId));
 
-            Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();
-            String sessionId = cookies.get(HttpCookie.JSESSION_ID).orElseThrow();
-
-            Controller controller = requestMapping.getController(httpRequest);
-            if (controller != null) {
-                HttpResponse response = new HttpResponse();
-                newSessionId.ifPresent(id ->
-                        response.setHeader("Set-Cookie", HttpCookie.JSESSION_ID + "=" + id));
-                controller.service(httpRequest, response);
-                response.writeTo(outputStream);
-                return;
-            }
-
-            handleRequest(httpRequest, sessionId, newSessionId, outputStream);
-        } catch (Exception e) {
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
+            response.writeTo(outputStream);
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("요청 처리 중 오류가 발생했습니다.", e);
         }
-    }
-
-    private void handleRequest(
-            HttpRequest request,
-            String sessionId,
-            Optional<String> newSessionId,
-            OutputStream outputStream
-    ) throws IOException {
-        String path = request.getRequestUri().getPath();
-        switch (path) {
-            case "/register" -> handleRegister(request, newSessionId, outputStream);
-            case "/login" -> handleLogin(request, sessionId, newSessionId, outputStream);
-            case "/session" -> handleSession(sessionId, newSessionId, outputStream);
-            case "/logout" -> handleLogout(request, sessionId, newSessionId, outputStream);
-            default -> serveResource(path, newSessionId, outputStream);
-        }
-    }
-
-    private void handleRegister(
-            HttpRequest request,
-            Optional<String> newSessionId,
-            OutputStream outputStream
-    ) throws IOException {
-        switch (request.getMethod()) {
-            case HttpMethod.GET -> serveResource("/register.html", newSessionId, outputStream);
-            case HttpMethod.POST -> {
-                Map<String, String> parameters = parseFormBody(request.getBody());
-                InMemoryUserRepository.save(new User(
-                        parameters.get("account"),
-                        parameters.get("password"),
-                        parameters.get("email")
-                ));
-
-                writeRedirect(outputStream, "/index.html", newSessionId);
-            }
-            default -> writeResponse(
-                    outputStream,
-                    HttpStatus.METHOD_NOT_ALLOWED,
-                    "Method Not Allowed",
-                    "text/plain",
-                    newSessionId
-            );
-        }
-    }
-
-    private void handleLogin(
-            HttpRequest request,
-            String sessionId,
-            Optional<String> newSessionId,
-            OutputStream outputStream
-    ) throws IOException {
-        switch (request.getMethod()) {
-            case HttpMethod.GET -> {
-                if (getLoginUser(sessionId).isPresent()) {
-                    writeRedirect(outputStream, "/index.html", newSessionId);
-                    return;
-                }
-                serveResource("/login.html", newSessionId, outputStream);
-            }
-            case HttpMethod.POST -> {
-                Map<String, String> parameters = parseFormBody(request.getBody());
-                Optional<User> loginUser = login(parameters);
-                if (loginUser.isEmpty()) {
-                    writeRedirect(outputStream, "/401.html", newSessionId);
-                    return;
-                }
-
-                User user = loginUser.get();
-                log.info("회원 조회 성공: account={}", user.getAccount());
-                Session session = getOrCreateSession(sessionId);
-                session.setAttribute(SESSION_USER, user);
-                Optional<String> responseSessionId = newSessionId;
-                if (!session.getId().equals(sessionId)) {
-                    responseSessionId = Optional.of(session.getId());
-                }
-                writeRedirect(outputStream, "/index.html", responseSessionId);
-            }
-            default -> writeResponse(
-                    outputStream,
-                    HttpStatus.METHOD_NOT_ALLOWED,
-                    "Method Not Allowed",
-                    "text/plain",
-                    newSessionId
-            );
-        }
-    }
-
-    private Session getOrCreateSession(String sessionId) {
-        Session session = sessionManager.findSession(sessionId);
-        if (session != null) {
-            return session;
-        }
-
-        Session newSession = new Session(UUID.randomUUID().toString());
-        sessionManager.add(newSession);
-        return newSession;
-    }
-
-    private Optional<User> getLoginUser(String sessionId) {
-        Session session = sessionManager.findSession(sessionId);
-        if (session == null) {
-            return Optional.empty();
-        }
-
-        Object user = session.getAttribute(SESSION_USER);
-        if (user instanceof User loginUser) {
-            return Optional.of(loginUser);
-        }
-        return Optional.empty();
-    }
-
-    private void handleSession(
-            String sessionId,
-            Optional<String> newSessionId,
-            OutputStream outputStream
-    ) throws IOException {
-        Optional<User> loginUser = getLoginUser(sessionId);
-        String responseBody = loginUser
-                .map(user -> "{\"loggedIn\":true,\"account\":\"" + escapeJson(user.getAccount()) + "\"}")
-                .orElse("{\"loggedIn\":false}");
-        writeResponse(outputStream, HttpStatus.OK, responseBody, "application/json", newSessionId);
-    }
-
-    private String escapeJson(String value) {
-        StringBuilder escaped = new StringBuilder();
-        for (char character : value.toCharArray()) {
-            switch (character) {
-                case '"' -> escaped.append("\\\"");
-                case '\\' -> escaped.append("\\\\");
-                case '\b' -> escaped.append("\\b");
-                case '\f' -> escaped.append("\\f");
-                case '\n' -> escaped.append("\\n");
-                case '\r' -> escaped.append("\\r");
-                case '\t' -> escaped.append("\\t");
-                default -> {
-                    if (character < 0x20) {
-                        escaped.append(String.format("\\u%04x", (int) character));
-                    } else {
-                        escaped.append(character);
-                    }
-                }
-            }
-        }
-        return escaped.toString();
-    }
-
-    private void handleLogout(
-            HttpRequest request,
-            String sessionId,
-            Optional<String> newSessionId,
-            OutputStream outputStream
-    ) throws IOException {
-        switch (request.getMethod()) {
-            case HttpMethod.POST -> {
-                Session session = sessionManager.findSession(sessionId);
-                if (session != null) {
-                    session.invalidate();
-                }
-
-                writeResponse(outputStream, HttpStatus.NO_CONTENT, "", "text/plain", newSessionId);
-            }
-            default -> writeResponse(
-                    outputStream,
-                    HttpStatus.METHOD_NOT_ALLOWED,
-                    "Method Not Allowed",
-                    "text/plain",
-                    newSessionId
-            );
-        }
-    }
-
-    private Map<String, String> parseFormBody(String body) {
-        Map<String, String> parameters = new HashMap<>();
-
-        for (String parameter : body.split("&")) {
-            String[] pair = parameter.split("=", 2);
-            if (pair.length != 2) {
-                continue;
-            }
-
-            String name = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
-            String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
-            parameters.put(name, value);
-        }
-
-        return parameters;
-    }
-
-    private void serveResource(
-            String path,
-            Optional<String> newSessionId,
-            OutputStream outputStream
-    ) throws IOException {
-        String responseBody;
-        try {
-            responseBody = resourceLoader.load(path);
-        } catch (FileNotFoundException e) {
-            writeResponse(outputStream, HttpStatus.NOT_FOUND, "Not Found", "text/plain", newSessionId);
-            return;
-        }
-
-        String contentType = path.endsWith(".css") ? "text/css" : "text/html";
-        writeResponse(outputStream, HttpStatus.OK, responseBody, contentType, newSessionId);
-    }
-
-    private Optional<User> login(Map<String, String> params) {
-        String account = params.get("account");
-        String password = params.get("password");
-
-        if (account == null || password == null) {
-            return Optional.empty();
-        }
-
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
-    }
-
-    private void writeRedirect(
-            OutputStream outputStream,
-            String location,
-            Optional<String> newSessionId
-    ) throws IOException {
-        Map<String, String> headers = responseHeaders(newSessionId);
-        headers.put("Location", location);
-
-        new HttpResponse(HttpStatus.FOUND, headers, "").writeTo(outputStream);
-    }
-
-    private void writeResponse(
-            OutputStream outputStream,
-            HttpStatus status,
-            String responseBody,
-            String contentType,
-            Optional<String> newSessionId
-    ) throws IOException {
-        Map<String, String> headers = responseHeaders(newSessionId);
-        headers.put("Content-Type", contentType + ";charset=utf-8");
-
-        new HttpResponse(
-                status,
-                headers,
-                responseBody
-        ).writeTo(outputStream);
-    }
-
-    private Map<String, String> responseHeaders(Optional<String> newSessionId) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        newSessionId.ifPresent(sessionId ->
-                headers.put("Set-Cookie", HttpCookie.JSESSION_ID + "=" + sessionId));
-        return headers;
     }
 }

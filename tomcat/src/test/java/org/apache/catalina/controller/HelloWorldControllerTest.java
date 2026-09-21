@@ -32,4 +32,24 @@ class HelloWorldControllerTest {
                         + "Hello world!"
         );
     }
+
+    @Test
+    void respondsWithMethodNotAllowedForPostRequest() throws Exception {
+        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(
+                "POST / HTTP/1.1\r\nContent-Length: 0\r\n\r\n"
+        )));
+        HttpResponse response = new HttpResponse();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        new HelloWorldController().service(request, response);
+        response.writeTo(outputStream);
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo(
+                "HTTP/1.1 405 Method Not Allowed\r\n"
+                        + "Content-Type: text/plain;charset=utf-8\r\n"
+                        + "Content-Length: 18\r\n"
+                        + "\r\n"
+                        + "Method Not Allowed"
+        );
+    }
 }

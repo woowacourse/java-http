@@ -2,16 +2,21 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
+    private final HttpCookie cookies;
+    private final Map<String, String> bodyParameters;
 
     public HttpRequest(
             RequestLine requestLine,
@@ -21,6 +26,8 @@ public final class HttpRequest {
         this.requestLine = Objects.requireNonNull(requestLine);
         this.headers = Map.copyOf(headers);
         this.body = Objects.requireNonNull(body);
+        this.cookies = new HttpCookie(getHeader("cookie"));
+        this.bodyParameters = parseBodyParameters(body);
     }
 
     public static HttpRequest parse(BufferedReader reader) throws IOException {
@@ -45,6 +52,22 @@ public final class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public String getParameter(String name) {
+        String queryParameter = requestLine.getRequestUri().getQueryParameter(name);
+        if (queryParameter != null) {
+            return queryParameter;
+        }
+        return bodyParameters.get(name);
+    }
+
+    public Optional<String> getCookie(String name) {
+        return cookies.get(name);
+    }
+
+    public Optional<String> createJSessionIdIfAbsent() {
+        return cookies.createJSessionIdIfAbsent();
     }
 
     private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
@@ -85,5 +108,27 @@ public final class HttpRequest {
         }
 
         return new String(buffer);
+    }
+
+    private Map<String, String> parseBodyParameters(String body) {
+        String contentType = getHeader("content-type");
+        if (contentType == null
+                || !contentType.startsWith("application/x-www-form-urlencoded")) {
+            return Map.of();
+        }
+
+        Map<String, String> parameters = new HashMap<>();
+
+        for (String parameter : body.split("&")) {
+            String[] pair = parameter.split("=", 2);
+            if (pair.length != 2) {
+                continue;
+            }
+
+            String name = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+            parameters.put(name, value);
+        }
+        return Map.copyOf(parameters);
     }
 }

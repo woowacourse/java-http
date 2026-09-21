@@ -49,8 +49,18 @@ public final class HttpResponse {
         setHeader("Content-Type", Objects.requireNonNull(contentType) + ";charset=utf-8");
     }
 
+    public void setCookie(String name, String value) {
+        setHeader("Set-Cookie", Objects.requireNonNull(name) + "=" + Objects.requireNonNull(value));
+    }
+
     public void setBody(String body) {
         this.body = Objects.requireNonNull(body).getBytes(StandardCharsets.UTF_8);
+    }
+
+    public void sendRedirect(String location) {
+        setStatus(HttpStatus.FOUND);
+        setHeader("Location", Objects.requireNonNull(location));
+        setBody("");
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {

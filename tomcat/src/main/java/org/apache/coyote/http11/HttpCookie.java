@@ -36,6 +36,10 @@ public class HttpCookie {
         return new HttpCookie(JSESSIONID, UUID.randomUUID().toString());
     }
 
+    public static HttpCookie ofJSessionId(String sessionId) {
+        return new HttpCookie(JSESSIONID, sessionId);
+    }
+
     public String toHeaderValue() {
         StringBuilder result = new StringBuilder();
 

@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,16 +69,31 @@ public class Http11Processor implements Runnable, Processor {
             String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
 
             HttpCookie requestCookie = new HttpCookie(httpRequestHeaders.get("cookie"));
+            String sessionId = requestCookie.get(HttpCookie.JSESSIONID);
+            Session session = SessionManager.getInstance().findSession(sessionId);
             HttpCookie responseCookie = null;
 
-            if (requestCookie.get(HttpCookie.JSESSIONID) == null) {
-                responseCookie = HttpCookie.ofJSessionId();
+            if (session == null) {
+                session = new Session(UUID.randomUUID().toString());
+                SessionManager.getInstance().add(session);
+                responseCookie = HttpCookie.ofJSessionId(session.getId());
+            }
+
+            if (path.equals("/login") && method.equals("GET") && queryString.isEmpty()) {
+                if (getUser(session) != null) {
+                    sendRedirect(outputStream, "/index.html", responseCookie);
+                    return;
+                }
             }
 
             if (path.equals("/login") && (method.equals("POST") || !queryString.isEmpty())) {
                 String loginData = method.equals("POST") ? requestBody : queryString;
 
-                boolean loginSuccess = login(loginData);
+                boolean loginSuccess = login(loginData, session);
+
+                if (loginSuccess) {
+                    responseCookie = HttpCookie.ofJSessionId(session.getId());
+                }
 
                 String redirectPath = loginSuccess ? "/index.html" : "/401.html";
 
@@ -219,7 +235,7 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + path;
     }
 
-    private boolean login(String queryString) {
+    private boolean login(String queryString, Session session) {
         Map<String, String> loginInfo = parseQueryString(queryString);
 
         String account = loginInfo.get("account");
@@ -235,14 +251,20 @@ public class Http11Processor implements Runnable, Processor {
             return false;
         }
 
-        var user = optionalUser.get();
+        User user = optionalUser.get();
 
         if (!user.checkPassword(password)) {
             return false;
         }
 
+        session.setAttribute("user", user);
         log.info("login user: {}", user);
+
         return true;
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private void sendRedirect(OutputStream outputStream, String redirectPath, HttpCookie responseCookie)

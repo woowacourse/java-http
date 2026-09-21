@@ -54,14 +54,16 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> headers = resolveHeader(reader);
 
-            final Map<String, String> cookies = extractCookies(headers.get("Cookie"));
-            final boolean shouldIssueJSessionId = !cookies.containsKey("JSESSIONID");
+            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+            final boolean shouldIssueJSessionId = !cookie.contains("JSESSIONID");
+            final String jSessionId;
 
-            if (shouldIssueJSessionId) {
-                cookies.put("JSESSIONID", UUID.randomUUID().toString());
+            if (cookie.contains("JSESSIONID")) {
+                jSessionId = cookie.get("JSESSIONID");
+            } else {
+                jSessionId = UUID.randomUUID().toString();
             }
 
-            final String jSessionId = cookies.get("JSESSIONID");
             final String method = extractMethod(requestLine);
             final String uri = extractUri(requestLine);
             final String path = extractPath(uri);
@@ -87,26 +89,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private Map<String, String> extractCookies(final String cookieHeader) {
-        final Map<String, String> cookies = new HashMap<>();
-
-        if (cookieHeader == null) {
-            return cookies;
-        }
-
-        for (String cookie : cookieHeader.split(";")) {
-            final String[] keyValue =
-                    cookie.trim().split("=", 2);
-
-            if (keyValue.length == 2
-                    && keyValue[0].equals("JSESSIONID")) {
-                cookies.put(keyValue[0], keyValue[1]);
-            }
-        }
-
-        return cookies;
     }
 
     private void handleRegister(

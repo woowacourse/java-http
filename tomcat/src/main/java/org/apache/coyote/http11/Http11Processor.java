@@ -12,7 +12,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -25,8 +27,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CRLF = "\r\n";
     private static final String STATIC_RESOURCE_ROOT = "static";
     private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PATH = "/login";
     private static final String ACCOUNT_PARAMETER = "account";
+    private static final String PASSWORD_PARAMETER = "password";
 
     private static final String ACCEPT_HEADER = "Accept";
     private static final String ACCEPT_ANY = "*/*";
@@ -34,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String TEXT_CSS = "text/css";
 
     private static final String STATUS_OK = "HTTP/1.1 200 OK ";
+    private static final String STATUS_FOUND = "HTTP/1.1 302 Found ";
     private static final String STATUS_NOT_FOUND = "HTTP/1.1 404 Not Found ";
 
     private final Socket connection;
@@ -65,12 +71,20 @@ public class Http11Processor implements Runnable, Processor {
             final var pathAndQueryString = splitPathAndQueryString(uri);
             final var path = pathAndQueryString[0];
             final var queryParameters = parseQueryParameters(pathAndQueryString);
-            logLoginUser(path, queryParameters);
 
             var statusLine = STATUS_OK;
+            var location = "";
             final byte[] responseBody;
             if (path.equals("/")) {
                 responseBody = "Hello world!".getBytes();
+            } else if (path.equals(LOGIN_PATH) && queryParameters.containsKey(ACCOUNT_PARAMETER)) {
+                statusLine = STATUS_FOUND;
+                if (login(queryParameters)) {
+                    location = INDEX_PAGE;
+                } else {
+                    location = UNAUTHORIZED_PAGE;
+                }
+                responseBody = new byte[0];
             } else {
                 var resourceUrl = findResource(path);
                 if (resourceUrl == null) {
@@ -81,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
             }
 
-            final var response = buildResponse(statusLine, contentType, responseBody);
+            final var response = buildResponse(statusLine, location, contentType, responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -139,11 +153,13 @@ public class Http11Processor implements Runnable, Processor {
         return queryParameters;
     }
 
-    private void logLoginUser(final String path, final Map<String, String> queryParameters) {
-        if (path.equals(LOGIN_PATH) && queryParameters.containsKey(ACCOUNT_PARAMETER)) {
-            InMemoryUserRepository.findByAccount(queryParameters.get(ACCOUNT_PARAMETER))
-                    .ifPresent(user -> log.info("user: {}", user));
-        }
+    private boolean login(final Map<String, String> queryParameters) {
+        final var account = queryParameters.get(ACCOUNT_PARAMETER);
+        final var password = queryParameters.get(PASSWORD_PARAMETER);
+        final var user = InMemoryUserRepository.findByAccount(account)
+                .filter(found -> found.checkPassword(password));
+        user.ifPresent(found -> log.info("login success: {}", found));
+        return user.isPresent();
     }
 
     private URL findResource(final String path) {
@@ -153,12 +169,17 @@ public class Http11Processor implements Runnable, Processor {
         return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path + ".html");
     }
 
-    private String buildResponse(final String statusLine, final String contentType, final byte[] body) {
-        return String.join(CRLF,
-                statusLine,
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(body, StandardCharsets.UTF_8));
+    private String buildResponse(final String statusLine, final String location, final String contentType,
+                                 final byte[] body) {
+        final List<String> lines = new ArrayList<>();
+        lines.add(statusLine);
+        if (!location.isEmpty()) {
+            lines.add("Location: " + location + " ");
+        }
+        lines.add("Content-Type: " + contentType + " ");
+        lines.add("Content-Length: " + body.length + " ");
+        lines.add("");
+        lines.add(new String(body, StandardCharsets.UTF_8));
+        return String.join(CRLF, lines);
     }
 }

@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.RequestMapping;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

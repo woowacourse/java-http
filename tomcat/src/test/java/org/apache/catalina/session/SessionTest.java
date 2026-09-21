@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import org.junit.jupiter.api.Test;
 

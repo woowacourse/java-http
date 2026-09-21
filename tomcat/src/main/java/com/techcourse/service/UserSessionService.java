@@ -1,8 +1,8 @@
 package com.techcourse.service;
 
 import com.techcourse.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 import java.util.Optional;
 import java.util.UUID;

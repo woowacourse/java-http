@@ -30,6 +30,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTML_EXTENSION = ".html";
     private static final String CSS_EXTENSION = ".css";
     private static final String JS_EXTENSION = ".js";
+    public static final String REDIRECTION_FOUND_CODE = "302";
+    public static final String UNAUTHORIZED_CODE = "401";
+    public static final String SUCCESS_CODE = "200";
+    public static final String SUCCESS_STATUS_RESPONSE = "OK";
+    public static final String ERROR_STATUS_RESPONSE = "ERROR";
 
     private final Socket connection;
 
@@ -60,6 +65,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String requestUri = part.substring(1);
+            String statusCode = SUCCESS_CODE;
 
             URL resource = getClass().getClassLoader()
                 .getResource(RESOURCE_FILE_PREFIX + requestUri);
@@ -84,9 +90,15 @@ public class Http11Processor implements Runnable, Processor {
                 User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalStateException("등록되지 않은 계정입니다."));
 
-                user.isMatchPassword(password);
-
-                log.info("user : {}", user);
+                if (user.isMatchPassword(password)) {
+                    statusCode = REDIRECTION_FOUND_CODE;
+                    log.info("user : {}", user);
+                }
+                if (!user.isMatchPassword(password)) {
+                    statusCode = UNAUTHORIZED_CODE;
+                    resource = getClass().getClassLoader()
+                        .getResource(RESOURCE_FILE_PREFIX + UNAUTHORIZED_CODE + HTML_EXTENSION);
+                }
             }
 
             if (validateURLIsNull(resource, outputStream)) {
@@ -96,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
             Path path = new File(resource.getPath()).toPath();
             byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
 
-            String response = createResponse(part, body, path);
+            String response = createResponse(part, body, path, statusCode);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -107,14 +119,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String createResponse(String part, byte[] body, Path path) throws IOException {
+    private static String createResponse(String part, byte[] body, Path path, String statusCode) throws IOException {
         String contentType = resolveContentType(part);
         if (contentType == null) {
             return "";
         }
 
+        String statusResponse = SUCCESS_STATUS_RESPONSE;
+        if (!statusCode.equals(SUCCESS_CODE)) {
+            statusResponse = ERROR_STATUS_RESPONSE;
+        }
+
         return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
+            "HTTP/1.1 " + statusCode + " " + statusResponse + " ",
             "Content-Type: " + contentType + ";charset=utf-8 ",
             "Content-Length: " + body.length + " ",
             "",

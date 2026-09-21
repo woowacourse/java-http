@@ -28,6 +28,8 @@ class HttpRequestTest {
         assertThat(request.getRequestUri().getQueryParameter("next")).isEqualTo("home");
         assertThat(request.getHeader("content-type"))
                 .isEqualTo("application/x-www-form-urlencoded");
+        assertThat(request.getHeader("Content-Type"))
+                .isEqualTo("application/x-www-form-urlencoded");
         assertThat(request.getBody()).isEqualTo("account=junior");
     }
 

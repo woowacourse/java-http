@@ -45,7 +45,7 @@ public final class HttpRequest {
     }
 
     public String getHeader(String name) {
-        return headers.get(name);
+        return headers.get(name.toLowerCase(Locale.ROOT));
     }
 
     public String getBody() {

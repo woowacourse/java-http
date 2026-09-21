@@ -252,10 +252,12 @@ class Http11ProcessorTest {
     @Test
     void 요청에_이미_JSession_쿠키_헤더가_있다면_응답에_포함하지_않는다() {
         // given
+        SessionManager manager = SessionManager.getInstance();
+        Session session = manager.createSession();
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + session.getId(),
                 "Connection: keep-alive ",
                 "Content-Length: 30",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -272,12 +274,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(
-                "HTTP/1.1 302 Found \r\n",
-                "Location: http://localhost:8080/index.html \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 0 \r\n"
-        );
+        assertThat(socket.output()).doesNotContain("Set-Cookie:");
+        manager.remove(session.getId());
     }
 
     @Test

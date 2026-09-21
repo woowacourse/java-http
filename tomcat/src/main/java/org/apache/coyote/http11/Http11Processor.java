@@ -27,6 +27,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CHARSET_SUFFIX = ";charset=utf-8";
+    private static final String COOKIE = "Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String LOCATION = "Location";
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
@@ -78,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readBody(reader, headers);
 
-            final var response = createResponse(requestLine, requestBody);
+            final var response = createResponse(requestLine, headers, requestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -98,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private String createResponse(final String requestLine, final String requestBody) throws IOException {
+    private String createResponse(final String requestLine, final Map<String, String> headers, final String requestBody) throws IOException {
         if (requestLine.isBlank() || requestLine.trim().split(" ").length != REQUEST_LINE_SIZE) {
             return buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
         }
@@ -107,7 +110,7 @@ public class Http11Processor implements Runnable, Processor {
         final String requestPath = parsePath(requestUri);
         final String method = parseMethod(requestLine);
         log.info("requestPath = " + requestPath);
-
+        log.info("{} {} / Cookie: {}", method, requestPath, headers.get(COOKIE));
 
         if (POST.equals(method)) {
             final Map<String, String> data = parseFormData(requestBody);
@@ -116,7 +119,11 @@ public class Http11Processor implements Runnable, Processor {
                 final Optional<User> user = login(data);
                 if (user.isPresent()) {
                     log.info("로그인 성공: {}", user.get());
-                    return buildRedirect(INDEX_PATH);
+
+                    final Map<String, String> responseHeaders = new LinkedHashMap<>();
+                    responseHeaders.put(LOCATION, INDEX_PATH);
+                    responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + UUID.randomUUID());
+                    return buildResponse(FOUND, responseHeaders, "");
                 }
                 log.info("로그인 실패: {}", data.get("account"));
                 login(parseQueryParams(requestUri));

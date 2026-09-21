@@ -26,6 +26,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ROOT_URI = "/";
     private static final String STATIC_RESOURCE_ROOT = "static";
     private static final String LOGIN = "/login";
+    private static final String LOGIN_SUCCESS = "/index.html";
+    private static final String LOGIN_FAILURE = "/401.html";
     private static final String DOT_HTML = ".html";
 
     private final Socket connection;
@@ -58,13 +60,24 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            String contentType = getContentType(requestUri);
+            final String requestPath = extractRequestPath(requestUri);
 
-            requestUri = handleQueryString(requestUri);
+            if (hasQueryString(requestUri) && requestPath.equals(LOGIN)) {
+                final String location = getLoginRedirectionLocation(requestUri);
+                final String responseHeader = createRedirectResponseHeader(version, location);
+
+                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
+            requestUri = requestPath;
 
             if (requestUri.equals(LOGIN)) {
                 requestUri += DOT_HTML;
             }
+
+            String contentType = getContentType(requestUri);
 
             if (!requestUri.equals(ROOT_URI)) {
                 final Path path = Path.of(getResourcePath(STATIC_RESOURCE_ROOT + requestUri));
@@ -102,6 +115,15 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
+    private String createRedirectResponseHeader(final String version, final String location) {
+        return String.join("\r\n",
+                version + " 302 Found ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                "");
+    }
+
     private String getResourcePath(final String path) {
         final URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
@@ -121,31 +143,55 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String handleQueryString(final String requestUri) {
-        final int queryIndex = requestUri.indexOf('?');
-        if (queryIndex == -1) {
+    private boolean hasQueryString(final String requestUri) {
+        return requestUri.indexOf('?') != -1;
+    }
+
+    private String extractRequestPath(final String requestUri) {
+        if (!hasQueryString(requestUri)) {
             return requestUri;
         }
 
-        final String queryString = requestUri.substring(queryIndex + 1);
-        final String path = requestUri.substring(0, queryIndex);
-        final String[] queryStringParts = queryString.split("&");
-        checkUser(queryStringParts);
-        return path;
+        return requestUri.substring(0, requestUri.indexOf('?'));
     }
 
-    private void checkUser(final String[] requestParts) {
-        final String account = requestParts[0].split("=", 2)[1];
-        String password = requestParts[1].split("=", 2)[1];
+    private String getLoginRedirectionLocation(final String requestUri) {
+        final int queryIndex = requestUri.indexOf('?');
+        final String queryString = requestUri.substring(queryIndex + 1);
+        final String[] queryStringParts = queryString.split("&");
+
+        if (checkUser(queryStringParts)) {
+            return LOGIN_SUCCESS;
+        }
+
+        return LOGIN_FAILURE;
+    }
+
+    private boolean checkUser(final String[] requestParts) {
+        if (requestParts.length < 2) {
+            return false;
+        }
+
+        final String[] accountPart = requestParts[0].split("=", 2);
+        final String[] passwordPart = requestParts[1].split("=", 2);
+        if (accountPart.length < 2 || passwordPart.length < 2) {
+            return false;
+        }
+
+        final String account = accountPart[1];
+        final String password = passwordPart[1];
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty()) {
-            return;
+            return false;
         }
 
         if (user.get().checkPassword(password)) {
             log.info("로그인 성공: {}", user.get());
+            return true;
         }
+
+        return false;
     }
 }

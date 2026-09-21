@@ -35,7 +35,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -52,9 +52,55 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5571 \r\n" + // index.html 주석처리하면서 크기 바뀜
-                "\r\n"+
+                "Content-Length: 5571 \r\n" +
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginSuccessRedirect() {
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFailureRedirect() {
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /401.html ",
+                "Content-Length: 0 ",
+                "",
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

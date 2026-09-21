@@ -23,6 +23,7 @@ import java.util.Optional;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -53,9 +54,13 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readRequestBody(reader, headers);
             final HttpCookie cookies = HttpCookie.parse(headers.get("Cookie"));
-            final String setCookie = cookies.get(HttpCookie.JSESSIONID)
-                    .isPresent() ? null : HttpCookie.newJSessionId();
-            final Optional<String> redirectLocation = resolveRedirect(method, requestUri, requestBody);
+            final Optional<String> sessionId = cookies.get(HttpCookie.JSESSIONID);
+            final Session session = sessionManager.getOrCreate(
+                    sessionId.orElseGet(HttpCookie::newSessionId));
+            final String setCookie = sessionId.isPresent()
+                    ? null
+                    : HttpCookie.JSESSIONID + "=" + session.getId();
+            final Optional<String> redirectLocation = resolveRedirect(method, requestUri, requestBody, session);
             if (redirectLocation.isPresent()) {
                 final String response = redirectResponse(redirectLocation.get(), setCookie);
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
@@ -93,13 +98,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<String> resolveRedirect(final String method, final String requestUri, final String requestBody) {
+    private Optional<String> resolveRedirect(final String method, final String requestUri,
+                                             final String requestBody, final Session session) {
         final int queryIndex = requestUri.indexOf('?');
         final String path = queryIndex >= 0 ? requestUri.substring(0, queryIndex) : requestUri;
 
         if ("/login".equals(path)) {
+            if ("GET".equals(method) && session.getAttribute("user") != null) {
+                return Optional.of("/index.html");
+            }
             if ("POST".equals(method)) {
-                return Optional.of(login(requestBody)
+                return Optional.of(login(requestBody, session)
                         ? "/index.html"
                         : "/401.html");
             }
@@ -176,7 +185,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, offset);
     }
 
-    private boolean login(final String queryString) {
+    private boolean login(final String queryString, final Session session) {
         final Map<String, String> parameters = parseQueryString(queryString);
         final String account = parameters.get("account");
         final String password = parameters.get("password");
@@ -187,6 +196,7 @@ public class Http11Processor implements Runnable, Processor {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
+                    session.setAttribute("user", user);
                     log.info("Login succeeded: account={}", user.getAccount());
                     return true;
                 })

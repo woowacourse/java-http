@@ -34,7 +34,11 @@ public class HttpCookie {
         return Optional.ofNullable(values.get(name));
     }
 
+    public static String newSessionId() {
+        return UUID.randomUUID().toString();
+    }
+
     public static String newJSessionId() {
-        return JSESSIONID + "=" + UUID.randomUUID();
+        return JSESSIONID + "=" + newSessionId();
     }
 }

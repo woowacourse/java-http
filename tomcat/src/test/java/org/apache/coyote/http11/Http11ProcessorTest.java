@@ -147,4 +147,37 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
     }
+
+    @Test
+    void redirectsLoggedInUserFromLoginPage() {
+        // given
+        final String sessionId = "logged-in-session";
+        final String loginBody = "account=gugu&password=password";
+        final String loginRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + sessionId,
+                "Content-Length: " + loginBody.length(),
+                "",
+                loginBody);
+        final var loginSocket = new StubSocket(loginRequest);
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final String request = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                "");
+        final var socket = new StubSocket(request);
+
+        // when
+        new Http11Processor(socket).process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n"
+                        + "Location: /index.html \r\n")
+                .doesNotContain("Set-Cookie:");
+    }
 }

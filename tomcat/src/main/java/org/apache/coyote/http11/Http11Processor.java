@@ -241,7 +241,7 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        log.info("회원 조회 결과: {}", user.get());
+        log.info("로그인 성공! 아이디 : {}", account);
 
         final Session session = createSession();
         session.setAttribute(USER_ATTRIBUTE, user.get());

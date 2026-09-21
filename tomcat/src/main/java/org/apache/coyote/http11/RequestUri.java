@@ -16,17 +16,17 @@ public record RequestUri(String path, Map<String, String> queryParameters) {
         final var path = uri.substring(0, queryStartIndex);
         final var queryString = uri.substring(queryStartIndex + 1);
 
-        return new RequestUri(path, parseQueryParameters(queryString));
+        return new RequestUri(path, parseParameters(queryString));
     }
 
-    private static Map<String, String> parseQueryParameters(final String queryString) {
-        if (queryString.isBlank()) {
+    public static Map<String, String> parseParameters(final String parameterString) {
+        if (parameterString.isBlank()) {
             return Map.of();
         }
 
         final var parameters = new HashMap<String, String>();
 
-        for (final var parameter : queryString.split("&")) {
+        for (final var parameter : parameterString.split("&")) {
             final var separatorIndex = parameter.indexOf('=');
 
             if (separatorIndex <= 0) {

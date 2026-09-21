@@ -12,10 +12,16 @@ import java.nio.charset.StandardCharsets;
 public class StubSocket extends Socket {
 
     private final String request;
+    private final int maximumReadSize;
     private final ByteArrayOutputStream outputStream;
 
     public StubSocket(final String request) {
+        this(request, Integer.MAX_VALUE);
+    }
+
+    public StubSocket(final String request, final int maximumReadSize) {
         this.request = request;
+        this.maximumReadSize = maximumReadSize;
         this.outputStream = new ByteArrayOutputStream();
     }
 
@@ -36,7 +42,17 @@ public class StubSocket extends Socket {
     }
 
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(request.getBytes());
+        return new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public int read(final byte[] bytes, final int offset, final int length) {
+                return super.read(bytes, offset, Math.min(length, maximumReadSize));
+            }
+
+            @Override
+            public int available() {
+                return 0;
+            }
+        };
     }
 
     public OutputStream getOutputStream() {

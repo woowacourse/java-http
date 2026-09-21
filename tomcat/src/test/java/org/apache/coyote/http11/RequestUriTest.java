@@ -14,4 +14,16 @@ class RequestUriTest {
         assertThat(requestUri.queryParameter("account")).isEqualTo("gugu");
         assertThat(requestUri.queryParameter("password")).isEqualTo("password");
     }
+
+    @Test
+    void parseFormParameters() {
+        final var parameters = RequestUri.parseParameters(
+                "account=gugu&password=password&email=hkkang%40woowahan.com"
+        );
+
+        assertThat(parameters)
+                .containsEntry("account", "gugu")
+                .containsEntry("password", "password")
+                .containsEntry("email", "hkkang@woowahan.com");
+    }
 }

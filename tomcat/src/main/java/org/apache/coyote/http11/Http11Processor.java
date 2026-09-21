@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +15,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final Map<String, String> CONTENT_TYPES = Map.of(
@@ -57,10 +59,13 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
             String sessionId = httpCookie.get("JSESSIONID");
+            Session session = SESSION_MANAGER.findSession(sessionId);
 
             String sessionIdToSet = null;
-            if (sessionId == null || sessionId.isBlank()) {
-                sessionIdToSet = UUID.randomUUID().toString();
+            if (session == null) {
+                session = SESSION_MANAGER.createSession();
+                sessionId = session.getId();
+                sessionIdToSet = sessionId;
             }
 
             String body = "";
@@ -74,7 +79,10 @@ public class Http11Processor implements Runnable, Processor {
 
             String redirectPath = handleRegister(method, path, params);
             if (redirectPath == null) {
-                redirectPath = handleLogin(method, path, params);
+                redirectPath = handleLogin(method, path, params, session);
+            }
+            if (redirectPath == null) {
+                redirectPath = handleLoggedInLoginPage(method, path, session);
             }
 
             if (redirectPath != null) {
@@ -187,7 +195,8 @@ public class Http11Processor implements Runnable, Processor {
         return "/index.html";
     }
 
-    private String handleLogin(final String method, final String path, final Map<String, String> params) {
+    private String handleLogin(final String method, final String path, final Map<String, String> params,
+                               final Session session) {
         if (!method.equals("POST") || !path.equals("/login")) {
             return null;
         }
@@ -206,11 +215,26 @@ public class Http11Processor implements Runnable, Processor {
 
         User foundUser = user.get();
         if (foundUser.checkPassword(password)) {
+            session.setAttribute("user", foundUser);
             log.info("login user: {}", foundUser);
             return "/index.html";
         }
 
         return "/401.html";
+    }
+
+    private String handleLoggedInLoginPage(final String method, final String path, final Session session) {
+        if (!method.equals("GET") || !path.equals("/login")) {
+            return null;
+        }
+        if (getUser(session) == null) {
+            return null;
+        }
+        return "/index.html";
+    }
+
+    private User getUser(final Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private String createRedirectResponse(final String location, final String sessionId) {

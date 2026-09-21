@@ -1,16 +1,13 @@
-package org.apache.catalina;
+package com.techcourse.controller;
 
-import org.apache.catalina.controller.HelloWorldController;
-import org.apache.catalina.controller.LoginController;
-import org.apache.catalina.controller.LogoutController;
-import org.apache.catalina.controller.RegisterController;
-import org.apache.catalina.controller.SessionController;
+import org.apache.catalina.Controller;
+import org.apache.catalina.ControllerMapping;
 import org.apache.catalina.resource.StaticResourceController;
 import org.apache.coyote.http11.HttpRequest;
 
 import java.util.Map;
 
-public final class RequestMapping {
+public final class RequestMapping implements ControllerMapping {
 
     private final Map<String, Controller> controllers = Map.of(
             "/", new HelloWorldController(),
@@ -21,6 +18,7 @@ public final class RequestMapping {
     );
     private final Controller staticResourceController = new StaticResourceController();
 
+    @Override
     public Controller getController(HttpRequest request) {
         return controllers.getOrDefault(
                 request.getRequestUri().getPath(),

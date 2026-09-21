@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.Session;
@@ -17,6 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 class Http11ProcessorTest {
+
+    private Http11Processor processor(StubSocket socket) {
+        return new Http11Processor(socket, new RequestMapping());
+    }
 
     @Test
     void successfulLoginRedirectsToIndex() {
@@ -36,7 +41,7 @@ class Http11ProcessorTest {
     void loginWithoutCredentialsServesLoginPage() throws IOException {
         final var socket = new StubSocket(getRequest("/login"));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         try (var resource = getClass().getClassLoader().getResourceAsStream("static/login.html")) {
             assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n")
@@ -50,7 +55,7 @@ class Http11ProcessorTest {
         SessionManager.getInstance().add(new Session(sessionId));
         final var socket = new StubSocket(postRequest("/login", body, sessionId));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertRedirect(socket, location);
     }
@@ -61,7 +66,7 @@ class Http11ProcessorTest {
         String body = "account=gugu&password=password";
         final var socket = new StubSocket(postRequest("/login", body, unknownSessionId));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         String issuedSessionId = socket.output()
                 .lines()
@@ -82,7 +87,7 @@ class Http11ProcessorTest {
     void registerPageIsServedForGetRequest() throws IOException {
         final var socket = new StubSocket(getRequest("/register"));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         try (var resource = getClass().getClassLoader().getResourceAsStream("static/register.html")) {
             assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n")
@@ -95,7 +100,7 @@ class Http11ProcessorTest {
         String body = "account=new-user&password=pass%3Dword&email=user%40example.com";
         final var socket = new StubSocket(postRequest("/register", body));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertRedirect(socket, "/index.html");
         assertThat(InMemoryUserRepository.findByAccount("new-user"))
@@ -107,7 +112,7 @@ class Http11ProcessorTest {
         String body = "account=gugu&password=changed&email=changed%40example.com";
         final var socket = new StubSocket(postRequest("/register", body));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output()).isEqualTo("HTTP/1.1 409 Conflict\r\n"
                 + "Content-Type: text/plain;charset=utf-8\r\n"
@@ -135,7 +140,7 @@ class Http11ProcessorTest {
         for (String body : invalidBodies) {
             final var socket = new StubSocket(postRequest("/register", body));
 
-            new Http11Processor(socket).process(socket);
+            processor(socket).process(socket);
 
             assertThat(socket.output())
                     .startsWith("HTTP/1.1 400 Bad Request\r\n")
@@ -159,7 +164,7 @@ class Http11ProcessorTest {
         );
         final var socket = new StubSocket(request);
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 400 Bad Request\r\n")
@@ -170,7 +175,7 @@ class Http11ProcessorTest {
     void unsupportedMethodReturnsNotImplemented() {
         final var socket = new StubSocket("PUT / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 501 Not Implemented\r\n")
@@ -185,7 +190,7 @@ class Http11ProcessorTest {
         SessionManager.getInstance().add(session);
         final var socket = new StubSocket(getRequest("/session", sessionId));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 500 Internal Server Error\r\n")
@@ -231,7 +236,7 @@ class Http11ProcessorTest {
     @Test
     void missingResourceReturnsNotFound() {
         final var socket = new StubSocket(getRequest("/missing.html"));
-        final var processor = new Http11Processor(socket);
+        final var processor = processor(socket);
 
         processor.process(socket);
 
@@ -248,7 +253,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket(getRequest("/"));
-        final var processor = new Http11Processor(socket);
+        final var processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -276,7 +281,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = processor(socket);
 
         // when
         processor.process(socket);
@@ -300,7 +305,7 @@ class Http11ProcessorTest {
     void servesJavaScriptWithJavaScriptContentType() {
         final var socket = new StubSocket(getRequest("/js/scripts.js"));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output()).contains("Content-Type: text/javascript;charset=utf-8");
     }
@@ -309,7 +314,7 @@ class Http11ProcessorTest {
     void servesSvgWithSvgContentType() {
         final var socket = new StubSocket(getRequest("/assets/img/error-404-monochrome.svg"));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output()).contains("Content-Type: image/svg+xml;charset=utf-8");
     }
@@ -318,7 +323,7 @@ class Http11ProcessorTest {
     void responseSetsJSessionIdWhenRequestDoesNotHaveOne() {
         final var socket = new StubSocket("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\nSet-Cookie: JSESSIONID=");
 
@@ -335,7 +340,7 @@ class Http11ProcessorTest {
     void responseDoesNotSetJSessionIdWhenRequestAlreadyHasOne() {
         final var socket = new StubSocket(getRequest("/"));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
     }
@@ -347,7 +352,7 @@ class Http11ProcessorTest {
         SessionManager.getInstance().add(new Session(sessionId));
         final var socket = new StubSocket(postRequest("/login", body, sessionId));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         Session session = SessionManager.getInstance().findSession(sessionId);
         assertThat(session).isNotNull();
@@ -363,10 +368,10 @@ class Http11ProcessorTest {
         String body = "account=gugu&password=password";
         SessionManager.getInstance().add(new Session(sessionId));
         final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
-        new Http11Processor(loginSocket).process(loginSocket);
+        processor(loginSocket).process(loginSocket);
 
         final var loginPageSocket = new StubSocket(getRequest("/login", sessionId));
-        new Http11Processor(loginPageSocket).process(loginPageSocket);
+        processor(loginPageSocket).process(loginPageSocket);
 
         assertRedirect(loginPageSocket, "/index.html");
     }
@@ -377,7 +382,7 @@ class Http11ProcessorTest {
         String body = "account=gugu&password=wrong";
         final var socket = new StubSocket(postRequest("/login", body, sessionId));
 
-        new Http11Processor(socket).process(socket);
+        processor(socket).process(socket);
 
         assertThat(SessionManager.getInstance().findSession(sessionId)).isNull();
     }
@@ -388,10 +393,10 @@ class Http11ProcessorTest {
         String body = "account=gugu&password=password";
         SessionManager.getInstance().add(new Session(sessionId));
         final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
-        new Http11Processor(loginSocket).process(loginSocket);
+        processor(loginSocket).process(loginSocket);
 
         final var sessionSocket = new StubSocket(getRequest("/session", sessionId));
-        new Http11Processor(sessionSocket).process(sessionSocket);
+        processor(sessionSocket).process(sessionSocket);
 
         assertThat(sessionSocket.output()).endsWith("{\"loggedIn\":true,\"account\":\"gugu\"}");
     }
@@ -402,16 +407,16 @@ class Http11ProcessorTest {
         String body = "account=gugu&password=password";
         SessionManager.getInstance().add(new Session(sessionId));
         final var loginSocket = new StubSocket(postRequest("/login", body, sessionId));
-        new Http11Processor(loginSocket).process(loginSocket);
+        processor(loginSocket).process(loginSocket);
 
         final var logoutSocket = new StubSocket(postRequest("/logout", "", sessionId));
-        new Http11Processor(logoutSocket).process(logoutSocket);
+        processor(logoutSocket).process(logoutSocket);
 
         assertThat(logoutSocket.output()).isEqualTo("HTTP/1.1 204 No Content\r\n\r\n");
         assertThat(SessionManager.getInstance().findSession(sessionId)).isNull();
 
         final var sessionSocket = new StubSocket(getRequest("/session", sessionId));
-        new Http11Processor(sessionSocket).process(sessionSocket);
+        processor(sessionSocket).process(sessionSocket);
         assertThat(sessionSocket.output()).endsWith("{\"loggedIn\":false}");
     }
 }

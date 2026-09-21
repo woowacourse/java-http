@@ -4,6 +4,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -656,7 +658,7 @@ class Http11ProcessorTest {
             final var response = responseTo(requestTarget, cookieHeader);
 
             // then
-            assertThat(response).contains("\r\nSet-Cookie: JSESSIONID=");
+            assertThat(response).containsPattern("\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
         }
 
         @Test
@@ -664,13 +666,74 @@ class Http11ProcessorTest {
         void existingSessionCookieDoesNotAddSetCookieHeader() {
             // given
             final var requestTarget = "/index.html";
-            final var cookieHeader = "Cookie: yummy_cookie=choco; JSESSIONID=existing-session";
+            final var session = SessionManager.getInstance().createSession();
+            final var cookieHeader = "Cookie: yummy_cookie=choco; JSESSIONID=" + session.getId();
 
             // when
             final var response = responseTo(requestTarget, cookieHeader);
 
             // then
             assertThat(response).doesNotContain("\r\nSet-Cookie:");
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 JSESSIONID를 요청하면 새 세션 쿠키를 응답한다")
+        void unknownSessionCookieAddsNewSetCookieHeader() {
+            // given
+            final var requestTarget = "/index.html";
+            final var cookieHeader = "Cookie: JSESSIONID=unknown-session";
+
+            // when
+            final var response = responseTo(requestTarget, cookieHeader);
+
+            // then
+            assertThat(response).containsPattern("\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
+        }
+    }
+
+    @Nested
+    @DisplayName("로그인 세션")
+    class LoginSessionTests {
+
+        @Test
+        @DisplayName("로그인에 성공하면 세션에 사용자를 저장한다")
+        void successfulLoginStoresUserInSession() {
+            // given
+            final var session = SessionManager.getInstance().createSession();
+            final var cookieHeader = "Cookie: JSESSIONID=" + session.getId();
+            final var requestBody = "account=gugu&password=password";
+
+            // when
+            postResponseTo("/login", requestBody, cookieHeader);
+
+            // then
+            assertThat(session.getAttribute("user")).isInstanceOf(User.class);
+        }
+
+        @Test
+        @DisplayName("로그인된 사용자가 로그인 페이지를 요청하면 302 Found 상태를 응답한다")
+        void loggedInUserRequestingLoginPageReturnsFoundStatus() {
+            // given
+            final var cookieHeader = loggedInSessionCookieHeader();
+
+            // when
+            final var response = responseTo("/login", cookieHeader);
+
+            // then
+            assertThat(response).startsWith("HTTP/1.1 302 Found ");
+        }
+
+        @Test
+        @DisplayName("로그인된 사용자가 로그인 페이지를 요청하면 인덱스 페이지로 이동시킨다")
+        void loggedInUserRequestingLoginPageRedirectsToIndex() {
+            // given
+            final var cookieHeader = loggedInSessionCookieHeader();
+
+            // when
+            final var response = responseTo("/login", cookieHeader);
+
+            // then
+            assertThat(response).contains("\r\nLocation: /index.html \r\n");
         }
     }
 
@@ -700,6 +763,21 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.length(),
+                "",
+                body);
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+        processor.process(socket);
+        return socket.output();
+    }
+
+    private String postResponseTo(final String requestTarget, final String body, final String header) {
+        final var request = String.join("\r\n",
+                "POST " + requestTarget + " HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
+                header,
                 "",
                 body);
         final var socket = new StubSocket(request);
@@ -741,6 +819,12 @@ class Http11ProcessorTest {
             logger.detachAppender(appender);
             appender.stop();
         }
+    }
+
+    private String loggedInSessionCookieHeader() {
+        final var session = SessionManager.getInstance().createSession();
+        session.setAttribute("user", new User("gugu", "password", "gugu@example.com"));
+        return "Cookie: JSESSIONID=" + session.getId();
     }
 
     private List<ILoggingEvent> processorLogs(final Runnable action) {

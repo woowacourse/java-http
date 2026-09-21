@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +18,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String GET_METHOD = "GET";
     private static final String POST_METHOD = "POST";
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
@@ -29,18 +31,29 @@ public class Http11Processor implements Runnable, Processor {
     private static final String COOKIE_HEADER = "Cookie";
     private static final String SET_COOKIE_HEADER = "Set-Cookie";
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    private static final String SESSION_USER_ATTRIBUTE = "user";
     private static final String CRLF = "\r\n";
 
     private final Socket connection;
     private final ResponseContentResolver responseContentResolver;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
-        this(connection, new ResponseContentResolver());
+        this(connection, new ResponseContentResolver(), SessionManager.getInstance());
     }
 
     Http11Processor(final Socket connection, final ResponseContentResolver responseContentResolver) {
+        this(connection, responseContentResolver, SessionManager.getInstance());
+    }
+
+    Http11Processor(
+            final Socket connection,
+            final ResponseContentResolver responseContentResolver,
+            final SessionManager sessionManager
+    ) {
         this.connection = connection;
         this.responseContentResolver = Objects.requireNonNull(responseContentResolver);
+        this.sessionManager = Objects.requireNonNull(sessionManager);
     }
 
     @Override
@@ -67,12 +80,15 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var request = parsedRequest.get();
-            final var requestUri = request.uri();
-            final String path = requestUri.getPath();
+            final var path = request.uri().getPath();
             if (path == null) {
                 return;
             }
-            final var response = addSessionCookieIfAbsent(request, resolveResponse(request));
+            final var resolvedSession = resolveSession(request);
+            var response = resolveResponse(request, path, resolvedSession.session());
+            if (resolvedSession.created()) {
+                response = addSessionCookie(response, resolvedSession.session());
+            }
 
             try {
                 writeResponse(outputStream, response);
@@ -100,10 +116,12 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password.get()));
     }
 
-    private HttpResponse resolveResponse(final HttpRequest request) {
-        final var path = request.uri().getPath();
+    private HttpResponse resolveResponse(final HttpRequest request, final String path, final Session session) {
+        if (LOGIN_PATH.equals(path) && GET_METHOD.equals(request.method()) && isLoggedIn(session)) {
+            return HttpResponse.redirect(INDEX_PATH);
+        }
         if (LOGIN_PATH.equals(path) && POST_METHOD.equals(request.method())) {
-            return resolveLoginResponse(request.body());
+            return resolveLoginResponse(request.body(), session);
         }
         if (REGISTER_PATH.equals(path) && POST_METHOD.equals(request.method())) {
             return resolveRegisterResponse(request.body());
@@ -111,17 +129,27 @@ public class Http11Processor implements Runnable, Processor {
         return resolveStaticResponse(path);
     }
 
-    private HttpResponse addSessionCookieIfAbsent(final HttpRequest request, final HttpResponse response) {
+    private SessionResolution resolveSession(final HttpRequest request) {
         final var cookies = request.headers()
                 .firstValue(COOKIE_HEADER)
                 .map(HttpCookies::parse)
                 .orElseGet(HttpCookies::empty);
-        if (cookies.get(SESSION_COOKIE_NAME).isPresent()) {
-            return response;
+        final var session = cookies.get(SESSION_COOKIE_NAME)
+                .map(sessionManager::findSession)
+                .orElse(null);
+        if (session != null) {
+            return new SessionResolution(session, false);
         }
 
-        final var sessionId = UUID.randomUUID().toString();
-        return response.addHeader(SET_COOKIE_HEADER, SESSION_COOKIE_NAME + "=" + sessionId);
+        return new SessionResolution(sessionManager.createSession(), true);
+    }
+
+    private HttpResponse addSessionCookie(final HttpResponse response, final Session session) {
+        return response.addHeader(SET_COOKIE_HEADER, SESSION_COOKIE_NAME + "=" + session.getId());
+    }
+
+    private boolean isLoggedIn(final Session session) {
+        return session.getAttribute(SESSION_USER_ATTRIBUTE) instanceof User;
     }
 
     private HttpResponse resolveRegisterResponse(final String requestBody) {
@@ -145,13 +173,15 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirect(INDEX_PATH);
     }
 
-    private HttpResponse resolveLoginResponse(final String requestBody) {
+    private HttpResponse resolveLoginResponse(final String requestBody, final Session session) {
         final var loginUser = findLoginUser(requestBody);
         if (loginUser.isEmpty()) {
             return HttpResponse.redirect(UNAUTHORIZED_PATH);
         }
 
-        log.info("login user found: {}", loginUser.get().getAccount());
+        final var user = loginUser.get();
+        session.setAttribute(SESSION_USER_ATTRIBUTE, user);
+        log.info("login user found: {}", user.getAccount());
         return HttpResponse.redirect(INDEX_PATH);
     }
 
@@ -180,5 +210,8 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
         outputStream.write(content.body());
         outputStream.flush();
+    }
+
+    private record SessionResolution(Session session, boolean created) {
     }
 }

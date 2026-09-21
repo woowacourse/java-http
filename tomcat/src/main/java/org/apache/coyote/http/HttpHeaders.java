@@ -75,7 +75,7 @@ public class HttpHeaders {
                 throw new IllegalArgumentException("Content-Length는 음수일 수 없습니다: " + value);
             }
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("잘못된 Content-Length입니다: " + value);
+            throw new IllegalArgumentException("잘못된 Content-Length 입니다: " + value);
         }
     }
 }

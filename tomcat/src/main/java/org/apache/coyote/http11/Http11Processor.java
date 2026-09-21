@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String ACCEPT_HEADER = "Accept";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String COOKIE_HEADER = "Cookie";
     private static final String ACCEPT_ANY = "*/*";
     private static final String TEXT_HTML = "text/html;charset=utf-8";
     private static final String TEXT_CSS = "text/css";
@@ -72,6 +74,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final var requestHeaders = readHeaders(bufferedReader);
+            final var cookie = new HttpCookie(requestHeaders.get(COOKIE_HEADER));
+            var setCookie = "";
+            if (!cookie.hasJSessionId()) {
+                setCookie = HttpCookie.JSESSIONID + "=" + UUID.randomUUID();
+            }
             final var contentType = decideContentType(requestHeaders);
             final var uri = parseUri(requestLine);
             final var method = parseMethod(requestLine);
@@ -117,7 +124,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
             }
 
-            final var response = buildResponse(statusLine, location, contentType, responseBody);
+            final var response = buildResponse(statusLine, location, setCookie, contentType, responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -212,12 +219,15 @@ public class Http11Processor implements Runnable, Processor {
         return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path + ".html");
     }
 
-    private String buildResponse(final String statusLine, final String location, final String contentType,
-                                 final byte[] body) {
+    private String buildResponse(final String statusLine, final String location, final String setCookie,
+                                 final String contentType, final byte[] body) {
         final List<String> lines = new ArrayList<>();
         lines.add(statusLine);
         if (!location.isEmpty()) {
             lines.add("Location: " + location + " ");
+        }
+        if (!setCookie.isEmpty()) {
+            lines.add("Set-Cookie: " + setCookie + " ");
         }
         lines.add("Content-Type: " + contentType + " ");
         lines.add("Content-Length: " + body.length + " ");

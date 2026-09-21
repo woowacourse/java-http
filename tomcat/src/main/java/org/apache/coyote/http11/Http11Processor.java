@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +14,20 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String HEADER_COOKIE = "cookie";
+    private static final String HEADER_CONTENT_LENGTH = "content-length";
 
     private final Socket connection;
 
@@ -50,27 +58,54 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            String method = parseMethod(requestLine);
             String uri = parseUri(requestLine);
             String queryString = extractQueryString(uri);
             String resourcePath = normalizePath(parsePath(uri));
 
-            readHeaders(reader);
+            Map<String, String> headers = readHeaders(reader);
+            HttpCookie cookie = HttpCookie.parse(headers.get(HEADER_COOKIE));
+            String sessionId = findOrCreateSessionId(cookie);
+            String setCookie = createJSessionIdCookie(cookie, sessionId);
+
+            if (isPostLogin(method, resourcePath)) {
+                String requestBody = readRequestBody(reader, headers);
+                writeLoginResponse(outputStream, requestBody, sessionId, setCookie);
+                return;
+            }
+
+            if (isGetLogin(method, resourcePath) && isLoggedIn(sessionId)) {
+                writeRedirectResponse(outputStream, "/index.html", setCookie);
+                return;
+            }
+
+            if (isPostRegister(method, resourcePath)) {
+                String requestBody = readRequestBody(reader, headers);
+                writeRegisterResponse(outputStream, requestBody, setCookie);
+                return;
+            }
+
             logUserIfExists(resourcePath, queryString);
 
             URL resource = findResource(resourcePath);
 
             if (resource == null) {
-                writeNotFoundResponse(outputStream);
+                writeNotFoundResponse(outputStream, setCookie);
                 return;
             }
 
             byte[] body = readBody(resource);
 
-            String response = createResponse("200 OK", resourcePath, body);
+            String response = createResponse("200 OK", resourcePath, body, setCookie);
             writeResponse(outputStream, response, body);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseMethod(String requestLine) {
+        String[] parts = requestLine.split(" ");
+        return parts[0];
     }
 
     private String parseUri(String requestLine) {
@@ -98,12 +133,137 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(queryIndex + 1);
     }
 
-    private void readHeaders(BufferedReader reader) throws IOException {
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
         String header;
 
         while ((header = reader.readLine()) != null && !header.isEmpty()) {
-            // Header는 현재 사용하지 않으므로 읽고 버린다.
+            String[] nameAndValue = header.split(":", 2);
+            if (nameAndValue.length == 2) {
+                String name = nameAndValue[0].trim().toLowerCase(Locale.ROOT);
+                String value = nameAndValue[1].trim();
+                headers.put(name, value);
+            }
         }
+
+        return headers;
+    }
+
+    private String findOrCreateSessionId(HttpCookie cookie) {
+        if (cookie.contains(HttpCookie.JSESSIONID)) {
+            String sessionId = cookie.get(HttpCookie.JSESSIONID);
+            if (SessionManager.findSession(sessionId) != null) {
+                return sessionId;
+            }
+        }
+
+        return createSession().getId();
+    }
+
+    private String createJSessionIdCookie(HttpCookie cookie, String sessionId) {
+        if (sessionId.equals(cookie.get(HttpCookie.JSESSIONID))) {
+            return null;
+        }
+
+        return HttpCookie.createJSessionId(sessionId);
+    }
+
+    private Session createSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        SessionManager.add(session);
+
+        return session;
+    }
+
+    private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        String contentLengthHeader = headers.get(HEADER_CONTENT_LENGTH);
+
+        if (contentLengthHeader == null) {
+            return "";
+        }
+
+        int contentLength = Integer.parseInt(contentLengthHeader);
+        char[] buffer = new char[contentLength];
+
+        int offset = 0;
+        while (offset < contentLength) {
+            int readCount = reader.read(buffer, offset, contentLength - offset);
+
+            if (readCount == -1) {
+                break;
+            }
+
+            offset += readCount;
+        }
+
+        return new String(buffer, 0, offset);
+    }
+
+    private boolean isPostLogin(String method, String resourcePath) {
+        return method.equals("POST") && resourcePath.equals("/login.html");
+    }
+
+    private boolean isGetLogin(String method, String resourcePath) {
+        return method.equals("GET") && resourcePath.equals("/login.html");
+    }
+
+    private boolean isLoggedIn(String sessionId) {
+        Session session = SessionManager.findSession(sessionId);
+        return session != null && session.getAttribute("user") != null;
+    }
+
+    private boolean isPostRegister(String method, String resourcePath) {
+        return method.equals("POST") && resourcePath.equals("/register.html");
+    }
+
+    private void writeLoginResponse(
+            OutputStream outputStream,
+            String requestBody,
+            String sessionId,
+            String setCookie
+    ) throws IOException {
+        Map<String, String> params = parseQueryString(requestBody);
+        String account = params.get("account");
+        String password = params.get("password");
+
+        if (account == null || password == null) {
+            writeRedirectResponse(outputStream, "/401.html", setCookie);
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> {
+                            SessionManager.remove(sessionId);
+                            Session session = createSession();
+                            session.setAttribute("user", user);
+                            log.info("조회된 사용자: id={}, account={}", user.getId(), user.getAccount());
+                            writeRedirectResponse(
+                                    outputStream,
+                                    "/index.html",
+                                    HttpCookie.createJSessionId(session.getId())
+                            );
+                        },
+                        () -> writeRedirectResponse(outputStream, "/401.html", setCookie)
+                );
+    }
+
+    private void writeRegisterResponse(OutputStream outputStream, String requestBody, String setCookie) {
+        Map<String, String> params = parseQueryString(requestBody);
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+
+        if (account == null || account.isBlank()
+                || password == null || password.isBlank()
+                || email == null || email.isBlank()) {
+            writeRedirectResponse(outputStream, "/register.html", setCookie);
+            return;
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        writeRedirectResponse(outputStream, "/index.html", setCookie);
     }
 
     private void logUserIfExists(String resourcePath, String queryString) {
@@ -153,7 +313,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeNotFoundResponse(OutputStream outputStream) throws IOException {
+    private void writeRedirectResponse(OutputStream outputStream, String location, String setCookie) {
+        List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 302 Found");
+        if (setCookie != null) {
+            lines.add("Set-Cookie: " + setCookie);
+        }
+        lines.add("Location: " + location);
+        lines.add("Content-Length: 0");
+        lines.add("");
+        lines.add("");
+
+        String response = String.join("\r\n",
+                lines
+        );
+
+        try {
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new UncheckedServletException(e);
+        }
+    }
+
+    private void writeNotFoundResponse(OutputStream outputStream, String setCookie) throws IOException {
         String resourcePath = "/404.html";
         URL resource = findResource(resourcePath);
 
@@ -162,18 +345,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         byte[] body = readBody(resource);
-        String response = createResponse("404 Not Found", resourcePath, body);
+        String response = createResponse("404 Not Found", resourcePath, body, setCookie);
         writeResponse(outputStream, response, body);
     }
 
-    private String createResponse(String status, String resourcePath, byte[] body) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status,
-                "Content-Type: " + getContentType(resourcePath),
-                "Content-Length: " + body.length,
-                "",
-                ""
-        );
+    private String createResponse(String status, String resourcePath, byte[] body, String setCookie) {
+        List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 " + status);
+        if (setCookie != null) {
+            lines.add("Set-Cookie: " + setCookie);
+        }
+        lines.add("Content-Type: " + getContentType(resourcePath));
+        lines.add("Content-Length: " + body.length);
+        lines.add("");
+        lines.add("");
+
+        return String.join("\r\n", lines);
     }
 
     private void writeResponse(
@@ -206,7 +393,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String key = keyValue[0];
-            String value = keyValue[1];
+            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
 
             queryParams.put(key, value);
         }

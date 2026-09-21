@@ -16,7 +16,7 @@ class HttpCookieTest {
     }
 
     @Test
-    void 존재하지_않는_쿠키를_조회하면_예외가_발생한다() {
+    void 존재하지_않는_쿠키를_조회하면_빈_값을_반환한다() {
         String cookieHeader = "yummy_cookie=choco";
 
         HttpCookie httpCookie = HttpCookie.from(cookieHeader);

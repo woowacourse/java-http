@@ -1,8 +1,8 @@
 package org.apache.coyote;
 
 import java.io.IOException;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 
 /**
  * 프로토콜 계층(coyote)과 컨테이너 계층(catalina)의 경계.
@@ -10,5 +10,5 @@ import org.apache.coyote.http.HttpServletResponse;
  */
 public interface Adapter {
 
-    HttpServletResponse service(HttpServletRequest request) throws IOException;
+    HttpResponse service(HttpRequest request) throws IOException;
 }

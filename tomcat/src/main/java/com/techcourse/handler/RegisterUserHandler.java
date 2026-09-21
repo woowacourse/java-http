@@ -5,19 +5,19 @@ import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.handler.ResourceHandler;
 import org.apache.coyote.http.HttpMethod;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.RequestBody;
 
 public class RegisterUserHandler implements ResourceHandler {
 
     @Override
-    public boolean canHandle(HttpServletRequest request) {
+    public boolean canHandle(HttpRequest request) {
         return request.method() == HttpMethod.POST && request.path().equals("/register");
     }
 
     @Override
-    public HttpServletResponse handle(HttpServletRequest request) {
+    public HttpResponse handle(HttpRequest request) {
         RequestBody body = request.body();
 
         Optional<String> account = body.get("account");
@@ -25,16 +25,16 @@ public class RegisterUserHandler implements ResourceHandler {
         Optional<String> email = body.get("email");
 
         if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            return HttpServletResponse.redirect("/register");
+            return HttpResponse.redirect("/register");
         }
 
         if (InMemoryUserRepository.findByAccount(account.get()).isPresent()) {
-            return HttpServletResponse.redirect("/register");
+            return HttpResponse.redirect("/register");
         }
 
         User user = new User(account.get(), password.get(), email.get());
         InMemoryUserRepository.save(user);
 
-        return HttpServletResponse.redirect("/index.html");
+        return HttpResponse.redirect("/index.html");
     }
 }

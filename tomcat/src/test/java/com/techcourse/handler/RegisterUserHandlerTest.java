@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.RequestBody;
 import org.apache.coyote.http.RequestLine;
 import org.assertj.core.api.Assertions;
@@ -18,10 +18,10 @@ class RegisterUserHandlerTest {
 
     @Test
     void 회원가입에_성공한다() {
-        HttpServletRequest request = registerRequest(
+        HttpRequest request = registerRequest(
                 "account=gyubin&password=password&email=gyubin%40woowahan.com");
 
-        HttpServletResponse response = registerUserHandler.handle(request);
+        HttpResponse response = registerUserHandler.handle(request);
 
         Assertions.assertThat(response.headers().get("Location"))
                 .isPresent()
@@ -29,8 +29,8 @@ class RegisterUserHandlerTest {
                 .isEqualTo("/index.html");
     }
 
-    private HttpServletRequest registerRequest(String body) {
-        return new HttpServletRequest(
+    private HttpRequest registerRequest(String body) {
+        return new HttpRequest(
                 RequestLine.from("POST /register HTTP/1.1 "),
                 HttpHeaders.from(List.of(
                         "Content-Type: " + ContentType.FORM_URLENCODED.value(),

@@ -7,11 +7,11 @@ import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public record HttpServletRequest(
+public record HttpRequest(
         RequestLine requestLine, HttpHeaders headers, RequestBody body
 ) {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpServletRequest.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     public String path() {
         return requestLine.getUri().getPath();

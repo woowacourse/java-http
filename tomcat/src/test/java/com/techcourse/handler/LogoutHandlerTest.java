@@ -8,8 +8,8 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.RequestBody;
 import org.apache.coyote.http.RequestLine;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -22,9 +22,9 @@ class LogoutHandlerTest {
     @Test
     void 로그아웃하면_세션을_제거하고_index로_이동한다() {
         Session session = loggedInSession();
-        HttpServletRequest request = request("/logout", session.getId());
+        HttpRequest request = request("/logout", session.getId());
 
-        HttpServletResponse response = logoutHandler.handle(request);
+        HttpResponse response = logoutHandler.handle(request);
 
         assertThat(SessionManager.findSession(session.getId())).isNull();
         assertThat(response.headers().get("Location"))
@@ -39,11 +39,11 @@ class LogoutHandlerTest {
         return session;
     }
 
-    private HttpServletRequest request(String path, String sessionId) {
+    private HttpRequest request(String path, String sessionId) {
         List<String> headers = sessionId == null
                 ? List.of()
                 : List.of("Cookie: JSESSIONID=" + sessionId);
-        return new HttpServletRequest(
+        return new HttpRequest(
                 RequestLine.from("GET " + path + " HTTP/1.1 "),
                 HttpHeaders.from(headers),
                 RequestBody.of(ContentType.PLAIN, ""));

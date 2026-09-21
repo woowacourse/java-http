@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +36,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpServletRequest request = new Http11RequestParser(inputStream).parse();
+            HttpRequest request = new Http11RequestParser(inputStream).parse();
 
-            HttpServletResponse response = adapter.service(request);
+            HttpResponse response = adapter.service(request);
 
             responseWriter.write(response, outputStream);
         } catch (IOException e) {

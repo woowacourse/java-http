@@ -1,12 +1,12 @@
 package org.apache.catalina.handler;
 
 import java.io.IOException;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 
 public interface ResourceHandler {
 
-    boolean canHandle(HttpServletRequest request);
+    boolean canHandle(HttpRequest request);
 
-    HttpServletResponse handle(HttpServletRequest request) throws IOException;
+    HttpResponse handle(HttpRequest request) throws IOException;
 }

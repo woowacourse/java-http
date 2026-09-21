@@ -3,7 +3,7 @@ package org.apache.coyote.http;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class HttpServletResponse {
+public class HttpResponse {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
@@ -12,22 +12,22 @@ public class HttpServletResponse {
     private final HttpHeaders headers;
     private final ResponseBody body;
 
-    private HttpServletResponse(HttpStatus status, Map<String, String> headers, ResponseBody body) {
+    private HttpResponse(HttpStatus status, Map<String, String> headers, ResponseBody body) {
         this.status = status;
         this.headers = HttpHeaders.from(withContentHeaders(headers, body));
         this.body = body;
     }
 
-    public static HttpServletResponse ok(ResponseBody body) {
+    public static HttpResponse ok(ResponseBody body) {
         return of(HttpStatus.OK, body);
     }
 
-    public static HttpServletResponse of(HttpStatus status, ResponseBody body) {
-        return new HttpServletResponse(status, Map.of(), body);
+    public static HttpResponse of(HttpStatus status, ResponseBody body) {
+        return new HttpResponse(status, Map.of(), body);
     }
 
-    public static HttpServletResponse redirect(String location) {
-        return new HttpServletResponse(HttpStatus.FOUND, Map.of("Location", location), EmptyBody.INSTANCE);
+    public static HttpResponse redirect(String location) {
+        return new HttpResponse(HttpStatus.FOUND, Map.of("Location", location), EmptyBody.INSTANCE);
     }
 
     private static Map<String, String> withContentHeaders(Map<String, String> headers, ResponseBody body) {
@@ -41,7 +41,7 @@ public class HttpServletResponse {
         return values;
     }
 
-    public HttpServletResponse addCookie(String key, String value) {
+    public HttpResponse addCookie(String key, String value) {
         headers.setCookie(key, value);
         return this;
     }

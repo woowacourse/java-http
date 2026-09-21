@@ -10,8 +10,8 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpServletRequest;
-import org.apache.coyote.http.HttpServletResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.RequestBody;
 import org.apache.coyote.http.RequestLine;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -23,9 +23,9 @@ class LoginUserHandlerTest {
 
     @Test
     void 로그인에_성공한_경우_쿠키를_설정한다() {
-        HttpServletRequest request = loginRequest("account=gugu&password=password");
+        HttpRequest request = loginRequest("account=gugu&password=password");
 
-        HttpServletResponse response = loginHandler.handle(request);
+        HttpResponse response = loginHandler.handle(request);
 
         assertThat(response.headers().get("Set-Cookie"))
                 .isPresent()
@@ -35,9 +35,9 @@ class LoginUserHandlerTest {
 
     @Test
     void 로그인에_실패한_경우_401_페이지로_이동한다() {
-        HttpServletRequest request = loginRequest("account=gugu&password=wrongPassword");
+        HttpRequest request = loginRequest("account=gugu&password=wrongPassword");
 
-        HttpServletResponse response = loginHandler.handle(request);
+        HttpResponse response = loginHandler.handle(request);
 
         assertThat(response.headers().get("Location"))
                 .isPresent()
@@ -47,9 +47,9 @@ class LoginUserHandlerTest {
 
     @Test
     void 로그인에_성공하면_발급한_세션이_SessionManager에_저장된다() {
-        HttpServletRequest request = loginRequest("account=gugu&password=password");
+        HttpRequest request = loginRequest("account=gugu&password=password");
 
-        HttpServletResponse response = loginHandler.handle(request);
+        HttpResponse response = loginHandler.handle(request);
 
         String sessionId = sessionIdOf(response);
         assertThat(SessionManager.findSession(sessionId)).isNotNull();
@@ -57,9 +57,9 @@ class LoginUserHandlerTest {
 
     @Test
     void 로그인에_성공하면_발급한_세션에_로그인한_사용자를_담는다() {
-        HttpServletRequest request = loginRequest("account=gugu&password=password");
+        HttpRequest request = loginRequest("account=gugu&password=password");
 
-        HttpServletResponse response = loginHandler.handle(request);
+        HttpResponse response = loginHandler.handle(request);
 
         User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
         Session session = SessionManager.findSession(sessionIdOf(response));
@@ -68,9 +68,9 @@ class LoginUserHandlerTest {
 
     @Test
     void 로그인에_실패하면_세션을_발급하지_않는다() {
-        HttpServletRequest request = loginRequest("account=gugu&password=wrongPassword");
+        HttpRequest request = loginRequest("account=gugu&password=wrongPassword");
 
-        HttpServletResponse response = loginHandler.handle(request);
+        HttpResponse response = loginHandler.handle(request);
 
         assertThat(response.headers().get("Set-Cookie")).isEmpty();
     }
@@ -79,29 +79,29 @@ class LoginUserHandlerTest {
     void 이미_세션이_있으면_새로_발급하지_않고_재사용한다() {
         Session existing = new Session(UUID.randomUUID().toString());
         SessionManager.add(existing);
-        HttpServletRequest request = loginRequestWithSession(
+        HttpRequest request = loginRequestWithSession(
                 "account=gugu&password=password", existing.getId());
 
-        HttpServletResponse response = loginHandler.handle(request);
+        HttpResponse response = loginHandler.handle(request);
 
         assertThat(sessionIdOf(response)).isEqualTo(existing.getId());
     }
 
-    private String sessionIdOf(HttpServletResponse response) {
+    private String sessionIdOf(HttpResponse response) {
         return response.headers().get("Set-Cookie")
                 .map(cookie -> cookie.substring("JSESSIONID=".length()))
                 .orElseThrow();
     }
 
-    private HttpServletRequest loginRequest(String body) {
-        return new HttpServletRequest(
+    private HttpRequest loginRequest(String body) {
+        return new HttpRequest(
                 RequestLine.from("POST /login HTTP/1.1 "),
                 HttpHeaders.from(List.of("Content-Type: " + ContentType.FORM_URLENCODED.value())),
                 RequestBody.of(ContentType.FORM_URLENCODED, body));
     }
 
-    private HttpServletRequest loginRequestWithSession(String body, String sessionId) {
-        return new HttpServletRequest(
+    private HttpRequest loginRequestWithSession(String body, String sessionId) {
+        return new HttpRequest(
                 RequestLine.from("POST /login HTTP/1.1 "),
                 HttpHeaders.from(List.of(
                         "Content-Type: " + ContentType.FORM_URLENCODED.value(),

@@ -8,11 +8,11 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 
-class HttpServletRequestTest {
+class HttpRequestTest {
 
     @Test
     void 쿠키가_없고_create가_true면_새로운_세션을_발급한다() {
-        HttpServletRequest request = getRequest(List.of());
+        HttpRequest request = getRequest(List.of());
 
         Session session = request.getSession(true);
 
@@ -22,7 +22,7 @@ class HttpServletRequestTest {
 
     @Test
     void 쿠키가_없고_create가_false면_null을_반환한다() {
-        HttpServletRequest request = getRequest(List.of());
+        HttpRequest request = getRequest(List.of());
 
         assertThat(request.getSession(false)).isNull();
     }
@@ -31,7 +31,7 @@ class HttpServletRequestTest {
     void 쿠키의_세션이_존재하면_해당_세션을_반환한다() {
         Session existing = new Session(UUID.randomUUID().toString());
         SessionManager.add(existing);
-        HttpServletRequest request = getRequest(List.of("Cookie: JSESSIONID=" + existing.getId()));
+        HttpRequest request = getRequest(List.of("Cookie: JSESSIONID=" + existing.getId()));
 
         assertThat(request.getSession(false)).isSameAs(existing);
     }
@@ -39,7 +39,7 @@ class HttpServletRequestTest {
     @Test
     void 쿠키의_세션이_존재하지_않고_create가_true면_새로운_세션을_발급한다() {
         String unknownId = UUID.randomUUID().toString();
-        HttpServletRequest request = getRequest(List.of("Cookie: JSESSIONID=" + unknownId));
+        HttpRequest request = getRequest(List.of("Cookie: JSESSIONID=" + unknownId));
 
         Session session = request.getSession(true);
 
@@ -50,14 +50,14 @@ class HttpServletRequestTest {
 
     @Test
     void 쿠키의_세션이_존재하지_않고_create가_false면_null을_반환한다() {
-        HttpServletRequest request = getRequest(
+        HttpRequest request = getRequest(
                 List.of("Cookie: JSESSIONID=" + UUID.randomUUID()));
 
         assertThat(request.getSession(false)).isNull();
     }
 
-    private HttpServletRequest getRequest(List<String> headers) {
-        return new HttpServletRequest(
+    private HttpRequest getRequest(List<String> headers) {
+        return new HttpRequest(
                 RequestLine.from("GET /index.html HTTP/1.1 "),
                 HttpHeaders.from(headers),
                 RequestBody.of(ContentType.PLAIN, ""));

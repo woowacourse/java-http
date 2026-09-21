@@ -25,8 +25,9 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.handlers = Map.of(
-                new Route(HttpMethod.POST, "/login"), new LoginRequestHandler()
-                );
+                new Route(HttpMethod.POST, "/login"), new LoginRequestHandler(),
+                new Route(HttpMethod.POST, "/register"), new RegisterRequestHandler()
+        );
     }
 
     @Override
@@ -71,9 +72,6 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse(request.path(), HttpStatus.OK);
         }
 
-        if (request.params().isEmpty()) {
-            return new HttpResponse(request.path(), HttpStatus.OK);
-        }
         return requestHandler.handle(request);
     }
 

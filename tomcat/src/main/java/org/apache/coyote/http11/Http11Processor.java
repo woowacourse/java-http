@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -23,9 +24,16 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_MESSAGE = "Hello world!";
     private static final String BAD_REQUEST_MESSAGE = "잘못된 요청입니다.";
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CHARSET_SUFFIX = ";charset=utf-8";
+    private static final String LOCATION = "Location";
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
+    private static final String FOUND = "302 FOUND";
+    private static final String INDEX_PATH = "/index.html";
     private static final String NOT_FOUND_PATH = "/404.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String HTML_EXTENSION = ".html";
@@ -76,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(final String requestLine) throws IOException {
         if (requestLine.isBlank() || requestLine.trim().split(" ").length != REQUEST_LINE_SIZE) {
-            return buildResponse(BAD_REQUEST, DEFAULT_CONTENT_TYPE, BAD_REQUEST_MESSAGE);
+            return buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
         }
 
         final String requestUri = parseUri(requestLine);
@@ -84,23 +92,42 @@ public class Http11Processor implements Runnable, Processor {
         log.info("requestPath = " + requestPath);
 
         if (LOGIN_PATH.equals(requestPath)) {
-            login(parseQueryParams(requestUri));
+            final Map<String, String> queryParams = parseQueryParams(requestUri);
+            if (!queryParams.isEmpty()) {
+                final Optional<User> user = login(queryParams);
+                if (user.isPresent()) {
+                    log.info("로그인 성공: {}", user.get());
+                    return buildRedirect(INDEX_PATH);
+                }
+                log.info("로그인 실패: {}", queryParams.get("account"));
+                login(parseQueryParams(requestUri));
+                return buildRedirect(UNAUTHORIZED_PATH);
+            }
         }
 
         try {
             final String responseBody = resolveResponseBody(requestPath);
-            return buildResponse(OK, resolveContentType(requestPath), responseBody);
+            return buildResponse(OK, contentTypeHeader(resolveContentType(requestPath)), responseBody);
         } catch (RuntimeException e) {
             log.info(e.getMessage());
-            return buildResponse(NOT_FOUND, DEFAULT_CONTENT_TYPE, resolveResponseBody(NOT_FOUND_PATH));
+            return buildResponse(NOT_FOUND, contentTypeHeader(DEFAULT_CONTENT_TYPE), resolveResponseBody(NOT_FOUND_PATH));
         }
     }
 
-    private String buildResponse(final String status, final String contentType, final String responseBody) {
+    private String buildRedirect(final String location) {
+        return buildResponse(FOUND, Map.of(LOCATION, location), "");
+    }
+
+    private String buildResponse(final String status, final Map<String, String> headers, final String responseBody) {
+        final Map<String, String> responseHeaders = new LinkedHashMap<>(headers);
+        responseHeaders.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+        final String headerLines = responseHeaders.entrySet().stream()
+                .map(header -> header.getKey() + ": " + header.getValue() + " ")
+                .collect(Collectors.joining("\r\n"));
+
         return String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                headerLines,
                 "",
                 responseBody);
     }
@@ -132,19 +159,14 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private void login(final Map<String, String> queryParams) {
+    private Optional<User> login(final Map<String, String> queryParams) {
         final String account = queryParams.get("account");
-        if (account == null) {
-            return;
+        final String password = queryParams.get("password");
+        if (account == null || password == null) {
+            return Optional.empty();
         }
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            log.info("존재하지 않는 계정입니다: {}", account);
-            return;
-        }
-        final User foundUser = user.get();
-        log.info("{}", foundUser);
-        log.info("비밀번호 일치 여부: {}", foundUser.checkPassword(queryParams.get("password")));
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
     }
 
     private String resolveContentType(String requestPath) {
@@ -192,5 +214,9 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new IOException("잘못된 리소스 경로입니다: " + resourcePath, e);
         }
+    }
+
+    private Map<String, String> contentTypeHeader(final String contentType) {
+        return Map.of(CONTENT_TYPE, contentType + CHARSET_SUFFIX);
     }
 }

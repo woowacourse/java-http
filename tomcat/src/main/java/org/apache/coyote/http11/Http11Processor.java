@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.sun.net.httpserver.Request;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -19,7 +18,7 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,10 +51,11 @@ public class Http11Processor implements Runnable, Processor {
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             HttpRequest httpRequest = new HttpRequest(reader);
-
             HttpCookie cookies = new HttpCookie(httpRequest.getHeader("cookie"));
+
             Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();
             String sessionId = cookies.get(HttpCookie.JSESSION_ID).orElseThrow();
+
 
             handleRequest(httpRequest, sessionId, newSessionId, outputStream);
         } catch (IOException | UncheckedServletException e) {
@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
     ) throws IOException {
         String path = request.getRequestUri().getPath();
         switch (path) {
-            case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html", newSessionId);
+            case "/" -> writeResponse(outputStream, 200, "OK", "Hello world!", "text/html", newSessionId);
             case "/register" -> handleRegister(request, newSessionId, outputStream);
             case "/login" -> handleLogin(request, sessionId, newSessionId, outputStream);
             case "/session" -> handleSession(sessionId, newSessionId, outputStream);
@@ -99,7 +99,14 @@ public class Http11Processor implements Runnable, Processor {
 
                 writeRedirect(outputStream, "/index.html", newSessionId);
             }
-            default -> writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
+            default -> writeResponse(
+                    outputStream,
+                    405,
+                    "Method Not Allowed",
+                    "Method Not Allowed",
+                    "text/plain",
+                    newSessionId
+            );
         }
     }
 
@@ -135,7 +142,14 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 writeRedirect(outputStream, "/index.html", responseSessionId);
             }
-            default -> writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
+            default -> writeResponse(
+                    outputStream,
+                    405,
+                    "Method Not Allowed",
+                    "Method Not Allowed",
+                    "text/plain",
+                    newSessionId
+            );
         }
     }
 
@@ -172,7 +186,7 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = loginUser
                 .map(user -> "{\"loggedIn\":true,\"account\":\"" + escapeJson(user.getAccount()) + "\"}")
                 .orElse("{\"loggedIn\":false}");
-        writeResponse(outputStream, "200 OK", responseBody, "application/json", newSessionId);
+        writeResponse(outputStream, 200, "OK", responseBody, "application/json", newSessionId);
     }
 
     private String escapeJson(String value) {
@@ -211,9 +225,16 @@ public class Http11Processor implements Runnable, Processor {
                     session.invalidate();
                 }
 
-                writeResponse(outputStream, "204 No Content", "", "text/plain", newSessionId);
+                writeResponse(outputStream, 204, "No Content", "", "text/plain", newSessionId);
             }
-            default -> writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
+            default -> writeResponse(
+                    outputStream,
+                    405,
+                    "Method Not Allowed",
+                    "Method Not Allowed",
+                    "text/plain",
+                    newSessionId
+            );
         }
     }
 
@@ -243,12 +264,12 @@ public class Http11Processor implements Runnable, Processor {
         try {
             responseBody = resourceLoader.load(path);
         } catch (FileNotFoundException e) {
-            writeResponse(outputStream, "404 Not Found", "Not Found", "text/plain", newSessionId);
+            writeResponse(outputStream, 404, "Not Found", "Not Found", "text/plain", newSessionId);
             return;
         }
 
         String contentType = path.endsWith(".css") ? "text/css" : "text/html";
-        writeResponse(outputStream, "200 OK", responseBody, contentType, newSessionId);
+        writeResponse(outputStream, 200, "OK", responseBody, contentType, newSessionId);
     }
 
     private Optional<User> login(Map<String, String> params) {
@@ -277,20 +298,24 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeResponse(
             OutputStream outputStream,
-            String status,
+            int statusCode,
+            String statusMessage,
             String responseBody,
             String contentType,
             Optional<String> newSessionId
     ) throws IOException {
-        byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        Map<String, String> headers = new LinkedHashMap<>();
+        newSessionId.ifPresent(sessionId ->
+                headers.put("Set-Cookie", HttpCookie.JSESSION_ID + "=" + sessionId));
+        headers.put("Content-Type", contentType + ";charset=utf-8 ");
 
-        String response = "HTTP/1.1 " + status + " \r\n"
-                + setCookieHeader(newSessionId)
-                + "Content-Type: " + contentType + ";charset=utf-8 \r\n"
-                + "Content-Length: " + responseBodyBytes.length + " \r\n"
-                + "\r\n"
-                + responseBody;
-        write(outputStream, response);
+        new HttpResponse(
+                "HTTP/1.1",
+                statusCode,
+                statusMessage,
+                headers,
+                responseBody
+        ).writeTo(outputStream);
     }
 
     private void write(OutputStream outputStream, String response) throws IOException {

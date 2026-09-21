@@ -362,9 +362,14 @@ public class Http11Processor implements Runnable, Processor {
         final User loginUser = user.get();
 
         // 로그인에 성공했을 때에만 Session을 조회하거나 생성한다.
-        final HttpSession session = getOrCreateSession(sessionId);
+        final HttpSession session =
+                SESSION_MANAGER.createSession();
         // 서버 Session에 로그인 User 저장
         session.setAttribute(USER_SESSION_KEY, loginUser);
+        responseHeaders.put(
+                SET_COOKIE,
+                JSESSIONID + "=" + session.getId()
+        );
 
         log.info("login success account: {}", loginUser.getAccount());
 
@@ -376,18 +381,6 @@ public class Http11Processor implements Runnable, Processor {
 
         return true;
 
-    }
-
-    private HttpSession getOrCreateSession(final String sessionId) {
-        final HttpSession session = SESSION_MANAGER.findSession(sessionId);
-
-        if (session != null) {
-            return session;
-        }
-
-        return SESSION_MANAGER.createSession(
-                sessionId
-        );
     }
 
     private User getUser(
@@ -470,12 +463,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> parseParameters(
-            final String queryString
+            final String parameterString
     ) {
         final Map<String, String> parameters =
                 new HashMap<>();
 
-        for (String parameter : queryString.split("&")) {
+        for (String parameter : parameterString.split("&")) {
             final String[] pair = parameter.split("=", 2);
 
             if (pair.length != 2) {

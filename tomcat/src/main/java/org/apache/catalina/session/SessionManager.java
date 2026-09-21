@@ -5,6 +5,7 @@ import org.apache.catalina.Manager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager implements Manager {
     //Http11Processor는 요청마다 새로 만들어지지만,
@@ -12,7 +13,7 @@ public class SessionManager implements Manager {
     private static final SessionManager INSTANCE =
             new SessionManager();
 
-    private static final Map<String, Session> SESSIONS =
+    private final Map<String, Session> sessions =
             new HashMap<>();
 
     private SessionManager() {
@@ -22,7 +23,10 @@ public class SessionManager implements Manager {
         return INSTANCE;
     }
 
-    public Session createSession(final String id) {
+    public Session createSession() {
+        final String id =
+                UUID.randomUUID().toString();
+
         final Session session =
                 new Session(id, this);
 
@@ -33,15 +37,13 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final HttpSession session) {
-        //SESSIONS
-
         if (!(session instanceof Session concreteSession)) {
             throw new IllegalArgumentException(
                     "SessionManager는 오직 Session만 관리한다."
             );
         }
 
-        SESSIONS.put(
+        sessions.put(
                 concreteSession.getId(),
                 concreteSession
         );
@@ -53,7 +55,7 @@ public class SessionManager implements Manager {
             return null;
         }
 
-        final Session session = SESSIONS.get(id);
+        final Session session = sessions.get(id);
 
         if (session != null) {
             session.access();
@@ -68,7 +70,7 @@ public class SessionManager implements Manager {
             return;
         }
 
-        SESSIONS.remove(
+        sessions.remove(
                 session.getId()
         );
     }

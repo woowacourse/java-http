@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -225,6 +226,36 @@ class Http11ProcessorTest {
 
         assertThat(socket.output())
                 .doesNotContain("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void JSESSIONID가_없는_요청에는_쿠키를_발급하지만_서버_세션은_생성하지_않는다() {
+        // given
+        final String httpRequest =
+                String.join("\r\n",
+                        "GET / HTTP/1.1",
+                        "Host: localhost:8080",
+                        "",
+                        ""
+                );
+
+        final var socket =
+                new StubSocket(httpRequest);
+
+        final var processor =
+                new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String sessionId =
+                extractSessionId(socket.output());
+
+        assertThat(
+                SessionManager.getInstance()
+                        .findSession(sessionId)
+        ).isNull();
     }
 
     @Test

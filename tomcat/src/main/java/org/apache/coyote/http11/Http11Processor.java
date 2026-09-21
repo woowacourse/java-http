@@ -67,6 +67,13 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> httpRequestHeaders = readHeaders(bufferedReader);
             String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
 
+            HttpCookie requestCookie = new HttpCookie(httpRequestHeaders.get("cookie"));
+            HttpCookie responseCookie = null;
+
+            if (requestCookie.get(HttpCookie.JSESSIONID) == null) {
+                responseCookie = HttpCookie.ofJSessionId();
+            }
+
             if (path.equals("/login") && (method.equals("POST") || !queryString.isEmpty())) {
                 String loginData = method.equals("POST") ? requestBody : queryString;
 
@@ -74,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 String redirectPath = loginSuccess ? "/index.html" : "/401.html";
 
-                sendRedirect(outputStream, redirectPath);
+                sendRedirect(outputStream, redirectPath, responseCookie);
                 return;
             }
 
@@ -88,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
                 User user = new User(account, password, email);
                 InMemoryUserRepository.save(user);
 
-                sendRedirect(outputStream, "/index.html");
+                sendRedirect(outputStream, "/index.html", responseCookie);
                 return;
             }
 
@@ -114,9 +121,16 @@ public class Http11Processor implements Runnable, Processor {
                 contentLength = fileBytes.length;
             }
 
+            String cookieHeader = "";
+
+            if (responseCookie != null) {
+                cookieHeader = "Set-Cookie: " + responseCookie.toHeaderValue();
+            }
+
             final var response = String.join("\r\n",
                     statusLine,
                     "Content-Type: " + contentType + " ",
+                    cookieHeader,
                     "Content-Length: " + contentLength + " ",
                     "",
                     responseBody);
@@ -231,10 +245,18 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private void sendRedirect(OutputStream outputStream, String redirectPath) throws IOException {
+    private void sendRedirect(OutputStream outputStream, String redirectPath, HttpCookie responseCookie)
+            throws IOException {
+        String cookieHeader = "";
+
+        if (responseCookie != null) {
+            cookieHeader = "Set-Cookie: " + responseCookie.toHeaderValue();
+        }
+
         String response = String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Location: " + redirectPath,
+                cookieHeader,
                 "Content-Length: 0",
                 "",
                 "");

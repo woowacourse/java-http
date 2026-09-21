@@ -128,12 +128,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n" +
-                "";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n")
+                .contains("Set-Cookie: JSESSIONID=");
     }
 
     @Test
@@ -211,12 +209,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n" +
-                "";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n")
+                .contains("Set-Cookie: JSESSIONID=");
         assertThat(InMemoryUserRepository.findByAccount("hong")).isPresent();
     }
 }

@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -141,11 +144,11 @@ public class Http11Processor implements Runnable, Processor {
                     .filter(user -> user.checkPassword(password)).isPresent();
 
             if (isLoggedIn) {
-                return redirect("/index.html");
+                return redirectToHomeWithLoggedIn();
             }
         }
 
-        return redirect("/401.html");
+        return redirectTo("/401.html");
     }
 
     private HttpResponse register(HttpRequest request) {
@@ -163,11 +166,22 @@ public class Http11Processor implements Runnable, Processor {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return redirect("/index.html");
+        return redirectToHomeWithLoggedIn();
     }
 
-    private HttpResponse redirect(final String location) {
-        final Map<String, String> headers = Map.of(LOCATION, location);
+    private HttpResponse redirectTo(final String location) {
+        return new HttpResponse(
+                new HttpStatusLine(HTTP_VERSION, 302, "Found"),
+                Map.of(LOCATION, location),
+                new byte[0]
+        );
+    }
+
+    private HttpResponse redirectToHomeWithLoggedIn() {
+        final Map<String, String> headers = Map.of(
+                LOCATION, "/index.html",
+                SET_COOKIE, JSESSIONID + "=" + UUID.randomUUID()
+        );
 
         return new HttpResponse(
                 new HttpStatusLine(HTTP_VERSION, 302, "Found"),

@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.resolver.View;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -26,9 +25,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        QueryParams params = request.getBody().getQueryParams();
-        String account = params.getValue("account");
-        String password = params.getValue("password");
+        String account = request.getBodyParameter("account");
+        String password = request.getBodyParameter("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
         if (optionalUser.isEmpty()) {

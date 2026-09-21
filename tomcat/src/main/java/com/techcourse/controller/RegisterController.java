@@ -20,18 +20,19 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        register(request.queryParameters(), response);
+        register(request, request.queryParameters(), response);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        register(request.formParameters(), response);
+        register(request, request.formParameters(), response);
     }
 
-    private void register(Map<String, String> params, HttpResponse response) throws IOException {
+    private void register(HttpRequest request, Map<String, String> params, HttpResponse response) throws IOException {
         if (params.get("account") != null && params.get("password") != null && params.get("email") != null) {
             try {
-                applicationService.register(params.get("account"), params.get("password"), params.get("email"));
+                var user = applicationService.register(params.get("account"), params.get("password"), params.get("email"));
+                request.session().setAttribute("user", user);
                 response.sendRedirect("/index.html");
                 return;
             } catch (DuplicateAccountException e) {

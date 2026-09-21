@@ -16,7 +16,7 @@ public class ApplicationService {
                 .filter(user -> user.checkPassword(password));
     }
 
-    public void register(String account, String password, String email) {
+    public User register(String account, String password, String email) {
         if(account == null || password == null || email == null) {
             throw new IllegalArgumentException();
         }
@@ -27,5 +27,6 @@ public class ApplicationService {
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+        return user;
     }
 }

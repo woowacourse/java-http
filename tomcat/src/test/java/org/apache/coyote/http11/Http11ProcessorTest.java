@@ -359,6 +359,39 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void registrationAuthenticatesNewAndExistingSessions() {
+        for (boolean existingSession : new boolean[]{false, true}) {
+            final var manager = new SessionManager();
+            if (existingSession) {
+                manager.add(new Session("registration-session"));
+            }
+            String account = "registration-" + UUID.randomUUID();
+            String body = "account=" + account + "&password=password&email=test%40example.com";
+            String cookie = existingSession ? "Cookie: JSESSIONID=registration-session\r\n" : "";
+            final var socket = new StubSocket("POST /register HTTP/1.1\r\n"
+                    + cookie + "Content-Type: application/x-www-form-urlencoded\r\n"
+                    + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                    + "\r\n\r\n" + body);
+
+            createProcessor(socket, manager).process(socket);
+
+            String sessionId = existingSession ? "registration-session" : assertSessionCookie(socket.output());
+            var user = (User) manager.findSession(sessionId).getAttribute("user");
+            assertThat(user).isNotNull();
+            assertThat(user.getAccount()).isEqualTo(account);
+            assertThat(socket.output()).contains("Location: /index.html\r\n");
+            if (existingSession) {
+                assertThat(socket.output()).doesNotContain("Set-Cookie:");
+            }
+
+            final var next = new StubSocket("GET /login HTTP/1.1\r\nCookie: JSESSIONID="
+                    + sessionId + "\r\n\r\n");
+            createProcessor(next, manager).process(next);
+            assertThat(next.output()).isEqualTo(createRedirectResponse("/index.html"));
+        }
+    }
+
+    @Test
     void duplicateRegistrationReturnsFormAndPreservesExistingAccount() throws IOException {
         final var service = new ApplicationService();
         String account = "registration-" + UUID.randomUUID();
@@ -380,12 +413,16 @@ class Http11ProcessorTest {
                 + "Content-Length: " + duplicateBody.getBytes(StandardCharsets.UTF_8).length
                 + "\r\n\r\n" + duplicateBody);
 
-        createProcessor(duplicate).process(duplicate);
+        final var duplicateManager = new SessionManager();
+        final var anonymousSession = new Session("existing-session");
+        duplicateManager.add(anonymousSession);
+        createProcessor(duplicate, duplicateManager).process(duplicate);
 
         assertThat(duplicate.output()).isEqualTo(createResponse(
                 "text/html;charset=utf-8", readResource("static/register.html")));
         assertThat(service.login(account, "original")).isPresent();
         assertThat(service.login(account, "replacement")).isEmpty();
+        assertThat(anonymousSession.getAttribute("user")).isNull();
     }
 
     @Test

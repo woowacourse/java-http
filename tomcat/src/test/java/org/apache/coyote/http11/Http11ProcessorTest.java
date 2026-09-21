@@ -95,8 +95,16 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginWithQuery() throws IOException {
-        assertLoginResponse("/login?account=gugu&password=password");
+    void successfulLoginRedirectsToIndex() {
+        final var socket = new StubSocket(
+                "GET /login?account=gugu&password=password HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo(
+                "HTTP/1.1 302 Found\r\n"
+                        + "Location: /index.html\r\n"
+                        + "Content-Length: 0\r\n\r\n");
     }
 
     private void assertLoginResponse(String requestTarget) throws IOException {

@@ -66,10 +66,24 @@ public class Http11Processor implements Runnable, Processor {
                 final String password = parameters.get("password");
 
                 if (account != null && password != null) {
-                    InMemoryUserRepository.findByAccount(account)
+                    final boolean authenticated = InMemoryUserRepository.findByAccount(account)
                             .filter(user -> user.checkPassword(password))
-                            .ifPresent(user ->
-                                    log.info("회원 조회 성공: {}", user.getAccount()));
+                            .isPresent();
+
+                    if (authenticated) {
+                        log.info("회원 조회 성공: {}", account);
+
+                        final String response = String.join("\r\n",
+                                "HTTP/1.1 302 Found",
+                                "Location: /index.html",
+                                "Content-Length: 0",
+                                "",
+                                "");
+
+                        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                        outputStream.flush();
+                        return;
+                    }
                 }
             }
 

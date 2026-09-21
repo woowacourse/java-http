@@ -12,6 +12,7 @@ import java.util.Map;
 public record HttpRequest(
         HttpRequestLine requestLine,
         Map<String, String> headers,
+        HttpCookie cookie,
         Map<String, String> body
 ) {
     private static final String COLON = ":";
@@ -20,6 +21,7 @@ public record HttpRequest(
     private static final int HEADER_VALUE_INDEX = 1;
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
 
     private static final int LF = '\n';
     private static final int END_OF_STREAM = -1;
@@ -30,7 +32,12 @@ public record HttpRequest(
         final HttpRequestLine requestLine = HttpRequestLine.from(readLine(bufferedInputStream));
         final Map<String, String> headers = readHeaders(bufferedInputStream);
 
-        return new HttpRequest(requestLine, headers, readBody(bufferedInputStream, headers));
+        return new HttpRequest(
+                requestLine,
+                headers,
+                readCookie(headers),
+                readBody(bufferedInputStream, headers)
+        );
     }
 
     private static String readLine(final InputStream inputStream) throws IOException {
@@ -68,6 +75,16 @@ public record HttpRequest(
         }
 
         return Collections.unmodifiableMap(headers);
+    }
+
+    private static HttpCookie readCookie(final Map<String, String> headers) {
+        final String cookies = headers.get(COOKIE);
+
+        if (cookies == null) {
+            return HttpCookie.empty();
+        }
+
+        return HttpCookie.from(cookies);
     }
 
     private static Map<String, String> readBody(final InputStream inputStream,

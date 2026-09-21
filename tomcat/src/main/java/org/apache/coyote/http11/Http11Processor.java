@@ -13,6 +13,7 @@ import org.apache.http.request.HttpTomcatRequest;
 import org.apache.http.response.HttpResponseParser;
 import org.apache.http.response.HttpTomcatResponse;
 import org.qupring.mvc.QupringMvc;
+import org.qupring.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,17 +70,32 @@ public class Http11Processor implements Runnable, Processor {
                 )
         );
 
-        StringBuilder requestBuilder = new StringBuilder();
+        StringBuilder request = new StringBuilder();
+        int contentLength = 0;
         String line;
 
+        // 요청 라인과 헤더
         while ((line = reader.readLine()) != null) {
-            requestBuilder.append(line).append("\r\n");
+            request.append(line).append("\r\n");
+
+            if (line.toLowerCase().startsWith("content-length:")) {
+                contentLength = Integer.parseInt(
+                        line.substring("content-length:".length()).trim()
+                );
+            }
 
             if (line.isEmpty()) {
                 break;
             }
         }
 
-        return requestBuilder.toString();
+        // 요청 body
+        if (contentLength > 0) {
+            char[] body = new char[contentLength];
+            int readLength = reader.read(body);
+            request.append(body, 0, readLength);
+        }
+
+        return request.toString();
     }
 }

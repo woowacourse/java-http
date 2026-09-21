@@ -24,6 +24,9 @@ public class HandlerMapping {
         for (Class<?> clazz : classes) {
             for (Method method : clazz.getDeclaredMethods()) {
                 Route route = method.getAnnotation(Route.class);
+                if(route == null){
+                    continue;
+                }
                 controllerMappings.put(new MappingTarget(route.path(), route.method()), method);
             }
         }

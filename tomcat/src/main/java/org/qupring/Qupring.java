@@ -1,10 +1,10 @@
 package org.qupring;
 
-import com.techcourse.UserController;
 import java.util.List;
 import org.apache.catalina.startup.Tomcat;
 import org.qupring.annotation.QupringApplication;
 import org.qupring.mvc.ApplicationScanner;
+import org.qupring.mvc.LoginController;
 import org.qupring.mvc.QupringMvc;
 import org.qupring.mvc.handler.HandlerMapping;
 
@@ -16,10 +16,7 @@ public class Qupring {
         HandlerMapping handlerMapping = new HandlerMapping();
         handlerMapping.addResourceMappings(applicationScanner.scanForResources());
 
-        /*
-        //임시
-        handlerMapping.addControllerMappings(List.of(UserController.class));
-         */
+        handlerMapping.addControllerMappings(List.of(LoginController.class));
 
         QupringMvc qupringMvc = new QupringMvc(handlerMapping);
 

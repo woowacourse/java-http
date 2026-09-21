@@ -53,92 +53,49 @@ public class Http11Processor implements Runnable, Processor {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
+            HttpRequest httpRequest = new HttpRequest(reader);
 
-            RequestLine requestLine = new RequestLine(reader.readLine());
-
-            Map<String, String> headers = readHeaders(reader);
-            String body = readBody(reader, headers);
-            HttpCookie cookies = new HttpCookie(headers.get("cookie"));
+            HttpCookie cookies = new HttpCookie(httpRequest.getHeader("cookie"));
             Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();
             String sessionId = cookies.get(HttpCookie.JSESSION_ID).orElseThrow();
 
-            handleRequest(requestLine, body, sessionId, newSessionId, outputStream);
+            handleRequest(httpRequest, sessionId, newSessionId, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line;
 
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] pair = line.split(":", 2);
-
-            if (pair.length == 2) {
-                headers.put(pair[0].trim().toLowerCase(Locale.ROOT), pair[1].trim());
-            }
-        }
-
-        return headers;
-    }
-
-    private String readBody(
-            BufferedReader reader,
-            Map<String, String> headers
-    ) throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
-        char[] buffer = new char[contentLength];
-        int totalRead = 0;
-
-        while (totalRead < contentLength) {
-            int readCount = reader.read(
-                    buffer,
-                    totalRead,
-                    contentLength - totalRead
-            );
-
-            if (readCount == -1) {
-                throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
-            }
-
-            totalRead += readCount;
-        }
-
-        return new String(buffer);
-    }
 
     private void handleRequest(
-            RequestLine requestLine,
-            String body,
+            HttpRequest request,
             String sessionId,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        String path = requestLine.getRequestUri().getPath();
+        String path = request.getRequestUri().getPath();
         switch (path) {
             case "/" -> writeResponse(outputStream, "200 OK", "Hello world!", "text/html", newSessionId);
-            case "/register" -> handleRegister(requestLine.getMethod(), body, newSessionId, outputStream);
-            case "/login" -> handleLogin(requestLine.getMethod(), body, sessionId, newSessionId, outputStream);
+            case "/register" -> handleRegister(request, newSessionId, outputStream);
+            case "/login" -> handleLogin(request, sessionId, newSessionId, outputStream);
             case "/session" -> handleSession(sessionId, newSessionId, outputStream);
-            case "/logout" -> handleLogout(requestLine.getMethod(), sessionId, newSessionId, outputStream);
+            case "/logout" -> handleLogout(request, sessionId, newSessionId, outputStream);
             default -> serveResource(path, newSessionId, outputStream);
         }
     }
 
     private void handleRegister(
-            String method,
-            String body,
+            HttpRequest request,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (method.equals(GET)) {
+        if (request.getMethod().equals(GET)) {
             serveResource("/register.html", newSessionId, outputStream);
             return;
         }
 
-        if (method.equals(POST)) {
-            Map<String, String> parameters = parseFormBody(body);
+        if (request.getMethod().equals(POST)) {
+            Map<String, String> parameters = parseFormBody(request.getBody());
             InMemoryUserRepository.save(new User(
                     parameters.get("account"),
                     parameters.get("password"),
@@ -150,13 +107,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLogin(
-            String method,
-            String body,
+            HttpRequest request,
             String sessionId,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (method.equals(GET)) {
+        if (request.getMethod().equals(GET)) {
             if (getLoginUser(sessionId).isPresent()) {
                 writeRedirect(outputStream, "/index.html", newSessionId);
                 return;
@@ -166,8 +122,8 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        if (method.equals(POST)) {
-            Map<String, String> parameters = parseFormBody(body);
+        if (request.getMethod().equals(POST)) {
+            Map<String, String> parameters = parseFormBody(request.getBody());
             Optional<User> loginUser = login(parameters);
             if (loginUser.isEmpty()) {
                 writeRedirect(outputStream, "/401.html", newSessionId);
@@ -246,12 +202,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLogout(
-            String method,
+            HttpRequest request,
             String sessionId,
             Optional<String> newSessionId,
             OutputStream outputStream
     ) throws IOException {
-        if (!POST.equals(method)) {
+        if (!POST.equals(request.getMethod())) {
             writeResponse(outputStream, "405 Method Not Allowed", "Method Not Allowed", "text/plain", newSessionId);
             return;
         }

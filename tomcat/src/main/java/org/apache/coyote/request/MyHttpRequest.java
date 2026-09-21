@@ -1,20 +1,39 @@
 package org.apache.coyote.request;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.cookie.HttpCookie;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
-public record MyHttpRequest(
-        String method,
-        String uri,
-        String resourcePath,
-        String contentType,
-        String version
-) {
+public class MyHttpRequest {
 
     private static final String RESOURCE_PATH_PREFIX = "static";
 
-    public MyHttpRequest {
-        resourcePath = RESOURCE_PATH_PREFIX + resolveResourcePath(resourcePath);
+    private SessionManager manager = SessionManager.getInstance();
+    private Session session;
+    private boolean isNewSession;
+    private Method method;
+    private String uri;
+    private String resourcePath;
+    private ContentType contentType;
+    private String version;
+    private HttpCookie cookie;
+    private String body;
+
+    public MyHttpRequest(Method method, String uri, String resourcePath, ContentType contentType, String version,
+                         HttpCookie cookie, String body) {
+        this.method = method;
+        this.uri = uri;
+        this.resourcePath = RESOURCE_PATH_PREFIX + resolveResourcePath(resourcePath);
+        this.contentType = contentType;
+        this.version = version;
+        this.cookie = cookie;
+        this.body = body;
     }
 
     public static MyHttpRequest of(String rawRequest) {
@@ -26,12 +45,61 @@ public record MyHttpRequest(
         }
 
         return new MyHttpRequest(
-                split[0],
+                Method.valueOf(split[0]),
                 split[1],
                 extractResourcePath(split[1]),
                 contentTypeOf(split[1]),
-                split[2]
+                split[2],
+                extractCookie(rawRequest),
+                extractBody(rawRequest)
         );
+    }
+
+    public Session getSession(boolean create) throws IOException {
+        final String jSessionId = "JSESSIONID";
+        if (this.session != null) {
+            return this.session;
+        }
+        if (cookie.has(jSessionId)) {
+            Session existsingSession = manager.findSession(cookie.getValue(jSessionId).get());
+            if (existsingSession != null) {
+                return existsingSession;
+            }
+        }
+        if (!create) {
+            return null;
+        }
+
+        this.session = manager.createSession();
+        this.isNewSession = true;
+        manager.add(this.session);
+        return this.session;
+    }
+
+    private static HttpCookie extractCookie(String rawRequest) {
+        return rawRequest.lines()
+                .filter(line -> line.startsWith("Cookie: "))
+                .map(line -> line.substring("Cookie: ".length()))
+                .map(HttpCookie::from)
+                .findFirst()
+                .orElse(HttpCookie.from(""));
+    }
+
+    private static String extractBody(String rawRequest) {
+        final String bodySeparator = "\r\n\r\n";
+        int startIndexOfBody = rawRequest.indexOf(bodySeparator);
+        if (startIndexOfBody == -1) {
+            return "";
+        }
+        return rawRequest.substring(startIndexOfBody + bodySeparator.length());
+    }
+
+    public boolean hasCookie(String cookieKeyName) {
+        return cookie.has(cookieKeyName);
+    }
+
+    public boolean hasRequestBody() {
+        return !body.isEmpty();
     }
 
     public boolean hasQueryParameter() {
@@ -64,15 +132,15 @@ public record MyHttpRequest(
         return uri.substring(startIndexOfPath, startIndexOfQueryString);
     }
 
-    private static String contentTypeOf(String url) {
+    private static ContentType contentTypeOf(String url) {
         int lastDotIndex = url.lastIndexOf(".");
         String fileNameExtension = url.substring(lastDotIndex + 1);
         return switch (fileNameExtension) {
-            case "/", "html" -> "text/html";
-            case "css" -> "text/css";
-            case "js" -> "text/javascript";
-            case "ico" -> "image/x-icon";
-            default -> "text/html";
+            case "/", "html" -> ContentType.HTML;
+            case "css" -> ContentType.CSS;
+            case "js" -> ContentType.JAVASCRIPT;
+            case "ico" -> ContentType.ICO;
+            default -> ContentType.HTML;
         };
     }
 
@@ -92,5 +160,37 @@ public record MyHttpRequest(
         int dotIndex = fileName.lastIndexOf(".");
         return dotIndex > 0
                 && dotIndex != fileName.length() - 1;
+    }
+
+    public boolean isNewSession() {
+        return isNewSession;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

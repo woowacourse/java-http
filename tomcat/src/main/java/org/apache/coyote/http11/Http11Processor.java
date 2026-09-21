@@ -2,9 +2,16 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.Register;
 import com.techcourse.model.User;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.Method;
 import org.apache.coyote.request.MyHttpRequest;
+import org.apache.coyote.response.MyHttpResponse;
+import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +24,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Manager manager = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -43,18 +53,55 @@ public class Http11Processor implements Runnable, Processor {
 
             MyHttpRequest httpRequest =
                     MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
-            log.info("start request: {} {}", httpRequest.method(), httpRequest.uri());
+            MyHttpResponse httpResponse = new MyHttpResponse();
+            log.info("start request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
 
-            if (isLoginRequest(httpRequest)) {
-                authenticate(httpRequest);
+            if (!httpRequest.hasCookie("JSESSIONID")) {
+                Session session = httpRequest.getSession(true);
+                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
 
-            final var responseBody = readStaticResource(httpRequest, "Hello world!");
-            final var response = buildHttpResponse(httpRequest, responseBody);
+            if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null
+                    && httpRequest.getMethod() == Method.GET
+                    && httpRequest.getUri().endsWith("/login")) {
 
-            outputStream.write(response.getBytes());
+                Session session = manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").get());
+                if (getUser(session) != null) {
+                    httpResponse.setStatusCode(StatusCode.FOUND);
+                    httpResponse.setContentType(ContentType.HTML);
+                    httpResponse.sendRedirect("index.html");
+                    outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                    return;
+                }
+            }
+
+            if (isLoginRequest(httpRequest)) {
+                authenticate(httpRequest, httpResponse);
+                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                return;
+            }
+
+            // register
+            if (isRegisterRequest(httpRequest)) {
+                register(httpRequest, httpResponse);
+                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                return;
+            }
+
+            httpResponse.setStatusCode(StatusCode.OK);
+            httpResponse.setContentType(httpRequest.getContentType());
+            final var responseBody = readStaticResource(httpRequest, "Hello world!");
+            httpResponse.writeBody(responseBody);
+
+            outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-            log.info("end request: {} {}", httpRequest.method(), httpRequest.uri());
+            log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -63,50 +110,112 @@ public class Http11Processor implements Runnable, Processor {
     private static String readHttpRequest(BufferedReader br) throws IOException {
         final StringBuilder sb = new StringBuilder();
         String line;
+        int contentLength = 0;
         while (!(line = br.readLine()).isEmpty()) {
             sb.append(line).append("\r\n");
+            if (line.startsWith("Content-Length:")) {
+                contentLength = Integer.parseInt(line.substring("Content-Length:".length()).strip());
+            }
         }
+        sb.append("\r\n");
+
+        char[] cbuf = new char[contentLength];
+        int read = 0;
+        while (read < contentLength) {
+            int count = br.read(cbuf, read, contentLength - read);
+            if (count == -1) {
+                break;
+            }
+            read += count;
+        }
+        sb.append(cbuf, 0, read);
         return sb.toString();
     }
 
-    private static boolean isLoginRequest(MyHttpRequest httpRequest) {
-        return httpRequest.resourcePath().equals("login")
-                && httpRequest.hasQueryParameter();
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
-    private static void authenticate(MyHttpRequest httpRequest) {
-        Map<String, String> queryParams = httpRequest.queryParameters();
+    private static boolean isLoginRequest(MyHttpRequest httpRequest) {
+        return httpRequest.getResourcePath().contains("static/login.html")
+                && httpRequest.getMethod() == Method.POST
+                && httpRequest.hasRequestBody();
+    }
 
-        User user = getUserByAccount(queryParams.get("account"));
+    private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
+        return httpRequest.getResourcePath().contains("static/register.html")
+                && httpRequest.getMethod() == Method.POST
+                && httpRequest.hasRequestBody();
+    }
 
-        if (user.checkPassword(queryParams.get("password"))) {
-            log.info("user matched={}", user);
+    // TODO json도 처리 가능하도록
+    private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) throws IOException {
+        Map<String, String> params = new HashMap<>();
+        for (String parameter : httpRequest.getBody().split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+            params.put(keyValue[0], keyValue[1]);
+        }
+        Optional<User> foundUser = findUserByAccount(params.get("account"));
+        if (foundUser.isEmpty()) {
+            log.info("authenticate failed: user not found");
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("401.html");
+            return;
+        }
+
+        if (foundUser.get().checkPassword(params.get("password"))) {
+            log.info("user matched={}", foundUser.get());
+            final var session = httpRequest.getSession(true);
+            if (httpRequest.isNewSession()) {
+                httpResponse.addHeader("Set-Cookie", String.join("=", "JSESSIONID", session.getId()));
+            }
+            session.setAttribute("user", foundUser.get());
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("index.html");
+            return;
+        }
+        log.info("authenticate failed: incorrectly password");
+        httpResponse.setStatusCode(StatusCode.FOUND);
+        httpResponse.setContentType(ContentType.HTML);
+        httpResponse.sendRedirect("401.html");
+    }
+
+    private static void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
+        Map<String, String> params = new HashMap<>();
+        for (String parameter : httpRequest.getBody().split("&")) {
+            String[] keyValue = parameter.split("=", 3);
+            params.put(keyValue[0], keyValue[1]);
+        }
+
+        try {
+            User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
+            log.info("registration succeed: {}", registeredUser);
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("index.html");
+        } catch (IllegalArgumentException e) {
+            log.error("registration failed: ", e);
+            httpResponse.setStatusCode(StatusCode.FOUND);
+            httpResponse.setContentType(ContentType.HTML);
+            httpResponse.sendRedirect("login.html");
         }
     }
 
-    private static User getUserByAccount(String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+    private static Optional<User> findUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account);
     }
 
     private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)
             throws IOException, URISyntaxException {
         URL fileUrl = Http11Processor.class
                 .getClassLoader()
-                .getResource(httpRequest.resourcePath());
+                .getResource(httpRequest.getResourcePath());
         File file = new File(Objects.requireNonNull(fileUrl).toURI());
         if (file.isFile()) {
             return Files.readString(file.toPath(), StandardCharsets.UTF_8);
         }
         return defaultContent;
-    }
-
-    private static String buildHttpResponse(MyHttpRequest httpRequest, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpRequest.contentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
     }
 }

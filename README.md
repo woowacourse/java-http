@@ -18,3 +18,39 @@
 1. [File, I/O Stream](study/src/test/java/study)
 2. [HTTP Cache](study/src/test/java/cache)
 3. [Thread](study/src/test/java/thread)
+
+<br>
+
+## 2단계 - 로그인 구현하기
+
+### 기능 요구 사항
+
+- [x] 로그인 성공 여부에 따라 리다이렉트 한다.
+  - [x] 로그인 버튼을 누르면 HTTP method를 POST로 요청한다.
+  - [x] 성공하면 http status code를 302로 반환하고, `/index.html`로 리다이렉트 한다.
+  - [x] 실패하면 `401.html`로 리다이렉트 한다.
+- [x] 로그인 상태 유지
+  - [x] `Cookie` 클래스를 추가한다.
+  - [x] 요청 헤더의 `Cookie`에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 추가해서 전달한다. 값은 `JSESSIONID=...` 형태이다.
+  - [x] 요청 헤더에 이미 `Cookie` 값이 있다면 응답 헤더에 추가하지 않는다.
+  - [x] 쿠키에서 전달 받은 `JSESSIONID` 값으로 로그인 여부를 체크한다.
+  - [x] 로그인에 성공하면 `Session` 객체의 값으로 `User` 객체를 저장한다.
+  - [x] 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 `index.html` 페이지로 리다이렉트 처리한다.
+- [x] 회원가입
+  - [x] `http://localhost/register` 로 접속하면 GET 요청으로 `register.html`을 보여준다.
+  - [x] 회원가입 버튼을 누르면 HTTP method를 POST로 요청한다.
+  - [x] 성공하면 `index.html`로 리다이렉트 한다.
+  - [x] 실패하면 `login.html`로 리다이렉트 한다.
+
+### 302 Found redirection response
+
+```http
+HTTP/1.1 302 Found
+Location: https://www.example.com/new-profile-url
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+```
+
+이 응답을 받은 브라우저는 자동적으로 `Location` 헤더에 적힌 URL로 GET 요청을 보내 유저를 new page로 redirecting 한다.
+
+다만 302 응답을 받은 user agent가 후속 redirection request를 수정할 수 있는데, 이를 방지하려면 응답 이후 메서드 변경이 금지된 307 Temporary Redirect를 사용해야 된다. 

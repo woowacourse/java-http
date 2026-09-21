@@ -24,7 +24,9 @@ public class ApplicationDispatcher implements Dispatcher {
     @Override
     public HttpResponse dispatch(HttpRequest httpRequest, Session session) throws IOException {
         String path = httpRequest.path();
-        Map<String, String> parameters = httpRequest.parameters();
+        Map<String, String> parameters = "POST".equals(httpRequest.method())
+                ? httpRequest.formParameters()
+                : httpRequest.queryParameters();
 
         if ("/login".equals(path)) {
             return switch (applicationController.login(parameters, session)) {

@@ -109,15 +109,19 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> headers = readHeaders(inputStream);
         String body = readBody(inputStream, headers);
 
-        Map<String, String> parameters = parseParameters(uri.getRawQuery());
-        if (isFormUrlEncoded(headers.get("content-type"))) {
-            parameters.putAll(parseParameters(body));
-        }
+        Map<String, String> queryParameters = parseParameters(uri.getRawQuery());
+        Map<String, String> formParameters = isFormUrlEncoded(headers.get("content-type"))
+                ? parseParameters(body)
+                : Map.of();
 
         return Optional.of(new HttpRequest(
                 parts[0],
                 uri.getPath(),
-                parameters,
+                parts[2],
+                headers,
+                queryParameters,
+                formParameters,
+                body,
                 parseCookies(headers.get("cookie"))
         ));
     }
@@ -187,9 +191,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
         StringBuilder headers = new StringBuilder(String.join("\r\n",
-                "HTTP/1.1 " + response.statusCode(),
-                "Content-Type: " + response.contentType(),
-                "Content-Length: " + response.contentLength(),
+                response.version() + " " + response.statusCode(),
                 ""
         ));
         response.headers().forEach((name, value) ->

@@ -243,7 +243,7 @@ class Http11ProcessorTest {
             assertThat(request.cookies().getCookie("yummy_cookie")).isEqualTo("choco");
             assertThat(request.cookies().getCookie("JSESSIONID")).isEqualTo("existing-session");
             assertThat(request.cookies().getCookie("token")).isEqualTo("abc==");
-            assertThat(request.parameters()).containsEntry("account", "gugu");
+            assertThat(request.formParameters()).containsEntry("account", "gugu");
             return HttpResponse.redirect("/index.html");
         }, manager);
 
@@ -320,13 +320,15 @@ class Http11ProcessorTest {
     @Test
     void formBodyWithCharsetIsParsedAlongsideQuery() {
         final var socket = new StubSocket(String.join("\r\n",
-                "POST /login?source=query HTTP/1.1",
+                "POST /login?account=query HTTP/1.1",
                 "Content-Type: Application/X-WWW-Form-Urlencoded; charset=UTF-8",
                 "Content-Length: 12", "", "account=gugu"));
         final var processor = new Http11Processor(socket, (request, session) -> {
-            assertThat(request.parameters()).hasSize(2)
-                    .containsEntry("source", "query")
-                    .containsEntry("account", "gugu");
+            assertThat(request.version()).isEqualTo("HTTP/1.1");
+            assertThat(request.headers()).containsEntry("content-length", "12");
+            assertThat(request.body()).isEqualTo("account=gugu");
+            assertThat(request.queryParameters()).hasSize(1).containsEntry("account", "query");
+            assertThat(request.formParameters()).hasSize(1).containsEntry("account", "gugu");
             return HttpResponse.redirect("/index.html");
         }, new SessionManager());
 
@@ -343,8 +345,10 @@ class Http11ProcessorTest {
             final var socket = new StubSocket("POST /login?source=query HTTP/1.1\r\n"
                     + header + "Content-Length: 12\r\n\r\naccount=gugu");
             final var processor = new Http11Processor(socket, (request, session) -> {
-                assertThat(request.parameters()).as("Content-Type: %s", contentType)
+                assertThat(request.queryParameters()).as("Content-Type: %s", contentType)
                         .hasSize(1).containsEntry("source", "query");
+                assertThat(request.formParameters()).isEmpty();
+                assertThat(request.body()).isEqualTo("account=gugu");
                 return HttpResponse.redirect("/index.html");
             }, new SessionManager());
 
@@ -407,7 +411,7 @@ class Http11ProcessorTest {
                 + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
                 + "\r\n\r\n" + body);
         final var processor = new Http11Processor(socket, (request, session) -> {
-            assertThat(request.parameters()).containsEntry("account", "gugu")
+            assertThat(request.formParameters()).containsEntry("account", "gugu")
                     .containsEntry("note", "hello world@한");
             return HttpResponse.redirect("/index.html");
         }, new SessionManager());

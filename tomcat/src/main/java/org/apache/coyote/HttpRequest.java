@@ -5,11 +5,17 @@ import java.util.Map;
 public record HttpRequest(
         String method,
         String path,
-        Map<String, String> parameters,
+        String version,
+        Map<String, String> headers,
+        Map<String, String> queryParameters,
+        Map<String, String> formParameters,
+        String body,
         HttpCookie cookies
 ) {
 
     public HttpRequest {
-        parameters = Map.copyOf(parameters);
+        headers = Map.copyOf(headers);
+        queryParameters = Map.copyOf(queryParameters);
+        formParameters = Map.copyOf(formParameters);
     }
 }

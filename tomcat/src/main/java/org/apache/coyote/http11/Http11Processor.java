@@ -58,8 +58,8 @@ public class Http11Processor implements Runnable, Processor {
             final String path = extractPath(uri);
             final Map<String, String> queryParams = extractQueryParams(uri);
 
-            if ("/login".equals(path) && !queryParams.isEmpty()) {
-                handleLogin(queryParams, outputStream);
+            if ("/login".equals(path) && "POST".equals(method)) {
+                handleLogin(reader, headers, outputStream);
                 return;
             } else if ("/register".equals(path) && "POST".equals(method)) {
                 handleRegister(reader, headers, outputStream);
@@ -88,7 +88,6 @@ public class Http11Processor implements Runnable, Processor {
     ) throws IOException {
         int bodyLength = 0;
         bodyLength = Integer.parseInt(headers.get("Content-Length"));
-        System.out.println("bodyLength: " + bodyLength);
 
         final char[] buffer = new char[bodyLength];
         reader.read(buffer, 0, bodyLength);
@@ -149,20 +148,30 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLogin(
-            final Map<String, String> queryParams,
+            final BufferedReader reader,
+            final Map<String, String> headers,
             final OutputStream outputStream
     ) throws IOException {
-        final String location = resolveLoginRedirect(queryParams);
+        int bodyLength = 0;
+        bodyLength = Integer.parseInt(headers.get("Content-Length"));
+
+        final char[] buffer = new char[bodyLength];
+        reader.read(buffer, 0, bodyLength);
+
+        final String requestBody = new String(buffer);
+        final Map<String, String> bodyParams = extractBody(requestBody);
+
+        final String location = resolveLoginRedirect(bodyParams);
         final String response = createRedirectResponse(location);
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 
     private String resolveLoginRedirect(
-            final Map<String, String> queryParams
+            final Map<String, String> bodyParams
     ) {
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
+        final String account = bodyParams.get("account");
+        final String password = bodyParams.get("password");
 
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             int contentLength = 0;
+            String cookieHeader = "";
             String line = bufferedReader.readLine();
 
             while (!"".equals(line)) {
@@ -87,7 +89,24 @@ public class Http11Processor implements Runnable, Processor {
                     contentLength = Integer.parseInt(header[1].trim());
                 }
 
+                if (header.length == 2 && header[0].equalsIgnoreCase("Cookie")) {
+                    cookieHeader = header[1].trim();
+                }
+
                 line = bufferedReader.readLine();
+            }
+
+            Map<String, Cookie> cookies = parseCookies(cookieHeader);
+            Cookie sessionCookie = cookies.get("JSESSIONID");
+            String setCookieHeader = "";
+
+            if (sessionCookie == null) {
+                String sessionId = UUID.randomUUID().toString();
+                sessionCookie = new Cookie("JSESSIONID", sessionId);
+
+                setCookieHeader = "Set-Cookie: "
+                        + sessionCookie.getName() + "=" + sessionCookie.getValue()
+                        + "; Path=/\r\n";
             }
 
             var responseBody = "Hello world!";
@@ -127,7 +146,7 @@ public class Http11Processor implements Runnable, Processor {
                 User newUser = new User(account, password, email);
                 InMemoryUserRepository.save(newUser);
 
-                String response = createRedirectResponse(INDEX_PATH);
+                String response = createRedirectResponse(INDEX_PATH, setCookieHeader);
 
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
@@ -153,7 +172,7 @@ public class Http11Processor implements Runnable, Processor {
                         if (user.get().checkPassword(password)) {
                             log.info("로그인 성공 : account={}", user.get().getAccount());
 
-                            String response = createRedirectResponse(INDEX_PATH);
+                            String response = createRedirectResponse(INDEX_PATH, setCookieHeader);
 
                             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                             outputStream.flush();
@@ -168,7 +187,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final var response = createResponse(contentType, responseBody);
+            final var response = createResponse(contentType, responseBody, setCookieHeader);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -196,6 +215,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(body);
     }
 
+    // 입력 예시: "account=gugu&password=1234"
     private Map<String, String> parseFormData(String queryString) {
         Map<String, String> parameters = new HashMap<>();
 
@@ -216,6 +236,26 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
+    // 입력 예시: "yummy_cookie=choco; JSESSIONID=abc123"
+    private Map<String,Cookie> parseCookies(String cookieHeader) {
+        Map<String, Cookie> cookies = new HashMap<>();
+
+        for (String part : cookieHeader.split(";")) {
+            String[] nameValue = part.trim().split("=", 2);
+
+            if (nameValue.length != 2) {
+                continue;
+            }
+
+            String name = nameValue[0].trim();
+            String value = nameValue[1].trim();
+
+            cookies.put(name, new Cookie(name, value));
+        }
+
+        return cookies;
+    }
+
     private String readStaticFile(String fileName) throws IOException, URISyntaxException {
         URL resource = getClass().getClassLoader()
                 .getResource(STATIC_RESOURCE_ROOT + fileName);
@@ -224,18 +264,22 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(filePath, StandardCharsets.UTF_8);
     }
 
-    private String createResponse(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
+    private String createResponse(
+            String contentType, String responseBody, String setCookieHeader
+    ) {
+        return "HTTP/1.1 200 OK\r\n"
+                + setCookieHeader
+                + String.join("\r\n",
+                        "Content-Type: " + contentType,
+                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
+                        "",
+                        responseBody);
     }
 
-    private String createRedirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
+    private String createRedirectResponse(String location, String setCookieHeader) {
+        return "HTTP/1.1 302 Found\r\n"
+                + setCookieHeader
+                + String.join("\r\n",
                 "Location: " + location,
                 "Content-Length: 0",
                 "",

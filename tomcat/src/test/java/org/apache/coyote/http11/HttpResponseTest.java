@@ -8,6 +8,21 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
 
     @Test
+    @DisplayName("리다이렉트 응답에 302 상태와 Location 헤더를 추가한다")
+    void createsRedirectResponse() {
+        // given
+        final HttpResponse response = HttpResponse.redirect("/index.html");
+
+        // when
+        final String actual = new String(response.toBytes());
+
+        // then
+        assertThat(actual)
+                .contains("HTTP/1.1 302 FOUND")
+                .contains("Location: /index.html");
+    }
+
+    @Test
     @DisplayName("응답 쿠키를 Set-Cookie 헤더로 변환한다")
     void convertsCookieToSetCookieHeader() {
         // given
@@ -24,7 +39,7 @@ class HttpResponseTest {
     @Test
     @DisplayName("OK 응답을 바이트로 변환한다")
     void convertsOkResponseToBytes() {
-        final HttpResponse response = new HttpResponse(HttpStatus.OK, "text/html;charset=utf-8", "Hello world!");
+        final HttpResponse response = HttpResponse.ok("text/html;charset=utf-8", "Hello world!");
 
         final String actual = new String(response.toBytes());
 

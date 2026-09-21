@@ -21,7 +21,7 @@ final class HttpRequest {
     private final URI uri;
     private final QueryParameters queryParameters;
     private final QueryParameters bodyParameters;
-    private final Cookie cookie;
+    private final HttpHeaders headers;
     private final Manager manager;
     private HttpSession session;
 
@@ -29,29 +29,31 @@ final class HttpRequest {
                         final URI uri,
                         final QueryParameters queryParameters,
                         final QueryParameters bodyParameters,
-                        final Cookie cookie,
+                        final HttpHeaders headers,
                         final Manager manager) {
         this.method = method;
         this.uri = uri;
         this.queryParameters = queryParameters;
         this.bodyParameters = bodyParameters;
-        this.cookie = cookie;
+        this.headers = headers;
         this.manager = manager;
     }
 
     static HttpRequest from(final BufferedReader reader, final Manager manager) {
         String line;
         List<String> headerLines = new ArrayList<>();
-        int contentLength = 0;
         String body = "";
+        HttpHeaders headers = new HttpHeaders();
 
         try {
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 headerLines.add(line);
-                if (line.startsWith("Content-Length:")) {
-                    contentLength = Integer.parseInt(line.split(":")[1].trim());
-                }
             }
+
+            headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
+            final int contentLength = headers.getFirst("Content-Length")
+                    .map(Integer::parseInt)
+                    .orElse(0);
             if (contentLength > 0) {
                 char[] bodyBuffer = new char[contentLength];
                 reader.read(bodyBuffer, 0, contentLength);
@@ -61,41 +63,32 @@ final class HttpRequest {
             log.error(e.getMessage(), e);
         }
 
-        return of(headerLines, body, manager);
+        return of(headerLines.getFirst(), headers, body, manager);
     }
 
     static HttpRequest from(final List<String> headerLines) {
         return of(headerLines, null);
     }
 
-    static HttpRequest of(final List<String> headers, String body) {
-        return of(headers, body, new SessionManager());
+    static HttpRequest of(final List<String> headerLines, String body) {
+        return of(headerLines, body, new SessionManager());
     }
 
-    static HttpRequest of(final List<String> headers, final String body, final Manager manager) {
-        final String[] requestLineParts = headers.getFirst().split(" ", 3);
+    static HttpRequest of(final List<String> headerLines, final String body, final Manager manager) {
+        final HttpHeaders headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
+        return of(headerLines.getFirst(), headers, body, manager);
+    }
+
+    private static HttpRequest of(final String requestLine,
+                                  final HttpHeaders headers,
+                                  final String body,
+                                  final Manager manager) {
+        final String[] requestLineParts = requestLine.split(" ", 3);
         final URI uri = URI.create(requestLineParts[1]);
         final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
 
         final QueryParameters bodyParameters = QueryParameters.from(body);
-        final Cookie cookie = Cookie.from(findCookieHeader(headers));
-
-        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, cookie, manager);
-    }
-
-    private static String findCookieHeader(final List<String> headers) {
-        for (String header : headers) {
-            final int separatorIndex = header.indexOf(':');
-            if (separatorIndex <= 0) {
-                continue;
-            }
-
-            final String name = header.substring(0, separatorIndex).trim();
-            if (name.equalsIgnoreCase("Cookie")) {
-                return header.substring(separatorIndex + 1).trim();
-            }
-        }
-        return null;
+        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, headers, manager);
     }
 
     String getMethod() {
@@ -104,6 +97,14 @@ final class HttpRequest {
 
     String getPath() {
         return uri.getPath();
+    }
+
+    boolean matches(final String method, final String path) {
+        return this.method.equals(method) && getPath().equals(path);
+    }
+
+    String getHeader(final String name) {
+        return headers.getFirst(name).orElse(null);
     }
 
     String getParameter(final String name) {
@@ -115,7 +116,7 @@ final class HttpRequest {
     }
 
     Cookie getCookie() {
-        return cookie;
+        return Cookie.from(headers.getFirst("Cookie").orElse(null));
     }
 
     HttpSession getSession() {
@@ -127,7 +128,7 @@ final class HttpRequest {
             return session;
         }
 
-        session = cookie.get(JSESSIONID)
+        session = getCookie().get(JSESSIONID)
                 .map(this::findSession)
                 .orElse(null);
 

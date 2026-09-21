@@ -26,6 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String RESOURCES_PREFIX = "static";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String LOGIN_USER = "loginUser";
+    private static final String GET = "GET";
+    private static final String POST = "POST";
+    private static final String ROOT_PATH = "/";
+    private static final String REGISTER_PATH = "/register";
+    private static final String LOGIN_PATH = "/login";
 
     private final Socket connection;
     private final Manager manager;
@@ -74,59 +79,70 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getResponse(final HttpRequest request) {
-        String path = request.getPath();
-        if (!path.equals("/") && isResourcePresent(path)) {
-            return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView(path));
+        final String path = request.getPath();
+        if (!path.equals(ROOT_PATH) && isResourcePresent(path)) {
+            return render(path);
         }
 
-        if (path.equals("/") && request.getMethod().equals("GET")) {
-            return new HttpResponse(HttpStatus.OK, getContentType(path), "Hello world!");
+        if (request.matches(GET, ROOT_PATH)) {
+            return HttpResponse.ok(getContentType(path), "Hello world!");
         }
-        if (path.equals("/register") && request.getMethod().equals("GET")) {
-            String body = modelToView("/register.html");
-            return new HttpResponse(HttpStatus.OK, getContentType(path), body);
+        if (request.matches(GET, REGISTER_PATH)) {
+            return render("/register.html");
         }
-        if (path.equals("/register") && request.getMethod().equals("POST")) {
-            saveUser(request);
-
-            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
-                    .addHeader("Location", "/index.html");
+        if (request.matches(POST, REGISTER_PATH)) {
+            return register(request);
         }
-        if (path.equals("/login") && request.getMethod().equals("GET")) {
-            if (isLoggedIn(request)) {
-                return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
-                        .addHeader("Location", "/index.html");
-            }
-            return new HttpResponse(HttpStatus.OK, getContentType(path), modelToView("/login.html"));
+        if (request.matches(GET, LOGIN_PATH)) {
+            return showLoginPage(request);
         }
-        if (path.equals("/login") && request.getMethod().equals("POST")) {
-            String account = request.getBodyParameter("account");
-            String password = request.getBodyParameter("password");
-
-            final Optional<User> loginUser = authenticate(account, password);
-            if (loginUser.isPresent()) {
-                final HttpSession session = request.getSession(true);
-                session.setAttribute(LOGIN_USER, loginUser.get());
-                return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
-                        .addHeader("Location", "/index.html");
-            }
-            return new HttpResponse(HttpStatus.FOUND, getContentType(path), " ")
-                    .addHeader("Location", "/401.html");
+        if (request.matches(POST, LOGIN_PATH)) {
+            return login(request);
         }
 
         return new HttpResponse(HttpStatus.BAD_REQUEST, getContentType(path), "Bad Request");
     }
 
-    private void saveUser(HttpRequest request) {
-        String name = request.getBodyParameter("account");
-        String password = request.getBodyParameter("password");
-        String email = request.getBodyParameter("email");
-        User user = new User(name, password, email);
+    private HttpResponse render(final String path) {
+        return HttpResponse.ok(getContentType(path), modelToView(path));
+    }
+
+    private HttpResponse register(final HttpRequest request) {
+        saveUser(request);
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private HttpResponse showLoginPage(final HttpRequest request) {
+        if (isLoggedIn(request)) {
+            return HttpResponse.redirect("/index.html");
+        }
+        return render("/login.html");
+    }
+
+    private HttpResponse login(final HttpRequest request) {
+        final String account = request.getBodyParameter("account");
+        final String password = request.getBodyParameter("password");
+
+        final Optional<User> loginUser = authenticate(account, password);
+        if (loginUser.isEmpty()) {
+            return HttpResponse.redirect("/401.html");
+        }
+
+        final HttpSession session = request.getSession(true);
+        session.setAttribute(LOGIN_USER, loginUser.get());
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private void saveUser(final HttpRequest request) {
+        final String account = request.getBodyParameter("account");
+        final String password = request.getBodyParameter("password");
+        final String email = request.getBodyParameter("email");
+        final User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
     }
 
-    private Optional<User> authenticate(String account, String password) {
+    private Optional<User> authenticate(final String account, final String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
     }

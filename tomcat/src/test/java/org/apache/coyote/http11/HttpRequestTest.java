@@ -3,7 +3,9 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
@@ -12,6 +14,55 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
+
+    @Test
+    @DisplayName("HTTP 메서드와 경로가 모두 일치할 때만 요청이 일치한다")
+    void matchesMethodAndPath() {
+        // given
+        final HttpRequest request = HttpRequest.of(List.of("GET /login HTTP/1.1"), null);
+
+        // when & then
+        assertThat(request.matches("GET", "/login")).isTrue();
+        assertThat(request.matches("POST", "/login")).isFalse();
+        assertThat(request.matches("GET", "/register")).isFalse();
+    }
+
+    @Test
+    @DisplayName("요청 헤더 이름은 대소문자를 구분하지 않고 조회한다")
+    void getsHeaderIgnoringCase() {
+        // given
+        final HttpRequest request = HttpRequest.of(List.of(
+                "GET /index.html HTTP/1.1",
+                "Content-Type: text/html;charset=utf-8"
+        ), null);
+
+        // when
+        final String contentType = request.getHeader("content-type");
+
+        // then
+        assertThat(contentType).isEqualTo("text/html;charset=utf-8");
+    }
+
+    @Test
+    @DisplayName("Content-Length 헤더 이름의 대소문자와 관계없이 요청 본문을 읽는다")
+    void readsBodyIgnoringContentLengthHeaderCase() {
+        // given
+        final String body = "account=gugu&password=password";
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "content-length: " + body.length(),
+                "",
+                body
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+
+        // when
+        final HttpRequest request = HttpRequest.from(reader, new SessionManager());
+
+        // then
+        assertThat(request.getBodyParameter("account")).isEqualTo("gugu");
+        assertThat(request.getBodyParameter("password")).isEqualTo("password");
+    }
 
     @Test
     @DisplayName("세션이 없을 때 getSession true를 호출하면 새 세션을 등록한다")

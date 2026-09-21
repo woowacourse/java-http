@@ -5,6 +5,8 @@ import java.util.Objects;
 
 final class HttpResponse {
 
+    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
+
     private final String body;
     private final HttpStatus status;
     private final HttpHeaders headers;
@@ -20,6 +22,15 @@ final class HttpResponse {
     HttpResponse addHeader(final String name, final String value) {
         headers.add(name, value);
         return this;
+    }
+
+    static HttpResponse ok(final String contentType, final String body) {
+        return new HttpResponse(HttpStatus.OK, contentType, body);
+    }
+
+    static HttpResponse redirect(final String location) {
+        return new HttpResponse(HttpStatus.FOUND, HTML_CONTENT_TYPE, " ")
+                .addHeader("Location", location);
     }
 
     public byte[] toBytes() {

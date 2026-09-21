@@ -5,7 +5,7 @@ import org.apache.catalina.controller.LoginController;
 import org.apache.catalina.controller.LogoutController;
 import org.apache.catalina.controller.RegisterController;
 import org.apache.catalina.controller.SessionController;
-import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.resource.StaticResourceController;
 import org.apache.coyote.http11.HttpRequest;
 
 import java.util.Map;

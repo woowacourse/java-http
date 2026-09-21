@@ -1,17 +1,16 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.resource;
 
-import org.apache.catalina.resource.StaticResourceLoader;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-final class StaticResourceService {
+public final class StaticResourceService {
 
     private final StaticResourceLoader resourceLoader = new StaticResourceLoader();
 
-    void serve(String path, HttpResponse response) throws IOException {
+    public void serve(String path, HttpResponse response) throws IOException {
         try {
             response.setBody(resourceLoader.load(path));
             response.setStatus(HttpStatus.OK);

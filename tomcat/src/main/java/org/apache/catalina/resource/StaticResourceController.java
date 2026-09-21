@@ -1,5 +1,6 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.resource;
 
+import org.apache.catalina.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 

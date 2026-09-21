@@ -128,6 +128,11 @@ public class Http11Processor implements Runnable, Processor {
             return redirectResponse(HttpStatus.FOUND, location);
         }
 
+        if (header.path().contains("register") && header.hasContain("Content-Length")) {
+            String location = registerUser(body);
+            return redirectResponse(HttpStatus.FOUND, location);
+        }
+
         Path path = new File(url.getFile()).toPath();
         responseBody = Files.readString(path);
 
@@ -178,6 +183,23 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info("user : {}", user);
+
+        return "/index.html";
+    }
+
+    private String registerUser(HttpRequestBody body) {
+        String[] formData = body.requestBody().split("&");
+
+        List<String> data = Arrays.asList(formData);
+
+        String account = data.get(0).split("=")[1];
+        String email = data.get(1).split("=")[1];
+        String password = data.get(2).split("=")[1];
+
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+
+        log.info("new user : {}", newUser);
 
         return "/index.html";
     }

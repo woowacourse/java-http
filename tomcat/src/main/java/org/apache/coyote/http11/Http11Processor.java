@@ -58,6 +58,7 @@ public class Http11Processor implements Runnable, Processor {
                     "HTTP/1.1 " + httpResponse.httpStatus().getMessage() + " ",
                     "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
+                    "Location: " + httpResponse.path(),
                     "",
                     new String(responseBody));
 

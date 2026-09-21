@@ -91,7 +91,7 @@ class Http11ProcessorTest {
     void login_failure() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=gugu HTTP/1.1",
+                "POST /login?account=gugu&password=gugu HTTP/1.1",
                 "Connection: keep-alive",
                 "",
                 ""
@@ -154,5 +154,26 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .contains("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void jSessionIdIssue_success_already_have_no_issue() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Cookie: JSESSIONID=existing-id",
+                "",
+                ""
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .doesNotContain("Set-Cookie: JSESSIONID=");
     }
 }

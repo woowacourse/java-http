@@ -3,6 +3,7 @@ package org.apache.catalina.session;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionContext;
+import org.apache.catalina.Manager;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -12,6 +13,7 @@ import java.util.Map;
 public class Session implements HttpSession {
 
     private final String id;
+    private final Manager manager;
     private final long creationTime;
     private final Map<String, Object> values = new HashMap<>();
 
@@ -20,8 +22,9 @@ public class Session implements HttpSession {
     private boolean isNew;
     private boolean valid;
 
-    public Session(final String id) {
+    public Session(final String id, final Manager manager) {
         this.id = id;
+        this.manager = manager;
         this.creationTime = System.currentTimeMillis();
         this.lastAccessedTime = creationTime;
         this.isNew = true;
@@ -73,9 +76,7 @@ public class Session implements HttpSession {
 
         values.clear();
         valid = false;
-
-        SessionManager.getInstance()
-                .remove(this);
+        manager.remove(this);
     }
 
     @Override

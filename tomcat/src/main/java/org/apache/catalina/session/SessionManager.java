@@ -12,7 +12,7 @@ public class SessionManager implements Manager {
     private static final SessionManager INSTANCE =
             new SessionManager();
 
-    private static final Map<String, HttpSession> SESSIONS =
+    private static final Map<String, Session> SESSIONS =
             new HashMap<>();
 
     private SessionManager() {
@@ -24,7 +24,7 @@ public class SessionManager implements Manager {
 
     public Session createSession(final String id) {
         final Session session =
-                new Session(id);
+                new Session(id, this);
 
         add(session);
 
@@ -33,23 +33,30 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final HttpSession session) {
+        //SESSIONS
+
+        if (!(session instanceof Session concreteSession)) {
+            throw new IllegalArgumentException(
+                    "SessionManager는 오직 Session만 관리한다."
+            );
+        }
+
         SESSIONS.put(
-                session.getId(),
-                session
+                concreteSession.getId(),
+                concreteSession
         );
     }
 
     @Override
-    public HttpSession findSession(final String id) {
+    public Session findSession(final String id) {
         if (id == null) {
             return null;
         }
 
-        final HttpSession session =
-                SESSIONS.get(id);
+        final Session session = SESSIONS.get(id);
 
-        if (session instanceof Session foundSession) {
-            foundSession.access();
+        if (session != null) {
+            session.access();
         }
 
         return session;

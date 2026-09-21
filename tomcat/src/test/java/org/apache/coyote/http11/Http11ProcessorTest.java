@@ -121,6 +121,34 @@ class Http11ProcessorTest {
                 });
     }
 
+    @Test
+    void registrationRejectsMissingOrBlankRequiredFields() {
+        String[] invalidBodies = {
+                "password=password&email=user%40example.com",
+                "account=+++&password=password&email=user%40example.com",
+                "account=missing-password&email=user%40example.com",
+                "account=blank-password&password=+++&email=user%40example.com",
+                "account=missing-email&password=password",
+                "account=blank-email&password=password&email=+++"
+        };
+
+        for (String body : invalidBodies) {
+            final var socket = new StubSocket(postRequest("/register", body));
+
+            new Http11Processor(socket).process(socket);
+
+            assertThat(socket.output())
+                    .startsWith("HTTP/1.1 400 Bad Request\r\n")
+                    .endsWith("Required fields must not be blank");
+        }
+
+        assertThat(InMemoryUserRepository.findByAccount("   ")).isEmpty();
+        assertThat(InMemoryUserRepository.findByAccount("missing-password")).isEmpty();
+        assertThat(InMemoryUserRepository.findByAccount("blank-password")).isEmpty();
+        assertThat(InMemoryUserRepository.findByAccount("missing-email")).isEmpty();
+        assertThat(InMemoryUserRepository.findByAccount("blank-email")).isEmpty();
+    }
+
     private String postRequest(String path, String body) {
         return postRequest(path, body, UUID.randomUUID().toString());
     }

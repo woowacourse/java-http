@@ -2,11 +2,13 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,10 +38,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-            final String requestLine = reader.readLine();
+            final var input = new BufferedInputStream(inputStream);
+            final String requestLine = readHttpLine(input);
 
             if (requestLine == null) {
                 return;
@@ -59,33 +59,35 @@ public class Http11Processor implements Runnable, Processor {
             log.info("method: {}, path: {}, version: {}",
                     method, path, httpVersion);
 
-            if ("/login".equals(path) && targetParts.length == 2) {
-                final Map<String, String> parameters = parseQuery(targetParts[1]);
+            final Map<String, String> headers = readHeaders(input);
+            final String body = readBody(input, headers);
+
+            if ("/login".equals(path) && "POST".equals(method)) {
+                final Map<String, String> parameters = parseQuery(body);
 
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
 
-                if (account != null && password != null) {
-                    final boolean authenticated = InMemoryUserRepository.findByAccount(account)
-                            .filter(user -> user.checkPassword(password))
-                            .isPresent();
+                final boolean authenticated = account != null && password != null
+                        && InMemoryUserRepository.findByAccount(account)
+                                .filter(user -> user.checkPassword(password))
+                                .isPresent();
 
-                    if (authenticated) {
-                        log.info("회원 조회 성공: {}", account);
-                    }
-
-                    final String location = authenticated ? "/index.html" : "/401.html";
-                    final String response = String.join("\r\n",
-                            "HTTP/1.1 302 Found",
-                            "Location: " + location,
-                            "Content-Length: 0",
-                            "",
-                            "");
-
-                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
-                    return;
+                if (authenticated) {
+                    log.info("회원 조회 성공: {}", account);
                 }
+
+                final String location = authenticated ? "/index.html" : "/401.html";
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: " + location,
+                        "Content-Length: 0",
+                        "",
+                        "");
+
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
             }
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
@@ -124,6 +126,60 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String readHttpLine(InputStream input) throws IOException {
+        final var bytes = new ByteArrayOutputStream();
+        int value;
+
+        while ((value = input.read()) != -1) {
+            if (value == '\n') {
+                final String line = bytes.toString(StandardCharsets.UTF_8);
+                return line.endsWith("\r") ? line.substring(0, line.length() - 1) : line;
+            }
+            bytes.write(value);
+        }
+
+        return bytes.size() == 0 ? null : bytes.toString(StandardCharsets.UTF_8);
+    }
+
+    private Map<String, String> readHeaders(InputStream input) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+
+        while ((line = readHttpLine(input)) != null) {
+            if (line.isEmpty()) {
+                return headers;
+            }
+
+            final String[] parts = line.split(":", 2);
+            if (parts.length != 2) {
+                throw new IOException("잘못된 요청 헤더입니다.");
+            }
+            headers.put(parts[0].trim().toLowerCase(Locale.ROOT), parts[1].trim());
+        }
+
+        throw new IOException("요청 헤더가 완전히 도착하지 않았습니다.");
+    }
+
+    private String readBody(InputStream input, Map<String, String> headers) throws IOException {
+        final int contentLength;
+        try {
+            contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+        } catch (NumberFormatException e) {
+            throw new IOException("잘못된 Content-Length입니다.");
+        }
+
+        if (contentLength < 0) {
+            throw new IOException("잘못된 Content-Length입니다.");
+        }
+
+        final byte[] body = input.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new IOException("요청 본문이 완전히 도착하지 않았습니다.");
+        }
+
+        return new String(body, StandardCharsets.UTF_8);
     }
 
     private Map<String, String> parseQuery(String query) {

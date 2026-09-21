@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +97,9 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void successfulLoginRedirectsToIndex() {
+    void postLoginRedirectsToIndex() {
         final var socket = new StubSocket(
-                "GET /login?account=gugu&password=password HTTP/1.1\r\nHost: localhost\r\n\r\n");
+                postLoginRequest("account=gugu&password=password"));
 
         new Http11Processor(socket).process(socket);
 
@@ -108,10 +110,9 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void wrongPasswordRedirectsToUnauthorized() {
+    void postLoginWithWrongPasswordRedirectsToUnauthorized() {
         final var socket = new StubSocket(
-                "GET /login?account=gugu&password=wrong HTTP/1.1\r\n"
-                        + "Host: localhost\r\n\r\n");
+                postLoginRequest("account=gugu&password=wrong"));
 
         new Http11Processor(socket).process(socket);
 
@@ -144,6 +145,75 @@ class Http11ProcessorTest {
         }
     }
 
+    @Test
+    void getLoginWithQueryDoesNotAuthenticate() throws IOException {
+        assertLoginResponse("/login?account=gugu&password=password");
+    }
+
+    @Test
+    void postLoginReadsHeadersUntilBlankLine() {
+        final String request = postLoginRequest("account=gugu&password=password")
+                .replace("Content-Length:", "content-length:")
+                .replace("\r\n\r\n", "\r\nX-Note: a:b\r\n\r\n");
+
+        assertRedirect(new StubSocket(request), "/index.html");
+    }
+
+    @Test
+    void postLoginReadsExactlyContentLengthBytes() {
+        final String body = "note=가&account=gugu&password=password";
+        final var socket = new StubSocket(postLoginRequest(body) + "XX");
+
+        assertRedirect(socket, "/index.html");
+    }
+
+    @Test
+    void postLoginReadsFragmentedInput() {
+        final String request = postLoginRequest("account=gugu&password=password");
+        final var socket = new StubSocket(request) {
+            @Override
+            public InputStream getInputStream() {
+                return new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8)) {
+                    @Override
+                    public synchronized int read(byte[] bytes, int offset, int length) {
+                        return super.read(bytes, offset, Math.min(length, 3));
+                    }
+                };
+            }
+        };
+
+        assertRedirect(socket, "/index.html");
+    }
+
+    @Test
+    void truncatedPostBodyIsNotProcessed() {
+        final String request = postLoginRequest("account=gugu&password=password");
+        final var socket = new StubSocket(request.substring(0, request.length() - 1));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEmpty();
+    }
+
+    private String postLoginRequest(String body) {
+        return String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+    }
+
+    private void assertRedirect(StubSocket socket, String location) {
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo(
+                "HTTP/1.1 302 Found\r\n"
+                        + "Location: " + location + "\r\n"
+                        + "Content-Length: 0\r\n\r\n");
+    }
+
     private void assertLoginResponse(String requestTarget) throws IOException {
         final var socket = new StubSocket(
                 "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
@@ -167,7 +237,7 @@ class Http11ProcessorTest {
         }
     }
 
-    private List<String> loginSuccessLogs(String requestTarget) {
+    private List<String> loginSuccessLogs(String body) {
         final Logger logger =
                 (Logger) LoggerFactory.getLogger(Http11Processor.class);
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -176,8 +246,7 @@ class Http11ProcessorTest {
         logger.addAppender(appender);
 
         try {
-            final var socket = new StubSocket(
-                    "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
+            final var socket = new StubSocket(postLoginRequest(body));
 
             new Http11Processor(socket).process(socket);
 
@@ -193,25 +262,25 @@ class Http11ProcessorTest {
 
     @Test
     void matchingCredentialsLogSuccess() {
-        assertThat(loginSuccessLogs("/login?account=gugu&password=password"))
+        assertThat(loginSuccessLogs("account=gugu&password=password"))
                 .containsExactly("회원 조회 성공: gugu");
     }
 
     @Test
     void wrongPasswordDoesNotLogSuccess() {
-        assertThat(loginSuccessLogs("/login?account=gugu&password=wrong"))
+        assertThat(loginSuccessLogs("account=gugu&password=wrong"))
                 .isEmpty();
     }
 
     @Test
-    void encodedQueryInDifferentOrderLogsSuccess() {
-        assertThat(loginSuccessLogs("/login?password=pass%77ord&account=%67ugu"))
+    void encodedBodyInDifferentOrderLogsSuccess() {
+        assertThat(loginSuccessLogs("password=pass%77ord&account=%67ugu"))
                 .containsExactly("회원 조회 성공: gugu");
     }
 
     @Test
     void missingPasswordDoesNotLogSuccess() {
-        assertThat(loginSuccessLogs("/login?account=gugu"))
+        assertThat(loginSuccessLogs("account=gugu"))
                 .isEmpty();
     }
 }

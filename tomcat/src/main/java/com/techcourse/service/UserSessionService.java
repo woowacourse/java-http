@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package com.techcourse.service;
 
 import com.techcourse.model.User;
 import org.apache.catalina.Session;
@@ -7,13 +7,13 @@ import org.apache.catalina.SessionManager;
 import java.util.Optional;
 import java.util.UUID;
 
-final class UserSessionService {
+public final class UserSessionService {
 
-    static final String SESSION_USER = "user";
+    public static final String SESSION_USER = "user";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
-    Optional<User> findUser(String sessionId) {
+    public Optional<User> findUser(String sessionId) {
         Session session = sessionManager.findSession(sessionId);
         if (session == null) {
             return Optional.empty();
@@ -26,7 +26,7 @@ final class UserSessionService {
         return Optional.empty();
     }
 
-    Session getOrCreate(String sessionId) {
+    public Session getOrCreate(String sessionId) {
         Session session = sessionManager.findSession(sessionId);
         if (session != null) {
             return session;
@@ -37,7 +37,7 @@ final class UserSessionService {
         return newSession;
     }
 
-    void invalidate(String sessionId) {
+    public void invalidate(String sessionId) {
         Session session = sessionManager.findSession(sessionId);
         if (session != null) {
             session.invalidate();

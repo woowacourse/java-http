@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +12,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String PATH_QUERY_SEPARATOR = "?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_NAME_VALUE_SEPARATOR = "=";
+    private static final String FORM_DATA_KEY_VALUE_SEPARATOR = "=";
     private static final String FILE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
@@ -51,13 +56,29 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             final List<String> requestHead = readRequestHead(reader);
 
-            final var response = resolveResponse(requestHead);
+            int contentLength = extractContentLength(requestHead);
+            String requestBody = readRequestBody(reader, contentLength);
+
+            final var response = resolveResponse(requestHead, requestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private int extractContentLength(List<String> requestHead) {
+        for (String headerLine : requestHead) {
+            String[] headerParts = headerLine.split(":", 2);
+
+            if (headerParts.length == 2
+                    && headerParts[0].trim().equalsIgnoreCase("Content-Length")) {
+                return Integer.parseInt(headerParts[1].trim());
+            }
+        }
+
+        return 0;
     }
 
     private List<String> readRequestHead(BufferedReader reader) throws IOException {
@@ -73,8 +94,30 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeader;
     }
 
-    private String resolveResponse(List<String> requestHead) {
+    private String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        if (contentLength < 0) {
+            throw new IOException();
+        }
+
+        char[] body = new char[contentLength];
+        int totalCharactersRead = 0;
+
+        while (totalCharactersRead < contentLength) {
+            int remainingCharacters = contentLength - totalCharactersRead;
+            int charactersRead = reader.read(body, totalCharactersRead, remainingCharacters);
+
+            if (charactersRead == -1) {
+                throw new EOFException("");
+            }
+            totalCharactersRead += charactersRead;
+        }
+
+        return new String(body);
+    }
+
+    private String resolveResponse(List<String> requestHead, String requestBody) {
         final String requestLine = extractRequestLine(requestHead);
+        final String requestMethod = requestLine.split(REQUEST_LINE_ELEMENT_SEPARATOR)[0];
         final String requestTarget = extractRequestTarget(requestLine);
         final String requestPath = extractTargetPath(requestTarget);
 
@@ -83,7 +126,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestPath.equals("/login")) {
-            return handleLogin(requestTarget);
+            return handleLogin(requestMethod, requestBody);
+        }
+
+        if (requestPath.equals("/register")) {
+            return handleRegister(requestMethod, requestBody);
         }
 
         try {
@@ -113,23 +160,68 @@ public class Http11Processor implements Runnable, Processor {
         return requestTarget;
     }
 
-    private String handleLogin(String requestTarget) {
-        String targetQueryString = extractTargetQueryString(requestTarget);
-
-        if (targetQueryString.isBlank()) {
+    private String handleLogin(String requestMethod, String requestBody) {
+        if (!requestMethod.equals("POST")) {
             return createOkResponse("/login.html");
         }
 
-        Map<String, String> queryParameters = parseQueryParameters(targetQueryString);
+        Map<String, String> requestFormData = parseFormData(requestBody);
 
-        String account = queryParameters.getOrDefault("account", "");
-        String password = queryParameters.getOrDefault("password", "");
+        String account = requestFormData.getOrDefault("account", "");
+        String password = requestFormData.getOrDefault("password", "");
 
         if (areCredentialsValid(account, password)) {
             return createRedirectResponse("/index.html");
         }
 
         return createRedirectResponse("/401.html");
+    }
+
+    private String handleRegister(String requestMethod, String requestBody) {
+        if (!requestMethod.equals("POST")) {
+            return createOkResponse("/register.html");
+        }
+
+        Map<String, String> requestFormData = parseFormData(requestBody);
+
+        if (!(requestFormData.containsKey("account")
+                && requestFormData.containsKey("password")
+                && requestFormData.containsKey("email"))) {
+            return createOkResponse("/register.html");
+        }
+
+        User user = new User(
+                requestFormData.get("account"),
+                requestFormData.get("password"),
+                requestFormData.get("email")
+        );
+        InMemoryUserRepository.save(user);
+
+        return createRedirectResponse("/index.html");
+    }
+
+    private Map<String, String> parseFormData(String requestBody) {
+        Map<String, String> formData = new HashMap<>();
+
+        for (String field : requestBody.split("&")) {
+            int separatorIndex = field.indexOf(FORM_DATA_KEY_VALUE_SEPARATOR);
+
+            if (separatorIndex < 0) {
+                continue;
+            }
+
+            String key = field.substring(0, separatorIndex);
+            String value = field.substring(
+                    separatorIndex + FORM_DATA_KEY_VALUE_SEPARATOR.length()
+            );
+
+            String decodedKey = URLDecoder.decode(key, StandardCharsets.UTF_8);
+            String decodedValue = URLDecoder.decode(value, StandardCharsets.UTF_8);
+
+            formData.putIfAbsent(decodedKey, decodedValue);
+        }
+
+        return formData;
     }
 
     private String extractTargetQueryString(String requestTarget) {
@@ -156,7 +248,7 @@ public class Http11Processor implements Runnable, Processor {
                     separatorIndex + QUERY_PARAMETER_NAME_VALUE_SEPARATOR.length()
             );
 
-            queryParameters.put(name, value);
+            queryParameters.putIfAbsent(name, value);
         }
         return queryParameters;
     }

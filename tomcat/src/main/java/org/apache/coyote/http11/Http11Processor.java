@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,22 +50,30 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> queryParams = parseQueryString(queryString);
 
+//            final String responseBody;
+//            final String contentType;
+
+//            if ("/".equals(path)) {
+//                responseBody = "Hello world!";
+//                contentType = "text/html";
+//            } else {
+//                responseBody = readStaticFile(path);
+//                contentType = resolveContentType(path);
+//            }
+
+            final String response;
+
             if ("/login".equals(path)) {
-                logLoginUser(queryParams);
-            }
-
-            final String responseBody;
-            final String contentType;
-
-            if ("/".equals(path)) {
-                responseBody = "Hello world!";
-                contentType = "text/html";
+                if (isLoginSuccess(queryParams)) {
+                    response = buildRedirectResponse("/index.html");
+                } else {
+                    response = buildRedirectResponse("/401.html");
+                }
+            } else if ("/".equals(path)) {
+                response = buildOkResponse("text/html", "Hello world!");
             } else {
-                responseBody = readStaticFile(path);
-                contentType = resolveContentType(path);
+                response = buildOkResponse(resolveContentType(path), readStaticFile(path));
             }
-
-            final String response = buildResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -73,7 +83,6 @@ public class Http11Processor implements Runnable, Processor {
             throw new RuntimeException(e);
         }
     }
-
 
     private String extractPath(final String requestUri) {
         final int queryStartIndex = requestUri.indexOf('?');
@@ -106,15 +115,19 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private void logLoginUser(final Map<String, String> queryParams) {
+    private boolean isLoginSuccess(final Map<String, String> queryParams) {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
 
-        if (account != null) {
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user -> log.info("user : {}", user));
+        if (account == null) {
+            return false;
         }
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(u -> u.checkPassword(password));
+        user.ifPresent(u -> log.info("user: {}", u));
+
+        return user.isPresent();
     }
 
     private String readStaticFile(final String path) throws URISyntaxException, IOException {
@@ -139,12 +152,20 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private String buildResponse(final String contentType, final String responseBody) {
+    private String buildOkResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
+    }
+
+    private String buildRedirectResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "",
+                "");
     }
 }

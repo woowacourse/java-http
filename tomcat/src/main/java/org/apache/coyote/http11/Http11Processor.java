@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
                 response = getResponse(requestLineParts[1], cookieHeader, session);
             }
             if (requestMethod.equals("POST")) {
-                response = getPostResponse(bufferedReader, requestLineParts[1], requestHeaders, cookieHeader);
+                response = getPostResponse(bufferedReader, requestLineParts[1], requestHeaders, cookieHeader, session);
             }
 
             outputStream.write(response.getBytes());
@@ -100,20 +100,37 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getPostResponse(BufferedReader bufferedReader, String requestUri,
-                                   Map<String, String> requestHeaders, String cookieHeader)
+                                   Map<String, String> requestHeaders, String cookieHeader, Session session)
             throws IOException {
         int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
         String requestBody = readRequestBody(bufferedReader, contentLength);
         Map<String, String> queryParameters = getQuerySeparate(requestBody);
 
-        if (InMemoryUserRepository.findByAccount(queryParameters.get("account")).isEmpty()) {
+        if (requestUri.equals("/login")) {
+            String account = queryParameters.get("account");
+            String password = queryParameters.get("password");
+            Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
+
+            if (foundUser.isEmpty() || !foundUser.get().checkPassword(password)) {
+                return getRedirectResponse("/401.html", getContentType(requestUri), cookieHeader);
+            }
+            session.setAttribute("user", foundUser.get());
+            return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
+        }
+
+        if (requestUri.equals("/register")) {
+            Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
+            if (foundUser.isPresent()) {
+                log.info("회원가입 실패! 아이디 : {}", queryParameters.get("account"));
+                return getRedirectResponse("/register.html", getContentType(requestUri), cookieHeader);
+            }
             User user = new User(queryParameters.get("account"), queryParameters.get("password"),
                     queryParameters.get("email"));
             InMemoryUserRepository.save(user);
+            session.setAttribute("user", user);
             return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
         }
-        log.info("회원가입 실패! 아이디 : {}", queryParameters.get("account"));
-        return getRedirectResponse("/register.html", getContentType(requestUri), cookieHeader);
+        return getRedirectResponse("/404.html", getContentType(requestUri), cookieHeader);
     }
 
     @Nonnull
@@ -132,24 +149,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(String requestUri, String cookieHeader, Session session) throws IOException {
-        if (requestUri.contains("/login?")) {
-            Map<String, String> queryMap = getQuerySeparate(requestUri);
-            String account = queryMap.get("account");
-            String password = queryMap.get("password");
-            Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
-            if (foundUser.isEmpty()) {
-                return getRedirectResponse("/401.html", getContentType(requestUri), cookieHeader);
-            }
-
-            User user = foundUser.get();
-
-            if (user.checkPassword(password)) {
-                log.info("로그인 성공! 아이디: {}, 세션 아이디: {}", user.getAccount(), session.getId());
-                session.setAttribute("user", user);
-                return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
-            }
-            return getRedirectResponse("/401.html", getContentType(requestUri), cookieHeader);
-        }
         if (requestUri.equals("/login")) {
             if (session.getAttribute("user") != null) {
                 log.info("로그인 페이지 접근! 세션 아이디: {}", session.getId());
@@ -157,7 +156,6 @@ public class Http11Processor implements Runnable, Processor {
 
             }
         }
-
         if (!requestUri.equals("/")) {
             String paths = getStaticResource(requestUri);
             if (paths != null) {

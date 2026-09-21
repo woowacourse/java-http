@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String line;
             int contentLength = 0;
-            boolean hasJsessionId = false;
+            HttpCookie cookie = null;
             while(true) {
                 line = reader.readLine();
                 if(line == null) {
@@ -65,11 +65,17 @@ public class Http11Processor implements Runnable, Processor {
                     contentLength = Integer.parseInt(header[1].trim());
                 }
                 if(header[0].equalsIgnoreCase("Cookie")) {
-                    HttpCookie cookie = new HttpCookie(header[1]);
-                    if(cookie.hasJsessionId()) {
-                        hasJsessionId = true;
-                    }
+                    cookie = new HttpCookie(header[1]);
                 }
+            }
+
+            String jSessionId = null;
+            if (cookie != null) {
+                jSessionId = cookie.getJsessionId();
+            }
+            final boolean shouldSetCookie = jSessionId == null;
+            if (shouldSetCookie) {
+                jSessionId = UUID.randomUUID().toString();
             }
 
             char[] bodyBuffer = new char[contentLength];
@@ -100,16 +106,38 @@ public class Http11Processor implements Runnable, Processor {
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
 
+            if ("/login".equals(path) && "GET".equals(method) && isLoggedIn(jSessionId)) {
+                StringBuilder responseHeader = new StringBuilder();
+                responseHeader.append("HTTP/1.1 302 Found").append("\r\n");
+                appendSetCookieIfMissing(responseHeader, shouldSetCookie, jSessionId);
+                responseHeader.append("Location: /index.html").append("\r\n");
+                responseHeader.append("Content-Length: 0").append("\r\n\r\n");
+                outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
             // 로그인 success/fail
             if ("/login".equals(path) && "POST".equals(method)) {
                 final String[] parameters = body.split("&");
                 String account = parameters[0].split("=")[1];
                 String password = parameters[1].split("=")[1];
 
-                if(InMemoryUserRepository.findByAccount(account).filter(user -> user.checkPassword(password)).isPresent()) {
+                final User user = InMemoryUserRepository.findByAccount(account)
+                        .filter(foundUser -> foundUser.checkPassword(password))
+                        .orElse(null);
+
+                if (user != null) {
+                    Session session = SessionManager.findSession(jSessionId);
+                    if (session == null) {
+                        session = new Session(jSessionId);
+                        SessionManager.add(session);
+                    }
+                    session.setAttribute("user", user);
+
                     StringBuilder responseHeader = new StringBuilder();
                     responseHeader.append("HTTP/1.1 302 Found").append("\r\n");
-                    appendSetCookieIfMissing(responseHeader, hasJsessionId);
+                    appendSetCookieIfMissing(responseHeader, shouldSetCookie, jSessionId);
                     responseHeader.append("Location: /index.html").append("\r\n");
                     responseHeader.append("Content-Length: 0").append("\r\n\r\n");
                     outputStream.write(responseHeader.toString().getBytes(StandardCharsets.UTF_8));
@@ -118,7 +146,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 StringBuilder responseHeader = new StringBuilder();
                 responseHeader.append("HTTP/1.1 401 Unauthorized").append("\r\n");
-                appendSetCookieIfMissing(responseHeader, hasJsessionId);
+                appendSetCookieIfMissing(responseHeader, shouldSetCookie, jSessionId);
                 responseHeader.append("Location: /401.html").append("\r\n");
                 responseHeader.append("Content-Length: 0").append("\r\n\r\n");
 
@@ -128,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 회원가입 처리
-            if ("/register".equals(path) && method.equals("POST")) {
+            if ("/register".equals(path) && "POST".equals(method)) {
                 String[] parameters = body.split("&");
                 String account = parameters[0].split("=")[1];
                 String email = URLDecoder.decode(parameters[1].split("=")[1], StandardCharsets.UTF_8);
@@ -137,7 +165,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 StringBuilder responseHeader = new StringBuilder();
                 responseHeader.append("HTTP/1.1 302 Found").append("\r\n");
-                appendSetCookieIfMissing(responseHeader, hasJsessionId);
+                appendSetCookieIfMissing(responseHeader, shouldSetCookie, jSessionId);
                 responseHeader.append("Location: /index.html").append("\r\n");
                 responseHeader.append("Content-Length: 0").append("\r\n\r\n");
 
@@ -170,7 +198,7 @@ public class Http11Processor implements Runnable, Processor {
 
             StringBuilder responseHeader = new StringBuilder();
             responseHeader.append("HTTP/1.1 200 OK \r\n");
-            appendSetCookieIfMissing(responseHeader, hasJsessionId);
+            appendSetCookieIfMissing(responseHeader, shouldSetCookie, jSessionId);
             responseHeader.append("Content-Type: ").append(contentType).append("\r\n");
             responseHeader.append("Content-Length: ").append(responseBody.length).append(" \r\n\r\n");
 
@@ -195,10 +223,16 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8 ";
     }
 
-    private void appendSetCookieIfMissing(final StringBuilder responseHeader, final boolean hasJsessionId) {
-        if (!hasJsessionId) {
+    private boolean isLoggedIn(final String jSessionId) {
+        final Session session = SessionManager.findSession(jSessionId);
+        return session != null && session.getAttribute("user") != null;
+    }
+
+    private void appendSetCookieIfMissing(final StringBuilder responseHeader, final boolean shouldSetCookie,
+                                          final String jSessionId) {
+        if (shouldSetCookie) {
             responseHeader.append("Set-Cookie: JSESSIONID=")
-                    .append(UUID.randomUUID())
+                    .append(jSessionId)
                     .append("\r\n");
         }
     }

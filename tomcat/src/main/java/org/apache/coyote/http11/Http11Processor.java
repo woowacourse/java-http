@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +25,12 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final Manager sessionManager = SessionManager.getInstance();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -65,21 +68,25 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+            Session session = sessionManager.findSession(cookie.get("JSESSIONID"));
             String cookieHeader = "";
-            if (cookie.get("JSESSIONID") == null) {
-                cookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "; Path=/\r\n";
+            if (session == null) {
+                session = new Session();
+                sessionManager.add(session);
+                cookieHeader = "Set-Cookie: JSESSIONID=" + session.getId() + "; Path=/\r\n";
             }
 
             String responseBody = "Hello world!";
             String contentType = contentType(path);
 
             if (method.equals("POST")) {
-                handlePost(path, br, outputStream, headers, cookieHeader);
+                handlePost(path, br, outputStream, headers, session, cookieHeader);
                 return;
             }
 
             if (method.equals("GET")) {
-                responseBody = handleGet(path);
+                handleGet(path, outputStream, session, cookieHeader);
+                return;
             }
 
             sendOk(outputStream, contentType, responseBody, cookieHeader);
@@ -88,23 +95,29 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleGet(String path) throws IOException {
+    private void handleGet(String path, OutputStream outputStream, Session session,
+                           String cookieHeader) throws IOException {
         if (path.equals("/login") || path.equals("/login.html")) {
-            return readFile("static/login.html");
+            if (session.getAttribute("user") != null) {
+                sendRedirect(outputStream, "/index.html", cookieHeader);
+                return;
+            }
+            path = "/login.html";
         }
 
         if (path.equals("/register")) {
-            return readFile("static/register.html");
+            path = "/register.html";
         }
 
+        String responseBody = "Hello world!";
         if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
-            return readFile("static" + path);
+            responseBody = readFile("static" + path);
         }
-        return "Hello world!";
+        sendOk(outputStream, contentType(path), responseBody, cookieHeader);
     }
 
     private void handlePost(String path, BufferedReader reader, OutputStream outputStream,
-                            Map<String, String> headers, String cookieHeader) throws IOException {
+                            Map<String, String> headers, Session session, String cookieHeader) throws IOException {
         if (!path.equals("/login") && !path.equals("/register")) {
             sendOk(outputStream, contentType(path), "Hello world!", cookieHeader);
             return;
@@ -140,16 +153,22 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        boolean authenticated = account != null && password != null
-                && InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.checkPassword(password))
-                        .isPresent();
-        if (authenticated) {
-            log.info("회원 조회 성공: {}", account);
+        if (account == null || password == null) {
+            sendRedirect(outputStream, "/401.html", cookieHeader);
+            return;
         }
 
-        String location = authenticated ? "/index.html" : "/401.html";
-        sendRedirect(outputStream, location, cookieHeader);
+        User user = InMemoryUserRepository.findByAccount(account)
+                .filter(foundUser -> foundUser.checkPassword(password))
+                .orElse(null);
+        if (user == null) {
+            sendRedirect(outputStream, "/401.html", cookieHeader);
+            return;
+        }
+
+        session.setAttribute("user", user);
+        log.info("회원 조회 성공: {}", user.getAccount());
+        sendRedirect(outputStream, "/index.html", cookieHeader);
     }
 
     private void sendOk(OutputStream outputStream, String contentType, String responseBody,

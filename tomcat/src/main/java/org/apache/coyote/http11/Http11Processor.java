@@ -35,9 +35,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             String requestLine = reader.readLine();
             if (requestLine == null) {
                 return;
@@ -66,10 +66,14 @@ public class Http11Processor implements Runnable, Processor {
         if ("/".equals(path)) {
             return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!");
         }
-        String resourcePath = "/login".equals(path) ? "/login.html" : path;
+        String resourcePath = path;
+        if ("/login".equals(path)) {
+            resourcePath = "/login.html";
+        }
         String responseBody = readStaticResource(resourcePath);
         if (responseBody == null) {
-            return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), readStaticResource(NOT_FOUND_PAGE));
+            String notFoundBody = readStaticResource(NOT_FOUND_PAGE);
+            return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), notFoundBody);
         }
         return buildResponse("HTTP/1.1 200 OK ", getContentType(resourcePath), responseBody);
     }

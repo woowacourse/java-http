@@ -76,7 +76,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+        final String body = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " \r\n" +
@@ -101,7 +101,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+        final String body = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " \r\n" +

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.BadRequestException;
 
 public record HttpRequest(
@@ -17,13 +18,18 @@ public record HttpRequest(
         Map<String, String> queryParameters,
         Map<String, String> formParameters,
         String body,
-        HttpCookie cookies
+        HttpCookie cookies,
+        Session session
 ) {
 
     public HttpRequest {
         headers = Map.copyOf(headers);
         queryParameters = Map.copyOf(queryParameters);
         formParameters = Map.copyOf(formParameters);
+    }
+
+    public HttpRequest withSession(Session session) {
+        return new HttpRequest(method, path, version, headers, queryParameters, formParameters, body, cookies, session);
     }
 
     public static Map<String, String> parseHeaders(List<String> headerLines) {
@@ -61,7 +67,8 @@ public record HttpRequest(
                 queryParameters,
                 formParameters,
                 body,
-                parseCookies(headers.get("cookie"))
+                parseCookies(headers.get("cookie")),
+                null
         );
     }
 

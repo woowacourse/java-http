@@ -7,17 +7,21 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Map;
 
-public record HttpResponse(
-        String version,
-        String statusCode,
-        Map<String, String> headers,
-        byte[] body
-) {
+public final class HttpResponse {
 
-    public HttpResponse {
-        Objects.requireNonNull(version);
-        Objects.requireNonNull(statusCode);
-        body = Objects.requireNonNull(body).clone();
+    private String version;
+    private String statusCode;
+    private Map<String, String> headers;
+    private byte[] body;
+
+    public HttpResponse() {
+        this("HTTP/1.1", "200 OK", Map.of("Content-Type", "text/html;charset=utf-8"), new byte[0]);
+    }
+
+    public HttpResponse(String version, String statusCode, Map<String, String> headers, byte[] body) {
+        this.version = Objects.requireNonNull(version);
+        this.statusCode = Objects.requireNonNull(statusCode);
+        this.body = Objects.requireNonNull(body).clone();
         Map<String, String> responseHeaders = new LinkedHashMap<>();
         headers.forEach((name, value) -> {
             Objects.requireNonNull(name);
@@ -25,12 +29,18 @@ public record HttpResponse(
             responseHeaders.put(name.equalsIgnoreCase("Content-Length") ? "Content-Length" : name, value);
         });
         responseHeaders.put("Content-Length", Integer.toString(body.length));
-        headers = Collections.unmodifiableMap(responseHeaders);
+        this.headers = Collections.unmodifiableMap(responseHeaders);
     }
 
-    @Override
-    public byte[] body() {
-        return body.clone();
+    public void copyFrom(HttpResponse response) {
+        version = response.version;
+        statusCode = response.statusCode;
+        headers = response.headers;
+        body = response.body.clone();
+    }
+
+    public void sendRedirect(String location) {
+        copyFrom(redirect(location));
     }
 
     public byte[] toBytes() {

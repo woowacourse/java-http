@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.Dispatcher;
+import org.apache.coyote.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +11,8 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    public void start(Dispatcher dispatcher) {
-        var connector = new Connector(dispatcher);
+    public void start(Adapter adapter) {
+        var connector = new Connector(adapter);
         connector.start();
 
         try {

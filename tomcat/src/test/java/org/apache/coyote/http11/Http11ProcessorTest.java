@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.ApplicationController;
+import com.techcourse.web.RequestMapping;
 import com.techcourse.service.ApplicationService;
-import com.techcourse.web.ApplicationDispatcher;
+import com.techcourse.web.ApplicationAdapter;
 import com.techcourse.web.StaticResourceHandler;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -430,10 +430,10 @@ class Http11ProcessorTest {
     private Http11Processor createProcessor(StubSocket socket, SessionManager manager) {
         final var service = new ApplicationService();
         final var resourceHandler = new StaticResourceHandler();
-        final var controller = new ApplicationController(service);
-        final var dispatcher = new ApplicationDispatcher(controller, resourceHandler);
 
-        return new Http11Processor(socket, dispatcher, manager);
+        final var adapter = new ApplicationAdapter(new RequestMapping(service, resourceHandler));
+
+        return new Http11Processor(socket, adapter, manager);
     }
 
     private String readResource(String path) throws IOException {

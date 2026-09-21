@@ -12,9 +12,10 @@ import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -36,6 +37,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_PATH = "; Path=/";
+
+    private static final int END_OF_STREAM = -1;
+    private static final int LINE_FEED = '\n';
+    private static final String CARRIAGE_RETURN = "\r";
 
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
@@ -66,30 +71,26 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var reader = new BufferedReader(
-                 new InputStreamReader(
-                         connection.getInputStream(),
-                         UTF_8
-                 ));
+        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
              final var outputStream = connection.getOutputStream()) {
 
-            handle(reader, outputStream);
+            handle(inputStream, outputStream);
         } catch (IOException | UncheckedServletException |URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handle(final BufferedReader reader, final OutputStream outputStream)
+    private void handle(final InputStream inputStream, final OutputStream outputStream)
             throws IOException, URISyntaxException {
-        final String rawRequestLine = reader.readLine();
+        final String rawRequestLine = readLine(inputStream);
         if (rawRequestLine == null) {
             return;
         }
 
         try {
             final RequestLine requestLine = RequestLine.from(rawRequestLine);
-            final RequestHeaders headers = RequestHeaders.from(readHeaders(reader));
-            final RequestBody body = RequestBody.from(readBody(reader, headers.getContentLength()));
+            final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
+            final RequestBody body = RequestBody.from(readBody(inputStream, headers.getContentLength()));
             final HttpRequest request = HttpRequest.of(requestLine, headers, body, sessionManager);
 
             log.info("request: {}", rawRequestLine);
@@ -189,34 +190,42 @@ public class Http11Processor implements Runnable, Processor {
         return INDEX_PAGE;
     }
 
-    private List<String> readHeaders(final BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        List<String> lists = new ArrayList<>();
+    private List<String> readHeaders(final InputStream inputStream) throws IOException {
+        final List<String> headers = new ArrayList<>();
+        String line = readLine(inputStream);
         while (line != null && !line.isEmpty()) {
-            lists.add(line);
-            line = reader.readLine();
+            headers.add(line);
+            line = readLine(inputStream);
         }
 
-        return lists;
+        return headers;
     }
 
     private String readBody(
-            final BufferedReader reader,
+            final InputStream inputStream,
             final int contentLength
             ) throws IOException {
         if (contentLength == 0) {
             return "";
         }
-        final char[] buffer = new char[contentLength];
-        int totalRead = 0;
-        while (totalRead < contentLength) {
-            final int read = reader.read(buffer, totalRead, contentLength - totalRead);
-            if (read == -1) {
-                break;
-            }
-            totalRead += read;
+        return new String(inputStream.readNBytes(contentLength), UTF_8);
+    }
+
+    private String readLine(final InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream line = new ByteArrayOutputStream();
+        int read = inputStream.read();
+        while (read != END_OF_STREAM && read != LINE_FEED) {
+            line.write(read);
+            read = inputStream.read();
         }
-        return new String(buffer, 0, totalRead);
+        if (read == END_OF_STREAM && line.size() == 0) {
+            return null;
+        }
+        final String value = line.toString(UTF_8);
+        if (value.endsWith(CARRIAGE_RETURN)) {
+            return value.substring(0, value.length() - CARRIAGE_RETURN.length());
+        }
+        return value;
     }
 
     private String login(final HttpRequest request) {

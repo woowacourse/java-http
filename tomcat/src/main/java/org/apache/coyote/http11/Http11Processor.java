@@ -38,10 +38,14 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var streamReader = new InputStreamReader(inputStream);
-             final var bufferedReader = new BufferedReader(streamReader);
-             final var outputStream = connection.getOutputStream()) {
+        try (
+                final var bufferedReader = new BufferedReader(
+                        new InputStreamReader(
+                                connection.getInputStream(),
+                                StandardCharsets.UTF_8
+                        )
+                );
+                final var outputStream = connection.getOutputStream()) {
 
             String requestLine = bufferedReader.readLine();
             String[] splitRequestLine = requestLine.split(" ");
@@ -99,8 +103,7 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (resourceName.endsWith(".css")) {
                         contentType = "text/css;charset=utf-8 ";
-                    }
-                    else if (resourceName.endsWith(".html")) {
+                    } else if (resourceName.endsWith(".html")) {
                         contentType = "text/html;charset=utf-8 ";
                     }
 

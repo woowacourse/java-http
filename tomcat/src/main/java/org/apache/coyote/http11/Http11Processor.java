@@ -2,9 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -62,6 +64,21 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(input);
             final String body = readBody(input, headers);
 
+            if ("/register".equals(path) && "POST".equals(method)) {
+                final Map<String, String> parameters = parseQuery(body);
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
+                final String email = parameters.get("email");
+
+                if (account == null || password == null || email == null) {
+                    throw new IOException("회원가입 필수 항목이 누락되었습니다.");
+                }
+
+                InMemoryUserRepository.save(new User(account, password, email));
+                writeRedirect(outputStream, "/index.html");
+                return;
+            }
+
             if ("/login".equals(path) && "POST".equals(method)) {
                 final Map<String, String> parameters = parseQuery(body);
 
@@ -78,15 +95,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 final String location = authenticated ? "/index.html" : "/401.html";
-                final String response = String.join("\r\n",
-                        "HTTP/1.1 302 Found",
-                        "Location: " + location,
-                        "Content-Length: 0",
-                        "",
-                        "");
-
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                writeRedirect(outputStream, location);
                 return;
             }
 
@@ -97,7 +106,8 @@ public class Http11Processor implements Runnable, Processor {
                     || "/401.html".equals(path)
                     || "/css/styles.css".equals(path)
                     || path.endsWith(".js")
-                    || "/login".equals(path)) {
+                    || "/login".equals(path)
+                    || "/register".equals(path)) {
 
                 if ("/css/styles.css".equals(path)) {
                     contentType = "text/css;charset=utf-8";
@@ -105,8 +115,8 @@ public class Http11Processor implements Runnable, Processor {
                     contentType = "text/javascript;charset=utf-8";
                 }
 
-                final String resourcePath = "/login".equals(path)
-                        ? "static/login.html"
+                final String resourcePath = "/login".equals(path) || "/register".equals(path)
+                        ? "static" + path + ".html"
                         : "static" + path;
 
                 responseBody = readResource(resourcePath);
@@ -126,6 +136,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void writeRedirect(OutputStream output, String location) throws IOException {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
+
+        output.write(response.getBytes(StandardCharsets.UTF_8));
+        output.flush();
     }
 
     private String readHttpLine(InputStream input) throws IOException {

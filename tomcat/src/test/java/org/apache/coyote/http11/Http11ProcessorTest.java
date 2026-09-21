@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -93,7 +95,7 @@ class Http11ProcessorTest {
 
     @Test
     void login() throws IOException {
-        assertLoginResponse("/login");
+        assertHtmlResponse("/login", "static/login.html");
     }
 
     @Test
@@ -147,7 +149,7 @@ class Http11ProcessorTest {
 
     @Test
     void getLoginWithQueryDoesNotAuthenticate() throws IOException {
-        assertLoginResponse("/login?account=gugu&password=password");
+        assertHtmlResponse("/login?account=gugu&password=password", "static/login.html");
     }
 
     @Test
@@ -195,9 +197,52 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEmpty();
     }
 
+    @Test
+    void registerPage() throws IOException {
+        assertHtmlResponse("/register", "static/register.html");
+    }
+
+    @Test
+    void registeredUserCanLogIn() {
+        final String body =
+                "account=register-user&password=pass%26word&email=moa%40example.com";
+
+        assertRedirect(new StubSocket(postRequest("/register", body)), "/index.html");
+
+        assertThat(InMemoryUserRepository.findByAccount("register-user"))
+                .hasValueSatisfying(user ->
+                        assertThat(user).usingRecursiveComparison()
+                                .isEqualTo(new User(
+                                        "register-user", "pass&word", "moa@example.com"
+                                )));
+
+        assertRedirect(
+                new StubSocket(postLoginRequest("account=register-user&password=pass%26word")),
+                "/index.html"
+        );
+    }
+
+    @Test
+    void registrationWithoutPasswordIsNotSaved() {
+        final var socket = new StubSocket(postRequest(
+                "/register",
+                "account=incomplete-register-user&email=moa%40example.com"
+        ));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(InMemoryUserRepository.findByAccount("incomplete-register-user"))
+                .isEmpty();
+        assertThat(socket.output()).isEmpty();
+    }
+
     private String postLoginRequest(String body) {
+        return postRequest("/login", body);
+    }
+
+    private String postRequest(String path, String body) {
         return String.join("\r\n",
-                "POST /login HTTP/1.1",
+                "POST " + path + " HTTP/1.1",
                 "Host: localhost",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
@@ -214,14 +259,14 @@ class Http11ProcessorTest {
                         + "Content-Length: 0\r\n\r\n");
     }
 
-    private void assertLoginResponse(String requestTarget) throws IOException {
+    private void assertHtmlResponse(String requestTarget, String resourceName) throws IOException {
         final var socket = new StubSocket(
                 "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
         new Http11Processor(socket).process(socket);
 
         try (var resource = getClass().getClassLoader()
-                .getResourceAsStream("static/login.html")) {
+                .getResourceAsStream(resourceName)) {
 
             assertThat(resource).isNotNull();
             final byte[] expectedBody = resource.readAllBytes();

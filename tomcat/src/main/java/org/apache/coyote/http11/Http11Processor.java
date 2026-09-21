@@ -45,7 +45,20 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = parsePath(requestUri);
             String queryString = parseQueryString(requestUri);
-            handleLogin(path, queryString);
+            String redirectLocation = handleLogin(path, queryString);
+
+            if (redirectLocation != null) {
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: " + redirectLocation,
+                        "Content-Length: 0",
+                        "",
+                        "");
+
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             byte[] responseBody = readResponseBody(path);
             String contentType = resolveContentType(path);
@@ -66,30 +79,34 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLogin(String path, String queryString) {
+    private String handleLogin(String path, String queryString) {
         if (!"/login".equals(path) || queryString.isEmpty()) {
-            return;
+            return null;
         }
 
         Map<String, String> parametersByName = new HashMap<>();
         String[] parameters = queryString.split("&");
+
         for (String parameter : parameters) {
             String[] nameAndValue = parameter.split("=");
+
             if (nameAndValue.length != 2) {
-                return;
+                return "/401.html";
             }
             parametersByName.put(nameAndValue[0], nameAndValue[1]);
         }
 
         String account = parametersByName.get("account");
         String password = parametersByName.get("password");
+
         if (account == null || password == null) {
-            return;
+            return "/401.html";
         }
 
-        InMemoryUserRepository.findByAccount(account)
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("user: {}", user));
+                .map(user -> "/index.html")
+                .orElse("/401.html");
     }
 
     private String parsePath(String requestUri) {

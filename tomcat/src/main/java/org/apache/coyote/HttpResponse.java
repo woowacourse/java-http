@@ -74,17 +74,18 @@ public final class HttpResponse {
 
     private static HttpResponse create(String statusCode, String contentType, byte[] body,
                                        Map<String, String> additionalHeaders) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", Integer.toString(body.length));
+        HttpResponse response = new HttpResponse("HTTP/1.1", statusCode,
+                Map.of("Content-Type", contentType), body);
+        Map<String, String> headers = new LinkedHashMap<>(response.headers);
         headers.putAll(additionalHeaders);
-        return new HttpResponse("HTTP/1.1", statusCode, headers, body);
+        response.headers = Collections.unmodifiableMap(headers);
+        return response;
     }
 
-    public HttpResponse withCookie(String name, String value) {
+    public void setCookie(String name, String value) {
         Map<String, String> newHeaders = new LinkedHashMap<>(headers);
         newHeaders.put("Set-Cookie", name + "=" + value);
 
-        return new HttpResponse(version, statusCode, newHeaders, body);
+        headers = Collections.unmodifiableMap(newHeaders);
     }
 }

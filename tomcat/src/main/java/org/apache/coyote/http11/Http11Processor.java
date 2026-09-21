@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = adapter.service(request.get(), session);
 
             if (created) {
-                response = response.withCookie("JSESSIONID", session.getId());
+                response.setCookie("JSESSIONID", session.getId());
             }
 
             return Optional.of(response);

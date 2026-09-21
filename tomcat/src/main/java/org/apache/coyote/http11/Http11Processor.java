@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -32,18 +33,34 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = new BufferedInputStream(connection.getInputStream());
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequest.parse(inputStream);
-            HttpResponse response = new HttpResponse();
+            try {
+                HttpRequest request = HttpRequest.parse(inputStream);
+                HttpResponse response = new HttpResponse();
 
-            request.createJSessionIdIfAbsent().ifPresent(sessionId -> response.setCookie(HttpCookie.JSESSION_ID, sessionId));
+                request.createJSessionIdIfAbsent()
+                        .ifPresent(sessionId -> response.setCookie(HttpCookie.JSESSION_ID, sessionId));
 
-            Controller controller = requestMapping.getController(request);
-            controller.service(request, response);
-            response.writeTo(outputStream);
+                Controller controller = requestMapping.getController(request);
+                controller.service(request, response);
+                response.writeTo(outputStream);
+            } catch (UnsupportedHttpMethodException e) {
+                log.warn(e.getMessage());
+                writeError(outputStream, HttpStatus.NOT_IMPLEMENTED, "Not Implemented");
+            } catch (HttpRequestParseException e) {
+                log.warn(e.getMessage());
+                writeError(outputStream, HttpStatus.BAD_REQUEST, "Bad Request");
+            } catch (Exception e) {
+                log.error("요청 처리 중 오류가 발생했습니다.", e);
+                writeError(outputStream, HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+            }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("요청 처리 중 오류가 발생했습니다.", e);
         }
+    }
+
+    private void writeError(OutputStream outputStream, HttpStatus status, String message) throws IOException {
+        HttpResponse response = new HttpResponse();
+        response.sendError(status, message);
+        response.writeTo(outputStream);
     }
 }

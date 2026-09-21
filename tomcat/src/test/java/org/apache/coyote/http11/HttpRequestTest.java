@@ -45,7 +45,7 @@ class HttpRequestTest {
         ));
 
         assertThatThrownBy(() -> HttpRequest.parse(inputStream))
-                .isInstanceOf(IOException.class)
+                .isInstanceOf(HttpRequestParseException.class)
                 .hasMessage("요청 본문이 Content-Length보다 짧습니다.");
     }
 

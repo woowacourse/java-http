@@ -28,6 +28,10 @@ final class UrlEncodedParameters {
     }
 
     private static String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new HttpRequestParseException("잘못된 URL 인코딩입니다.", e);
+        }
     }
 }

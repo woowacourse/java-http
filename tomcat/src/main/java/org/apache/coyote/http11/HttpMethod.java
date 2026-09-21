@@ -15,10 +15,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.value.equals(method))
                 .findFirst()
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "지원하지 않는 HTTP 메서드입니다: " + method
-                        )
-                );
+                .orElseThrow(() -> new UnsupportedHttpMethodException(method));
     }
 }

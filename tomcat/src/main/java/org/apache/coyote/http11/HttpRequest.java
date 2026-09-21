@@ -101,13 +101,25 @@ public final class HttpRequest {
             InputStream inputStream,
             Map<String, String> headers
     ) throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+        int contentLength = parseContentLength(headers.getOrDefault("content-length", "0"));
         byte[] body = inputStream.readNBytes(contentLength);
         if (body.length != contentLength) {
-            throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
+            throw new HttpRequestParseException("요청 본문이 Content-Length보다 짧습니다.");
         }
 
         return new String(body, StandardCharsets.UTF_8);
+    }
+
+    private static int parseContentLength(String value) {
+        try {
+            int contentLength = Integer.parseInt(value);
+            if (contentLength < 0) {
+                throw new HttpRequestParseException("Content-Length는 0 이상이어야 합니다.");
+            }
+            return contentLength;
+        } catch (NumberFormatException e) {
+            throw new HttpRequestParseException("잘못된 Content-Length입니다.", e);
+        }
     }
 
     private static String readLine(InputStream inputStream) throws IOException {

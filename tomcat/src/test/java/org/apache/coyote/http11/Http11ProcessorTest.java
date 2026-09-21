@@ -149,6 +149,49 @@ class Http11ProcessorTest {
         assertThat(InMemoryUserRepository.findByAccount("blank-email")).isEmpty();
     }
 
+    @Test
+    void malformedRequestReturnsBadRequest() {
+        String request = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Content-Length: invalid",
+                "",
+                "body"
+        );
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request\r\n")
+                .endsWith("Bad Request");
+    }
+
+    @Test
+    void unsupportedMethodReturnsNotImplemented() {
+        final var socket = new StubSocket("PUT / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 501 Not Implemented\r\n")
+                .endsWith("Not Implemented");
+    }
+
+    @Test
+    void controllerFailureReturnsInternalServerError() {
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        session.setAttribute("user", new User(null, null, null));
+        SessionManager.getInstance().add(session);
+        final var socket = new StubSocket(getRequest("/session", sessionId));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 500 Internal Server Error\r\n")
+                .endsWith("Internal Server Error");
+    }
+
     private String postRequest(String path, String body) {
         return postRequest(path, body, UUID.randomUUID().toString());
     }

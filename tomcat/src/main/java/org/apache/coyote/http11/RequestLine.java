@@ -16,12 +16,12 @@ public final class RequestLine {
 
     public static RequestLine parse(String rawLine) {
         if (rawLine == null) {
-            throw new IllegalArgumentException("잘못된 Request Line입니다.");
+            throw new HttpRequestParseException("잘못된 Request Line입니다.");
         }
 
         String[] parts = rawLine.trim().split("\\s+");
         if (parts.length != 3) {
-            throw new IllegalArgumentException("잘못된 Request Line입니다.");
+            throw new HttpRequestParseException("잘못된 Request Line입니다.");
         }
 
         return new RequestLine(

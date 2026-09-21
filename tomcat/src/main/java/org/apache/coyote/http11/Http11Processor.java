@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,10 +31,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
+    private static final String EMAIL_PARAMETER = "email";
 
     private static final String ACCEPT_HEADER = "Accept";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String ACCEPT_ANY = "*/*";
     private static final String TEXT_HTML = "text/html;charset=utf-8";
     private static final String TEXT_CSS = "text/css";
@@ -41,6 +45,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATUS_OK = "HTTP/1.1 200 OK ";
     private static final String STATUS_FOUND = "HTTP/1.1 302 Found ";
     private static final String STATUS_NOT_FOUND = "HTTP/1.1 404 Not Found ";
+
+    private static final String POST = "POST";
 
     private final Socket connection;
 
@@ -68,18 +74,34 @@ public class Http11Processor implements Runnable, Processor {
             final var requestHeaders = readHeaders(bufferedReader);
             final var contentType = decideContentType(requestHeaders);
             final var uri = parseUri(requestLine);
+            final var method = parseMethod(requestLine);
             final var pathAndQueryString = splitPathAndQueryString(uri);
             final var path = pathAndQueryString[0];
-            final var queryParameters = parseQueryParameters(pathAndQueryString);
+            var queryString = "";
+            if (pathAndQueryString.length == 2) {
+                queryString = pathAndQueryString[1];
+            }
+            final var queryParameters = parseQueryParameters(queryString);
 
             var statusLine = STATUS_OK;
             var location = "";
             final byte[] responseBody;
             if (path.equals("/")) {
                 responseBody = "Hello world!".getBytes();
-            } else if (path.equals(LOGIN_PATH) && queryParameters.containsKey(ACCOUNT_PARAMETER)) {
+            } else if (method.equals(POST) && path.equals(REGISTER_PATH)) {
+                final var requestBody = readBody(bufferedReader, requestHeaders);
+                final var formParameters = parseQueryParameters(requestBody);
+                register(formParameters);
+
                 statusLine = STATUS_FOUND;
-                if (login(queryParameters)) {
+                location = INDEX_PAGE;
+                responseBody = new byte[0];
+            } else if (method.equals(POST) && path.equals(LOGIN_PATH)) {
+                final var requestBody = readBody(bufferedReader, requestHeaders);
+                final var formParameters = parseQueryParameters(requestBody);
+
+                statusLine = STATUS_FOUND;
+                if (login(formParameters)) {
                     location = INDEX_PAGE;
                 } else {
                     location = UNAUTHORIZED_PAGE;
@@ -122,6 +144,14 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
+    private String readBody(final BufferedReader reader, final Map<String, String> requestHeaders)
+            throws IOException {
+        final int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH_HEADER));
+        final char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
     private String decideContentType(final Map<String, String> requestHeaders) {
         final var accept = requestHeaders.getOrDefault(ACCEPT_HEADER, ACCEPT_ANY);
         if (accept.contains(TEXT_CSS)) {
@@ -135,27 +165,40 @@ public class Http11Processor implements Runnable, Processor {
         return tokens[1];
     }
 
+    private String parseMethod(final String requestLine) {
+        final String[] tokens = requestLine.split(" ");
+        return tokens[0];
+    }
+
     private String[] splitPathAndQueryString(final String uri) {
         return uri.split("\\?", 2);
     }
 
-    private Map<String, String> parseQueryParameters(final String[] pathAndQueryString) {
-        final Map<String, String> queryParameters = new LinkedHashMap<>();
-        if (pathAndQueryString.length < 2) {
-            return queryParameters;
+    private Map<String, String> parseQueryParameters(final String queryString) {
+        final Map<String, String> parameters = new LinkedHashMap<>();
+        if (queryString.isEmpty()) {
+            return parameters;
         }
-        final String[] pairs = pathAndQueryString[1].split("&");
+        final String[] pairs = queryString.split("&");
         for (int i = 0; i < pairs.length; i++) {
             final String[] nameAndValue = pairs[i].split("=", 2);
-            queryParameters.put(URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
+            parameters.put(URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
                     URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8));
         }
-        return queryParameters;
+        return parameters;
     }
 
-    private boolean login(final Map<String, String> queryParameters) {
-        final var account = queryParameters.get(ACCOUNT_PARAMETER);
-        final var password = queryParameters.get(PASSWORD_PARAMETER);
+    private void register(final Map<String, String> formParameters) {
+        final var user = new User(formParameters.get(ACCOUNT_PARAMETER),
+                formParameters.get(PASSWORD_PARAMETER),
+                formParameters.get(EMAIL_PARAMETER));
+        InMemoryUserRepository.save(user);
+        log.info("register success: {}", user);
+    }
+
+    private boolean login(final Map<String, String> formParameters) {
+        final var account = formParameters.get(ACCOUNT_PARAMETER);
+        final var password = formParameters.get(PASSWORD_PARAMETER);
         final var user = InMemoryUserRepository.findByAccount(account)
                 .filter(found -> found.checkPassword(password));
         user.ifPresent(found -> log.info("login success: {}", found));

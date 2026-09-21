@@ -4,9 +4,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class HttpCookieTest {
+
+    @Nested
+    class parse_cookie {
+
+        @Test
+        void 쿠키에_등호가_없는_경우_예외가_발생한다() {
+            String invalidCookie = "JSESSIONID";
+
+            assertThatThrownBy(() -> HttpCookie.from(invalidCookie))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void 쿠키_이름이_없는_경우_예외가_발생한다() {
+            String invalidCookie = "=session-id";
+
+            assertThatThrownBy(() -> HttpCookie.from(invalidCookie))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void 쿠키_값에_등호가_포함되어도_정상_생성된다() {
+            HttpCookie httpCookie = HttpCookie.from("token=a=b");
+
+            assertThat(httpCookie.getValue("token")).hasValue("a=b");
+        }
+
+        @Test
+        void 쿠키_값이_비어있어도_정상_생성된다() {
+            HttpCookie httpCookie = HttpCookie.from("JSESSIONID=");
+
+            assertThat(httpCookie.getValue("JSESSIONID")).hasValue("");
+        }
+    }
 
     @Test
     void Cookie_헤더의_이름이_포함된_경우_예외가_발생한다() {

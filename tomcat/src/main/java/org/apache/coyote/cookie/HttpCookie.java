@@ -12,19 +12,24 @@ public class HttpCookie {
         this.cookies = Map.copyOf(cookies);
     }
 
-    public static HttpCookie from(String cookieHeader) {
-        if (cookieHeader.startsWith("Cookie: ")) {
-            throw new IllegalArgumentException("\"Cookie: \" 헤더 이름이 포함되어 있습니다. 헤더 값만 전달해주세요.");
+    public static HttpCookie from(String cookieString) {
+        if (cookieString.isEmpty()) {
+            return new HttpCookie(Map.of());
+        }
+        if (cookieString.startsWith("Cookie: ")) {
+            throw new IllegalArgumentException("잘못된 Cookie 형식입니다: " + cookieString);
         }
 
         Map<String, String> cookies = new HashMap<>();
-        if (cookieHeader.isEmpty()) {
-            return new HttpCookie(cookies);
-        }
-
-        for (String keyValue : cookieHeader.split(";")) {
-            String[] split = keyValue.strip().split("=", 2);
-            cookies.put(split[0], split[1]);
+        for (String keyValue : cookieString.split(";")) {
+            String cookie = keyValue.strip();
+            int separatorIndex = cookie.indexOf('=');
+            if (separatorIndex <= 0) {
+                throw new IllegalArgumentException("잘못된 Cookie 형식입니다: " + cookieString);
+            }
+            String name = cookie.substring(0, separatorIndex).strip();
+            String value = cookie.substring(separatorIndex + 1).strip();
+            cookies.put(name, value);
         }
         return new HttpCookie(cookies);
     }

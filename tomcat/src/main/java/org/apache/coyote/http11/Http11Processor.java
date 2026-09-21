@@ -5,6 +5,9 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.cookie.HttpCookie;
 import org.apache.coyote.Processor;
+import org.apache.session.Session;
+import org.apache.session.SessionManager;
+import org.apache.session.SessionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +65,25 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (pathUri.equals("/login") && method.equals("POST")) {
-                if (login(reqBody)) {
-                    writeAndFlush(outputStream, createLoginResponse(headers.get("Cookie")));
+            if (pathUri.equals("/login") && method.equals("GET")) {
+                if (isLogin(headers.get("Cookie"))) {
+                    writeAndFlush(outputStream, createRedirectResponse());
                     return;
                 }
+            }
+
+            if (pathUri.equals("/login") && method.equals("POST")) {
+                User user = login(reqBody);
+
+                if (user != null) {
+                    SessionResult sessionResult = storeSession(headers, user);
+                    writeAndFlush(
+                            outputStream,
+                            createLoginResponse(sessionResult.getJsessionId(), sessionResult.isNew())
+                    );
+                    return;
+                }
+
                 pathUri = "/401.html";
             }
 
@@ -82,6 +99,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private static SessionResult storeSession(Map<String, String> headers, User user) {
+        String jsessionId = getOrCreateJsessionId(headers.get("Cookie"));
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(jsessionId);
+
+        boolean isNew = false;
+
+        if (session == null) {
+            session = new Session(jsessionId);
+            sessionManager.add(session);
+            isNew = true;
+        }
+
+        session.setAttribute("user", user);
+        return new SessionResult(jsessionId, isNew);
+    }
+
     private static void handleRegister(String reqBody, OutputStream outputStream) throws IOException {
         Map<String, String> reqBodyParams = parseQueryParams(reqBody);
 
@@ -91,25 +125,19 @@ public class Http11Processor implements Runnable, Processor {
                 reqBodyParams.get(("email"))
         ));
 
-        writeAndFlush(outputStream, createRegisterResponse());
+        writeAndFlush(outputStream, createRedirectResponse());
     }
 
-    private static boolean login(String reqBody) {
+    private static User login(String reqBody) {
         Map<String, String> queryParams = parseQueryParams(reqBody);
 
         if (queryParams.get("account") == null || queryParams.get("password") == null) {
-            return false;
+            return null;
         }
 
         return InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .map(user -> {
-                    if (user.checkPassword(queryParams.get("password"))) {
-                        log.info("user : {}", user.toString());
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
+                .filter(user -> user.checkPassword(queryParams.get("password")))
+                .orElse(null);
     }
 
     private static String findResponseBody(String pathUri, Path path) throws IOException {
@@ -134,17 +162,13 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private static String createLoginResponse(String cookie) {
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookie(cookie);
-        String jsessionid = httpCookie.getCookieValue("JSESSIONID");
-
+    private static String createLoginResponse(String jsessionId, boolean isNew) {
         StringBuilder response = new StringBuilder()
                 .append("HTTP/1.1 302 Found\r\n");
 
-        if (jsessionid == null || jsessionid.isBlank()) {
+        if (isNew) {
             response.append("Set-Cookie: JSESSIONID=")
-                    .append(httpCookie.generateCookie())
+                    .append(jsessionId)
                     .append("\r\n");
         }
 
@@ -155,7 +179,18 @@ public class Http11Processor implements Runnable, Processor {
         return response.toString();
     }
 
-    private static String createRegisterResponse() {
+    private static String getOrCreateJsessionId(String cookie) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookie(cookie);
+        String jsessionid = httpCookie.getCookieValue("JSESSIONID");
+
+        if (jsessionid == null || jsessionid.isBlank()) {
+            return httpCookie.generateCookie();
+        }
+        return jsessionid;
+    }
+
+    private static String createRedirectResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html",
@@ -210,6 +245,19 @@ public class Http11Processor implements Runnable, Processor {
             offset += read;
         }
         return new String(body);
+    }
+
+    private boolean isLogin(String cookie) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookie(cookie);
+        String jsessionId = httpCookie.getCookieValue("JSESSIONID");
+
+        if (jsessionId == null || jsessionId.isBlank()) {
+            return false;
+        }
+        Session session = SessionManager.getInstance().findSession(jsessionId);
+
+        return session != null && session.getAttribute("user") != null;
     }
 
     private Map<String, String> readHeaders(BufferedReader bufferedReader) throws IOException {

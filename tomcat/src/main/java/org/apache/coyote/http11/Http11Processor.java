@@ -34,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX_PATH = "/index.html";
     private static final String NOT_FOUND_PATH = "/404.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String REGISTER_PATH = "/register";
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String HTML_EXTENSION = ".html";
@@ -41,10 +42,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CSS_CONTENT_TYPE = "text/css";
     private static final String JS_EXTENSION = ".js";
     private static final String JS_CONTENT_TYPE = "text/javascript";
+
+    private static final int METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;
     private static final String STATIC_PREFIX = "static";
     private static final int REQUEST_LINE_SIZE = 3;
 
+    private static final String POST = "POST";
     private static final String OK = "200 OK";
     private static final String BAD_REQUEST = "400 Bad Request";
     private static final String NOT_FOUND = "404 Not Found";
@@ -71,9 +75,10 @@ public class Http11Processor implements Runnable, Processor {
             if (requestLine == null) {
                 return;
             }
-            readHeaders(reader);
+            final Map<String, String> headers = readHeaders(reader);
+            final String requestBody = readBody(reader, headers);
 
-            final var response = createResponse(requestLine);
+            final var response = createResponse(requestLine, requestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -82,26 +87,52 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String requestLine) throws IOException {
+    private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
+        final String contentLength = headers.get(CONTENT_LENGTH);
+        if (contentLength == null) {
+            return "";
+        }
+        final int length = Integer.parseInt(contentLength);
+        final char[] buffer = new char[length];
+        reader.read(buffer, 0, length);
+        return new String(buffer);
+    }
+
+    private String createResponse(final String requestLine, final String requestBody) throws IOException {
         if (requestLine.isBlank() || requestLine.trim().split(" ").length != REQUEST_LINE_SIZE) {
             return buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
         }
 
         final String requestUri = parseUri(requestLine);
         final String requestPath = parsePath(requestUri);
+        final String method = parseMethod(requestLine);
         log.info("requestPath = " + requestPath);
 
-        if (LOGIN_PATH.equals(requestPath)) {
-            final Map<String, String> queryParams = parseQueryParams(requestUri);
-            if (!queryParams.isEmpty()) {
-                final Optional<User> user = login(queryParams);
+
+        if (POST.equals(method)) {
+            final Map<String, String> data = parseFormData(requestBody);
+
+            if (LOGIN_PATH.equals(requestPath)) {
+                final Optional<User> user = login(data);
                 if (user.isPresent()) {
                     log.info("로그인 성공: {}", user.get());
                     return buildRedirect(INDEX_PATH);
                 }
-                log.info("로그인 실패: {}", queryParams.get("account"));
+                log.info("로그인 실패: {}", data.get("account"));
                 login(parseQueryParams(requestUri));
                 return buildRedirect(UNAUTHORIZED_PATH);
+            }
+
+            if (REGISTER_PATH.equals(requestPath)) {
+                final String account = data.get("account");
+                final String password = data.get("password");
+                final String email = data.get("email");
+                if (account == null || password == null || email == null) {
+                    return buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
+                }
+                InMemoryUserRepository.save(new User(account, password, email));
+                log.info("회원가입 성공: {}", account);
+                return buildRedirect(INDEX_PATH);
             }
         }
 
@@ -112,6 +143,20 @@ public class Http11Processor implements Runnable, Processor {
             log.info(e.getMessage());
             return buildResponse(NOT_FOUND, contentTypeHeader(DEFAULT_CONTENT_TYPE), resolveResponseBody(NOT_FOUND_PATH));
         }
+    }
+
+    private Map<String, String> parseFormData(String requestBody) {
+        if (requestBody.isBlank()) {
+            return Map.of();
+        }
+        final Map<String, String> params = new HashMap<>();
+        for (final String param : requestBody.split("&")) {
+            final String[] keyAndValue = param.split("=", 2);
+            if (keyAndValue.length == 2) {
+                params.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+        return params;
     }
 
     private String buildRedirect(final String location) {
@@ -142,6 +187,10 @@ public class Http11Processor implements Runnable, Processor {
             return requestUri;
         }
         return requestUri.substring(0, index);
+    }
+
+    private String parseMethod(final String requestLine) {
+        return requestLine.trim().split(" ")[METHOD_INDEX];
     }
 
     private Map<String, String> parseQueryParams(final String requestUri) {
@@ -179,11 +228,14 @@ public class Http11Processor implements Runnable, Processor {
         return DEFAULT_CONTENT_TYPE;
     }
 
-    private List<String> readHeaders(BufferedReader reader) throws IOException {
-        final List<String> headers = new ArrayList<>();
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isBlank()) {
-            headers.add(line);
+            final String[] nameAndValue = line.split(":", 2);
+            if (nameAndValue.length == 2) {
+                headers.put(nameAndValue[0].trim(), nameAndValue[1].trim());
+            }
         }
         return headers;
     }

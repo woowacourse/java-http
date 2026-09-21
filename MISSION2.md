@@ -7,10 +7,10 @@
 ![img.png](img.png)
 
 ## 2. POST 방식 도입
-- [ ] `http://localhost:8080/register` 접속 시 `register.html` 보여주고 GET 사용
-- [ ] 회원가입 버튼 누를 시 `POST` 요청 사용
-- [ ] 회원가입 완료 시 `/index.html`로 리다이렉트
-- [ ] 로그인 페이지 버튼 클릭 시 `POST` 요청 사용
+- [x] `http://localhost:8080/register` 접속 시 `register.html` 보여주고 GET 사용
+- [x] 회원가입 버튼 누를 시 `POST` 요청 사용
+- [x] 회원가입 완료 시 `/index.html`로 리다이렉트
+- [x] 로그인 페이지 버튼 클릭 시 `POST` 요청 사용
 
 ## 3. Cookie에 JSESSIONID 값 저장
 - [ ] 로그인 성공 후 쿠키와 세션을 활용해 로그인 상태 유지하기

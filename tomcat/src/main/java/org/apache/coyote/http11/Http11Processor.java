@@ -24,6 +24,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String OK_STATUS = "200 OK";
     private static final String NOT_FOUND_STATUS = "404 Not Found";
     private static final String NOT_FOUND_BODY = "404 Not Found";
+    private static final String FOUND_STATUS = "302 Found";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String LOCATION_HEADER = "Location";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
     private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
     private static final String USER_SESSION_ATTRIBUTE = "user";
 
@@ -145,14 +150,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final var responseContent = responseContentFor(requestUri.path());
-            final var responseBody = responseContent.body();
-
-            final var responseHeader = responseHeaderFor(responseContent, newSessionIdFor(requestCookie));
-
-            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
-            outputStream.flush();
+            final var response = responseFor(responseContentFor(requestUri.path()), newSessionIdFor(requestCookie));
+            writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -191,26 +190,16 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.of(UUID.randomUUID().toString());
     }
 
-    private String responseHeaderFor(
+    private HttpResponse responseFor(
             final ResponseContent responseContent,
             final Optional<String> newSessionId
     ) {
-        if (newSessionId.isEmpty()) {
-            return String.join("\r\n",
-                    "HTTP/1.1 " + responseContent.status() + " ",
-                    "Content-Type: " + responseContent.contentType() + " ",
-                    "Content-Length: " + responseContent.body().length + " ",
-                    "",
-                    "");
-        }
+        final var body = responseContent.body();
+        final var response = HttpResponse.of(responseContent.status() + " ", body);
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + responseContent.status() + " ",
-                "Set-Cookie: " + SESSION_ID_COOKIE_NAME + "=" + newSessionId.get(),
-                "Content-Type: " + responseContent.contentType() + " ",
-                "Content-Length: " + responseContent.body().length + " ",
-                "",
-                "");
+        return withSessionCookie(response, newSessionId)
+                .withHeader(CONTENT_TYPE_HEADER, responseContent.contentType() + " ")
+                .withHeader(CONTENT_LENGTH_HEADER, body.length + " ");
     }
 
     private void redirect(
@@ -218,29 +207,30 @@ public class Http11Processor implements Runnable, Processor {
             final String location,
             final Optional<String> newSessionId
     ) throws IOException {
-        final var responseHeader = redirectResponseHeader(location, newSessionId);
-
-        outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+        writeResponse(outputStream, redirectResponseFor(location, newSessionId));
     }
 
-    private String redirectResponseHeader(final String location, final Optional<String> newSessionId) {
-        if (newSessionId.isEmpty()) {
-            return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
-        }
+    private HttpResponse redirectResponseFor(final String location, final Optional<String> newSessionId) {
+        final var response = HttpResponse.of(FOUND_STATUS, new byte[0]);
 
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Set-Cookie: " + SESSION_ID_COOKIE_NAME + "=" + newSessionId.get(),
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
+        return withSessionCookie(response, newSessionId)
+                .withHeader(LOCATION_HEADER, location)
+                .withHeader(CONTENT_LENGTH_HEADER, "0");
+    }
+
+    private HttpResponse withSessionCookie(final HttpResponse response, final Optional<String> newSessionId) {
+        return newSessionId
+                .map(sessionId -> response.withHeader(
+                        SET_COOKIE_HEADER,
+                        SESSION_ID_COOKIE_NAME + "=" + sessionId
+                ))
+                .orElse(response);
+    }
+
+    private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        outputStream.write(response.headerBytes());
+        outputStream.write(response.body());
+        outputStream.flush();
     }
 
     private User getUser(final Session session) {

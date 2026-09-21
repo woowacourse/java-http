@@ -10,6 +10,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,6 +137,45 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        final String expectedHeader = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
+                "Content-Length: 0 ");
+
+        assertThat(socket.output()).startsWith(expectedHeader);
+        assertThat(socket.output()).containsPattern("Set-Cookie: JSESSIONID=.+; Path=/");
+    }
+
+    @Test
+    void 로그인한_사용자는_발급받은_세션으로_인증_상태를_유지한다() {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final String loginRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                requestBody);
+        final var loginSocket = new StubSocket(loginRequest);
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(.+?); Path=/")
+                .matcher(loginSocket.output());
+        assertThat(matcher.find()).isTrue();
+        final String sessionId = matcher.group(1);
+
+        // when
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + sessionId + " ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        new Http11Processor(socket).process(socket);
+
+        // then
         final String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html ",
@@ -143,6 +184,24 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 정적_리소스_요청은_세션을_만들지_않는다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
     }
 
     @Test

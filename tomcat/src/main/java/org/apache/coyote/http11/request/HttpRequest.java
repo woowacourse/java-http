@@ -10,6 +10,8 @@ public class HttpRequest {
     private final RequestHeaders headers;
     private final RequestBody body;
 
+    private Session newSession;
+
     public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -40,8 +42,24 @@ public class HttpRequest {
         return headers.getCookie();
     }
 
-    public Optional<Session> getSession() {
+    public Optional<Session> findSession() {
+        if (newSession != null) {
+            return Optional.of(newSession);
+        }
         return getCookie().get(HttpCookie.JSESSIONID)
                 .flatMap(SessionManager.getInstance()::findSession);
+    }
+
+    public Session getSession() {
+        return findSession().orElseGet(this::createSession);
+    }
+
+    public Optional<Session> getNewSession() {
+        return Optional.ofNullable(newSession);
+    }
+
+    private Session createSession() {
+        newSession = SessionManager.getInstance().create();
+        return newSession;
     }
 }

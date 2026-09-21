@@ -3,8 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -25,7 +23,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -37,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_PATH = "; Path=/";
 
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
@@ -105,13 +103,10 @@ public class Http11Processor implements Runnable, Processor {
 
 
     private void addSessionCookie(final HttpRequest request, final HttpResponse response) {
-        if (request.getCookie().hasJSessionId()) {
-            return;
-        }
-        final String sessionId = UUID.randomUUID().toString();
-        log.info("issue JSESSIONID: {}", sessionId);
-        response.addCookie(JSESSIONID + "=" + sessionId);
-        SessionManager.getInstance().add(new Session(sessionId));
+        request.getNewSession().ifPresent(session -> {
+            log.info("issue JSESSIONID: {}", session.getId());
+            response.addCookie(JSESSIONID + "=" + session.getId() + COOKIE_PATH);
+        });
     }
 
     private HttpResponse route(final HttpRequest request)
@@ -143,7 +138,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
-        return request.getSession()
+        return request.findSession()
                 .map(session -> session.getAttribute(USER))
                 .isPresent();
     }
@@ -232,9 +227,7 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password.get()))
                 .map(user -> {
                     log.info("user: {}", user);
-                    log.info("session present: {}", request.getSession().isPresent());   // ← 추가
-                    request.getSession()
-                            .ifPresent(session -> session.setAttribute(USER, user));
+                    request.getSession().setAttribute(USER, user);
                     return INDEX_PAGE;
                 })
                 .orElseGet(() -> {

@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            HttpRequest httpRequest = new HttpRequest(reader);
+            HttpRequest httpRequest = HttpRequest.parse(reader);
             HttpCookie cookies = new HttpCookie(httpRequest.getHeader("cookie"));
 
             Optional<String> newSessionId = cookies.createJSessionIdIfAbsent();

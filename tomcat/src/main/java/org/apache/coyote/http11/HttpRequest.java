@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public final class HttpRequest {
 
@@ -13,11 +14,21 @@ public final class HttpRequest {
     private final String body;
 
     public HttpRequest(
-            BufferedReader reader
-    ) throws IOException {
-        this.requestLine = new RequestLine(reader.readLine());
-        this.headers = readHeaders(reader);
-        this.body = readBody(reader, this.headers);
+            RequestLine requestLine,
+            Map<String, String> headers,
+            String body
+    ) {
+        this.requestLine = Objects.requireNonNull(requestLine);
+        this.headers = Map.copyOf(headers);
+        this.body = Objects.requireNonNull(body);
+    }
+
+    public static HttpRequest parse(BufferedReader reader) throws IOException {
+        RequestLine requestLine = RequestLine.parse(reader.readLine());
+        Map<String, String> headers = readHeaders(reader);
+        String body = readBody(reader, headers);
+
+        return new HttpRequest(requestLine, headers, body);
     }
 
     public HttpMethod getMethod() {
@@ -36,10 +47,9 @@ public final class HttpRequest {
         return body;
     }
 
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
-
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             String[] pair = line.split(":", 2);
@@ -52,7 +62,7 @@ public final class HttpRequest {
         return headers;
     }
 
-    private String readBody(
+    private static String readBody(
             BufferedReader reader,
             Map<String, String> headers
     ) throws IOException {

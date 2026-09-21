@@ -34,12 +34,12 @@ public class Http11Processor implements Runnable, Processor {
             OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest request = new HttpRequest(inputStream);
-            HttpCookie cookies = request.getCookies();
+            HttpResponse response = new HttpResponse(outputStream);
             String method = request.getMethod();
             String path = request.getPath();
 
-            if (cookies.getCookie("JSESSIONID") == null) {
-                cookies.add("JSESSIONID", UUID.randomUUID().toString());
+            if (request.getCookies().getCookie("JSESSIONID") == null) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
             }
 
             if (path.equals("/")) {
@@ -47,18 +47,18 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if (path.equals("/register") && method.equals("POST")) {
-                handleRegister(cookies, request, outputStream);
+                handleRegister(request, response);
                 return;
             }
             if (path.equals("/login") && method.equals("GET")) {
-                handleLoginPage(cookies, request, outputStream);
+                handleLoginPage(request, response);
                 return;
             }
             if (path.equals("/login") && method.equals("POST")) {
-                handleLogin(cookies, request, outputStream);
+                handleLogin(request, response);
                 return;
             }
-            respondStaticResource(cookies, htmlParser(path), outputStream);
+            response.forward(htmlParser(path));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -82,31 +82,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void respondStaticResource(HttpCookie cookies, String requestTarget, OutputStream outputStream) {
-        try (final var resourceStream = getClass()
-                .getClassLoader()
-                .getResourceAsStream("static" + requestTarget)) {
-
-            byte[] responseBody = new byte[0];
-            if (resourceStream != null) {
-                responseBody = resourceStream.readAllBytes();
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
-                    "Content-Type: " + contentType(requestTarget),
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    new String(responseBody));
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
     private String htmlParser(String path) {
         if (!path.contains(".")) {
             return path + ".html";
@@ -114,24 +89,21 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private void handleLoginPage(HttpCookie cookies, HttpRequest request, OutputStream outputStream) {
-        String sessionId = getSessionId(request);
-        Session session = SessionManager.getSession(sessionId);
+    private void handleLoginPage(HttpRequest request, HttpResponse response) {
+        Session session = request.getSession();
 
         boolean loggedIn = session.getAttribute("user") != null;
-
         if (loggedIn) {
-            respondStaticResource(cookies, "/index.html", outputStream);
+            response.sendRedirect("/index.html");
             return;
         }
-
-        respondStaticResource(cookies, "/login.html", outputStream);
+        response.forward("/login.html");
     }
 
-    private void handleLogin(HttpCookie cookies, HttpRequest request, OutputStream outputStream) throws IOException {
+    private void handleLogin(HttpRequest request, HttpResponse response) throws IOException {
         if (request.getParamSize() < 2) {
             log.debug("로그인 파라미터가 부족합니다.");
-            respondStaticResource(cookies, "/login.html", outputStream);
+            response.forward("/login.html");
             return;
         }
         String account = request.getParameter("account");
@@ -142,28 +114,26 @@ public class Http11Processor implements Runnable, Processor {
                         user -> {
                             if (!user.checkPassword(password)) {
                                 log.debug("비밀번호 불일치: {}", account);
-                                respondStaticResource(cookies, "/401.html", outputStream);
+                                response.sendRedirect("/401.html");
                                 return;
                             }
 
-                            Session session = SessionManager.getSession(getSessionId(request));
-
+                            Session session = request.getSession();
                             session.setAttribute("user", user);
-
                             log.debug("로그인 성공: {}", account);
-                            response302LoginSuccessHeader(cookies, outputStream);
+                            response.sendRedirect("/index.html");
                         },
                         () -> {
                             log.debug("존재하지 않는 계정: {}", account);
-                            respondStaticResource(cookies, "/401.html", outputStream);
+                            response.sendRedirect("/401.html");
                         }
                 );
     }
 
-    private void handleRegister(HttpCookie cookies, HttpRequest request, OutputStream outputStream) {
+    private void handleRegister(HttpRequest request, HttpResponse response) {
         if (request.getParamSize() < 3) {
             log.debug("회원가입 파라미터가 부족합니다.");
-            respondStaticResource(cookies, "/register.html", outputStream);
+            response.forward("/register.html");
             return;
         }
         User user = new User(
@@ -173,54 +143,6 @@ public class Http11Processor implements Runnable, Processor {
         );
         InMemoryUserRepository.save(user);
         log.debug("User : {}", user);
-        response201UserCreatedHeader(cookies, outputStream);
-        respondStaticResource(cookies, "/index.html", outputStream);
-    }
-
-    private void response201UserCreatedHeader(HttpCookie cookies, OutputStream outputStream) {
-        try {
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 201 Created ",
-                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
-                    "Content-Type: application/json ",
-                    "");
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void response302LoginSuccessHeader(HttpCookie cookies, OutputStream outputStream) {
-        try {
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 302 Redirect ",
-                    "Set-Cookie: " + cookies.sessionConcatenate() + " ",
-                    "Location: /index.html ",
-                    "");
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private String contentType(final String requestTarget) {
-        if (requestTarget.endsWith(".css")) {
-            return "text/css;charset=utf-8 ";
-        }
-        if (requestTarget.endsWith(".js")) {
-            return "application/javascript;charset=utf-8 ";
-        }
-        if (requestTarget.endsWith(".svg")) {
-            return "image/svg+xml ";
-        }
-        return "text/html;charset=utf-8 ";
-    }
-
-    private String getSessionId(HttpRequest request) {
-        return request.getCookies().getCookie("JSESSIONID");
+        response.sendRedirect("/index.html");
     }
 }

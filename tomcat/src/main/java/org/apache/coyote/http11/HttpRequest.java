@@ -73,6 +73,10 @@ public class HttpRequest {
         return new HttpCookie(getHeader("Cookie"));
     }
 
+    public Session getSession() {
+        return SessionManager.getSession(getCookies().getCookie("JSESSIONID"));
+    }
+
     private void processRequestLine(String requestLine) {
         log.debug("request line : {}", requestLine);
         String[] tokens = requestLine.split(" ");

@@ -16,8 +16,4 @@ public class HttpCookie {
     public String getCookie(String name) {
         return cookies.get(name);
     }
-
-    public String sessionConcatenate() {
-        return "JSESSIONID=" + cookies.get("JSESSIONID");
-    }
 }

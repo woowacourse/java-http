@@ -23,8 +23,4 @@ public class RequestLine {
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
-
-    public HttpPath getHttpPath() {
-        return httpPath;
-    }
 }

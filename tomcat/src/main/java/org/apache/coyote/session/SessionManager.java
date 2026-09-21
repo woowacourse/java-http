@@ -9,6 +9,10 @@ public class SessionManager implements Manager {
     private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
 
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void add(HttpSession session) {
         SESSIONS.put(session.getId(), session);
@@ -25,9 +29,5 @@ public class SessionManager implements Manager {
     }
 
     private SessionManager() {
-    }
-
-    public static SessionManager getInstance() {
-        return INSTANCE;
     }
 }

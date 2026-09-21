@@ -23,6 +23,35 @@ public class HttpRequest {
         this.httpBody = requestBody(bufferedReader);
     }
 
+    public boolean hasSamePath(String path) {
+        return requestLine.hasSamePath(path);
+    }
+
+    public Map<String, String> getParameters() {
+        String queryLine = httpBody.getValue();
+        final String[] params = queryLine.split(QUERY_PARAM_DELIMITER);
+
+        final Map<String, String> queries = new HashMap<>();
+        for (String param : params) {
+            final String[] keyToken = param.split(KEY_VALUE_DELIMITER);
+            queries.put(URLDecoder.decode(keyToken[0], StandardCharsets.UTF_8),
+                    URLDecoder.decode(keyToken[1], StandardCharsets.UTF_8));
+        }
+        return queries;
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(httpHeaders.get("Cookie"));
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
     private HttpHeaders requestHeaders(BufferedReader bufferedReader) throws IOException {
         HttpHeaders headers = new HttpHeaders();
 
@@ -66,34 +95,5 @@ public class HttpRequest {
             return new HttpBody(new String(""));
         }
         throw new IOException("Content-Length는 음수일 수 없습니다.");
-    }
-
-    public boolean hasSamePath(String path) {
-        return requestLine.hasSamePath(path);
-    }
-
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
-    }
-
-    public HttpCookie getCookies() {
-        return new HttpCookie(httpHeaders.get("Cookie"));
-    }
-
-    public Map<String, String> getParameters() {
-        String queryLine = httpBody.getValue();
-        final String[] params = queryLine.split(QUERY_PARAM_DELIMITER);
-
-        final Map<String, String> queries = new HashMap<>();
-        for (String param : params) {
-            final String[] keyToken = param.split(KEY_VALUE_DELIMITER);
-            queries.put(URLDecoder.decode(keyToken[0], StandardCharsets.UTF_8),
-                    URLDecoder.decode(keyToken[1], StandardCharsets.UTF_8));
-        }
-        return queries;
     }
 }

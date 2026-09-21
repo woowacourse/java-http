@@ -74,28 +74,6 @@ public class LoginController extends AbstractController {
         redirectToUnauthorized(response);
     }
 
-    private void redirectToUnauthorized(HttpResponse response) throws IOException {
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
-        response.putHeader(LOCATION, "/401.html");
-        response.write();
-    }
-
-    private Session createSession(User user) {
-        final Session session = new Session(UUID.randomUUID().toString());
-        session.setAttribute(USER, user);
-        SessionManager.getInstance().add(session);
-        return session;
-    }
-
-    private static void removeSessionIfExists(HttpCookie httpCookie) {
-        if (httpCookie.get(JSESSIONID) != null) {
-            HttpSession existedSession = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
-            if (existedSession != null) {
-                SessionManager.getInstance().remove(existedSession);
-            }
-        }
-    }
-
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         HttpCookie httpCookie = new HttpCookie(request.getHttpHeaders().get("Cookie"));
@@ -120,5 +98,27 @@ public class LoginController extends AbstractController {
         response.setHttpBody(new HttpBody(body));
 
         response.write();
+    }
+
+    private void redirectToUnauthorized(HttpResponse response) throws IOException {
+        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
+        response.putHeader(LOCATION, "/401.html");
+        response.write();
+    }
+
+    private Session createSession(User user) {
+        final Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute(USER, user);
+        SessionManager.getInstance().add(session);
+        return session;
+    }
+
+    private void removeSessionIfExists(HttpCookie httpCookie) {
+        if (httpCookie.get(JSESSIONID) != null) {
+            HttpSession existedSession = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
+            if (existedSession != null) {
+                SessionManager.getInstance().remove(existedSession);
+            }
+        }
     }
 }

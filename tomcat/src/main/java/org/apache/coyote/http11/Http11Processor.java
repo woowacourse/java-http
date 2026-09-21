@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -99,25 +102,30 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleLogin(final String method, final Map<String, String> parameters, final OutputStream outputStream, final String contentType, final HttpCookie cookie) throws IOException {
         if ("GET".equals(method)) {
+            if (isLoggedIn(cookie)) {
+                writeRedirectResponse(outputStream, "/index.html");
+                return;
+            }
+
             final var responseBody = readStaticResource("/login.html");
             writeResponse(outputStream, responseBody, contentType);
             return;
         }
 
         if ("POST".equals(method)) {
-            if (!authenticate(parameters)) {
+            final var authenticatedUser = findAuthenticatedUser(parameters);
+
+            if (authenticatedUser.isEmpty()) {
                 writeRedirectResponse(outputStream, "/401.html");
                 return;
             }
 
-            final var sessionId = cookie.getValue("JSESSIONID");
+            final var sessionId = UUID.randomUUID().toString();
+            final var session = new Session(sessionId);
+            session.setAttribute("user", authenticatedUser.get());
+            SessionManager.getInstance().add(session);
 
-            if (sessionId.isPresent()) {
-                writeRedirectResponse(outputStream, "/index.html");
-                return;
-            }
-
-            writeRedirectResponse(outputStream, "/index.html", UUID.randomUUID().toString());
+            writeRedirectResponse(outputStream, "/index.html", sessionId);
             return;
         }
 
@@ -287,17 +295,28 @@ public class Http11Processor implements Runnable, Processor {
         return URLDecoder.decode(parameter, StandardCharsets.UTF_8);
     }
 
-    private boolean authenticate(Map<String, String> parameters) {
+    private Optional<User> findAuthenticatedUser(final Map<String, String> parameters) {
         final var account = parameters.get("account");
         final var password = parameters.get("password");
 
         if (account == null || password == null) {
-            return false;
+            return Optional.empty();
         }
 
         return InMemoryUserRepository.findByAccount(account)
-                .map(user -> user.checkPassword(password))
-                .orElse(false);
+                .filter(user -> user.checkPassword(password));
+    }
+
+    private boolean isLoggedIn(final HttpCookie cookie) {
+        final var sessionId = cookie.getValue("JSESSIONID");
+
+        if (sessionId.isEmpty()) {
+            return false;
+        }
+
+        final var session = SessionManager.getInstance().findSession(sessionId.get());
+
+        return session != null && session.getAttribute("user") instanceof User;
     }
 
     private void register(final Map<String, String> parameters) {

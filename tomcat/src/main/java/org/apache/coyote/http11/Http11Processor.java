@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -13,6 +14,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +28,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -65,9 +70,12 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(input);
             final String body = readBody(input, headers);
             final String sessionId = findSessionId(headers.get("cookie"));
-            final String setCookieHeader = sessionId == null
-                    ? "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "; Path=/\r\n"
-                    : "";
+            HttpSession session = sessionManager.findSession(sessionId);
+            String setCookieHeader = "";
+            if (session == null) {
+                session = createSession();
+                setCookieHeader = createSessionCookie(session);
+            }
 
             if ("/register".equals(path) && "POST".equals(method)) {
                 final Map<String, String> parameters = parseQuery(body);
@@ -90,17 +98,28 @@ public class Http11Processor implements Runnable, Processor {
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
 
-                final boolean authenticated = account != null && password != null
-                        && InMemoryUserRepository.findByAccount(account)
-                                .filter(user -> user.checkPassword(password))
-                                .isPresent();
+                final User user = account == null || password == null
+                        ? null
+                        : InMemoryUserRepository.findByAccount(account)
+                                .filter(candidate -> candidate.checkPassword(password))
+                                .orElse(null);
 
-                if (authenticated) {
+                if (user != null) {
+                    session.invalidate();
+                    session = createSession();
+                    session.setAttribute("user", user);
+                    setCookieHeader = createSessionCookie(session);
                     log.info("회원 조회 성공: {}", account);
                 }
 
-                final String location = authenticated ? "/index.html" : "/401.html";
+                final String location = user != null ? "/index.html" : "/401.html";
                 writeRedirect(outputStream, location, setCookieHeader);
+                return;
+            }
+
+            if ("GET".equals(method) && "/login".equals(path)
+                    && session.getAttribute("user") instanceof User) {
+                writeRedirect(outputStream, "/index.html", setCookieHeader);
                 return;
             }
 
@@ -140,6 +159,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpSession createSession() {
+        final HttpSession session = new Session(UUID.randomUUID().toString(), sessionManager);
+        sessionManager.add(session);
+        return session;
+    }
+
+    private String createSessionCookie(HttpSession session) {
+        return "Set-Cookie: JSESSIONID=" + session.getId() + "; Path=/\r\n";
     }
 
     private String findSessionId(String cookieHeader) {

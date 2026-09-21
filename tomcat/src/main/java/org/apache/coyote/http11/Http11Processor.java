@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,24 +49,35 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+        } catch (EOFException e) {
+            log.info("클라이언트가 요청 없이 연결을 닫았습니다.");
+        } catch (IOException e) {
+            log.error("연결에 응답하지 못했습니다.", e);
+        } catch (RuntimeException e) {
+            log.error("응답을 전송하지 못했습니다.", e);
         }
     }
 
-    private HttpResponse createResponse(final InputStream inputStream) throws IOException {
+    private HttpResponse createResponse(final InputStream inputStream) throws EOFException {
         try {
             final HttpRequest httpRequest = HttpRequest.from(inputStream);
             log.info("httpRequest = {}", httpRequest);
 
             return handle(httpRequest);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
+            log.info("잘못된 요청입니다. {}", e.getMessage());
+
+            return new HttpResponse(
+                    new HttpStatusLine(HTTP_VERSION, 400, "Bad Request"),
+                    Map.of(CONTENT_LENGTH, "0"),
+                    new byte[0]
+            );
+        } catch (EOFException e) {
+            throw e;
+        } catch (IOException | RuntimeException e) {
             log.error("요청을 처리하지 못했습니다.", e);
 
-            return readResource(
-                    requiredResource("static/500.html"),
-                    new HttpStatusLine(HTTP_VERSION, 500, "Internal Server Error")
-            );
+            return serverError();
         }
     }
 
@@ -184,6 +195,19 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(new User(account, password, email));
 
         return redirectToHomeWithLoggedIn();
+    }
+
+    private HttpResponse serverError() {
+        final HttpStatusLine statusLine =
+                new HttpStatusLine(HTTP_VERSION, 500, "Internal Server Error");
+
+        try {
+            return readResource(requiredResource("static/500.html"), statusLine);
+        } catch (IOException | RuntimeException e) {
+            log.error("500.html을 읽지 못했습니다.", e);
+
+            return new HttpResponse(statusLine, Map.of(CONTENT_LENGTH, "0"), new byte[0]);
+        }
     }
 
     private HttpResponse redirectTo(final String location) {

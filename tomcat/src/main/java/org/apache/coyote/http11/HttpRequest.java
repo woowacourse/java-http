@@ -64,7 +64,7 @@ public record HttpRequest(
         }
 
         if (line == null) {
-            throw new IOException("헤더가 빈 줄로 끝나지 않았습니다.");
+            throw new IllegalArgumentException("헤더가 빈 줄로 끝나지 않았습니다.");
         }
 
         return Collections.unmodifiableMap(headers);
@@ -82,7 +82,7 @@ public record HttpRequest(
         final byte[] body = inputStream.readNBytes(length);
 
         if (body.length != length) {
-            throw new IOException("요청 본문이 Content-Length보다 짧습니다: " + contentLength);
+            throw new IllegalArgumentException("요청 본문이 Content-Length보다 짧습니다: " + contentLength);
         }
 
         return HttpRequestLine.parseParameters(new String(body, StandardCharsets.UTF_8));

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -28,13 +29,13 @@ public record HttpRequestLine(
 
     public static HttpRequestLine from(final String requestLine) throws IOException {
         if (requestLine == null) {
-            throw new IOException("클라이언트가 요청 없이 연결을 닫았습니다.");
+            throw new EOFException("클라이언트가 요청 없이 연결을 닫았습니다.");
         }
 
         final String[] requestLineParts = requestLine.split(REQUEST_LINE_DELIMITER);
 
         if (requestLineParts.length != REQUEST_LINE_PARTS_COUNT) {
-            throw new IOException("잘못된 HTTP Request Line 형식입니다: " + requestLine);
+            throw new IllegalArgumentException("잘못된 HTTP Request Line 형식입니다: " + requestLine);
         }
 
         final String requestTarget = requestLineParts[REQUEST_TARGET_INDEX];

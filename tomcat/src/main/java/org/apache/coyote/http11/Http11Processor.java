@@ -35,7 +35,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Map<String, String> MIME_TYPES = Map.of(
             "html", "text/html",
-            "css", "text/css"
+            "css", "text/css",
+            "js", "application/javascript"
     );
 
     private final Socket connection;
@@ -69,22 +70,25 @@ public class Http11Processor implements Runnable, Processor {
             // 요청 헤더 읽기
             String line;
             int contentLength = 0;
-            boolean hasJsessionId = false;
+            HttpCookie httpCookie = new HttpCookie();
+
             while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
                 if (line.startsWith("Content-Length:")) {
                     contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
                 }
                 if (line.startsWith("Cookie:")) {
                     String cookieHeader = line.substring("Cookie:".length()).trim();
-                    HttpCookie httpCookie = new HttpCookie(cookieHeader);
-                    hasJsessionId = httpCookie.hasJsessionId();
+                    httpCookie = new HttpCookie(cookieHeader);
                 }
             }
 
             // 응답 헤더
             Map<String, String> responseHeaders = new LinkedHashMap<>();
-            if (!hasJsessionId) {
-                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID() + "; Path=/");
+            if (!httpCookie.hasJsessionId()) {
+                String sessionId = UUID.randomUUID().toString();
+                Session session = new Session(sessionId);
+                SessionManager.add(session);
+                responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
             }
 
             URI uri = URI.create(requestTarget);
@@ -99,14 +103,11 @@ public class Http11Processor implements Runnable, Processor {
                 String response = createResponse(responseHeaders, "HTTP/1.1 200 OK ", responseBody);
                 sendResponse(outputStream, response);
             } else if ("/login".equals(uriPath)) {
-                String rawQuery = uri.getRawQuery();
-
-                // 이 경우 로그인 여부 확인해서 302 index or 401 반환
-                if (rawQuery != null) {
-                    Map<String, String> queryParameters = parseQueryParameters(rawQuery);
-
-                    String account = queryParameters.get("account");
-                    String password = queryParameters.get("password");
+                if ("POST".equals(method)) {
+                    String requestBody = getRequestBody(contentLength, bufferedReader);
+                    Map<String, String> bodyParameters = parseQueryParameters(requestBody);
+                    String account = bodyParameters.get("account");
+                    String password = bodyParameters.get("password");
 
                     InMemoryUserRepository.findByAccount(account)
                             .filter(user -> user.checkPassword(password))
@@ -114,8 +115,11 @@ public class Http11Processor implements Runnable, Processor {
                                     user -> {
                                         try {
                                             String sessionId = UUID.randomUUID().toString();
+                                            Session session = new Session(sessionId);
+                                            session.setAttribute("loginUser", user);
+                                            SessionManager.add(session);
                                             responseHeaders.put("Location", "/index.html");
-                                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+                                            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
                                             responseHeaders.put("Content-Length", "0");
                                             String response = createResponse(responseHeaders, "HTTP/1.1 302 Found", null);
                                             sendResponse(outputStream, response);
@@ -137,7 +141,21 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                // 이경우 그냥 login.html 보여주기
+                if ("GET".equals(method) && httpCookie.hasJsessionId()) {
+                    String jsessionId = httpCookie.getJsessionId();
+                    Session session = SessionManager.findSession(jsessionId);
+                    if (session != null) {
+                        User loginUser = (User) session.getAttribute("loginUser");
+                        if (loginUser != null) {
+                            responseHeaders.put("Location", "/index.html");
+                            responseHeaders.put("Content-Length", "0");
+                            String response = createResponse(responseHeaders, "HTTP/1.1 302 Found", null);
+                            sendResponse(outputStream, response);
+                            return;
+                        }
+                    }
+                }
+
                 String loginPath = uriPath + ".html";
                 InputStream resourceAsStream = getResourceInputStream(responseHeaders, loginPath, outputStream);
                 if (resourceAsStream == null) {
@@ -166,20 +184,25 @@ public class Http11Processor implements Runnable, Processor {
                     }
                     return;
                 }
-                String requestBody = getRequestBody(contentLength, bufferedReader);
-                Map<String, String> bodyParameters = parseQueryParameters(requestBody);
-                saveUser(bodyParameters);
 
-                try {
+                if ("POST".equals(method)) {
+                    String requestBody = getRequestBody(contentLength, bufferedReader);
+                    Map<String, String> bodyParameters = parseQueryParameters(requestBody);
+                    User savedUser = saveUser(bodyParameters);
+
                     String sessionId = UUID.randomUUID().toString();
+                    Session session = new Session(sessionId);
+                    session.setAttribute("loginUser", savedUser);
+                    SessionManager.add(session);
+
                     responseHeaders.put("Location", "/index.html");
-                    responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+                    responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
                     responseHeaders.put("Content-Length", "0");
+
                     String response = createResponse(responseHeaders, "HTTP/1.1 302 Found", null);
                     sendResponse(outputStream, response);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
+
             } else {
                 // 클래스 로더에서 정적 파일 가져오기
                 InputStream resourceAsStream = getResourceInputStream(responseHeaders, uriPath, outputStream);
@@ -206,11 +229,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void saveUser(Map<String, String> bodyParameters) {
+    private static User saveUser(Map<String, String> bodyParameters) {
         String account = bodyParameters.get("account");
         String email = bodyParameters.get("email");
         String password = bodyParameters.get("password");
-        InMemoryUserRepository.save(new User(account, email, password));
+        return InMemoryUserRepository.save(new User(account, email, password));
     }
 
     private static String getRequestBody(int contentLength, BufferedReader bufferedReader) throws IOException {

@@ -7,6 +7,8 @@ public class HttpCookie {
 
     private final Map<String, String> cookies = new LinkedHashMap<String, String>();
 
+    public HttpCookie() {}
+
     public HttpCookie(String cookieHeader) {
         String[] cookiePairs = cookieHeader.split(";");
         for (String cookiePair : cookiePairs) {
@@ -28,5 +30,9 @@ public class HttpCookie {
             }
         }
         return false;
+    }
+
+    public String getJsessionId() {
+        return cookies.get("JSESSIONID");
     }
 }

@@ -76,13 +76,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 if (line.startsWith("Cookie:")) {
                     String cookieHeader = line.substring("Cookie:".length()).trim();
-                    String[] cookies = cookieHeader.trim().split(";");
-                    for (String cookie : cookies) {
-                        String[] parts = cookie.trim().split("=", 2);
-                        if ("JSESSIONID".equals(parts[0])) {
-                            hasJsessionId = true;
-                        }
-                    }
+                    HttpCookie httpCookie = new HttpCookie(cookieHeader);
+                    hasJsessionId = httpCookie.hasJsessionId();
                 }
             }
 

@@ -64,7 +64,7 @@ public class LoginController {
             return;
         }
 
-        Session session = createSession(request, user);
+        Session session = SessionManager.createSession(request, user);
         response.setCookie(SESSION_COOKIE_NAME + "=" + session.getId());
         redirect(response, LOGIN_SUCCESS_PATH);
     }
@@ -90,17 +90,6 @@ public class LoginController {
 
         return session != null
                 && session.getAttribute(SESSION_USER_KEY) != null;
-    }
-
-    private Session createSession(
-            HttpRequest request,
-            User user
-    ) {
-        Session session = request.getSession(true);
-        session.setAttribute(SESSION_USER_KEY, user);
-
-        SessionManager.getInstance().add(session);
-        return session;
     }
 
     private void redirect(

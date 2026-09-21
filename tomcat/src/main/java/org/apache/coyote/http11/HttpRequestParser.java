@@ -7,17 +7,33 @@ import java.util.*;
 public class HttpRequestParser {
 
     public HttpRequest parse(BufferedReader bufferedReader) throws IOException {
-        String line = getHttpRequestLine(bufferedReader);
-        HttpRequestLine requestLine = parseRequestLine(line);
-        Map<String, String> headers = parserHeader(bufferedReader);
+        final String line = getHttpRequestLine(bufferedReader);
+        final HttpRequestLine requestLine = parseRequestLine(line);
+        final Map<String, String> headers = parserHeader(bufferedReader);
+        final String parserBody = parserBody(headers, bufferedReader);
+
+        final Map<String, String > params = new HashMap<>(requestLine.params);
+
+        if (isFormUrlEncoded(headers)) {
+            params.putAll(getParamsMap(parserBody));
+        }
+
         return HttpRequest.builder()
                 .httpMethod(requestLine.httpMethod)
                 .path(requestLine.path)
                 .version(requestLine.version)
                 .headers(headers)
-                .params(requestLine.params)
-                .body(parserBody(headers, bufferedReader))
+                .params(params)
+                .body(parserBody)
                 .build();
+    }
+
+    private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
+        String line = bufferedReader.readLine();
+        if (line == null) {
+            throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
+        }
+        return line;
     }
 
     private HttpRequestLine parseRequestLine(String line) {
@@ -29,6 +45,38 @@ public class HttpRequestParser {
         final String path = getPath(uri);
         final Map<String, String> params = getParams(uri);
         return new HttpRequestLine(method, path, version, params);
+    }
+
+    private String getPath(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            return uri.substring(0, index);
+        }
+        return uri;
+    }
+
+    private Map<String, String> getParams(String uri) {
+        return getQueryString(uri)
+                .map(this::getParamsMap)
+                .orElseGet(Collections::emptyMap);
+    }
+
+    private Optional<String> getQueryString(String uri) {
+        if (uri.contains("?")) {
+            int index = uri.indexOf("?");
+            return Optional.of(uri.substring(index + 1));
+        }
+        return Optional.empty();
+    }
+
+    private Map<String, String> getParamsMap(String str) {
+        Map<String, String> paramsMap = new HashMap<>();
+        String[] data = str.split("\\&");
+        for (String d : data) {
+            String[] param = d.split("\\=");
+            paramsMap.put(param[0], param[1]);
+        }
+        return paramsMap;
     }
 
     private Map<String, String> parserHeader(BufferedReader bufferedReader) throws IOException {
@@ -61,9 +109,9 @@ public class HttpRequestParser {
         char[] buffer = new char[contentLength];
         int offset = 0;
 
-        while (offset < contentLength){
+        while (offset < contentLength) {
             final int readCount = bufferedReader.read(buffer, offset, contentLength - offset);
-            if (readCount==-1){
+            if (readCount == -1) {
                 throw new IllegalArgumentException("헤더 정보와 실제 content 길이 다름");
             }
             offset += readCount;
@@ -72,44 +120,10 @@ public class HttpRequestParser {
         return new String(buffer);
     }
 
-    private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
-        }
-        return line;
-    }
-
-    private String getPath(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return uri.substring(0, index);
-        }
-        return uri;
-    }
-
-    private Map<String, String> getParams(String uri) {
-        return getQueryString(uri)
-                .map(this::getParamsMap)
-                .orElseGet(Collections::emptyMap);
-    }
-
-    private Optional<String> getQueryString(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return Optional.of(uri.substring(index + 1));
-        }
-        return Optional.empty();
-    }
-
-    private Map<String, String> getParamsMap(String queryString) {
-        Map<String, String> paramsMap = new HashMap<>();
-        String[] data = queryString.split("\\&");
-        for (String d : data) {
-            String[] param = d.split("\\=");
-            paramsMap.put(param[0], param[1]);
-        }
-        return paramsMap;
+    private boolean isFormUrlEncoded(Map<String, String> headers) {
+        return headers
+                .getOrDefault("content-type", "")
+                .startsWith("application/x-www-form-urlencoded");
     }
 
     private record HttpRequestLine(

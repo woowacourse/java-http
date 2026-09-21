@@ -2,12 +2,18 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,99 +48,190 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            // 1. InputStream을 문자열 단위로 읽기 위해 BufferedReader로 감싼다.
+            // InputStream을 문자열 단위로 읽기 위해 BufferedReader로 감싼다.
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            // 2. Request Line(첫 줄)을 읽음 (예: "GET /index.html HTTP/1.1")
+            // Request Line 파싱(예: GET /index.html HTTP/1.1)
             final String requestLine = reader.readLine();
             log.info("request line 첫 줄: {}", requestLine);
             if (requestLine == null) {
+                log.warn("클라이언트로부터 전달된 RequestLine이 존재하지 않습니다.");
                 return;
             }
 
-            // 3. 헤더의 끝(빈 줄 "")이 나올 때까지 헤더들을 읽어 소진 (무한 루프 방지)
-            String line;
-            while ((line = reader.readLine()) != null && !"".equals(line)) {
-                // 헤더 내용 소진
-            }
+            final String[] requestLineParts = requestLine.split(" ");
+            final String method = requestLineParts[0]; // GET, POST
+            final String uri = requestLineParts[1];    // /login?account=gugu 등
 
-            // 4. Request Line에서 공백으로 문자열을 분리하여 URI 경로를 추출
-            final String uri = requestLine.split(" ")[1];
-            String path = uri;
-            String queryString = "";
-            log.info("path: {}", path);
-
+            // path와 queryString 분리
+            final String path;
+            final String queryString;
             if (uri.contains("?")) {
                 int index = uri.indexOf("?");
                 path = uri.substring(0, index);
                 queryString = uri.substring(index + 1);
+            } else {
+                path = uri;
+                queryString = "";
             }
 
-            // 5. /login 요청 시 Query String 파싱 및 회원 조회
-            if ("/login".equals(path)) {
-                String account = "";
-                String password = "";
-
-                // "account=gugu&password=password" -> ["account=gugu", "password=password"]
-                for (String param : queryString.split("&")) {
-                    String[] keyValue = param.split("=");
-                    if (keyValue.length == 2) {
-                        if ("account".equals(keyValue[0])) {
-                            account = keyValue[1];
-                        }
-                        if ("password".equals(keyValue[0])) {
-                            password = keyValue[1];
-                        }
-                    }
+            // Header 파싱 (Content-Length)
+            String line;
+            String rawCookie = "";
+            int contentLength = 0;
+            while ((line = reader.readLine()) != null && !"".equals(line)) {
+                if (line.startsWith("Content-Length: ")) {
+                    contentLength = Integer.parseInt(line.split(": ")[1]);
                 }
-
-                final var user = InMemoryUserRepository.findByAccount(account);
-                log.info("조회된 회원: {}", user);
-
-                // 응답해 줄 실제 정적 파일 경로 지정
-                path = "/login.html";
+                if(line.startsWith("Cookie: ")) {
+                    rawCookie = line.substring(8);  // "Cookie: " 이후 문자열
+                }
             }
 
-            // 6. ClassLoader를 통해 resources/static 디렉토리 내의 파일 데이터를 바이트 배열로 읽는다.
-            byte[] body;
-            final String contentType; // 기본 값
-            final var resourceUrl = getClass().getClassLoader().getResource("static" + path);
+            final HttpCookie cookies = new HttpCookie(rawCookie);
+            String jsessionId = cookies.getCookie("JSESSIONID");
+            boolean needSetCookie = false;
 
-            // 자원이 존재하고, 디렉터리가 아닌 파일인 경우
+            if(jsessionId==null) {
+                jsessionId = UUID.randomUUID().toString();
+                needSetCookie = true;
+            }
+
+            // 3. Body 파싱 (POST 방식 데이터)
+            // Content-Length는 바이트 수이므로, read()가 한 번에 다 채워준다고 가정하지 않고
+            // 실제 읽은 만큼(totalRead)만 문자열로 변환한다. (한글 등 멀티바이트 문자, 패킷 분할 대응)
+            String requestBody = "";
+            if (contentLength > 0) {
+                char[] buffer = new char[contentLength];
+                int totalRead = 0;
+                while (totalRead < contentLength) {
+                    int read = reader.read(buffer, totalRead, contentLength - totalRead);
+                    if (read == -1) {
+                        break;
+                    }
+                    totalRead += read;
+                }
+                requestBody = new String(buffer, 0, totalRead);
+            }
+
+            // POST 로그인 처리
+            if ("POST".equals(method) && "/login".equals(path)) {
+                String account = parseParam(requestBody, "account");
+                String password = parseParam(requestBody, "password");
+
+                final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+                // 회원 정보가 존재하고 비밀번호가 일치하는 경우
+                if (user.isPresent() && user.get().checkPassword(password)) {
+                    // 1. 기존 세션을 찾거나 없으면 신규 세션 생성 후 저장 (조회+생성을 원자적으로 수행)
+                    Session session = SessionManager.getOrCreate(jsessionId);
+                    // 2. 세션으로 유저 정보 보관
+                    session.setAttribute("user", user.get());
+                    send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
+                } else {
+                    send302Redirect(outputStream, "/401.html", jsessionId, needSetCookie);
+                }
+                return;
+            }
+
+            // POST 회원가입 처리
+            if ("POST".equals(method) && "/register".equals(path)) {
+                // Long id = Long.parseLong(parseParam(requestBody, "id"));   // 일단 id는 null 처리로 user 생성
+                String account = parseParam(requestBody, "account");
+                String password = parseParam(requestBody, "password");
+                String email = parseParam(requestBody, "email");
+
+                // 회원 저장
+                User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+
+                send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
+                return; // 302 응답 후 종료
+            }
+
+            // GET 로그인에 접근할 때, 세션에 user가 들어있는지 검사하여 이미 로그인했다면 index.html로 리다이렉트
+            if ("GET".equals(method) && ("/login".equals(path) || "/login.html".equals(path))) {
+                final Session session = SessionManager.findSession(jsessionId);
+
+                // 세션이 존재하고 로그인 유저 데이터가 있다면 바로 index.html로 리다이렉트
+                if (session != null && session.getAttribute("user") != null) {
+                    send302Redirect(outputStream, "/index.html", jsessionId, needSetCookie);
+                    return;
+                }
+            }
+
+            // GET 정적 파일 응답 (200 OK)
+            String targetPath = path;
+            if ("/".equals(targetPath)) {
+                targetPath = "/index.html";
+            } else if ("/login".equals(targetPath)) {
+                targetPath = "/login.html";
+            } else if("/register".equals(targetPath)) {
+                targetPath = "/register.html";
+            }
+            byte[] body;
+            final String contentType;
+            final var resourceUrl = getClass().getClassLoader().getResource("static" + targetPath);
+
             if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
                 body = Files.readAllBytes(Path.of(resourceUrl.toURI()));
-                // 확장자에 따른 raw한 if-else 조건 처리
-                if (path.endsWith(".css")) {
+                if (targetPath.endsWith(".css")) {
                     contentType = "text/css;charset=utf-8";
-                } else if (path.endsWith(".js")) {
+                } else if (targetPath.endsWith(".js")) {
                     contentType = "application/javascript;charset=utf-8";
-                } else if (path.endsWith(".ico")) {
-                    contentType = "image/x-icon";
                 } else {
                     contentType = "text/html;charset=utf-8";
                 }
             } else {
-                // '/' 요청이나 static에 파일이 없는 경우 기본 Hello world!
                 body = "Hello world!".getBytes(StandardCharsets.UTF_8);
                 contentType = "text/html;charset=utf-8";
             }
-            
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: "+contentType+" ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    "");
 
-            // 7. 헤더 텍스트와 파일 바이트(본문)를 순서대로 전송한다.
-            // HTTP 응답은 규격상 무조건 [헤더 텍스트] + [빈 줄(\r\n)] + [바디 데이터] 순서로 날아간다.
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));  // 헤더 텍스트
-            outputStream.write(body);  // 바디 데이터
+            List<String> headers = new ArrayList<>();
+            headers.add("HTTP/1.1 200 OK ");
+            if (needSetCookie) {
+                headers.add("Set-Cookie: JSESSIONID=" + jsessionId + " ");
+            }
+            headers.add("Content-Type: " + contentType + " ");
+            headers.add("Content-Length: " + body.length + " ");
+            headers.add("");
+            headers.add("");
+
+            final var response = String.join("\r\n", headers);
+
+            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(body);
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
+    }
+
+    // key=vaule 형태에서 value 추출
+    private String parseParam(final String requestBody, final String key) {
+        for(String param : requestBody.split("&")) {
+            String[] keyValue= param.split("=");
+            if(keyValue.length == 2 && key.equals(keyValue[0])) {
+                return keyValue[1];
+            }
+        }
+        return "";
+    }
+
+    // 302 리다이렉트 응답 전송
+    private void send302Redirect(OutputStream outputStream, String redirectPath, String jsessionId, boolean needSetCookie) throws IOException {
+        List<String> headers = new ArrayList<>();
+        headers.add("HTTP/1.1 302 Found ");
+        headers.add("Location: " + redirectPath + " ");
+        if (needSetCookie) {
+            headers.add("Set-Cookie: JSESSIONID=" + jsessionId + " ");
+        }
+        headers.add("");
+        headers.add("");
+
+        final var response = String.join("\r\n", headers);
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 }

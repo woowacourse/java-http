@@ -30,8 +30,6 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        System.out.println(getClass().getClassLoader().getResource(fileName));
-        System.out.println(getClass().getClassLoader().getResource(fileName).getPath());
         // todo
         final String actual = getClass().getClassLoader()
                         .getResource(fileName).getPath();
@@ -54,7 +52,6 @@ class FileTest {
 
         // todo
         final List<String> actual = Files.readAllLines(path);
-        System.out.println(actual);
 
         assertThat(actual).containsOnly("nextstep");
     }

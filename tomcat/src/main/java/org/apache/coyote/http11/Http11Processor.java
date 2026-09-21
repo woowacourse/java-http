@@ -24,7 +24,8 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.handlers = Map.of("/login", new LoginRequestHandler());
+        this.handlers = Map.of(
+                "/login", new LoginRequestHandler());
     }
 
     @Override
@@ -39,9 +40,8 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final String line = getHttpRequestLine(bufferedReader);
             HttpRequestParser httpRequestParser = new HttpRequestParser();
-            HttpRequest httpRequest = httpRequestParser.parseRequestLine(line);
+            HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             HttpResponse httpResponse = handleRequest(httpRequest);
 
             final var responseBody = createResponseBody(httpResponse.path());
@@ -54,20 +54,13 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     new String(responseBody));
 
-            log.info("http method: {}, path: {}, http status: {}", httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
+            log.info("mehtod: {} , path: {}, http status: {}",
+                    httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
-        }
-        return line;
     }
 
     private HttpResponse handleRequest(HttpRequest request) {
@@ -80,8 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         if (request.params().isEmpty()) {
             return new HttpResponse(request.path(), HttpStatus.OK);
         }
-
-        return requestHandler.handle(request.params());
+        return requestHandler.handle(request);
     }
 
     private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {

@@ -11,9 +11,9 @@ public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
 
     @Override
-    public HttpResponse handle(Map<String, String> paramsMap) {
+    public HttpResponse handle(HttpRequest httpRequest) {
         try {
-            login(paramsMap);
+            login(httpRequest.params());
         } catch (IllegalArgumentException e) {
             return new HttpResponse("/401.html", HttpStatus.UNAUTHORIZED);
         }

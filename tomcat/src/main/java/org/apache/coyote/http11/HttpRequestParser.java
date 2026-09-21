@@ -1,21 +1,83 @@
 package org.apache.coyote.http11;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.*;
 
 public class HttpRequestParser {
 
-    public HttpRequest parseRequestLine(String line) {
+    public HttpRequest parse(BufferedReader bufferedReader) throws IOException {
+        String line = getHttpRequestLine(bufferedReader);
+        HttpRequestLine requestLine = parseRequestLine(line);
+        Map<String, String> headers = parserHeader(bufferedReader);
+        return HttpRequest.builder()
+                .httpMethod(requestLine.httpMethod)
+                .path(requestLine.path)
+                .version(requestLine.version)
+                .headers(headers)
+                .params(requestLine.params)
+                .body(parserBody(headers, bufferedReader))
+                .build();
+    }
+
+    private HttpRequestLine parseRequestLine(String line) {
         final String[] tokens = line.split(" ", 3);
         final HttpMethod method = HttpMethod.of(tokens[0]);
         final String uri = tokens[1];
+        final String version = tokens[2];
 
         final String path = getPath(uri);
         final Map<String, String> params = getParams(uri);
+        return new HttpRequestLine(method, path, version, params);
+    }
 
-        return new HttpRequest(method, path, params);
+    private Map<String, String> parserHeader(BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !"".equals(line)) {
+            final String[] tokens = line.split(":", 2);
+
+            if (tokens.length != 2) {
+                throw new IllegalArgumentException("잘못된 HTTP 헤더입니다: " + line);
+            }
+
+            final String name = tokens[0].trim().toLowerCase(Locale.ROOT);
+            final String value = tokens[1].trim();
+
+            headers.put(name, value);
+        }
+        return headers;
+    }
+
+    private String parserBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
+        final int contentLength = Integer.parseInt(
+                headers.getOrDefault("content-length", "0")
+        );
+
+        if (contentLength == 0) {
+            return "";
+        }
+
+        char[] buffer = new char[contentLength];
+        int offset = 0;
+
+        while (offset < contentLength){
+            final int readCount = bufferedReader.read(buffer, offset, contentLength - offset);
+            if (readCount==-1){
+                throw new IllegalArgumentException("헤더 정보와 실제 content 길이 다름");
+            }
+            offset += readCount;
+        }
+
+        return new String(buffer);
+    }
+
+    private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
+        String line = bufferedReader.readLine();
+        if (line == null) {
+            throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
+        }
+        return line;
     }
 
     private String getPath(String uri) {
@@ -48,5 +110,12 @@ public class HttpRequestParser {
             paramsMap.put(param[0], param[1]);
         }
         return paramsMap;
+    }
+
+    private record HttpRequestLine(
+            HttpMethod httpMethod,
+            String path,
+            String version,
+            Map<String, String> params) {
     }
 }

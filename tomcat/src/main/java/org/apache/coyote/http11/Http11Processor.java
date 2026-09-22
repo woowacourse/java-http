@@ -14,9 +14,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -58,7 +61,13 @@ public class Http11Processor implements Runnable, Processor {
             }
             Map<String, String> headers = readHeaders(reader);
             String requestBody = readRequestBody(reader, headers);
-            String response = createResponse(method, path, requestBody);
+            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+            String sessionId = cookie.get("JSESSIONID");
+            String setCookie = null;
+            if (sessionId == null) {
+                setCookie = "JSESSIONID=" + UUID.randomUUID();
+            }
+            String response = createResponse(method, path, requestBody, setCookie);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -96,15 +105,15 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, totalRead);
     }
 
-    private String createResponse(String method, String path, String requestBody) throws IOException {
+    private String createResponse(String method, String path, String requestBody, String setCookie) throws IOException {
         if ("POST".equals(method) && "/login".equals(path)) {
-            return login(requestBody);
+            return login(requestBody, setCookie);
         }
         if ("POST".equals(method) && "/register".equals(path)) {
-            return register(requestBody);
+            return register(requestBody, setCookie);
         }
         if ("/".equals(path)) {
-            return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!");
+            return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!", setCookie);
         }
         String resourcePath = path;
         if ("/login".equals(path)) {
@@ -116,26 +125,34 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = readStaticResource(resourcePath);
         if (responseBody == null) {
             String notFoundBody = readStaticResource(NOT_FOUND_PAGE);
-            return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), notFoundBody);
+            return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), notFoundBody, setCookie);
         }
-        return buildResponse("HTTP/1.1 200 OK ", getContentType(resourcePath), responseBody);
+        return buildResponse("HTTP/1.1 200 OK ", getContentType(resourcePath), responseBody, setCookie);
     }
 
-    private String buildRedirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "",
-                "");
+    private String buildRedirectResponse(String location, String setCookie) {
+        List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 302 Found ");
+        lines.add("Location: " + location + " ");
+        if (setCookie != null) {
+            lines.add("Set-Cookie: " + setCookie + " ");
+        }
+        lines.add("");
+        lines.add("");
+        return String.join("\r\n", lines);
     }
 
-    private String buildResponse(String statusLine, String contentType, String responseBody) {
-        return String.join("\r\n",
-                statusLine,
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
+    private String buildResponse(String statusLine, String contentType, String responseBody, String setCookie) {
+        List<String> lines = new ArrayList<>();
+        lines.add(statusLine);
+        lines.add("Content-Type: " + contentType + " ");
+        lines.add("Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
+        if (setCookie != null) {
+            lines.add("Set-Cookie: " + setCookie + " ");
+        }
+        lines.add("");
+        lines.add(responseBody);
+        return String.join("\r\n", lines);
     }
 
     private String readStaticResource(String path) throws IOException {
@@ -157,22 +174,22 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String login(String requestBody) {
+    private String login(String requestBody, String setCookie) {
         Map<String, String> parameters = parseQueryString(requestBody);
         String account = parameters.get("account");
         String password = parameters.get("password");
         if (account == null || password == null) {
-            return buildRedirectResponse(UNAUTHORIZED_PAGE);
+            return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return buildRedirectResponse(UNAUTHORIZED_PAGE);
+            return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
         }
         log.info("user : {}", user.get().getAccount());
-        return buildRedirectResponse(INDEX_PAGE);
+        return buildRedirectResponse(INDEX_PAGE, setCookie);
     }
 
-    private String register(String requestBody) {
+    private String register(String requestBody, String setCookie) {
         Map<String, String> parameters = parseQueryString(requestBody);
         String account = parameters.get("account");
         String password = parameters.get("password");
@@ -180,10 +197,10 @@ public class Http11Processor implements Runnable, Processor {
         if (account == null || account.isBlank()
                 || password == null || password.isBlank()
                 || email == null || email.isBlank()) {
-            return buildRedirectResponse(REGISTER_PAGE);
+            return buildRedirectResponse(REGISTER_PAGE, setCookie);
         }
         InMemoryUserRepository.save(new User(account, password, email));
-        return buildRedirectResponse(INDEX_PAGE);
+        return buildRedirectResponse(INDEX_PAGE, setCookie);
     }
 
     private Map<String, String> parseQueryString(String queryString) {

@@ -62,14 +62,14 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인에_성공하면_세션_쿠키를_발급하고_인덱스_페이지로_리다이렉트한다() {
+    void 소문자_content_length_헤더로_로그인할_수_있다() {
         // given
         final var requestBody = "account=gugu&password=password";
         final var request = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: " + requestBody.length(),
+                "content-length: " + requestBody.length(),
                 "",
                 requestBody);
 
@@ -115,7 +115,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인된_상태에서_로그인_페이지에_접근하면_인덱스_페이지로_리다이렉트한다() {
+    void 소문자_cookie_헤더로도_로그인_상태를_확인한다() {
         // given
         final var requestBody = "account=gugu&password=password";
         final var loginRequest = String.join("\r\n",
@@ -138,7 +138,7 @@ class Http11ProcessorTest {
         final var request = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",
-                "Cookie: JSESSIONID=" + sessionId,
+                "cookie: JSESSIONID=" + sessionId,
                 "",
                 "");
         final var socket = new StubSocket(request);

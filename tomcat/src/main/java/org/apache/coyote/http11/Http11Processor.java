@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             final var requestLine = parseRequestLine(reader);
             final var headers = readHeaders(reader);
 
-            final var cookieHeader = headers.get("Cookie");
+            final var cookieHeader = headers.get("cookie");
             final var cookie = HttpCookie.parse(cookieHeader);
 
             final var method = requestLine.get(0);
@@ -59,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> requestParameters;
             if ("POST".equals(method)) {
-                final var contentLengthHeader = headers.get("Content-Length");
+                final var contentLengthHeader = headers.get("content-length");
 
                 if (contentLengthHeader == null) {
                     throw new IllegalArgumentException("Content-Length 헤더가 없습니다.");
@@ -178,7 +179,7 @@ public class Http11Processor implements Runnable, Processor {
             if (split.length != 2) {
                 throw new IllegalArgumentException("올바르지 않은 HTTP 요청입니다.");
             }
-            resultMap.put(split[0].trim(), split[1].trim());
+            resultMap.put(split[0].trim().toLowerCase(Locale.ROOT), split[1].trim());
         }
         return resultMap;
     }

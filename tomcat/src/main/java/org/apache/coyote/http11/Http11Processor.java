@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +52,41 @@ public class Http11Processor implements Runnable, Processor {
             final String type = findType(uri);
             String status = "200 OK";
             HttpCookie httpCookie = new HttpCookie(findCookies(request));
+            boolean hasJSessionId = hasJSessionId(httpCookie);
+            String jSessionId = httpCookie.get("JSESSIONID");
+            if (!hasJSessionId) {
+                jSessionId = UUID.randomUUID().toString();
+            }
+
+            final SessionManager manager = SessionManager.getInstance();
+
+            if (uri.equals("/login") && method.equals("GET")) {
+                if (hasJSessionId) {
+                    log.info("쿠키 존재!");
+                    String id = httpCookie.get("JSESSIONID");
+                    log.info("session: {}", manager.findSession(id));
+                    if (manager.findSession(id) != null) {
+                        log.info("세션 존재!");
+                        uri = "/index.html";
+                    }
+                }
+            }
 
             if (!body.isEmpty()) {
                 Map<String, String> pairs = findQueries(body);
                 if (uri.equals("/login")) {
                     if (userMatching(pairs.get("account"), pairs.get("password"))) {
                         log.info("로그인 성공! id: {}", pairs.get("account"));
+                        if (manager.findSession(jSessionId) == null) {
+                            String account = pairs.get("account");
+                            Session session = new Session(jSessionId);
+                            boolean isPresent = InMemoryUserRepository.findByAccount(account).isPresent();
+                            if (isPresent) {
+                                User user = InMemoryUserRepository.findByAccount(account).get();
+                                session.setAttribute("user", user);
+                                manager.add(session);
+                            }
+                        }
                         status = "302 FOUND";
                         uri = "/index.html";
                     } else {
@@ -73,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("uri: {}", uri);
 
             final String responseBody = makeResponseBody(uri);
-            final String response = makeResponse(status, type, responseBody, httpCookie);
+            final String response = makeResponse(status, type, responseBody, hasJSessionId, jSessionId);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -110,6 +140,10 @@ public class Http11Processor implements Runnable, Processor {
             return List.of(uri.split("\\.")).getLast();
         }
         return "html";
+    }
+
+    private boolean hasJSessionId(HttpCookie httpCookie) {
+        return httpCookie.containsKey("JSESSIONID");
     }
 
     private String findCookies(String request) {
@@ -153,16 +187,17 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private String setCookie(HttpCookie httpCookie) {
-        if (httpCookie.containsKey("JSESSIONID")) {
+    private String setCookie(boolean hasJSessionId, String jSessionId) {
+        if (hasJSessionId) {
             return "";
         }
-        return "Set-Cookie: JSESSIONID=" + httpCookie.addJSessionId() + " ";
+        return "Set-Cookie: JSESSIONID=" + jSessionId + " ";
     }
 
-    private String makeResponse(String status, String type, String responseBody, HttpCookie httpCookie) {
+    private String makeResponse(String status, String type, String responseBody, boolean hasJSessionId,
+                                String jSessionId) {
 
-        final String setCookie = setCookie(httpCookie);
+        final String setCookie = setCookie(hasJSessionId, jSessionId);
         return String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",

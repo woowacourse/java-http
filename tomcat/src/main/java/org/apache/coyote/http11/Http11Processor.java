@@ -16,11 +16,10 @@ import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -33,13 +32,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        log.atInfo().log("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
+             final var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
             // 첫번째 라인 & 요청 url 구하기

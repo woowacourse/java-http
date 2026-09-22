@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,29 +54,13 @@ public class Http11Processor implements Runnable, Processor {
             String body = readBody(reader, headers);
 
             Optional<Cookie> sessionCookie = findSessionCookie(headers);
-            String response = handleRequest(method, target, body);
-            response = addSessionCookieIfAbsent(response, sessionCookie);
+            String response = handleRequest(method, target, body, sessionCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String addSessionCookieIfAbsent(String response, Optional<Cookie> cookie) {
-        if (cookie.isPresent()) {
-            return response;
-        }
-
-        String uuid = UUID.randomUUID().toString();
-
-        String setCookie = "Set-Cookie: JSESSIONID=" + uuid + "\r\n";
-        int insertPosition = response.indexOf("\r\n") + 2;
-
-        return response.substring(0, insertPosition)
-                + setCookie
-                + response.substring(insertPosition);
     }
 
     private Optional<Cookie> findSessionCookie(Map<String, String> headers) {
@@ -144,10 +129,16 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String handleRequest(String method, String target, String body) throws IOException {
+    private String handleRequest(String method, String target, String body, Optional<Cookie> sessionCookie) throws IOException {
         String resourcePath = extractResourcePath(target);
 
         if ("GET".equals(method)) {
+            Session session = findSession(sessionCookie);
+
+            if ("/login".equals(resourcePath) && isLoggedIn(session)) {
+                return generateRedirectResponse("/index.html");
+            }
+
             return serveStaticResource(resourcePath);
         }
 
@@ -164,6 +155,18 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+    }
+
+    private Session findSession(Optional<Cookie> sessionCookie) {
+        if (sessionCookie.isEmpty()) {
+            return null;
+        }
+
+        return SessionManager.findSession(sessionCookie.get().value());
+    }
+
+    private boolean isLoggedIn(Session session) {
+        return session != null && session.getAttribute("user") != null;
     }
 
     private Map<String, String> parseFormData(String body) {
@@ -204,23 +207,35 @@ public class Http11Processor implements Runnable, Processor {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return redirect("/index.html");
+        return generateRedirectResponse("/index.html");
     }
 
     private String handleLogin(Map<String, String> formData) {
         String account = formData.get("account");
         String password = formData.get("password");
 
-        boolean authenticated = authenticate(account, password);
+        Optional<User> authenticatedUser = authenticate(account, password);
 
-        if (!authenticated) {
-            return redirect("/401.html");
+        if (authenticatedUser.isEmpty()) {
+            return generateRedirectResponse("/401.html");
         }
 
-        return redirect("/index.html");
+        Session session = createSession(authenticatedUser);
+
+        return generateRedirectResponse("/index.html", session.getId());
     }
 
-    private String redirect(String location) {
+    @Nonnull
+    private static Session createSession(Optional<User> authenticatedUser) {
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        session.setAttribute("user", authenticatedUser.get());
+        SessionManager.add(session);
+
+        return session;
+    }
+
+    private String generateRedirectResponse(String location) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Location: " + location,
@@ -230,18 +245,28 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private boolean authenticate(String account, String password) {
+    private String generateRedirectResponse(String location, String sessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Set-Cookie: JSESSIONID=" + sessionId,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+    }
+
+    private Optional<User> authenticate(String account, String password) {
         if (account == null || account.isBlank()) {
-            return false;
+            return Optional.empty();
         }
 
         if (password == null || password.isBlank()) {
-            return false;
+            return Optional.empty();
         }
 
         return InMemoryUserRepository.findByAccount(account)
-                .map(user -> user.checkPassword(password))
-                .orElse(false);
+                .filter(user -> user.checkPassword(password));
     }
 
     private String serveStaticResource(String resourcePath) throws IOException {

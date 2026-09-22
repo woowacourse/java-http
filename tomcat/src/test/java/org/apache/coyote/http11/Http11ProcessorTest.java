@@ -15,7 +15,13 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=existing ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when
@@ -39,6 +45,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing ",
                 "",
                 "");
 
@@ -66,6 +73,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Content-Length: 30 ",
                 "Content-Type: application/x-www-form-urlencoded ",
+                "Cookie: JSESSIONID=existing ",
                 "",
                 "account=gugu&password=password");
 
@@ -91,6 +99,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Content-Length: 27 ",
                 "Content-Type: application/x-www-form-urlencoded ",
+                "Cookie: JSESSIONID=existing ",
                 "",
                 "account=gugu&password=wrong");
 
@@ -107,5 +116,21 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void setCookieWhenJSessionIdIsMissing() {
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
     }
 }

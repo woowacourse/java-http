@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN = "/login";
     private static final String REGISTER = "/register";
     private static final String POST_METHOD = "POST";
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String LOGIN_SUCCESS = "/index.html";
     private static final String LOGIN_FAILURE = "/401.html";
     private static final String DOT_HTML = ".html";
@@ -47,8 +51,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final var inputStream = connection.getInputStream(); final var outputStream = connection.getOutputStream()) {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final String requestLine = reader.readLine();
@@ -62,13 +65,15 @@ public class Http11Processor implements Runnable, Processor {
             final String version = requestParts[2];
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readRequestBody(method, headers, reader);
+            final HttpCookie cookies = new HttpCookie(headers.get(COOKIE_HEADER));
+            final String setCookie = createSetCookieHeader(cookies);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             final String requestPath = extractRequestPath(requestUri);
 
             if (method.equals(POST_METHOD) && requestPath.equals(LOGIN)) {
                 final String location = getLoginRedirectionLocation(requestBody);
-                final String responseHeader = createRedirectResponseHeader(version, location);
+                final String responseHeader = createRedirectResponseHeader(version, location, setCookie);
 
                 outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
@@ -77,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (method.equals(POST_METHOD) && requestPath.equals(REGISTER)) {
                 saveUser(requestBody);
-                final String responseHeader = createRedirectResponseHeader(version, LOGIN_SUCCESS);
+                final String responseHeader = createRedirectResponseHeader(version, LOGIN_SUCCESS, setCookie);
 
                 outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
@@ -97,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readAllBytes(path);
             }
 
-            final String responseHeader = createResponseHeader(version, contentType, responseBody.length);
+            final String responseHeader = createResponseHeader(version, contentType, responseBody.length, setCookie);
 
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -119,9 +124,8 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String readRequestBody(final String method,
-                                   final Map<String, String> headers,
-                                   final BufferedReader reader) throws IOException {
+    private String readRequestBody(final String method, final Map<String, String> headers, final BufferedReader reader)
+            throws IOException {
         if (!method.equals(POST_METHOD)) {
             return "";
         }
@@ -132,29 +136,39 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private String createResponseHeader(final String version, String contentType, final int contentLength) {
-        return String.join("\r\n",
-                version + " 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + contentLength + " ",
-                "",
-                "");
+    private String createResponseHeader(final String version, final String contentType, final int contentLength,
+                                        final String setCookie) {
+        if (setCookie.isEmpty()) {
+            return String.join("\r\n", version + " 200 OK ", "Content-Type: " + contentType + " ",
+                    "Content-Length: " + contentLength + " ", "", "");
+        }
+
+        return String.join("\r\n", version + " 200 OK ", SET_COOKIE_HEADER + ": " + setCookie + " ",
+                "Content-Type: " + contentType + " ", "Content-Length: " + contentLength + " ", "", "");
     }
 
-    private String createRedirectResponseHeader(final String version, final String location) {
-        return String.join("\r\n",
-                version + " 302 Found ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
-                "");
+    private String createRedirectResponseHeader(final String version, final String location, final String setCookie) {
+        if (setCookie.isEmpty()) {
+            return String.join("\r\n", version + " 302 Found ", "Location: " + location + " ", "Content-Length: 0 ", "",
+                    "");
+        }
+
+        return String.join("\r\n", version + " 302 Found ", SET_COOKIE_HEADER + ": " + setCookie + " ",
+                "Location: " + location + " ", "Content-Length: 0 ", "", "");
+    }
+
+    private String createSetCookieHeader(final HttpCookie cookies) {
+        final String sessionId = cookies.getValue(JSESSIONID);
+        if (sessionId != null) {
+            return "";
+        }
+        return JSESSIONID + "=" + UUID.randomUUID();
     }
 
     private String getResourcePath(final String path) {
         final URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
-            throw new UncheckedServletException(
-                    new FileNotFoundException("리소스를 찾을 수 없습니다: " + path));
+            throw new UncheckedServletException(new FileNotFoundException("리소스를 찾을 수 없습니다: " + path));
         }
         return resource.getPath();
     }
@@ -193,11 +207,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void saveUser(final String requestBody) {
         final Map<String, String> formData = parseFormData(requestBody);
-        final User user = new User(
-                formData.get("account"),
-                formData.get("password"),
-                formData.get("email")
-        );
+        final User user = new User(formData.get("account"), formData.get("password"), formData.get("email"));
         InMemoryUserRepository.save(user);
     }
 

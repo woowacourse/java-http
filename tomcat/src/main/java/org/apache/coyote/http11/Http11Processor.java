@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
@@ -39,24 +39,38 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String request = readRequest(inputStream);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            final String request = readRequest(reader);
             log.info(request);
 
+            String method = request.split(" ")[0];
+            log.info("method = {}", method);
             String uri = request.split(" ")[1];
-            log.info("uri: {}", uri);
+            String body = readRequestBody(method, request, reader);
             final String type = findType(uri);
             String status = "200 OK";
+            log.info("body: {}", body);
 
-            final String queryString = findQueryString(uri);
-            if (!queryString.isBlank()) {
-                final Map<String, String> pairs = findQueries(queryString);
-                if (userMatching(pairs.get("account"), pairs.get("password"))) {
-                    status = "302 FOUND";
-                    uri = "/index.html";
+            if (!body.isEmpty()) {
+                Map<String, String> pairs = findQueries(body);
+                if (uri.equals("/login")) {
+                    if (userMatching(pairs.get("account"), pairs.get("password"))) {
+                        log.info("로그인 성공! id: {}", pairs.get("account"));
+                        status = "302 FOUND";
+                        uri = "/index.html";
+                    } else {
+                        uri = "/401.html";
+                    }
                 } else {
-                    uri = "/401.html";
+                    User user = new User(pairs.get("account"), pairs.get("password"), pairs.get("email"));
+                    log.info("user: {}", user);
+                    InMemoryUserRepository.save(user);
+                    uri = "/index.html";
                 }
             }
+
+            log.info("uri: {}", uri);
 
             final String responseBody = makeResponseBody(uri);
             final String response = makeResponse(status, type, responseBody);
@@ -68,8 +82,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequest(InputStream inputStream) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    private String readRequest(BufferedReader reader) throws IOException {
         final StringBuilder builder = new StringBuilder();
 
         String line;
@@ -80,18 +93,23 @@ public class Http11Processor implements Runnable, Processor {
         return builder.toString();
     }
 
+    private String readRequestBody(String method, String request, BufferedReader reader) throws IOException {
+        if (!method.equals("POST")) {
+            return "";
+        }
+        String bodyLength = request.split("Content-Length:", 2)[1].trim();
+        bodyLength = bodyLength.split("\r\n")[0].trim();
+        int length = Integer.parseInt(bodyLength);
+        char[] body = new char[length];
+        reader.read(body, 0, length);
+        return new String(body);
+    }
+
     private String findType(String uri) {
         if (uri.contains(".")) {
             return List.of(uri.split("\\.")).getLast();
         }
         return "html";
-    }
-
-    private String findQueryString(String uri) {
-        if (uri.contains("?")) {
-            return List.of(uri.split("\\?")).getLast();
-        }
-        return "";
     }
 
     private Map<String, String> findQueries(String queryString) {
@@ -115,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
         if (uri.equals("/") || uri.isBlank()) {
             return "Hello world!";
         }
-        if (uri.equals("/login")) {
+        if (uri.equals("/login") || uri.equals("/register")) {
             uri = uri + ".html";
         }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);

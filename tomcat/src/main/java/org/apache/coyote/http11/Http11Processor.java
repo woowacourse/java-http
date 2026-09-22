@@ -3,10 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -62,13 +61,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest readHttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
         StringBuilder request = new StringBuilder();
         int contentLength = 0;
 
         String line;
-        while (!(line = reader.readLine()).isEmpty()) {
+        while (!(line = readLine(inputStream)).isEmpty()) {
             request.append(line).append(LINE_SEPARATOR);
 
             if (line.startsWith("Content-Length:")) {
@@ -80,11 +77,22 @@ public class Http11Processor implements Runnable, Processor {
 
         request.append(LINE_SEPARATOR);
 
-        char[] body = new char[contentLength];
-        reader.read(body);
-        request.append(body);
+        byte[] body = new byte[contentLength];
+        inputStream.read(body);
+        request.append(new String(body, StandardCharsets.UTF_8));
 
         return new HttpRequest(request.toString());
+    }
+
+    private String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream line = new ByteArrayOutputStream();
+        int value;
+        while ((value = inputStream.read()) != -1 && value != '\n') {
+            if (value != '\r') {
+                line.write(value);
+            }
+        }
+        return line.toString(StandardCharsets.US_ASCII);
     }
 
     private String buildResponse(HttpRequest httpRequest) {

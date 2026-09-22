@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,14 +39,45 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestUri = readRequestUri(reader);
-            if (requestUri == null) {
+            String requestLine = reader.readLine();
+            if (requestLine == null) {
                 return;
             }
 
+            String[] requestParts = requestLine.split(" ");
+
+            String method = requestParts[0];
+            String requestUri = requestParts[1];
+
+            Map<String, String> headers = readHeaders(reader);
+
+            String requestBody = "";
+            if (method.equals("POST")) {
+                String contentLengthHeader = headers.get("Content-Length");
+                if (contentLengthHeader != null) {
+                    int contentLength = Integer.parseInt(contentLengthHeader);
+                    char[] buffer = new char[contentLength];
+
+                    reader.read(buffer, 0, contentLength);
+                    requestBody = new String(buffer);
+                }
+            }
+
             String path = parsePath(requestUri);
+
             String queryString = parseQueryString(requestUri);
-            String redirectLocation = handleLogin(path, queryString);
+
+            String  parameters;
+            if (method.equals("POST")) {
+                parameters = requestBody;
+            } else {
+                parameters = queryString;
+            }
+
+            String redirectLocation = handleLogin(path, parameters);
+            if (redirectLocation == null) {
+                redirectLocation = handleRegister(method, path, parameters);
+            }
 
             if (redirectLocation != null) {
                 final var response = String.join("\r\n",
@@ -79,22 +111,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleLogin(String path, String queryString) {
-        if (!"/login".equals(path) || queryString.isEmpty()) {
+    private String handleLogin(String path, String parameters) {
+        if (!"/login".equals(path) || parameters.isEmpty()) {
             return null;
         }
 
-        Map<String, String> parametersByName = new HashMap<>();
-        String[] parameters = queryString.split("&");
-
-        for (String parameter : parameters) {
-            String[] nameAndValue = parameter.split("=");
-
-            if (nameAndValue.length != 2) {
-                return "/401.html";
-            }
-            parametersByName.put(nameAndValue[0], nameAndValue[1]);
-        }
+        Map<String, String> parametersByName = parseParameters(parameters);
 
         String account = parametersByName.get("account");
         String password = parametersByName.get("password");
@@ -107,6 +129,41 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password))
                 .map(user -> "/index.html")
                 .orElse("/401.html");
+    }
+
+    private Map<String, String> parseParameters(String parameters) {
+        Map<String, String> parametersByName = new HashMap<>();
+        String[] parameterPairs = parameters.split("&");
+
+        for (String parameter : parameterPairs) {
+            String[] nameAndValue = parameter.split("=");
+
+            if (nameAndValue.length != 2) {
+                return Map.of();
+            }
+            parametersByName.put(nameAndValue[0], nameAndValue[1]);
+        }
+
+        return parametersByName;
+    }
+
+    private String handleRegister(String method, String path, String parameters) {
+        if (!method.equals("POST") || !"/register".equals(path) || parameters.isEmpty()) {
+            return null;
+        }
+
+        Map<String, String> parametersByName = parseParameters(parameters);
+
+        String account = parametersByName.get("account");
+        String password = parametersByName.get("password");
+        String email = parametersByName.get("email");
+
+        if (account == null || password == null || email == null) {
+            return null;
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        return "/index.html";
     }
 
     private String parsePath(String requestUri) {
@@ -126,27 +183,6 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String readRequestUri(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-        if (requestLine == null) {
-            return null;
-        }
-
-        while (true) {
-            String headerLine = reader.readLine();
-            if (headerLine == null) {
-                return null;
-            }
-
-            if (headerLine.isEmpty()) {
-                break;
-            }
-        }
-
-        String[] requestParts = requestLine.split(" ");
-        return requestParts[1];
-    }
-
     private String resolveContentType(String requestUri) {
         if (requestUri.endsWith(".css")) {
             return "text/css;";
@@ -160,7 +196,7 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
-        if ("/login".equals(requestUri)) {
+        if ("/login".equals(requestUri) || "/register".equals(requestUri)) {
             requestUri = requestUri + ".html";
         }
 
@@ -172,5 +208,26 @@ public class Http11Processor implements Runnable, Processor {
 
             return Objects.requireNonNull(resourceStream).readAllBytes();
         }
+    }
+
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+
+        while (true) {
+            String headerLine = reader.readLine();
+
+            if (headerLine == null || headerLine.isEmpty()) {
+                break;
+            }
+
+            String[] parts = headerLine.split(":", 2);
+
+            String left = parts[0].strip();
+            String right = parts[1].strip();
+
+            headers.put(left, right);
+        }
+
+        return headers;
     }
 }

@@ -45,12 +45,12 @@ public class Http11Processor implements Runnable, Processor {
             log.info(request);
 
             String method = request.split(" ")[0];
-            log.info("method = {}", method);
             String uri = request.split(" ")[1];
             String body = readRequestBody(method, request, reader);
+            log.info("body: {}", body);
             final String type = findType(uri);
             String status = "200 OK";
-            log.info("body: {}", body);
+            HttpCookie httpCookie = new HttpCookie(findCookies(request));
 
             if (!body.isEmpty()) {
                 Map<String, String> pairs = findQueries(body);
@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("uri: {}", uri);
 
             final String responseBody = makeResponseBody(uri);
-            final String response = makeResponse(status, type, responseBody);
+            final String response = makeResponse(status, type, responseBody, httpCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -112,6 +112,15 @@ public class Http11Processor implements Runnable, Processor {
         return "html";
     }
 
+    private String findCookies(String request) {
+        if (!request.contains("Cookie")) {
+            return "";
+        }
+        String allCookies = request.split("Cookie: ", 2)[1];
+        log.info("allCookies: {}", allCookies);
+        return allCookies.trim();
+    }
+
     private Map<String, String> findQueries(String queryString) {
         final List<String> queries = List.of(queryString.split("&"));
         final Map<String, String> pairs = new HashMap<>();
@@ -131,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeResponseBody(String uri) throws IOException {
         if (uri.equals("/") || uri.isBlank()) {
-            return "Hello world!";
+            uri = "/index.html";
         }
         if (uri.equals("/login") || uri.equals("/register")) {
             uri = uri + ".html";
@@ -144,11 +153,21 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private String makeResponse(String status, String type, String responseBody) {
+    private String setCookie(HttpCookie httpCookie) {
+        if (httpCookie.containsKey("JSESSIONID")) {
+            return "";
+        }
+        return "Set-Cookie: JSESSIONID=" + httpCookie.addJSessionId() + " ";
+    }
+
+    private String makeResponse(String status, String type, String responseBody, HttpCookie httpCookie) {
+
+        final String setCookie = setCookie(httpCookie);
         return String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
+                setCookie,
                 "",
                 responseBody);
     }

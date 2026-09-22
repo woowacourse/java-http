@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +95,9 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleLogin(HttpRequest request) {
         Map<String, String> parameters = request.getParameters();
         if (canLogin(parameters)) {
-            return HttpResponse.found("/index.html");
+            HttpResponse response = HttpResponse.found("/index.html");
+            response.addCookie(UUID.randomUUID().toString());
+            return response;
         }
         return HttpResponse.found("/401.html");
     }

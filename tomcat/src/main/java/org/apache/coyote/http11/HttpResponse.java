@@ -30,6 +30,9 @@ public class HttpResponse {
         return new HttpResponse(HttpStatus.FOUND, headers, "");
     }
 
+    public void addCookie(String jSessionId) {
+        headers.put("Set-Cookie", "JSESSIONID=" + jSessionId);
+    }
 
     public byte[] getBytes() {
         List<String> lines = new ArrayList<>();

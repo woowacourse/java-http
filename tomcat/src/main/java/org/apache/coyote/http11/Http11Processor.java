@@ -1,16 +1,29 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_ROOT = "static";
+    private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
     private final Socket connection;
 
@@ -29,19 +42,173 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+            );
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String requestLine = reader.readLine();
+            if (requestLine == null) {
+                return;
+            }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            readHeaders(reader);
+
+            final var requestUri = extractRequestUri(requestLine);
+            final var requestPath = extractRequestPath(requestUri);
+            final var queryParameters = parseQueryParameters(requestUri);
+
+            logLoginUser(requestPath, queryParameters);
+
+            final var responseBody = readResponseBody(requestPath);
+            final var contentType = findContentType(requestPath);
+
+            writeResponse(outputStream, contentType, responseBody);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void readHeaders(final BufferedReader reader) throws IOException {
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            if (line.isEmpty()) {
+                return;
+            }
+        }
+    }
+
+    private String extractRequestUri(final String requestLine) {
+        final var requestParts = requestLine.trim().split("\\s+");
+
+        if (requestParts.length != 3) {
+            throw new UncheckedServletException(
+                    new IllegalArgumentException("유효하지 않은 요청 라인입니다: " + requestLine)
+            );
+        }
+
+        return requestParts[1];
+    }
+
+    private String extractRequestPath(final String requestUri) {
+        final var queryIndex = requestUri.indexOf('?');
+
+        if (queryIndex < 0) {
+            return requestUri;
+        }
+
+        return requestUri.substring(0, queryIndex);
+    }
+
+    private Map<String, String> parseQueryParameters(final String requestUri) {
+        final var queryIndex = requestUri.indexOf('?');
+
+        if (queryIndex < 0 || queryIndex == requestUri.length() - 1) {
+            return Map.of();
+        }
+
+        final Map<String, String> parameters = new HashMap<>();
+        final var queryString = requestUri.substring(queryIndex + 1);
+
+        for (final var parameter : queryString.split("&")) {
+            final var nameAndValue = parameter.split("=", 2);
+            if (nameAndValue.length == 2) {
+                parameters.put(
+                        URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8)
+                );
+            }
+        }
+
+        return parameters;
+    }
+
+    private void logLoginUser(
+            final String requestPath,
+            final Map<String, String> queryParameters
+    ) {
+        if (!"/login".equals(requestPath)) {
+            return;
+        }
+
+        final var account = queryParameters.get("account");
+        final var password = queryParameters.get("password");
+
+        if (account == null || password == null) {
+            return;
+        }
+
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info("회원 조회 결과: account={}", user.getAccount()));
+    }
+
+    private byte[] readResponseBody(final String requestPath) throws IOException {
+        if ("/".equals(requestPath)) {
+            return "Hello world!".getBytes(StandardCharsets.UTF_8);
+        }
+
+        validateRequestPath(requestPath);
+
+        final var resourcePath = findResourcePath(requestPath);
+        final var classLoader = Http11Processor.class.getClassLoader();
+
+        try (final var resource = classLoader.getResourceAsStream(resourcePath)) {
+            if (resource == null) {
+                throw new IOException("리소스를 찾을 수 없습니다: " + resourcePath);
+            }
+
+            return resource.readAllBytes();
+        }
+    }
+
+    private String findResourcePath(final String requestPath) {
+        if ("/login".equals(requestPath)) {
+            return STATIC_ROOT + "/login.html";
+        }
+
+        return STATIC_ROOT + requestPath;
+    }
+
+    private void validateRequestPath(final String requestPath) {
+        final var pathSegments = List.of(requestPath.split("/"));
+
+        if (!requestPath.startsWith("/") || pathSegments.contains("..")) {
+            throw new UncheckedServletException(
+                    new IllegalArgumentException("유효하지 않은 요청 경로입니다: " + requestPath)
+            );
+        }
+    }
+
+    private String findContentType(final String requestPath) {
+        final var contentType = URLConnection.guessContentTypeFromName(requestPath);
+
+        if ("/".equals(requestPath) || "text/html".equals(contentType)) {
+            return HTML_CONTENT_TYPE;
+        }
+
+        if (contentType == null) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+
+        return contentType;
+    }
+
+    private void writeResponse(
+            final OutputStream outputStream,
+            final String contentType,
+            final byte[] responseBody
+    ) throws IOException {
+        final var responseHeaders = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.length + " ",
+                "",
+                ""
+        );
+
+        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseBody);
+        outputStream.flush();
     }
 }

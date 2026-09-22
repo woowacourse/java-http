@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
@@ -10,6 +11,7 @@ public class HttpRequest {
     private final String httpVersion;
     private final HttpHeaders headers;
     private final HttpRequestBody body;
+    private final Session session;
 
     public HttpRequest(String requestLine, HttpHeaders headers, HttpRequestBody body) {
         validateNotBlank(requestLine);
@@ -34,6 +36,11 @@ public class HttpRequest {
         this.queryString = queryString;
         this.headers = headers;
         this.body = body;
+        this.session = null;
+    }
+
+    public HttpRequest withSession(Session session) {
+        return new HttpRequest(this, session);
     }
 
     public String getMethod() {
@@ -58,6 +65,20 @@ public class HttpRequest {
 
     public HttpRequestBody getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    private HttpRequest(HttpRequest request, Session session) {
+        this.method = request.method;
+        this.path = request.path;
+        this.queryString = request.queryString;
+        this.httpVersion = request.httpVersion;
+        this.headers = request.headers;
+        this.body = request.body;
+        this.session = session;
     }
 
     private void validateNotBlank(String requestLine) {

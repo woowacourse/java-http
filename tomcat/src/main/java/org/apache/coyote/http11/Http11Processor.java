@@ -177,12 +177,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String findContentType(final String requestUri) {
-        if (requestUri.endsWith(".css")) {
+    private String findContentType(final String requestPath) {
+        if (requestPath.endsWith(".css")) {
             return CSS_CONTENT_TYPE;
         }
 
-        if (requestUri.endsWith(".js")) {
+        if (requestPath.endsWith(".js")) {
             return JAVASCRIPT_CONTENT_TYPE;
         }
 

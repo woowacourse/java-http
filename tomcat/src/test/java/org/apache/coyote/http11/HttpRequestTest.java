@@ -2,9 +2,8 @@ package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,9 +35,7 @@ class HttpRequestTest {
                 "Content-Length: 65",
                 "",
                 "a".repeat(65));
-        final BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
-
-        final HttpRequest request = HttpRequest.from(reader);
+        final HttpRequest request = requestFrom(httpRequest);
 
         assertThat(request.getMethod()).isEqualTo("POST");
         assertThat(request.getPath()).isEqualTo("/register");
@@ -56,14 +53,26 @@ class HttpRequestTest {
                 "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 requestBody);
-        final BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
-
-        final HttpRequest request = HttpRequest.from(reader);
+        final HttpRequest request = requestFrom(httpRequest);
 
         assertThat(request.getBodyParams())
                 .containsEntry("account", "new-user")
                 .containsEntry("password", "password")
                 .containsEntry("email", "new-user@example.com");
+    }
+
+    @Test
+    void POST_요청의_한글_form_본문을_바이트_길이만큼_읽는다() throws IOException {
+        final String requestBody = "account=우테코";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                requestBody);
+        final HttpRequest request = requestFrom(httpRequest);
+
+        assertThat(request.getBodyParams()).containsEntry("account", "우테코");
     }
 
     @Test
@@ -74,9 +83,7 @@ class HttpRequestTest {
                 "Cookie: yummy_cookie=choco; JSESSIONID=session-id",
                 "",
                 "");
-        final BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
-
-        final HttpRequest request = HttpRequest.from(reader);
+        final HttpRequest request = requestFrom(httpRequest);
 
         assertThat(request.getCookies().getValue("JSESSIONID")).contains("session-id");
     }
@@ -88,10 +95,12 @@ class HttpRequestTest {
                 "Host: localhost:8080",
                 "",
                 "");
-        final BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
-
-        final HttpRequest request = HttpRequest.from(reader);
+        final HttpRequest request = requestFrom(httpRequest);
 
         assertThat(request.getCookies().getValue("JSESSIONID")).isEmpty();
+    }
+
+    private HttpRequest requestFrom(final String httpRequest) throws IOException {
+        return HttpRequest.from(new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8)));
     }
 }

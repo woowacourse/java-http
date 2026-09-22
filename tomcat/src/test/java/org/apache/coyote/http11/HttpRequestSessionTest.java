@@ -5,9 +5,9 @@ import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,7 +61,7 @@ class HttpRequestSessionTest {
                 "Cookie: " + cookie,
                 "",
                 "");
-        return HttpRequest.from(new BufferedReader(new StringReader(httpRequest)));
+        return requestFrom(httpRequest);
     }
 
     private HttpRequest requestWithoutCookie() throws IOException {
@@ -69,6 +69,10 @@ class HttpRequestSessionTest {
                 "GET /index.html HTTP/1.1",
                 "",
                 "");
-        return HttpRequest.from(new BufferedReader(new StringReader(httpRequest)));
+        return requestFrom(httpRequest);
+    }
+
+    private HttpRequest requestFrom(final String httpRequest) throws IOException {
+        return HttpRequest.from(new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8)));
     }
 }

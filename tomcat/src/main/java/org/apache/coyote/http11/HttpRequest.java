@@ -3,8 +3,9 @@ package org.apache.coyote.http11;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -40,23 +41,40 @@ public class HttpRequest {
                 new TreeMap<>(String.CASE_INSENSITIVE_ORDER), new HashMap<>());
     }
 
-    public static HttpRequest from(final BufferedReader reader) throws IOException {
-        final String requestLine = reader.readLine();
+    public static HttpRequest from(final InputStream inputStream) throws IOException {
+        final String requestLine = readLine(inputStream);
         if (requestLine == null) {
             throw new IOException("HTTP 요청 줄을 읽을 수 없습니다.");
         }
         final HttpRequest request = from(requestLine);
 
         String headerLine;
-        while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
+        while ((headerLine = readLine(inputStream)) != null && !headerLine.isEmpty()) {
             final String[] header = headerLine.split(":", 2);
             request.headers.put(header[0].trim(), header[1].trim());
         }
-        request.bodyParams.putAll(readBodyParams(reader, request.headers));
+        request.bodyParams.putAll(readBodyParams(inputStream, request.headers));
         return request;
     }
 
-    private static Map<String, String> readBodyParams(final BufferedReader reader,
+    private static String readLine(final InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int current;
+        while ((current = inputStream.read()) != -1 && current != '\n') {
+            buffer.write(current);
+        }
+        if (current == -1 && buffer.size() == 0) {
+            return null;
+        }
+
+        final byte[] line = buffer.toByteArray();
+        final int length = line.length > 0 && line[line.length - 1] == '\r'
+                ? line.length - 1
+                : line.length;
+        return new String(line, 0, length, StandardCharsets.ISO_8859_1);
+    }
+
+    private static Map<String, String> readBodyParams(final InputStream inputStream,
                                                        final Map<String, String> headers) throws IOException {
         final String contentLengthHeader = headers.get("Content-Length");
         if (contentLengthHeader == null) {
@@ -64,16 +82,11 @@ public class HttpRequest {
         }
 
         final int contentLength = Integer.parseInt(contentLengthHeader);
-        final char[] buffer = new char[contentLength];
-        int totalRead = 0;
-        while (totalRead < contentLength) {
-            final int read = reader.read(buffer, totalRead, contentLength - totalRead);
-            if (read == -1) {
-                throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
-            }
-            totalRead += read;
+        final byte[] body = inputStream.readNBytes(contentLength);
+        if (body.length < contentLength) {
+            throw new IOException("요청 본문이 Content-Length보다 짧습니다.");
         }
-        return extractFormParams(new String(buffer));
+        return extractFormParams(new String(body, StandardCharsets.UTF_8));
     }
 
     private static Map<String, String> extractFormParams(final String requestBody) {

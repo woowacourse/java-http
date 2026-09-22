@@ -4,15 +4,12 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,8 +37,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
             final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest request = HttpRequest.from(reader);
+            HttpRequest request = HttpRequest.from(inputStream);
             HttpResponse response = new HttpResponse(outputStream);
 
             final Optional<String> requestedSessionId = request.getCookies().getValue("JSESSIONID");

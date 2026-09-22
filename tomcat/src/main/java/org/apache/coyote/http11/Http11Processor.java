@@ -50,6 +50,8 @@ public class Http11Processor implements Runnable, Processor {
                 path = uri.substring(0, index);
                 queryString = uri.substring(index + 1);
             }
+            Map<String, String> headers = readHeaders(reader);
+            String requestBody = readRequestBody(reader, headers);
             if ("/login".equals(path) && !queryString.isEmpty()) {
                 login(queryString);
             }
@@ -60,6 +62,35 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] keyValue = line.split(":", 2);
+            if (keyValue.length == 2) {
+                headers.put(keyValue[0].trim(), keyValue[1].trim());
+            }
+        }
+        return headers;
+    }
+
+    private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        if (!headers.containsKey("Content-Length")) {
+            return "";
+        }
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        int totalRead = 0;
+        while (totalRead < contentLength) {
+            int readCount = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (readCount == -1) {
+                break;
+            }
+            totalRead += readCount;
+        }
+        return new String(buffer, 0, totalRead);
     }
 
     private String createResponse(String path) throws IOException {

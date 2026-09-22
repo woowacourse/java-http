@@ -16,7 +16,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final long DEFAULT_USER_ID = 999L;
-    private static final String LINE_SEPARATOR = "\r\n";
 
     private final Socket connection;
 
@@ -37,28 +36,24 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            String response = buildResponse(httpRequest);
-            response = addSessionCookie(httpRequest, response);
-            outputStream.write(response.getBytes());
+            HttpResponse httpResponse = buildResponse(httpRequest);
+            addSessionCookie(httpRequest, httpResponse);
+            outputStream.write(httpResponse.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String addSessionCookie(HttpRequest httpRequest, String response) {
+    private void addSessionCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.getCookies().hasSessionId()) {
-            return response;
+            return;
         }
 
-        String cookieHeader = "Set-Cookie: JSESSIONID=" + httpRequest.getOrCreateSession().getId() + LINE_SEPARATOR;
-        int endOfStatusLine = response.indexOf(LINE_SEPARATOR) + LINE_SEPARATOR.length();
-        return response.substring(0, endOfStatusLine)
-                + cookieHeader
-                + response.substring(endOfStatusLine);
+        httpResponse.setHeader("Set-Cookie", "JSESSIONID=" + httpRequest.getOrCreateSession().getId());
     }
 
-    private String buildResponse(HttpRequest httpRequest) {
+    private HttpResponse buildResponse(HttpRequest httpRequest) {
         if ("/login".equals(httpRequest.getPath())) {
             return buildLoginResponse(httpRequest);
         }
@@ -72,14 +67,10 @@ public class Http11Processor implements Runnable, Processor {
         return buildResourceResponse(httpRequest.getPath());
     }
 
-    private String buildLoginResponse(HttpRequest httpRequest) {
+    private HttpResponse buildLoginResponse(HttpRequest httpRequest) {
         Session session = httpRequest.findSession();
         if ("GET".equals(httpRequest.getMethod()) && isLoggedIn(session)) {
-            return String.join(LINE_SEPARATOR,
-                    "HTTP/1.1 302 Found",
-                    "Location: /index.html",
-                    "",
-                    "");
+            return buildRedirectResponse("/index.html");
         }
 
         if (!"POST".equals(httpRequest.getMethod())) {
@@ -91,36 +82,24 @@ public class Http11Processor implements Runnable, Processor {
         var user = InMemoryUserRepository.findByAccountAndPassword(account, password);
         if (user.isPresent()) {
             httpRequest.getOrCreateSession().setAttribute("user", user.get());
-            return String.join(LINE_SEPARATOR,
-                    "HTTP/1.1 302 Found",
-                    "Location: /index.html",
-                    "",
-                    "");
+            return buildRedirectResponse("/index.html");
         }
 
-        return String.join(LINE_SEPARATOR,
-                "HTTP/1.1 302 Found",
-                "Location: /401.html",
-                "",
-                "");
+        return buildRedirectResponse("/401.html");
     }
 
     private boolean isLoggedIn(Session session) {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private String buildRegisterResponse(HttpRequest httpRequest) {
+    private HttpResponse buildRegisterResponse(HttpRequest httpRequest) {
         if (!"POST".equals(httpRequest.getMethod())) {
             return buildResourceResponse("/register.html");
         }
 
         register(httpRequest.getBody());
 
-        return String.join(LINE_SEPARATOR,
-                "HTTP/1.1 302 Found",
-                "Location: /index.html",
-                "",
-                "");
+        return buildRedirectResponse("/index.html");
     }
 
     private void register(Map<String, String> requestBody) {
@@ -132,29 +111,27 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
     }
 
-    private String buildRootResponse() {
-        String responseBody = "Hello world!";
-
-        return String.join(LINE_SEPARATOR,
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
+    private HttpResponse buildRedirectResponse(String location) {
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.redirect(location);
+        return httpResponse;
     }
 
-    private String buildResourceResponse(String path) {
+    private HttpResponse buildRootResponse() {
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setBody("Hello world!", "text/html;charset=utf-8");
+        return httpResponse;
+    }
+
+    private HttpResponse buildResourceResponse(String path) {
         final var resource = findResource(path);
         if (resource == null) {
             throw new RuntimeException("자원을 찾을 수 없습니다.");
         }
 
-        return String.join(LINE_SEPARATOR,
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + getContentType(path) + " ",
-                "Content-Length: " + resource.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                resource);
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setBody(resource, getContentType(path));
+        return httpResponse;
     }
 
     private String getContentType(String path) {

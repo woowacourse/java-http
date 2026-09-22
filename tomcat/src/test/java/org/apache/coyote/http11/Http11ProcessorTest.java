@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -18,10 +20,11 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(String.join("\r\n",
                 "GET / HTTP/1.1",
                 "Host: localhost:8080",
-                "Cookie: JSESSIONID=existing-session",
+                "Cookie: JSESSIONID=테스트세션",
                 "",
                 ""));
         final var processor = new Http11Processor(socket);
+        new SessionManager().add(new Session("테스트세션"));
 
         // when
         processor.process(socket);
@@ -44,12 +47,13 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=existing-session",
+                "Cookie: JSESSIONID=테스트세션",
                 "",
                 "");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+        new SessionManager().add(new Session("테스트세션"));
 
         // when
         processor.process(socket);

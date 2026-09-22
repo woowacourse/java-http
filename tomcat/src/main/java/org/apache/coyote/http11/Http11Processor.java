@@ -20,7 +20,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,18 +62,25 @@ public class Http11Processor implements Runnable, Processor {
             String cookieHeader = extractCookieHeader(requestHead);
             HttpCookie httpCookie = new HttpCookie(cookieHeader);
             String sessionId = httpCookie.getValue("JSESSIONID");
-            boolean shouldSetCookie = sessionId.isBlank();
 
-            if (shouldSetCookie) {
+            boolean shouldSetCookie = false;
+            SessionManager sessionManager = new SessionManager();
+            Session session = sessionManager.findSession(sessionId);
+            if (session == null) {
+                shouldSetCookie = true;
                 sessionId = UUID.randomUUID().toString();
+                session = new Session(sessionId);
+
+                sessionManager.add(session);
             }
+
 
             int contentLength = extractContentLength(requestHead);
             String requestBody = readRequestBody(reader, contentLength);
 
-            String response = resolveResponse(requestHead, requestBody);
+            String response = resolveResponse(requestHead, requestBody, session);
             if (shouldSetCookie) {
-                response = addSetCookieHeader(response, sessionId);
+                response = addSetCookieHeader(response, session);
             }
 
             outputStream.write(response.getBytes());
@@ -140,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(body);
     }
 
-    private String resolveResponse(List<String> requestHead, String requestBody) {
+    private String resolveResponse(List<String> requestHead, String requestBody, Session session) {
         final String requestLine = extractRequestLine(requestHead);
         final String requestMethod = requestLine.split(REQUEST_LINE_ELEMENT_SEPARATOR)[0];
         final String requestTarget = extractRequestTarget(requestLine);
@@ -151,11 +161,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestPath.equals("/login")) {
-            return handleLogin(requestMethod, requestBody);
+            return handleLogin(requestMethod, requestBody, session);
         }
 
         if (requestPath.equals("/register")) {
-            return handleRegister(requestMethod, requestBody);
+            return handleRegister(requestMethod, requestBody, session);
         }
 
         try {
@@ -185,7 +195,13 @@ public class Http11Processor implements Runnable, Processor {
         return requestTarget;
     }
 
-    private String handleLogin(String requestMethod, String requestBody) {
+    private String handleLogin(String requestMethod, String requestBody, Session session) {
+        User loggedInUser = (User) session.getAttribute("user");
+
+        if (requestMethod.equals("GET") && loggedInUser != null) {
+            return createRedirectResponse("/index.html");
+        }
+
         if (!requestMethod.equals("POST")) {
             return createOkResponse("/login.html");
         }
@@ -196,13 +212,21 @@ public class Http11Processor implements Runnable, Processor {
         String password = requestFormData.getOrDefault("password", "");
 
         if (areCredentialsValid(account, password)) {
+            User user = InMemoryUserRepository.findByAccount(account).get();
+            session.setAttribute("user", user);
             return createRedirectResponse("/index.html");
         }
 
         return createRedirectResponse("/401.html");
     }
 
-    private String handleRegister(String requestMethod, String requestBody) {
+    private String handleRegister(String requestMethod, String requestBody, Session session) {
+        User loggedInUser = (User) session.getAttribute("user");
+
+        if (requestMethod.equals("GET") && loggedInUser != null) {
+            return createRedirectResponse("/index.html");
+        }
+
         if (!requestMethod.equals("POST")) {
             return createOkResponse("/register.html");
         }
@@ -288,13 +312,13 @@ public class Http11Processor implements Runnable, Processor {
                 .isPresent();
     }
 
-    private String addSetCookieHeader(String response, String sessionId) {
+    private String addSetCookieHeader(String response, Session session) {
         int statusLineEndIndex = response.indexOf("\r\n");
         String statusLine = response.substring(0, statusLineEndIndex);
         String remainingResponse = response.substring(statusLineEndIndex);
 
         return statusLine
-                + "\r\nSet-Cookie: JSESSIONID=" + sessionId
+                + "\r\nSet-Cookie: JSESSIONID=" + session.getId()
                 + remainingResponse;
     }
 

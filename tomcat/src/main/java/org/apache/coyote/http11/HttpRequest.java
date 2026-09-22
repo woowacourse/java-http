@@ -15,6 +15,7 @@ public class HttpRequest {
     private String path;
     private Map<String, String> headers = new HashMap<>();
     private Map<String, String> params = new HashMap<>();
+    private Session session;
 
     public HttpRequest(InputStream in) {
         try {
@@ -74,7 +75,11 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        return SessionManager.getSession(getCookies().getCookie("JSESSIONID"));
+        return session;
+    }
+
+    void setSession(Session session) {
+        this.session = session;
     }
 
     private void processRequestLine(String requestLine) {

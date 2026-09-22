@@ -23,6 +23,8 @@ import org.apache.coyote.http11.Session;
  */
 public interface Manager {
 
+    Session createSession();
+
     /**
      * Add this Session to the set of active Sessions for this Manager.
      *

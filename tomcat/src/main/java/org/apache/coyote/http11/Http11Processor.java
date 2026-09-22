@@ -1,11 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.UUID;
+import org.apache.catalina.Manager;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.ControllerMapper;
 import org.apache.coyote.Processor;
@@ -17,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -37,18 +38,15 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse(outputStream);
             String path = request.getPath();
 
-            if (request.getCookies().getCookie("JSESSIONID") == null) {
-                response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-            }
-
             Controller controller = ControllerMapper.getController(path);
-
-            if (controller == null) {
-                String root = getDefaultPath(path);
-                response.forward(root);
-                return;
+            String sessionId = request.getCookies().getCookie("JSESSIONID");
+            Session session = sessionManager.findSession(sessionId);
+            if (session == null) {
+                session = sessionManager.createSession();
+                response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
 
+            request.setSession(session);
             controller.service(request, response);
         } catch (IOException e) {
             log.error(e.getMessage(), e);

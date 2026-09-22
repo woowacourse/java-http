@@ -3,11 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,46 +52,20 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            HttpRequestReader requestReader = new HttpRequestReader();
+            HttpRequest request = requestReader.read(inputStream);
 
-            String requestLine = bufferedReader.readLine();
-
-            if (requestLine == null) {
+            if (request == null) {
                 return;
             }
 
-            String[] requestParts = requestLine.split(" ");
-            String method = requestParts[0];
-            String uri = requestParts[1];
-            String path = uri;
+            String method = request.getMethod();
+            String path = request.getPath();
 
-            int index = uri.indexOf("?");
+            String cookieHeader = request.getHeaders().get("Cookie");
 
-            if (index != -1) {
-                path = uri.substring(0, index);
-            }
-
-            int contentLength = 0;
-            String cookieHeader = "";
-            String line = bufferedReader.readLine();
-
-            while (!"".equals(line)) {
-                if (line == null) {
-                    return;
-                }
-
-                String[] header = line.split(":", 2);
-
-                if (header.length == 2 && header[0].equalsIgnoreCase("Content-Length")) {
-                    contentLength = Integer.parseInt(header[1].trim());
-                }
-
-                if (header.length == 2 && header[0].equalsIgnoreCase("Cookie")) {
-                    cookieHeader = header[1].trim();
-                }
-
-                line = bufferedReader.readLine();
+            if (cookieHeader == null) {
+                cookieHeader = "";
             }
 
             Map<String, Cookie> cookies = parseCookies(cookieHeader);
@@ -151,8 +122,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (method.equals("POST") && path.equals(JOIN_PATH)) {
-                String requestBody = readRequestBody(bufferedReader, contentLength);
-                Map<String, String> parameters = parseFormData(requestBody);
+                Map<String, String> parameters = request.getBody().parseFormData();
 
                 String account = parameters.getOrDefault("account", "");
                 String email = parameters.getOrDefault("email", "");
@@ -183,8 +153,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (method.equals("POST") && path.equals(LOGIN_PATH)) {
-                String requestBody = readRequestBody(bufferedReader, contentLength);
-                Map<String, String> parameters = parseFormData(requestBody);
+                Map<String, String> parameters = request.getBody().parseFormData();
 
                 String account = parameters.getOrDefault("account", "");
                 String password = parameters.getOrDefault("password", "");
@@ -215,46 +184,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
-        char[] body = new char[contentLength];
-        int totalRead = 0;
-
-        while (totalRead < contentLength) {
-            int count = reader.read(
-                    body, totalRead, contentLength - totalRead
-            );
-
-            if (count == -1) {
-                throw new IOException("요청 본문이 끝까지 도착하지 않았습니다.");
-            }
-
-            totalRead += count;
-        }
-
-        return new String(body);
-    }
-
-    // 입력 예시: "account=gugu&password=1234"
-    private Map<String, String> parseFormData(String queryString) {
-        Map<String, String> parameters = new HashMap<>();
-
-        for (String parameter : queryString.split("&")) {
-            String[] keyValue = parameter.split("=", 2);
-
-            if (keyValue.length != 2) {
-                continue;
-            }
-
-            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-
-            parameters.put(key, value);
-
-        }
-
-        return parameters;
     }
 
     // 입력 예시: "yummy_cookie=choco; JSESSIONID=abc123"

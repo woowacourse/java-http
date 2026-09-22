@@ -2,12 +2,20 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +28,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -36,10 +46,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-            final String requestLine = reader.readLine();
+            final var input = new BufferedInputStream(inputStream);
+            final String requestLine = readHttpLine(input);
 
             if (requestLine == null) {
                 return;
@@ -59,17 +67,67 @@ public class Http11Processor implements Runnable, Processor {
             log.info("method: {}, path: {}, version: {}",
                     method, path, httpVersion);
 
-            if ("/login".equals(path) && targetParts.length == 2) {
-                final Map<String, String> parameters = parseQuery(targetParts[1]);
+            final Map<String, String> headers = readHeaders(input);
+            final String body = readBody(input, headers);
+            final String sessionId = findSessionId(headers.get("cookie"));
+            HttpSession session = sessionManager.findSession(sessionId);
+            String setCookieHeader = "";
+            if (session == null) {
+                setCookieHeader = createSessionCookie(UUID.randomUUID().toString());
+            }
+
+            if ("/register".equals(path) && "POST".equals(method)) {
+                final Map<String, String> parameters = parseQuery(body);
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
+                final String email = parameters.get("email");
+
+                if (account == null || password == null || email == null) {
+                    throw new IOException("회원가입 필수 항목이 누락되었습니다.");
+                }
+
+                if (!InMemoryUserRepository.save(new User(account, password, email))) {
+                    writeRegistrationConflict(outputStream, setCookieHeader);
+                    return;
+                }
+                writeRedirect(outputStream, "/index.html", setCookieHeader);
+                return;
+            }
+
+            if ("/login".equals(path) && "POST".equals(method)) {
+                final Map<String, String> parameters = parseQuery(body);
 
                 final String account = parameters.get("account");
                 final String password = parameters.get("password");
 
-                if (account != null && password != null) {
-                    InMemoryUserRepository.findByAccount(account)
-                            .filter(user -> user.checkPassword(password))
-                            .ifPresent(user ->
-                                    log.info("회원 조회 성공: {}", user.getAccount()));
+                final User user = account == null || password == null
+                        ? null
+                        : InMemoryUserRepository.findByAccount(account)
+                                .filter(candidate -> candidate.checkPassword(password))
+                                .orElse(null);
+
+                if (user != null) {
+                    if (session != null) {
+                        invalidateSession(session);
+                    }
+                    session = createSession();
+                    session.setAttribute("user", user);
+                    setCookieHeader = createSessionCookie(session.getId());
+                    log.info("회원 조회 성공: {}", account);
+                }
+
+                final String location = user != null ? "/index.html" : "/401.html";
+                writeRedirect(outputStream, location, setCookieHeader);
+                return;
+            }
+
+            if ("GET".equals(method) && "/login".equals(path)) {
+                if (isLoggedIn(session)) {
+                    writeRedirect(outputStream, "/index.html", setCookieHeader);
+                    return;
+                }
+                if (session != null) {
+                    setCookieHeader = createSessionCookie(UUID.randomUUID().toString());
                 }
             }
 
@@ -77,9 +135,11 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "text/html;charset=utf-8";
 
             if ("/index.html".equals(path)
+                    || "/401.html".equals(path)
                     || "/css/styles.css".equals(path)
                     || path.endsWith(".js")
-                    || "/login".equals(path)) {
+                    || "/login".equals(path)
+                    || "/register".equals(path)) {
 
                 if ("/css/styles.css".equals(path)) {
                     contentType = "text/css;charset=utf-8";
@@ -87,8 +147,8 @@ public class Http11Processor implements Runnable, Processor {
                     contentType = "text/javascript;charset=utf-8";
                 }
 
-                final String resourcePath = "/login".equals(path)
-                        ? "static/login.html"
+                final String resourcePath = "/login".equals(path) || "/register".equals(path)
+                        ? "static" + path + ".html"
                         : "static" + path;
 
                 responseBody = readResource(resourcePath);
@@ -96,9 +156,8 @@ public class Http11Processor implements Runnable, Processor {
             final String responseHeader = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    "");
+                    "Content-Length: " + responseBody.length + " ")
+                    + "\r\n" + setCookieHeader + "\r\n";
 
             outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);
@@ -108,6 +167,130 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isLoggedIn(HttpSession session) {
+        if (session == null) {
+            return false;
+        }
+        try {
+            return session.getAttribute("user") instanceof User;
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
+
+    private void invalidateSession(HttpSession session) {
+        try {
+            session.invalidate();
+        } catch (IllegalStateException e) {
+            log.debug("이미 무효화된 세션입니다.");
+        }
+    }
+
+    private HttpSession createSession() {
+        final HttpSession session = new Session(UUID.randomUUID().toString(), sessionManager);
+        sessionManager.add(session);
+        return session;
+    }
+
+    private String createSessionCookie(String sessionId) {
+        return "Set-Cookie: JSESSIONID=" + sessionId + "; Path=/\r\n";
+    }
+
+    private String findSessionId(String cookieHeader) {
+        if (cookieHeader == null) {
+            return null;
+        }
+
+        for (String cookie : cookieHeader.split(";")) {
+            final String[] pair = cookie.trim().split("=", 2);
+            if (pair.length == 2
+                    && "JSESSIONID".equals(pair[0].trim())
+                    && !pair[1].isBlank()) {
+                return pair[1].trim();
+            }
+        }
+        return null;
+    }
+
+    private void writeRegistrationConflict(OutputStream output, String setCookieHeader)
+            throws IOException {
+        final byte[] body = "이미 사용 중인 계정입니다.".getBytes(StandardCharsets.UTF_8);
+        final String header = String.join("\r\n",
+                "HTTP/1.1 409 Conflict",
+                "Content-Type: text/plain;charset=utf-8",
+                "Content-Length: " + body.length)
+                + "\r\n" + setCookieHeader + "\r\n";
+        output.write(header.getBytes(StandardCharsets.UTF_8));
+        output.write(body);
+        output.flush();
+    }
+
+    private void writeRedirect(OutputStream output, String location,
+                               String setCookieHeader) throws IOException {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0")
+                + "\r\n" + setCookieHeader + "\r\n";
+
+        output.write(response.getBytes(StandardCharsets.UTF_8));
+        output.flush();
+    }
+
+    private String readHttpLine(InputStream input) throws IOException {
+        final var bytes = new ByteArrayOutputStream();
+        int value;
+
+        while ((value = input.read()) != -1) {
+            if (value == '\n') {
+                final String line = bytes.toString(StandardCharsets.UTF_8);
+                return line.endsWith("\r") ? line.substring(0, line.length() - 1) : line;
+            }
+            bytes.write(value);
+        }
+
+        return bytes.size() == 0 ? null : bytes.toString(StandardCharsets.UTF_8);
+    }
+
+    private Map<String, String> readHeaders(InputStream input) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+
+        while ((line = readHttpLine(input)) != null) {
+            if (line.isEmpty()) {
+                return headers;
+            }
+
+            final String[] parts = line.split(":", 2);
+            if (parts.length != 2) {
+                throw new IOException("잘못된 요청 헤더입니다.");
+            }
+            headers.put(parts[0].trim().toLowerCase(Locale.ROOT), parts[1].trim());
+        }
+
+        throw new IOException("요청 헤더가 완전히 도착하지 않았습니다.");
+    }
+
+    private String readBody(InputStream input, Map<String, String> headers) throws IOException {
+        final int contentLength;
+        try {
+            contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+        } catch (NumberFormatException e) {
+            throw new IOException("잘못된 Content-Length입니다.");
+        }
+
+        if (contentLength < 0) {
+            throw new IOException("잘못된 Content-Length입니다.");
+        }
+
+        final byte[] body = input.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new IOException("요청 본문이 완전히 도착하지 않았습니다.");
+        }
+
+        return new String(body, StandardCharsets.UTF_8);
     }
 
     private Map<String, String> parseQuery(String query) {

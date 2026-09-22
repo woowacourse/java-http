@@ -5,6 +5,7 @@ import support.StubSocket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,5 +62,31 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+    }
+
+    @Test
+    void 정적_리소스에_맞는_Content_Type을_응답한다() {
+        final var contentTypes = Map.of(
+                "/css/styles.css", "text/css",
+                "/js/scripts.js", "text/javascript",
+                "/assets/img/error-404-monochrome.svg", "image/svg+xml"
+        );
+
+        contentTypes.forEach((path, contentType) -> {
+            final var httpRequest = String.join("\r\n",
+                    "GET " + path + " HTTP/1.1",
+                    "Host: localhost:8080",
+                    "",
+                    ""
+            );
+            final var socket = new StubSocket(httpRequest);
+            final var processor = new Http11Processor(socket);
+
+            processor.process(socket);
+
+            assertThat(socket.output())
+                    .as(path)
+                    .contains("Content-Type: " + contentType);
+        });
     }
 }

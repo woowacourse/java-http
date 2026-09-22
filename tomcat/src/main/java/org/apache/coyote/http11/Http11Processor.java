@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_ROOT = "static";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
-    private static final String CSS_CONTENT_TYPE = "text/css";
-    private static final String JAVASCRIPT_CONTENT_TYPE = "application/javascript";
+    private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
     private final Socket connection;
 
@@ -178,15 +178,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String findContentType(final String requestPath) {
-        if (requestPath.endsWith(".css")) {
-            return CSS_CONTENT_TYPE;
+        final var contentType = URLConnection.guessContentTypeFromName(requestPath);
+
+        if ("/".equals(requestPath) || "text/html".equals(contentType)) {
+            return HTML_CONTENT_TYPE;
         }
 
-        if (requestPath.endsWith(".js")) {
-            return JAVASCRIPT_CONTENT_TYPE;
+        if (contentType == null) {
+            return DEFAULT_CONTENT_TYPE;
         }
 
-        return HTML_CONTENT_TYPE;
+        return contentType;
     }
 
     private void writeResponse(

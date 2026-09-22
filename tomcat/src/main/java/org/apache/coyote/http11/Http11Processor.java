@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +15,13 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
 
     private final Socket connection;
@@ -42,20 +46,17 @@ public class Http11Processor implements Runnable, Processor {
             if (requestLine == null) {
                 return;
             }
-            String uri = requestLine.split(" ")[1];
+            String[] parts = requestLine.split(" ");
+            String method = parts[0];
+            String uri = parts[1];
             String path = uri;
-            String queryString = "";
             int index = uri.indexOf("?");
             if (index != -1) {
                 path = uri.substring(0, index);
-                queryString = uri.substring(index + 1);
             }
             Map<String, String> headers = readHeaders(reader);
             String requestBody = readRequestBody(reader, headers);
-            if ("/login".equals(path) && !queryString.isEmpty()) {
-                login(queryString);
-            }
-            String response = createResponse(path);
+            String response = createResponse(method, path, requestBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -93,7 +94,10 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, totalRead);
     }
 
-    private String createResponse(String path) throws IOException {
+    private String createResponse(String method, String path, String requestBody) throws IOException {
+        if ("POST".equals(method) && "/login".equals(path)) {
+            return login(requestBody);
+        }
         if ("/".equals(path)) {
             return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!");
         }
@@ -107,6 +111,14 @@ public class Http11Processor implements Runnable, Processor {
             return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), notFoundBody);
         }
         return buildResponse("HTTP/1.1 200 OK ", getContentType(resourcePath), responseBody);
+    }
+
+    private String buildRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "",
+                "");
     }
 
     private String buildResponse(String statusLine, String contentType, String responseBody) {
@@ -137,16 +149,19 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private void login(String queryString) {
-        Map<String, String> queryParams = parseQueryString(queryString);
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-        if (account == null) {
-            return;
+    private String login(String requestBody) {
+        Map<String, String> parameters = parseQueryString(requestBody);
+        String account = parameters.get("account");
+        String password = parameters.get("password");
+        if (account == null || password == null) {
+            return buildRedirectResponse(UNAUTHORIZED_PAGE);
         }
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("user : {}", user));
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            return buildRedirectResponse(UNAUTHORIZED_PAGE);
+        }
+        log.info("user : {}", user.get().getAccount());
+        return buildRedirectResponse(INDEX_PAGE);
     }
 
     private Map<String, String> parseQueryString(String queryString) {

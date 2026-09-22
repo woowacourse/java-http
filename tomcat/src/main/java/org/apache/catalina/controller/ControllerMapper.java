@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class ControllerMapper {
     private static final Map<String, Controller> controllers = Map.of(
+            "/", new HomeController(),
             "/index", new HomeController(),
             "/login", new LoginController(),
             "/register", new RegisterController()

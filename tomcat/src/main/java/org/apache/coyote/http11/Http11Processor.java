@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,21 +35,40 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequestParser(inputStream).parse();
-            String requestPath = request.getPath();
-            String responseBody = readStaticResource(requestPath);
-
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType(requestPath) + " ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            HttpResponse response = createResponse(request);
+            response.writeTo(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
+        if (isRegisterRequest(request, HttpMethod.GET)) {
+            return staticResourceResponse("/register.html");
+        }
+        if (isRegisterRequest(request, HttpMethod.POST)) {
+            return register(request);
+        }
+        return staticResourceResponse(request.getPath());
+    }
+
+    private boolean isRegisterRequest(HttpRequest request, HttpMethod method) {
+        return request.getMethod() == method && request.getPath().equals("/register");
+    }
+
+    private HttpResponse register(HttpRequest request) {
+        User user = new User(
+                request.getParameter("account"),
+                request.getParameter("password"),
+                request.getParameter("email")
+        );
+        InMemoryUserRepository.save(user);
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private HttpResponse staticResourceResponse(String requestPath) throws IOException {
+        String responseBody = readStaticResource(requestPath);
+        return HttpResponse.ok(responseBody, contentType(requestPath));
     }
 
     private String readStaticResource(String requestPath) throws IOException {

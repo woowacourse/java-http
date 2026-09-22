@@ -1,16 +1,68 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @Test
+    void GET_register는_register_html을_응답한다() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String responseBody = Files.readString(new File(resource.getFile()).toPath());
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .endsWith(responseBody);
+    }
+
+    @Test
+    void POST_register는_사용자를_저장하고_index로_redirect한다() {
+        // given
+        String account = "usher-" + UUID.randomUUID();
+        String body = "account=" + account + "&password=password&email=usher%40woowahan.com";
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        User savedUser = InMemoryUserRepository.findByAccount(account).orElseThrow();
+        assertThat(savedUser.checkPassword("password")).isTrue();
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n")
+                .endsWith("\r\n\r\n");
+    }
 
     @Test
     void process() {

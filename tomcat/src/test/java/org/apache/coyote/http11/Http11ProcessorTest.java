@@ -25,6 +25,29 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
+    @DisplayName("존재하지 않는 경로를 요청하면 404 Not Found를 반환한다")
+    void respondsWithNotFoundWhenPathDoesNotExist() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /unknown HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-id",
+                "",
+                ""
+        );
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 404 Not Found")
+                .contains("해당하는 경로가 없습니다.");
+    }
+
+    @Test
     @DisplayName("요청 형식이 잘못되면 400 Bad Request를 반환한다")
     void respondsWithBadRequestWhenRequestIsMalformed() {
         // given

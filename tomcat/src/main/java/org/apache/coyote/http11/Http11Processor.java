@@ -108,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
             return login(request);
         }
 
-        return new HttpResponse(HttpStatus.BAD_REQUEST, getContentType(path), "Bad Request");
+        return new HttpResponse(HttpStatus.NOT_FOUND, getContentType(path), "해당하는 경로가 없습니다.");
     }
 
     private HttpResponse render(final String path) {

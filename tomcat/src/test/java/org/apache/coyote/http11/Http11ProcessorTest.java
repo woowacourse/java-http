@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -11,6 +15,18 @@ import java.nio.file.Files;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    private static final String EXISTING_SESSION_ID = "existing-session-id";
+
+    @BeforeEach
+    void setUp() {
+        SessionManager.getInstance().add(new Session(EXISTING_SESSION_ID));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SessionManager.getInstance().remove(EXISTING_SESSION_ID);
+    }
 
     @Test
     void process() {

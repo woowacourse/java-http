@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -46,15 +48,99 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String buildResponseWith(InputStream inputStream) throws IOException {
-        String requestUri = parseRequestUriFrom(inputStream);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String[] startLine = reader.readLine().split(" ");
+        String httpMethod = startLine[0];
+        String requestUri = startLine[1];
+
+        Map<String, String> headers = readHeaders(reader);
+        String requestBody = readBody(reader, headers);
 
         String path = parsePathFrom(requestUri);
-        String queryString = parseQueryStringFrom(requestUri);
 
-        if(path.startsWith("/login")){
-            return loginResponse(queryString);
+        if (path.startsWith("/login") && httpMethod.equals("POST")) {
+            return loginResponse(parseFormData(requestBody));
         }
 
+        if (path.startsWith("/register") && httpMethod.equals("POST")) {
+            return registerResponse(parseFormData(requestBody));
+        }
+
+        return staticResponse(path);
+    }
+
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] keyValue = line.split(": ", 2);
+            headers.put(keyValue[0], keyValue[1]);
+        }
+        return headers;
+    }
+
+    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return null;
+        }
+        int length = Integer.parseInt(contentLength);
+        char[] buffer = new char[length];
+        reader.read(buffer, 0, length);
+        return new String(buffer);
+    }
+
+    private Map<String, String> parseFormData(String data) {
+        Map<String, String> params = new HashMap<>();
+        if (data == null || data.isEmpty()) {
+            return params;
+        }
+        for (String pair : data.split("&")) {
+            String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return params;
+    }
+
+    private String loginResponse(Map<String, String> params) {
+        Optional<User> account = findAccount(params.get("account"), params.get("password"));
+        if (account.isPresent()) {
+            return redirect("/index.html");
+        }
+        return redirect("/401.html");
+    }
+
+    private String registerResponse(Map<String, String> params) {
+        User user = new User(params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(user);
+        return redirect("/index.html");
+    }
+
+    private Optional<User> findAccount(String account, String password) {
+        if (account == null || password == null) {
+            return Optional.empty();
+        }
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("user : {}", user.get());
+            return user;
+        }
+
+        return Optional.empty();
+    }
+
+    private String redirect(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location + " "
+        );
+    }
+
+    private String staticResponse(String path) throws IOException {
         String contentType = contentTypeOf(path);
         String responseBody = resolveContentOf(path);
 
@@ -66,54 +152,6 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String loginResponse(String queryString) {
-        Optional<User> account = findAccount(queryString);
-
-        if(account.isPresent()) {
-            return String.join("\r\n",
-                    "HTTP/1.1 302 FOUND ",
-                    "Location: /index.html "
-            );
-        }
-
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: /401.html "
-        );
-    }
-
-    private Optional<User> findAccount(String queryString) {
-        if (queryString == null) {
-            return Optional.empty();
-        }
-
-        String[] queryParts = queryString.split("&");
-
-        String accountQuery = queryParts[0].substring(queryParts[0].lastIndexOf("=") + 1);
-        String passwordQuery = queryParts[1].substring(queryParts[1].lastIndexOf("=") + 1);
-
-        Optional<User> account = InMemoryUserRepository.findByAccount(accountQuery);
-
-        if(account.isPresent() && account.get().checkPassword(passwordQuery)) {
-            log.info("user : " + account);
-            return account;
-        }
-
-        return Optional.empty();
-    }
-
-    private String parseQueryStringFrom(String requestUri) {
-        if (requestUri.contains("?")) {
-            return requestUri.substring(requestUri.indexOf('?') + 1);
-        }
-        return null;
-    }
-
-    private String parseRequestUriFrom(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        return bufferedReader.readLine().split(" ")[1];
-    }
-
     private String parsePathFrom(String requestUri) {
         String path = requestUri;
         if (path.contains("?")) {
@@ -123,7 +161,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        if(!path.contains(".")) {
+        if (!path.contains(".")) {
             path = path.concat(".html");
         }
 

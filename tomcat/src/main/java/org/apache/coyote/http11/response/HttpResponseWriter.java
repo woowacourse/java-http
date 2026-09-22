@@ -23,10 +23,7 @@ public class HttpResponseWriter {
             OutputStream outputStream,
             HttpResponse response
     ) throws IOException {
-        String statusLine = response.getHttpVersion()
-                + " " + response.getStatusCode()
-                + " " + response.getReasonPhrase()
-                + "\r\n";
+        String statusLine = response.getStatusLine() + "\r\n";
 
         outputStream.write(statusLine.getBytes(StandardCharsets.UTF_8));
     }
@@ -50,7 +47,7 @@ public class HttpResponseWriter {
         }
 
         String contentLength = "Content-Length: "
-                + response.getBody().length
+                + response.getContentLength()
                 + "\r\n";
 
         outputStream.write(contentLength.getBytes(StandardCharsets.UTF_8));

@@ -23,6 +23,14 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public String getStatusLine() {
+        return httpVersion + " " + statusCode + " " + reasonPhrase;
+    }
+
+    public int getContentLength() {
+        return body.length;
+    }
+
     public String getHttpVersion() {
         return httpVersion;
     }

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -41,11 +42,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String requestTarget = extractRequestTarget(inputStream);
+            String[] requestParts = extractRequestParts(inputStream);
+
+            String method = requestParts[0];
+            String requestTarget = requestParts[1];
             String requestPath = extractRequestPath(requestTarget);
             Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            dispatchRequest(requestPath, queryParameters);
+            Optional<String> redirectPath = dispatchRequest(method, requestPath, queryParameters);
+            if (redirectPath.isPresent()) {
+                outputStream.write(createRedirectResponse(redirectPath.get()).getBytes());
+                outputStream.flush();
+                return;
+            }
 
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
@@ -60,7 +69,6 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
-
     private String createHeader(String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -75,20 +83,31 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private void dispatchRequest(String requestPath, Map<String, String> queryParameters) {
-        if ("/login".equals(requestPath) && !queryParameters.isEmpty()) {
-            handleLogin(queryParameters.get("account"), queryParameters.get("password"));
-        }
+    private static String createRedirectResponse(String redirectPath) {
+        String header = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + redirectPath,
+                "Content-Length: 0");
+
+        return createResponse(header, "");
+
     }
 
-    private void handleLogin(String account, String password) {
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("user not found"));
-        if (user.checkPassword(password)) {
-            log.info("user={}", user);
-        } else {
-            throw new RuntimeException("invalid account or password");
+    private Optional<String> dispatchRequest(String method, String requestPath, Map<String, String> queryParameters) {
+        if ("GET".equals(method) && "/login".equals(requestPath) && !queryParameters.isEmpty()) {
+            return Optional.of(handleLogin(queryParameters.get("account"), queryParameters.get("password")));
         }
+        return Optional.empty();
+    }
+
+    private String handleLogin(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(user -> {
+                    log.info("user={}", user);
+                    return "/index.html";
+                })
+                .orElse("/401.html");
     }
 
     private String extractRequestPath(String requestTarget) {
@@ -126,13 +145,13 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + requestPath;
     }
 
-    private String extractRequestTarget(InputStream inputStream) throws IOException {
+    private String[] extractRequestParts(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestLine = bufferedReader.readLine();
 
         String[] requestLineParts = requestLine.split(" ");
         skipHeaders(bufferedReader);
-        return requestLineParts[1];
+        return requestLineParts;
     }
 
     private void skipHeaders(BufferedReader bufferedReader) throws IOException {

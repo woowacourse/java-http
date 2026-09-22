@@ -58,4 +58,52 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void loginSuccessRedirectsToIndex() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFailureRedirectsTo401() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=wrong HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /401.html",
+                "Content-Length: 0",
+                "",
+                "");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

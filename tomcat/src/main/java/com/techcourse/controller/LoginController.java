@@ -15,8 +15,6 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String USER = "user";
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String SET_COOKIE = "Set-Cookie";
 
     private static final String LOGIN_PAGE = "/login.html";
     private static final String INDEX_PAGE = "/index.html";
@@ -58,9 +56,6 @@ public class LoginController extends AbstractController {
         final Session session = request.createSession();
         session.setAttribute(USER, user);
 
-        return HttpResponses.redirect(
-                INDEX_PAGE,
-                Map.of(SET_COOKIE, JSESSIONID + "=" + session.getId())
-        );
+        return HttpResponses.redirect(INDEX_PAGE);
     }
 }

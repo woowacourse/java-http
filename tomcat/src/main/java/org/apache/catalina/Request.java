@@ -13,6 +13,8 @@ public class Request {
     private final HttpRequest httpRequest;
     private final SessionManager sessionManager;
 
+    private Session createdSession;
+
     public Request(final HttpRequest httpRequest, final SessionManager sessionManager) {
         this.httpRequest = httpRequest;
         this.sessionManager = sessionManager;
@@ -23,7 +25,13 @@ public class Request {
     }
 
     public Session createSession() {
-        return sessionManager.create();
+        createdSession = sessionManager.create();
+
+        return createdSession;
+    }
+
+    public Optional<Session> createdSession() {
+        return Optional.ofNullable(createdSession);
     }
 
     public Map<String, String> body() {

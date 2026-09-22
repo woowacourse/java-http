@@ -44,16 +44,9 @@ public final class HttpResponses {
     }
 
     public static HttpResponse redirect(final String location) {
-        return redirect(location, Map.of());
-    }
-
-    public static HttpResponse redirect(final String location, final Map<String, String> headers) {
-        final Map<String, String> allHeaders = new LinkedHashMap<>(headers);
-        allHeaders.put(LOCATION, location);
-
         return new HttpResponse(
                 new HttpStatusLine(HTTP_VERSION, 302, "Found"),
-                allHeaders,
+                Map.of(LOCATION, location),
                 new byte[0]
         );
     }

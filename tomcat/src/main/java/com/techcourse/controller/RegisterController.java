@@ -2,7 +2,6 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Map;
 import org.apache.catalina.Request;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
@@ -19,8 +18,6 @@ public class RegisterController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
     private static final String USER = "user";
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String SET_COOKIE = "Set-Cookie";
 
     private static final String REGISTER_PAGE = "/register.html";
     private static final String INDEX_PAGE = "/index.html";
@@ -55,9 +52,6 @@ public class RegisterController extends AbstractController {
         final Session session = request.createSession();
         session.setAttribute(USER, user);
 
-        return HttpResponses.redirect(
-                INDEX_PAGE,
-                Map.of(SET_COOKIE, JSESSIONID + "=" + session.getId())
-        );
+        return HttpResponses.redirect(INDEX_PAGE);
     }
 }

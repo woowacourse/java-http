@@ -113,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> queryParameters,
             String body) {
         if ("GET".equals(method) && "/login".equals(requestPath) && !queryParameters.isEmpty()) {
-            return Optional.of(handleLogin(queryParameters.get("account"), queryParameters.get("password")));
+            return Optional.of(handleLogin(queryParameters));
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
             return Optional.of(handleRegister(body));
@@ -140,7 +140,9 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
-    private String handleLogin(String account, String password) {
+    private String handleLogin(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {

@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -61,8 +64,13 @@ public class Http11Processor implements Runnable, Processor {
 
         String path = parsePathFrom(requestUri);
 
-        if (path.startsWith("/login") && httpMethod.equals("POST")) {
-            return loginResponse(parseFormData(requestBody), cookie);
+        if (path.startsWith("/login")) {
+            if (httpMethod.equals("GET") && isLoggedIn(cookie)) {
+                return redirect("/index.html");
+            }
+            if (httpMethod.equals("POST")) {
+                return loginResponse(parseFormData(requestBody));
+            }
         }
 
         if (path.startsWith("/register") && httpMethod.equals("POST")) {
@@ -107,15 +115,25 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private String loginResponse(Map<String, String> params, HttpCookie cookie) {
+    private String loginResponse(Map<String, String> params) {
         Optional<User> account = findAccount(params.get("account"), params.get("password"));
-        if (account.isPresent()) {
-            if (!cookie.hasJSessionId()) {
-                return redirectWithSessionCookie("/index.html", UUID.randomUUID().toString());
-            }
-            return redirect("/index.html");
+        if (account.isEmpty()) {
+            return redirect("/401.html");
         }
-        return redirect("/401.html");
+
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", account.get());
+        sessionManager.add(session);
+
+        return redirectWithSessionCookie("/index.html", session.getId());
+    }
+
+    private boolean isLoggedIn(HttpCookie cookie) {
+        if (!cookie.hasJSessionId()) {
+            return false;
+        }
+        Session session = sessionManager.findSession(cookie.getJSessionId());
+        return session != null && session.getAttribute("user") != null;
     }
 
     private String registerResponse(Map<String, String> params) {

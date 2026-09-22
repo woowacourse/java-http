@@ -8,14 +8,14 @@ public class HttpRequest {
     private final String path;
     private final String version;
     private final Map<String, String> headers = new HashMap<String, String>();
-    private final String responseBody;
+    private final String requestBody;
 
-    public HttpRequest(String method, String path, String version, Map<String, String> headers, String responseBody) {
+    public HttpRequest(String method, String path, String version, Map<String, String> headers, String requestBody) {
         this.method = method;
         this.path = path;
         this.version = version;
         this.headers.putAll(headers);
-        this.responseBody = responseBody;
+        this.requestBody = requestBody;
     }
 
     public String getMethod() {
@@ -34,7 +34,7 @@ public class HttpRequest {
         return headers;
     }
 
-    public String getResponseBody() {
-        return responseBody;
+    public String getRequestBody() {
+        return requestBody;
     }
 }

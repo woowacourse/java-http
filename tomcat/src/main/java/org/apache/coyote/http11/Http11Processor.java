@@ -3,10 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -39,24 +36,22 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+             final var outputStream = connection.getOutputStream()
         ) {
-            String[] requestLineParts = bufferedReader.readLine().split(" ");
-            final var requestMethod = requestLineParts[0].toUpperCase();
-            log.info("요청 메소드: {}, 요청 URI: {}", requestMethod, requestLineParts[1]);
-            Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
-            HttpCookie httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
+            HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
+            final var requestMethod = httpRequest.getMethod().toUpperCase();
+            log.info("요청 메소드: {}, 요청 URI: {}", requestMethod, httpRequest.getPath());
+            HttpCookie httpCookie = new HttpCookie(httpRequest.getHeaders().get("Cookie"));
             String sessionId = httpCookie.getJSessionId();
             Session session = getSession(sessionId);
             String cookieHeader = getCookieHeader(httpCookie, session);
 
             String response = "";
             if (requestMethod.equals("GET")) {
-                response = getResponse(requestLineParts[1], cookieHeader, session);
+                response = getResponse(httpRequest, cookieHeader, session);
             }
             if (requestMethod.equals("POST")) {
-                response = getPostResponse(bufferedReader, requestLineParts[1], requestHeaders, cookieHeader, session);
+                response = getPostResponse(httpRequest, cookieHeader, session);
             }
 
             outputStream.write(response.getBytes());
@@ -64,20 +59,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Map<String, String> readRequestHeaders(BufferedReader bufferedReader)
-            throws IOException {
-        Map<String, String> requestHeaders = new HashMap<>();
-        String requestHeaderLine;
-        while ((requestHeaderLine = bufferedReader.readLine()) != null) {
-            if (requestHeaderLine.isEmpty()) {
-                break;
-            }
-            String[] header = requestHeaderLine.split(":", 2);
-            requestHeaders.put(header[0].trim(), header[1].trim());
-        }
-        return requestHeaders;
     }
 
     private String getCookieHeader(HttpCookie httpCookie, Session session) {
@@ -98,70 +79,54 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    private String getPostResponse(BufferedReader bufferedReader, String requestUri,
-                                   Map<String, String> requestHeaders, String cookieHeader, Session session)
-            throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
-        String requestBody = readRequestBody(bufferedReader, contentLength);
-        Map<String, String> queryParameters = getQuerySeparate(requestBody);
+    private String getPostResponse(HttpRequest httpRequest, String cookieHeader, Session session) {
+        Map<String, String> queryParameters = getQuerySeparate(httpRequest.getRequestBody());
 
-        if (requestUri.equals("/login")) {
+        if (httpRequest.getPath().equals("/login")) {
             String account = queryParameters.get("account");
             String password = queryParameters.get("password");
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
 
             if (foundUser.isEmpty() || !foundUser.get().checkPassword(password)) {
-                return getRedirectResponse("/401.html", getContentType(requestUri), cookieHeader);
+                return getRedirectResponse("/401.html", getContentType(httpRequest.getPath()), cookieHeader);
             }
             session.setAttribute("user", foundUser.get());
-            return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
+            return getRedirectResponse("/index.html", getContentType(httpRequest.getPath()), cookieHeader);
         }
 
-        if (requestUri.equals("/register")) {
+        if (httpRequest.getPath().equals("/register")) {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
             if (foundUser.isPresent()) {
                 log.info("회원가입 실패! 아이디 : {}", queryParameters.get("account"));
-                return getRedirectResponse("/register.html", getContentType(requestUri), cookieHeader);
+                return getRedirectResponse("/register.html", getContentType(httpRequest.getPath()), cookieHeader);
             }
             User user = new User(queryParameters.get("account"), queryParameters.get("password"),
                     queryParameters.get("email"));
             InMemoryUserRepository.save(user);
             session.setAttribute("user", user);
-            return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
+            return getRedirectResponse("/index.html", getContentType(httpRequest.getPath()), cookieHeader);
         }
-        return getRedirectResponse("/404.html", getContentType(requestUri), cookieHeader);
+        return getRedirectResponse("/404.html", getContentType(httpRequest.getPath()), cookieHeader);
     }
 
-    @Nonnull
-    private String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
-        char[] buffer = new char[contentLength];
-        int readLength = 0;
-
-        while (readLength < contentLength) {
-            int currentLength = bufferedReader.read(buffer, readLength, contentLength - readLength);
-            if (currentLength == -1) {
-                break;
-            }
-            readLength += currentLength;
-        }
-        return new String(buffer, 0, readLength);
-    }
-
-    private String getResponse(String requestUri, String cookieHeader, Session session) throws IOException {
-        if (requestUri.equals("/login")) {
+    private String getResponse(HttpRequest httpRequest, String cookieHeader, Session session) throws IOException {
+        if (httpRequest.getPath().equals("/login")) {
             if (session.getAttribute("user") != null) {
                 log.info("로그인 페이지 접근! 세션 아이디: {}", session.getId());
-                return getRedirectResponse("/index.html", getContentType(requestUri), cookieHeader);
+                return getRedirectResponse("/index.html", getContentType(httpRequest.getPath()),
+                        cookieHeader);
 
             }
         }
-        if (!requestUri.equals("/")) {
-            String paths = getStaticResource(requestUri);
+        if (!httpRequest.getPath().equals("/")) {
+            String paths = getStaticResource(httpRequest.getPath());
             if (paths != null) {
-                return getOkResponse(getContentType(requestUri), paths, cookieHeader);
+                return getOkResponse(getContentType(httpRequest.getPath()), paths,
+                        cookieHeader);
             }
         }
-        return getOkResponse(getContentType(requestUri), "Hello world!", cookieHeader);
+        return getOkResponse(getContentType(httpRequest.getPath()), "Hello world!",
+                cookieHeader);
     }
 
     private String getRedirectResponse(String location, String contentType, String cookieHeader) {

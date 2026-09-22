@@ -73,7 +73,7 @@ class HttpRequestParserTest {
                     new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8)));
 
             // then
-            assertThat(request.getResponseBody()).isEmpty();
+            assertThat(request.getRequestBody()).isEmpty();
         }
 
         @Test
@@ -91,7 +91,7 @@ class HttpRequestParserTest {
                     new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8)));
 
             // then
-            assertThat(request.getResponseBody()).isEqualTo(body);
+            assertThat(request.getRequestBody()).isEqualTo(body);
         }
     }
 }

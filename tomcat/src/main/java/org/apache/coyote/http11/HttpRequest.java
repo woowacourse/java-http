@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,7 +82,9 @@ public class HttpRequest {
         }
         for (String pair : body.split(PARAMETER_SEPARATOR)) {
             String[] keyValue = pair.split(KEY_VALUE_SEPARATOR);
-            parameters.put(keyValue[0], keyValue[1]);
+            String name = keyValue[0];
+            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            parameters.put(name, value);
         }
         return parameters;
     }

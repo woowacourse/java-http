@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -42,6 +43,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response;
             if (isLoginRequest(request)) {
                 response = handleLogin(request);
+            } else if (isRegisterRequest(request)) {
+                response = handleRegister(request);
             } else {
                 String contentType = resolveContentType(request.getPath());
                 String responseBody = resolveResponseBody(request.getPath());
@@ -94,6 +97,23 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.found("/index.html");
         }
         return HttpResponse.found("/401.html");
+    }
+
+    private boolean isRegisterRequest(HttpRequest request) {
+        return request.getPath().equals("/register")
+                && request.getMethod().equals("POST");
+    }
+
+    private HttpResponse handleRegister(HttpRequest request) {
+        Map<String, String> parameters = request.getParameters();
+        String account = parameters.get("account");
+        String password = parameters.get("password");
+        String email = parameters.get("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        return HttpResponse.found("/index.html");
     }
 
     private boolean canLogin(Map<String, String> parameters) {

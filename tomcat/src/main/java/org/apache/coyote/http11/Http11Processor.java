@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    // 요청 필드
+    private String method;
+    private String path;
+    private final Map<String, String> queryParameters = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
+
+    // 응답 필드
+    private byte[] httpResponse;
+    private final StringBuilder bodyBuilder = new StringBuilder();
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -43,35 +54,42 @@ public class Http11Processor implements Runnable, Processor {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), UTF_8));
              final var outputStream = connection.getOutputStream()) {
 
-            String requestUri = readRequestUri(reader);
-            String[] pathParts = requestUri.split("\\?", 2);
-            String path = pathParts[0];
+            parseRequestLine(reader);
+            parseHeaders(reader);
 
-            Map<String, String> queryParameters = new HashMap<>();
-            if (pathParts.length > 1) {
-                queryParameters = parseQueryParameters(pathParts[1]);
-            }
-
-            if (path.equals("/login")) {
-                logLoginResult(queryParameters);
-                serveStaticFile(reader, "/login.html", outputStream);
+            if (method.equals("GET")) {
+                handleGetRequest(outputStream);
                 return;
             }
-            if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
-                serveStaticFile(reader, path, outputStream);
-                return;
+            if (method.equals("POST")) {
+//                handlePostRequest(outputStream);
             }
-            if (path.equals("/")) {
-                serverHomePage(outputStream);
-            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readRequestUri(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
+    private void handleGetRequest(OutputStream outputStream) throws IOException {
+        if (path.equals("/login")) {
+            logLoginResult(queryParameters);
+            serveStaticFile( path + ".html");
+            writeResponse(outputStream);
+            return;
+        }
+        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
+            serveStaticFile(path);
+            writeResponse(outputStream);
+            return;
+        }
+        if (path.equals("/")) {
+            serverHomePage();
+            writeResponse(outputStream);
+        }
+    }
 
+    private void parseRequestLine(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
         if (line == null) {
             throw new IOException("EOF: No request line received");
         }
@@ -81,12 +99,16 @@ public class Http11Processor implements Runnable, Processor {
             throw new IOException("Invalid line received: " + line);
         }
 
-        return parts[1];
+        method = parts[0];
+        String[] pathParts = parts[1].split("\\?", 2);
+        path = pathParts[0];
+
+        if (pathParts.length > 1) {
+            parseQueryParameters(pathParts[1]);
+        }
     }
 
-    private Map<String, String> parseQueryParameters(String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
-
+    private void parseQueryParameters(String queryString) {
         for (String param : queryString.split("&")) {
             if (param.isEmpty()) continue;
 
@@ -95,8 +117,14 @@ public class Http11Processor implements Runnable, Processor {
             String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], UTF_8) : "";
             queryParameters.put(key, value);
         }
+    }
 
-        return queryParameters;
+    private void parseHeaders(BufferedReader reader) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] headerParts = line.split(" ");
+            headers.put(headerParts[0].trim(), headerParts[1].trim());
+        }
     }
 
     private void logLoginResult(Map<String, String> queryParameters) {
@@ -115,19 +143,19 @@ public class Http11Processor implements Runnable, Processor {
                 );
     }
 
-    private void serveStaticFile(BufferedReader reader, String requestUri, OutputStream outputStream) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        readRequestHeader(reader, headers);
+    private void serveStaticFile(String requestUri) throws IOException {
+        String contentType = findContentType(requestUri);
 
         URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri));
+        String body = Files.readString(Path.of(resource.getPath()), UTF_8);
+        writeBody(body);
 
-        Path path = Path.of(resource.getPath());
+        httpResponse = createOkHttpResponse(contentType).getBytes(UTF_8);
+    }
 
-        byte[] responseBody = Files.readAllBytes(path);
-        String contentType = findContentType(requestUri);
-        final var response = createHtmlOkResponseHeader(contentType, responseBody.length);
-
-        writeResponse(outputStream, response.getBytes(UTF_8), responseBody);
+    private void serverHomePage() {
+        writeBody("Hello world!");
+        httpResponse = createOkHttpResponse(findContentType("/")).getBytes(UTF_8);
     }
 
     private String findContentType(String requestUri) {
@@ -140,37 +168,24 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private void serverHomePage(OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
-
-        final var response = createHtmlOkResponseHeader(findContentType("/"), responseBody.getBytes().length);
-
-        writeResponse(outputStream, response.getBytes(), responseBody.getBytes(UTF_8));
-    }
-
-    private void readRequestHeader(BufferedReader reader, Map<String, String> headers) throws IOException {
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] headerParts = line.split(" ");
-            headers.put(headerParts[0].trim(), headerParts[1].trim());
-        }
+    private void writeBody(String body) {
+        bodyBuilder.append(body);
     }
 
     @Nonnull
-    private String createHtmlOkResponseHeader(String contentType, int contentLength) {
+    private String createOkHttpResponse(String contentType) {
+        int contentLength = bodyBuilder.toString().getBytes(UTF_8).length;
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + contentLength + " ",
                 "",
-                ""
+                bodyBuilder.toString()
         );
     }
 
-    private void writeResponse(OutputStream outputStream, byte[] response, byte[] responseBody)
-            throws IOException {
-        outputStream.write(response);
-        outputStream.write(responseBody);
+    private void writeResponse(OutputStream outputStream) throws IOException {
+        outputStream.write(httpResponse);
         outputStream.flush();
     }
 }

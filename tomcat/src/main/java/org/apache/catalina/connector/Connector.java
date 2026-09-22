@@ -1,7 +1,10 @@
 package org.apache.catalina.connector;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.Adapter;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
@@ -19,13 +22,14 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_THREAD_POOL_SIZE = 100;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 250;
+    private static final int DEFAULT_WORK_QUEUE_CAPACITY = 100;
 
     private final ServerSocket serverSocket;
     private final Adapter adapter;
     private final SessionManager sessionManager = new SessionManager();
     private final ExecutorService executorService;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector(Adapter adapter) {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter, DEFAULT_THREAD_POOL_SIZE);
@@ -35,7 +39,12 @@ public class Connector implements Runnable {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.adapter = adapter;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads, maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_WORK_QUEUE_CAPACITY),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -49,10 +58,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -77,7 +86,16 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, adapter, sessionManager);
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("Request processing rejected: worker queue is full or executor is shut down");
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error("Failed to close rejected connection", closeException);
+            }
+        }
     }
 
     public void stop() {
@@ -86,6 +104,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

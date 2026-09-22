@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +24,9 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
-    private static void response(String responseBody, OutputStream outputStream, String type) throws IOException {
+    private void response(String responseBody, OutputStream outputStream, StatusCode statusCode, String type) throws IOException {
         final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 "+ statusCode,
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -37,18 +36,33 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private static void empty(OutputStream outputStream, String contentType) throws IOException {
+    private void empty(OutputStream outputStream, String contentType) throws IOException {
         final var responseBody = "Hello world!";
-        response(responseBody, outputStream, contentType);
+        response(responseBody, outputStream, StatusCode.OK, contentType);
     }
 
-    private static void login(Request request) {
+    private void login(OutputStream outputStream, Request request) throws IOException {
         String account = request.getRequestParam("account");
         String password = request.getRequestParam("password");
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
             log.info(user.toString());
+            loginSuccess(outputStream, request);
         }
+        if ((user != null && !user.checkPassword(password))) {
+            loginFail(outputStream, request);
+        }
+        handling(outputStream, request, StatusCode.OK);
+    }
+
+    private void loginFail(OutputStream outputStream, Request request) throws IOException {
+        Request unauthorized = Request.changePath(request, "/401");
+        handling(outputStream, unauthorized, StatusCode.UNAUTHORIZED);
+    }
+
+    private void loginSuccess(OutputStream outputStream, Request request) throws IOException {
+        Request found = Request.changePath(request, "/index");
+        handling(outputStream, found, StatusCode.FOUND);
     }
 
     @Override
@@ -68,15 +82,16 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if (request.getPath().startsWith("/login")) {
-                login(request);
+                login(outputStream, request);
+                return;
             }
-            handling(outputStream, request);
+            handling(outputStream, request, StatusCode.OK);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handling(OutputStream outputStream, Request request) throws IOException {
+    private void handling(OutputStream outputStream, Request request, StatusCode statusCode) throws IOException {
         String path = request.getPath();
         String contentType = request.getContentType();
         if (!path.contains(".")) {
@@ -85,6 +100,6 @@ public class Http11Processor implements Runnable, Processor {
         log.info("path: {}", path);
         final URL resource = getClass().getClassLoader().getResource("static" + path);
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        response(responseBody, outputStream, contentType);
+        response(responseBody, outputStream, statusCode, contentType);
     }
 }

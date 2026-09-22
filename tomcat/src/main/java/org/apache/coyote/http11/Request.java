@@ -29,6 +29,10 @@ public class Request {
         return splitUri(tokenizer, method, contentType);
     }
 
+    public static Request changePath(Request request, String path) {
+        return new Request(request.method, path, request.requestParams, request.contentType);
+    }
+
     @Nonnull
     private static Request splitUri(StringTokenizer tokenizer, String method, ContentType contentType) {
         String uri = tokenizer.nextToken();

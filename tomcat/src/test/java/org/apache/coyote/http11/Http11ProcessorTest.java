@@ -15,14 +15,12 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class Http11ProcessorTest {
 
     private static final String SESSION_ID = "test-session-id";
     private static final String SESSION_COOKIE = "Cookie: JSESSIONID=" + SESSION_ID;
-
-    static {
-    }
 
     @BeforeEach
     void setUp() {
@@ -224,6 +222,74 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+
+        @Test
+        void post_success_if_jsessionid_doesnt_exist() {
+            // given
+            final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept : */*",
+                "",
+                "account=gugu&password=password");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final String actual = socket.output();
+
+            assertAll(
+                () -> assertThat(actual).contains(
+                    "HTTP/1.1 302 Found ",
+                    "Location: /index.html ",
+                    "Content-Type: text/html;charset=utf-8 "),
+                () -> assertThat(actual).containsPattern(
+                    "Set-Cookie: JSESSIONID=[^;]+")
+            );
+        }
+
+        @Test
+        void post_login_with_unknown_session_id_issues_new_session() {
+            // given
+            final String wrongSessionCookie = "Cookie: JSESSIONID=wrong-jsessionid";
+            final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept : */*",
+                wrongSessionCookie,
+                "",
+                "account=gugu&password=password");
+
+            final StubSocket socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final String actual = socket.output();
+
+            assertAll(
+                () -> assertThat(actual).contains(
+                    "HTTP/1.1 302 Found ",
+                    "Location: /index.html ",
+                    "Content-Type: text/html;charset=utf-8 "),
+                () -> assertThat(actual).containsPattern(
+                    "Set-Cookie: JSESSIONID=[^;]+")
+                    .doesNotContain("Set-Cookie: JSESSIONID=wrong-jsessionid")
+            );
+        }
+
 
         @Test
         void post_failure1() throws IOException {

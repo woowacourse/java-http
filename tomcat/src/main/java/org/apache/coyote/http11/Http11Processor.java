@@ -29,6 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String GET = "GET";
     private static final String POST = "POST";
     private static final String ROOT_RESPONSE_BODY = "Hello world!";
+    private static final String LOGIN_USER = "user";
 
     private final Socket connection;
     private final RequestParser requestParser;
@@ -98,6 +99,9 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParams = requestParser.getQueryParams(requestHeaderInfos);
 
         if (requestParser.getRequestMethod(requestHeaderInfos).equals(GET) && queryParams.isEmpty()) {
+            if (isLoggedIn(cookie)) {
+                return responseBuilder.buildRedirect(HttpStatus.FOUND, "/index.html");
+            }
             return responseBuilder.build(
                     HttpStatus.OK,
                     requestParser.getAccept(requestHeaderInfos),
@@ -108,11 +112,16 @@ public class Http11Processor implements Runnable, Processor {
         User user = findLoginUser(queryParams);
         if (user != null) {
             Session session = getOrCreateSession(cookie);
-            session.setAttribute("user", user);
+            session.setAttribute(LOGIN_USER, user);
             return responseBuilder.buildWithCookie(HttpStatus.FOUND, "/index.html", cookie, session.getId());
         }
 
         return responseBuilder.buildRedirect(HttpStatus.FOUND, "/401.html");
+    }
+
+    private boolean isLoggedIn(HttpCookie cookie) {
+        Session session = sessionManager.findSession(cookie.getJSessionId());
+        return session != null && session.getAttribute(LOGIN_USER) != null;
     }
 
     private String processRegisterRequest(Map<String, String> requestHeaderInfos)

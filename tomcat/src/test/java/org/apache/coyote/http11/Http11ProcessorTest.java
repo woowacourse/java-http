@@ -91,4 +91,30 @@ class Http11ProcessorTest {
                 "",
                 ""));
     }
+
+    @Test
+    void loggedInUserIsRedirectedFromLoginPageToIndex() {
+        final var loginSocket = new StubSocket(
+                "GET /login?account=gugu&password=password HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        new Http11Processor(loginSocket).process(loginSocket);
+        String setCookie = loginSocket.output().lines()
+                .filter(line -> line.startsWith("Set-Cookie:"))
+                .findFirst()
+                .orElseThrow();
+
+        final var loginPageSocket = new StubSocket(String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                setCookie.replace("Set-Cookie:", "Cookie:"),
+                "",
+                ""));
+        new Http11Processor(loginPageSocket).process(loginPageSocket);
+
+        assertThat(loginPageSocket.output()).isEqualTo(String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
+                "Content-Length: 0 ",
+                "",
+                ""));
+    }
 }

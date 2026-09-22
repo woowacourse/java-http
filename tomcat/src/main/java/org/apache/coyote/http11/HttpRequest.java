@@ -11,11 +11,13 @@ public class HttpRequest {
     private final String method;
     private final String requestTarget;
     private final Map<String, String> queryParameters;
+    private final String body;
 
-    public HttpRequest(String method, String requestTarget, Map<String, String> queryParameters) {
+    public HttpRequest(String method, String requestTarget, Map<String, String> queryParameters, String body) {
         this.method = method;
         this.requestTarget = requestTarget;
         this.queryParameters = queryParameters;
+        this.body = body;
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
@@ -34,7 +36,26 @@ public class HttpRequest {
         final var requestTargetParts = requestLineParts[1].split("\\?", 2);
         final String requestTarget = requestTargetParts[0];
 
-        return new HttpRequest(method, requestTarget, initQueryParameters(requestTargetParts));
+        int contentLength = 0;
+        String headerLine;
+        while (!(headerLine = bufferedReader.readLine()).isBlank()) {
+            if (headerLine.startsWith("Content-Length:")) {
+                contentLength = Integer.parseInt(headerLine.split(":", 2)[1].trim());
+            }
+        }
+
+        char[] bodyCharacters = new char[contentLength];
+        int readLength = 0;
+        while (readLength < contentLength) {
+            int currentReadLength = bufferedReader.read(bodyCharacters, readLength, contentLength - readLength);
+            if (currentReadLength == -1) {
+                throw new IOException("Request body ended unexpectedly");
+            }
+            readLength += currentReadLength;
+        }
+        String body = new String(bodyCharacters);
+
+        return new HttpRequest(method, requestTarget, initQueryParameters(requestTargetParts), body);
     }
 
     private static Map<String, String> initQueryParameters(String[] requestTargetParts) {
@@ -55,6 +76,10 @@ public class HttpRequest {
         return method.equals("GET");
     }
 
+    public boolean isPostMethod() {
+        return method.equals("POST");
+    }
+
     public boolean isPath(String path) {
         return requestTarget.equals(path);
     }
@@ -69,5 +94,9 @@ public class HttpRequest {
 
     public String getQueryParameter(String account) {
         return queryParameters.get(account);
+    }
+
+    public String getBody() {
+        return body;
     }
 }

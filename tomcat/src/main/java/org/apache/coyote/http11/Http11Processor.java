@@ -105,20 +105,20 @@ public class Http11Processor implements Runnable, Processor {
             final var reader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8)
             );
-            final var requestHeader = RequestHeader.from(reader);
-            final var requestUri = RequestUri.from(requestHeader.path());
-            final var requestCookie = HttpCookie.from(requestHeader.header("Cookie"));
+            final var request = HttpRequest.from(reader);
+            final var requestUri = RequestUri.from(request.path());
+            final var requestCookie = HttpCookie.from(request.header("Cookie"));
             final var currentSession = sessionFor(requestCookie);
 
-            if (requestHeader.method().equals("GET")
+            if (request.method().equals("GET")
                     && requestUri.path().equals("/login")
                     && currentSession.map(this::getUser).isPresent()) {
                 redirect(outputStream, "/index.html", Optional.empty());
                 return;
             }
 
-            if (requestHeader.method().equals("POST")) {
-                final var requestBody = readRequestBody(reader, requestHeader);
+            if (request.method().equals("POST")) {
+                final var requestBody = readRequestBody(reader, request);
                 final var parameters = RequestUri.parseParameters(requestBody);
 
                 if (requestUri.path().equals("/register")) {
@@ -159,9 +159,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestBody(
             final BufferedReader reader,
-            final RequestHeader requestHeader
+            final HttpRequest request
     ) throws IOException {
-        final var contentLength = Integer.parseInt(requestHeader.header("Content-Length"));
+        final var contentLength = Integer.parseInt(request.header("Content-Length"));
         final var buffer = new char[contentLength];
         var totalRead = 0;
 

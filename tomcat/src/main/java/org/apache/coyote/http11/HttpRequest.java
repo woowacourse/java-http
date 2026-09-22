@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public record RequestHeader(String method, String path, String version, Map<String, String> headers) {
-    public static RequestHeader from(final BufferedReader reader) throws IOException {
+public record HttpRequest(String method, String path, String version, Map<String, String> headers) {
+    public static HttpRequest from(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
 
         if (requestLine == null || requestLine.isBlank()) {
@@ -30,15 +30,13 @@ public record RequestHeader(String method, String path, String version, Map<Stri
                 throw new IOException("Invalid request header");
             }
 
-            final var name = headerLine.substring(0, colonIndex)
-                    .trim()
-                    .toLowerCase(Locale.ROOT);
+            final var name = headerLine.substring(0, colonIndex).trim().toLowerCase(Locale.ROOT);
             final var value = headerLine.substring(colonIndex + 1).trim();
 
             parsedHeaders.put(name, value);
         }
 
-        return new RequestHeader(
+        return new HttpRequest(
                 requestParts[0],
                 requestParts[1],
                 requestParts[2],

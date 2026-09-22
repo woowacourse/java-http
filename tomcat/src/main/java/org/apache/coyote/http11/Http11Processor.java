@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -14,7 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,9 +59,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final Map<String, String> headers = resolveHeader(reader);
+            final Map<String, List<String>> headers = resolveHeader(reader);
 
-            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+            final HttpCookie cookie = new HttpCookie(headers.get("cookie"));
             final boolean shouldIssueJSessionId = !cookie.contains("JSESSIONID");
             final String jSessionId;
             SessionManager sessionManager = SessionManager.getInstance();
@@ -79,39 +83,16 @@ public class Http11Processor implements Runnable, Processor {
             final String uri = extractUri(requestLine);
             final String path = extractPath(uri);
 
-            if ("/login".equals(path) && "POST".equals(method)) {
-                handleLogin(
-                        reader,
-                        headers,
-                        outputStream,
-                        jSessionId,
-                        shouldIssueJSessionId,
-                        session
-                );
-                return;
-            }
-            if ("/login".equals(path)
-                    && "GET".equals(method)
-                    && session.getAttribute("user") != null) {
-
-                final String response = createRedirectResponse(
-                        "/index.html",
-                        jSessionId,
-                        shouldIssueJSessionId
-                );
-
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                return;
-            }
-            if ("/register".equals(path) && "POST".equals(method)) {
-                handleRegister(
-                        reader,
-                        headers,
-                        outputStream,
-                        jSessionId,
-                        shouldIssueJSessionId
-                );
+            if (handleRoute(
+                    method,
+                    path,
+                    reader,
+                    headers,
+                    outputStream,
+                    jSessionId,
+                    shouldIssueJSessionId,
+                    session
+            )) {
                 return;
             }
 
@@ -123,22 +104,101 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
 
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedIOException | UncheckedServletException e ) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private boolean handleRoute(
+            final String method,
+            final String path,
+            final BufferedReader reader,
+            final Map<String, List<String>> headers,
+            final OutputStream outputStream,
+            final String jSessionId,
+            final boolean shouldIssueJSessionId,
+            final Session session
+    ) throws IOException {
+
+        if (isLoginPath(path)) {
+            return handleLoginRoute(
+                    method,
+                    reader,
+                    headers,
+                    outputStream,
+                    jSessionId,
+                    shouldIssueJSessionId,
+                    session
+            );
+        }
+
+        if (isRegisterPath(path) && "POST".equals(method)) {
+            handleRegister(
+                    reader,
+                    headers,
+                    outputStream,
+                    jSessionId,
+                    shouldIssueJSessionId
+            );
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean handleLoginRoute(
+            final String method,
+            final BufferedReader reader,
+            final Map<String, List<String>> headers,
+            final OutputStream outputStream,
+            final String jSessionId,
+            final boolean shouldIssueJSessionId,
+            final Session session
+    ) throws IOException {
+
+        if ("POST".equals(method)) {
+            handleLogin(
+                    reader,
+                    headers,
+                    outputStream,
+                    jSessionId,
+                    shouldIssueJSessionId,
+                    session
+            );
+            return true;
+        }
+
+        if ("GET".equals(method)
+                && session.getAttribute("user") != null) {
+
+            final String response = createRedirectResponse(
+                    "/index.html",
+                    jSessionId,
+                    shouldIssueJSessionId
+            );
+
+            outputStream.write(
+                    response.getBytes(StandardCharsets.UTF_8)
+            );
+            outputStream.flush();
+
+            return true;
+        }
+
+        return false;
+    }
+
     private void handleRegister(
             final BufferedReader reader,
-            final Map<String, String> headers,
+            final Map<String, List<String>> headers,
             final OutputStream outputStream,
             final String jSessionId,
             final boolean shouldIssueJSessionId
     ) throws IOException {
-        int bodyLength = 0;
-        bodyLength = Integer.parseInt(headers.get("Content-Length"));
+
+        final int bodyLength = resolveContentLength(headers);
 
         final char[] buffer = new char[bodyLength];
         reader.read(buffer, 0, bodyLength);
@@ -188,29 +248,53 @@ public class Http11Processor implements Runnable, Processor {
         return bodyParams;
     }
 
-    private Map<String, String> resolveHeader(
+    private Map<String, List<String>> resolveHeader(
             final BufferedReader reader
-    ) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line = reader.readLine();
+    ) {
+        final Map<String, List<String>> headers = new HashMap<>();
 
-        while (line != null && !line.isEmpty()) {
-            final String[] header = line.split(":", 2);
-            headers.put(header[0].trim(), header[1].trim());
-            line = reader.readLine();
+        try {
+            String line = reader.readLine();
+
+            while (line != null && !line.isEmpty()) {
+                final String[] header = line.split(":", 2);
+
+                if (header.length != 2) {
+                    throw new IllegalArgumentException(
+                            "Invalid header line: " + line
+                    );
+                }
+
+                final String name = header[0]
+                        .trim()
+                        .toLowerCase(Locale.ROOT);
+
+                final String value = header[1].trim();
+
+                headers.computeIfAbsent(name, key -> new ArrayList<>())
+                        .add(value);
+
+                line = reader.readLine();
+            }
+
+            return headers;
+        } catch (IOException e) {
+            throw new UncheckedIOException(
+                    "HTTP Header를 읽는 중 오류가 발생했습니다.",
+                    e
+            );
         }
-        return headers;
     }
 
     private void handleLogin(
             final BufferedReader reader,
-            final Map<String, String> headers,
+            final Map<String, List<String>> headers,
             final OutputStream outputStream,
             final String jSessionId,
             final boolean shouldIssueJSessionId,
             final Session session
     ) throws IOException {
-        final int bodyLength = Integer.parseInt(headers.get("Content-Length"));
+        final int bodyLength = resolveContentLength(headers);
 
         final char[] buffer = new char[bodyLength];
         reader.read(buffer, 0, bodyLength);
@@ -248,6 +332,47 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private int resolveContentLength(Map<String, List<String>> headers) {
+        final List<String> headerValues = headers.get("content-length");
+
+        if (headerValues == null || headerValues.isEmpty()) {
+            return 0;
+        }
+
+        String contentLength = null;
+
+        for (String headerValue : headerValues) {
+            for(String value : headerValue.split(",")) {
+                final String trimmedValue = value.trim();
+
+                if (contentLength == null) {
+                    contentLength = trimmedValue;
+                    continue;
+                }
+
+                if (!contentLength.equals(trimmedValue)) {
+                    throw new IllegalArgumentException("conflicting header value: " + headerValue);
+                }
+            }
+        }
+
+        if (contentLength == null) {
+            return 0;
+        }
+
+        try {
+            final int length = Integer.parseInt(contentLength);
+
+            if (length < 0) {
+                throw new IllegalArgumentException("Invalid Content-Length: " + contentLength);
+            }
+
+            return length;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid Content-Length: " + contentLength, e);
+        }
+    }
+
     private String extractMethod(final String requestLine) {
         return requestLine.split(" ")[0];
     }
@@ -267,15 +392,23 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String resolveResourcePath(final String path) {
-        if ("/login".equals(path)) {
+        if (isLoginPath(path)) {
             return "/login.html";
         }
 
-        if ("/register".equals(path)) {
+        if (isRegisterPath(path)) {
             return "/register.html";
         }
 
         return path;
+    }
+
+    private boolean isLoginPath(final String path) {
+        return "/login".equals(path);
+    }
+
+    private boolean isRegisterPath(final String path) {
+        return "/register".equals(path);
     }
 
     private String createResponseBody(
@@ -338,7 +471,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (uri.endsWith(".js")) {
-            return "application/javascript";
+            return "text/javascript";
         }
 
         return "text/html;charset=utf-8";

@@ -14,7 +14,7 @@ public class HttpResponse {
     private String reasonPhrase = "OK";
     private byte[] body = new byte[0];
 
-    public void setStatus(int statusCode, String reasonPhrase) {
+    private void setStatus(int statusCode, String reasonPhrase) {
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
     }
@@ -23,9 +23,21 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
+    public void setCookie(String name, String value) {
+        setHeader("Set-Cookie", name + "=" + value);
+    }
+
     public void setBody(String body, String contentType) {
         this.body = body.getBytes(StandardCharsets.UTF_8);
         setHeader("Content-Type", contentType);
+    }
+
+    public void notFound() {
+        setStatus(404, "Not Found");
+    }
+
+    public void methodNotAllowed() {
+        setStatus(405, "Method Not Allowed");
     }
 
     public void redirect(String location) {

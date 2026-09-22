@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RootController;
+import org.apache.catalina.RequestMapping;
+import org.apache.catalina.controller.StaticResourceController;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -7,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +26,9 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new RequestMapping(
+                new StaticResourceController(), List.of(new RootController()));
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -50,7 +56,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new RequestMapping(new StaticResourceController(), List.of());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);

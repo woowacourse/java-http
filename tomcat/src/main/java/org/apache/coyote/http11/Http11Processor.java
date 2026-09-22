@@ -63,10 +63,9 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
             final Request request = readRequest(bufferedReader);
             final HttpCookie httpCookie = HttpCookie.from(request.headerValue("Cookie"));
-            final SessionContext sessionContext = getOrCreateSession(httpCookie);
 
-            Response response = dispatchRequest(request, sessionContext);
-            completeResponse(response, sessionContext);
+            Response response = dispatchRequest(request, httpCookie);
+            completeResponse(response);
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -87,15 +86,11 @@ public class Http11Processor implements Runnable, Processor {
         return SessionContext.created(newSession);
     }
 
-    private void completeResponse(final Response response, final SessionContext sessionContext) throws IOException {
+    private void completeResponse(final Response response) throws IOException {
         response.addBody(readStaticResource(response.filePath()));
         response.addHeader("Content-Type", getContentType(response.filePath()) + ";charset=utf-8");
         response.addHeader("Content-Length", String.valueOf(response.body()
             .getBytes().length));
-        if (sessionContext.created()) {
-            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionContext.session().id());
-        }
-
     }
 
     private void writeResponse(final OutputStream outputStream, final Response response)
@@ -156,18 +151,23 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer).trim();
     }
 
-    private Response dispatchRequest(final Request request, final SessionContext sessionContext) {
+    private Response dispatchRequest(final Request request, final HttpCookie httpCookie) {
         final Route route = Route.from(request);
-        if (routeHandlerMap.containsKey(route)) {
-            return routeHandlerMap.get(route)
-                .apply(request, sessionContext);
-        }
         if (request.httpMethod() == HttpMethod.GET
             && STATIC_RESOURCE_PATHS.contains(request.path())) {
             return Response.ok(request.path());
         }
+        if (!routeHandlerMap.containsKey(route)) {
+            return Response.notFound();
+        }
 
-        return Response.notFound();
+        final SessionContext sessionContext = getOrCreateSession(httpCookie);
+        final Response response = routeHandlerMap.get(route)
+            .apply(request, sessionContext);
+        if (sessionContext.created()) {
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionContext.session().id());
+        }
+        return response;
     }
 
     private Response handleIndex(final Request request, final SessionContext sessionContext) {

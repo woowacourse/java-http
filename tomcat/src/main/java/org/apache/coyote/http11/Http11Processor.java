@@ -82,21 +82,22 @@ public class Http11Processor implements Runnable, Processor {
                 requestUri = requestUri.substring(0, index);
             }
 
+            Cookie cookie = new Cookie(headers.get("Cookie"));
+
             String statusLine = "HTTP/1.1 200 OK ";
             String location = null;
+            String setCookie = null;
 
             if (requestUri.equals("/login") && method.equals("GET")) {
                 requestUri = "/login.html";
             }
 
             if (requestUri.equals("/login") && method.equals("POST")) {
-                //POST의 폼 데이터는 쿼리 스트링이 아니라 본문에 담겨 오니까
                 Map<String, String> params = parseParam(requestBody);
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(params.getOrDefault("account", ""))
                         .filter(it -> it.checkPassword(params.get("password")));
 
-                //로그인 실패를 기본값으로 두고, 성공하면 덮어씀
                 statusLine = "HTTP/1.1 401 Unauthorized ";
                 requestUri = "/401.html";
 
@@ -104,6 +105,11 @@ public class Http11Processor implements Runnable, Processor {
                     log.info("user : {}", user.get());
                     statusLine = "HTTP/1.1 302 Found ";
                     location = "/index.html";
+
+                    //이미 세션 아이디를 들고 있으면 새로 발급하지 않음
+                    if (!cookie.hasJSessionId()) {
+                        setCookie = Cookie.createJSessionId();
+                    }
                 }
             }
 
@@ -136,6 +142,9 @@ public class Http11Processor implements Runnable, Processor {
             lines.add(statusLine);
             if (location != null) {
                 lines.add("Location: " + location + " ");
+            }
+            if (setCookie != null) {
+                lines.add("Set-Cookie: " + setCookie + " ");
             }
             lines.add("Content-Type: " + contentType + ";charset=utf-8 ");
             lines.add("Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");

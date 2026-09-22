@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +57,12 @@ public class Http11Processor implements Runnable, Processor {
 
         Map<String, String> headers = readHeaders(reader);
         String requestBody = readBody(reader, headers);
+        HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
 
         String path = parsePathFrom(requestUri);
 
         if (path.startsWith("/login") && httpMethod.equals("POST")) {
-            return loginResponse(parseFormData(requestBody));
+            return loginResponse(parseFormData(requestBody), cookie);
         }
 
         if (path.startsWith("/register") && httpMethod.equals("POST")) {
@@ -105,9 +107,12 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private String loginResponse(Map<String, String> params) {
+    private String loginResponse(Map<String, String> params, HttpCookie cookie) {
         Optional<User> account = findAccount(params.get("account"), params.get("password"));
         if (account.isPresent()) {
+            if (!cookie.hasJSessionId()) {
+                return redirectWithSessionCookie("/index.html", UUID.randomUUID().toString());
+            }
             return redirect("/index.html");
         }
         return redirect("/401.html");
@@ -137,6 +142,14 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: " + location + " "
+        );
+    }
+
+    private String redirectWithSessionCookie(String location, String jSessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location + " ",
+                "Set-Cookie: JSESSIONID=" + jSessionId + " "
         );
     }
 

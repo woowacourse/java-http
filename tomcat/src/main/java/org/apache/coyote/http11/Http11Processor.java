@@ -18,8 +18,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,27 +64,20 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final HttpRequest request = optionalRequest.get();
+            final HttpResponse response = new HttpResponse();
 
-            final Map<String, String> responseHeaders = new LinkedHashMap<>();
+            final String sessionId = resolveSessionId(request, response);
 
-            final String sessionId = resolveSessionId(request, responseHeaders);
+            boolean handled = handleLogin(request, sessionId, response);
 
-            if (handleLogin(outputStream, request, sessionId, responseHeaders)) {
-                return;
+            if (!handled) {
+                handled = handleRegister(request, response);
             }
 
-            if (handleRegister(outputStream, request, responseHeaders)) {
-                return;
+            if (!handled) {
+                handleResource(request, response);
             }
-
-            if ("/".equals(request.getPath())) {
-                writeResponse(outputStream, "200 OK",
-                        "text/html;charset=utf-8",
-                        HELLO_WORLD, responseHeaders);
-                return;
-            }
-
-            writeStaticResource(outputStream, request.getPath(), responseHeaders);
+            response.writeTo(outputStream);
         } catch (IOException
                  | URISyntaxException
                  | UncheckedServletException e) {
@@ -97,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String resolveSessionId(
             final HttpRequest request,
-            final Map<String, String> responseHeaders
+            final HttpResponse response
     ) {
 
         final Optional<String> existingSessionId = request.getCookie(JSESSIONID);
@@ -107,16 +98,15 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final String newSessionId = UUID.randomUUID().toString();
-        responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + newSessionId);
+        response.addHeader(SET_COOKIE, JSESSIONID + "=" + newSessionId);
         return newSessionId;
     }
 
     private boolean handleLogin(
-            final OutputStream outputStream,
             final HttpRequest request,
             final String sessionId,
-            final Map<String, String> responseHeaders
-    ) throws IOException {
+            final HttpResponse response
+    ) {
         if (!LOGIN_PATH.equals(request.getPath())) {
             return false;
         }
@@ -125,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpSession session = SESSION_MANAGER.findSession(sessionId);
 
             if (session != null && getUser(session) != null) {
-                writeRedirect(outputStream, "/index.html", responseHeaders);
+                response.sendRedirect("/index.html");
                 return true;
             }
             // Session이 없거나 로그인하지 않았다면 새로 만들지 않고 login.html을 보여준다.
@@ -141,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
         final String password = request.getParameter("password").orElse(null);
 
         if (account == null || password == null) {
-            writeRedirect(outputStream, "/401.html", responseHeaders);
+            response.sendRedirect("/401.html");
             return true;
         }
 
@@ -150,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isEmpty()) {
             log.info("login failed account: {}", account);
-            writeRedirect(outputStream, "/401.html", responseHeaders);
+            response.sendRedirect("/401.html");
             return true;
         }
         final User loginUser = user.get();
@@ -159,9 +149,9 @@ public class Http11Processor implements Runnable, Processor {
         final HttpSession session = SESSION_MANAGER.createSession();
         // 서버 Session에 로그인 User 저장
         session.setAttribute(USER_SESSION_KEY, loginUser);
-        responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + session.getId());
+        response.addHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
         log.info("login success account: {}", loginUser.getAccount());
-        writeRedirect(outputStream, "/index.html", responseHeaders);
+        response.sendRedirect("/index.html");
         return true;
 
     }
@@ -174,12 +164,7 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private boolean handleRegister(
-            final OutputStream outputStream,
-            final HttpRequest request,
-            final Map<String, String> responseHeaders
-    ) throws IOException {
-
+    private boolean handleRegister(final HttpRequest request, final HttpResponse response) {
         if (!REGISTER_PATH.equals(request.getPath())) {
             return false;
         }
@@ -207,83 +192,41 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("register success account: {}", account);
 
-        writeRedirect(outputStream, "/index.html", responseHeaders);
-
+        response.sendRedirect("/index.html");
         return true;
     }
 
-
-    private void writeRedirect(
-            final OutputStream outputStream,
-            final String location,
-            final Map<String, String> commonHeaders
-    ) throws IOException {
-
-        final Map<String, String> responseHeaders =
-                new LinkedHashMap<>(
-                        commonHeaders
-                );
-        responseHeaders.put(
-                "Location",
-                location
-        );
-
-        writeResponse(
-                outputStream,
-                "302 Found",
-                null,
-                new byte[0],
-                responseHeaders
-        );
-    }
-
-    private void writeStaticResource(
-            final OutputStream outputStream,
-            final String path,
-            final Map<String, String> responseHeaders
+    private void handleResource(
+            final HttpRequest request,
+            final HttpResponse response
     ) throws IOException, URISyntaxException {
-
-        final String resourcePath = resolveResourcePath(path);
-
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource(resourcePath);
-        if (resource == null) {
-            writeNotFound(outputStream, responseHeaders);
+        if ("/".equals(request.getPath())) {
+            response.ok("text/html;charset=utf-8", HELLO_WORLD);
             return;
         }
-        final byte[] responseBody =
-                Files.readAllBytes(
-                        Path.of(resource.toURI())
-                );
 
-
-        writeResponse(
-                outputStream,
-                "200 OK",
-                resolveContentType(path),
-                responseBody,
-                responseHeaders
-        );
+        setStaticResourceResponse(response, request.getPath());
     }
 
-    private void writeNotFound(
-            final OutputStream outputStream,
-            final Map<String, String> responseHeaders
-    ) throws IOException {
+    private void setStaticResourceResponse(
+            final HttpResponse response,
+            final String path
+    ) throws IOException, URISyntaxException {
+        final String resourcePath = resolveResourcePath(path);
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
 
-        final byte[] responseBody =
-                "Not Found".getBytes(
-                        StandardCharsets.UTF_8
-                );
+        if (resource == null) {
+            setNotFoundResponse(response);
+            return;
+        }
 
-        writeResponse(
-                outputStream,
-                "404 Not Found",
-                "text/plain;charset=utf-8",
-                responseBody,
-                responseHeaders
-        );
+        final byte[] responseBody = Files.readAllBytes(Path.of(resource.toURI()));
+        response.ok(resolveContentType(path), responseBody);
+    }
+
+    private void setNotFoundResponse(final HttpResponse response) {
+        final byte[] responseBody = "Not Found".getBytes(StandardCharsets.UTF_8);
+        response.notFound("text/plain;charset=utf-8", responseBody);
     }
 
     private String resolveResourcePath(final String path) {
@@ -307,57 +250,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html;charset=utf-8";
-    }
-
-    private void writeResponse(
-            final OutputStream outputStream,
-            final String status,
-            final String contentType,
-            final byte[] responseBody,
-            final Map<String, String> additionalHeaders
-    ) throws IOException {
-
-        final StringBuilder responseHeaders =
-                new StringBuilder();
-
-        responseHeaders
-                .append("HTTP/1.1 ")
-                .append(status)
-                .append(" \r\n");
-
-        if (contentType != null) {
-            responseHeaders
-                    .append("Content-Type: ")
-                    .append(contentType)
-                    .append(" \r\n");
-        }
-
-        for (Map.Entry<String, String> header
-                : additionalHeaders.entrySet()) {
-
-            responseHeaders
-                    .append(header.getKey())
-                    .append(": ")
-                    .append(header.getValue())
-                    .append(" \r\n");
-        }
-
-        responseHeaders
-                .append("Content-Length: ")
-                .append(responseBody.length)
-                .append(" \r\n")
-                .append("\r\n");
-
-        outputStream.write(
-                responseHeaders
-                        .toString()
-                        .getBytes(
-                                StandardCharsets.UTF_8
-                        )
-        );
-
-        outputStream.write(responseBody);
-        outputStream.flush();
     }
 }
 

@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
 
-            final HttpResponse response = handleRequest(uri, requestTarget, httpCookie, requestBody);
+            final HttpResponse response = handleRequest(uri, httpCookie, requestBody);
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
@@ -88,21 +89,22 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private HttpResponse handleRequest(final URI uri, final String requestTarget, final HttpCookie httpCookie, final String requestBody) throws IOException {
+    private HttpResponse handleRequest(final URI uri, final HttpCookie httpCookie, final String requestBody) throws IOException {
         final String uriPath = uri.getPath();
 
         if (uriPath.equals("/login")) {
-            return handleLogin(uri, requestTarget, httpCookie, requestBody);
+            return handleLogin(uri, httpCookie, requestBody);
         }
 
         if (uriPath.equals("/register")) {
-            return handleRegister(requestTarget, requestBody);
+            return handleRegister(requestBody);
         }
 
-        return createFileResponse(getFilePath(uriPath), requestTarget, "200 OK");
+        return createFileResponse(uriPath, "200 OK");
     }
 
-    private HttpResponse handleLogin(final URI uri, final String requestTarget, final HttpCookie httpCookie, final String requestBody) throws IOException {
+    private HttpResponse handleLogin(final URI uri, final HttpCookie httpCookie,
+                                     final String requestBody) throws IOException {
         final String uriPath = uri.getPath();
         Path filePath = getFilePath(uriPath);
         String httpStatus;
@@ -124,31 +126,30 @@ public class Http11Processor implements Runnable, Processor {
             if (jsessionId == null) {
                 httpCookie.put(JSESSION_ID_KEY, UUID.randomUUID().toString());
             }
-        }
-        else if (query == null && requestBody == null){
+        } else if (query == null && requestBody == null) {
             httpStatus = "200 OK";
-            filePath = resolveResourcePath("static/login.html");
-        }
-        else {
+            filePath = getFilePath("/login");
+        } else {
             httpStatus = "401 Unauthorized";
             filePath = resolveResourcePath("static/401.html");
         }
 
-        final String contentType = getContentType(requestTarget);
+        final String contentType = getContentType(filePath);
         final String responseBody = location == null ? getResponseBody(filePath) : "";
         return new HttpResponse(httpStatus, contentType, responseBody, location, httpCookie);
     }
 
-    private HttpResponse handleRegister(final String requestTarget, final String requestBody) throws IOException {
+    private HttpResponse handleRegister(final String requestBody) throws IOException {
         if (requestBody != null) {
             createUser(extractQueryParams(requestBody));
         }
 
-        return createFileResponse(resolveResourcePath("static/register.html"), requestTarget, "200 OK");
+        return createFileResponse("/register", "200 OK");
     }
 
-    private HttpResponse createFileResponse(final Path filePath, final String requestTarget, final String httpStatus) throws IOException {
-        final String contentType = getContentType(requestTarget);
+    private HttpResponse createFileResponse(final String uriPath, final String httpStatus) throws IOException {
+        final Path filePath = getFilePath(uriPath);
+        final String contentType = getContentType(filePath);
         final String responseBody = getResponseBody(filePath);
         return new HttpResponse(httpStatus, contentType, responseBody, null, null);
     }
@@ -157,12 +158,14 @@ public class Http11Processor implements Runnable, Processor {
         if (uriPath.equals("/")) {
             return Path.of("/");
         }
-        if (uriPath.equals("/login")) {
-            return resolveResourcePath("static/login.html");
-        }
-        else {
-            return resolveResourcePath("static" + uriPath);
-        }
+
+        final String resourceName = switch (uriPath) {
+            case "/login" -> "static/login.html";
+            case "/register" -> "static/register.html";
+            default -> "static/" + (uriPath.startsWith("/") ? uriPath.substring(1) : uriPath);
+        };
+
+        return resolveResourcePath(resourceName);
     }
 
     private Map<String, String> extractQueryParams(final String query) {
@@ -214,12 +217,14 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(filePath);
     }
 
-    private String getContentType(final String requestUri) {
-        if (requestUri.endsWith(".css")) {
+    private String getContentType(final Path filePath) {
+        final String path = filePath.toString();
+
+        if (path.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
 
-        if (requestUri.endsWith(".js")) {
+        if (path.endsWith(".js")) {
             return "text/javascript;charset=utf-8";
         }
 

@@ -15,12 +15,15 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(HttpSession session) {
-        sessions.put(session.getId(), (Session) session);
+        Session existing = sessions.putIfAbsent(session.getId(), (Session) session);
+        if (existing != null) {
+            throw new IllegalStateException("Session ID already exists: " + session.getId());
+        }
     }
 
     @Override
     public void remove(HttpSession session) {
-        sessions.remove(session.getId(), session);
+        sessions.remove(session.getId(), (Session) session);
     }
 
     public SessionManager() {}

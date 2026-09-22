@@ -1,10 +1,16 @@
 package com.techcourse.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 
 public class HomeController extends AbstractController {
+
+    @Override
+    protected List<String> allowedMethods() {
+        return List.of("GET", "POST");
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

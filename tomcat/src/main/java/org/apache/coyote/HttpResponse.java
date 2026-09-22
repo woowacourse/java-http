@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Map;
 
@@ -70,6 +71,11 @@ public final class HttpResponse {
     public static HttpResponse redirect(String location) {
         return create("302 Found", "text/html;charset=utf-8", new byte[0],
                 Map.of("Location", location));
+    }
+
+    public static HttpResponse methodNotAllowed(List<String> allowedMethods) {
+        return create("405 Method Not Allowed", "text/html;charset=utf-8", new byte[0],
+                Map.of("Allow", String.join(", ", allowedMethods)));
     }
 
     private static HttpResponse create(String statusCode, String contentType, byte[] body,

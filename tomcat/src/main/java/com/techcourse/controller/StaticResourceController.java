@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.web.StaticResourceHandler;
 import java.io.IOException;
+import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 
@@ -11,6 +12,11 @@ public class StaticResourceController extends AbstractController {
 
     public StaticResourceController(StaticResourceHandler staticResourceHandler) {
         this.staticResourceHandler = staticResourceHandler;
+    }
+
+    @Override
+    protected List<String> allowedMethods() {
+        return List.of("GET", "POST");
     }
 
     @Override

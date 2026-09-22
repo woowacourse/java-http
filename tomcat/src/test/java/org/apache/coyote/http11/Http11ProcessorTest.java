@@ -235,17 +235,7 @@ class Http11ProcessorTest {
                 "content-length: 12",
                 "Content-Type: application/x-www-form-urlencoded",
                 "", "account=gugu"));
-        final var manager = new SessionManager();
-        final var existing = new Session("existing-session");
-        manager.add(existing);
-        final var processor = new Http11Processor(socket, (request, session) -> {
-            assertThat(session).isSameAs(existing);
-            assertThat(request.cookies().getCookie("yummy_cookie")).isEqualTo("choco");
-            assertThat(request.cookies().getCookie("JSESSIONID")).isEqualTo("existing-session");
-            assertThat(request.cookies().getCookie("token")).isEqualTo("abc==");
-            assertThat(request.formParameters()).containsEntry("account", "gugu");
-            return HttpResponse.redirect("/index.html");
-        }, manager);
+        final var processor = getHttp11Processor(socket);
 
         processor.process(socket);
 
@@ -458,6 +448,24 @@ class Http11ProcessorTest {
         assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
     }
 
+    @Test
+    void unsupportedMethodsReturn405WithAllowedMethods() {
+        for (String path : new String[]{"/", "/login", "/register", "/index.html"}) {
+            for (String method : new String[]{"PUT", "DELETE", "PATCH", "OPTIONS"}) {
+                var socket = new StubSocket(method + " " + path + " HTTP/1.1\r\n"
+                        + "Cookie: JSESSIONID=existing-session\r\n\r\n");
+
+                createProcessor(socket).process(socket);
+
+                assertThat(socket.output()).as("%s %s", method, path)
+                        .startsWith("HTTP/1.1 405 Method Not Allowed\r\n")
+                        .contains("\r\nAllow: GET, POST\r\n")
+                        .contains("\r\nContent-Length: 0\r\n")
+                        .endsWith("\r\n\r\n");
+            }
+        }
+    }
+
     private Http11Processor createProcessor(StubSocket socket) {
         final var manager = new SessionManager();
         manager.add(new Session("existing-session"));
@@ -507,5 +515,19 @@ class Http11ProcessorTest {
                 "",
                 responseBody
         );
+    }
+
+    private static Http11Processor getHttp11Processor(StubSocket socket) {
+        final var manager = new SessionManager();
+        final var existing = new Session("existing-session");
+        manager.add(existing);
+        return new Http11Processor(socket, (request, session) -> {
+            assertThat(session).isSameAs(existing);
+            assertThat(request.cookies().getCookie("yummy_cookie")).isEqualTo("choco");
+            assertThat(request.cookies().getCookie("JSESSIONID")).isEqualTo("existing-session");
+            assertThat(request.cookies().getCookie("token")).isEqualTo("abc==");
+            assertThat(request.formParameters()).containsEntry("account", "gugu");
+            return HttpResponse.redirect("/index.html");
+        }, manager);
     }
 }

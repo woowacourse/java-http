@@ -4,6 +4,7 @@ import com.techcourse.service.ApplicationService;
 import com.techcourse.web.StaticResourceHandler;
 import java.io.IOException;
 import java.util.Map;
+import java.util.List;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.slf4j.Logger;
@@ -18,6 +19,11 @@ public class LoginController extends AbstractController {
     public LoginController(ApplicationService applicationService, StaticResourceHandler staticResourceHandler) {
         this.applicationService = applicationService;
         this.staticResourceHandler = staticResourceHandler;
+    }
+
+    @Override
+    protected List<String> allowedMethods() {
+        return List.of("GET", "POST");
     }
 
     @Override

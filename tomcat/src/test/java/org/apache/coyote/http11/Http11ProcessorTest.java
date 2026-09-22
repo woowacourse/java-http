@@ -185,4 +185,21 @@ class Http11ProcessorTest {
                 .contains("Location: /index.html ");
         assertThat(InMemoryUserRepository.findByAccount("dongkey")).isPresent();
     }
+
+    @Test
+    void setCookieWhenNoSessionId() {
+        final String httpRequest= String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
+    }
 }

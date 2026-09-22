@@ -21,16 +21,16 @@ public class Connector implements Runnable {
 
     private volatile boolean stopped;
 
-    public Connector(ServerSocket serverSocket, SessionManager sessionManager, boolean stopped) {
+    private Connector(ServerSocket serverSocket, SessionManager sessionManager, boolean stopped) {
         this.serverSocket = serverSocket;
         this.sessionManager = sessionManager;
         this.stopped = stopped;
     }
 
-    public static Connector create() {
+    public static Connector of(final SessionManager sessionManager) {
         try {
             return new Connector(new ServerSocket(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT),
-                    new SessionManager(), false);
+                    sessionManager, false);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

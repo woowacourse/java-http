@@ -1,6 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,7 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        Connector connector = Connector.create();
+        Connector connector = Connector.of(new SessionManager());
         connector.startListening();
 
         registerShutdownHook(connector);

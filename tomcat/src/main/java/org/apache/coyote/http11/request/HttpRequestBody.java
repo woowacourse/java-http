@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 
 public class HttpRequestBody {
 
@@ -15,7 +16,7 @@ public class HttpRequestBody {
 
     public static HttpRequestBody from(BufferedReader reader, HttpRequestHeader header) throws IOException {
         String body = "";
-        QueryParams queryParams = null;
+        QueryParams queryParams = QueryParams.from("");
         if (header.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(header.getValue("Content-Length"));
             char[] bodyChars = new char[contentLength];
@@ -30,7 +31,7 @@ public class HttpRequestBody {
         return body;
     }
 
-    public String getParameter(String key) {
+    public Optional<String> getParameter(String key) {
         return queryParams.getValue(key);
     }
 }

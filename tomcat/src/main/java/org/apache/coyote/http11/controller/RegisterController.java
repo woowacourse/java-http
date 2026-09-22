@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.controller;
 
+import static org.apache.coyote.http11.request.RequestParams.anyBlank;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -14,8 +16,7 @@ public class RegisterController extends AbstractController {
         String password = request.getBodyParameter("password");
         String email = request.getBodyParameter("email");
 
-        if (isBlank(account) || isBlank(password) || isBlank(email)
-                || InMemoryUserRepository.findByAccount(account).isPresent()) {
+        if (anyBlank(account, password, email) || isDuplicateAccount(account)) {
             response.sendRedirect("/register.html");
             return;
         }
@@ -29,7 +30,7 @@ public class RegisterController extends AbstractController {
         View.renderStaticPage(request.getUri(), response);
     }
 
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
+    private boolean isDuplicateAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account).isPresent();
     }
 }

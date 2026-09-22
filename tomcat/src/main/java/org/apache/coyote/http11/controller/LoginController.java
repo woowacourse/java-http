@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.controller;
 
+import static org.apache.coyote.http11.request.RequestParams.anyBlank;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
@@ -27,6 +29,10 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getBodyParameter("account");
         String password = request.getBodyParameter("password");
+        if (anyBlank(account, password)) {
+            response.sendRedirect("/401.html");
+            return;
+        }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
         if (optionalUser.isEmpty()) {

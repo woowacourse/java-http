@@ -98,7 +98,7 @@ public class HttpRequest {
     }
 
     public String getBodyParameter(String key) {
-        return body.getParameter(key);
+        return body.getParameter(key).orElse("");
     }
 
     public HttpMethod getMethod() {

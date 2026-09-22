@@ -7,7 +7,7 @@ public class RequestMapping {
     private static final Controller STATIC_RESOURCE_CONTROLLER = new StaticPageController();
     private static final Controller LOGIN_CONTROLLER = new LoginController();
     private static final Map<String, Controller> controllers = Map.of(
-            "/", LOGIN_CONTROLLER,
+            "/", STATIC_RESOURCE_CONTROLLER,
             "/login", LOGIN_CONTROLLER,
             "/logout", new LogoutController(),
             "/register", new RegisterController()

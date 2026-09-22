@@ -89,4 +89,22 @@ class Http11ProcessorTest {
                     .contains("Content-Type: " + contentType);
         });
     }
+
+    @Test
+    void 두_점이_포함된_정상적인_파일명을_허용한다() {
+        final var httpRequest = String.join("\r\n",
+                "GET /a..b.js HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                ""
+        );
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("path is valid");
+    }
 }

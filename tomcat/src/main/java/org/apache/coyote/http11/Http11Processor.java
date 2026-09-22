@@ -15,6 +15,7 @@ import java.net.URLDecoder;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
@@ -170,7 +171,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void validateRequestPath(final String requestPath) {
-        if (!requestPath.startsWith("/") || requestPath.contains("..")) {
+        final var pathSegments = List.of(requestPath.split("/"));
+
+        if (!requestPath.startsWith("/") || pathSegments.contains("..")) {
             throw new UncheckedServletException(
                     new IllegalArgumentException("유효하지 않은 요청 경로입니다: " + requestPath)
             );

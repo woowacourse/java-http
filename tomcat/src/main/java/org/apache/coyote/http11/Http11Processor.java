@@ -87,7 +87,10 @@ public class Http11Processor implements Runnable, Processor {
                     throw new IOException("회원가입 필수 항목이 누락되었습니다.");
                 }
 
-                InMemoryUserRepository.save(new User(account, password, email));
+                if (!InMemoryUserRepository.save(new User(account, password, email))) {
+                    writeRegistrationConflict(outputStream, setCookieHeader);
+                    return;
+                }
                 writeRedirect(outputStream, "/index.html", setCookieHeader);
                 return;
             }
@@ -185,6 +188,19 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return null;
+    }
+
+    private void writeRegistrationConflict(OutputStream output, String setCookieHeader)
+            throws IOException {
+        final byte[] body = "이미 사용 중인 계정입니다.".getBytes(StandardCharsets.UTF_8);
+        final String header = String.join("\r\n",
+                "HTTP/1.1 409 Conflict",
+                "Content-Type: text/plain;charset=utf-8",
+                "Content-Length: " + body.length)
+                + "\r\n" + setCookieHeader + "\r\n";
+        output.write(header.getBytes(StandardCharsets.UTF_8));
+        output.write(body);
+        output.flush();
     }
 
     private void writeRedirect(OutputStream output, String location,

@@ -228,6 +228,33 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void duplicateRegistrationPreservesOriginalUser() {
+        final String account = "duplicate-" + UUID.randomUUID();
+        assertRedirect(new StubSocket(postRequest("/register",
+                "account=" + account + "&password=original&email=original%40example.com")),
+                "/index.html");
+        final User original = InMemoryUserRepository.findByAccount(account).orElseThrow();
+        final var duplicate = new StubSocket(postRequest("/register",
+                "account=" + account + "&password=replacement&email=replacement%40example.com"));
+
+        new Http11Processor(duplicate, sessionManager).process(duplicate);
+
+        final String[] response = duplicate.output().split("\\r\\n\\r\\n", 2);
+        final String message = "이미 사용 중인 계정입니다.";
+        assertThat(response).hasSize(2);
+        assertThat(response[0].split("\\r\\n")).contains(
+                "HTTP/1.1 409 Conflict",
+                "Content-Type: text/plain;charset=utf-8",
+                "Content-Length: " + message.getBytes(StandardCharsets.UTF_8).length);
+        assertThat(response[1]).isEqualTo(message);
+        assertThat(InMemoryUserRepository.findByAccount(account)).containsSame(original);
+        assertRedirect(new StubSocket(postLoginRequest(
+                "account=" + account + "&password=original")), "/index.html");
+        assertRedirect(new StubSocket(postLoginRequest(
+                "account=" + account + "&password=replacement")), "/401.html");
+    }
+
+    @Test
     void registrationWithoutPasswordIsNotSaved() {
         final var socket = new StubSocket(postRequest(
                 "/register",

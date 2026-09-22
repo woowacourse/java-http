@@ -55,9 +55,7 @@ public class Http11Processor implements Runnable, Processor {
                 queryString = requestUri.substring(queryStringIndex + 1);
             }
 
-            while (!reader.readLine().isEmpty()) {
-
-            }
+            skipHeaders(reader);
 
             if ("/index.html".equals(path)) {
                 final byte[] responseBody = getClass()
@@ -102,6 +100,16 @@ public class Http11Processor implements Runnable, Processor {
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void skipHeaders(final BufferedReader reader) throws IOException {
+        while (true) {
+            final String headerLine = reader.readLine();
+
+            if (headerLine == null || headerLine.isEmpty()) {
+                return;
+            }
         }
     }
 

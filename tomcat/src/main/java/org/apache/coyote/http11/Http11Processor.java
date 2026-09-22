@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,16 +16,46 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COLON = ":";
+    private static final String CONTENT_TYPE_TEXT_HTML = "text/html";
+    private static final String CONTENT_TYPE_TEXT_CSS = "text/css";
+    private static final String CONTENT_TYPE_TEXT_JAVASCRIPT = "text/javascript";
+    private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String PATH_INDEX_HTML = "/index.html";
+    private static final String PATH_LOGIN_HTML = "/login.html";
+    private static final String PATH_REGISTER_HTML = "/register.html";
+    private static final String PATH_401_HTML = "401.html";
+    private static final String PATH_404_HTML = "static/404.html";
+    private static final String METHOD_GET = "GET";
+    private static final String METHOD_POST = "POST";
+    private static final String HTTP_STATUS_OK = "200 OK";
+    private static final String HTTP_STATUS_FOUND = "302 Found";
+    private static final String HTTP_STATUS_NOT_FOUND = "404 Not Found";
+    private static final String CHARSET_UTF_8 = "charset=utf-8 ";
+    private static final String SEMI_COLON = ";";
+    private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
+    private static final String LOCATION = "Location";
+    private static final String STATIC = "static";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
+    private static final String USER = "user";
+
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
 
@@ -50,8 +82,10 @@ public class Http11Processor implements Runnable, Processor {
             }
             Map<String, String> headers = readHeaders(bufferedReader);
             String requestBody = readBody(bufferedReader, headers);
-
-            handle(outputStream, requestLine.split(" ")[1]);
+            String[] requestLines = requestLine.split(" ");
+            MyHttpCookie httpCookie = new MyHttpCookie(headers.get(COOKIE));
+            Session session = SESSION_MANAGER.findSession(httpCookie.getJSessionId());
+            handle(outputStream, requestLines[0], requestLines[1], requestBody, headers.get(CONTENT_TYPE), session);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -64,14 +98,13 @@ public class Http11Processor implements Runnable, Processor {
             if (line == null || line.isEmpty()) {
                 return headers;
             }
-            String[] headerLine = line.split(":");
+            String[] headerLine = line.split(COLON);
             headers.put(headerLine[0], headerLine[1].trim());
         }
     }
 
-    private String readBody(final BufferedReader bufferedReader, final Map<String, String> headers)
-            throws IOException {
-        String contentLength = headers.get("Content-Length");
+    private String readBody(final BufferedReader bufferedReader, final Map<String, String> headers) throws IOException {
+        String contentLength = headers.get(CONTENT_LENGTH);
         if (contentLength == null) {
             return "";
         }
@@ -80,32 +113,79 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, count);
     }
 
-    private void handle(final OutputStream outputStream, final String requestTarget)
-            throws IOException, URISyntaxException {
-        if ("/".equals(requestTarget)) {
-            writeResponse(outputStream, "200 OK", "text/html", "Hello world!");
-        } else if (requestTarget.startsWith("/login")) {
-            login(outputStream, requestTarget);
+    private void handle(final OutputStream outputStream, final String method, String path, String body, String contentType, Session session) throws IOException, URISyntaxException {
+        if ("/".equals(path)) {
+            writeResponse(outputStream, HTTP_STATUS_OK, CONTENT_TYPE_TEXT_HTML, "Hello world!");
+        } else if ("/login".equals(path)) {
+            login(outputStream, method, body, contentType, session);
+        } else if ("/register".equals(path)) {
+            register(outputStream, method, body);
         } else {
-            writeStaticFile(outputStream, requestTarget);
+            writeStaticFile(outputStream, path);
         }
     }
 
-    private void login(final OutputStream outputStream, final String requestTarget)
-            throws IOException, URISyntaxException {
-        if (requestTarget.contains("?")) {
-            Map<String, String> queryStringMap = parseQueryString(requestTarget);
-            Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringMap.get("account"));
-            if (optionalUser.isEmpty()) {
+    private void login(final OutputStream outputStream, final String method, String body, String contentType, Session session) throws IOException, URISyntaxException {
+        if (METHOD_GET.equals(method)) {
+            if (session != null && session.getAttribute(USER) != null) {
+                redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML);
                 return;
             }
-            User user = optionalUser.get();
-            if (!user.checkPassword(queryStringMap.get("password"))) {
-                throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
+            writeStaticFile(outputStream, PATH_LOGIN_HTML);
+        } else if (METHOD_POST.equals(method)) {
+            try {
+                Map<String, String> parameters;
+                if (contentType.startsWith(CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED)) {
+                    parameters = parseFormData(body);
+                } else {
+                    throw new IllegalArgumentException("지원하지 않는 Content-Type입니다: " + contentType);
+                }
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(parameters.get("account"));
+                if (optionalUser.isEmpty()) {
+                    throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
+                }
+                User user = optionalUser.get();
+                if (!user.checkPassword(parameters.get("password"))) {
+                    throw new IllegalArgumentException("아이디와 비밀번호를 다시 확인하고 입력해주세요.");
+                }
+                log.info(user.toString());
+                if (session == null) {
+                    Session newSession = new Session(UUID.randomUUID().toString());
+                    newSession.setAttribute(USER, user);
+                    SESSION_MANAGER.add(newSession);
+                    cookieResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML, newSession.getId());
+                    return;
+                }
+                session.setAttribute(USER, user);
+                redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML);
+            } catch (IllegalArgumentException exception) {
+                redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_401_HTML);
             }
-            log.info(user.toString());
         }
-        writeStaticFile(outputStream, "/login.html");
+    }
+
+    private void register(final OutputStream outputStream, final String method, String body) throws IOException, URISyntaxException {
+        if (METHOD_GET.equals(method)) {
+            writeStaticFile(outputStream, PATH_REGISTER_HTML);
+        } else if (METHOD_POST.equals(method)) {
+            Map<String, String> parameters = parseFormData(body);
+            User user = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
+            InMemoryUserRepository.save(user);
+            log.info(user.toString());
+            redirectResponse(outputStream, HTTP_STATUS_FOUND, CONTENT_TYPE_TEXT_HTML, "", PATH_INDEX_HTML);
+        }
+    }
+
+    private Map<String, String> parseFormData(final String body) {
+        Map<String, String> formData = new HashMap<>();
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] keyAndMap = pair.split("=", 2);
+            String key = keyAndMap[0];
+            String value = keyAndMap[1];
+            formData.put(URLDecoder.decode(key, StandardCharsets.UTF_8), URLDecoder.decode(value, StandardCharsets.UTF_8));
+        }
+        return formData;
     }
 
     private Map<String, String> parseQueryString(final String requestTarget) {
@@ -118,33 +198,56 @@ public class Http11Processor implements Runnable, Processor {
         return queryStringMap;
     }
 
-    private void writeStaticFile(final OutputStream outputStream, final String target)
-            throws IOException, URISyntaxException {
-        URL resource = getClass().getClassLoader().getResource("static" + target);
+    private void writeStaticFile(final OutputStream outputStream, final String target) throws IOException, URISyntaxException {
+        URL resource = getClass().getClassLoader().getResource(STATIC + target);
         if (resource == null) {
-            URL notFound = getClass().getClassLoader().getResource("static/404.html");
-            writeResponse(outputStream, "404 Not Found", "text/html", Files.readString(Path.of(notFound.toURI())));
+            URL notFound = getClass().getClassLoader().getResource(PATH_404_HTML);
+            writeResponse(outputStream, HTTP_STATUS_NOT_FOUND, CONTENT_TYPE_TEXT_HTML, Files.readString(Path.of(notFound.toURI())));
             return;
         }
-        writeResponse(outputStream, "200 OK", contentTypeOf(target), Files.readString(Path.of(resource.toURI())));
+        writeResponse(outputStream, HTTP_STATUS_OK, contentTypeOf(target), Files.readString(Path.of(resource.toURI())));
     }
 
     private String contentTypeOf(final String target) {
         if (target.endsWith(".css")) {
-            return "text/css";
+            return CONTENT_TYPE_TEXT_CSS;
         }
         if (target.endsWith(".js")) {
-            return "text/javascript";
+            return CONTENT_TYPE_TEXT_JAVASCRIPT;
         }
-        return "text/html";
+        return CONTENT_TYPE_TEXT_HTML;
     }
 
-    private void writeResponse(final OutputStream outputStream, final String status, final String contentType,
-                               final String responseBody) throws IOException {
+    private void redirectResponse(final OutputStream outputStream, final String status, final String contentType, final String responseBody, final String locationUrl) throws IOException {
         final var response = String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                HTTP_VERSION_1_1 + " " + status + " ",
+                CONTENT_TYPE + ": " + contentType + SEMI_COLON + " " + CHARSET_UTF_8,
+                CONTENT_LENGTH + ": " + responseBody.getBytes().length + " ",
+                LOCATION + ": " + locationUrl + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void writeResponse(final OutputStream outputStream, final String status, final String contentType, final String responseBody) throws IOException {
+        final var response = String.join("\r\n",
+                HTTP_VERSION_1_1 + " " + status + " ",
+                CONTENT_TYPE + ": " + contentType + SEMI_COLON + " " + CHARSET_UTF_8,
+                CONTENT_LENGTH + ": " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void cookieResponse(final OutputStream outputStream, final String status, final String contentType, final String responseBody, final String locationUrl, final String cookie) throws IOException {
+        final var response = String.join("\r\n",
+                HTTP_VERSION_1_1 + " " + status + " ",
+                SET_COOKIE + ": " + JSESSIONID + "=" + cookie + " ",
+                CONTENT_TYPE + ": " + contentType + SEMI_COLON + " " + CHARSET_UTF_8,
+                CONTENT_LENGTH + ": " + responseBody.getBytes().length + " ",
+                LOCATION + ": " + locationUrl + " ",
                 "",
                 responseBody);
         outputStream.write(response.getBytes());

@@ -1,9 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
 
@@ -32,8 +34,20 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
+    public Map<String, String> getBodyParameters() {
+        return parseParameters(body);
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return parseParameters(requestLine.getRawQuery());
+    }
+
     public HttpCookie getHttpCookie() {
         return httpCookie;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     public int getContentLength() {
@@ -66,5 +80,18 @@ public class HttpRequest {
         String cookieHeader = headers.get("Cookie");
 
         return cookieHeader == null ? new HttpCookie() : new HttpCookie(cookieHeader);
+    }
+
+    private Map<String, String> parseParameters(String parameters) {
+        return Arrays.stream(parameters.split("&"))
+                .map(parameter -> parameter.split("=", 2))
+                .collect(Collectors.toMap(
+                        parts -> decode(parts[0]),
+                        parts -> parts.length > 1 ? decode(parts[1]) : ""
+                ));
+    }
+
+    private static String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

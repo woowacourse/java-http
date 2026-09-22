@@ -25,7 +25,7 @@ class Http11ProcessorTest {
         // then
         String response = socket.output();
 
-        assertThat(response).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(response).startsWith("HTTP/1.1 200 OK\r\n");
         assertThat(response).containsPattern(
                 "Set-Cookie: JSESSIONID=[0-9a-f-]{36}; Path=/\\r\\n"
         );
@@ -58,7 +58,7 @@ class Http11ProcessorTest {
         );
         final String response = socket.output();
 
-        assertThat(response).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(response).startsWith("HTTP/1.1 200 OK\r\n");
         assertThat(response).containsPattern(
                 "Set-Cookie: JSESSIONID=[0-9a-f-]{36}; Path=/\\r\\n"
         );

@@ -144,6 +144,9 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found ")
                 .contains("Location: /index.html ");
+
+        final String sessionId = socket.output().split("Set-Cookie: JSESSIONID=", 2)[1].split(" ", 2)[0];
+        assertThat(SessionManager.findSession(sessionId).getAttribute("user")).isNotNull();
     }
 
     @Test
@@ -186,7 +189,9 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found ")
                 .contains("Location: /index.html ");
-        assertThat(InMemoryUserRepository.findByAccount("dongkey")).isPresent();
+        final var saved = InMemoryUserRepository.findByAccount("dongkey");
+        assertThat(saved).isPresent();
+        assertThat(saved.get().toString()).contains("dongkey@woowahan.com");
     }
 
     @Test

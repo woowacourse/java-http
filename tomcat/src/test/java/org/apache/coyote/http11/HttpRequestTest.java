@@ -18,7 +18,7 @@ class HttpRequestTest {
                 "",
                 "");
 
-        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getPath()).isEqualTo("/index.html");
         assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
     }
@@ -31,8 +31,8 @@ class HttpRequestTest {
                 "");
 
         assertThat(request.getPath()).isEqualTo("/login");
-        assertThat(request.getQueryParameter("account")).isEqualTo("gugu");
-        assertThat(request.getQueryParameter("password")).isEqualTo("password");
+        assertThat(request.getParameter("account")).isEqualTo("gugu");
+        assertThat(request.getParameter("password")).isEqualTo("password");
     }
 
     @Test
@@ -42,8 +42,8 @@ class HttpRequestTest {
                 "",
                 "");
 
-        assertThat(request.getQueryParameter("account")).isEmpty();
-        assertThat(request.getQueryParameter("password")).isEmpty();
+        assertThat(request.getParameter("account")).isEmpty();
+        assertThat(request.getParameter("password")).isEmpty();
     }
 
     @Test
@@ -60,16 +60,80 @@ class HttpRequestTest {
     }
 
     @Test
-    void 헤더는_빈_줄까지만_읽는다() throws IOException {
-        final BufferedReader reader = readerOf(
+    void 본문을_Content_Length_만큼_읽는다() throws IOException {
+        final HttpRequest request = parse(
                 "POST /login HTTP/1.1",
                 "Content-Length: 4",
                 "",
                 "body");
 
-        HttpRequest.from(reader);
+        assertThat(request.getBody()).isEqualTo("body");
+    }
 
-        assertThat(reader.readLine()).isEqualTo("body");
+    @Test
+    void 폼_바디의_파라미터를_읽는다() throws IOException {
+        final HttpRequest request = parse(
+                "POST /login HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password");
+
+        assertThat(request.getParameter("account")).isEqualTo("gugu");
+        assertThat(request.getParameter("password")).isEqualTo("password");
+    }
+
+    @Test
+    void URL_인코딩된_값을_디코딩한다() throws IOException {
+        final HttpRequest request = parse(
+                "POST /register HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 23",
+                "",
+                "email=ksc%40example.com");
+
+        assertThat(request.getParameter("email")).isEqualTo("ksc@example.com");
+    }
+
+    @Test
+    void 같은_이름이_쿼리와_바디에_있으면_쿼리를_우선한다() throws IOException {
+        final HttpRequest request = parse(
+                "POST /login?account=admin HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 12",
+                "",
+                "account=gugu");
+
+        assertThat(request.getParameter("account")).isEqualTo("admin");
+    }
+
+    @Test
+    void 쿠키_헤더를_HttpCookie로_제공한다() throws IOException {
+        final HttpRequest request = parse(
+                "GET /index.html HTTP/1.1",
+                "Cookie: yummy_cookie=choco; JSESSIONID=656cef62",
+                "",
+                "");
+
+        assertThat(request.getCookie().get("JSESSIONID")).isEqualTo("656cef62");
+    }
+
+    @Test
+    void 쿠키_헤더가_없어도_빈_쿠키를_제공한다() throws IOException {
+        final HttpRequest request = parse(
+                "GET /index.html HTTP/1.1",
+                "",
+                "");
+
+        assertThat(request.getCookie().get("JSESSIONID")).isNull();
+    }
+
+    @Test
+    void 지원하지_않는_메서드면_예외가_발생한다() {
+        final BufferedReader reader = readerOf("DELETE / HTTP/1.1", "", "");
+
+        assertThatThrownBy(() -> HttpRequest.from(reader))
+                .isInstanceOf(HttpRequestParseException.class);
     }
 
     @Test

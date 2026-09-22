@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.qupring.mvc.ApplicationScanner;
 import org.qupring.mvc.QupringMvc;
-import org.qupring.mvc.handler.HandlerMapping;
+import org.qupring.mvc.handler.RequestMapping;
 import support.StubSocket;
 
 import java.io.File;
@@ -24,10 +24,10 @@ class Http11ProcessorTest {
     @BeforeEach
     void setup() {
         ApplicationScanner applicationScanner = new ApplicationScanner();
-        HandlerMapping handlerMapping = new HandlerMapping();
-        handlerMapping.addResourceMappings(applicationScanner.scanForResources());
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.addResourceMappings(applicationScanner.scanForResources());
 
-        qupringMvc = new QupringMvc(handlerMapping);
+        qupringMvc = new QupringMvc(requestMapping);
 
     }
 

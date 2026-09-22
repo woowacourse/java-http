@@ -2,13 +2,12 @@ package com.techcourse;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.http.HttpMethod;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 import org.qupring.file.HtmlReader;
-import org.qupring.mvc.annotation.Route;
+import org.qupring.mvc.controller.AbstractController;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
     private static final int FOUND = 302;
     private static final String HTML_CONTENT_TYPE =
@@ -21,8 +20,8 @@ public class LoginController {
 
     private final LoginSessionService loginSessionService = new LoginSessionService();
 
-    @Route(path = "/login", method = HttpMethod.GET)
-    public void loginPage(
+    @Override
+    protected void doGet(
             HttpRequest request,
             HttpResponse response
     ) {
@@ -40,8 +39,8 @@ public class LoginController {
         );
     }
 
-    @Route(path = "/login", method = HttpMethod.POST)
-    public void login(
+    @Override
+    protected void doPost(
             HttpRequest request,
             HttpResponse response
     ) {
@@ -64,22 +63,6 @@ public class LoginController {
                 "Set-Cookie",
                 SESSION_COOKIE_NAME + "=" + sessionId + "; Path=/"
         );
-        redirect(response, LOGIN_SUCCESS_PATH);
-    }
-
-    @Route(path = "/register", method = HttpMethod.POST)
-    public void register(
-            HttpRequest request,
-            HttpResponse response
-    ) {
-        String account = request.getBody("account");
-        String password = request.getBody("password");
-        String email = request.getBody("email");
-
-        InMemoryUserRepository.save(
-                new User(null, account, password, email)
-        );
-
         redirect(response, LOGIN_SUCCESS_PATH);
     }
 

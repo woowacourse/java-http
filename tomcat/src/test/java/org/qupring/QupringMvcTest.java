@@ -2,7 +2,6 @@ package org.qupring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Map;
 import org.apache.http.HttpMethod;
 import org.apache.http.request.HttpRequest;
@@ -11,20 +10,20 @@ import org.apache.http.response.HttpResponse;
 import org.apache.http.response.HttpTomcatResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.qupring.mvc.annotation.Route;
 import org.qupring.file.HtmlReader;
 import org.qupring.mvc.QupringMvc;
-import org.qupring.mvc.handler.HandlerMapping;
+import org.qupring.mvc.controller.AbstractController;
+import org.qupring.mvc.handler.RequestMapping;
 
 class QupringMvcTest {
 
-    private HandlerMapping handlerMapping;
+    private RequestMapping requestMapping;
     private QupringMvc qupringMvc;
 
     @BeforeEach
     void setUp() {
-        handlerMapping = new HandlerMapping();
-        qupringMvc = new QupringMvc(handlerMapping);
+        requestMapping = new RequestMapping();
+        qupringMvc = new QupringMvc(requestMapping);
     }
 
     @Test
@@ -44,7 +43,7 @@ class QupringMvcTest {
     @Test
     void 매핑된_정적_리소스를_응답한다() {
         // given
-        handlerMapping.addResourceMappings(
+        requestMapping.addResourceMappings(
                 Map.of("/login", "static/login.html")
         );
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
@@ -63,8 +62,8 @@ class QupringMvcTest {
     @Test
     void 컨트롤러를_정적_리소스보다_먼저_실행한다() {
         // given
-        handlerMapping.addControllerMappings(List.of(TestController.class));
-        handlerMapping.addResourceMappings(
+        requestMapping.addController("/test", new TestController());
+        requestMapping.addResourceMappings(
                 Map.of("/test", "static/login.html")
         );
         HttpTomcatResponse response = HttpTomcatResponse.createDefault();
@@ -105,10 +104,10 @@ class QupringMvcTest {
         );
     }
 
-    public static class TestController {
+    public static class TestController extends AbstractController {
 
-        @Route(path = "/test", method = HttpMethod.GET)
-        public void test(HttpRequest request, HttpResponse response) {
+        @Override
+        protected void doGet(HttpRequest request, HttpResponse response) {
             response.setBody("controller response");
         }
     }

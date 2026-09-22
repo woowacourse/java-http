@@ -18,7 +18,7 @@ class SessionTest {
         @DisplayName("이름으로 속성을 저장하고 조회한다")
         void storesAttributeByName() {
             // given
-            final var session = new Session("session-id");
+            final var session = new StandardSession("session-id");
 
             // when
             session.setAttribute("user", "gugu");
@@ -31,7 +31,7 @@ class SessionTest {
         @DisplayName("이름으로 속성을 제거한다")
         void removesAttributeByName() {
             // given
-            final var session = new Session("session-id");
+            final var session = new StandardSession("session-id");
             session.setAttribute("user", "gugu");
 
             // when
@@ -64,7 +64,7 @@ class SessionTest {
         @DisplayName("무효화한 세션의 속성을 조회할 수 없다")
         void invalidatedSessionRejectsAttributeAccess() {
             // given
-            final var session = new Session("invalid-session");
+            final var session = new StandardSession("invalid-session");
             session.invalidate();
 
             // when

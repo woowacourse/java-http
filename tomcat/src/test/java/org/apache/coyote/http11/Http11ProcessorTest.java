@@ -634,8 +634,8 @@ class Http11ProcessorTest {
     class SessionCookieTests {
 
         @Test
-        @DisplayName("요청에 JSESSIONID가 없으면 새 세션 쿠키를 응답한다")
-        void missingSessionCookieAddsSetCookieHeader() {
+        @DisplayName("일반 요청에 JSESSIONID가 없어도 새 세션 쿠키를 응답하지 않는다")
+        void missingSessionCookieDoesNotAddSetCookieHeader() {
             // given
             final var requestTarget = "/index.html";
 
@@ -643,13 +643,12 @@ class Http11ProcessorTest {
             final var response = responseTo(requestTarget);
 
             // then
-            assertThat(response).containsPattern(
-                    "\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
+            assertThat(response).doesNotContain("\r\nSet-Cookie:");
         }
 
         @Test
-        @DisplayName("요청에 다른 쿠키만 있으면 새 세션 쿠키를 응답한다")
-        void unrelatedCookieAddsSetCookieHeader() {
+        @DisplayName("일반 요청에 다른 쿠키만 있어도 새 세션 쿠키를 응답하지 않는다")
+        void unrelatedCookieDoesNotAddSetCookieHeader() {
             // given
             final var requestTarget = "/index.html";
             final var cookieHeader = "Cookie: yummy_cookie=choco";
@@ -658,7 +657,7 @@ class Http11ProcessorTest {
             final var response = responseTo(requestTarget, cookieHeader);
 
             // then
-            assertThat(response).containsPattern("\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
+            assertThat(response).doesNotContain("\r\nSet-Cookie:");
         }
 
         @Test
@@ -677,8 +676,8 @@ class Http11ProcessorTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 JSESSIONID를 요청하면 새 세션 쿠키를 응답한다")
-        void unknownSessionCookieAddsNewSetCookieHeader() {
+        @DisplayName("일반 요청에 존재하지 않는 JSESSIONID가 있어도 새 세션 쿠키를 응답하지 않는다")
+        void unknownSessionCookieDoesNotAddNewSetCookieHeader() {
             // given
             final var requestTarget = "/index.html";
             final var cookieHeader = "Cookie: JSESSIONID=unknown-session";
@@ -687,13 +686,39 @@ class Http11ProcessorTest {
             final var response = responseTo(requestTarget, cookieHeader);
 
             // then
-            assertThat(response).containsPattern("\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
+            assertThat(response).doesNotContain("\r\nSet-Cookie:");
         }
     }
 
     @Nested
     @DisplayName("로그인 세션")
     class LoginSessionTests {
+
+        @Test
+        @DisplayName("세션 없이 로그인에 성공하면 새 세션 쿠키를 응답한다")
+        void successfulLoginWithoutSessionAddsSetCookieHeader() {
+            // given
+            final var requestBody = "account=gugu&password=password";
+
+            // when
+            final var response = postResponseTo("/login", requestBody);
+
+            // then
+            assertThat(response).containsPattern("\\r\\nSet-Cookie: JSESSIONID=[0-9a-f-]{36} \\r\\n");
+        }
+
+        @Test
+        @DisplayName("세션 없이 로그인에 실패하면 새 세션 쿠키를 응답하지 않는다")
+        void failedLoginWithoutSessionDoesNotAddSetCookieHeader() {
+            // given
+            final var requestBody = "account=gugu&password=wrong";
+
+            // when
+            final var response = postResponseTo("/login", requestBody);
+
+            // then
+            assertThat(response).doesNotContain("\r\nSet-Cookie:");
+        }
 
         @Test
         @DisplayName("로그인에 성공하면 세션에 사용자를 저장한다")

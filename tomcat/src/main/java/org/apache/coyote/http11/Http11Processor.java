@@ -84,11 +84,8 @@ public class Http11Processor implements Runnable, Processor {
             if (path == null) {
                 return;
             }
-            final var resolvedSession = resolveSession(request);
-            var response = resolveResponse(request, path, resolvedSession.session());
-            if (resolvedSession.created()) {
-                response = addSessionCookie(response, resolvedSession.session());
-            }
+            final var session = findSession(request);
+            final var response = resolveResponse(request, path, session);
 
             try {
                 writeResponse(outputStream, response);
@@ -116,7 +113,11 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password.get()));
     }
 
-    private HttpResponse resolveResponse(final HttpRequest request, final String path, final Session session) {
+    private HttpResponse resolveResponse(
+            final HttpRequest request,
+            final String path,
+            final Optional<Session> session
+    ) {
         if (LOGIN_PATH.equals(path) && GET_METHOD.equals(request.method()) && isLoggedIn(session)) {
             return HttpResponse.redirect(INDEX_PATH);
         }
@@ -129,27 +130,23 @@ public class Http11Processor implements Runnable, Processor {
         return resolveStaticResponse(path);
     }
 
-    private SessionResolution resolveSession(final HttpRequest request) {
+    private Optional<Session> findSession(final HttpRequest request) {
         final var cookies = request.headers()
                 .firstValue(COOKIE_HEADER)
                 .map(HttpCookies::parse)
                 .orElseGet(HttpCookies::empty);
-        final var session = cookies.get(SESSION_COOKIE_NAME)
-                .map(sessionManager::findSession)
-                .orElse(null);
-        if (session != null) {
-            return new SessionResolution(session, false);
-        }
-
-        return new SessionResolution(sessionManager.createSession(), true);
+        return cookies.get(SESSION_COOKIE_NAME)
+                .map(sessionManager::findSession);
     }
 
     private HttpResponse addSessionCookie(final HttpResponse response, final Session session) {
         return response.addHeader(SET_COOKIE_HEADER, SESSION_COOKIE_NAME + "=" + session.getId());
     }
 
-    private boolean isLoggedIn(final Session session) {
-        return session.getAttribute(SESSION_USER_ATTRIBUTE) instanceof User;
+    private boolean isLoggedIn(final Optional<Session> session) {
+        return session
+                .map(value -> value.getAttribute(SESSION_USER_ATTRIBUTE) instanceof User)
+                .orElse(false);
     }
 
     private HttpResponse resolveRegisterResponse(final String requestBody) {
@@ -173,16 +170,21 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirect(INDEX_PATH);
     }
 
-    private HttpResponse resolveLoginResponse(final String requestBody, final Session session) {
+    private HttpResponse resolveLoginResponse(final String requestBody, final Optional<Session> session) {
         final var loginUser = findLoginUser(requestBody);
         if (loginUser.isEmpty()) {
             return HttpResponse.redirect(UNAUTHORIZED_PATH);
         }
 
         final var user = loginUser.get();
-        session.setAttribute(SESSION_USER_ATTRIBUTE, user);
+        final var loginSession = session.orElseGet(sessionManager::createSession);
+        loginSession.setAttribute(SESSION_USER_ATTRIBUTE, user);
         log.info("login user found: {}", user.getAccount());
-        return HttpResponse.redirect(INDEX_PATH);
+        final var response = HttpResponse.redirect(INDEX_PATH);
+        if (session.isPresent()) {
+            return response;
+        }
+        return addSessionCookie(response, loginSession);
     }
 
     private HttpResponse resolveStaticResponse(final String path) {
@@ -210,8 +212,5 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
         outputStream.write(content.body());
         outputStream.flush();
-    }
-
-    private record SessionResolution(Session session, boolean created) {
     }
 }

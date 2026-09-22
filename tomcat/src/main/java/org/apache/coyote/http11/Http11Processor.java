@@ -87,10 +87,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        if (!headers.containsKey("Content-Length")) {
-            return "";
-        }
-        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
         char[] buffer = new char[contentLength];
         int totalRead = 0;
         while (totalRead < contentLength) {
@@ -186,14 +183,15 @@ public class Http11Processor implements Runnable, Processor {
         if (account == null || password == null) {
             return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
         }
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
+        Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+        if (loginUser.isEmpty()) {
             return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
         }
         Session session = new Session(UUID.randomUUID().toString());
-        session.setAttribute("user", user.get());
+        session.setAttribute("user", loginUser.get());
         SessionManager.add(session);
-        log.info("user : {}", user.get().getAccount());
+        log.info("user : {}", loginUser.get().getAccount());
         return buildRedirectResponse(INDEX_PAGE, "JSESSIONID=" + session.getId());
     }
 

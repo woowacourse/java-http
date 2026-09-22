@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,8 +187,11 @@ public class Http11Processor implements Runnable, Processor {
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
         }
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user.get());
+        SessionManager.add(session);
         log.info("user : {}", user.get().getAccount());
-        return buildRedirectResponse(INDEX_PAGE, setCookie);
+        return buildRedirectResponse(INDEX_PAGE, "JSESSIONID=" + session.getId());
     }
 
     private String register(String requestBody, String setCookie) {

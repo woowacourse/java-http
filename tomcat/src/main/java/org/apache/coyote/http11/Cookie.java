@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Cookie {
 
@@ -12,9 +11,9 @@ public class Cookie {
         this.cookies = parse(rawCookie);
     }
 
-    //세션 아이디는 추측할 수 없어야 하므로 UUID로 만듦
-    public static String createJSessionId() {
-        return "JSESSIONID=" + UUID.randomUUID();
+    //Set-Cookie로 내려보낼 값. 쿠키에 담기는 건 세션 아이디뿐임
+    public static String ofJSessionId(final String sessionId) {
+        return "JSESSIONID=" + sessionId;
     }
 
     private Map<String, String> parse(final String rawCookie) {

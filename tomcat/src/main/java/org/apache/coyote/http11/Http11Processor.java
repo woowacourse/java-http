@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +93,12 @@ public class Http11Processor implements Runnable, Processor {
 
             if (requestUri.equals("/login") && method.equals("GET")) {
                 requestUri = "/login.html";
+
+                //이미 로그인한 상태면 로그인 페이지를 보여줄 필요가 없음
+                if (isLoggedIn(cookie)) {
+                    statusLine = "HTTP/1.1 302 Found ";
+                    location = "/index.html";
+                }
             }
 
             if (requestUri.equals("/login") && method.equals("POST")) {
@@ -106,10 +115,12 @@ public class Http11Processor implements Runnable, Processor {
                     statusLine = "HTTP/1.1 302 Found ";
                     location = "/index.html";
 
-                    //이미 세션 아이디를 들고 있으면 새로 발급하지 않음
-                    if (!cookie.hasJSessionId()) {
-                        setCookie = Cookie.createJSessionId();
-                    }
+                    //로그인 정보는 서버(세션)에 두고, 클라이언트에는 세션 아이디만 내려보냄
+                    Session session = new Session(UUID.randomUUID().toString());
+                    session.setAttribute("user", user.get());
+                    SessionManager.getInstance().add(session);
+
+                    setCookie = Cookie.ofJSessionId(session.getId());
                 }
             }
 
@@ -158,6 +169,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isLoggedIn(final Cookie cookie) throws IOException {
+        if (!cookie.hasJSessionId()) {
+            return false;
+        }
+
+        Session session = SessionManager.getInstance().findSession(cookie.getJSessionId());
+        if (session == null) {
+            return false;
+        }
+
+        return getUser(session) != null;
+    }
+
+    private User getUser(final Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private Map<String, String> parseParam(String queryString) {

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.model.User;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -24,14 +26,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n")
+                .contains("Content-Type: text/html;charset=utf-8 \r\n")
+                .contains("Content-Length: 12 \r\n")
+                .endsWith("\r\n\r\nHello world!");
     }
 
     @Test
@@ -52,24 +52,35 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n")
+                .contains("Content-Type: text/html;charset=utf-8 \r\n")
+                .contains("Content-Length: 5564 \r\n")
+                .endsWith("\r\n\r\n" + new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
-    void 소문자_content_length_헤더로_로그인할_수_있다() {
+    void 최초_요청에서_발급된_세션에_로그인한_사용자를_저장한다() {
         // given
+        final var firstRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var firstSocket = new StubSocket(firstRequest);
+        new Http11Processor(firstSocket).process(firstSocket);
+
+        final var sessionId = extractSessionId(firstSocket);
+        final var sessionBeforeLogin = SessionManager.getInstance().findSession(sessionId);
+
         final var requestBody = "account=gugu&password=password";
         final var request = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "content-length: " + requestBody.length(),
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 requestBody);
 
@@ -80,10 +91,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        final var sessionAfterLogin = SessionManager.getInstance().findSession(sessionId);
+        final var user = (User) sessionAfterLogin.getAttribute("user");
+
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found \r\n")
                 .contains("Location: /index.html\r\n")
-                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n");
+                .doesNotContain("Set-Cookie");
+        assertThat(sessionAfterLogin).isSameAs(sessionBeforeLogin);
+        assertThat(user.getAccount()).isEqualTo("gugu");
     }
 
     @Test
@@ -105,13 +121,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /401.html",
-                "\r\n");
-
-        assertThat(socket.output()).isEqualTo(expected);
-        assertThat(socket.output()).doesNotContain("Set-Cookie");
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /401.html\r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n");
     }
 
     @Test
@@ -153,5 +166,14 @@ class Http11ProcessorTest {
                 "\r\n");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String extractSessionId(final StubSocket socket) {
+        return socket.output()
+                .lines()
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .map(line -> line.substring("Set-Cookie: JSESSIONID=".length()))
+                .findFirst()
+                .orElseThrow();
     }
 }

@@ -40,20 +40,26 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final String request = readRequest(inputStream);
+            log.info(request);
 
             String uri = request.split(" ")[1];
             log.info("uri: {}", uri);
             final String type = findType(uri);
+            String status = "200 OK";
 
             final String queryString = findQueryString(uri);
             if (!queryString.isBlank()) {
-                uri = List.of(uri.split("\\?")).getFirst() + ".html";
                 final Map<String, String> pairs = findQueries(queryString);
-                userMatching(pairs.get("account"), pairs.get("password"));
+                if (userMatching(pairs.get("account"), pairs.get("password"))) {
+                    status = "302 FOUND";
+                    uri = "/index.html";
+                } else {
+                    uri = "/401.html";
+                }
             }
 
             final String responseBody = makeResponseBody(uri);
-            final String response = makeResponse(type, responseBody);
+            final String response = makeResponse(status, type, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -99,15 +105,18 @@ public class Http11Processor implements Runnable, Processor {
         return pairs;
     }
 
-    private void userMatching(String account, String password) {
-        InMemoryUserRepository.findByAccount(account)
+    private boolean userMatching(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("user : {}", user));
+                .isPresent();
     }
 
     private String makeResponseBody(String uri) throws IOException {
         if (uri.equals("/") || uri.isBlank()) {
             return "Hello world!";
+        }
+        if (uri.equals("/login")) {
+            uri = uri + ".html";
         }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
 
@@ -117,9 +126,9 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private String makeResponse(String type, String responseBody) {
+    private String makeResponse(String status, String type, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

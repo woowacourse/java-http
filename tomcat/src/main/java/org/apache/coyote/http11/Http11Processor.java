@@ -36,6 +36,18 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private void redirect(String redirectUrl, OutputStream outputStream) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + redirectUrl,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
     private void empty(OutputStream outputStream, String contentType) throws IOException {
         final var responseBody = "Hello world!";
         response(responseBody, outputStream, StatusCode.OK, contentType);
@@ -56,13 +68,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void loginFail(OutputStream outputStream, Request request) throws IOException {
-        Request unauthorized = Request.changePath(request, "/401");
-        handling(outputStream, unauthorized, StatusCode.UNAUTHORIZED);
+        redirect("/401", outputStream);
     }
 
     private void loginSuccess(OutputStream outputStream, Request request) throws IOException {
-        Request found = Request.changePath(request, "/index");
-        handling(outputStream, found, StatusCode.FOUND);
+        redirect("/index", outputStream);
     }
 
     @Override

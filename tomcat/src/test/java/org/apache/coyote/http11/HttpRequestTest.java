@@ -78,7 +78,7 @@ class HttpRequestTest {
     @Test
     void 헤더_이름은_대소문자를_구분하지_않는다() throws IOException {
         // given
-        String body = "account=gugu";
+        String body = "account=usher";
         String rawRequest = "POST /login HTTP/1.1\r\n"
                 + "cOnTeNt-TyPe: application/x-www-form-urlencoded\r\n"
                 + "cOnTeNt-LeNgTh: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n"
@@ -91,7 +91,7 @@ class HttpRequestTest {
         // then
         assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
         assertThat(request.getBody()).isEqualTo(body);
-        assertThat(request.getParameter("account")).isEqualTo("gugu");
+        assertThat(request.getParameter("account")).isEqualTo("usher");
     }
 
     private String formRequest(String body) {

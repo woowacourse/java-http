@@ -17,6 +17,71 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void GET_login은_login_html을_응답한다() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String responseBody = Files.readString(new File(resource.getFile()).toPath());
+        assertThat(response)
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .endsWith(responseBody);
+    }
+
+    @Test
+    void POST_login에_성공하면_index로_redirect한다() {
+        // given
+        String body = "account=usher&password=password";
+        String httpRequest = formRequest("/login", body);
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n");
+    }
+
+    @Test
+    void POST_login에서_계정을_찾지_못하면_401_html로_redirect한다() {
+        // given
+        String body = "account=unknown&password=password";
+        String httpRequest = formRequest("/login", body);
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /401.html \r\n");
+    }
+
+    @Test
+    void POST_login에서_비밀번호가_다르면_401_html로_redirect한다() {
+        // given
+        String body = "account=usher&password=wrong";
+        String httpRequest = formRequest("/login", body);
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /401.html \r\n");
+    }
+
+    @Test
     void GET_register는_register_html을_응답한다() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
@@ -148,5 +213,21 @@ class Http11ProcessorTest {
                 responseBody;
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String formRequest(String path, String body) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+    }
+
+    private String process(String httpRequest) {
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+        processor.process(socket);
+        return socket.output();
     }
 }

@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,17 +44,23 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(HttpRequest request) throws IOException {
-        if (isRegisterRequest(request, HttpMethod.GET)) {
+        if (isRequest(request, HttpMethod.GET, "/register")) {
             return staticResourceResponse("/register.html");
         }
-        if (isRegisterRequest(request, HttpMethod.POST)) {
+        if (isRequest(request, HttpMethod.POST, "/register")) {
             return register(request);
+        }
+        if (isRequest(request, HttpMethod.GET, "/login")) {
+            return staticResourceResponse("/login.html");
+        }
+        if (isRequest(request, HttpMethod.POST, "/login")) {
+            return login(request);
         }
         return staticResourceResponse(request.getPath());
     }
 
-    private boolean isRegisterRequest(HttpRequest request, HttpMethod method) {
-        return request.getMethod() == method && request.getPath().equals("/register");
+    private boolean isRequest(HttpRequest request, HttpMethod method, String path) {
+        return request.getMethod() == method && request.getPath().equals(path);
     }
 
     private HttpResponse register(HttpRequest request) {
@@ -64,6 +71,27 @@ public class Http11Processor implements Runnable, Processor {
         );
         InMemoryUserRepository.save(user);
         return HttpResponse.redirect("/index.html");
+    }
+
+    private HttpResponse login(HttpRequest request) {
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
+        if (isAuthenticated(account, password)) {
+            return HttpResponse.redirect("/index.html");
+        }
+        return HttpResponse.redirect("/401.html");
+    }
+
+    private boolean isAuthenticated(String account, String password) {
+        if (account == null || password == null) {
+            return false;
+        }
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            return false;
+        }
+        return user.get().checkPassword(password);
     }
 
     private HttpResponse staticResourceResponse(String requestPath) throws IOException {

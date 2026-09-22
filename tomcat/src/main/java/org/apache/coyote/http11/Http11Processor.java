@@ -9,7 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
+
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,9 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequest.from(reader);
             HttpResponse response;
-            if (isLoginRequest(request)) {
+            if (isLoginPageRequest(request) && isLoggedIn(request)) {
+                response = HttpResponse.found("/index.html");
+            } else if (isLoginRequest(request)) {
                 response = handleLogin(request);
             } else if (isRegisterRequest(request)) {
                 response = handleRegister(request);
@@ -92,11 +95,25 @@ public class Http11Processor implements Runnable, Processor {
         && request.getMethod().equals("POST");
     }
 
+    private boolean isLoginPageRequest(HttpRequest request) {
+        return request.getPath().equals("/login")
+                && request.getMethod().equals("GET");
+    }
+
+    private boolean isLoggedIn(HttpRequest request) {
+        Session session = request.getSession(false);
+        return session != null && session.getAttribute("user") != null;
+    }
+
     private HttpResponse handleLogin(HttpRequest request) {
         Map<String, String> parameters = request.getParameters();
         if (canLogin(parameters)) {
+            User user = InMemoryUserRepository.findByAccount(parameters.get("account")).get();
+            Session session = request.getSession(true);
+            session.setAttribute("user", user);
+
             HttpResponse response = HttpResponse.found("/index.html");
-            response.addCookie(UUID.randomUUID().toString());
+            response.addCookie(session.getId());
             return response;
         }
         return HttpResponse.found("/401.html");

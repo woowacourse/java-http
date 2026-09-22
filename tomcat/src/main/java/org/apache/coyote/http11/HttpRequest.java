@@ -6,6 +6,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 
@@ -116,5 +120,22 @@ public class HttpRequest {
 
     public String getJSessionId() {
         return cookie.getJSessionId();
+    }
+
+    public Session getSession(boolean create) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        String jSessionId = getJSessionId();
+        if (jSessionId != null) {
+            Session session = sessionManager.findSession(jSessionId);
+            if (session != null) {
+                return session;
+            }
+        }
+        if (!create) {
+            return null;
+        }
+        Session newSession = new Session(UUID.randomUUID().toString());
+        sessionManager.add(newSession);
+        return newSession;
     }
 }

@@ -339,7 +339,7 @@ class Http11ProcessorTest {
                 "Accept : */*",
                 SESSION_COOKIE,
                 "",
-                "account=kios&password=password&email=kios%40woowahan.com");
+                "account=kios&password=password&email=kios@woowahan.com");
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

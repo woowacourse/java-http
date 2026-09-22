@@ -36,11 +36,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+            final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
-            String response = handleRequest(httpRequest);
+            HttpResponse response = handleRequest(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toHttpMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -49,11 +49,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(HttpRequest httpRequest) throws URISyntaxException, IOException {
+    private HttpResponse handleRequest(HttpRequest httpRequest) throws URISyntaxException, IOException {
         String requestTarget = httpRequest.getRequestTarget();
 
         if (requestTarget.equals("/")) {
-            return createResponse("Hello world!", "text/html", "200 OK");
+            return HttpResponse.create("200 OK", "text/html", "Hello world!");
         }
 
         if (httpRequest.isPostMethod() && httpRequest.isPath("/login")) {
@@ -68,10 +68,10 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = getContentType(requestTarget);
 
         if (ClassLoader.getSystemResource(resourcePath) == null) {
-            return createResponse(createResponseBody("static/404.html"), "text/html", "404 Not Found");
+            return HttpResponse.create("404 Not Found", "text/html", createResponseBody("static/404.html"));
         }
 
-        return createResponse(createResponseBody(resourcePath), contentType, "200 OK");
+        return HttpResponse.create("200 OK", contentType, createResponseBody(resourcePath));
     }
 
     private String getResourcePath(String requestTarget) {
@@ -92,11 +92,11 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private String createLoginResponse(HttpRequest httpRequest) {
+    private HttpResponse createLoginResponse(HttpRequest httpRequest) {
         if (handleLogin(httpRequest)) {
-            return createRedirectResponse("/index.html");
+            return HttpResponse.redirect("/index.html");
         }
-        return createRedirectResponse("/401.html");
+        return HttpResponse.redirect("/401.html");
     }
 
     private boolean handleLogin(HttpRequest httpRequest) {
@@ -115,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private String createRegisterResponse(HttpRequest httpRequest) {
+    private HttpResponse createRegisterResponse(HttpRequest httpRequest) {
         Map<String, String> body = parseBody(httpRequest.getBody());
         String account = body.get("account");
         String password = body.get("password");
@@ -123,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return createRedirectResponse("/index.html");
+        return HttpResponse.redirect("/index.html");
     }
 
     private Map<String, String> parseBody(String body) {
@@ -143,29 +143,6 @@ public class Http11Processor implements Runnable, Processor {
             parameters.put(name, URLDecoder.decode(value, StandardCharsets.UTF_8));
         }
         return parameters;
-    }
-
-    private String createRedirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                ""
-        );
-    }
-
-    private String createResponse(String responseBody, String contentType, String status) {
-        String contentTypeHeader = "Content-Type: " + contentType;
-        if (contentType.startsWith("text/")) {
-            contentTypeHeader += ";charset=utf-8";
-        }
-        return String.join("\r\n",
-                "HTTP/1.1 " + status,
-                contentTypeHeader,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 
     private String createResponseBody(String resourcePath) throws URISyntaxException, IOException {

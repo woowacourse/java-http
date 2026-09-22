@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String QUERY_PARAM_DELIMITER = "&";
     private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
     private static final String JSESSION_ID_KEY = "JSESSIONID";
+    private static final String LOGIN_USER_KEY = "user";
 
     private final Socket connection;
 
@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
 
-            final HttpResponse response = handleRequest(uri, httpCookie, requestBody);
+            final HttpResponse response = handleRequest(httpMethod, uri, httpCookie, requestBody);
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
@@ -79,7 +79,8 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequestHeaders;
     }
 
-    private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> httpRequestHeaders) throws IOException {
+    private String readRequestBody(final BufferedReader bufferedReader,
+                                   final Map<String, String> httpRequestHeaders) throws IOException {
         if (httpRequestHeaders.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
@@ -89,11 +90,11 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private HttpResponse handleRequest(final URI uri, final HttpCookie httpCookie, final String requestBody) throws IOException {
+    private HttpResponse handleRequest(final HttpMethod httpMethod, final URI uri, final HttpCookie httpCookie, final String requestBody) throws IOException {
         final String uriPath = uri.getPath();
 
         if (uriPath.equals("/login")) {
-            return handleLogin(uri, httpCookie, requestBody);
+            return handleLogin(httpMethod, uri, httpCookie, requestBody);
         }
 
         if (uriPath.equals("/register")) {
@@ -103,40 +104,59 @@ public class Http11Processor implements Runnable, Processor {
         return createFileResponse(uriPath, "200 OK");
     }
 
-    private HttpResponse handleLogin(final URI uri, final HttpCookie httpCookie,
-                                     final String requestBody) throws IOException {
+    private HttpResponse handleLogin(final HttpMethod httpMethod, final URI uri, final HttpCookie httpCookie, final String requestBody) throws IOException {
         final String uriPath = uri.getPath();
         Path filePath = getFilePath(uriPath);
-        String httpStatus;
-        String location = null;
-        String jsessionId = httpCookie.get(JSESSION_ID_KEY);
+
+        if (httpMethod == HttpMethod.GET && isLoggedIn(httpCookie)) {
+            return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/index.html", httpCookie);
+        }
 
         final String query = uri.getQuery();
-        boolean loginSuccess = false;
-        if (query != null) {
-            loginSuccess = login(extractQueryParams(query));
-        }
-        if (requestBody != null) {
-            loginSuccess = login(extractQueryParams(requestBody));
-        }
+        final String loginParameters = requestBody != null ? requestBody : query;
 
-        if (loginSuccess) {
-            httpStatus = "302 Found";
-            location = "/index.html";
-            if (jsessionId == null) {
-                httpCookie.put(JSESSION_ID_KEY, UUID.randomUUID().toString());
-            }
-        } else if (query == null && requestBody == null) {
-            httpStatus = "200 OK";
+        if (loginParameters == null) {
             filePath = getFilePath("/login");
-        } else {
-            httpStatus = "401 Unauthorized";
-            filePath = resolveResourcePath("static/401.html");
+            return new HttpResponse("200 OK", getContentType(filePath), getResponseBody(filePath), null, httpCookie);
         }
 
-        final String contentType = getContentType(filePath);
-        final String responseBody = location == null ? getResponseBody(filePath) : "";
-        return new HttpResponse(httpStatus, contentType, responseBody, location, httpCookie);
+        final Optional<User> user = authenticate(extractQueryParams(loginParameters));
+        if (user.isPresent()) {
+            saveUserInSession(httpCookie, user.get());
+            return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/index.html", httpCookie);
+        }
+
+        filePath = resolveResourcePath("static/401.html");
+        return new HttpResponse("401 Unauthorized", getContentType(filePath), getResponseBody(filePath), null, httpCookie);
+    }
+
+    private boolean isLoggedIn(final HttpCookie httpCookie) throws IOException {
+        final String sessionId = httpCookie.get(JSESSION_ID_KEY);
+        if (sessionId == null) {
+            return false;
+        }
+
+        final Session session = SessionManager.getInstance().findSession(sessionId);
+        return session != null && session.getAttribute(LOGIN_USER_KEY) != null;
+    }
+
+    private void saveUserInSession(final HttpCookie httpCookie, final User user) throws IOException {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        String sessionId = httpCookie.get(JSESSION_ID_KEY);
+        Session session = null;
+
+        if (sessionId != null) {
+            session = sessionManager.findSession(sessionId);
+        }
+
+        if (session == null) {
+            sessionId = UUID.randomUUID().toString();
+            session = new Session(sessionId);
+            sessionManager.add(session);
+            httpCookie.put(JSESSION_ID_KEY, sessionId);
+        }
+
+        session.setAttribute(LOGIN_USER_KEY, user);
     }
 
     private HttpResponse handleRegister(final String requestBody) throws IOException {
@@ -183,18 +203,18 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private boolean login(final Map<String, String> params) {
+    private Optional<User> authenticate(final Map<String, String> params) {
         final String account = params.get("account");
         final String password = params.get("password");
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             log.error("login error");
-            return false;
+            return Optional.empty();
         }
 
         log.info("user : {}", user.get());
-        return true;
+        return user;
     }
 
     private void createUser(final Map<String, String> params) {

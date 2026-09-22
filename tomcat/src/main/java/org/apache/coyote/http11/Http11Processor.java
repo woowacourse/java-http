@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import org.apache.catalina.ResolvedSession;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
@@ -43,29 +42,24 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = new HttpRequestParser(inputStream).parse();
             Cookies cookies = new Cookies(request.getHeader("Cookie"));
-            ResolvedSession resolvedSession = SessionManager.resolve(cookies.getValue(SESSION_COOKIE_KEY));
+            Optional<Session> session = SessionManager.find(cookies.getValue(SESSION_COOKIE_KEY));
 
-            HttpResponse response = createResponse(request, resolvedSession.session());
-            addSessionCookie(response, resolvedSession);
+            HttpResponse response = createResponse(request, session);
             response.writeTo(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void addSessionCookie(HttpResponse response, ResolvedSession resolvedSession) {
-        if (!resolvedSession.isNewSession()) {
-            return;
-        }
-
+    private void addSessionCookie(HttpResponse response, Session session) {
         HttpCookie sessionCookie = new HttpCookie(
                 SESSION_COOKIE_KEY,
-                resolvedSession.session().getId()
+                session.getId()
         );
         response.addHeader("Set-Cookie", sessionCookie.toHeaderValue());
     }
 
-    private HttpResponse createResponse(HttpRequest request, Session session) throws IOException {
+    private HttpResponse createResponse(HttpRequest request, Optional<Session> session) throws IOException {
         if (isRequest(request, HttpMethod.GET, "/register")) {
             return staticResourceResponse("/register.html");
         }
@@ -73,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
             return register(request);
         }
         if (isRequest(request, HttpMethod.GET, "/login")) {
-            if (session.getAttribute(USER_ATTRIBUTE_KEY) != null) {
+            if (session.isPresent() && session.get().getAttribute(USER_ATTRIBUTE_KEY) != null) {
                 return HttpResponse.redirect("/index.html");
             }
             return staticResourceResponse("/login.html");
@@ -98,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirect("/index.html");
     }
 
-    private HttpResponse login(HttpRequest request, Session session) {
+    private HttpResponse login(HttpRequest request, Optional<Session> existingSession) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         Optional<User> user = findAuthenticatedUser(account, password);
@@ -106,8 +100,13 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.redirect("/401.html");
         }
 
+        HttpResponse response = HttpResponse.redirect("/index.html");
+        Session session = existingSession.orElseGet(SessionManager::create);
         session.setAttribute(USER_ATTRIBUTE_KEY, user.get());
-        return HttpResponse.redirect("/index.html");
+        if (existingSession.isEmpty()) {
+            addSessionCookie(response, session);
+        }
+        return response;
     }
 
     private Optional<User> findAuthenticatedUser(String account, String password) {

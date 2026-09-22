@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -17,9 +19,57 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
-    void JSESSIONID가_없으면_Set_Cookie를_응답한다() {
+    void 로그인에_성공하면_인증된_User_객체를_세션의_user_속성에_저장한다() {
         // given
-        String httpRequest = "GET /login HTTP/1.1\r\n\r\n";
+        String httpRequest = formRequest("/login", "account=usher&password=password");
+        User user = InMemoryUserRepository.findByAccount("usher").orElseThrow();
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        String sessionId = getSessionCookie(response).substring("JSESSIONID=".length());
+        Session session = SessionManager.find(sessionId).orElseThrow();
+        assertThat(session.getAttribute("user")).isSameAs(user);
+    }
+
+    @Test
+    void 등록되지_않은_JSESSIONID로_로그인_페이지에_접근하면_로그인_페이지를_응답한다() throws IOException {
+        // given
+        String httpRequest = "GET /login HTTP/1.1\r\nCookie: JSESSIONID=unknown-session-id\r\n\r\n";
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String responseBody = Files.readString(new File(resource.getFile()).toPath());
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response).startsWith("HTTP/1.1 200 OK \r\n")
+                .endsWith(responseBody)
+                .doesNotContain("Set-Cookie");
+        assertThat(SessionManager.find("unknown-session-id")).isEmpty();
+    }
+
+    @Test
+    void 등록되지_않은_JSESSIONID로_로그인에_성공하면_새_JSESSIONID_쿠키를_발급한다() {
+        // given
+        String httpRequest = formRequest("/login", "account=usher&password=password",
+                "JSESSIONID=unknown-session-id");
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        String sessionId = getSessionCookie(response).substring("JSESSIONID=".length());
+        assertThat(UUID.fromString(sessionId)).isNotNull();
+        assertThat(SessionManager.find(sessionId)).isPresent();
+        assertThat(SessionManager.find("unknown-session-id")).isEmpty();
+    }
+
+    @Test
+    void 세션_없이_로그인에_성공하면_JSESSIONID_쿠키를_발급한다() {
+        // given
+        String httpRequest = formRequest("/login", "account=usher&password=password", "theme=dark");
 
         // when
         String response = process(httpRequest);
@@ -29,27 +79,26 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 유효한_JSESSIONID가_있으면_Set_Cookie를_다시_응답하지_않는다() {
+    void 기존_세션으로_로그인에_성공하면_해당_세션을_재사용한다() {
         // given
-        String firstResponse = process("GET /login HTTP/1.1\r\n\r\n");
-        String sessionCookie = getSessionCookie(firstResponse);
-        String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1",
-                "Cookie: " + sessionCookie,
-                "",
-                "");
+        Session session = SessionManager.create();
+        String httpRequest = formRequest("/login", "account=usher&password=password",
+                "JSESSIONID=" + session.getId());
 
         // when
         String response = process(httpRequest);
 
         // then
         assertThat(response).doesNotContain("Set-Cookie");
+        assertThat(SessionManager.find(session.getId()).orElseThrow()).isSameAs(session);
+        assertThat(session.getAttribute("user"))
+                .isSameAs(InMemoryUserRepository.findByAccount("usher").orElseThrow());
     }
 
     @Test
-    void 로그인한_세션으로_GET_login을_요청하면_index로_redirect한다() {
+    void 로그인한_세션으로_로그인_페이지에_접근하면_index_페이지로_리다이렉트한다() {
         // given
-        String firstResponse = process("GET /login HTTP/1.1\r\n\r\n");
+        String firstResponse = process(formRequest("/login", "account=usher&password=password"));
         String sessionCookie = getSessionCookie(firstResponse);
         String loginBody = "account=usher&password=password";
         process(formRequest("/login", loginBody, "theme=dark; " + sessionCookie));
@@ -70,7 +119,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void GET_login은_login_html을_응답한다() throws IOException {
+    void 세션_없이_로그인_페이지에_접근하면_로그인_페이지를_응답한다() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
@@ -86,11 +135,12 @@ class Http11ProcessorTest {
         String responseBody = Files.readString(new File(resource.getFile()).toPath());
         assertThat(response)
                 .startsWith("HTTP/1.1 200 OK \r\n")
+                .doesNotContain("Set-Cookie")
                 .endsWith(responseBody);
     }
 
     @Test
-    void POST_login에_성공하면_index로_redirect한다() {
+    void 로그인에_성공하면_index_페이지로_리다이렉트한다() {
         // given
         String body = "account=usher&password=password";
         String httpRequest = formRequest("/login", body);
@@ -105,7 +155,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void POST_login에서_계정을_찾지_못하면_401_html로_redirect한다() {
+    void 존재하지_않는_계정으로_로그인하면_401_페이지로_리다이렉트한다() {
         // given
         String body = "account=unknown&password=password";
         String httpRequest = formRequest("/login", body);
@@ -116,11 +166,12 @@ class Http11ProcessorTest {
         // then
         assertThat(response)
                 .startsWith("HTTP/1.1 302 Found \r\n")
-                .contains("Location: /401.html \r\n");
+                .contains("Location: /401.html \r\n")
+                .doesNotContain("Set-Cookie");
     }
 
     @Test
-    void POST_login에서_비밀번호가_다르면_401_html로_redirect한다() {
+    void 비밀번호가_틀리면_401_페이지로_리다이렉트한다() {
         // given
         String body = "account=usher&password=wrong";
         String httpRequest = formRequest("/login", body);
@@ -131,7 +182,8 @@ class Http11ProcessorTest {
         // then
         assertThat(response)
                 .startsWith("HTTP/1.1 302 Found \r\n")
-                .contains("Location: /401.html \r\n");
+                .contains("Location: /401.html \r\n")
+                .doesNotContain("Set-Cookie");
     }
 
     @Test
@@ -157,7 +209,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void POST_register는_사용자를_저장하고_index로_redirect한다() {
+    void 회원가입에_성공하면_사용자를_저장하고_index_페이지로_리다이렉트한다() {
         // given
         String account = "usher-" + UUID.randomUUID();
         String body = "account=" + account + "&password=password&email=usher%40woowahan.com";
@@ -179,6 +231,7 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found \r\n")
                 .contains("Location: /index.html \r\n")
+                .doesNotContain("Set-Cookie")
                 .endsWith("\r\n\r\n");
     }
 
@@ -196,7 +249,7 @@ class Http11ProcessorTest {
                 .startsWith("HTTP/1.1 200 OK \r\n")
                 .contains("Content-Type: text/html;charset=utf-8 \r\n")
                 .contains("Content-Length: 12 \r\n")
-                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n")
+                .doesNotContain("Set-Cookie")
                 .endsWith("\r\n\r\nHello world!");
     }
 
@@ -214,7 +267,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void 로그인하지_않아도_정적_파일을_요청하면_해당_파일을_응답한다() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -236,12 +289,12 @@ class Http11ProcessorTest {
                 .startsWith("HTTP/1.1 200 OK \r\n")
                 .contains("Content-Type: text/html;charset=utf-8 \r\n")
                 .contains("Content-Length: 5564 \r\n")
-                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n")
+                .doesNotContain("Set-Cookie")
                 .endsWith("\r\n\r\n" + responseBody);
     }
 
     @Test
-    void css() throws IOException {
+    void 로그인하지_않아도_CSS_파일을_요청하면_해당_파일을_응답한다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
@@ -261,7 +314,7 @@ class Http11ProcessorTest {
                 .startsWith("HTTP/1.1 200 OK \r\n")
                 .contains("Content-Type: text/css \r\n")
                 .contains("Content-Length: " + responseBody.getBytes().length + " \r\n")
-                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n")
+                .doesNotContain("Set-Cookie")
                 .endsWith("\r\n\r\n" + responseBody);
     }
 

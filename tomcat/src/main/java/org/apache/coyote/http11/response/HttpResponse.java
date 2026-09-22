@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.HttpStatus;
+import org.apache.coyote.MimeType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +73,7 @@ public class HttpResponse {
         List<String> lines = new ArrayList<>();
         lines.add("HTTP/1.1 " + status.getStatusLine());
         addCookies(lines);
-        lines.add("Content-Type: " + getContentType(resourcePath));
+        lines.add("Content-Type: " + MimeType.from(resourcePath));
         lines.add("Content-Length: " + body.length);
         lines.add("");
         lines.add("");
@@ -99,14 +100,6 @@ public class HttpResponse {
         } catch (IOException e) {
             throw new UncheckedServletException(e);
         }
-    }
-
-    private String getContentType(String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-
-        return "text/html;charset=utf-8";
     }
 
     private void write(byte[] bytes) {

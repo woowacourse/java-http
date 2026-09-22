@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class HttpCookie {
 
@@ -18,10 +19,19 @@ public class HttpCookie {
         }
         final Map<String, String> cookieMap = new LinkedHashMap<>();
         Arrays.stream(rawCookies.trim().split("; "))
-            .map(cookieToken -> cookieToken.split("="))
-            .forEach(cookiePair -> cookieMap.put(cookiePair[0], cookiePair[1]));
+            .map(HttpCookie::parseCookiePair)
+            .forEach(cookiePair ->
+                cookieMap.put(cookiePair.getKey(), cookiePair.getValue()));
 
         return new HttpCookie(cookieMap);
+    }
+
+    private static Entry<String, String> parseCookiePair(String cookieToken) {
+        final int firstEqualSignIndex = cookieToken.indexOf("=");
+
+        return Map.entry(
+            cookieToken.substring(0, firstEqualSignIndex),
+            cookieToken.substring(firstEqualSignIndex + 1));
     }
 
     public String getValue(final String key) {

@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
         try {
             InMemoryUserRepository.save(new User(account, password, email));
         } catch (IllegalArgumentException e) {
-            response.redirect("/register.html");
+            response.redirect("/401.html");
             return;
         }
 

@@ -188,7 +188,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static String createStaticFileResponse(String status, String responseBody, String type) {
         return String.join("\r\n",
-                "HTTP/1.1 " + status,
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
@@ -199,7 +199,7 @@ public class Http11Processor implements Runnable, Processor {
         StringBuilder response = new StringBuilder()
                 .append("HTTP/1.1 ")
                 .append(status)
-                .append("\r\n");
+                .append(" \r\n");
 
         if (isNew) {
             response.append("Set-Cookie: JSESSIONID=")
@@ -216,7 +216,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static String createLogoutResponse(String status) {
         return String.join("\r\n",
-                "HTTP/1.1 " + status,
+                "HTTP/1.1 " + status + " ",
                 "Location: /login",
                 "Set-Cookie: JSESSIONID=; Max-Age=0; Path=/",
                 "Content-Length: 0",
@@ -227,7 +227,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static String createRedirectResponse(String status) {
         return String.join("\r\n",
-                "HTTP/1.1 " + status,
+                "HTTP/1.1 " + status + " ",
                 "Location: /index.html",
                 "Content-Length: 0",
                 "",
@@ -238,7 +238,7 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = "권한이 없습니다.";
 
         return String.join("\r\n",
-                "HTTP/1.1 " + status,
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: text/plain; charset=utf-8",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
                 "",
@@ -250,7 +250,7 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = "요청이 잘못되었습니다.";
 
         return String.join("\r\n",
-                "HTTP/1.1 " + status,
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: text/plain; charset=utf-8",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
                 "",

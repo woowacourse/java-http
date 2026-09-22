@@ -7,8 +7,6 @@ import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 import org.qupring.file.HtmlReader;
 import org.qupring.mvc.annotation.Route;
-import org.qupring.session.Session;
-import org.qupring.session.SessionManager;
 
 public class LoginController {
 
@@ -19,15 +17,16 @@ public class LoginController {
     private static final String LOGIN_SUCCESS_PATH = "/index.html";
     private static final String LOGIN_FAILURE_PATH = "/401.html";
 
-    private static final String SESSION_USER_KEY = "user";
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+
+    private final LoginSessionService loginSessionService = new LoginSessionService();
 
     @Route(path = "/login", method = HttpMethod.GET)
     public void loginPage(
             HttpRequest request,
             HttpResponse response
     ) {
-        if (isLoggedIn(request)) {
+        if (loginSessionService.isLoggedIn(request)) {
             redirect(response, LOGIN_SUCCESS_PATH);
             return;
         }
@@ -46,10 +45,6 @@ public class LoginController {
             HttpRequest request,
             HttpResponse response
     ) {
-        if (isLoggedIn(request)) {
-            redirect(response, LOGIN_SUCCESS_PATH);
-            return;
-        }
 
         String account = request.getBody("account");
         String password = request.getBody("password");
@@ -64,8 +59,11 @@ public class LoginController {
             return;
         }
 
-        Session session = SessionManager.createSession(request, user);
-        response.setCookie(SESSION_COOKIE_NAME + "=" + session.getId());
+        String sessionId = loginSessionService.login(request, user);
+        response.setHeader(
+                "Set-Cookie",
+                SESSION_COOKIE_NAME + "=" + sessionId + "; Path=/"
+        );
         redirect(response, LOGIN_SUCCESS_PATH);
     }
 
@@ -83,13 +81,6 @@ public class LoginController {
         );
 
         redirect(response, LOGIN_SUCCESS_PATH);
-    }
-
-    private boolean isLoggedIn(HttpRequest request) {
-        Session session = request.getSession(false);
-
-        return session != null
-                && session.getAttribute(SESSION_USER_KEY) != null;
     }
 
     private void redirect(

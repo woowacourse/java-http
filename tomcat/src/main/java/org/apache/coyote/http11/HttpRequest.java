@@ -2,15 +2,28 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Optional;
 
-record HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, String body) {
+public final class HttpRequest {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final int END_OF_STREAM = -1;
 
-    static Optional<HttpRequest> readFrom(final BufferedReader reader) throws IOException {
+    private final HttpRequestLine requestLine;
+    private final HttpHeaders headers;
+    private final String body;
+
+    private HttpRequest(
+            final HttpRequestLine requestLine,
+            final HttpHeaders headers,
+            final String body
+    ) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
+    public static Optional<HttpRequest> readFrom(final BufferedReader reader) throws IOException {
         final var requestLine = readRequestLine(reader);
         if (requestLine.isEmpty()) {
             return Optional.empty();
@@ -28,12 +41,26 @@ record HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, String body
         return Optional.of(new HttpRequest(requestLine.get(), headers.get(), body.get()));
     }
 
-    String method() {
+    public String method() {
         return requestLine.method();
     }
 
-    URI uri() {
-        return requestLine.uri();
+    public String path() {
+        return requestLine.uri().getPath();
+    }
+
+    public Optional<String> header(final String name) {
+        return headers.firstValue(name);
+    }
+
+    public Optional<String> cookie(final String name) {
+        return header("Cookie")
+                .map(HttpCookies::parse)
+                .flatMap(cookies -> cookies.get(name));
+    }
+
+    public String body() {
+        return body;
     }
 
     private static Optional<HttpRequestLine> readRequestLine(final BufferedReader reader) throws IOException {

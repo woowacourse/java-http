@@ -51,8 +51,9 @@ final class HttpRequest {
         String body = "";
 
         final int contentLength = headers.getFirst("Content-Length")
-                .map(Integer::parseInt)
+                .map(HttpRequest::parseInt)
                 .orElse(0);
+
         if (contentLength > 0) {
             char[] bodyBuffer = new char[contentLength];
             int read = reader.read(bodyBuffer, 0, contentLength);
@@ -64,12 +65,25 @@ final class HttpRequest {
         return body;
     }
 
+    private static int parseInt(String contentLengthString) {
+        int contentLength;
+        try {
+            contentLength = Integer.parseInt(contentLengthString);
+        } catch (NumberFormatException e) {
+            throw new InvalidHttpRequestException("Content-Length의 값이 숫자가 아닙니다.");
+        }
+        return contentLength;
+    }
+
     @Nonnull
     private static List<String> readHeaderLines(BufferedReader reader) throws IOException {
         String line;
         List<String> headerLines = new ArrayList<>();
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             headerLines.add(line);
+        }
+        if (headerLines.isEmpty()) {
+            throw new InvalidHttpRequestException("HttpHeader가 비어있습니다.");
         }
         return headerLines;
     }
@@ -91,15 +105,30 @@ final class HttpRequest {
                                   final HttpHeaders headers,
                                   final String body,
                                   final Manager manager) {
-        final String[] requestLineParts = requestLine.split(" ", 3);
-        if (requestLineParts.length != 3) {
-            throw new InvalidHttpRequestException("Invalid request line: " + requestLine);
-        }
-        final URI uri = URI.create(requestLineParts[1]);
+        final String[] requestLineParts = parseRequestLine(requestLine);
+        final URI uri = createURI(requestLineParts[1]);
         final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
 
         final QueryParameters bodyParameters = QueryParameters.from(body);
         return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, headers, manager);
+    }
+
+    @Nonnull
+    private static String[] parseRequestLine(String requestLine) {
+        final String[] requestLineParts = requestLine.split(" ", 3);
+        if (requestLineParts.length != 3) {
+            throw new InvalidHttpRequestException("Invalid request line: " + requestLine);
+        }
+        return requestLineParts;
+    }
+
+    @Nonnull
+    private static URI createURI(String uri) {
+        try {
+            return URI.create(uri);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidHttpRequestException("Invalid URI: " + uri);
+        }
     }
 
     String getMethod() {

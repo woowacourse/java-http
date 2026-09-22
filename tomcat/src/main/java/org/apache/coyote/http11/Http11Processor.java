@@ -56,6 +56,11 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             final String requestLine = reader.readLine();
+
+            if (requestLine == null || requestLine.isBlank()) {
+                return;
+            }
+
             final String requestUri = requestLine.split(" ")[1];
 
             final int queryStringIndex = requestUri.indexOf("?");

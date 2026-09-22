@@ -60,39 +60,18 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            // 요청줄 읽기
-            String requestStartLine = bufferedReader.readLine();
-            String[] startLineParts = requestStartLine.trim().split("\\s+");
-
-            String method = startLineParts[0];
-            String requestTarget = startLineParts[1];
-
-            // 요청 헤더 읽기
-            String line;
-            int contentLength = 0;
-            HttpCookie httpCookie = new HttpCookie();
-
-            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                if (line.startsWith("Content-Length:")) {
-                    contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
-                }
-                if (line.startsWith("Cookie:")) {
-                    String cookieHeader = line.substring("Cookie:".length()).trim();
-                    httpCookie = new HttpCookie(cookieHeader);
-                }
-            }
+            HttpRequest httpRequest = parseHttpRequest(bufferedReader);
 
             // 응답 헤더
             Map<String, String> responseHeaders = new LinkedHashMap<>();
-            if (!httpCookie.hasJsessionId()) {
+            if (!httpRequest.hasJsessionId()) {
                 String sessionId = UUID.randomUUID().toString();
                 Session session = new Session(sessionId);
                 SessionManager.add(session);
                 responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
             }
 
-            URI uri = URI.create(requestTarget);
-            String uriPath = uri.getPath();
+            String uriPath = httpRequest.getPath();
 
             // 요청 경로 없을 경우 문자열 반환
             if ("/".equals(uriPath)) {
@@ -103,8 +82,8 @@ public class Http11Processor implements Runnable, Processor {
                 String response = createResponse(responseHeaders, "HTTP/1.1 200 OK ", responseBody);
                 sendResponse(outputStream, response);
             } else if ("/login".equals(uriPath)) {
-                if ("POST".equals(method)) {
-                    String requestBody = getRequestBody(contentLength, bufferedReader);
+                if ("POST".equals(httpRequest.getMethod())) {
+                    String requestBody = getRequestBody(httpRequest.getContentLength(), bufferedReader);
                     Map<String, String> bodyParameters = parseQueryParameters(requestBody);
                     String account = bodyParameters.get("account");
                     String password = bodyParameters.get("password");
@@ -141,8 +120,8 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                if ("GET".equals(method) && httpCookie.hasJsessionId()) {
-                    String jsessionId = httpCookie.getJsessionId();
+                if ("GET".equals(httpRequest.getMethod()) && httpRequest.hasJsessionId()) {
+                    String jsessionId = httpRequest.getJsessionId();
                     Session session = SessionManager.findSession(jsessionId);
                     if (session != null) {
                         User loginUser = (User) session.getAttribute("loginUser");
@@ -169,7 +148,7 @@ public class Http11Processor implements Runnable, Processor {
                     sendResponse(outputStream, response);
                 }
             } else if ("/register".equals(uriPath)) {
-                if ("GET".equals(method)) {
+                if ("GET".equals(httpRequest.getMethod())) {
                     String registerFileName = uriPath + ".html";
                     InputStream resourceAsStream = getResourceInputStream(responseHeaders, registerFileName, outputStream);
                     if (resourceAsStream == null) {
@@ -185,8 +164,8 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                if ("POST".equals(method)) {
-                    String requestBody = getRequestBody(contentLength, bufferedReader);
+                if ("POST".equals(httpRequest.getMethod())) {
+                    String requestBody = getRequestBody(httpRequest.getContentLength(), bufferedReader);
                     Map<String, String> bodyParameters = parseQueryParameters(requestBody);
                     User savedUser = saveUser(bodyParameters);
 
@@ -227,6 +206,25 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
+        StringBuilder rawRequest = new StringBuilder();
+
+        rawRequest.append(bufferedReader.readLine()).append("\r\n");
+
+        String line;
+        int contentLength = 0;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            rawRequest.append(line).append("\r\n");
+            if (line.startsWith("Content-Length:")) {
+                contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
+            }
+        }
+        rawRequest.append("\r\n");
+        rawRequest.append(getRequestBody(contentLength, bufferedReader));
+
+        return new HttpRequest(rawRequest.toString());
     }
 
     private static User saveUser(Map<String, String> bodyParameters) {

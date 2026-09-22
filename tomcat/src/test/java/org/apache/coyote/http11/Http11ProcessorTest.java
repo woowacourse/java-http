@@ -66,12 +66,14 @@ class Http11ProcessorTest {
 
         processor.process(socket);
 
-        assertThat(socket.output()).isEqualTo(String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Length: 0 ",
-                "",
-                ""));
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n")
+                .endsWith(String.join("\r\n",
+                        "Location: /index.html ",
+                        "Content-Length: 0 ",
+                        "",
+                        ""));
     }
 
     @Test

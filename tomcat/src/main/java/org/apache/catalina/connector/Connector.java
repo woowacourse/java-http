@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +17,20 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final SessionManager sessionManager;
+    private final RequestHandler requestHandler;
 
     private volatile boolean stopped;
 
-    private Connector(ServerSocket serverSocket, SessionManager sessionManager, boolean stopped) {
+    private Connector(ServerSocket serverSocket, RequestHandler requestHandler, boolean stopped) {
         this.serverSocket = serverSocket;
-        this.sessionManager = sessionManager;
+        this.requestHandler = requestHandler;
         this.stopped = stopped;
     }
 
-    public static Connector of(final SessionManager sessionManager) {
+    public static Connector of(final RequestHandler requestHandler) {
         try {
             return new Connector(new ServerSocket(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT),
-                    sessionManager, false);
+                    requestHandler, false);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -65,7 +65,7 @@ public class Connector implements Runnable {
     }
 
     private void dispatch(final Socket connection) {
-        Http11Processor processor = new Http11Processor(connection, sessionManager);
+        Http11Processor processor = new Http11Processor(connection, requestHandler);
 
         Thread thread = new Thread(processor);
         thread.start();

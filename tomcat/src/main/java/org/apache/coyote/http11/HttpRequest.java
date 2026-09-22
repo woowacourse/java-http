@@ -8,16 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
+
 
 public record HttpRequest(
         HttpRequestLine requestLine,
         Map<String, String> headers,
         HttpCookieHeader cookies,
-        Map<String, String> body,
-        SessionManager sessionManager
+        Map<String, String> body
 ) {
     private static final String COLON = ":";
     private static final int HEADER_PARTS_COUNT = 2;
@@ -26,13 +23,11 @@ public record HttpRequest(
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
-    private static final String JSESSIONID = "JSESSIONID";
 
     private static final int LF = '\n';
     private static final int END_OF_STREAM = -1;
 
-    public static HttpRequest of(final InputStream inputStream,
-                                 final SessionManager sessionManager) throws IOException {
+    public static HttpRequest from(final InputStream inputStream) throws IOException {
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
         final HttpRequestLine requestLine = HttpRequestLine.from(readLine(bufferedInputStream));
@@ -42,8 +37,7 @@ public record HttpRequest(
                 requestLine,
                 headers,
                 HttpCookieHeader.from(headers.get(COOKIE)),
-                readBody(bufferedInputStream, headers),
-                sessionManager
+                readBody(bufferedInputStream, headers)
         );
     }
 
@@ -102,13 +96,6 @@ public record HttpRequest(
         return HttpRequestLine.parseParameters(new String(body, StandardCharsets.UTF_8));
     }
 
-    public Optional<Session> findSession() {
-        return sessionManager.find(cookies.get(JSESSIONID));
-    }
-
-    public Session createSession() {
-        return sessionManager.create();
-    }
 
     public boolean isGet() {
         return "GET".equals(requestLine.method());

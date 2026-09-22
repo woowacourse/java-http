@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         final String requestUri = parseUri(requestLine);
         final String requestPath = parsePath(requestUri);
         final String method = parseMethod(requestLine);
+        final Map<String, String> cookies = parseCookies(headers.get(COOKIE));
         log.info("requestPath = " + requestPath);
         log.info("{} {} / Cookie: {}", method, requestPath, headers.get(COOKIE));
 
@@ -119,14 +122,17 @@ public class Http11Processor implements Runnable, Processor {
                 final Optional<User> user = login(data);
                 if (user.isPresent()) {
                     log.info("로그인 성공: {}", user.get());
+                    final String sessionId = UUID.randomUUID().toString();
+                    final Session session = new Session(sessionId);
+                    session.setAttribute("user", user.get());
+                    SessionManager.add(session);
 
                     final Map<String, String> responseHeaders = new LinkedHashMap<>();
                     responseHeaders.put(LOCATION, INDEX_PATH);
-                    responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + UUID.randomUUID());
+                    responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + sessionId);
                     return buildResponse(FOUND, responseHeaders, "");
                 }
                 log.info("로그인 실패: {}", data.get("account"));
-                login(parseQueryParams(requestUri));
                 return buildRedirect(UNAUTHORIZED_PATH);
             }
 
@@ -143,6 +149,14 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
+        if (LOGIN_PATH.equals(requestPath)) {
+            final String sessionId = cookies.get(JSESSIONID);
+            if (sessionId != null && SessionManager.findSession(sessionId) != null) {
+                log.info("이미 로그인된 사용자: {}", SessionManager.findSession(sessionId).getAttribute("user"));
+                return buildRedirect(INDEX_PATH);
+            }
+        }
+
         try {
             final String responseBody = resolveResponseBody(requestPath);
             return buildResponse(OK, contentTypeHeader(resolveContentType(requestPath)), responseBody);
@@ -150,6 +164,20 @@ public class Http11Processor implements Runnable, Processor {
             log.info(e.getMessage());
             return buildResponse(NOT_FOUND, contentTypeHeader(DEFAULT_CONTENT_TYPE), resolveResponseBody(NOT_FOUND_PATH));
         }
+    }
+
+    private Map<String, String> parseCookies(String cookie) {
+        if (cookie == null || cookie.isBlank()) {
+            return Map.of();
+        }
+        final Map<String, String> cookies = new HashMap<>();
+        for (final String c : cookie.split(";")) {
+            final String[] keyAndValue = c.trim().split("=", 2);
+            if (keyAndValue.length == 2) {
+                cookies.put(keyAndValue[0], keyAndValue[1]);
+            }
+        }
+        return cookies;
     }
 
     private Map<String, String> parseFormData(String requestBody) {

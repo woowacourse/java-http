@@ -24,9 +24,10 @@ public class HttpRequest {
     private final String version;
     private final Map<String, String> httpRequestHeaders;
     private final Map<String, String> httpRequestBody;
+    private final HttpCookie httpCookie;
 
-    private HttpRequest(String method, String path, Map<String, String> queryParameters,
-                        String version, Map<String, String> httpRequestHeaders, Map<String, String> httpRequestBody) {
+    private HttpRequest(String method, String path, Map<String, String> queryParameters, String version,
+                        Map<String, String> httpRequestHeaders, Map<String, String> httpRequestBody, HttpCookie httpCookie) {
         validate(method, version);
         this.method = method;
         this.path = path;
@@ -34,6 +35,7 @@ public class HttpRequest {
         this.version = version;
         this.httpRequestHeaders = httpRequestHeaders;
         this.httpRequestBody = httpRequestBody;
+        this.httpCookie = httpCookie;
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
@@ -49,10 +51,12 @@ public class HttpRequest {
             String[] header = line.split(": ");
             httpRequestHeaders.put(header[0], header[1]);
         }
+        HttpCookie httpCookie = HttpCookie.from(httpRequestHeaders.get("Cookie"));
+
         if (method.equals("GET")) {
-            return createGetRequest(method, requestUri, version, httpRequestHeaders);
+            return createGetRequest(method, requestUri, version, httpRequestHeaders, httpCookie);
         }
-        return createPostRequest(method, requestUri, version, httpRequestHeaders, bufferedReader);
+        return createPostRequest(method, requestUri, version, httpRequestHeaders, bufferedReader, httpCookie);
     }
 
     public boolean isRoot() {
@@ -92,26 +96,31 @@ public class HttpRequest {
         return "POST".equals(method) && "/register".equals(path);
     }
 
+    public String getJsessionid() {
+        return httpCookie.getJsessionid();
+    }
+
     private static HttpRequest createGetRequest(
-            String method, String requestUri, String version, Map<String, String> httpRequestHeaders) {
+            String method, String requestUri, String version,
+            Map<String, String> httpRequestHeaders, HttpCookie httpCookie) {
         int index = requestUri.indexOf("?");
         if (index == -1) {
-            return new HttpRequest(method, requestUri, Map.of(), version, httpRequestHeaders, Map.of());
+            return new HttpRequest(method, requestUri, Map.of(), version, httpRequestHeaders, Map.of(), httpCookie);
         }
         String path = requestUri.substring(0, index);
         Map<String, String> queryParameters = parseParameters(requestUri.substring(index + 1));
-        return new HttpRequest(method, path, queryParameters, version, httpRequestHeaders, Map.of());
+        return new HttpRequest(method, path, queryParameters, version, httpRequestHeaders, Map.of(), httpCookie);
     }
 
     private static HttpRequest createPostRequest(
-            String method, String requestUri, String version,
-            Map<String, String> httpRequestHeaders, BufferedReader bufferedReader) throws IOException {
+            String method, String requestUri, String version, Map<String, String> httpRequestHeaders,
+            BufferedReader bufferedReader, HttpCookie httpCookie) throws IOException {
         int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
         return new HttpRequest(
-                method, requestUri, Map.of(), version, httpRequestHeaders, parseParameters(requestBody));
+                method, requestUri, Map.of(), version, httpRequestHeaders, parseParameters(requestBody), httpCookie);
     }
 
     private static Map<String, String> parseParameters(String queryString) {

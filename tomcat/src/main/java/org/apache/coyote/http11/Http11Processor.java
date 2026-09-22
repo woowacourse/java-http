@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +52,54 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> headers = readHeaders(reader);
             String body = readBody(reader, headers);
 
-            final String response = handleRequest(method, target, body);
+            Optional<Cookie> sessionCookie = findSessionCookie(headers);
+            String response = handleRequest(method, target, body);
+            response = addSessionCookieIfAbsent(response, sessionCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String addSessionCookieIfAbsent(String response, Optional<Cookie> cookie) {
+        if (cookie.isPresent()) {
+            return response;
+        }
+
+        String uuid = UUID.randomUUID().toString();
+
+        String setCookie = "Set-Cookie: JSESSIONID=" + uuid + "\r\n";
+        int insertPosition = response.indexOf("\r\n") + 2;
+
+        return response.substring(0, insertPosition)
+                + setCookie
+                + response.substring(insertPosition);
+    }
+
+    private Optional<Cookie> findSessionCookie(Map<String, String> headers) {
+        String cookieHeader = headers.get("cookie");
+
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String[] cookiePairs = cookieHeader.split(";");
+
+        for (String pair : cookiePairs) {
+            Optional<Cookie> parsed = Cookie.parse(pair);
+            if (parsed.isEmpty()) {
+                continue;
+            }
+
+            String cookieName = parsed.get().name();
+            if ("JSESSIONID".equals(cookieName)) {
+                return parsed;
+            }
+        }
+
+        return Optional.empty();
     }
 
     private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {

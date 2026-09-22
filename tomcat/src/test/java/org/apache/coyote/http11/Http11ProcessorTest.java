@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -83,6 +86,41 @@ class Http11ProcessorTest {
         assertThat(response).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html\r\nSet-Cookie: JSESSIONID=");
         assertThat(response).endsWith("\r\nContent-Length: 0\r\n\r\n");
         assertThat(sessionId).matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+
+        Session session = SessionManager.getInstance().findSession(sessionId);
+        User user = (User) session.getAttribute("user");
+        assertThat(user.getAccount()).isEqualTo("gugu");
+        SessionManager.getInstance().remove(sessionId);
+    }
+
+    @Test
+    void loggedInUserIsRedirectedFromLoginToIndex() {
+        // given
+        String sessionId = "logged-in-session-id";
+        Session session = new Session(sessionId);
+        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+        SessionManager.getInstance().add(session);
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+        assertThat(socket.output()).isEqualTo(expected);
+        SessionManager.getInstance().remove(sessionId);
     }
 
     @Test
@@ -108,6 +146,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         assertThat(socket.output()).isEqualTo(expected);
+        assertThat(SessionManager.getInstance().findSession("existing-session-id")).isNull();
     }
 
     @Test

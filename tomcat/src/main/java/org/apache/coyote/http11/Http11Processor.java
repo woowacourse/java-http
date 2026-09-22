@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -50,8 +53,10 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = extractHeaders(bufferedReader);
             final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
             final Map<String, String> responseHeaders = new LinkedHashMap<>();
-            if (!cookie.contains("JSESSIONID")) {
-                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            String sessionId = cookie.get("JSESSIONID");
+            if (sessionId == null) {
+                sessionId = UUID.randomUUID().toString();
+                responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
             }
             String body = extractRequestBody(bufferedReader, headers);
 
@@ -65,7 +70,8 @@ public class Http11Processor implements Runnable, Processor {
                     requestPath,
                     queryParameters,
                     body,
-                    responseHeaders
+                    responseHeaders,
+                    sessionId
             );
             if (handledResponse.isPresent()) {
                 outputStream.write(handledResponse.get().getBytes());
@@ -138,9 +144,10 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath,
             Map<String, String> queryParameters,
             String body,
-            Map<String, String> responseHeaders) {
-        if ("GET".equals(method) && "/login".equals(requestPath) && !queryParameters.isEmpty()) {
-            return Optional.of(handleLoginRequest(queryParameters, responseHeaders));
+            Map<String, String> responseHeaders,
+            String sessionId) {
+        if ("GET".equals(method) && "/login".equals(requestPath)) {
+            return handleLoginRequest(queryParameters, responseHeaders, sessionId);
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
             return Optional.of(createRedirectResponse(handleRegister(body), responseHeaders));
@@ -167,15 +174,29 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
-    private String handleLoginRequest(
+    private Optional<String> handleLoginRequest(
             Map<String, String> queryParameters,
-            Map<String, String> responseHeaders) {
+            Map<String, String> responseHeaders,
+            String sessionId) {
+        Session session = sessionManager.findSession(sessionId);
+        if (session != null && getUser(session) != null) {
+            return Optional.of(createRedirectResponse("/index.html", responseHeaders));
+        }
+        if (queryParameters.isEmpty()) {
+            return Optional.empty();
+        }
+
         String account = queryParameters.get("account");
         String password = queryParameters.get("password");
+        Optional<User> user = login(account, password);
+        if (user.isEmpty()) {
+            return Optional.of(createRedirectResponse("/401.html", responseHeaders));
+        }
 
-        return login(account, password)
-                .map(user -> createRedirectResponse("/index.html", responseHeaders))
-                .orElseGet(() -> createRedirectResponse("/401.html", responseHeaders));
+        Session loginSession = new Session(sessionId);
+        loginSession.setAttribute("user", user.get());
+        sessionManager.add(loginSession);
+        return Optional.of(createRedirectResponse("/index.html", responseHeaders));
     }
 
     private Optional<User> login(String account, String password) {
@@ -183,6 +204,10 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(foundUser -> foundUser.checkPassword(password));
         user.ifPresent(foundUser -> log.info("user={}", foundUser));
         return user;
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private String extractRequestPath(String requestTarget) {

@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.ResolvedSession;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String SESSION_COOKIE_KEY = "JSESSIONID";
+    private static final String USER_ATTRIBUTE_KEY = "user";
 
     private final Socket connection;
 
@@ -35,15 +40,32 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
+
             HttpRequest request = new HttpRequestParser(inputStream).parse();
-            HttpResponse response = createResponse(request);
+            Cookies cookies = new Cookies(request.getHeader("Cookie"));
+            ResolvedSession resolvedSession = SessionManager.resolve(cookies.getValue(SESSION_COOKIE_KEY));
+
+            HttpResponse response = createResponse(request, resolvedSession.session());
+            addSessionCookie(response, resolvedSession);
             response.writeTo(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse createResponse(HttpRequest request) throws IOException {
+    private void addSessionCookie(HttpResponse response, ResolvedSession resolvedSession) {
+        if (!resolvedSession.isNewSession()) {
+            return;
+        }
+
+        HttpCookie sessionCookie = new HttpCookie(
+                SESSION_COOKIE_KEY,
+                resolvedSession.session().getId()
+        );
+        response.addHeader("Set-Cookie", sessionCookie.toHeaderValue());
+    }
+
+    private HttpResponse createResponse(HttpRequest request, Session session) throws IOException {
         if (isRequest(request, HttpMethod.GET, "/register")) {
             return staticResourceResponse("/register.html");
         }
@@ -51,10 +73,13 @@ public class Http11Processor implements Runnable, Processor {
             return register(request);
         }
         if (isRequest(request, HttpMethod.GET, "/login")) {
+            if (session.getAttribute(USER_ATTRIBUTE_KEY) != null) {
+                return HttpResponse.redirect("/index.html");
+            }
             return staticResourceResponse("/login.html");
         }
         if (isRequest(request, HttpMethod.POST, "/login")) {
-            return login(request);
+            return login(request, session);
         }
         return staticResourceResponse(request.getPath());
     }
@@ -73,25 +98,31 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirect("/index.html");
     }
 
-    private HttpResponse login(HttpRequest request) {
+    private HttpResponse login(HttpRequest request, Session session) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
-        if (isAuthenticated(account, password)) {
-            return HttpResponse.redirect("/index.html");
+        Optional<User> user = findAuthenticatedUser(account, password);
+        if (user.isEmpty()) {
+            return HttpResponse.redirect("/401.html");
         }
-        return HttpResponse.redirect("/401.html");
+
+        session.setAttribute(USER_ATTRIBUTE_KEY, user.get());
+        return HttpResponse.redirect("/index.html");
     }
 
-    private boolean isAuthenticated(String account, String password) {
+    private Optional<User> findAuthenticatedUser(String account, String password) {
         if (account == null || password == null) {
-            return false;
+            return Optional.empty();
         }
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
-        return user.get().checkPassword(password);
+        if (!user.get().checkPassword(password)) {
+            return Optional.empty();
+        }
+        return user;
     }
 
     private HttpResponse staticResourceResponse(String requestPath) throws IOException {

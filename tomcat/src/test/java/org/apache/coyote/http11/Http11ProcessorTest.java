@@ -17,6 +17,59 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void JSESSIONID가_없으면_Set_Cookie를_응답한다() {
+        // given
+        String httpRequest = "GET /login HTTP/1.1\r\n\r\n";
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response).containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n");
+    }
+
+    @Test
+    void 유효한_JSESSIONID가_있으면_Set_Cookie를_다시_응답하지_않는다() {
+        // given
+        String firstResponse = process("GET /login HTTP/1.1\r\n\r\n");
+        String sessionCookie = getSessionCookie(firstResponse);
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Cookie: " + sessionCookie,
+                "",
+                "");
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void 로그인한_세션으로_GET_login을_요청하면_index로_redirect한다() {
+        // given
+        String firstResponse = process("GET /login HTTP/1.1\r\n\r\n");
+        String sessionCookie = getSessionCookie(firstResponse);
+        String loginBody = "account=usher&password=password";
+        process(formRequest("/login", loginBody, "theme=dark; " + sessionCookie));
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Cookie: locale=ko; " + sessionCookie,
+                "",
+                "");
+
+        // when
+        String response = process(httpRequest);
+
+        // then
+        assertThat(response)
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n")
+                .doesNotContain("Set-Cookie");
+    }
+
+    @Test
     void GET_login은_login_html을_응답한다() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
@@ -139,14 +192,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .contains("Content-Type: text/html;charset=utf-8 \r\n")
+                .contains("Content-Length: 12 \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n")
+                .endsWith("\r\n\r\nHello world!");
     }
 
     @Test
@@ -180,13 +231,13 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .contains("Content-Type: text/html;charset=utf-8 \r\n")
+                .contains("Content-Length: 5564 \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n")
+                .endsWith("\r\n\r\n" + responseBody);
     }
 
     @Test
@@ -206,13 +257,12 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .contains("Content-Type: text/css \r\n")
+                .contains("Content-Length: " + responseBody.getBytes().length + " \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]+ \\r\\n")
+                .endsWith("\r\n\r\n" + responseBody);
     }
 
     private String formRequest(String path, String body) {
@@ -222,6 +272,24 @@ class Http11ProcessorTest {
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 body);
+    }
+
+    private String formRequest(String path, String body, String cookie) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Cookie: " + cookie,
+                "",
+                body);
+    }
+
+    private String getSessionCookie(String response) {
+        return response.lines()
+                .filter(line -> line.startsWith("Set-Cookie: "))
+                .map(line -> line.substring("Set-Cookie: ".length()).trim())
+                .findFirst()
+                .orElseThrow();
     }
 
     private String process(String httpRequest) {

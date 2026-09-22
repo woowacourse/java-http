@@ -79,15 +79,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> httpRequestHeaders) throws IOException {
-        String requestBody = null;
         if (httpRequestHeaders.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
-            requestBody = new String(buffer);
+            return new String(buffer);
         }
-
-        return requestBody;
+        return null;
     }
 
     private HttpResponse handleRequest(final URI uri, final String requestTarget, final HttpCookie httpCookie, final String requestBody) throws IOException {

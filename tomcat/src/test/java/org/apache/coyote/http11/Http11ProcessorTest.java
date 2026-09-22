@@ -3,10 +3,8 @@ package org.apache.coyote.http11;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +33,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -49,13 +47,19 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/index.html")) {
+            assertThat(resource).isNotNull();
 
-        assertThat(socket.output()).isEqualTo(expected);
+            final var responseBody = resource.readAllBytes();
+            final var expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.length + " ",
+                    "",
+                    new String(responseBody, StandardCharsets.UTF_8)
+            );
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
     }
 }

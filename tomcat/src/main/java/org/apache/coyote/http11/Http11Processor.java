@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String INDEX_PAGE = "/index.html";
+    private static final String REGISTER_PAGE = "/register.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
 
@@ -98,12 +100,18 @@ public class Http11Processor implements Runnable, Processor {
         if ("POST".equals(method) && "/login".equals(path)) {
             return login(requestBody);
         }
+        if ("POST".equals(method) && "/register".equals(path)) {
+            return register(requestBody);
+        }
         if ("/".equals(path)) {
             return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!");
         }
         String resourcePath = path;
         if ("/login".equals(path)) {
             resourcePath = "/login.html";
+        }
+        if ("/register".equals(path)) {
+            resourcePath = REGISTER_PAGE;
         }
         String responseBody = readStaticResource(resourcePath);
         if (responseBody == null) {
@@ -164,12 +172,26 @@ public class Http11Processor implements Runnable, Processor {
         return buildRedirectResponse(INDEX_PAGE);
     }
 
+    private String register(String requestBody) {
+        Map<String, String> parameters = parseQueryString(requestBody);
+        String account = parameters.get("account");
+        String password = parameters.get("password");
+        String email = parameters.get("email");
+        if (account == null || account.isBlank()
+                || password == null || password.isBlank()
+                || email == null || email.isBlank()) {
+            return buildRedirectResponse(REGISTER_PAGE);
+        }
+        InMemoryUserRepository.save(new User(account, password, email));
+        return buildRedirectResponse(INDEX_PAGE);
+    }
+
     private Map<String, String> parseQueryString(String queryString) {
         Map<String, String> queryParams = new HashMap<>();
         for (String pair : queryString.split("&")) {
             String[] keyValue = pair.split("=", 2);
             if (keyValue.length == 2) {
-                queryParams.put(keyValue[0], keyValue[1]);
+                queryParams.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
             }
         }
         return queryParams;

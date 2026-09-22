@@ -13,6 +13,43 @@ public class HttpHeaders {
         this.values = Map.copyOf(parseHeaders(headerLines));
     }
 
+    public HttpHeaders(Map<String, String> headers) {
+        Map<String, String> normalized = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
+
+            normalized.put(name.toLowerCase(Locale.ROOT), value);
+        }
+
+        this.values = Map.copyOf(normalized);
+    }
+
+    public String get(String name) {
+        return values.get(name.toLowerCase(Locale.ROOT));
+    }
+
+    public Map<String, String> getValues() {
+        return values;
+    }
+
+    public int getContentLength() {
+        String value = get("Content-Length");
+
+        if (value == null) {
+            return 0;
+        }
+
+        int contentLength = Integer.parseInt(value);
+
+        if (contentLength < 0) {
+            throw new IllegalArgumentException("본문 길이는 음수일 수 없습니다.");
+        }
+
+        return contentLength;
+    }
+
     private Map<String, String> parseHeaders(List<String> headerLines) {
         Map<String, String> headers = new HashMap<>();
 
@@ -30,25 +67,5 @@ public class HttpHeaders {
         }
 
         return headers;
-    }
-
-    public String get(String name) {
-        return values.get(name.toLowerCase(Locale.ROOT));
-    }
-
-    public int getContentLength() {
-        String value = get("Content-Length");
-
-        if (value == null) {
-            return 0;
-        }
-
-        int contentLength = Integer.parseInt(value);
-
-        if (contentLength < 0) {
-            throw new IllegalArgumentException("본문 길이는 음수일 수 없습니다.");
-        }
-
-        return contentLength;
     }
 }

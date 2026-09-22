@@ -14,6 +14,10 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestReader;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +56,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            HttpResponseWriter responseWriter = new HttpResponseWriter();
             HttpRequestReader requestReader = new HttpRequestReader();
             HttpRequest request = requestReader.read(inputStream);
 
@@ -70,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, Cookie> cookies = parseCookies(cookieHeader);
             Cookie sessionCookie = cookies.get("JSESSIONID");
-            String setCookieHeader = "";
+            Map<String, String> responseHeaders = new HashMap<>();
 
             SessionManager sessionManager = SessionManager.getInstance();
             Session session = null;
@@ -87,9 +92,10 @@ public class Http11Processor implements Runnable, Processor {
 
                 sessionCookie = new Cookie("JSESSIONID", sessionId);
 
-                setCookieHeader = "Set-Cookie: "
-                        + sessionCookie.getName() + "=" + sessionCookie.getValue()
-                        + "; Path=/\r\n";
+                responseHeaders.put(
+                        "Set-Cookie",
+                        sessionCookie.getName() + "=" + sessionCookie.getValue() + "; Path=/"
+                );
             }
 
             var responseBody = "Hello world!";
@@ -131,10 +137,9 @@ public class Http11Processor implements Runnable, Processor {
                 User newUser = new User(account, password, email);
                 InMemoryUserRepository.save(newUser);
 
-                String response = createRedirectResponse(INDEX_PATH, setCookieHeader);
+                HttpResponse response = createRedirectResponse(INDEX_PATH, responseHeaders);
 
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                responseWriter.write(outputStream, response);
                 return;
             }
 
@@ -142,10 +147,9 @@ public class Http11Processor implements Runnable, Processor {
                 User loginUser = (User) session.getAttribute("user");
 
                 if (loginUser != null) {
-                    String response = createRedirectResponse(INDEX_PATH, setCookieHeader);
+                    HttpResponse response = createRedirectResponse(INDEX_PATH, responseHeaders);
 
-                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
+                    responseWriter.write(outputStream, response);
                     return;
                 }
 
@@ -170,20 +174,51 @@ public class Http11Processor implements Runnable, Processor {
                     location = INDEX_PATH;
                 }
 
-                String response = createRedirectResponse(location, setCookieHeader);
+                HttpResponse response = createRedirectResponse(location, responseHeaders);
 
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                responseWriter.write(outputStream, response);
                 return;
             }
 
-            final var response = createResponse(contentType, responseBody, setCookieHeader);
+            HttpResponse response = createOkResponse(contentType, responseBody, responseHeaders);
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            responseWriter.write(outputStream, response);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse createOkResponse(
+            String contentType,
+            String responseBody,
+            Map<String, String> responseHeaders
+    ) {
+        Map<String, String> headers = new HashMap<>(responseHeaders);
+        headers.put("Content-Type", contentType);
+
+        return new HttpResponse(
+                "HTTP/1.1",
+                200,
+                "OK",
+                new HttpHeaders(headers),
+                responseBody.getBytes(StandardCharsets.UTF_8)
+        );
+    }
+
+    private HttpResponse createRedirectResponse(
+            String location,
+            Map<String, String> responseHeaders
+    ) {
+        Map<String, String> headers = new HashMap<>(responseHeaders);
+        headers.put("Location", location);
+
+        return new HttpResponse(
+                "HTTP/1.1",
+                302,
+                "Found",
+                new HttpHeaders(headers),
+                new byte[0]
+        );
     }
 
     // 입력 예시: "yummy_cookie=choco; JSESSIONID=abc123"
@@ -213,27 +248,4 @@ public class Http11Processor implements Runnable, Processor {
         Path filePath = Path.of(resource.toURI());
         return Files.readString(filePath, StandardCharsets.UTF_8);
     }
-
-    private String createResponse(
-            String contentType, String responseBody, String setCookieHeader
-    ) {
-        return "HTTP/1.1 200 OK\r\n"
-                + setCookieHeader
-                + String.join("\r\n",
-                        "Content-Type: " + contentType,
-                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
-                        "",
-                        responseBody);
-    }
-
-    private String createRedirectResponse(String location, String setCookieHeader) {
-        return "HTTP/1.1 302 Found\r\n"
-                + setCookieHeader
-                + String.join("\r\n",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
-    }
-
 }

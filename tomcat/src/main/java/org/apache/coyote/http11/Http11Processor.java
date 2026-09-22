@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -106,6 +107,21 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            if (requestUri.equals("/register") && method.equals("GET")) {
+                requestUri = "/register.html";
+            }
+
+            if (requestUri.equals("/register") && method.equals("POST")) {
+                Map<String, String> params = parseParam(requestBody);
+
+                InMemoryUserRepository.save(
+                        new User(params.get("account"), params.get("password"), params.get("email")));
+
+                statusLine = "HTTP/1.1 302 Found ";
+                location = "/index.html";
+            }
+
+
             var responseBody = "";
 
             var contentType = "text/html";
@@ -142,7 +158,7 @@ public class Http11Processor implements Runnable, Processor {
             if (keyValue.length != 2 || keyValue[1].isBlank()) {
                 continue;
             }
-            params.put(keyValue[0], keyValue[1]);
+            params.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
         }
         return params;
     }

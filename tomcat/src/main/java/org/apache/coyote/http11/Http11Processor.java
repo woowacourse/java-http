@@ -228,21 +228,6 @@ public class Http11Processor implements Runnable, Processor {
         return requestLine.trim().split(" ")[METHOD_INDEX];
     }
 
-    private Map<String, String> parseQueryParams(final String requestUri) {
-        final int index = requestUri.indexOf("?");
-        if (index == -1) {
-            return Map.of();
-        }
-        final Map<String, String> queryParams = new HashMap<>();
-        for (final String param : requestUri.substring(index + 1).split("&")) {
-            final String[] keyAndValue = param.split("=", 2);
-            if (keyAndValue.length == 2) {
-                queryParams.put(keyAndValue[0], keyAndValue[1]);
-            }
-        }
-        return queryParams;
-    }
-
     private Optional<User> login(final Map<String, String> queryParams) {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");

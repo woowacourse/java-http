@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
                 path = uri.substring(0, index);
                 queryString = uri.substring(index + 1);
             }
-            if ("/login".equals(path)) {
+            if ("/login".equals(path) && !queryString.isEmpty()) {
                 login(queryString);
             }
             String response = createResponse(path);

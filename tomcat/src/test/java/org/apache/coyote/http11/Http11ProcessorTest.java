@@ -33,6 +33,19 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 요청_첫_줄이_없어도_예외가_발생하지_않는다() {
+        // given
+        final var socket = new StubSocket("");
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("Hello world!");
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
@@ -55,6 +68,32 @@ class Http11ProcessorTest {
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

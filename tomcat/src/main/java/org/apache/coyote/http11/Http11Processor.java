@@ -65,11 +65,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestBody = readRequestBody(reader, headers);
             HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
             String sessionId = cookie.get("JSESSIONID");
-            String setCookie = null;
-            if (sessionId == null) {
-                setCookie = "JSESSIONID=" + UUID.randomUUID();
-            }
-            String response = createResponse(method, path, requestBody, setCookie);
+            String response = createResponse(method, path, requestBody, sessionId);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -107,12 +103,19 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, totalRead);
     }
 
-    private String createResponse(String method, String path, String requestBody, String setCookie) throws IOException {
+    private String createResponse(String method, String path, String requestBody, String sessionId) throws IOException {
+        String setCookie = null;
+        if (sessionId == null) {
+            setCookie = "JSESSIONID=" + UUID.randomUUID();
+        }
         if ("POST".equals(method) && "/login".equals(path)) {
             return login(requestBody, setCookie);
         }
         if ("POST".equals(method) && "/register".equals(path)) {
             return register(requestBody, setCookie);
+        }
+        if ("GET".equals(method) && "/login".equals(path) && isLoggedIn(sessionId)) {
+            return buildRedirectResponse(INDEX_PAGE, setCookie);
         }
         if ("/".equals(path)) {
             return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!", setCookie);
@@ -192,6 +195,14 @@ public class Http11Processor implements Runnable, Processor {
         SessionManager.add(session);
         log.info("user : {}", user.get().getAccount());
         return buildRedirectResponse(INDEX_PAGE, "JSESSIONID=" + session.getId());
+    }
+
+    private boolean isLoggedIn(String sessionId) {
+        if (sessionId == null) {
+            return false;
+        }
+        Session session = SessionManager.findSession(sessionId);
+        return session != null && session.getAttribute("user") != null;
     }
 
     private String register(String requestBody, String setCookie) {

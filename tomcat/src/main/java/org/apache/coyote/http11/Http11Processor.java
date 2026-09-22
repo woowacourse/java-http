@@ -41,17 +41,12 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
             final var requestMethod = httpRequest.getMethod().toUpperCase();
             log.info("요청 메소드: {}, 요청 URI: {}", requestMethod, httpRequest.getPath());
-            HttpCookie httpCookie = new HttpCookie(httpRequest.getHeaders().get("Cookie"));
-            String sessionId = httpCookie.getJSessionId();
-            Session session = getSession(sessionId);
-            String sessionCookie = getSessionCookie(httpCookie, session);
-
             HttpResponse response = new HttpResponse(httpRequest.getVersion(), 404, "Not Found", "");
             if (requestMethod.equals("GET")) {
-                response = getResponse(httpRequest, sessionCookie, session);
+                response = getResponse(httpRequest);
             }
             if (requestMethod.equals("POST")) {
-                response = getPostResponse(httpRequest, sessionCookie, session);
+                response = getPostResponse(httpRequest);
             }
 
             outputStream.write(response.toBytes());
@@ -61,25 +56,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getSessionCookie(HttpCookie httpCookie, Session session) {
-        if (session.getId().equals(httpCookie.getJSessionId())) {
-            return "";
-        }
-        return "JSESSIONID=" + session.getId();
-    }
-
-    private Session getSession(String sessionId) {
-        Session session = SessionManager.findSession(sessionId);
-
-        if (session == null) {
-            String newSessionId = UUID.randomUUID().toString();
-            session = new Session(newSessionId);
-            SessionManager.add(session);
-        }
-        return session;
-    }
-
-    private HttpResponse getPostResponse(HttpRequest httpRequest, String sessionCookie, Session session) {
+    private HttpResponse getPostResponse(HttpRequest httpRequest) {
         Map<String, String> queryParameters = getQuerySeparate(httpRequest.getRequestBody());
 
         if (httpRequest.getPath().equals("/login")) {
@@ -89,11 +66,13 @@ public class Http11Processor implements Runnable, Processor {
 
             if (foundUser.isEmpty() || !foundUser.get().checkPassword(password)) {
                 return getRedirectResponse(httpRequest, "/401.html", getContentType(httpRequest.getPath()),
-                        sessionCookie);
+                        "");
             }
+            Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", foundUser.get());
+            SessionManager.add(session);
             return getRedirectResponse(httpRequest, "/index.html", getContentType(httpRequest.getPath()),
-                    sessionCookie);
+                    "JSESSIONID=" + session.getId());
         }
 
         if (httpRequest.getPath().equals("/register")) {
@@ -101,35 +80,35 @@ public class Http11Processor implements Runnable, Processor {
             if (foundUser.isPresent()) {
                 log.info("회원가입 실패! 아이디 : {}", queryParameters.get("account"));
                 return getRedirectResponse(httpRequest, "/register.html", getContentType(httpRequest.getPath()),
-                        sessionCookie);
+                        "");
             }
             User user = new User(queryParameters.get("account"), queryParameters.get("password"),
                     queryParameters.get("email"));
             InMemoryUserRepository.save(user);
-            session.setAttribute("user", user);
             return getRedirectResponse(httpRequest, "/index.html", getContentType(httpRequest.getPath()),
-                    sessionCookie);
+                    "");
         }
-        return getRedirectResponse(httpRequest, "/404.html", getContentType(httpRequest.getPath()), sessionCookie);
+        return getRedirectResponse(httpRequest, "/404.html", getContentType(httpRequest.getPath()), "");
     }
 
-    private HttpResponse getResponse(HttpRequest httpRequest, String sessionCookie, Session session)
+    private HttpResponse getResponse(HttpRequest httpRequest)
             throws IOException {
         if (httpRequest.getPath().equals("/login")) {
-            if (session.getAttribute("user") != null) {
+            HttpCookie httpCookie = new HttpCookie(httpRequest.getHeaders().get("Cookie"));
+            Session session = SessionManager.findSession(httpCookie.getJSessionId());
+            if (session != null && session.getAttribute("user") != null) {
                 log.info("로그인 페이지 접근! 세션 아이디: {}", session.getId());
                 return getRedirectResponse(httpRequest, "/index.html", getContentType(httpRequest.getPath()),
-                        sessionCookie);
-
+                        "");
             }
         }
         if (!httpRequest.getPath().equals("/")) {
             String paths = getStaticResource(httpRequest.getPath());
             if (paths != null) {
-                return getOkResponse(httpRequest, getContentType(httpRequest.getPath()), paths, sessionCookie);
+                return getOkResponse(httpRequest, getContentType(httpRequest.getPath()), paths);
             }
         }
-        return getOkResponse(httpRequest, getContentType(httpRequest.getPath()), "Hello world!", sessionCookie);
+        return getOkResponse(httpRequest, getContentType(httpRequest.getPath()), "Hello world!");
     }
 
     private HttpResponse getRedirectResponse(HttpRequest httpRequest, String location,
@@ -142,12 +121,10 @@ public class Http11Processor implements Runnable, Processor {
         return response;
     }
 
-    private HttpResponse getOkResponse(HttpRequest httpRequest, String contentType, String body,
-                                       String sessionCookie) {
+    private HttpResponse getOkResponse(HttpRequest httpRequest, String contentType, String body) {
         HttpResponse response = new HttpResponse(httpRequest.getVersion(), 200, "OK", body);
         response.addHeader("Content-Type", contentType);
         response.addHeader("Content-Length", body.getBytes(StandardCharsets.UTF_8).length + " ");
-        addSessionCookie(response, sessionCookie);
         return response;
     }
 

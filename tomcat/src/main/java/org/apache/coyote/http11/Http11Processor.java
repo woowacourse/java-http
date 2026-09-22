@@ -24,18 +24,22 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final Map<String, String> CONTENT_TYPE = Map.of("html", "text/html", "css", "text/css", "js",
             "application/javascript");
-    private static final String HTTP_VERSION = "HTTP/1.1";
+
     private static final String STATIC_ROOT = "static";
+
     private static final String GET_METHOD = "GET";
     private static final String POST_METHOD = "POST";
+
     private static final String DEFAULT_REQUEST = "/";
     private static final String LOGIN_REQUEST = "/login";
     private static final String REGISTER_REQUEST = "/register";
+
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String REGISTER_PAGE = "/register.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
+
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
     private final Socket connection;
@@ -94,10 +98,10 @@ public class Http11Processor implements Runnable, Processor {
 
             URL url = getClass().getClassLoader().getResource(STATIC_ROOT + path);
             if (url == null) {
-                writeResponse(outputStream, makeResponse(HttpStatus.NOT_FOUND, NOT_FOUND_PAGE));
+                writeResponse(outputStream, makeNotFoundResponse());
                 return;
             }
-            writeResponse(outputStream, makeResponse(HttpStatus.OK, path));
+            writeResponse(outputStream, makeOkResponse(path));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -105,39 +109,47 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleLogin(String requestBody) {
+    private HttpResponse handleLogin(String requestBody) {
         Map<String, String> params = parseFormData(requestBody);
-        String account = params.get("account");
-        String password = params.get("password");
+        Optional<User> user = login(params);
 
-        if (account == null || password == null) {
-            return makeRedirectResponse(UNAUTHORIZED_PAGE);
+        if (user.isPresent()) {
+            return HttpResponse.redirect(INDEX_PAGE);
         }
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("회원 조회 결과: user={}", user.get());
-            return makeRedirectResponse(INDEX_PAGE);
-        }
-        return makeRedirectResponse(UNAUTHORIZED_PAGE);
+        return HttpResponse.redirect(UNAUTHORIZED_PAGE);
     }
 
-    private String handleRegister(String requestBody) {
+    private HttpResponse handleRegister(String requestBody) {
         Map<String, String> params = parseFormData(requestBody);
         String account = params.get("account");
         String password = params.get("password");
         String email = params.get("email");
 
         if (account == null || password == null || email == null) {
-            return makeRedirectResponse(REGISTER_PAGE);
+            return HttpResponse.redirect(REGISTER_PAGE);
         }
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return makeRedirectResponse(INDEX_PAGE);
+        return HttpResponse.redirect(INDEX_PAGE);
     }
 
-    private void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
+    private HttpResponse makeNotFoundResponse() throws IOException, URISyntaxException {
+        String body = readResource(NOT_FOUND_PAGE);
+        return HttpResponse.notFound(contentTypeOf(NOT_FOUND_PAGE), body);
+    }
+
+    private String readResource(String resourcePath) throws IOException, URISyntaxException {
+        URL url = getClass().getClassLoader().getResource(STATIC_ROOT + resourcePath);
+        return new String(Files.readAllBytes(Paths.get(url.toURI())));
+    }
+
+    private String contentTypeOf(String resourcePath) {
+        String extension = getExtension(resourcePath);
+        return CONTENT_TYPE.getOrDefault(extension, "text/html") + ";charset=utf-8";
+    }
+
+    private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toHttpMessage().getBytes());
         outputStream.flush();
     }
 
@@ -187,28 +199,28 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private String makeResponse(HttpStatus status, String resourcePath) throws IOException, URISyntaxException {
-        URL url = getClass().getClassLoader().getResource(STATIC_ROOT + resourcePath);
-        String responseBody = new String(Files.readAllBytes(Paths.get(url.toURI())));
-        String extension = getExtension(resourcePath);
+    private Optional<User> login(Map<String, String> params) {
+        String account = params.get("account");
+        String password = params.get("password");
+        if (account == null || password == null) {
+            return Optional.empty();
+        }
 
-        return HTTP_VERSION + " " + status.getCode() + " " + status.getReasonPhrase() + " \r\n" +
-                "Content-Type: " + CONTENT_TYPE.getOrDefault(extension, "text/html") + ";charset=utf-8 \r\n" +
-                "Content-Length: " + getContentLength(responseBody) + " \r\n\r\n" +
-                responseBody;
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("회원 조회 결과: user={}", user.get());
+            return user;
+        }
+        return Optional.empty();
     }
 
-    private String makeRedirectResponse(String locationAddress) {
-        return HTTP_VERSION + " " + HttpStatus.FOUND.getCode() + " " + HttpStatus.FOUND.getReasonPhrase() + " \r\n" +
-                "Location: " + locationAddress + " \r\n\r\n";
+    private HttpResponse makeOkResponse(String resourcePath) throws IOException, URISyntaxException {
+        String body = readResource(resourcePath);
+        return HttpResponse.ok(contentTypeOf(resourcePath), body);
     }
 
     private String getExtension(String resourcePath) {
         int lastIndex = resourcePath.lastIndexOf(".");
         return resourcePath.substring(lastIndex + 1);
-    }
-
-    private int getContentLength(String responseBody) {
-        return responseBody.getBytes().length;
     }
 }

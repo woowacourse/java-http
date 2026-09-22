@@ -12,12 +12,14 @@ public class HttpRequest {
     private final String requestTarget;
     private final Map<String, String> queryParameters;
     private final String body;
+    private final Cookie cookie;
 
-    public HttpRequest(String method, String requestTarget, Map<String, String> queryParameters, String body) {
+    public HttpRequest(String method, String requestTarget, Map<String, String> queryParameters, String body, Cookie cookie) {
         this.method = method;
         this.requestTarget = requestTarget;
         this.queryParameters = queryParameters;
         this.body = body;
+        this.cookie = cookie;
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
@@ -37,10 +39,14 @@ public class HttpRequest {
         final String requestTarget = requestTargetParts[0];
 
         int contentLength = 0;
+        Cookie cookie = Cookie.empty();
         String headerLine;
         while (!(headerLine = bufferedReader.readLine()).isBlank()) {
             if (headerLine.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(headerLine.split(":", 2)[1].trim());
+            }
+            if (headerLine.startsWith("Cookie:")) {
+                cookie = Cookie.parse(headerLine.split(":", 2)[1].trim());
             }
         }
 
@@ -55,7 +61,7 @@ public class HttpRequest {
         }
         String body = new String(bodyCharacters);
 
-        return new HttpRequest(method, requestTarget, initQueryParameters(requestTargetParts), body);
+        return new HttpRequest(method, requestTarget, initQueryParameters(requestTargetParts), body, cookie);
     }
 
     private static Map<String, String> initQueryParameters(String[] requestTargetParts) {
@@ -98,5 +104,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Cookie getCookie() {
+        return cookie;
     }
 }

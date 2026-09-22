@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +39,15 @@ public class Http11Processor implements Runnable, Processor {
              ) {
 
             HttpRequest request = HttpRequest.from(reader);
+            HttpResponse response;
+            if (isLoginRequest(request)) {
+                response = handleLogin(request);
+            } else {
+                String contentType = resolveContentType(request.getPath());
+                String responseBody = resolveResponseBody(request.getPath());
 
-            String contentType = resolveContentType(request.getPath());
-            String responseBody = resolveResponseBody(request.getPath());
-
-            HttpResponse response = HttpResponse.ok(contentType, responseBody);
-
+                response = HttpResponse.ok(contentType, responseBody);
+            }
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -76,5 +81,26 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new String(Files.readAllBytes(Path.of(resource.getPath())));
+    }
+
+    private boolean isLoginRequest(HttpRequest request) {
+        return request.getPath().equals("/login")
+        && request.getMethod().equals("POST");
+    }
+
+    private HttpResponse handleLogin(HttpRequest request) {
+        Map<String, String> parameters = request.getParameters();
+        if (canLogin(parameters)) {
+            return HttpResponse.found("/index.html");
+        }
+        return HttpResponse.found("/401.html");
+    }
+
+    private boolean canLogin(Map<String, String> parameters) {
+        String account = parameters.get("account");
+        String password = parameters.get("password");
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
     }
 }

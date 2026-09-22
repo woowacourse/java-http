@@ -24,6 +24,13 @@ public class HttpResponse {
         return new HttpResponse(HttpStatus.OK, headers, responseBody);
     }
 
+    public static HttpResponse found(String location) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", location);
+        return new HttpResponse(HttpStatus.FOUND, headers, "");
+    }
+
+
     public byte[] getBytes() {
         List<String> lines = new ArrayList<>();
         lines.add("HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getStatusMessage() + " ");

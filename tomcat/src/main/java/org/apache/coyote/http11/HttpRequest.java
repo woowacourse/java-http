@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 public class HttpRequest {
 
@@ -17,6 +22,7 @@ public class HttpRequest {
     private final String ALLOWED_VERSION = "HTTP/1.1";
     private static final String ROOT_PATH = "/";
     private static final String STATIC_TARGET_PATH = "static";
+    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
 
     private final String method;
     private final String path;
@@ -96,8 +102,27 @@ public class HttpRequest {
         return "POST".equals(method) && "/register".equals(path);
     }
 
+    public Session getSession(boolean isCreate) throws IOException {
+        Session session = SESSION_MANAGER.findSession(httpCookie.getJsessionid());
+        if (isCreate && session == null) {
+            String id = UUID.randomUUID().toString();
+            Session newSession = new Session(id);
+            SESSION_MANAGER.add(newSession);
+            return newSession;
+        }
+        return session;
+    }
+
     public String getJsessionid() {
         return httpCookie.getJsessionid();
+    }
+
+    public String createJsessionidIfAbsent() {
+        String jsessionid = httpCookie.getJsessionid();
+        if (jsessionid.isEmpty()) {
+            return UUID.randomUUID().toString();
+        }
+        return "";
     }
 
     private static HttpRequest createGetRequest(

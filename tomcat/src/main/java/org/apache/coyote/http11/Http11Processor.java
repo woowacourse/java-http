@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRoot()) {
             return HttpResponse.ok(
-                    createSetCookieHeaderIfAbsent(httpRequest), "text/html", "Hello world!".getBytes(StandardCharsets.UTF_8));
+                    httpRequest.createJsessionidIfAbsent(), "text/html", "Hello world!".getBytes(StandardCharsets.UTF_8));
         }
         return createResourceResponse(httpRequest);
     }
@@ -64,39 +64,49 @@ public class Http11Processor implements Runnable, Processor {
             return createRegisterResponse(httpRequest);
         }
         String resourcePath = httpRequest.getResourcePath();
+        if (httpRequest.isGetLoginRequest() && isLoggedIn(httpRequest)) {
+            return HttpResponse.sendRedirect("", "/index.html");
+        }
         if (httpRequest.isGetLoginRequest() || httpRequest.isGetRegisterRequest()) {
             resourcePath += ".html";
         }
         URL resource = getClass().getClassLoader().getResource(resourcePath);
-
         if (resource == null) {
             return createNotFoundResponse(httpRequest);
         }
         byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
-        return HttpResponse.ok(createSetCookieHeaderIfAbsent(httpRequest), getContentType(resource.getPath()), body);
+        return HttpResponse.ok(httpRequest.createJsessionidIfAbsent(), getContentType(resource.getPath()), body);
     }
 
-    private HttpResponse createLoginResponse(HttpRequest httpRequest) {
+    private boolean isLoggedIn(HttpRequest httpRequest) throws IOException {
+        Session session = httpRequest.getSession(false);
+        return session != null && session.getAttribute("user") != null;
+    }
+
+    private HttpResponse createLoginResponse(HttpRequest httpRequest) throws IOException {
         if (!httpRequest.hasBodyParameters("account", "password")) {
-            return HttpResponse.found(createSetCookieHeaderIfAbsent(httpRequest), "401.html", "", new byte[0]);
+            return HttpResponse.sendRedirect(httpRequest.createJsessionidIfAbsent(), "401.html");
         }
         Optional<User> userOpt = InMemoryUserRepository.findByAccount(httpRequest.getBodyParameter("account"));
         if (userOpt.isEmpty()) {
-            return HttpResponse.found(createSetCookieHeaderIfAbsent(httpRequest), "/401.html", "", new byte[0]);
+            return HttpResponse.sendRedirect(httpRequest.createJsessionidIfAbsent(), "/401.html");
         }
 
         User user = userOpt.get();
         String password = httpRequest.getBodyParameter("password");
-        if (password != null && user.checkPassword(password)) {
+        if (user.checkPassword(password)) {
+            Session session = httpRequest.getSession(true);
+            session.setAttribute("user", user);
             log.info("로그인 성공! 아이디: {}", user.getAccount());
-            return HttpResponse.found(createSetCookieHeaderIfAbsent(httpRequest), "/index.html", "", new byte[0]);
+            String jsessionid = decideJsessionidToSet(httpRequest, session.getId());
+            return HttpResponse.sendRedirect(jsessionid, "/index.html");
         }
-        return HttpResponse.found(createSetCookieHeaderIfAbsent(httpRequest), "/401.html", "", new byte[0]);
+        return HttpResponse.sendRedirect(httpRequest.createJsessionidIfAbsent(), "/401.html");
     }
 
     private HttpResponse createRegisterResponse(HttpRequest httpRequest) {
         if (!httpRequest.hasBodyParameters("account", "password", "email")) {
-            return HttpResponse.found(createSetCookieHeaderIfAbsent(httpRequest), "/401.html", "", new byte[0]);
+            return HttpResponse.sendRedirect(httpRequest.createJsessionidIfAbsent(), "/401.html");
         }
         String account = httpRequest.getBodyParameter("account");
         String password = httpRequest.getBodyParameter("password");
@@ -104,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        return HttpResponse.found(createSetCookieHeaderIfAbsent(httpRequest), "/index.html", "", new byte[0]);
+        return HttpResponse.sendRedirect(httpRequest.createJsessionidIfAbsent(), "/index.html");
     }
 
     private HttpResponse createNotFoundResponse(HttpRequest httpRequest) throws IOException {
@@ -112,11 +122,11 @@ public class Http11Processor implements Runnable, Processor {
 
         if (resource == null) {
             return HttpResponse.notFound(
-                    createSetCookieHeaderIfAbsent(httpRequest), "text/plain", "404 NOT FOUND".getBytes(StandardCharsets.UTF_8));
+                    httpRequest.createJsessionidIfAbsent(), "text/plain", "404 NOT FOUND".getBytes(StandardCharsets.UTF_8));
         }
 
         byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
-        return HttpResponse.notFound(createSetCookieHeaderIfAbsent(httpRequest), getContentType(resource.getPath()), body);
+        return HttpResponse.notFound(httpRequest.createJsessionidIfAbsent(), getContentType(resource.getPath()), body);
     }
 
     private String getContentType(String resource) {
@@ -129,11 +139,11 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String createSetCookieHeaderIfAbsent(HttpRequest httpRequest) {
+    private String decideJsessionidToSet(HttpRequest httpRequest, String otherJsessionid) {
         String jsessionid = httpRequest.getJsessionid();
-        if (jsessionid.isEmpty()) {
-            return "Set-Cookie: JSESSIONID=" + UUID.randomUUID();
+        if (jsessionid.equals(otherJsessionid)) {
+            return "";
         }
-        return "";
+        return otherJsessionid;
     }
 }

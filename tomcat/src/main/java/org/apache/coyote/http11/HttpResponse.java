@@ -8,15 +8,15 @@ public final class HttpResponse {
 
     private final int statusCode;
     private final String reasonPhrase;
-    private final String setCookieHeader;
+    private final String jsessionid;
     private final String location;
     private final String contentType;
     private final byte[] body;
 
-    private HttpResponse(int statusCode, String reasonPhrase, String setCookieHeader, String location, String contentType, byte[] body) {
+    private HttpResponse(int statusCode, String reasonPhrase, String jsessionid, String location, String contentType, byte[] body) {
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
-        this.setCookieHeader = setCookieHeader;
+        this.jsessionid = jsessionid;
         this.location = location;
         this.contentType = contentType;
         this.body = body;
@@ -26,8 +26,8 @@ public final class HttpResponse {
         return new HttpResponse(200, "OK", jsessionid, "", contentType, body);
     }
 
-    public static HttpResponse found(String jsessionid, String location, String contentType, byte[] body) {
-        return new HttpResponse(302, "Found", jsessionid, location, contentType, body);
+    public static HttpResponse sendRedirect(String jsessionid, String location) {
+        return new HttpResponse(302, "Found", jsessionid, location, "", new byte[0]);
     }
 
     public static HttpResponse notFound(String jsessionid, String contentType, byte[] body) {
@@ -38,8 +38,8 @@ public final class HttpResponse {
         StringBuilder headers = new StringBuilder();
         headers.append("HTTP/1.1 ")
                 .append(statusCode).append(" ").append(reasonPhrase).append(" \r\n");
-        if (!setCookieHeader.isBlank()) {
-            headers.append(setCookieHeader).append("\r\n");
+        if (!jsessionid.isBlank()) {
+            headers.append("Set-Cookie: JSESSIONID=").append(jsessionid).append("\r\n");
         }
         if (!location.isBlank()) {
             headers.append("Location: ").append(location).append("\r\n");

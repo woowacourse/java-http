@@ -4,14 +4,18 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Duration;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -22,6 +26,13 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 class Http11ProcessorTest {
 
@@ -284,7 +295,9 @@ class Http11ProcessorTest {
 
     @Test
     void doesNotReissueExistingSessionCookie() throws IOException {
-        final String sessionId = assertNewSessionCookie(getLoginResponse(""));
+        final var login = new StubSocket(postLoginRequest("account=gugu&password=password"));
+        assertRedirect(login, "/index.html");
+        final String sessionId = assertNewSessionCookie(login.output());
         final String response = getLoginResponse(
                 "theme=dark; JSESSIONID=" + sessionId + "; language=ko"
         );
@@ -292,9 +305,9 @@ class Http11ProcessorTest {
         assertThat(responseHeaders(response))
                 .noneMatch(header -> header.startsWith("Set-Cookie:"));
 
-        assertThat(sessionManager.findSession(sessionId)).isNotNull();
-        assertThat(sessionManager.findSession(sessionId).getAttribute("user")).isNull();
-        assertHtmlResponseBody(response, "static/login.html");
+        assertThat(sessionManager.findSession(sessionId).getAttribute("user"))
+                .isSameAs(InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+        assertRedirectResponse(response, "/index.html");
     }
 
     @Test
@@ -337,12 +350,11 @@ class Http11ProcessorTest {
         final String replacementId = assertNewSessionCookie(oldIdResponse);
         assertThat(replacementId).isNotIn(beforeId, afterId);
         assertThat(sessionManager.findSession(beforeId)).isNull();
-        assertThat(sessionManager.findSession(replacementId)).isNotNull();
-        assertThat(sessionManager.findSession(replacementId).getAttribute("user")).isNull();
+        assertThat(sessionManager.findSession(replacementId)).isNull();
     }
 
     @Test
-    void unknownSessionIdReceivesNewAnonymousSession() throws IOException {
+    void unknownSessionIdReceivesNewCookieWithoutSavingASession() throws IOException {
         final String unknownId = UUID.randomUUID().toString();
         final String response = getLoginResponse("JSESSIONID=" + unknownId);
 
@@ -351,19 +363,19 @@ class Http11ProcessorTest {
         assertThat(newId).isNotEqualTo(unknownId);
 
         assertThat(sessionManager.findSession(unknownId)).isNull();
-        assertThat(sessionManager.findSession(newId)).isNotNull();
-        assertThat(sessionManager.findSession(newId).getAttribute("user")).isNull();
+        assertThat(sessionManager.findSession(newId)).isNull();
     }
 
     @Test
-    void failedLoginDoesNotAuthenticateAnonymousSession() throws IOException {
+    void failedLoginDoesNotCreateASession() throws IOException {
         final String sessionId = assertNewSessionCookie(getLoginResponse(""));
         final var socket = new StubSocket(withCookie(
                 postLoginRequest("account=gugu&password=wrong"), sessionId));
 
         assertRedirect(socket, "/401.html");
-        assertThat(sessionManager.findSession(sessionId)).isNotNull();
-        assertThat(sessionManager.findSession(sessionId).getAttribute("user")).isNull();
+        assertThat(sessionManager.findSession(sessionId)).isNull();
+        final String replacementId = assertNewSessionCookie(socket.output());
+        assertThat(sessionManager.findSession(replacementId)).isNull();
 
         assertHtmlResponseBody(getLoginResponse("JSESSIONID=" + sessionId), "static/login.html");
     }
@@ -378,10 +390,116 @@ class Http11ProcessorTest {
         assertHtmlResponseBody(anonymousResponse, "static/login.html");
         final String anonymousId = assertNewSessionCookie(anonymousResponse);
         assertThat(anonymousId).isNotEqualTo(authenticatedId);
-        assertThat(sessionManager.findSession(anonymousId)).isNotNull();
-        assertThat(sessionManager.findSession(anonymousId).getAttribute("user")).isNull();
+        assertThat(sessionManager.findSession(anonymousId)).isNull();
 
         assertRedirectResponse(getLoginResponse("JSESSIONID=" + authenticatedId), "/index.html");
+    }
+
+    @Test
+    void anonymousRequestsIssueCookiesWithoutSavingSessions() throws IOException {
+        final SessionManager manager = spy(new SessionManager());
+        final String account = "anonymous-register-" + UUID.randomUUID();
+        final List<String> requests = List.of(
+                "GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n",
+                "GET /register HTTP/1.1\r\nHost: localhost\r\n\r\n",
+                "GET /index.html HTTP/1.1\r\nHost: localhost\r\n\r\n",
+                "GET /css/styles.css HTTP/1.1\r\nHost: localhost\r\n\r\n",
+                postLoginRequest("account=gugu&password=wrong"),
+                postRequest("/register",
+                        "account=" + account + "&password=password&email=moa%40example.com"));
+
+        for (String request : requests) {
+            final var socket = new StubSocket(request);
+            new Http11Processor(socket, manager).process(socket);
+
+            final String id = assertNewSessionCookie(socket.output());
+            assertThat(manager.findSession(id)).isNull();
+        }
+        verify(manager, never()).add(any());
+    }
+
+    @Test
+    void successfulReloginInvalidatesThePreviousAuthenticatedSession() throws IOException {
+        final var firstLogin = new StubSocket(postLoginRequest("account=gugu&password=password"));
+        assertRedirect(firstLogin, "/index.html");
+        final String oldId = assertNewSessionCookie(firstLogin.output());
+        final var previous = sessionManager.findSession(oldId);
+        final var nextLogin = new StubSocket(withCookie(
+                postLoginRequest("account=gugu&password=password"), oldId));
+
+        assertRedirect(nextLogin, "/index.html");
+        final String nextId = assertNewSessionCookie(nextLogin.output());
+
+        assertThat(nextId).isNotEqualTo(oldId);
+        assertThat(sessionManager.findSession(oldId)).isNull();
+        assertThatIllegalStateException().isThrownBy(() -> previous.getAttribute("user"));
+        assertRedirectResponse(getLoginResponse("JSESSIONID=" + nextId), "/index.html");
+    }
+
+    @Test
+    void expiredLoginCookieShowsLoginPageWithoutCreatingAnotherSession() {
+        final Clock clock = mock(Clock.class);
+        final SessionManager manager = new SessionManager(clock);
+        final var login = new StubSocket(postLoginRequest("account=gugu&password=password"));
+        new Http11Processor(login, manager).process(login);
+        final String expiredId = assertNewSessionCookie(login.output());
+        when(clock.millis()).thenReturn(Duration.ofMinutes(30).toMillis());
+        final var revisit = new StubSocket(withCookie(
+                "GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n", expiredId));
+
+        new Http11Processor(revisit, manager).process(revisit);
+
+        assertThat(revisit.output()).startsWith("HTTP/1.1 200 OK");
+        assertThat(revisit.output()).doesNotContain("Location: /index.html");
+        final String replacementId = assertNewSessionCookie(revisit.output());
+        assertThat(replacementId).isNotEqualTo(expiredId);
+        assertThat(manager.findSession(expiredId)).isNull();
+        assertThat(manager.findSession(replacementId)).isNull();
+    }
+
+    @Test
+    void sessionInvalidatedAfterLookupStillShowsLoginPage() throws IOException {
+        final SessionManager manager = managerInvalidatingAfterLookup();
+        final var socket = new StubSocket(withCookie(
+                "GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n", "expired-during-request"));
+
+        new Http11Processor(socket, manager).process(socket);
+
+        assertHtmlResponseBody(socket.output(), "static/login.html");
+        final String id = assertNewSessionCookie(socket.output());
+        assertThat(manager.findSession(id)).isNull();
+    }
+
+    @Test
+    void sessionInvalidatedAfterLookupStillAllowsSuccessfulLogin() {
+        final SessionManager manager = managerInvalidatingAfterLookup();
+        final var socket = new StubSocket(withCookie(
+                postLoginRequest("account=gugu&password=password"), "expired-during-request"));
+
+        new Http11Processor(socket, manager).process(socket);
+
+        assertRedirectResponse(socket.output(), "/index.html");
+        final String id = assertNewSessionCookie(socket.output());
+        assertThat(manager.findSession("expired-during-request")).isNull();
+        assertThat(manager.findSession(id).getAttribute("user"))
+                .isSameAs(InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+    }
+
+    private SessionManager managerInvalidatingAfterLookup() {
+        final SessionManager manager = new SessionManager() {
+            @Override
+            public HttpSession findSession(String id) {
+                final HttpSession session = super.findSession(id);
+                if ("expired-during-request".equals(id) && session != null) {
+                    session.invalidate();
+                }
+                return session;
+            }
+        };
+        final Session session = new Session("expired-during-request", manager);
+        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+        manager.add(session);
+        return manager;
     }
 
     private String getLoginResponse(String cookie) {

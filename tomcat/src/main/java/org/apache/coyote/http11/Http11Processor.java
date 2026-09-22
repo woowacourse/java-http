@@ -73,8 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpSession session = sessionManager.findSession(sessionId);
             String setCookieHeader = "";
             if (session == null) {
-                session = createSession();
-                setCookieHeader = createSessionCookie(session);
+                setCookieHeader = createSessionCookie(UUID.randomUUID().toString());
             }
 
             if ("/register".equals(path) && "POST".equals(method)) {
@@ -108,10 +107,12 @@ public class Http11Processor implements Runnable, Processor {
                                 .orElse(null);
 
                 if (user != null) {
-                    session.invalidate();
+                    if (session != null) {
+                        invalidateSession(session);
+                    }
                     session = createSession();
                     session.setAttribute("user", user);
-                    setCookieHeader = createSessionCookie(session);
+                    setCookieHeader = createSessionCookie(session.getId());
                     log.info("회원 조회 성공: {}", account);
                 }
 
@@ -120,10 +121,14 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if ("GET".equals(method) && "/login".equals(path)
-                    && session.getAttribute("user") instanceof User) {
-                writeRedirect(outputStream, "/index.html", setCookieHeader);
-                return;
+            if ("GET".equals(method) && "/login".equals(path)) {
+                if (isLoggedIn(session)) {
+                    writeRedirect(outputStream, "/index.html", setCookieHeader);
+                    return;
+                }
+                if (session != null) {
+                    setCookieHeader = createSessionCookie(UUID.randomUUID().toString());
+                }
             }
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
@@ -164,14 +169,33 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean isLoggedIn(HttpSession session) {
+        if (session == null) {
+            return false;
+        }
+        try {
+            return session.getAttribute("user") instanceof User;
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
+
+    private void invalidateSession(HttpSession session) {
+        try {
+            session.invalidate();
+        } catch (IllegalStateException e) {
+            log.debug("이미 무효화된 세션입니다.");
+        }
+    }
+
     private HttpSession createSession() {
         final HttpSession session = new Session(UUID.randomUUID().toString(), sessionManager);
         sessionManager.add(session);
         return session;
     }
 
-    private String createSessionCookie(HttpSession session) {
-        return "Set-Cookie: JSESSIONID=" + session.getId() + "; Path=/\r\n";
+    private String createSessionCookie(String sessionId) {
+        return "Set-Cookie: JSESSIONID=" + sessionId + "; Path=/\r\n";
     }
 
     private String findSessionId(String cookieHeader) {

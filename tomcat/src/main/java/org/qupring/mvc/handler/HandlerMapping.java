@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.HttpMethod;
-import org.qupring.annotation.Route;
+import org.qupring.mvc.annotation.Route;
 
 public class HandlerMapping {
 

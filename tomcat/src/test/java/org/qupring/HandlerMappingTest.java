@@ -5,7 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.util.List;
 import org.apache.http.HttpMethod;
 import org.junit.jupiter.api.Test;
-import org.qupring.annotation.Route;
+import org.qupring.mvc.annotation.Route;
 import org.qupring.mvc.handler.HandlerMapping;
 import org.qupring.mvc.handler.MappingTarget;
 

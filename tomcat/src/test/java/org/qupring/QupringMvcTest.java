@@ -11,7 +11,7 @@ import org.apache.http.response.HttpResponse;
 import org.apache.http.response.HttpTomcatResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.qupring.annotation.Route;
+import org.qupring.mvc.annotation.Route;
 import org.qupring.file.HtmlReader;
 import org.qupring.mvc.QupringMvc;
 import org.qupring.mvc.handler.HandlerMapping;

@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,16 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> headers = readHeaders(reader);
 
+            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+            String sessionId = cookie.get("JSESSIONID");
+            boolean newSession = !cookie.contains("JSESSIONID");
+
+            String setCookieHeader = "";
+            if (newSession) {
+                sessionId = UUID.randomUUID().toString();
+                setCookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
+            }
+
             String requestBody = "";
             if (method.equals("POST")) {
                 String contentLengthHeader = headers.get("Content-Length");
@@ -80,12 +91,12 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (redirectLocation != null) {
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: " + redirectLocation,
-                        "Content-Length: 0",
-                        "",
-                        "");
+                final var response =
+                        "HTTP/1.1 302 Found\r\n"
+                                + "Location: " + redirectLocation + "\r\n"
+                                + setCookieHeader
+                                + "Content-Length: 0\r\n"
+                                + "\r\n";
 
                 outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
@@ -95,12 +106,12 @@ public class Http11Processor implements Runnable, Processor {
             byte[] responseBody = readResponseBody(path);
             String contentType = resolveContentType(path);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + "charset=utf-8 ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    "");
+            final var response =
+                    "HTTP/1.1 200 OK\r\n"
+                            + setCookieHeader
+                            + "Content-Type: " + contentType + "charset=utf-8\r\n"
+                            + "Content-Length: " + responseBody.length + "\r\n"
+                            + "\r\n";
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.write(responseBody);

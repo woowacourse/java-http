@@ -4,8 +4,8 @@ import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.FormContents;
+import org.apache.coyote.http11.HttpHeaders;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class HttpRequest {
@@ -13,21 +13,33 @@ public class HttpRequest {
     private static final String COOKIE_HEADER = "Cookie";
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final HttpHeaders headers;
     private final byte[] body;
     private final FormContents formContents;
     private final Cookies cookies;
 
-    public HttpRequest(RequestLine requestLine, Map<String, String> headers) {
-        this(requestLine, headers, null);
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers) {
+        this(requestLine, headers, new byte[0]);
     }
 
-    public HttpRequest(RequestLine requestLine, Map<String, String> headers, byte[] body) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, byte[] body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.formContents = FormContents.of(headers.get(CONTENT_TYPE_HEADER), body);
-        this.cookies = Cookies.from(headers.get(COOKIE_HEADER));
+        this.formContents = retrieveFormContents(headers, body);
+        this.cookies = retrieveCookies(headers);
+    }
+
+    private static FormContents retrieveFormContents(HttpHeaders headers, byte[] body) {
+        String contentTypeValue = headers.get(CONTENT_TYPE_HEADER)
+                .orElse("");
+        return FormContents.of(contentTypeValue, body);
+    }
+
+    private static Cookies retrieveCookies(HttpHeaders headers) {
+        String cookiePairs = headers.get(COOKIE_HEADER)
+                .orElse("");
+        return Cookies.from(cookiePairs);
     }
 
     public String getPath() {

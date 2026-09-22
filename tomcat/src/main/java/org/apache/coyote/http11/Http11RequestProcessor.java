@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 public class Http11RequestProcessor {
@@ -22,16 +23,12 @@ public class Http11RequestProcessor {
 
     public HttpRequest process() throws IOException {
         RequestLine requestLine = RequestLine.from(readLine());
-        Map<String, String> headers = readHeaders();
-        String contentLength = headers.get("Content-Length");
+        HttpHeaders headers = readHeaders();
 
-        if (contentLength == null) {
-            return new HttpRequest(requestLine, headers);
-        }
-        return new HttpRequest(requestLine, headers, readBody(Integer.parseInt(contentLength)));
+        return new HttpRequest(requestLine, headers, readBody(headers.getContentLength()));
     }
 
-    private Map<String, String> readHeaders() throws IOException {
+    private HttpHeaders readHeaders() throws IOException {
         Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         String line;
 
@@ -39,7 +36,7 @@ public class Http11RequestProcessor {
             int separatorIndex = line.indexOf(':');
             headers.put(line.substring(0, separatorIndex).strip(), line.substring(separatorIndex + 1).strip());
         }
-        return headers;
+        return new HttpHeaders(headers);
     }
 
     private String readLine() throws IOException {

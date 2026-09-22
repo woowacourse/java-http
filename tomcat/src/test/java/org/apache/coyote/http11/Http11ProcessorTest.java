@@ -226,7 +226,7 @@ class Http11ProcessorTest {
         }
 
         @Test
-        void post_failure() throws IOException {
+        void post_failure1() throws IOException {
             // given
             final String httpRequest= String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -238,6 +238,40 @@ class Http11ProcessorTest {
                 SESSION_COOKIE,
                 "",
                 "account=gugu&password=passwor");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/401.html");
+            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            String expected = String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Location: /401.html ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 2426 ",
+                "",
+                body);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @Test
+        void post_failure2() throws IOException {
+            // given
+            final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept : */*",
+                SESSION_COOKIE,
+                "",
+                "account=emptyuser&password=password");
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

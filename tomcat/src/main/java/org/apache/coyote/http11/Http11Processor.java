@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import org.apache.coyote.Processor;
@@ -182,9 +183,11 @@ public class Http11Processor implements Runnable, Processor {
     private Response handlePostLogin(final Request request, final SessionContext sessionContext) {
         final LoginRequest loginRequest = parseLoginRequest(request.requestBody());
         final Session session = sessionContext.session();
-        final User user = InMemoryUserRepository.findByAccount(loginRequest.account())
-            .orElseThrow();
-        if (user.checkPassword(loginRequest.password())) {
+        final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
+            .filter(foundUser -> foundUser.checkPassword(loginRequest.password()));
+
+        if (filteredUser.isPresent()) {
+            final User user = filteredUser.get();
             log.info("user: {}", user);
             session.addAttribute("user", user);
             return Response.found("/index.html", "/index.html");

@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
 public enum HttpStatus {
-    OK(200, "Ok"),
+    OK(200, "OK"),
     FOUND(302, "Found"),
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     ;
 
-    private int code;
-    private String reasonPhrase;
+    private final int code;
+    private final String reasonPhrase;
 
     private HttpStatus(int code, String reasonPhrase) {
         this.code = code;
@@ -17,6 +17,6 @@ public enum HttpStatus {
 
     @Override
     public String toString() {
-        return code + " " + name();
+        return code + " " + reasonPhrase;
     }
 }

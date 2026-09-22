@@ -24,6 +24,22 @@ import support.StubSocket;
 @DisplayName("HTTP/1.1 요청 처리")
 class Http11ProcessorTest {
 
+    @Test
+    @DisplayName("요청 형식이 잘못되면 400 Bad Request를 반환한다")
+    void respondsWithBadRequestWhenRequestIsMalformed() {
+        // given
+        final var socket = new StubSocket("INVALID\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 400 Bad Request")
+                .doesNotContain("Set-Cookie");
+    }
+
     @Nested
     @DisplayName("쿠키")
     class CookieTest {
@@ -176,7 +192,7 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output())
-                    .contains("HTTP/1.1 302 FOUND")
+                    .contains("HTTP/1.1 302 Found")
                     .contains("Location: /index.html");
             assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
         }
@@ -238,7 +254,7 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output())
-                    .contains("HTTP/1.1 302 FOUND")
+                    .contains("HTTP/1.1 302 Found")
                     .contains("Location: /index.html");
         }
 
@@ -287,7 +303,7 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output())
-                    .contains("HTTP/1.1 302 FOUND")
+                    .contains("HTTP/1.1 302 Found")
                     .contains("Location: /401.html");
         }
 
@@ -311,7 +327,7 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output())
-                    .contains("HTTP/1.1 302 FOUND")
+                    .contains("HTTP/1.1 302 Found")
                     .contains("Location: /index.html");
         }
 

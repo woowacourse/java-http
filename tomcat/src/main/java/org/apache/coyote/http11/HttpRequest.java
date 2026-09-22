@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.reflections.Reflections.log;
-
 import com.techcourse.exception.UncheckedServletException;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
@@ -10,11 +8,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
 final class HttpRequest {
+
     private static final String JSESSIONID = "JSESSIONID";
 
     private final String method;
@@ -39,31 +39,39 @@ final class HttpRequest {
         this.manager = manager;
     }
 
-    static HttpRequest from(final BufferedReader reader, final Manager manager) {
+    static HttpRequest from(final BufferedReader reader, final Manager manager) throws IOException {
+        List<String> headerLines = readHeaderLines(reader);
+        HttpHeaders headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
+        String body = readBody(reader, headers);
+        return of(headerLines.getFirst(), headers, body, manager);
+    }
+
+    @Nonnull
+    private static String readBody(BufferedReader reader, HttpHeaders headers) throws IOException {
+        String body = "";
+
+        final int contentLength = headers.getFirst("Content-Length")
+                .map(Integer::parseInt)
+                .orElse(0);
+        if (contentLength > 0) {
+            char[] bodyBuffer = new char[contentLength];
+            int read = reader.read(bodyBuffer, 0, contentLength);
+            if (read != contentLength) {
+                throw new InvalidHttpRequestException("Invalid Content-Length: " + contentLength);
+            }
+            body = new String(bodyBuffer);
+        }
+        return body;
+    }
+
+    @Nonnull
+    private static List<String> readHeaderLines(BufferedReader reader) throws IOException {
         String line;
         List<String> headerLines = new ArrayList<>();
-        String body = "";
-        HttpHeaders headers = new HttpHeaders();
-
-        try {
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                headerLines.add(line);
-            }
-
-            headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
-            final int contentLength = headers.getFirst("Content-Length")
-                    .map(Integer::parseInt)
-                    .orElse(0);
-            if (contentLength > 0) {
-                char[] bodyBuffer = new char[contentLength];
-                reader.read(bodyBuffer, 0, contentLength);
-                body = new String(bodyBuffer);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            headerLines.add(line);
         }
-
-        return of(headerLines.getFirst(), headers, body, manager);
+        return headerLines;
     }
 
     static HttpRequest from(final List<String> headerLines) {
@@ -84,6 +92,9 @@ final class HttpRequest {
                                   final String body,
                                   final Manager manager) {
         final String[] requestLineParts = requestLine.split(" ", 3);
+        if (requestLineParts.length != 3) {
+            throw new InvalidHttpRequestException("Invalid request line: " + requestLine);
+        }
         final URI uri = URI.create(requestLineParts[1]);
         final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
 

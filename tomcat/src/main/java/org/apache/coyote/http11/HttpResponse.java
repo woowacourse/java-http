@@ -19,9 +19,8 @@ final class HttpResponse {
         headers.add("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 
-    HttpResponse addHeader(final String name, final String value) {
-        headers.add(name, value);
-        return this;
+    static HttpResponse badRequest(String message) {
+        return new HttpResponse(HttpStatus.BAD_REQUEST, "text/plain", message);
     }
 
     static HttpResponse ok(final String contentType, final String body) {
@@ -29,8 +28,13 @@ final class HttpResponse {
     }
 
     static HttpResponse redirect(final String location) {
-        return new HttpResponse(HttpStatus.FOUND, HTML_CONTENT_TYPE, " ")
+        return new HttpResponse(HttpStatus.FOUND, HTML_CONTENT_TYPE, "")
                 .addHeader("Location", location);
+    }
+
+    HttpResponse addHeader(final String name, final String value) {
+        headers.add(name, value);
+        return this;
     }
 
     public byte[] toBytes() {

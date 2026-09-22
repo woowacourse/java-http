@@ -56,14 +56,22 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final HttpRequest request = HttpRequest.from(reader, manager);
 
-            final HttpResponse response = addSessionCookieIfMissing(request, getResponse(request));
+            final HttpResponse response = dispatch(reader);
 
             outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse dispatch(BufferedReader reader) throws IOException {
+        try {
+            final HttpRequest request = HttpRequest.from(reader, manager);
+            return addSessionCookieIfMissing(request, getResponse(request));
+        } catch (InvalidHttpRequestException e) {
+            return HttpResponse.badRequest(e.getMessage());
         }
     }
 

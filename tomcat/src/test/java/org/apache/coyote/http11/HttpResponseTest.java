@@ -18,7 +18,7 @@ class HttpResponseTest {
 
         // then
         assertThat(actual)
-                .contains("HTTP/1.1 302 FOUND")
+                .contains("HTTP/1.1 302 Found")
                 .contains("Location: /index.html");
     }
 

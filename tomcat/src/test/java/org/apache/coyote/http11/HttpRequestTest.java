@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
@@ -14,6 +15,73 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
+
+    @Test
+    @DisplayName("요청이 비어 있으면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenRequestIsEmpty() {
+        // given
+        final BufferedReader reader = new BufferedReader(new StringReader(""));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("Content-Length가 숫자가 아니면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenContentLengthIsNotNumeric() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: invalid",
+                "",
+                "account=gugu"
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("요청 대상 URI 형식이 잘못되면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenRequestTargetIsMalformed() {
+        // given
+        final BufferedReader reader = new BufferedReader(new StringReader("GET /%zz HTTP/1.1\r\n\r\n"));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("요청 라인 형식이 잘못되면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenRequestLineIsMalformed() {
+        // given
+        final BufferedReader reader = new BufferedReader(new StringReader("INVALID\r\n\r\n"));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("요청을 읽는 중 발생한 IOException은 그대로 전달한다")
+    void propagatesIOExceptionWhenReadingRequestFails() {
+        // given
+        final IOException expected = new IOException("요청 읽기 실패");
+        final BufferedReader reader = new BufferedReader(new StringReader("")) {
+            @Override
+            public String readLine() throws IOException {
+                throw expected;
+            }
+        };
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isSameAs(expected);
+    }
 
     @Test
     @DisplayName("HTTP 메서드와 경로가 모두 일치할 때만 요청이 일치한다")
@@ -45,7 +113,7 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("Content-Length 헤더 이름의 대소문자와 관계없이 요청 본문을 읽는다")
-    void readsBodyIgnoringContentLengthHeaderCase() {
+    void readsBodyIgnoringContentLengthHeaderCase() throws IOException {
         // given
         final String body = "account=gugu&password=password";
         final String rawRequest = String.join("\r\n",

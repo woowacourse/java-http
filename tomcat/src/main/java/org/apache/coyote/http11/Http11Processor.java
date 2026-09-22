@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,13 +22,15 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, String> CONTENT_TYPE = Map.of("html", "text/html", "css", "text/css", "js", "application/javascript");
+    private static final Map<String, String> CONTENT_TYPE = Map.of("html", "text/html", "css", "text/css", "js",
+            "application/javascript");
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String STATIC_ROOT = "static";
     private static final String DEFAULT_REQUEST = "/";
     private static final String LOGIN_REQUEST = "/login";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
 
     private final Socket connection;
@@ -49,7 +52,8 @@ public class Http11Processor implements Runnable, Processor {
              final var inputReader = new InputStreamReader(inputStream);
              final var reader = new BufferedReader(inputReader)) {
 
-            String requestUri = reader.readLine().split(" ")[1];
+            String line = reader.readLine();
+            String requestUri = line.split(" ")[1];
 
             String[] uriParts = requestUri.split("\\?");
             requestUri = uriParts[0];
@@ -63,9 +67,23 @@ public class Http11Processor implements Runnable, Processor {
             if (requestUri.equals(DEFAULT_REQUEST)) {
                 requestUri = INDEX_PAGE;
             }
+
             if (requestUri.equals(LOGIN_REQUEST)) {
-                requestUri = LOGIN_PAGE;
-                login(queryParams);
+                if (queryParams.isEmpty()) {
+                    requestUri = LOGIN_PAGE;
+                } else {
+                    Optional<User> user = login(queryParams);
+                    String response;
+                    if (user.isPresent()) {
+                        response = makeRedirectResponse(INDEX_PAGE);
+                    } else {
+                        response = makeRedirectResponse(UNAUTHORIZED_PAGE);
+                    }
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
             }
 
             URL url = getClass().getClassLoader().getResource(STATIC_ROOT + requestUri);
@@ -101,17 +119,19 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private void login(Map<String, String> queryParams) {
+    private Optional<User> login(Map<String, String> queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         if (account == null || password == null) {
-            return;
+            return Optional.empty();
         }
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("회원 조회 결과: user={}", user.get());
+            return user;
         }
+        return Optional.empty();
     }
 
     private String makeResponse(HttpStatus status, String resourcePath) throws IOException, URISyntaxException {
@@ -123,6 +143,11 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Type: " + CONTENT_TYPE.getOrDefault(extension, "text/html") + ";charset=utf-8 \r\n" +
                 "Content-Length: " + getContentLength(responseBody) + " \r\n\r\n" +
                 responseBody;
+    }
+
+    private String makeRedirectResponse(String locationAddress) {
+        return HTTP_VERSION + " " + HttpStatus.FOUND.getCode() + " " + HttpStatus.FOUND.getReasonPhrase() + " \r\n" +
+                "Location: " + locationAddress + " \r\n\r\n";
     }
 
     private String getExtension(String resourcePath) {

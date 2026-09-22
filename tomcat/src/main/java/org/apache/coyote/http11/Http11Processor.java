@@ -72,7 +72,14 @@ public class Http11Processor implements Runnable, Processor {
             if ("POST".equals(requestMethod)) {
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
+                int totalRead = 0;
+                while (totalRead < contentLength) {
+                    final int read = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
+                    if (read == -1) {
+                        throw new IOException("[ERROR] 요청 본문이 Content-Length보다 짧습니다.");
+                    }
+                    totalRead += read;
+                }
                 rawParams = new String(buffer);
             } else {
                 rawParams = queryString;

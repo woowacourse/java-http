@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -57,8 +57,12 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.create("200 OK", "text/html", "Hello world!");
         }
 
+        if (httpRequest.isGetMethod() && httpRequest.isPath("/login") && isLoggedIn(httpRequest)) {
+            return HttpResponse.redirect("/index.html");
+        }
+
         if (httpRequest.isPostMethod() && httpRequest.isPath("/login")) {
-            return createLoginResponse(httpRequest);
+            return handleLoginRequest(httpRequest);
         }
 
         if (httpRequest.isPostMethod() && httpRequest.isPath("/register")) {
@@ -93,35 +97,55 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private HttpResponse createLoginResponse(HttpRequest httpRequest) {
-        if (!handleLogin(httpRequest)) {
+    private HttpResponse handleLoginRequest(HttpRequest httpRequest) {
+        User user = authenticateUser(httpRequest);
+        if (user == null) {
             return HttpResponse.redirect("/401.html");
         }
 
-        if (httpRequest.getCookie().contains("JSESSIONID")) {
-            return HttpResponse.redirect("/index.html");
-        }
-
-        return HttpResponse.redirectWithCookie(
-                "/index.html",
-                "JSESSIONID=" + UUID.randomUUID()
-        );
+        Session session = saveLoginSession(httpRequest, user);
+        return createLoginSuccessResponse(httpRequest, session);
     }
 
-    private boolean handleLogin(HttpRequest httpRequest) {
+    private User authenticateUser(HttpRequest httpRequest) {
         Map<String, String> body = parseBody(httpRequest.getBody());
         String account = body.get("account");
         String password = body.get("password");
 
         if (account == null || password == null) {
-            return false;
+            return null;
         }
+
         User user = InMemoryUserRepository.findByAccount(account).orElse(null);
-        if (user != null && user.checkPassword(password)) {
-            log.info(user.toString());
-            return true;
+        if (user == null || !user.checkPassword(password)) {
+            return null;
         }
-        return false;
+
+        log.info(user.toString());
+        return user;
+    }
+
+    private Session saveLoginSession(HttpRequest httpRequest, User user) {
+        Session session = httpRequest.getSession(true);
+        session.setAttribute("user", user);
+        return session;
+    }
+
+    private HttpResponse createLoginSuccessResponse(HttpRequest httpRequest, Session session) {
+        String requestedSessionId = httpRequest.getCookie().getValue("JSESSIONID");
+        if (session.getId().equals(requestedSessionId)) {
+            return HttpResponse.redirect("/index.html");
+        }
+
+        return HttpResponse.redirectWithCookie(
+                "/index.html",
+                "JSESSIONID=" + session.getId()
+        );
+    }
+
+    private boolean isLoggedIn(HttpRequest httpRequest) {
+        Session session = httpRequest.getSession(false);
+        return session != null && session.getAttribute("user") != null;
     }
 
     private HttpResponse createRegisterResponse(HttpRequest httpRequest) {

@@ -2,10 +2,9 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.UUID;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 
@@ -17,18 +16,20 @@ public class HttpRequest {
     private final String version;
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
+    private final SessionManager sessionManager;
 
     private HttpRequest(HttpMethod method, String uri, String query, String version,
-                        HttpRequestHeader header, HttpRequestBody body) {
+                        HttpRequestHeader header, HttpRequestBody body, SessionManager sessionManager) {
         this.method = method;
         this.uri = uri;
         this.query = query;
         this.version = version;
         this.header = header;
         this.body = body;
+        this.sessionManager = sessionManager;
     }
 
-    public static HttpRequest from(BufferedReader reader) throws IOException {
+    public static HttpRequest from(BufferedReader reader, SessionManager sessionManager) throws IOException {
         String startLine = reader.readLine();
         String[] tokens = startLine.split(" ");
         HttpMethod method = HttpMethod.valueOf(tokens[0]);
@@ -41,7 +42,7 @@ public class HttpRequest {
         String uri = parseUri(rawPath);
         String query = parseQuery(rawPath);
 
-        return new HttpRequest(method, uri, query, version, header, body);
+        return new HttpRequest(method, uri, query, version, header, body, sessionManager);
     }
 
     public String getCookie(String key) {
@@ -51,12 +52,11 @@ public class HttpRequest {
     public Session getSession(boolean create) {
         String jsessionid = getCookie("JSESSIONID");
         if(create && !hasSession()) {
-            UUID uuid = UUID.randomUUID();
-            Session session = new Session(uuid.toString());
-            SessionManager.add(session);
+            Session session = new Session(sessionManager);
+            sessionManager.add(session);
             return session;
         }
-        return SessionManager.findSession(jsessionid);
+        return sessionManager.findSession(jsessionid);
     }
 
     public boolean hasSession() {
@@ -64,7 +64,7 @@ public class HttpRequest {
         if (jsessionid == null || jsessionid.isEmpty()) {
            return false;
         }
-        Session session = SessionManager.findSession(jsessionid);
+        Session session = sessionManager.findSession(jsessionid);
 
         return session != null;
     }

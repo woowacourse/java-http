@@ -11,7 +11,7 @@ import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.resolver.View;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 
 public class LoginController extends AbstractController {
 

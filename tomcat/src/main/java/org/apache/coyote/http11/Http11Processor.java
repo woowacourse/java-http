@@ -8,7 +8,8 @@ import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.Socket;
@@ -18,9 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequest request = HttpRequest.from(reader);
+            HttpRequest request = HttpRequest.from(reader, sessionManager);
             HttpResponse response = new HttpResponse();
 
             Controller controller = RequestMapping.getController(request.getUri());

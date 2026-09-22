@@ -30,7 +30,7 @@ public class HttpResponse {
                 body = resourceStream.readAllBytes();
             }
             headers.put("Content-Type", contentType(url));
-            headers.put("Content-Length", body.length + "");
+            headers.put("Content-Length", body.length + " ");
             response200Header(body.length);
             responseBody(body);
         } catch (IOException e) {
@@ -40,7 +40,7 @@ public class HttpResponse {
 
     public void sendRedirect(String redirectUrl) {
         try {
-            dos.writeBytes("HTTP 302 Found \r\n");
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
             processHeaders();
             dos.writeBytes("Location: " + redirectUrl + "\r\n");
             dos.writeBytes("\r\n");
@@ -62,7 +62,6 @@ public class HttpResponse {
     private void responseBody(byte[] body) {
         try {
             dos.write(body, 0, body.length);
-            dos.writeBytes("\r\n");
             dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

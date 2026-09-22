@@ -12,7 +12,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        response.forward("/register");
+        response.forward("/register.html");
     }
 
     @Override

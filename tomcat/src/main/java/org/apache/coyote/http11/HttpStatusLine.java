@@ -3,10 +3,10 @@ package org.apache.coyote.http11;
 public record HttpStatusLine(
         String httpVersion,
         int statusCode,
-        String reason
+        String statusMessage
 ) {
     @Override
     public String toString() {
-        return httpVersion + " " + statusCode + " " + reason;
+        return httpVersion + " " + statusCode + " " + statusMessage;
     }
 }

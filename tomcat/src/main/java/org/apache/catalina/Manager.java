@@ -1,7 +1,6 @@
 package org.apache.catalina;
 
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 
 /**
@@ -38,7 +37,7 @@ public interface Manager {
      * @param id The session id for the session to be returned
      *
      * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
+     *  instantiated for any statusMessage
      * @exception IOException if an input/output error occurs while
      *  processing this request
      *

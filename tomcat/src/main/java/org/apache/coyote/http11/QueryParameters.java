@@ -15,6 +15,10 @@ final class QueryParameters {
         this.values = Collections.unmodifiableMap(values);
     }
 
+    static QueryParameters empty() {
+        return new QueryParameters(Collections.emptyMap());
+    }
+
     static QueryParameters from(final String rawQuery) {
         if (rawQuery == null || rawQuery.isEmpty()) {
             return new QueryParameters(Collections.emptyMap());
@@ -34,15 +38,15 @@ final class QueryParameters {
         return new QueryParameters(values);
     }
 
+    private static String decode(final String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
     Optional<String> get(final String name) {
         return Optional.ofNullable(values.get(name));
     }
 
     boolean isEmpty() {
         return values.isEmpty();
-    }
-
-    private static String decode(final String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

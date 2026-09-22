@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 public class HttpRequest {
 
-    private final String ALLOWED_METHOD = "GET";
+    private final Set<String> ALLOWED_METHOD = Set.of("GET", "POST");
     private final String ALLOWED_VERSION = "HTTP/1.1";
     private static final String ROOT_PATH = "/";
     private static final String STATIC_TARGET_PATH = "static";
@@ -15,64 +22,107 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> queryParameters;
     private final String version;
+    private final Map<String, String> httpRequestHeaders;
+    private final Map<String, String> httpRequestBody;
 
-    private HttpRequest(String method, String path, Map<String, String> queryParameters, String version) {
+    private HttpRequest(String method, String path, Map<String, String> queryParameters,
+                        String version, Map<String, String> httpRequestHeaders, Map<String, String> httpRequestBody) {
         validate(method, version);
         this.method = method;
         this.path = path;
         this.queryParameters = queryParameters;
         this.version = version;
+        this.httpRequestHeaders = httpRequestHeaders;
+        this.httpRequestBody = httpRequestBody;
     }
 
-    public static HttpRequest from(String startLine) {
-        StringTokenizer stringTokenizer = new StringTokenizer(startLine, " ");
+    public static HttpRequest from(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line = bufferedReader.readLine();
+        StringTokenizer stringTokenizer = new StringTokenizer(line, " ");
         String method = stringTokenizer.nextToken();
         String requestUri = stringTokenizer.nextToken();
         String version = stringTokenizer.nextToken();
+        Map<String, String> httpRequestHeaders = new HashMap<>();
 
-        int index = requestUri.indexOf("?");
-        if (index == -1) {
-            return new HttpRequest(method, requestUri, Map.of(), version);
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
+            String[] header = line.split(": ");
+            httpRequestHeaders.put(header[0], header[1]);
         }
-        String path = requestUri.substring(0, index);
-        Map<String, String> queryParameters = parseQueryParameters(requestUri.substring(index + 1));
-        return new HttpRequest(method, path, queryParameters, version);
+        if (method.equals("GET")) {
+            return createGetRequest(method, requestUri, version, httpRequestHeaders);
+        }
+        return createPostRequest(method, requestUri, version, httpRequestHeaders, bufferedReader);
     }
 
     public boolean isRoot() {
         return ROOT_PATH.equals(path);
     }
 
-    public boolean hasParameters(String... names) {
+    public boolean hasBodyParameters(String ... names) {
         for (String name : names) {
-            if (!queryParameters.containsKey(name)) {
+            if (!httpRequestBody.containsKey(name)) {
                 return false;
             }
         }
         return true;
     }
 
-    public String getParameter(String key) {
-        return queryParameters.get(key);
+    public String getBodyParameter(String key) {
+        return httpRequestBody.get(key);
     }
 
     public String getResourcePath() {
         return STATIC_TARGET_PATH + path;
     }
 
-    public boolean isLoginRequest() {
+    public boolean isGetLoginRequest() {
         return "GET".equals(method) && "/login".equals(path);
     }
 
-    private static Map<String, String> parseQueryParameters(String queryString) {
+    public boolean isGetRegisterRequest() {
+        return "GET".equals(method) && "/register".equals(path);
+    }
+
+    public boolean isPostLoginRequest() {
+        return "POST".equals(method) && "/login".equals(path);
+    }
+
+    public boolean isPostRegisterRequest() {
+        return "POST".equals(method) && "/register".equals(path);
+    }
+
+    private static HttpRequest createGetRequest(
+            String method, String requestUri, String version, Map<String, String> httpRequestHeaders) {
+        int index = requestUri.indexOf("?");
+        if (index == -1) {
+            return new HttpRequest(method, requestUri, Map.of(), version, httpRequestHeaders, Map.of());
+        }
+        String path = requestUri.substring(0, index);
+        Map<String, String> queryParameters = parseParameters(requestUri.substring(index + 1));
+        return new HttpRequest(method, path, queryParameters, version, httpRequestHeaders, Map.of());
+    }
+
+    private static HttpRequest createPostRequest(
+            String method, String requestUri, String version,
+            Map<String, String> httpRequestHeaders, BufferedReader bufferedReader) throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return new HttpRequest(
+                method, requestUri, Map.of(), version, httpRequestHeaders, parseParameters(requestBody));
+    }
+
+    private static Map<String, String> parseParameters(String queryString) {
         Map<String, String> queryParameters = new HashMap<>();
         StringTokenizer stringTokenizer = new StringTokenizer(queryString, "&");
 
         while (stringTokenizer.hasMoreTokens()) {
             String parameter = stringTokenizer.nextToken();
             int index = parameter.indexOf("=");
-            String key = parameter.substring(0, index);
-            String value = parameter.substring(index + 1);
+            String key = URLDecoder.decode(parameter.substring(0, index), StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(parameter.substring(index + 1), StandardCharsets.UTF_8);
             queryParameters.put(key, value);
         }
         return queryParameters;
@@ -84,7 +134,7 @@ public class HttpRequest {
     }
 
     private void validateMethod(String method) {
-        if (ALLOWED_METHOD.equals(method)) {
+        if (ALLOWED_METHOD.contains(method)) {
             return;
         }
         throw new IllegalArgumentException("400 지원하지 않는 HTTP 메서드입니다: " + method);

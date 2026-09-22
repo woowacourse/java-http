@@ -7,10 +7,8 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -37,11 +35,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var outputStream = connection.getOutputStream()) {
 
-            String requestStartLine = bufferedReader.readLine();
-            HttpRequest httpRequest = HttpRequest.from(requestStartLine);
+            HttpRequest httpRequest = HttpRequest.from(inputStream);
             HttpResponse response = createResponse(httpRequest);
             response.writeTo(outputStream);
 
@@ -59,11 +55,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResourceResponse(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isLoginRequest() && httpRequest.hasParameters("account", "password")) {
+        if (httpRequest.isPostLoginRequest()) {
             return createLoginResponse(httpRequest);
         }
+        if (httpRequest.isPostRegisterRequest()) {
+            return createRegisterResponse(httpRequest);
+        }
         String resourcePath = httpRequest.getResourcePath();
-        if (httpRequest.isLoginRequest()) {
+        if (httpRequest.isGetLoginRequest() || httpRequest.isGetRegisterRequest()) {
             resourcePath += ".html";
         }
         URL resource = getClass().getClassLoader().getResource(resourcePath);
@@ -75,19 +74,35 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.ok(getContentType(resource.getPath()), body);
     }
 
-    private HttpResponse createLoginResponse(HttpRequest httpRequest) throws IOException {
-        Optional<User> userOpt = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
+    private HttpResponse createLoginResponse(HttpRequest httpRequest) {
+        if (!httpRequest.hasBodyParameters("account", "password")) {
+            return HttpResponse.found("401.html", "", new byte[0]);
+        }
+        Optional<User> userOpt = InMemoryUserRepository.findByAccount(httpRequest.getBodyParameter("account"));
         if (userOpt.isEmpty()) {
             return HttpResponse.found("/401.html", "", new byte[0]);
         }
 
         User user = userOpt.get();
-        String password = httpRequest.getParameter("password");
+        String password = httpRequest.getBodyParameter("password");
         if (password != null && user.checkPassword(password)) {
-            log.info(user.toString());
+            log.info("로그인 성공! 아이디: {}", user.getAccount());
             return HttpResponse.found("/index.html", "", new byte[0]);
         }
         return HttpResponse.found("/401.html", "", new byte[0]);
+    }
+
+    private HttpResponse createRegisterResponse(HttpRequest httpRequest) {
+        if (!httpRequest.hasBodyParameters("account", "password", "email")) {
+            return HttpResponse.found("/401.html", "", new byte[0]);
+        }
+        String account = httpRequest.getBodyParameter("account");
+        String password = httpRequest.getBodyParameter("password");
+        String email = httpRequest.getBodyParameter("email");
+        User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+        return HttpResponse.found("/index.html", "", new byte[0]);
     }
 
     private HttpResponse createNotFoundResponse() throws IOException {

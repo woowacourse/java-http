@@ -1,6 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import org.apache.coyote.HttpMethod;
+import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.FormContents;
 
 import java.util.Map;
 import java.util.Optional;

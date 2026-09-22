@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
+
+import org.apache.coyote.http11.InvalidRequestException;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +32,7 @@ public class RequestUri {
         }
         final String path = uri.substring(0, queryIndex);
         final String queryString = uri.substring(queryIndex + 1);
-        return new RequestUri(path, parseQueryString(queryString));
+        return new RequestUri(decodePath(path), parseQueryString(queryString));
     }
 
     private static Map<String, String> parseQueryString(final String queryString) {
@@ -64,6 +66,10 @@ public class RequestUri {
         } catch (IllegalArgumentException e) {
             throw new InvalidRequestException("잘못된 인코딩입니다: " + path, e);
         }
+    }
+
+    public boolean hasQueryParameters() {
+        return !queryParameters.isEmpty();
     }
 
     public String getPath() {

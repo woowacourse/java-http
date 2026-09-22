@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
+
+import org.apache.coyote.http11.InvalidRequestException;
 
 import java.util.Optional;
 
@@ -42,6 +44,10 @@ public class RequestLine {
 
     public String getPath() {
         return requestUri.getPath();
+    }
+
+    public boolean hasQueryParameters() {
+        return requestUri.hasQueryParameters();
     }
 
     public Optional<String> getQueryParameter(final String name) {

@@ -5,12 +5,12 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,16 +40,19 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String[] requestParts = extractRequestParts(inputStream);
+            String[] requestMessage = extractRequestMessage(bufferedReader);
+            final Map<String, String> headers = extractHeaders(bufferedReader);
+            String body = extractRequestBody(bufferedReader, headers);
 
-            String method = requestParts[0];
-            String requestTarget = requestParts[1];
+            String method = requestMessage[0];
+            String requestTarget = requestMessage[1];
             String requestPath = extractRequestPath(requestTarget);
             Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            Optional<String> redirectPath = dispatchRequest(method, requestPath, queryParameters);
+            Optional<String> redirectPath = dispatchRequest(method, requestPath, queryParameters, body);
             if (redirectPath.isPresent()) {
                 outputStream.write(createRedirectResponse(redirectPath.get()).getBytes());
                 outputStream.flush();
@@ -69,6 +72,17 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+        final String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return "";
+        }
+        final char[] buffer = new char[Integer.parseInt(contentLength)];
+        bufferedReader.read(buffer);
+        return new String(buffer);
+    }
+
     private String createHeader(String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -93,11 +107,37 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private Optional<String> dispatchRequest(String method, String requestPath, Map<String, String> queryParameters) {
+    private Optional<String> dispatchRequest(
+            String method,
+            String requestPath,
+            Map<String, String> queryParameters,
+            String body) {
         if ("GET".equals(method) && "/login".equals(requestPath) && !queryParameters.isEmpty()) {
             return Optional.of(handleLogin(queryParameters.get("account"), queryParameters.get("password")));
         }
+        if ("POST".equals(method) && "/register".equals(requestPath)) {
+            return Optional.of(handleRegister(body));
+        }
         return Optional.empty();
+    }
+
+    private String handleRegister(String body) {
+        final Map<String, String> params = parseParams(body);
+        User user = new User(
+                params.get("account"),
+                params.get("password"),
+                params.get("email")
+        );
+        InMemoryUserRepository.save(user);
+        return "/index.html";
+    }
+
+    private Map<String, String> parseParams(String body) {
+        String[] parameterPairs = body.split("&");
+
+        return Arrays.stream(parameterPairs)
+                .map(parameterPair -> parameterPair.split("="))
+                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
     private String handleLogin(String account, String password) {
@@ -145,21 +185,10 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + requestPath;
     }
 
-    private String[] extractRequestParts(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    private String[] extractRequestMessage(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
 
-        String[] requestLineParts = requestLine.split(" ");
-        skipHeaders(bufferedReader);
-        return requestLineParts;
-    }
-
-    private void skipHeaders(BufferedReader bufferedReader) throws IOException {
-        String headerLine = bufferedReader.readLine();
-
-        while (headerLine != null && !headerLine.isEmpty()) {
-            headerLine = bufferedReader.readLine();
-        }
+        return requestLine.split(" ");
     }
 
     private String resolveResponseBody(String resourcePath) throws IOException {
@@ -186,5 +215,17 @@ public class Http11Processor implements Runnable, Processor {
             return "application/javascript;charset=utf-8";
         }
         return "text/html;charset=utf-8";
+    }
+
+    private Map<String, String> extractHeaders(final BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+
+        String headerLine;
+        while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
+            String[] parts = headerLine.split(":", 2);
+            headers.put(parts[0], parts[1].trim());
+        }
+
+        return headers;
     }
 }

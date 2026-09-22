@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -105,5 +106,34 @@ class Http11ProcessorTest {
                 "",
                 "");
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void register() {
+        // given
+        String body = "account=newuser&password=password&email=newuser%40example.com";
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
+                "",
+                body);
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0",
+                "",
+                "");
+        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(InMemoryUserRepository.findByAccount("newuser").orElseThrow().checkPassword("password"))
+                .isTrue();
     }
 }

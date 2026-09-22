@@ -10,7 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,12 +57,19 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
             String sessionId = cookie.get("JSESSIONID");
-            boolean newSession = !cookie.contains("JSESSIONID");
 
             String setCookieHeader = "";
-            if (newSession) {
+            if (sessionId == null) {
                 sessionId = UUID.randomUUID().toString();
                 setCookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
+            }
+
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = sessionManager.findSession(sessionId);
+
+            if (session == null) {
+                session = new Session(sessionId);
+                sessionManager.add(session);
             }
 
             String requestBody = "";
@@ -85,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
                 parameters = queryString;
             }
 
-            String redirectLocation = handleLogin(path, parameters);
+            String redirectLocation = handleLogin(method, path, parameters, session);
             if (redirectLocation == null) {
                 redirectLocation = handleRegister(method, path, parameters);
             }
@@ -122,8 +132,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleLogin(String path, String parameters) {
-        if (!"/login".equals(path) || parameters.isEmpty()) {
+    private String handleLogin(String method, String path, String parameters, Session session) {
+        if (!"/login".equals(path)) {
+            return null;
+        }
+
+        User loginUser = (User) session.getAttribute("user");
+        if (loginUser != null) {
+            return "/index.html";
+        }
+
+        if (!method.equals("POST") || parameters.isEmpty()) {
             return null;
         }
 
@@ -136,10 +155,17 @@ public class Http11Processor implements Runnable, Processor {
             return "/401.html";
         }
 
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .map(user -> "/index.html")
-                .orElse("/401.html");
+        Optional<User> foundUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+
+        if (foundUser.isEmpty()) {
+            return "/401.html";
+        }
+
+        User user = foundUser.get();
+        session.setAttribute("user", user);
+
+        return "/index.html";
     }
 
     private Map<String, String> parseParameters(String parameters) {

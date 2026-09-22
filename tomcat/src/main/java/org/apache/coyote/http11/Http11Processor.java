@@ -47,16 +47,16 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestLine = bufferedReader.readLine();
-            final Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
+            final String startLine = bufferedReader.readLine();
+            final HttpMethod httpMethod = HttpMethod.valueOf(startLine.split(" ")[0]);
+            final String requestTarget = startLine.split(" ")[1];
+            final URI uri = URI.create(requestTarget);
+            log.info("request uri: {}", uri);
 
+            final Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
             final HttpCookie httpCookie = new HttpCookie(httpRequestHeaders.get("Cookie"));
 
             final String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
-
-            final String requestTarget = requestLine.split(" ")[1];
-            final URI uri = URI.create(requestTarget);
-            log.info("request uri: {}", uri);
 
             final HttpResponse response = handleRequest(uri, requestTarget, httpCookie, requestBody);
 

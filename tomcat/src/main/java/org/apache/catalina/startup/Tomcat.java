@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
-import org.apache.catalina.controller.ControllerMapping;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,14 +12,14 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final ControllerMapping controllerMapping;
+    private final Adapter adapter;
 
-    public Tomcat(ControllerMapping controllerMapping) {
-        this.controllerMapping = Objects.requireNonNull(controllerMapping);
+    public Tomcat(Adapter adapter) {
+        this.adapter = Objects.requireNonNull(adapter);
     }
 
     public void start() {
-        var connector = new Connector(controllerMapping);
+        var connector = new Connector(adapter);
         connector.start();
 
         try {

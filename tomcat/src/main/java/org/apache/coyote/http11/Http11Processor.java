@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.controller.Controller;
-import org.apache.catalina.controller.ControllerMapping;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ControllerMapping controllerMapping;
+    private final Adapter adapter;
 
-    public Http11Processor(final Socket connection, final ControllerMapping controllerMapping) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllerMapping = Objects.requireNonNull(controllerMapping);
+        this.adapter = Objects.requireNonNull(adapter);
     }
 
     @Override
@@ -50,8 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             request.createJSessionIdIfAbsent()
                     .ifPresent(sessionId -> response.setCookie(HttpCookie.JSESSION_ID, sessionId));
 
-            Controller controller = controllerMapping.getController(request);
-            controller.service(request, response);
+            adapter.service(request, response);
             return response;
         } catch (UnsupportedHttpMethodException e) {
             log.warn(e.getMessage());

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.ApplicationAdapter;
 import com.techcourse.controller.RequestMapping;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class Http11ProcessorTest {
 
     private Http11Processor processor(StubSocket socket) {
-        return new Http11Processor(socket, new RequestMapping());
+        return new Http11Processor(socket, new ApplicationAdapter(new RequestMapping()));
     }
 
     @Test

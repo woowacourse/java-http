@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -278,6 +280,26 @@ class Http11ProcessorTest {
 
         // when
         new Http11Processor(socket, new SessionManager()).process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticResponse("login.html", "text/html;charset=utf-8"));
+    }
+
+    @Test
+    @DisplayName("세션이 만료된 뒤 로그인 페이지에 접근하면 로그인 폼을 보여준다")
+    void showLoginPageWhenSessionIsExpired() throws IOException {
+        // given
+        final AtomicLong now = new AtomicLong(0);
+        final var manager = new SessionManager(now::get);
+        final var loginSocket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
+        new Http11Processor(loginSocket, manager).process(loginSocket);
+        final String sessionId = extractSessionId(loginSocket.output());
+        now.addAndGet(Duration.ofMinutes(30).toMillis());
+
+        final var socket = new StubSocket(getRequestWithCookie("/login", "JSESSIONID=" + sessionId));
+
+        // when
+        new Http11Processor(socket, manager).process(socket);
 
         // then
         assertThat(socket.output()).isEqualTo(staticResponse("login.html", "text/html;charset=utf-8"));

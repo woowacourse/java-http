@@ -5,7 +5,6 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
-import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.MimeType;
@@ -117,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
             responseProcessor.sendRedirect("/401.html");
             return;
         }
-        doNewLogin(responseProcessor, loginUser.get());
+        doNewLogin(httpRequest, responseProcessor, loginUser.get());
     }
 
     private void showLoginPage(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
@@ -137,10 +136,10 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.ofNullable(manager.findSession(sessionId.get()));
     }
 
-    private void doNewLogin(HttpResponseProcessor responseProcessor, User user) throws IOException {
-        Session session = Session.create();
+    private void doNewLogin(HttpRequest request, HttpResponseProcessor responseProcessor, User user) throws IOException {
+        findSession(request).ifPresent(manager::remove);
+        HttpSession session = manager.createSession();
         session.setAttribute(USER_ATTRIBUTE, user);
-        manager.add(session);
 
         Cookies cookies = Cookies.of(new Cookie(SessionManager.SESSION_ID, session.getId()));
         responseProcessor.sendRedirect("/index.html", cookies);

@@ -10,24 +10,54 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Session implements HttpSession {
+class Session implements HttpSession {
     private static final String UNSUPPORTED_MESSAGE = "지원하지 않는 기능입니다.";
+    private static final int DEFAULT_MAX_INACTIVE_INTERVAL_SECONDS = 30 * 60;
+    private static final long MILLIS_PER_SECOND = 1000L;
 
     private final String id;
     private final Map<String, Object> attributes;
+    private final long creationTime;
+    private volatile long lastAccessedTime;
+    private volatile int maxInactiveInterval;
 
-    public Session(String id) {
+    Session(String id, long now) {
         this.id = id;
         this.attributes = new ConcurrentHashMap<>();
+        this.creationTime = now;
+        this.lastAccessedTime = now;
+        this.maxInactiveInterval = DEFAULT_MAX_INACTIVE_INTERVAL_SECONDS;
     }
 
-    public static Session create() {
-        return new Session(UUID.randomUUID().toString());
+    static Session create(long now) {
+        return new Session(UUID.randomUUID().toString(), now);
+    }
+
+    void access(long now) {
+        this.lastAccessedTime = now;
+    }
+
+    boolean isExpired(long now) {
+        // 서블릿 규약: 0 이하면 만료되지 않는다
+        if (maxInactiveInterval <= 0) {
+            return false;
+        }
+        return now - lastAccessedTime >= maxInactiveInterval * MILLIS_PER_SECOND;
+    }
+
+    @Override
+    public long getCreationTime() {
+        return creationTime;
     }
 
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public long getLastAccessedTime() {
+        return lastAccessedTime;
     }
 
     @Override
@@ -55,13 +85,13 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public long getCreationTime() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
+    public void setMaxInactiveInterval(int interval) {
+        this.maxInactiveInterval = interval;
     }
 
     @Override
-    public long getLastAccessedTime() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
+    public int getMaxInactiveInterval() {
+        return maxInactiveInterval;
     }
 
     @Override
@@ -70,36 +100,31 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public void setMaxInactiveInterval(int interval) {
-        throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public int getMaxInactiveInterval() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
-    }
-
-    @Override
+    @Deprecated
     public HttpSessionContext getSessionContext() {
         throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
     }
 
     @Override
+    @Deprecated
     public Object getValue(String name) {
         throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
     }
 
     @Override
+    @Deprecated
     public String[] getValueNames() {
         throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
     }
 
     @Override
+    @Deprecated
     public void putValue(String name, Object value) {
         throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
     }
 
     @Override
+    @Deprecated
     public void removeValue(String name) {
         throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
     }

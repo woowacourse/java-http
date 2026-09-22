@@ -8,18 +8,34 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import java.util.Map;
 import org.apache.catalina.Dispatcher;
+import org.apache.catalina.controller.ControllerMapping;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private static Dispatcher dispatcher() {
+        return new Dispatcher(
+                new ControllerMapping(Map.of(
+                        "/", new HomeController(),
+                        "/login", new LoginController(),
+                        "/register", new RegisterController()
+                )),
+                new SessionManager()
+        );
+    }
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final var processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -43,7 +59,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -70,7 +86,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -89,7 +105,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -119,7 +135,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -144,7 +160,7 @@ class Http11ProcessorTest {
                 "",
                 "account=gugu&password=wrongPassword");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -165,7 +181,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);
@@ -195,7 +211,7 @@ class Http11ProcessorTest {
                 "account=hong&email=hong@woowa.com&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new Dispatcher(new SessionManager()));
+        final Http11Processor processor = new Http11Processor(socket, dispatcher());
 
         // when
         processor.process(socket);

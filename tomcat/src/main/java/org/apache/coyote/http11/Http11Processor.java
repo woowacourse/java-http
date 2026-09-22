@@ -76,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createResponse(final InputStream inputStream) throws EOFException {
         try {
-            final HttpRequest httpRequest = HttpRequest.from(inputStream);
+            final HttpRequest httpRequest = HttpRequest.of(inputStream, sessionManager);
             log.info("httpRequest = {}", httpRequest);
 
             return handle(httpRequest);
@@ -114,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
         if ("/login".equals(path) && request.isGet()) {
-            boolean isLoggedIn = sessionManager.find(request.cookies().get(JSESSIONID))
+            boolean isLoggedIn = request.findSession()
                     .map(session -> session.getAttribute(USER))
                     .isPresent();
 
@@ -185,7 +185,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse login(final HttpRequest request) {
         return findUser(request.body())
-                .map(this::redirectToHomeWithLoggedIn)
+                .map(user -> redirectToHomeWithLoggedIn(request, user))
                 .orElseGet(() -> redirectTo(UNAUTHORIZED_PAGE));
     }
 
@@ -221,7 +221,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        return redirectToHomeWithLoggedIn(user);
+        return redirectToHomeWithLoggedIn(request, user);
     }
 
     private HttpResponse serverError() {
@@ -245,8 +245,8 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private HttpResponse redirectToHomeWithLoggedIn(final User user) {
-        final Session session = sessionManager.create();
+    private HttpResponse redirectToHomeWithLoggedIn(final HttpRequest request, final User user) {
+        final Session session = request.createSession();
         session.setAttribute(USER, user);
 
         final Map<String, String> headers = Map.of(

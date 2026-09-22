@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.HttpMethod;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
 public class HttpRequest {
@@ -22,6 +24,10 @@ public class HttpRequest {
         this.headers = headers;
         this.formContents = formContents;
         this.cookies = cookies;
+    }
+
+    public static HttpRequest from(InputStream inputStream) throws IOException {
+        return new Http11RequestParser().parse(inputStream);
     }
 
     public HttpMethod getMethod() {

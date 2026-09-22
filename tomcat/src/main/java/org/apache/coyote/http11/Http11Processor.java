@@ -7,7 +7,6 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Cookie;
-import org.apache.coyote.http11.request.Http11RequestParser;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -22,15 +21,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final RequestMapping requestMapping = RequestMapping.createDefault();
 
     private final Socket connection;
-    private final Http11RequestParser requestParser;
 
     public Http11Processor(final Socket connection) {
-        this(connection, new Http11RequestParser());
-    }
-
-    public Http11Processor(final Socket connection, Http11RequestParser requestParser) {
         this.connection = connection;
-        this.requestParser = requestParser;
     }
 
     @Override
@@ -48,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = requestParser.parse(inputStream);
+            HttpRequest request = HttpRequest.from(inputStream);
 
             if (request == null) {
                 return;

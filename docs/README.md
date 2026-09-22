@@ -10,4 +10,4 @@
 - [x] 로그인 여부에 따라 페이지 이동하기
 - [x] POST 방식으로 회원가입
 - [x] Cookie에 JSESSIONID 값 저장하기
-- [ ] Session 구현하기
+- [x] Session 구현하기

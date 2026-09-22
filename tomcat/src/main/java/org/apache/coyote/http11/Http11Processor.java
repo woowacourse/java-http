@@ -33,9 +33,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String COOKIE_HEADER = "Cookie";
     private static final String SET_COOKIE_HEADER = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER = "user";
     private static final String LOGIN_SUCCESS = "/index.html";
     private static final String LOGIN_FAILURE = "/401.html";
     private static final String DOT_HTML = ".html";
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -66,14 +68,15 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
             final String requestBody = readRequestBody(method, headers, reader);
             final HttpCookie cookies = new HttpCookie(headers.get(COOKIE_HEADER));
-            final String setCookie = createSetCookieHeader(cookies);
+            final String sessionId = cookies.getValue(JSESSIONID);
+            final Session session = SESSION_MANAGER.findSession(sessionId);
+            String setCookie = createSetCookieHeader(cookies);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             final String requestPath = extractRequestPath(requestUri);
 
             if (method.equals(POST_METHOD) && requestPath.equals(LOGIN)) {
-                final String location = getLoginRedirectionLocation(requestBody);
-                final String responseHeader = createRedirectResponseHeader(version, location, setCookie);
+                final String responseHeader = createLoginResponseHeader(version, requestBody, sessionId, setCookie);
 
                 outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
@@ -90,6 +93,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             requestUri = requestPath;
+
+            if (requestPath.equals(LOGIN) && isLoggedIn(session)) {
+                final String responseHeader = createRedirectResponseHeader(version, LOGIN_SUCCESS, "");
+
+                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             if (requestUri.equals(LOGIN) || requestUri.equals(REGISTER)) {
                 requestUri += DOT_HTML;
@@ -165,6 +176,47 @@ public class Http11Processor implements Runnable, Processor {
         return JSESSIONID + "=" + UUID.randomUUID();
     }
 
+    private String createLoginResponseHeader(final String version, final String requestBody,
+                                             final String sessionId, final String setCookie) {
+        final String location = getLoginRedirectionLocation(requestBody);
+        String responseCookie = setCookie;
+
+        if (location.equals(LOGIN_SUCCESS)) {
+            final User user = findUser(requestBody);
+            final Session loginSession = getOrCreateSession(sessionId);
+            loginSession.setAttribute(USER, user);
+            responseCookie = createSessionCookie(sessionId, loginSession);
+        }
+
+        return createRedirectResponseHeader(version, location, responseCookie);
+    }
+
+    private Session getOrCreateSession(final String sessionId) {
+        final Session session = SESSION_MANAGER.findSession(sessionId);
+        if (session != null) {
+            return session;
+        }
+        return SESSION_MANAGER.createSession();
+    }
+
+    private String createSessionCookie(final String requestSessionId, final Session session) {
+        if (requestSessionId != null && requestSessionId.equals(session.getId())) {
+            return "";
+        }
+        return JSESSIONID + "=" + session.getId();
+    }
+
+    private boolean isLoggedIn(final Session session) {
+        return getUser(session) != null;
+    }
+
+    private User getUser(final Session session) {
+        if (session == null) {
+            return null;
+        }
+        return (User) session.getAttribute(USER);
+    }
+
     private String getResourcePath(final String path) {
         final URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
@@ -203,6 +255,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return LOGIN_FAILURE;
+    }
+
+    private User findUser(final String requestBody) {
+        final Map<String, String> formData = parseFormData(requestBody);
+        final String account = formData.get("account");
+        final String password = formData.get("password");
+
+        if (account == null || password == null) {
+            return null;
+        }
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            return null;
+        }
+        return user.get();
     }
 
     private void saveUser(final String requestBody) {

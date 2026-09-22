@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -20,6 +21,21 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String ROOT_PATH = "/";
+    private static final String LOGIN_PATH = "/login";
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String STATIC_RESOURCE_DIRECTORY = "static";
+
+    private static final Map<String, String> RESOURCE_PATH_BY_REQUEST_PATH = Map.of(
+            LOGIN_PATH,  "/login.html"
+    );
+
+    private static final Map<String, String> CONTENT_TYPE_BY_EXTENSION = Map.of(
+            ".html", "text/html;charset=utf-8",
+            ".css", "text/css;charset=utf-8",
+            ".js", "application/javascript;charset=utf-8"
+    );
 
     private final Socket connection;
 
@@ -57,50 +73,57 @@ public class Http11Processor implements Runnable, Processor {
 
             skipHeaders(reader);
 
-            if ("/index.html".equals(path)) {
-                final byte[] responseBody = getClass()
-                        .getClassLoader()
-                        .getResourceAsStream("static/index.html")
-                        .readAllBytes();
-
-                outputStream.write(response(responseBody, "text/html;charset=utf-8").getBytes(StandardCharsets.UTF_8));
-            } else if ("/login".equals(path)) {
-                if (!queryString.isEmpty()) {
-                    login(queryString);
-                }
-
-                final byte[] responseBody = getClass()
-                        .getClassLoader()
-                        .getResourceAsStream("static/login.html")
-                        .readAllBytes();
-
-                outputStream.write(response(responseBody, "text/html;charset=utf-8").getBytes(StandardCharsets.UTF_8));
-
-            } else if ("/css/styles.css".equals(path)) {
-              final byte[] responseBody = getClass()
-                      .getClassLoader()
-                      .getResourceAsStream("static/css/styles.css")
-                      .readAllBytes();
-
-              outputStream.write(response(responseBody, "text/css;charset=utf-8").getBytes(StandardCharsets.UTF_8));
-            } else if (path.endsWith(".js")) {
-                final byte[] responseBody = getClass()
-                        .getClassLoader()
-                        .getResourceAsStream("static" + path)
-                        .readAllBytes();
-
-                outputStream.write(response(responseBody, "application/javascript;charset=utf-8").getBytes(StandardCharsets.UTF_8));
-            } else {
-                final var responseBody = "Hello world!";
-                final byte[] responseBodyBytes = responseBody.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(response(responseBodyBytes, "text/html;charset=utf-8").getBytes(StandardCharsets.UTF_8));
+            if (LOGIN_PATH.equals(path) && !queryString.isEmpty()) {
+                login(queryString);
             }
+
+            final ResponseData responseData = loadResponseData(path);
+            outputStream.write(
+                    response(responseData.body(), responseData.contentType()).getBytes(StandardCharsets.UTF_8)
+            );
 
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private ResponseData loadResponseData(final String requestPath) throws IOException {
+        if (ROOT_PATH.equals(requestPath)) {
+            return new ResponseData(
+                    DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8),
+                    DEFAULT_CONTENT_TYPE
+            );
+        }
+
+        final String resourcePath = STATIC_RESOURCE_DIRECTORY + RESOURCE_PATH_BY_REQUEST_PATH.getOrDefault(requestPath, requestPath);
+
+        final InputStream resource = getClass().
+                getClassLoader().
+                getResourceAsStream(resourcePath);
+
+        if (resource == null) {
+            return new ResponseData(
+                    DEFAULT_RESPONSE_BODY.getBytes(StandardCharsets.UTF_8),
+                    DEFAULT_CONTENT_TYPE
+            );
+        }
+
+        try (resource) {
+            return new ResponseData(resource.readAllBytes(), contentTypeOf(resourcePath));
+        }
+    }
+
+    private String contentTypeOf(final String resourcePath) {
+        return CONTENT_TYPE_BY_EXTENSION.entrySet().stream()
+                .filter(entry -> resourcePath.endsWith(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(DEFAULT_CONTENT_TYPE);
+    }
+
+    private record ResponseData(byte[] body, String contentType) {
     }
 
     private void skipHeaders(final BufferedReader reader) throws IOException {

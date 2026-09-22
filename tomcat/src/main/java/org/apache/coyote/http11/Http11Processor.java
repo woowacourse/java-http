@@ -3,9 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -38,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()
         ) {
-            HttpRequest httpRequest = readHttpRequest(inputStream);
+            HttpRequest httpRequest = new HttpRequest(inputStream);
             String response = buildResponse(httpRequest);
             response = addSessionCookie(httpRequest, response);
             outputStream.write(response.getBytes());
@@ -58,43 +56,6 @@ public class Http11Processor implements Runnable, Processor {
         return response.substring(0, endOfStatusLine)
                 + cookieHeader
                 + response.substring(endOfStatusLine);
-    }
-
-    private HttpRequest readHttpRequest(InputStream inputStream) throws IOException {
-        StringBuilder request = new StringBuilder();
-        int contentLength = 0;
-
-        String line;
-        while (!(line = readLine(inputStream)).isEmpty()) {
-            request.append(line).append(LINE_SEPARATOR);
-
-            if (line.startsWith("Content-Length:")) {
-                contentLength = Integer.parseInt(
-                        line.substring("Content-Length:".length()).trim()
-                );
-            }
-        }
-
-        request.append(LINE_SEPARATOR);
-
-        byte[] body = inputStream.readNBytes(contentLength);
-        if (body.length != contentLength) {
-            throw new RuntimeException("본문을 모두 읽기 전에 연결이 종료되었습니다.");
-        }
-        request.append(new String(body, StandardCharsets.UTF_8));
-
-        return new HttpRequest(request.toString());
-    }
-
-    private String readLine(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream line = new ByteArrayOutputStream();
-        int value;
-        while ((value = inputStream.read()) != -1 && value != '\n') {
-            if (value != '\r') {
-                line.write(value);
-            }
-        }
-        return line.toString(StandardCharsets.US_ASCII);
     }
 
     private String buildResponse(HttpRequest httpRequest) {

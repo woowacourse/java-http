@@ -7,13 +7,13 @@ import org.apache.cookie.HttpCookie;
 import org.apache.coyote.Processor;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
-import org.apache.session.SessionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -44,13 +44,13 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)
         ) {
-            String headerFirstLine = bufferedReader.readLine();
+            String headerFirstLine = readLine(bufferedInputStream);
 
-            Map<String, String> headers = readHeaders(bufferedReader);
+            Map<String, String> headers = readHeaders(bufferedInputStream);
             int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-            String reqBody = readReqBody(bufferedReader, contentLength);
+            String reqBody = readReqBody(bufferedInputStream, contentLength);
 
             String method = headerFirstLine.split(" ")[0];
             String reqUri = headerFirstLine.split(" ")[1];
@@ -87,11 +87,11 @@ public class Http11Processor implements Runnable, Processor {
                 User user = login(reqBody);
 
                 if (user != null) {
-                    SessionResult sessionResult = storeSession(headers, user);
+                    String jsessionId = storeSession(headers, user);
 
                     writeAndFlush(
                             outputStream,
-                            createLoginResponse("302 Found", sessionResult.getJsessionId(), sessionResult.isNew())
+                            createLoginResponse("302 Found", jsessionId)
                     );
                     return;
                 }
@@ -118,21 +118,47 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static SessionResult storeSession(Map<String, String> headers, User user) {
-        String jsessionId = getJsessionId(headers.get("Cookie"));
-        SessionManager sessionManager = SessionManager.getInstance();
-        Session session = sessionManager.findSession(jsessionId);
+    private static String readLine(BufferedInputStream inputStream) throws IOException {
+        ByteArrayOutputStream line = new ByteArrayOutputStream();
 
-        boolean isNew = false;
+        int current;
+        boolean isCarriageReturn = false;
 
-        if (session == null) {
-            session = new Session();
-            sessionManager.add(session);
-            isNew = true;
+        while ((current = inputStream.read()) != -1) {
+            if (isCarriageReturn) {
+                if (current == '\n') {
+                    return new String(
+                            line.toByteArray(),
+                            StandardCharsets.ISO_8859_1
+                    );
+                }
+                line.write('\r');
+                isCarriageReturn = false;
+            }
+            if (current == '\r') {
+                isCarriageReturn = true;
+            } else {
+                line.write(current);
+            }
         }
 
-        session.setAttribute("user", user);
-        return new SessionResult(session.getJsessionId(), isNew);
+        throw new EOFException("라인이 끝나기 전에 스트림이 종료되었습니다.");
+    }
+
+    private static String storeSession(Map<String, String> headers, User user) {
+        SessionManager sessionManager = SessionManager.getInstance();
+
+        Session oldSession = sessionManager.findSession(getJsessionId(headers.get("Cookie")));
+        if (oldSession != null) {
+            oldSession.invalidate();
+            sessionManager.remove(oldSession.getJsessionId());
+        }
+
+        Session newSession = new Session();
+        sessionManager.add(newSession);
+        newSession.setAttribute("user", user);
+
+        return newSession.getJsessionId();
     }
 
     private static String getJsessionId(String cookie) {
@@ -195,23 +221,15 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private static String createLoginResponse(String status, String jsessionId, boolean isNew) {
-        StringBuilder response = new StringBuilder()
-                .append("HTTP/1.1 ")
-                .append(status)
-                .append(" \r\n");
-
-        if (isNew) {
-            response.append("Set-Cookie: JSESSIONID=")
-                    .append(jsessionId)
-                    .append("\r\n");
-        }
-
-        response.append("Location: /index.html\r\n")
-                .append("Content-Length: 0\r\n")
-                .append("\r\n");
-
-        return response.toString();
+    private static String createLoginResponse(String status, String jsessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status + " \r\n",
+                "Set-Cookie: JSESSIONID=" + jsessionId + "\r\n",
+                "Location: /index.html\r\n",
+                "Content-Length: 0",
+                "",
+                ""
+        );
     }
 
     private static String createLogoutResponse(String status) {
@@ -296,23 +314,18 @@ public class Http11Processor implements Runnable, Processor {
         return Path.of(resource.toURI());
     }
 
-    private static String readReqBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+    private static String readReqBody(BufferedInputStream bufferedInputStream, int contentLength) throws IOException {
         if (contentLength == 0) {
             return "";
         }
 
-        char[] body = new char[contentLength];
-        int offset = 0;
+        byte[] bytes = bufferedInputStream.readNBytes(contentLength);
 
-        while (offset < contentLength) {
-            int read = bufferedReader.read(body, offset, contentLength - offset);
-
-            if (read == -1) {
-                throw new IOException("요청 바디가 중간에 끝났습니다.");
-            }
-            offset += read;
+        if (bytes.length != contentLength) {
+            throw new EOFException("요청 바디가 중간에 끝났습니다.");
         }
-        return new String(body);
+
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private void handleLogout(String cookie) {
@@ -337,11 +350,11 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private Map<String, String> readHeaders(BufferedReader bufferedReader) throws IOException {
+    private Map<String, String> readHeaders(BufferedInputStream bufferedInputStream) throws IOException {
         Map<String, String> headerMaps = new HashMap<>();
         String line;
 
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
+        while (!(line = readLine(bufferedInputStream)).isEmpty()) {
             headerMaps.put(line.split(":")[0].trim(), line.split(":")[1].trim());
         }
 

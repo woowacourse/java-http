@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,8 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private final Socket connection;
-
+    private final SessionManager sessionManager = new SessionManager();
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -71,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
                         "Hello world!".getBytes()
                 );
             } else if (requestPath.startsWith("/login")) {
-                httpResponse = handleLoginRequest(formParameters, requestHeaders);
+                httpResponse = handleLoginRequest(formParameters, requestHeaders, requestMethod);
             } else if (requestPath.startsWith("/register") && requestMethod.equals("POST")) {
                 User user = new User(formParameters.get("account"), formParameters.get("password"), formParameters.get("email"));
                 InMemoryUserRepository.save(user);
@@ -89,6 +90,41 @@ public class Http11Processor implements Runnable, Processor {
     }
 }
 
+    private String getSessionId(Map<String, String> requestHeaders) {
+        String cookieHeader = requestHeaders.get("Cookie");
+
+        if (cookieHeader == null) { return null;}
+
+        for (String cookie : cookieHeader.split(";")) {
+            String[] parts = cookie.trim().split("=", 2);
+
+            if (parts.length == 2 && parts[0].equals("JSESSIONID")) {
+                return parts[1];
+            }
+        }
+
+        return null;
+    }
+
+    private Session getSession(Map<String, String> requestHeaders, boolean create) {
+        String sessionId = getSessionId(requestHeaders);
+
+        if (sessionId != null) {
+            Session session = sessionManager.findSession(sessionId);
+
+            if (session != null) {
+                return session;
+            }
+        }
+
+        if (!create) {
+            return null;
+        }
+
+        Session session = Session.create();
+        sessionManager.add(session);
+        return session;
+    }
     private Map<String, String> parseFormParameters(String requestBody) throws URISyntaxException, IOException {
         Map<String, String> partsMap = new HashMap<>();
 
@@ -159,46 +195,50 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private HttpResponse handleLoginRequest(Map<String, String> formParameters, Map<String, String> requestHeaders)
-            throws URISyntaxException, IOException {
+    private HttpResponse handleLoginRequest(Map<String, String> formParameters, Map<String, String> requestHeaders, String requestMethod) throws URISyntaxException, IOException {
 
+        // 로그인 페이지 접근
+        if (requestMethod.equals("GET")) {
+            Session session = getSession(requestHeaders, false);
+
+            if (session != null && session.getAttribute("user") != null) {
+                return createRedirectResponse("/index.html");
+            }
+
+            return createResourceResponse("/login");
+        }
+
+        // 로그인 제출
         String account = formParameters.get("account");
         String password = formParameters.get("password");
 
         if (account == null || password == null) {
-            return createResourceResponse("/login.html");
-        }
-
-        if (!authenticateUser(account, password)) {
             return createUnauthorizedResponse();
         }
 
-        String cookieLine = requestHeaders.get("Cookie");
-        String httpCookie = findHttpCookie(cookieLine);
+        final var user = InMemoryUserRepository
+                .findByAccount(account)
+                .filter(foundUser -> foundUser.checkPassword(password))
+                .orElse(null);
 
-        return createLoginSuccessResponse(httpCookie);
-    }
-
-    private String findHttpCookie(String cookieLine) {
-        if (cookieLine == null) { return HttpCookie.makeJsessionid().toString(); }
-
-        Map<String, String> cookieParts = new HashMap<>();
-
-        String[] cookies = cookieLine.split(";");
-
-        for (String cookie : cookies) {
-            String[] parts = cookie.split("=", 2);
-            if (parts.length != 2) {
-                continue;
-            }
-            cookieParts.put(parts[0].trim(), parts[1].trim());
+        if  (user == null) {
+            return createUnauthorizedResponse();
         }
-        if (cookieParts.isEmpty() || cookieParts.get("JSESSIONID") == null) {
-            return HttpCookie.makeJsessionid().toString();
-        }
-        return cookieParts.get("JSESSIONID");
-    }
 
+        // 성공한 경우에만 세션 생성
+        Session session = getSession(requestHeaders, true);
+        session.setAttribute("user", user);
+
+        HttpCookie cookie = new HttpCookie(session.getId());
+
+        return createLoginSuccessResponse(cookie.toString());
+    }
+    private HttpResponse createRedirectResponse(String url) {
+        return new HttpResponse(
+                "302 FOUND ",
+                Map.of("Location", url),
+                new byte[0]);
+    }
     private HttpResponse createLoginSuccessResponse(String httpCookie) {
         return new HttpResponse(
                 "302 FOUND ",
@@ -303,15 +343,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryParameters;
-    }
-
-    // 로그인
-    private boolean authenticateUser(String account, String password) {
-
-        return InMemoryUserRepository
-                .findByAccount(account)
-                .map(user -> user.checkPassword(password))
-                .orElse(false);
     }
 
     // content-type 결정

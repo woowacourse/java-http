@@ -77,8 +77,10 @@ public class Http11Processor implements Runnable, Processor {
 
         request.append(LINE_SEPARATOR);
 
-        byte[] body = new byte[contentLength];
-        inputStream.read(body);
+        byte[] body = inputStream.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new RuntimeException("본문을 모두 읽기 전에 연결이 종료되었습니다.");
+        }
         request.append(new String(body, StandardCharsets.UTF_8));
 
         return new HttpRequest(request.toString());

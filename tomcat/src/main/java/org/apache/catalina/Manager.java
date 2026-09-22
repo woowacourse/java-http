@@ -25,11 +25,12 @@ import java.io.IOException;
 public interface Manager {
 
     /**
-     * Add this Session to the set of active Sessions for this Manager.
+     * Construct and return a new session object, and register it with
+     * this Manager.
      *
-     * @param session Session to be added
+     * @return the newly created session
      */
-    void add(HttpSession session);
+    HttpSession createSession();
 
     /**
      * Return the active Session, associated with this Manager, with the

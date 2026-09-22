@@ -19,7 +19,6 @@ public class HttpResponseProcessor {
     private static final String STATIC_RESOURCE_PREFIX = "static";
     private final OutputStream outputStream;
 
-
     public HttpResponseProcessor(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
@@ -78,6 +77,26 @@ public class HttpResponseProcessor {
 
         outputStream.write(head.getBytes(StandardCharsets.ISO_8859_1));
         outputStream.write(body);
+        outputStream.flush();
+    }
+
+    public void sendRedirect(String path) throws IOException {
+        sendRedirect(path, Cookies.empty());
+    }
+
+    public void sendRedirect(String path, Cookies cookies) throws IOException {
+        HttpStatus found = HttpStatus.FOUND;
+        final StringBuilder head = new StringBuilder()
+                .append("HTTP/1.1 ").append(found.getCode()).append(" ").append(found.getMessage()).append(" \r\n")
+                .append("Location: ").append(path).append(" \r\n")
+                .append("Content-Length: 0 \r\n");
+
+        for (Cookie cookie : cookies.values()) {
+            head.append("Set-Cookie: ").append(cookie.toHeaderValue()).append(" \r\n");
+        }
+        head.append("\r\n");
+
+        outputStream.write(head.toString().getBytes(StandardCharsets.ISO_8859_1));
         outputStream.flush();
     }
 }

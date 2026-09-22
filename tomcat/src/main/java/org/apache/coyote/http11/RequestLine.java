@@ -43,10 +43,6 @@ public class RequestLine {
         return uri.getPath();
     }
 
-    public String getVersion() {
-        return version;
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(method, uri, version);
@@ -54,13 +50,9 @@ public class RequestLine {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof RequestLine that)) {
-            return false;
-        }
-        return method == that.method && uri.equals(that.uri) && version.equals(that.version);
+        if (o == null || getClass() != o.getClass()) return false;
+        RequestLine that = (RequestLine) o;
+        return method == that.method && Objects.equals(uri, that.uri) && Objects.equals(version, that.version);
     }
 
     public RequestUri getUri() {

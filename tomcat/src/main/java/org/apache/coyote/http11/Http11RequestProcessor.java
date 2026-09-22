@@ -5,8 +5,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Http11RequestProcessor {
     private static final char CR = '\r';
@@ -29,7 +29,7 @@ public class Http11RequestProcessor {
     }
 
     private Map<String, String> readHeaders() throws IOException {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         String line;
 
         while (!(line = readLine()).isBlank()) {

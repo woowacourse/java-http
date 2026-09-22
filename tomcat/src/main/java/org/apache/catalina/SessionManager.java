@@ -8,6 +8,8 @@ public class SessionManager implements Manager {
 
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
+    public SessionManager() {}
+
     @Override
     public Session findSession(String id) {
         return id == null ? null : sessions.get(id);
@@ -26,5 +28,4 @@ public class SessionManager implements Manager {
         sessions.remove(session.getId(), (Session) session);
     }
 
-    public SessionManager() {}
 }

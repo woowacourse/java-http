@@ -361,7 +361,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         final User loginUser = user.get();
 
-        // 로그인에 성공했을 때에만 Session을 조회하거나 생성한다.
+        // 로그인에 성공했을 때에만 Session을 생성한다.
         final HttpSession session =
                 SESSION_MANAGER.createSession();
         // 서버 Session에 로그인 User 저장

@@ -10,7 +10,7 @@ import java.util.Map;
 
 public record HttpRequestLine(
         String method,
-        String uri,
+        String path,
         Map<String, String> queryParameters
 ) {
     public static final Charset CHARSET = StandardCharsets.US_ASCII;

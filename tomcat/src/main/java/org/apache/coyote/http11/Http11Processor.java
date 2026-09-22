@@ -98,9 +98,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handle(final HttpRequest request) throws IOException {
-        final String uri = request.requestLine().uri();
+        final String path = request.requestLine().path();
 
-        if ("/".equals(uri) && request.isGet()) {
+        if ("/".equals(path) && request.isGet()) {
             byte[] responseBody = "Hello world!".getBytes();
 
             Map<String, String> headers = new LinkedHashMap<>();
@@ -113,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody
             );
         }
-        if ("/login".equals(uri) && request.isGet()) {
+        if ("/login".equals(path) && request.isGet()) {
             boolean isLoggedIn = sessionManager.find(request.cookies().get(JSESSIONID))
                     .map(session -> session.getAttribute(USER))
                     .isPresent();
@@ -124,22 +124,22 @@ public class Http11Processor implements Runnable, Processor {
 
             return getStaticResource(LOGIN_PAGE);
         }
-        if ("/login".equals(uri) && request.isPost()) {
+        if ("/login".equals(path) && request.isPost()) {
             return login(request);
         }
-        if ("/register".equals(uri) && request.isGet()) {
+        if ("/register".equals(path) && request.isGet()) {
             return getStaticResource(REGISTER_PAGE);
         }
-        if ("/register".equals(uri) && request.isPost()) {
+        if ("/register".equals(path) && request.isPost()) {
             return register(request);
         }
 
-        return getStaticResource(uri);
+        return getStaticResource(path);
     }
 
-    private HttpResponse getStaticResource(final String uri) throws IOException {
+    private HttpResponse getStaticResource(final String path) throws IOException {
         final URL resource = getClass()
-                .getClassLoader().getResource("static" + uri);
+                .getClassLoader().getResource("static" + path);
 
         if (resource == null) {
             return readResource(requiredResource(NOT_FOUND_PAGE),

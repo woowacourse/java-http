@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +16,7 @@ public class HttpRequest {
     private final Map<String, String> queryParameters;
     private final String body;
     private final Cookie cookie;
+    private Session session;
 
     public HttpRequest(String method, String requestTarget, Map<String, String> queryParameters, String body, Cookie cookie) {
         this.method = method;
@@ -108,5 +112,22 @@ public class HttpRequest {
 
     public Cookie getCookie() {
         return cookie;
+    }
+
+    public Session getSession(boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        String sessionId = cookie.getValue("JSESSIONID");
+        if (sessionId != null) {
+            session = SessionManager.getInstance().findSession(sessionId);
+        }
+
+        if (session == null && create) {
+            session = SessionManager.getInstance().createSession();
+        }
+
+        return session;
     }
 }

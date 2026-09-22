@@ -50,19 +50,29 @@ public class Http11Processor implements Runnable, Processor {
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
             String contentType = resolveContentType(resourcePath);
+            String header = createHeader(contentType, responseBody);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String response = createResponse(header, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createHeader(String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ");
+    }
+
+    private static String createResponse(String header, String responseBody) {
+        return String.join("\r\n",
+                header,
+                "",
+                responseBody);
     }
 
     private void dispatchRequest(String requestPath, Map<String, String> queryParameters) {

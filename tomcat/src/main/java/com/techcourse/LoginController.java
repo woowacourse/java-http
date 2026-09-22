@@ -1,4 +1,4 @@
-package org.qupring.mvc;
+package com.techcourse;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

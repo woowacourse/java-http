@@ -13,10 +13,6 @@ public class ApplicationScanner {
         return List.of();
     }
 
-    /*
-     * static 폴더 안의 HTML 파일을 스캔하여
-     * 요청 경로와 클래스패스 리소스 경로를 반환한다.
-     */
     public Map<String, String> scanForResources() {
         ClassLoader classLoader =
                 Thread.currentThread().getContextClassLoader();

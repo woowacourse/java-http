@@ -1,5 +1,8 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.Adapter;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
@@ -17,20 +20,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 100;
 
     private final ServerSocket serverSocket;
     private final Adapter adapter;
     private final SessionManager sessionManager = new SessionManager();
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(Adapter adapter) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter, DEFAULT_THREAD_POOL_SIZE);
     }
 
-    public Connector(final int port, final int acceptCount, final Adapter adapter) {
+    public Connector(final int port, final int acceptCount, final Adapter adapter, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.adapter = adapter;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -72,7 +78,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, adapter, sessionManager);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {

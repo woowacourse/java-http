@@ -11,9 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +55,9 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = extractRequestPath(requestTarget);
             Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            Optional<String> redirectPath = dispatchRequest(method, requestPath, queryParameters, body);
-            if (redirectPath.isPresent()) {
-                outputStream.write(createRedirectResponse(redirectPath.get()).getBytes());
+            Optional<String> handledResponse = dispatchRequest(method, requestPath, queryParameters, body);
+            if (handledResponse.isPresent()) {
+                outputStream.write(handledResponse.get().getBytes());
                 outputStream.flush();
                 return;
             }
@@ -62,9 +65,7 @@ public class Http11Processor implements Runnable, Processor {
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
             String contentType = resolveContentType(resourcePath);
-            String header = createHeader(contentType, responseBody);
-
-            String response = createResponse(header, responseBody);
+            String response = createOkResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -83,11 +84,21 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private String createHeader(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ");
+    private String createOkResponse(String contentType, String responseBody) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", contentType);
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+
+        return createResponse(createHeader("HTTP/1.1 200 OK", headers), responseBody);
+    }
+
+    private static String createHeader(String statusLine, Map<String, String> headers) {
+        return Stream.concat(
+                        Stream.of(statusLine),
+                        headers.entrySet().stream()
+                                .map(header -> header.getKey() + ": " + header.getValue())
+                )
+                .collect(Collectors.joining("\r\n"));
     }
 
     private static String createResponse(String header, String responseBody) {
@@ -98,13 +109,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static String createRedirectResponse(String redirectPath) {
-        String header = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + redirectPath,
-                "Content-Length: 0");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", redirectPath);
+        headers.put("Content-Length", "0");
 
-        return createResponse(header, "");
+        return createResponse(createHeader("HTTP/1.1 302 Found", headers), "");
+    }
 
+    private static String createLoginSuccessResponse(String sessionId) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", "/index.html");
+        headers.put("Set-Cookie", "JSESSIONID=" + sessionId);
+        headers.put("Content-Length", "0");
+
+        return createResponse(createHeader("HTTP/1.1 302 Found", headers), "");
     }
 
     private Optional<String> dispatchRequest(
@@ -113,10 +131,10 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> queryParameters,
             String body) {
         if ("GET".equals(method) && "/login".equals(requestPath) && !queryParameters.isEmpty()) {
-            return Optional.of(handleLogin(queryParameters));
+            return Optional.of(handleLoginRequest(queryParameters));
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
-            return Optional.of(handleRegister(body));
+            return Optional.of(createRedirectResponse(handleRegister(body)));
         }
         return Optional.empty();
     }
@@ -140,16 +158,22 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
-    private String handleLogin(Map<String, String> queryParameters) {
+    private String handleLoginRequest(Map<String, String> queryParameters) {
         String account = queryParameters.get("account");
         String password = queryParameters.get("password");
+
+        return login(account, password)
+                .map(sessionId -> createLoginSuccessResponse(sessionId))
+                .orElseGet(() -> createRedirectResponse("/401.html"));
+    }
+
+    private Optional<String> login(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
                     log.info("user={}", user);
-                    return "/index.html";
-                })
-                .orElse("/401.html");
+                    return UUID.randomUUID().toString();
+                });
     }
 
     private String extractRequestPath(String requestTarget) {

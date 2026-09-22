@@ -23,14 +23,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 12",
-                "",
-                "Hello world!");
+        String response = socket.output();
+        String sessionId = response.split("Set-Cookie: JSESSIONID=")[1].split("\r\n")[0];
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).startsWith("HTTP/1.1 200 OK\r\nSet-Cookie: JSESSIONID=");
+        assertThat(response).endsWith(
+                "\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: 12\r\n\r\nHello world!"
+        );
+        assertThat(sessionId).matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
     }
 
     @Test
@@ -40,6 +40,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-session-id",
                 "",
                 "");
 
@@ -58,6 +59,7 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
     }
 
     @Test
@@ -89,6 +91,7 @@ class Http11ProcessorTest {
         String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=wrong HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=existing-session-id",
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
@@ -116,6 +119,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.length(),
+                "Cookie: JSESSIONID=existing-session-id",
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);

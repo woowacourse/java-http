@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createResourceResponse(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isLoginRequest() && httpRequest.hasParameters("account", "password")) {
-            findUser(httpRequest);
+            return createLoginResponse(httpRequest);
         }
         String resourcePath = httpRequest.getResourcePath();
         if (httpRequest.isLoginRequest()) {
@@ -75,17 +75,19 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.ok(getContentType(resource.getPath()), body);
     }
 
-    private void findUser(HttpRequest httpRequest) {
+    private HttpResponse createLoginResponse(HttpRequest httpRequest) throws IOException {
         Optional<User> userOpt = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
         if (userOpt.isEmpty()) {
-            return;
+            return HttpResponse.found("/401.html", "", new byte[0]);
         }
 
         User user = userOpt.get();
         String password = httpRequest.getParameter("password");
         if (password != null && user.checkPassword(password)) {
             log.info(user.toString());
+            return HttpResponse.found("/index.html", "", new byte[0]);
         }
+        return HttpResponse.found("/401.html", "", new byte[0]);
     }
 
     private HttpResponse createNotFoundResponse() throws IOException {

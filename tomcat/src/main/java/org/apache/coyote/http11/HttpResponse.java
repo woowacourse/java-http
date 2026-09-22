@@ -8,32 +8,45 @@ public final class HttpResponse {
 
     private final int statusCode;
     private final String reasonPhrase;
+    private final String location;
     private final String contentType;
     private final byte[] body;
 
-    private HttpResponse(int statusCode, String reasonPhrase, String contentType, byte[] body) {
+    private HttpResponse(int statusCode, String reasonPhrase, String location, String contentType, byte[] body) {
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
+        this.location = location;
         this.contentType = contentType;
         this.body = body;
     }
 
     public static HttpResponse ok(String contentType, byte[] body) {
-        return new HttpResponse(200, "OK", contentType, body);
+        return new HttpResponse(200, "OK", "", contentType, body);
+    }
+
+    public static HttpResponse found(String location, String contentType, byte[] body) {
+        return new HttpResponse(302, "Found", location, contentType, body);
     }
 
     public static HttpResponse notFound(String contentType, byte[] body) {
-        return new HttpResponse(404, "Not Found", contentType, body);
+        return new HttpResponse(404, "Not Found", "", contentType, body);
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {
-        String headers = String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + reasonPhrase + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                "");
-        outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
+        StringBuilder headers = new StringBuilder();
+        headers.append("HTTP/1.1 ")
+                .append(statusCode).append(" ").append(reasonPhrase).append(" \r\n");
+
+        if (!location.isBlank()) {
+            headers.append("Location: ").append(location).append("\r\n");
+        }
+        if (!contentType.isBlank()) {
+            headers.append("Content-Type: ").append(contentType).append(";charset=utf-8 \r\n");
+        }
+        headers.append("Content-Length: ").append(body.length).append(" \r\n")
+                .append("\r\n");
+
+        outputStream.write(headers.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
     }
 }

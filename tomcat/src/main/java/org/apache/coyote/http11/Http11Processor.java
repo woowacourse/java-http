@@ -227,6 +227,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Location: " + location,
+                "Content-Length: 0",
                 "",
                 "");
     }
@@ -236,6 +237,7 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 302 Found",
                 "Location: " + location,
                 "Set-Cookie: JSESSIONID=" + sessionId,
+                "Content-Length: 0",
                 "",
                 "");
     }

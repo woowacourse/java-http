@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-final class HttpResponse {
+public final class HttpResponse {
     private static final String LINE_SEPARATOR = "\r\n";
 
     private final String status;

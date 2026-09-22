@@ -6,7 +6,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public record HttpRequest(String method, String path, String version, Map<String, String> headers) {
+public record HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
+    public HttpRequest(final String method, final String path, final String version, final Map<String, String> headers) {
+        this(method, path, version, headers, "");
+    }
+
+    public HttpRequest {
+        headers = Map.copyOf(headers);
+    }
+
     public static HttpRequest from(final BufferedReader reader) throws IOException {
         final var requestLine = reader.readLine();
 
@@ -40,11 +48,16 @@ public record HttpRequest(String method, String path, String version, Map<String
                 requestParts[0],
                 requestParts[1],
                 requestParts[2],
-                Map.copyOf(parsedHeaders)
+                parsedHeaders,
+                ""
         );
     }
 
     public String header(final String name) {
         return headers.get(name.toLowerCase(Locale.ROOT));
+    }
+
+    public HttpRequest withBody(final String requestBody) {
+        return new HttpRequest(method, path, version, headers, requestBody);
     }
 }

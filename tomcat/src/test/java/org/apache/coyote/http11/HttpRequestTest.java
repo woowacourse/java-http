@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +47,16 @@ class HttpRequestTest {
         assertThatThrownBy(() -> HttpRequest.from(reader))
                 .isInstanceOf(IOException.class)
                 .hasMessage("Invalid request header");
+    }
+
+    @Test
+    void addingBodyCreatesNewRequest() {
+        final var request = new HttpRequest("POST", "/login", "HTTP/1.1", Map.of());
+
+        final var requestWithBody = request.withBody("account=gugu&password=password");
+
+        assertThat(request.body()).isEmpty();
+        assertThat(requestWithBody.body()).isEqualTo("account=gugu&password=password");
     }
 
     private BufferedReader requestReader(final String... lines) {

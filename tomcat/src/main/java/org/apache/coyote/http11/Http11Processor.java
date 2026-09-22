@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -46,48 +44,39 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)
         ) {
-            String headerFirstLine = readLine(bufferedInputStream);
-
-            Map<String, String> headers = readHeaders(bufferedInputStream);
-            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-            String reqBody = readReqBody(bufferedInputStream, contentLength);
-
-            String method = headerFirstLine.split(" ")[0];
-            String reqUri = headerFirstLine.split(" ")[1];
-
-            int queryIndex = reqUri.indexOf("?");
-            String pathUri = readPathUri(reqUri, queryIndex);
-            String query = readQuery(reqUri, queryIndex);
-
+            HttpRequest httpRequest = HttpRequest.from(bufferedInputStream);
+            String method = httpRequest.getMethod();
+            String pathUri = httpRequest.getPathUri();
+            String requestBody = httpRequest.getRequestBody();
             String status = "200 OK";
 
             if (pathUri.equals("/register") && method.equals("POST")) {
-                if (isLogin(headers.get("Cookie"))) {
+                if (isLogin(httpRequest.getHeader("Cookie"))) {
                     writeAndFlush(outputStream, createForbiddenResponse("403 Forbidden"));
                     return;
                 }
-                handleRegister(reqBody, outputStream);
+                handleRegister(requestBody, outputStream);
                 return;
             }
 
             if (pathUri.equals("/login") && method.equals("GET")) {
-                if (isLogin(headers.get("Cookie"))) {
+                if (isLogin(httpRequest.getHeader("Cookie"))) {
                     writeAndFlush(outputStream, createRedirectResponse("302 Found"));
                     return;
                 }
             }
 
             if (pathUri.equals("/logout") && method.equals("POST")) {
-                handleLogout(headers.get("Cookie"));
+                handleLogout(httpRequest.getHeader("Cookie"));
                 writeAndFlush(outputStream, createLogoutResponse("302 Found"));
                 return;
             }
 
             if (pathUri.equals("/login") && method.equals("POST")) {
-                User user = login(reqBody);
+                User user = login(requestBody);
 
                 if (user != null) {
-                    String jsessionId = storeSession(headers, user);
+                    String jsessionId = storeSession(httpRequest.getHeader("Cookie"), user);
 
                     writeAndFlush(
                             outputStream,
@@ -118,37 +107,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String readLine(BufferedInputStream inputStream) throws IOException {
-        ByteArrayOutputStream line = new ByteArrayOutputStream();
-
-        int current;
-        boolean isCarriageReturn = false;
-
-        while ((current = inputStream.read()) != -1) {
-            if (isCarriageReturn) {
-                if (current == '\n') {
-                    return new String(
-                            line.toByteArray(),
-                            StandardCharsets.ISO_8859_1
-                    );
-                }
-                line.write('\r');
-                isCarriageReturn = false;
-            }
-            if (current == '\r') {
-                isCarriageReturn = true;
-            } else {
-                line.write(current);
-            }
-        }
-
-        throw new EOFException("라인이 끝나기 전에 스트림이 종료되었습니다.");
-    }
-
-    private static String storeSession(Map<String, String> headers, User user) {
+    private static String storeSession(String cookie, User user) {
+        String jsessionId = getJsessionId(cookie);
         SessionManager sessionManager = SessionManager.getInstance();
 
-        Session oldSession = sessionManager.findSession(getJsessionId(headers.get("Cookie")));
+        Session oldSession = sessionManager.findSession(jsessionId);
         if (oldSession != null) {
             oldSession.invalidate();
             sessionManager.remove(oldSession.getJsessionId());
@@ -167,12 +130,12 @@ public class Http11Processor implements Runnable, Processor {
         return httpCookie.getCookieValue("JSESSIONID");
     }
 
-    private static void handleRegister(String reqBody, OutputStream outputStream) throws IOException {
-        Map<String, String> reqBodyParams = parseQueryParams(reqBody);
+    private static void handleRegister(String requestBody, OutputStream outputStream) throws IOException {
+        Map<String, String> requestBodyParams = parseQueryParams(requestBody);
 
-        String account = reqBodyParams.get("account");
-        String password = reqBodyParams.get("password");
-        String email = reqBodyParams.get("email");
+        String account = requestBodyParams.get("account");
+        String password = requestBodyParams.get("password");
+        String email = requestBodyParams.get("email");
 
         if (isBlank(account) || isBlank(password) || isBlank(email)) {
             writeAndFlush(outputStream, createBadRequestResponse("400 Bad Request"));
@@ -187,8 +150,8 @@ public class Http11Processor implements Runnable, Processor {
         return value == null || value.isBlank();
     }
 
-    private static User login(String reqBody) {
-        Map<String, String> queryParams = parseQueryParams(reqBody);
+    private static User login(String requestBody) {
+        Map<String, String> queryParams = parseQueryParams(requestBody);
 
         if (queryParams.get("account") == null || queryParams.get("password") == null) {
             return null;
@@ -223,9 +186,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static String createLoginResponse(String status, String jsessionId) {
         return String.join("\r\n",
-                "HTTP/1.1 " + status + " \r\n",
-                "Set-Cookie: JSESSIONID=" + jsessionId + "\r\n",
-                "Location: /index.html\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Set-Cookie: JSESSIONID=" + jsessionId,
+                "Location: /index.html",
                 "Content-Length: 0",
                 "",
                 ""
@@ -249,7 +212,8 @@ public class Http11Processor implements Runnable, Processor {
                 "Location: /index.html",
                 "Content-Length: 0",
                 "",
-                "");
+                ""
+            );
     }
 
     private static String createForbiddenResponse(String status) {
@@ -314,20 +278,6 @@ public class Http11Processor implements Runnable, Processor {
         return Path.of(resource.toURI());
     }
 
-    private static String readReqBody(BufferedInputStream bufferedInputStream, int contentLength) throws IOException {
-        if (contentLength == 0) {
-            return "";
-        }
-
-        byte[] bytes = bufferedInputStream.readNBytes(contentLength);
-
-        if (bytes.length != contentLength) {
-            throw new EOFException("요청 바디가 중간에 끝났습니다.");
-        }
-
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
     private void handleLogout(String cookie) {
         String jsessionId = getJsessionId(cookie);
         SessionManager sessionManager = SessionManager.getInstance();
@@ -348,31 +298,6 @@ public class Http11Processor implements Runnable, Processor {
 
         Session session = SessionManager.getInstance().findSession(jsessionId);
         return session != null && session.getAttribute("user") != null;
-    }
-
-    private Map<String, String> readHeaders(BufferedInputStream bufferedInputStream) throws IOException {
-        Map<String, String> headerMaps = new HashMap<>();
-        String line;
-
-        while (!(line = readLine(bufferedInputStream)).isEmpty()) {
-            headerMaps.put(line.split(":")[0].trim(), line.split(":")[1].trim());
-        }
-
-        return headerMaps;
-    }
-
-    private String readQuery(String reqUri, int queryIndex) {
-        if (queryIndex == -1) {
-            return "";
-        }
-        return reqUri.substring(queryIndex + 1);
-    }
-
-    private String readPathUri(String reqUri, int queryIndex) {
-        if (queryIndex == -1) {
-            return reqUri;
-        }
-        return reqUri.substring(0, queryIndex);
     }
 
     private String normalizePathUri(String pathUri) {

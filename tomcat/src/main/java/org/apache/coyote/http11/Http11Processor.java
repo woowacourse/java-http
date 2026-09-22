@@ -4,6 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.enums.HttpMethod;
 import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.handler.LoginPageHandler;
 import org.apache.coyote.http11.handler.LoginRequestHandler;
 import org.apache.coyote.http11.handler.RegisterRequestHandler;
 import org.apache.coyote.http11.handler.RequestHandler;
@@ -30,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.handlers = Map.of(
+                new Route(HttpMethod.GET, "/login"), new LoginPageHandler(),
                 new Route(HttpMethod.POST, "/login"), new LoginRequestHandler(),
                 new Route(HttpMethod.POST, "/register"), new RegisterRequestHandler()
         );
@@ -54,7 +56,6 @@ public class Http11Processor implements Runnable, Processor {
             final Optional<String> newCookie = getNewCookie(httpRequest, httpResponse);
             final var responseBody = createResponseBody(httpResponse.path());
             final String contentType = getContentType(httpResponse.path());
-
 
             var response = "";
             if (newCookie.isPresent()) {

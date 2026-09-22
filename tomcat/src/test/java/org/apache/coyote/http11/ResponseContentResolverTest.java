@@ -47,6 +47,38 @@ class ResponseContentResolverTest {
         }
     }
 
+    @Test
+    @DisplayName("/register 요청은 회원가입 페이지의 내용을 반환한다")
+    void registerPathResolvesToRegisterPageBody() throws IOException {
+        // given
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/register.html")) {
+            assertThat(resource).isNotNull();
+            final var expectedBody = resource.readAllBytes();
+
+            // when
+            final var response = resolver.resolve("/register");
+
+            // then
+            assertThat(response.body()).isEqualTo(expectedBody);
+        }
+    }
+
+    @Test
+    @DisplayName("/401.html 요청은 인증 실패 페이지의 내용을 반환한다")
+    void unauthorizedPathResolvesToUnauthorizedPageBody() throws IOException {
+        // given
+        try (final var resource = getClass().getClassLoader().getResourceAsStream("static/401.html")) {
+            assertThat(resource).isNotNull();
+            final byte[] expectedBody = resource.readAllBytes();
+
+            // when
+            final var response = resolver.resolve("/401.html");
+
+            // then
+            assertThat(response.body()).isEqualTo(expectedBody);
+        }
+    }
+
     @Nested
     @DisplayName("등록된 정적 리소스를 읽지 못한 경우")
     class ResourceLoadingFailure {

@@ -38,4 +38,25 @@ class Http11RequestParserTest {
                 .map(Cookie::getValue)
                 .contains("session-id");
     }
+
+    @Test
+    @DisplayName("요청 본문은 Content-Length 바이트만큼만 읽는다.")
+    void readBodyByContentLengthBytes() throws Exception {
+        // given
+        String body = "account=러로";
+        String message = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body
+        ) + "TAIL";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+
+        // when
+        HttpRequest request = new Http11RequestParser().parse(inputStream);
+
+        // then
+        assertThat(request.getParameter("account")).contains("러로");
+    }
 }

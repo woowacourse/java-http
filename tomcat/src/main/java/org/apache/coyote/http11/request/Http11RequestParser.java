@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
@@ -12,15 +11,14 @@ import java.util.Map;
 public class Http11RequestParser {
 
     public HttpRequest parse(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String requestLine = reader.readLine();
+        String requestLine = readLine(inputStream);
 
         if (requestLine == null) {
             return null;
         }
 
-        HttpHeaders headers = readHeaders(reader);
-        String requestBody = readRequestBody(reader, headers);
+        HttpHeaders headers = readHeaders(inputStream);
+        String requestBody = readRequestBody(inputStream, headers);
 
         return new HttpRequest(
                 new RequestLine(requestLine),
@@ -30,11 +28,11 @@ public class Http11RequestParser {
         );
     }
 
-    private HttpHeaders readHeaders(BufferedReader reader) throws IOException {
+    private HttpHeaders readHeaders(InputStream inputStream) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String header;
 
-        while ((header = reader.readLine()) != null && !header.isEmpty()) {
+        while ((header = readLine(inputStream)) != null && !header.isEmpty()) {
             String[] nameAndValue = header.split(":", 2);
             if (nameAndValue.length == 2) {
                 headers.put(
@@ -47,7 +45,7 @@ public class Http11RequestParser {
         return new HttpHeaders(headers);
     }
 
-    private String readRequestBody(BufferedReader reader, HttpHeaders headers) throws IOException {
+    private String readRequestBody(InputStream inputStream, HttpHeaders headers) throws IOException {
         String contentLengthHeader = headers.find(HttpHeaders.CONTENT_LENGTH).orElse(null);
 
         if (contentLengthHeader == null) {
@@ -55,19 +53,43 @@ public class Http11RequestParser {
         }
 
         int contentLength = Integer.parseInt(contentLengthHeader);
-        char[] buffer = new char[contentLength];
+        byte[] body = inputStream.readNBytes(contentLength);
 
-        int offset = 0;
-        while (offset < contentLength) {
-            int readCount = reader.read(buffer, offset, contentLength - offset);
+        return new String(body, StandardCharsets.UTF_8);
+    }
 
-            if (readCount == -1) {
+    private String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int current;
+        boolean previousWasCarriageReturn = false;
+
+        while ((current = inputStream.read()) != -1) {
+            if (previousWasCarriageReturn && current == '\n') {
+                previousWasCarriageReturn = false;
                 break;
             }
 
-            offset += readCount;
+            if (previousWasCarriageReturn) {
+                buffer.write('\r');
+                previousWasCarriageReturn = false;
+            }
+
+            if (current == '\r') {
+                previousWasCarriageReturn = true;
+                continue;
+            }
+
+            buffer.write(current);
         }
 
-        return new String(buffer, 0, offset);
+        if (current == -1 && buffer.size() == 0 && !previousWasCarriageReturn) {
+            return null;
+        }
+
+        if (previousWasCarriageReturn) {
+            buffer.write('\r');
+        }
+
+        return buffer.toString(StandardCharsets.UTF_8);
     }
 }

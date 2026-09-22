@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.session.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -17,11 +18,15 @@ class Http11ProcessorCookieTest {
     );
 
     private String createdSessionId;
+    private String existingSessionId;
 
     @AfterEach
     void tearDown() {
         if (createdSessionId != null) {
             SessionManager.getInstance().remove(createdSessionId);
+        }
+        if (existingSessionId != null) {
+            SessionManager.getInstance().remove(existingSessionId);
         }
     }
 
@@ -69,6 +74,9 @@ class Http11ProcessorCookieTest {
 
     @Test
     void 기존_JSESSIONID가_있으면_새로운_쿠키를_응답하지_않는다() {
+        existingSessionId = "existing-session-id";
+        SessionManager.getInstance().add(new Session(existingSessionId));
+
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
@@ -80,5 +88,26 @@ class Http11ProcessorCookieTest {
         new Http11Processor(socket).process(socket);
 
         assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID");
+    }
+
+    @Test
+    void 유효하지_않은_JSESSIONID면_새로운_쿠키를_응답한다() {
+        final String invalidSessionId = "invalid-session-id";
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + invalidSessionId,
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+
+        new Http11Processor(socket).process(socket);
+
+        final Matcher matcher = JSESSION_ID_PATTERN.matcher(socket.output());
+        assertThat(matcher.find()).isTrue();
+
+        createdSessionId = matcher.group(1);
+        assertThat(createdSessionId).isNotEqualTo(invalidSessionId);
+        assertThat(SessionManager.getInstance().findSession(createdSessionId)).isNotNull();
     }
 }

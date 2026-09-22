@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,10 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest request = HttpRequest.from(reader);
             HttpResponse response = new HttpResponse(outputStream);
-            if (request.getCookies().getValue("JSESSIONID").isEmpty()) {
-                final var session = request.getSession(true);
+
+            final Optional<String> requestedSessionId = request.getCookies().getValue("JSESSIONID");
+            final Session session = request.getSession(true);
+            if (requestedSessionId.filter(session.getId()::equals).isEmpty()) {
                 response.addCookie("JSESSIONID", session.getId());
             }
 

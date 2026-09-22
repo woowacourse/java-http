@@ -62,10 +62,12 @@ class Http11ProcessorTest {
     @Test
     void loginSuccessRedirect() {
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -85,10 +87,12 @@ class Http11ProcessorTest {
     @Test
     void loginFailureRedirect() {
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
+                "Content-Length: 27 ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "");
+                "account=gugu&password=wrong");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

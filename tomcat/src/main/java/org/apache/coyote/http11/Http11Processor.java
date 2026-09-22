@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +27,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ROOT_URI = "/";
     private static final String STATIC_RESOURCE_ROOT = "static";
     private static final String LOGIN = "/login";
+    private static final String REGISTER = "/register";
+    private static final String POST_METHOD = "POST";
     private static final String LOGIN_SUCCESS = "/index.html";
     private static final String LOGIN_FAILURE = "/401.html";
     private static final String DOT_HTML = ".html";
@@ -58,13 +61,23 @@ public class Http11Processor implements Runnable, Processor {
             String requestUri = requestParts[1];
             final String version = requestParts[2];
             final Map<String, String> headers = readHeaders(reader);
+            final String requestBody = readRequestBody(method, headers, reader);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             final String requestPath = extractRequestPath(requestUri);
 
-            if (hasQueryString(requestUri) && requestPath.equals(LOGIN)) {
-                final String location = getLoginRedirectionLocation(requestUri);
+            if (method.equals(POST_METHOD) && requestPath.equals(LOGIN)) {
+                final String location = getLoginRedirectionLocation(requestBody);
                 final String responseHeader = createRedirectResponseHeader(version, location);
+
+                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
+            if (method.equals(POST_METHOD) && requestPath.equals(REGISTER)) {
+                saveUser(requestBody);
+                final String responseHeader = createRedirectResponseHeader(version, LOGIN_SUCCESS);
 
                 outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
@@ -73,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
 
             requestUri = requestPath;
 
-            if (requestUri.equals(LOGIN)) {
+            if (requestUri.equals(LOGIN) || requestUri.equals(REGISTER)) {
                 requestUri += DOT_HTML;
             }
 
@@ -104,6 +117,19 @@ public class Http11Processor implements Runnable, Processor {
             headers.put(name, value);
         }
         return headers;
+    }
+
+    private String readRequestBody(final String method,
+                                   final Map<String, String> headers,
+                                   final BufferedReader reader) throws IOException {
+        if (!method.equals(POST_METHOD)) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     private String createResponseHeader(final String version, String contentType, final int contentLength) {
@@ -155,16 +181,38 @@ public class Http11Processor implements Runnable, Processor {
         return requestUri.substring(0, requestUri.indexOf('?'));
     }
 
-    private String getLoginRedirectionLocation(final String requestUri) {
-        final int queryIndex = requestUri.indexOf('?');
-        final String queryString = requestUri.substring(queryIndex + 1);
-        final String[] queryStringParts = queryString.split("&");
+    private String getLoginRedirectionLocation(final String requestBody) {
+        final String[] formParts = requestBody.split("&");
 
-        if (checkUser(queryStringParts)) {
+        if (checkUser(formParts)) {
             return LOGIN_SUCCESS;
         }
 
         return LOGIN_FAILURE;
+    }
+
+    private void saveUser(final String requestBody) {
+        final Map<String, String> formData = parseFormData(requestBody);
+        final User user = new User(
+                formData.get("account"),
+                formData.get("password"),
+                formData.get("email")
+        );
+        InMemoryUserRepository.save(user);
+    }
+
+    private Map<String, String> parseFormData(final String requestBody) {
+        final Map<String, String> formData = new HashMap<>();
+        final String[] formFields = requestBody.split("&");
+
+        for (String formField : formFields) {
+            final String[] keyValue = formField.split("=", 2);
+            if (keyValue.length < 2) {
+                continue;
+            }
+            formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+        }
+        return formData;
     }
 
     private boolean checkUser(final String[] requestParts) {

@@ -35,6 +35,15 @@ public class HttpResponse {
         return new HttpResponse("302 Found", headers, "");
     }
 
+    public static HttpResponse redirectWithCookie(String location, String cookie) {
+        List<String> headers = new ArrayList<>();
+        headers.add("Location: " + location);
+        headers.add("Set-Cookie: " + cookie);
+        headers.add("Content-Length: 0");
+
+        return new HttpResponse("302 Found", headers, "");
+    }
+
     public String toHttpMessage() {
         List<String> response = new ArrayList<>();
         response.add("HTTP/1.1 " + status);

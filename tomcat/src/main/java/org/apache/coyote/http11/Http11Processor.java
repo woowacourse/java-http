@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -93,10 +94,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createLoginResponse(HttpRequest httpRequest) {
-        if (handleLogin(httpRequest)) {
+        if (!handleLogin(httpRequest)) {
+            return HttpResponse.redirect("/401.html");
+        }
+
+        if (httpRequest.getCookie().contains("JSESSIONID")) {
             return HttpResponse.redirect("/index.html");
         }
-        return HttpResponse.redirect("/401.html");
+
+        return HttpResponse.redirectWithCookie(
+                "/index.html",
+                "JSESSIONID=" + UUID.randomUUID()
+        );
     }
 
     private boolean handleLogin(HttpRequest httpRequest) {

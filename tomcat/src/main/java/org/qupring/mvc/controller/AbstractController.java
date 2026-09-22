@@ -19,10 +19,12 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        // NOOP
+        response.setStatus(304);
+        response.setLocation("/404.html");
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        // NOOP
+        response.setStatus(304);
+        response.setLocation("/404.html");
     }
 }

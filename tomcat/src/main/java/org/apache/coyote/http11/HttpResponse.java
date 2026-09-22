@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class HttpResponse {
-    private DataOutputStream dos = null;
+    private DataOutputStream dos;
     private Map<String, String> headers = new HashMap<>();
 
     public HttpResponse(OutputStream out) {

@@ -15,19 +15,23 @@ public class HttpRequest {
     private static final String CONTENT_LENGTH = "content-length";
     private static final String PARAMETER_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final String COOKIE = "cookie";
 
     private final String method;
     private final String path;
     private final Map<String, String> headers;
     private final String body;
     private final Map<String, String> parameters;
+    private final HttpCookie cookie;
 
-    private HttpRequest(String method, String path, Map<String, String> headers, String body, Map<String, String> parameters) {
+    private HttpRequest(String method, String path, Map<String, String> headers, String body,
+                        Map<String, String> parameters, HttpCookie cookie) {
         this.method = method;
         this.path = path;
         this.headers = headers;
         this.body = body;
         this.parameters = parameters;
+        this.cookie = cookie;
     }
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
@@ -40,8 +44,9 @@ public class HttpRequest {
         String body = parseBody(reader, headers);
 
         Map<String, String> parameters = parseParameters(body);
+        HttpCookie cookie = HttpCookie.from(headers.get(COOKIE));
 
-        return new HttpRequest(method, path, headers, body, parameters);
+        return new HttpRequest(method, path, headers, body, parameters, cookie);
     }
 
     private static String parsePath(String uri) {
@@ -107,5 +112,9 @@ public class HttpRequest {
 
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    public String getJSessionId() {
+        return cookie.getJSessionId();
     }
 }

@@ -76,9 +76,9 @@ public class Http11Processor implements Runnable, Processor {
             } else if (path.equals(REGISTER_PATH)) {
                 response = processRegisterRequest(requestInformations);
             } else {
-                response = responseBuilder.build(
+                response = responseBuilder.buildStaticResource(
                         HttpStatus.OK,
-                        requestParser.getAccept(requestInformations),
+                        path,
                         processOtherRequest(path)
                 );
             }

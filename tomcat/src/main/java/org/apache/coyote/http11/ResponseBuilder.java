@@ -9,6 +9,14 @@ public class ResponseBuilder {
     public String build(HttpStatus httpStatus, String accept, String responseBody) {
         String contentType = resolveContentType(accept);
 
+        return buildWithContentType(httpStatus, contentType, responseBody);
+    }
+
+    public String buildStaticResource(HttpStatus httpStatus, String path, String responseBody) {
+        return buildWithContentType(httpStatus, resolveContentTypeByPath(path), responseBody);
+    }
+
+    private String buildWithContentType(HttpStatus httpStatus, String contentType, String responseBody) {
         return String.join("\r\n",
                 statusLine(httpStatus),
                 "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -58,5 +66,19 @@ public class ResponseBuilder {
         }
 
         return preferred;
+    }
+
+    private String resolveContentTypeByPath(String path) {
+        int extensionIndex = path.lastIndexOf('.');
+        if (extensionIndex == -1) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+
+        return switch (path.substring(extensionIndex + 1).toLowerCase()) {
+            case "js" -> "application/javascript";
+            case "css" -> "text/css";
+            case "svg" -> "image/svg+xml";
+            default -> DEFAULT_CONTENT_TYPE;
+        };
     }
 }

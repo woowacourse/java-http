@@ -117,4 +117,20 @@ class Http11ProcessorTest {
                 "",
                 ""));
     }
+
+    @Test
+    void javascriptResourceHasJavascriptContentType() {
+        final var socket = new StubSocket(String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1",
+                "Host: localhost:8080",
+                "Accept: */*",
+                "",
+                ""));
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith(String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: application/javascript;charset=utf-8 "));
+    }
 }

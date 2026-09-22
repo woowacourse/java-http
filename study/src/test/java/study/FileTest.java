@@ -2,8 +2,8 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -23,13 +23,13 @@ class FileTest {
      * 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws Exception {
         final String fileName = "nextstep.txt";
         final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
         Assertions.assertNotNull(resourceUrl);
 
-        final File file = new File(resourceUrl.getFile());
-        final String actual = file.getAbsolutePath();
+        final Path path = Path.of(resourceUrl.toURI());
+        final String actual = path.toString();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -46,7 +46,7 @@ class FileTest {
         Assertions.assertNotNull(resourceUrl);
 
         final Path path = Path.of(resourceUrl.toURI());
-        final List<String> actual = java.nio.file.Files.readAllLines(path);
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

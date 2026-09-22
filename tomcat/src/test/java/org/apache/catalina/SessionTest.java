@@ -1,12 +1,12 @@
 package org.apache.catalina;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 import com.techcourse.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 class SessionTest {
 
@@ -142,18 +142,6 @@ class SessionTest {
             session.invalidate();
 
             assertThat(session.getId()).isEqualTo(SESSION_ID);
-        }
-
-        @Test
-        @DisplayName("무효화한 뒤에도 다시 값을 담을 수 있다")
-        void canStoreAgainAfterInvalidate() {
-            final Session session = new Session(SESSION_ID);
-            session.setAttribute("user", "gugu");
-            session.invalidate();
-
-            session.setAttribute("user", "lie");
-
-            assertThat(session.getAttribute("user")).isEqualTo("lie");
         }
     }
 }

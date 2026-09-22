@@ -19,6 +19,7 @@ import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

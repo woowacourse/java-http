@@ -1,12 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Objects;
+import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
 
     private final HttpMethod method;
-    private final String path;
-    private final String queryString;
+    private final RequestUri uri;
     private final String protocolVersion;
 
     public RequestLine(final String requestLine) {
@@ -14,21 +14,13 @@ public class RequestLine {
 
         final String[] components = requestLine.strip().split(" ");
         if (components.length != 3) {
-            throw new IllegalArgumentException("잘못된 요청 첫 줄: " + requestLine);
+            throw new IllegalArgumentException("잘못된 RequestLine: " + requestLine);
         }
 
         this.method = HttpMethod.from(components[0]);
+        this.uri = new RequestUri(components[1]);
         this.protocolVersion = components[2];
 
-        final String requestUri = components[1];
-        final int queryIndex = requestUri.indexOf('?');
-        if (queryIndex >= 0) {
-            this.path = requestUri.substring(0, queryIndex);
-            this.queryString = requestUri.substring(queryIndex + 1);
-        } else {
-            this.path = requestUri;
-            this.queryString = "";
-        }
     }
 
     public boolean isPost() {
@@ -40,7 +32,7 @@ public class RequestLine {
     }
 
     public String getPath() {
-        return path;
+        return uri.getPath();
     }
 
 }

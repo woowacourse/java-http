@@ -1,8 +1,8 @@
 package com.techcourse.controller;
 
 import com.techcourse.model.User;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.Cookies;
 import org.apache.coyote.http11.request.FormContents;
 import org.apache.coyote.http11.request.HttpHeaders;

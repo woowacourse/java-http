@@ -24,6 +24,10 @@ public class HttpResponse {
         cookies.add(cookie);
     }
 
+    public void clearCookies() {
+        cookies.clear();
+    }
+
     public void redirect(String location) {
         List<String> lines = new ArrayList<>();
         lines.add("HTTP/1.1 " + HttpStatus.FOUND.getStatusLine());

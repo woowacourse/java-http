@@ -1,8 +1,8 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -38,9 +38,10 @@ public class LoginController extends AbstractController {
                 .ifPresentOrElse(
                         user -> {
                             SessionManager.remove(request.getSessionId());
-                            Session session = createSession();
+                            Session session = SessionManager.create();
                             session.setAttribute("user", user);
                             log.info("조회된 사용자: id={}, account={}", user.getId(), user.getAccount());
+                            response.clearCookies();
                             response.addCookie(Cookie.createJSessionId(session.getId()));
                             response.redirect("/index.html");
                         },
@@ -53,10 +54,4 @@ public class LoginController extends AbstractController {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private Session createSession() {
-        Session session = new Session(java.util.UUID.randomUUID().toString());
-        SessionManager.add(session);
-
-        return session;
-    }
 }

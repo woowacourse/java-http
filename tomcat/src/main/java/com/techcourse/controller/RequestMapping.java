@@ -14,6 +14,21 @@ public class RequestMapping {
         this.defaultController = defaultController;
     }
 
+    public static RequestMapping createDefault() {
+        LoginController loginController = new LoginController();
+        RegisterController registerController = new RegisterController();
+
+        return new RequestMapping(
+                Map.of(
+                        "/login", loginController,
+                        "/login.html", loginController,
+                        "/register", registerController,
+                        "/register.html", registerController
+                ),
+                new StaticResourceController()
+        );
+    }
+
     public Controller getController(HttpRequest request) {
         return mappings.getOrDefault(request.getPath(), defaultController);
     }

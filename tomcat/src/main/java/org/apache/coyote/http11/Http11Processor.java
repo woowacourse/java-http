@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +56,22 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             final List<String> requestHead = readRequestHead(reader);
+            String cookieHeader = extractCookieHeader(requestHead);
+            HttpCookie httpCookie = new HttpCookie(cookieHeader);
+            String sessionId = httpCookie.getValue("JSESSIONID");
+            boolean shouldSetCookie = sessionId.isBlank();
+
+            if (shouldSetCookie) {
+                sessionId = UUID.randomUUID().toString();
+            }
 
             int contentLength = extractContentLength(requestHead);
             String requestBody = readRequestBody(reader, contentLength);
 
-            final var response = resolveResponse(requestHead, requestBody);
+            String response = resolveResponse(requestHead, requestBody);
+            if (shouldSetCookie) {
+                response = addSetCookieHeader(response, sessionId);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -79,6 +91,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return 0;
+    }
+
+    private String extractCookieHeader(List<String> requestHead) {
+        for (String headerLine : requestHead) {
+            String[] headerParts = headerLine.split(":", 2);
+
+            if (headerParts.length == 2
+                    && headerParts[0].trim().equalsIgnoreCase("Cookie")) {
+                return headerParts[1].trim();
+            }
+        }
+
+        return "";
     }
 
     private List<String> readRequestHead(BufferedReader reader) throws IOException {
@@ -261,6 +286,16 @@ public class Http11Processor implements Runnable, Processor {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .isPresent();
+    }
+
+    private String addSetCookieHeader(String response, String sessionId) {
+        int statusLineEndIndex = response.indexOf("\r\n");
+        String statusLine = response.substring(0, statusLineEndIndex);
+        String remainingResponse = response.substring(statusLineEndIndex);
+
+        return statusLine
+                + "\r\nSet-Cookie: JSESSIONID=" + sessionId
+                + remainingResponse;
     }
 
     private String createOkResponse(String resource) {

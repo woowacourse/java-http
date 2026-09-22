@@ -44,28 +44,28 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie httpCookie = new HttpCookie(httpRequest.getHeaders().get("Cookie"));
             String sessionId = httpCookie.getJSessionId();
             Session session = getSession(sessionId);
-            String cookieHeader = getCookieHeader(httpCookie, session);
+            String sessionCookie = getSessionCookie(httpCookie, session);
 
-            String response = "";
+            HttpResponse response = new HttpResponse(httpRequest.getVersion(), 404, "Not Found", "");
             if (requestMethod.equals("GET")) {
-                response = getResponse(httpRequest, cookieHeader, session);
+                response = getResponse(httpRequest, sessionCookie, session);
             }
             if (requestMethod.equals("POST")) {
-                response = getPostResponse(httpRequest, cookieHeader, session);
+                response = getPostResponse(httpRequest, sessionCookie, session);
             }
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getCookieHeader(HttpCookie httpCookie, Session session) {
+    private String getSessionCookie(HttpCookie httpCookie, Session session) {
         if (session.getId().equals(httpCookie.getJSessionId())) {
             return "";
         }
-        return "Set-Cookie: JSESSIONID=" + session.getId() + "\r\n";
+        return "JSESSIONID=" + session.getId();
     }
 
     private Session getSession(String sessionId) {
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    private String getPostResponse(HttpRequest httpRequest, String cookieHeader, Session session) {
+    private HttpResponse getPostResponse(HttpRequest httpRequest, String sessionCookie, Session session) {
         Map<String, String> queryParameters = getQuerySeparate(httpRequest.getRequestBody());
 
         if (httpRequest.getPath().equals("/login")) {
@@ -88,64 +88,73 @@ public class Http11Processor implements Runnable, Processor {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
 
             if (foundUser.isEmpty() || !foundUser.get().checkPassword(password)) {
-                return getRedirectResponse("/401.html", getContentType(httpRequest.getPath()), cookieHeader);
+                return getRedirectResponse(httpRequest, "/401.html", getContentType(httpRequest.getPath()),
+                        sessionCookie);
             }
             session.setAttribute("user", foundUser.get());
-            return getRedirectResponse("/index.html", getContentType(httpRequest.getPath()), cookieHeader);
+            return getRedirectResponse(httpRequest, "/index.html", getContentType(httpRequest.getPath()),
+                    sessionCookie);
         }
 
         if (httpRequest.getPath().equals("/register")) {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParameters.get("account"));
             if (foundUser.isPresent()) {
                 log.info("회원가입 실패! 아이디 : {}", queryParameters.get("account"));
-                return getRedirectResponse("/register.html", getContentType(httpRequest.getPath()), cookieHeader);
+                return getRedirectResponse(httpRequest, "/register.html", getContentType(httpRequest.getPath()),
+                        sessionCookie);
             }
             User user = new User(queryParameters.get("account"), queryParameters.get("password"),
                     queryParameters.get("email"));
             InMemoryUserRepository.save(user);
             session.setAttribute("user", user);
-            return getRedirectResponse("/index.html", getContentType(httpRequest.getPath()), cookieHeader);
+            return getRedirectResponse(httpRequest, "/index.html", getContentType(httpRequest.getPath()),
+                    sessionCookie);
         }
-        return getRedirectResponse("/404.html", getContentType(httpRequest.getPath()), cookieHeader);
+        return getRedirectResponse(httpRequest, "/404.html", getContentType(httpRequest.getPath()), sessionCookie);
     }
 
-    private String getResponse(HttpRequest httpRequest, String cookieHeader, Session session) throws IOException {
+    private HttpResponse getResponse(HttpRequest httpRequest, String sessionCookie, Session session)
+            throws IOException {
         if (httpRequest.getPath().equals("/login")) {
             if (session.getAttribute("user") != null) {
                 log.info("로그인 페이지 접근! 세션 아이디: {}", session.getId());
-                return getRedirectResponse("/index.html", getContentType(httpRequest.getPath()),
-                        cookieHeader);
+                return getRedirectResponse(httpRequest, "/index.html", getContentType(httpRequest.getPath()),
+                        sessionCookie);
 
             }
         }
         if (!httpRequest.getPath().equals("/")) {
             String paths = getStaticResource(httpRequest.getPath());
             if (paths != null) {
-                return getOkResponse(getContentType(httpRequest.getPath()), paths,
-                        cookieHeader);
+                return getOkResponse(httpRequest, getContentType(httpRequest.getPath()), paths, sessionCookie);
             }
         }
-        return getOkResponse(getContentType(httpRequest.getPath()), "Hello world!",
-                cookieHeader);
+        return getOkResponse(httpRequest, getContentType(httpRequest.getPath()), "Hello world!", sessionCookie);
     }
 
-    private String getRedirectResponse(String location, String contentType, String cookieHeader) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                contentType,
-                "Content-Length: " + 0 + " ",
-                cookieHeader,
-                "");
+    private HttpResponse getRedirectResponse(HttpRequest httpRequest, String location,
+                                             String contentType, String sessionCookie) {
+        HttpResponse response = new HttpResponse(httpRequest.getVersion(), 302, "Found", "");
+        response.addHeader("Location", location + " ");
+        response.addHeader("Content-Type", contentType);
+        response.addHeader("Content-Length", "0 ");
+        addSessionCookie(response, sessionCookie);
+        return response;
     }
 
-    private String getOkResponse(String contentType, String body, String cookieHeader) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                contentType,
-                "Content-Length: " + body.getBytes().length + " ",
-                cookieHeader,
-                body);
+    private HttpResponse getOkResponse(HttpRequest httpRequest, String contentType, String body,
+                                       String sessionCookie) {
+        HttpResponse response = new HttpResponse(httpRequest.getVersion(), 200, "OK", body);
+        response.addHeader("Content-Type", contentType);
+        response.addHeader("Content-Length", body.getBytes(StandardCharsets.UTF_8).length + " ");
+        addSessionCookie(response, sessionCookie);
+        return response;
+    }
+
+    private void addSessionCookie(HttpResponse response, String sessionCookie) {
+        if (!sessionCookie.isEmpty()) {
+            response.addHeader("Set-Cookie", sessionCookie);
+        }
     }
 
     private Map<String, String> getQuerySeparate(String requestUri) {
@@ -162,12 +171,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(String requestUri) {
         if (requestUri.endsWith(".css")) {
-            return "Content-Type: text/css;charset=utf-8 ";
+            return "text/css;charset=utf-8 ";
         }
         if (requestUri.endsWith(".js")) {
-            return "Content-Type: text/javascript;charset=utf-8 ";
+            return "text/javascript;charset=utf-8 ";
         }
-        return "Content-Type: text/html;charset=utf-8 ";
+        return "text/html;charset=utf-8 ";
     }
 
     @Nullable

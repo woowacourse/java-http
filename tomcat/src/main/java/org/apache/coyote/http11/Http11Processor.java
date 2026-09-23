@@ -5,12 +5,9 @@ import static com.techcourse.db.InMemoryUserRepository.findByAccount;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,34 +22,9 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
-    private void response(String responseBody, OutputStream outputStream, StatusCode statusCode, String type)
-            throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + statusCode,
-                "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void redirect(String redirectUrl, OutputStream outputStream) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + redirectUrl,
-                "Content-Length: 0",
-                "",
-                ""
-        );
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
     private void empty(OutputStream outputStream, Request request) throws IOException {
-        final var responseBody = "Hello world!";
-        response(responseBody, outputStream, StatusCode.OK, request.getContentTypeName());
+        Response response = Response.empty(request);
+        response.response(outputStream);
     }
 
     private void login(OutputStream outputStream, Request request) throws IOException {
@@ -66,20 +38,22 @@ public class Http11Processor implements Runnable, Processor {
         if ((user != null && !user.checkPassword(password))) {
             loginFail(outputStream);
         }
-        handling(outputStream, request, StatusCode.OK);
+        Response response = handling(request, StatusCode.OK);
+        response.response(outputStream);
     }
 
     private void loginFail(OutputStream outputStream) throws IOException {
-        redirect("/401", outputStream);
+        Response.redirect(outputStream, "/401");
     }
 
     private void loginSuccess(OutputStream outputStream) throws IOException {
-        redirect("/index", outputStream);
+        Response.redirect(outputStream, "/index");
     }
 
     private void register(OutputStream outputStream, Request request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
-            handling(outputStream, request, StatusCode.OK);
+            Response response = handling(request, StatusCode.OK);
+            response.response(outputStream);
             return;
         }
         String account = request.getRequestParam("account");
@@ -87,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         String email = request.getRequestParam("email");
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        redirect("/index", outputStream);
+        Response.redirect(outputStream, "/index");
     }
 
     @Override
@@ -122,18 +96,11 @@ public class Http11Processor implements Runnable, Processor {
             register(outputStream, request);
             return;
         }
-        handling(outputStream, request, StatusCode.OK);
+        Response response = handling(request, StatusCode.OK);
+        response.response(outputStream);
     }
 
-    private void handling(OutputStream outputStream, Request request, StatusCode statusCode) throws IOException {
-        String path = request.getPath();
-        String contentType = request.getContentTypeName();
-        if (!path.contains(".")) {
-            path += "." + contentType;
-        }
-        log.info("path: {}", path);
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        response(responseBody, outputStream, statusCode, contentType);
+    private Response handling(Request request, StatusCode statusCode) throws IOException {
+        return Response.from(request, statusCode, getClass().getClassLoader());
     }
 }

@@ -22,6 +22,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
     private static final int DEFAULT_MAX_QUEUE_SIZE = 100;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 5L;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -45,12 +46,19 @@ public class Connector implements Runnable {
             final int maxThreads,
             final int maxQueueSize
     ) {
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = createExecutorService(maxThreads, maxQueueSize);
+        this(
+                createServerSocket(port, acceptCount),
+                createExecutorService(maxThreads, maxQueueSize)
+        );
+    }
+
+    Connector(final ServerSocket serverSocket, final ExecutorService executorService) {
+        this.serverSocket = serverSocket;
+        this.executorService = executorService;
         this.stopped = false;
     }
 
-    private ExecutorService createExecutorService(final int maxThreads, final int maxQueueSize) {
+    private static ExecutorService createExecutorService(final int maxThreads, final int maxQueueSize) {
         final int checkedMaxThreads = checkMaxThreads(maxThreads);
         final int checkedMaxQueueSize = checkMaxQueueSize(maxQueueSize);
         return new ThreadPoolExecutor(
@@ -62,7 +70,7 @@ public class Connector implements Runnable {
         );
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private static ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
@@ -92,7 +100,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -100,18 +110,22 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection);
+        final var connectionTask = new ConnectionTask(connection);
         try {
-            executorService.execute(processor);
+            executorService.execute(connectionTask);
         } catch (RejectedExecutionException e) {
-            close(connection);
+            connectionTask.close();
             log.warn("HTTP request rejected because the thread pool is full or stopping", e);
         }
     }
 
     public void stop() {
         stopped = true;
-        executorService.shutdown();
+        closeServerSocket();
+        shutdownExecutorService();
+    }
+
+    private void closeServerSocket() {
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -119,7 +133,33 @@ public class Connector implements Runnable {
         }
     }
 
-    private int checkPort(final int port) {
+    private void shutdownExecutorService() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                forceShutdown();
+                awaitForcedTermination();
+            }
+        } catch (InterruptedException e) {
+            forceShutdown();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void forceShutdown() {
+        executorService.shutdownNow().stream()
+                .filter(ConnectionTask.class::isInstance)
+                .map(ConnectionTask.class::cast)
+                .forEach(ConnectionTask::close);
+    }
+
+    private void awaitForcedTermination() throws InterruptedException {
+        if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            log.warn("HTTP worker thread pool did not terminate");
+        }
+    }
+
+    private static int checkPort(final int port) {
         final var MIN_PORT = 1;
         final var MAX_PORT = 65535;
 
@@ -129,18 +169,18 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
+    private static int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 
-    private int checkMaxThreads(final int maxThreads) {
+    private static int checkMaxThreads(final int maxThreads) {
         if (maxThreads <= 0) {
             return DEFAULT_MAX_THREADS;
         }
         return maxThreads;
     }
 
-    private int checkMaxQueueSize(final int maxQueueSize) {
+    private static int checkMaxQueueSize(final int maxQueueSize) {
         if (maxQueueSize <= 0) {
             return DEFAULT_MAX_QUEUE_SIZE;
         }
@@ -152,6 +192,24 @@ public class Connector implements Runnable {
             connection.close();
         } catch (IOException e) {
             log.warn("Failed to close rejected connection", e);
+        }
+    }
+
+    private final class ConnectionTask implements Runnable {
+
+        private final Socket connection;
+
+        private ConnectionTask(final Socket connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public void run() {
+            new Http11Processor(connection).run();
+        }
+
+        private void close() {
+            Connector.this.close(connection);
         }
     }
 }

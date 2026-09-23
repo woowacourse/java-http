@@ -195,13 +195,15 @@ public class Http11Processor implements Runnable, Processor {
             final User user = authenticatedUser.get();
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
 
-            final Session session = findSession(request)
-                    .orElseGet(this::createSession);
+            final Optional<Session> existingSession = findSession(request);
+            final Session session = existingSession.orElseGet(this::createSession);
             session.setAttribute(SESSION_USER_ATTRIBUTE, user);
 
             final Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Location", INDEX_PATH);
-            headers.put("Set-Cookie", JSESSION_ID + "=" + session.getId());
+            if (existingSession.isEmpty()) {
+                headers.put("Set-Cookie", JSESSION_ID + "=" + session.getId());
+            }
             sendRedirect(outputStream, headers);
             return;
         }

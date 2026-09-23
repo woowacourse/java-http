@@ -11,7 +11,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -46,13 +52,141 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String buildResponseWith(InputStream inputStream) throws IOException {
-        String requestUri = parseRequestUriFrom(inputStream);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+        String[] startLine = reader.readLine().split(" ");
+        String httpMethod = startLine[0];
+        String requestUri = startLine[1];
+
+        Map<String, String> headers = readHeaders(reader);
+        String requestBody = readBody(reader, headers);
+        HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
+
+        Session session = findSession(cookie);
+        boolean isNewSession = session == null;
+        if (isNewSession) {
+            session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+        }
+
+        String response = routeRequest(httpMethod, requestUri, requestBody, session);
+        if (isNewSession) {
+            return withSessionCookie(response, session.getId());
+        }
+        return response;
+    }
+
+    private Session findSession(HttpCookie cookie) {
+        if (!cookie.hasJSessionId()) {
+            return null;
+        }
+        return sessionManager.findSession(cookie.getJSessionId());
+    }
+
+    private String routeRequest(String httpMethod, String requestUri, String requestBody, Session session)
+            throws IOException {
         String path = parsePathFrom(requestUri);
-        String queryString = parseQueryStringFrom(requestUri);
 
-        logAccountInfo(queryString);
+        if (path.startsWith("/login")) {
+            if (httpMethod.equals("GET") && isLoggedIn(session)) {
+                return redirect("/index.html");
+            }
+            if (httpMethod.equals("POST")) {
+                return loginResponse(parseFormData(requestBody), session);
+            }
+        }
 
+        if (path.startsWith("/register") && httpMethod.equals("POST")) {
+            return registerResponse(parseFormData(requestBody));
+        }
+
+        return staticResponse(path);
+    }
+
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] keyValue = line.split(": ", 2);
+            headers.put(keyValue[0], keyValue[1]);
+        }
+        return headers;
+    }
+
+    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return null;
+        }
+        int length = Integer.parseInt(contentLength);
+        char[] buffer = new char[length];
+        reader.read(buffer, 0, length);
+        return new String(buffer);
+    }
+
+    private Map<String, String> parseFormData(String data) {
+        Map<String, String> params = new HashMap<>();
+        if (data == null || data.isEmpty()) {
+            return params;
+        }
+        for (String pair : data.split("&")) {
+            String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                params.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return params;
+    }
+
+    private String loginResponse(Map<String, String> params, Session session) {
+        Optional<User> account = findAccount(params.get("account"), params.get("password"));
+        if (account.isEmpty()) {
+            return redirect("/401.html");
+        }
+
+        session.setAttribute("user", account.get());
+        return redirect("/index.html");
+    }
+
+    private boolean isLoggedIn(Session session) {
+        return session.getAttribute("user") != null;
+    }
+
+    private String registerResponse(Map<String, String> params) {
+        User user = new User(params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(user);
+        return redirect("/index.html");
+    }
+
+    private Optional<User> findAccount(String account, String password) {
+        if (account == null || password == null) {
+            return Optional.empty();
+        }
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("user : {}", user.get());
+            return user;
+        }
+
+        return Optional.empty();
+    }
+
+    private String redirect(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location + " "
+        );
+    }
+
+    private String withSessionCookie(String response, String jSessionId) {
+        int statusLineEnd = response.indexOf("\r\n");
+        return response.substring(0, statusLineEnd)
+                + "\r\nSet-Cookie: JSESSIONID=" + jSessionId + " "
+                + response.substring(statusLineEnd);
+    }
+
+    private String staticResponse(String path) throws IOException {
         String contentType = contentTypeOf(path);
         String responseBody = resolveContentOf(path);
 
@@ -64,43 +198,20 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private void logAccountInfo(String queryString) {
-        if (queryString != null) {
-            String[] queryParts = queryString.split("&");
-
-            String accountQuery = queryParts[0].substring(queryParts[0].lastIndexOf("=") + 1);
-            String passwordQuery = queryParts[1].substring(queryParts[1].lastIndexOf("=") + 1);
-
-            Optional<User> account = InMemoryUserRepository.findByAccount(accountQuery);
-            account.ifPresent(user -> {
-                if(user.checkPassword(passwordQuery)) {
-                    log.info("user : " + user);
-                }
-            });
-        }
-    }
-
-    private String parseQueryStringFrom(String requestUri) {
-        if (requestUri.contains("?")) {
-            return requestUri.substring(requestUri.indexOf('?') + 1);
-        }
-        return null;
-    }
-
-    private String parseRequestUriFrom(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        return bufferedReader.readLine().split(" ")[1];
-    }
-
     private String parsePathFrom(String requestUri) {
-        if (!requestUri.endsWith(".html")) {
+        String path = requestUri;
+        if (path.contains("?")) {
             int queryFileStrEndIndex = requestUri.indexOf("?");
             if (queryFileStrEndIndex != -1) {
-                requestUri = requestUri.substring(0, queryFileStrEndIndex).concat(".html");
+                path = path.substring(0, queryFileStrEndIndex);
             }
         }
 
-        return requestUri;
+        if (!path.contains(".")) {
+            path = path.concat(".html");
+        }
+
+        return path;
     }
 
     private String resolveContentOf(String filePath) throws IOException {

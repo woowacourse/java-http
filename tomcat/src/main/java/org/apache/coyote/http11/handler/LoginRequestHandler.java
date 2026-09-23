@@ -2,9 +2,9 @@ package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.enums.HttpStatus;
@@ -22,7 +22,7 @@ public class LoginRequestHandler implements RequestHandler {
     public HttpResponse handle(HttpRequest httpRequest) {
         final Map<String, String> headers = new HashMap<>();
         try {
-            login(httpRequest.params(), headers);
+            login(httpRequest, headers);
         } catch (IllegalArgumentException e) {
             headers.put("Location", "/401.html");
             return new HttpResponse("/401.html", HttpStatus.UNAUTHORIZED, headers);
@@ -31,9 +31,12 @@ public class LoginRequestHandler implements RequestHandler {
         return new HttpResponse("/index.html", HttpStatus.FOUND, headers);
     }
 
-    private void login(Map<String, String> paramsMap, Map<String, String> headers) {
-        User user = getValidatedUser(paramsMap);
+    private void login(HttpRequest httpRequest, Map<String, String> headers) {
+        User user = getValidatedUser(httpRequest.params());
         log.info("user: {}", user.toString());
+
+        removeOldSession(httpRequest);
+
         String sessionId = saveSession(user);
         headers.put("cookie", sessionId);
     }
@@ -50,6 +53,23 @@ public class LoginRequestHandler implements RequestHandler {
             throw new IllegalArgumentException("비밀번호 불일치");
         }
         return user;
+    }
+
+    private void removeOldSession(HttpRequest httpRequest) {
+        final HttpCookie cookie = new HttpCookie(
+                httpRequest.headers().getOrDefault("cookie", "")
+        );
+
+        try {
+            final String sessionId = cookie.getSessionId();
+            final SessionManager sessionManager = SessionManager.getInstance();
+
+            if (sessionManager.isExistSession(sessionId)) {
+                sessionManager.remove(sessionManager.findSession(sessionId));
+            }
+        } catch (IllegalArgumentException ignored) {
+            // 제거할 기존 세션이 없음
+        }
     }
 
     private String saveSession(User user) {

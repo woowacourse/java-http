@@ -54,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse httpResponse = handleRequest(httpRequest);
 
             var header = new StringBuilder();
-            addResponseHeaderInfo(httpRequest, httpResponse, header);
+            addResponseHeaderInfo(httpResponse, header);
 
             final var responseBody = createResponseBody(httpResponse.path());
             final String contentType = getContentType(httpResponse.path());
@@ -67,8 +67,6 @@ public class Http11Processor implements Runnable, Processor {
             String body = new String(responseBody);
 
             response.append(String.join("\r\n", responseLine, header.toString() + "\r\n", body));
-
-            System.out.println(response.toString());
 
             log.info("mehtod: {} , path: {}, http status: {}",
                     httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
@@ -89,13 +87,8 @@ public class Http11Processor implements Runnable, Processor {
         return requestHandler.handle(request);
     }
 
-    private void addResponseHeaderInfo(HttpRequest httpRequest, HttpResponse httpResponse, StringBuilder header) {
-        String cookie = httpRequest.headers().getOrDefault("cookie", "");
-        HttpCookie httpCookie = new HttpCookie(cookie);
-
-        if (cookie.isBlank() && httpResponse.headers().containsKey("cookie")) {
-            httpCookie.add("JSESSIONID", httpResponse.headers().get("cookie"));
-
+    private void addResponseHeaderInfo(HttpResponse httpResponse, StringBuilder header) {
+        if (httpResponse.headers().containsKey("cookie")) {
             header.append("Set-Cookie: JSESSIONID=")
                     .append(httpResponse.headers().get("cookie"))
                     .append("\r\n");

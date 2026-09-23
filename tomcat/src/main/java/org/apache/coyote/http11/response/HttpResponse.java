@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 public class HttpResponse {
     private static final String VERSION = "HTTP/1.1";
 
-    private final HttpStatus status;
+    private HttpStatus status;
     private final HttpHeaders headers;
     private Cookies cookies = Cookies.empty();
     private final byte[] body;
@@ -52,5 +52,9 @@ public class HttpResponse {
         outputStream.writeBytes(headBytes);
         outputStream.writeBytes(body);
         return outputStream.toByteArray();
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        this.status = httpStatus;
     }
 }

@@ -5,6 +5,7 @@ public enum HttpStatus {
     FOUND(302, "Found"),
     BAD_REQUEST(400, "Bad Request"),
     NOT_FOUND(404, "Not Found"),
+    METHOD_NOT_ALLOWED(406, "Method Not Allowed"),
     ;
 
     private final int code;

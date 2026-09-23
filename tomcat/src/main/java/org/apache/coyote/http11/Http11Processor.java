@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import java.util.Optional;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String SESSION_COOKIE_KEY = "JSESSIONID";
     private static final String USER_ATTRIBUTE_KEY = "user";
 
     private final Socket connection;
@@ -53,14 +51,14 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IllegalArgumentException e) {
             return resources.error(HttpStatus.BAD_REQUEST);
         }
-        Cookies cookies = new Cookies(request.getHeader("Cookie"));
-        Optional<Session> session = SessionManager.find(cookies.getValue(SESSION_COOKIE_KEY));
-        return createResponseSafely(request, session);
+        HttpResponse response = createResponseSafely(request);
+        request.getNewSession().ifPresent(session -> addSessionCookie(response, session));
+        return response;
     }
 
-    private HttpResponse createResponseSafely(HttpRequest request, Optional<Session> session) {
+    private HttpResponse createResponseSafely(HttpRequest request) {
         try {
-            return createResponse(request, session);
+            return createResponse(request);
         } catch (IOException | RuntimeException e) {
             log.error(e.getMessage(), e);
             return resources.error(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,26 +67,27 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addSessionCookie(HttpResponse response, Session session) {
         HttpCookie sessionCookie = new HttpCookie(
-                SESSION_COOKIE_KEY,
+                HttpCookie.SESSION_COOKIE_KEY,
                 session.getId()
         );
         response.addHeader("Set-Cookie", sessionCookie.toHeaderValue());
     }
 
-    private HttpResponse createResponse(HttpRequest request, Optional<Session> session) throws IOException {
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
         return switch (Route.find(request.getMethod(), request.getPath())) {
             case HOME -> staticResourceResponse("/index.html");
             case REGISTER_PAGE -> staticResourceResponse("/register.html");
             case REGISTER -> register(request);
-            case LOGIN_PAGE -> loginPage(session);
-            case LOGIN -> login(request, session);
+            case LOGIN_PAGE -> loginPage(request);
+            case LOGIN -> login(request);
             case STATIC_RESOURCE -> staticResourceResponse(request.getPath());
             case NOT_FOUND -> resources.error(HttpStatus.NOT_FOUND);
         };
     }
 
-    private HttpResponse loginPage(Optional<Session> session) throws IOException {
-        if (session.isPresent() && session.get().getAttribute(USER_ATTRIBUTE_KEY) != null) {
+    private HttpResponse loginPage(HttpRequest request) throws IOException {
+        Session session = request.getSession(false);
+        if (session != null && session.getAttribute(USER_ATTRIBUTE_KEY) != null) {
             return HttpResponse.redirect("/index.html");
         }
         return staticResourceResponse("/login.html");
@@ -104,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirect("/index.html");
     }
 
-    private HttpResponse login(HttpRequest request, Optional<Session> existingSession) {
+    private HttpResponse login(HttpRequest request) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         Optional<User> user = findAuthenticatedUser(account, password);
@@ -112,13 +111,9 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.redirect("/401.html");
         }
 
-        HttpResponse response = HttpResponse.redirect("/index.html");
-        Session session = existingSession.orElseGet(SessionManager::create);
+        Session session = request.getSession(true);
         session.setAttribute(USER_ATTRIBUTE_KEY, user.get());
-        if (existingSession.isEmpty()) {
-            addSessionCookie(response, session);
-        }
-        return response;
+        return HttpResponse.redirect("/index.html");
     }
 
     private Optional<User> findAuthenticatedUser(String account, String password) {

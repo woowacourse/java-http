@@ -36,8 +36,8 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         List<String> lines = new ArrayList<>();
-        lines.add("HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getStatusMessage() + " ");
-        headers.forEach((name, value) -> lines.add(name + ": " + value + " "));   // 끝 공백!
+        lines.add("HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getStatusMessage());
+        headers.forEach((name, value) -> lines.add(name + ": " + value));
         lines.add("");
         lines.add(responseBody);
         return String.join("\r\n", lines).getBytes();

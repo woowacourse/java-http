@@ -46,15 +46,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String[] requestParts = readLine.split(" ", 3);
-            String method = requestParts[0];
-            String target = requestParts[1];
+            RequestLine requestLine = RequestLine.parse(readLine);
 
             Map<String, String> headers = readHeaders(reader);
             String body = readBody(reader, headers);
 
             Optional<Cookie> sessionCookie = findSessionCookie(headers);
-            String response = handleRequest(method, target, body, sessionCookie);
+            String response = handleRequest(requestLine.method(), requestLine.target(), body, sessionCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -129,7 +127,8 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String handleRequest(String method, String target, String body, Optional<Cookie> sessionCookie) throws IOException {
+    private String handleRequest(String method, String target, String body, Optional<Cookie> sessionCookie)
+            throws IOException {
         String resourcePath = extractResourcePath(target);
 
         if ("GET".equals(method)) {

@@ -24,11 +24,16 @@ class Http11ProcessorTest {
     private Http11Processor createProcessor(final StubSocket socket) {
         final SessionManager sessionManager = SessionManager.getInstance();
 
-        final RequestMapping requestMapping = new RequestMapping(
-                Map.of("/login", new LoginController(sessionManager),
-                        "/register", new RegisterController()));
+        final HttpSessionService sessionService = new HttpSessionService(sessionManager);
 
-        return new Http11Processor(socket, requestMapping, new StaticResourceController());
+        final RequestMapping requestMapping = new RequestMapping(
+                Map.of("/login", new LoginController(sessionService),
+                        "/register", new RegisterController()
+                )
+        );
+
+        return new Http11Processor(socket, requestMapping,
+                new StaticResourceController(), sessionService);
     }
 
     @Test

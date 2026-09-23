@@ -3,6 +3,7 @@ package org.apache.catalina.connector;
 import org.apache.coyote.Controller;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,24 +23,27 @@ public class Connector implements Runnable {
     private boolean stopped;
     private final RequestMapping requestMapping;
     private final Controller staticResourceController;
-
+    private final HttpSessionService sessionService;
 
     public Connector(
             final RequestMapping requestMapping,
-            final Controller staticResourceController
+            final Controller staticResourceController,
+            final HttpSessionService sessionService
     ) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, staticResourceController);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, staticResourceController, sessionService);
     }
 
     public Connector(
             final int port,
             final int acceptCount,
             final RequestMapping requestMapping,
-            final Controller staticResourceController
+            final Controller staticResourceController,
+            final HttpSessionService sessionService
     ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = requestMapping;
         this.staticResourceController = staticResourceController;
+        this.sessionService = sessionService;
         this.stopped = false;
     }
 
@@ -83,7 +87,7 @@ public class Connector implements Runnable {
             return;
         }
         final Http11Processor processor =
-                new Http11Processor(connection, requestMapping, staticResourceController);
+                new Http11Processor(connection, requestMapping, staticResourceController, sessionService);
         new Thread(processor).start();
     }
 

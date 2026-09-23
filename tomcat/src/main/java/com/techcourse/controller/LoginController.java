@@ -3,10 +3,10 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,28 +18,21 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String SET_COOKIE = "Set-Cookie";
+
     private static final String USER_SESSION_KEY = "user";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private final SessionManager sessionManager;
+    private final HttpSessionService sessionService;
 
-    public LoginController(final SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
+    public LoginController(final HttpSessionService sessionService) {
+        this.sessionService = sessionService;
     }
+
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
 
-        final Optional<String> sessionId = request.getCookie(JSESSIONID);
-
-        if (sessionId.isEmpty()) {
-            return;
-        }
-
-        final HttpSession session = sessionManager.findSession(sessionId.get());
-
+        final HttpSession session = sessionService.findSession(request);
         if (session == null) {
             return;
         }
@@ -74,12 +67,9 @@ public class LoginController extends AbstractController {
 
         final User loginUser = user.get();
 
-        final HttpSession session = sessionManager.createSession();
+        final HttpSession session = sessionService.createSession(response);
 
         session.setAttribute(USER_SESSION_KEY, loginUser);
-
-        response.addHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
-
         log.info("login success account: {}", loginUser.getAccount());
 
         response.sendRedirect(INDEX_PAGE);

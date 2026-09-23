@@ -10,27 +10,27 @@ import java.io.BufferedInputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
     private final RequestMapping requestMapping;
     private final Controller staticResourceController;
+    private final HttpSessionService sessionService;
 
     public Http11Processor(
             final Socket connection,
             final RequestMapping requestMapping,
-            final Controller staticResourceController
+            final Controller staticResourceController,
+            final HttpSessionService sessionService
     ) {
         this.connection = connection;
         this.requestMapping = requestMapping;
         this.staticResourceController = staticResourceController;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = optionalRequest.get();
             final HttpResponse response = new HttpResponse();
 
-            addSessionIdCookieIfAbsent(request, response);
+            sessionService.ensureSessionIdCookie(request, response);
             serviceController(request, response);
             if (!response.hasStatus()) {// fallback구조
                 staticResourceController.service(request, response);
@@ -62,19 +62,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void addSessionIdCookieIfAbsent(
-            final HttpRequest request, final HttpResponse response) {
-        final Optional<String> existingSessionId = request.getCookie(JSESSIONID);
-
-        if (existingSessionId.isPresent() && !existingSessionId.get().isBlank()) {
-            return;
-        }
-
-        final String newSessionId = UUID.randomUUID().toString();
-
-        response.addHeader(SET_COOKIE, JSESSIONID + "=" + newSessionId);
     }
 
     private void serviceController(

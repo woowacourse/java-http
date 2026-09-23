@@ -33,6 +33,9 @@ public class RequestDispatcher {
 
         try {
             controller.service(request, response);
+            if (!response.isConfigured()) {
+                throw new IllegalStateException("컨트롤러가 HTTP 응답을 설정하지 않았습니다.");
+            }
         } catch (BadRequestException e) {
             throw e;
         } catch (IOException | RuntimeException e) {

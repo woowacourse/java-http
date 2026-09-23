@@ -24,7 +24,10 @@ public abstract class AbstractController implements PageController {
     }
 
     private void methodNotAllowed(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-        httpResponse.setBody("text/plain", "지원하지 않는 HTTP 메서드입니다: " + httpRequest.getMethod());
+        httpResponse.setBody(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "text/plain",
+                "지원하지 않는 HTTP 메서드입니다: " + httpRequest.getMethod()
+        );
     }
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.http11.StaticResource;
 import org.apache.coyote.http11.request.HttpCookie;
 
@@ -20,40 +21,30 @@ public class HttpResponse {
     private HttpCookie cookie = HttpCookie.empty();
     private HttpStatus status = HttpStatus.OK;
     private String body = "";
+    private boolean configured;
 
-    public static HttpResponse of(HttpStatus status, String contentType, String body) {
-        HttpResponse response = new HttpResponse();
-        response.setStatus(status);
-        response.setBody(contentType, body);
-
-        return response;
-    }
-
-    public static HttpResponse of(HttpStatus status, StaticResource staticResource) {
-        return of(status, staticResource.getContentType(), staticResource.getBody());
-    }
-
-    public void setStatus(HttpStatus status) {
+    public void setBody(HttpStatus status, String contentType, String body) {
+        Objects.requireNonNull(status);
+        Objects.requireNonNull(contentType);
+        Objects.requireNonNull(body);
         this.status = status;
-    }
-
-    public void setHeader(String name, String value) {
-        headers.put(name, value);
-    }
-
-    public void setBody(String contentType, String body) {
         setHeader(CONTENT_TYPE, contentType + CHARSET);
         this.body = body;
+        configured = true;
     }
 
     public void setStaticResource(HttpStatus status, StaticResource staticResource) {
-        setStatus(status);
-        setBody(staticResource.getContentType(), staticResource.getBody());
+        setBody(status, staticResource.getContentType(), staticResource.getBody());
     }
 
     public void sendRedirect(String location) {
-        setStatus(HttpStatus.FOUND);
-        setHeader(LOCATION, location);
+        setHeader(LOCATION, Objects.requireNonNull(location));
+        status = HttpStatus.FOUND;
+        configured = true;
+    }
+
+    public boolean isConfigured() {
+        return configured;
     }
 
     public void addCookie(String name, String value) {
@@ -65,9 +56,14 @@ public class HttpResponse {
         cookie = HttpCookie.empty();
         status = HttpStatus.OK;
         body = "";
+        configured = false;
     }
 
     public byte[] toBytes() {
+        if (!configured) {
+            throw new IllegalStateException("HTTP 응답이 설정되지 않았습니다.");
+        }
+
         List<String> lines = new ArrayList<>();
         lines.add(VERSION + " " + status.getCode() + " " + status.getReasonPhrase() + " ");
 
@@ -79,5 +75,9 @@ public class HttpResponse {
         lines.add(body);
 
         return String.join(CRLF, lines).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private void setHeader(String name, String value) {
+        headers.put(name, value);
     }
 }

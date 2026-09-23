@@ -65,6 +65,17 @@ class RequestDispatcherTest {
     }
 
     @Test
+    void internalServerErrorWhenControllerDoesNotConfigureResponse() throws IOException {
+        final RequestDispatcher dispatcher = new RequestDispatcher(Map.of(), (request, response) -> {
+        });
+        final HttpResponse response = new HttpResponse();
+
+        dispatcher.dispatch(indexRequest(), response);
+
+        assertThat(toString(response)).isEqualTo(serverErrorResponse());
+    }
+
+    @Test
     void badRequestExceptionIsNotHandledHere() {
         // given
         final BadRequestException exception = new BadRequestException("잘못된 정적 리소스 경로입니다: /../secret");

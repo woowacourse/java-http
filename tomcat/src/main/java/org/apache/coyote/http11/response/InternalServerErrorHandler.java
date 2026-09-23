@@ -21,13 +21,16 @@ public class InternalServerErrorHandler {
 
     public void handle(HttpResponse response) {
         response.reset();
-        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 
         try {
             response.setStaticResource(HttpStatus.INTERNAL_SERVER_ERROR, staticResourceLoader.load(SERVER_ERROR_PAGE));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            response.setBody("text/plain", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            response.setBody(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "text/plain",
+                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()
+            );
         }
     }
 }

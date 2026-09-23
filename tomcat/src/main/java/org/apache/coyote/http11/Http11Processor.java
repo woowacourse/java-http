@@ -67,8 +67,7 @@ public class Http11Processor implements Runnable, Processor {
         } catch (BadRequestException e) {
             log.warn(e.getMessage());
             response.reset();
-            response.setStatus(HttpStatus.BAD_REQUEST);
-            response.setBody("text/plain", e.getMessage());
+            response.setBody(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
         }
 
         return response;

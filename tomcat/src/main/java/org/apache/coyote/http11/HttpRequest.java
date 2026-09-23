@@ -18,6 +18,19 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
+    public Map<String, String> getQueryParameter() {
+        Map<String, String> parameters = new HashMap<>();
+        if (requestBody == null || requestBody.isEmpty()) {
+            return parameters;
+        }
+        String[] queryParameters = requestBody.split("&");
+        for (String parameter : queryParameters) {
+            String[] queryParameter = parameter.split("=", -1);
+            parameters.put(queryParameter[0], queryParameter[1]);
+        }
+        return parameters;
+    }
+
     public String getMethod() {
         return method;
     }

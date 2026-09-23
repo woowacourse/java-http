@@ -10,21 +10,16 @@ import org.apache.coyote.http11.HttpResponse;
 
 public class StaticResourceController extends AbstractController {
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        super.service(request, response);
-    }
-
-    @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = request.getPath();
         if (path.equals("/")) {
             String resource = "Hello world!";
-            getOkResponse(request, response, resource);
+            response.ok(resource, getContentType(path));
             return;
         }
         String resource = getStaticResource(path);
         if (resource != null && response != null) {
-            getOkResponse(request, response, resource);
+            response.ok(resource, getContentType(path));
         }
     }
 
@@ -53,12 +48,4 @@ public class StaticResourceController extends AbstractController {
         return "text/html;charset=utf-8 ";
     }
 
-    private void getOkResponse(HttpRequest httpRequest, HttpResponse httpResponse, String responseBody) {
-        httpResponse.setVersion(httpRequest.getVersion());
-        httpResponse.setStatusCode(200);
-        httpResponse.setReasonPhrase("OK");
-        httpResponse.setResponseBody(responseBody);
-        httpResponse.addHeader("Content-Type", getContentType(httpRequest.getPath()));
-        httpResponse.addHeader("Content-Length", responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
-    }
 }

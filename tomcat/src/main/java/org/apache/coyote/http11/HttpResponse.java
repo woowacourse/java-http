@@ -10,19 +10,12 @@ public class HttpResponse {
     private int statusCode;
     private String reasonPhrase;
     private String responseBody;
-
-    public HttpResponse() {
-    }
-
+    
     public HttpResponse(String version, int statusCode, String reasonPhrase, String responseBody) {
         this.version = version;
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
         this.responseBody = responseBody;
-    }
-
-    public void addHeader(String name, String value) {
-        headers.put(name, value);
     }
 
     public byte[] toBytes() {
@@ -44,23 +37,23 @@ public class HttpResponse {
         return response.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    public String getResponseBody() {
-        return responseBody;
-    }
-
-    public void setResponseBody(String responseBody) {
+    public void ok(String responseBody, String contentType) {
+        this.statusCode = 200;
+        this.reasonPhrase = "OK";
         this.responseBody = responseBody;
+        headers.put("Content-Type", contentType);
+        headers.put("Content-Length",
+                String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public void setReasonPhrase(String reasonPhrase) {
-        this.reasonPhrase = reasonPhrase;
+    public void redirect(String location, String sessionCookie) {
+        this.statusCode = 302;
+        this.reasonPhrase = "Found";
+        this.responseBody = "";
+        headers.put("Location", location);
+        headers.put("Content-Length", "0");
+        if (!sessionCookie.isEmpty()) {
+            headers.put("Set-Cookie", sessionCookie);
+        }
     }
 }

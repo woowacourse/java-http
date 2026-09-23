@@ -94,10 +94,15 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseThrow(() -> new IllegalStateException("등록되지 않은 계정입니다."));
 
                 if (user.isMatchPassword(password)) {
-                    statusCode = REDIRECTION_FOUND_CODE;
-                    resource = getClass().getClassLoader()
-                        .getResource(RESOURCE_FILE_PREFIX + INDEX + HTML_EXTENSION);
                     log.info("user : {}", user);
+                    String response = String.join("\r\n",
+                        "HTTP/1.1 302 " + FOUND_STATUS_RESPONSE + " ",
+                        "Location: /index.html ",
+                        "",
+                        "");
+
+                    writeAndFlush(outputStream, response.getBytes(StandardCharsets.UTF_8));
+                    return;
                 }
                 if (!user.isMatchPassword(password)) {
                     statusCode = UNAUTHORIZED_CODE;
@@ -115,13 +120,18 @@ public class Http11Processor implements Runnable, Processor {
 
             String response = createResponse(part, body, path, statusCode);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writeAndFlush(outputStream, response.getBytes());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void writeAndFlush(OutputStream outputStream, byte[] response)
+        throws IOException {
+        outputStream.write(response);
+        outputStream.flush();
     }
 
     private static String createResponse(String part, byte[] body, Path path, String statusCode) throws IOException {
@@ -172,8 +182,7 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 responseBody);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writeAndFlush(outputStream, response.getBytes());
             return true;
         }
         return false;
@@ -188,8 +197,7 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 "");
 
-            outputStream.write(notFound.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            writeAndFlush(outputStream, notFound.getBytes(StandardCharsets.UTF_8));
             return true;
         }
         return false;

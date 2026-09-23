@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class QueryParams {
@@ -12,6 +13,9 @@ public class QueryParams {
     }
 
     public static QueryParams from(String queryParams) {
+        if (queryParams == null || queryParams.isBlank()) {
+            return new QueryParams(List.of());
+        }
         return new QueryParams(
                 Stream.of(queryParams.split("&"))
                         .map(QueryParam::from)
@@ -19,11 +23,10 @@ public class QueryParams {
         );
     }
 
-    public String getValue(String key) {
+    public Optional<String> getValue(String key) {
         return params.stream()
                 .filter(param -> param.isSameKey(key))
                 .findAny()
-                .map(QueryParam::getValue)
-                .orElseThrow(IllegalArgumentException::new);
+                .map(QueryParam::getValue);
     }
 }

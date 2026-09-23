@@ -1,15 +1,19 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
     private final String id;
+    private final SessionManager sessionManager;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id) {
-        this.id = id;
+    public Session(SessionManager sessionManager) {
+        this.id = UUID.randomUUID().toString();
+        this.sessionManager = sessionManager;
     }
+
 
     public String getId() {
         return id;
@@ -29,6 +33,6 @@ public class Session {
 
     public void invalidate() {
         values.clear();
-        SessionManager.remove(this);
+        sessionManager.remove(this);
     }
 }

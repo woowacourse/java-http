@@ -36,8 +36,8 @@ class RegisterControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입 필수 값이 비어 있으면 저장하지 않고 회원가입 페이지로 리다이렉트한다.")
-    void redirectToRegisterWhenRequiredValueIsBlank() throws Exception {
+    @DisplayName("회원가입 필수 값이 비어 있으면 저장하지 않고 401 페이지로 리다이렉트한다.")
+    void redirectToUnauthorizedWhenRequiredValueIsBlank() throws Exception {
         // given
         HttpRequest request = postRegisterRequest("account=&password=&email=");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -48,7 +48,7 @@ class RegisterControllerTest {
         // then
         assertThat(outputStream.toString(StandardCharsets.UTF_8))
                 .contains("HTTP/1.1 302 Found")
-                .contains("Location: /register.html");
+                .contains("Location: /401.html");
         assertThat(InMemoryUserRepository.findByAccount(""))
                 .isEmpty();
     }

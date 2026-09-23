@@ -30,7 +30,7 @@ class HttpRequestParser {
         Map<String, String> headers = readHeaders();
         byte[] body = readBody(headers);
         FormParameters formParameters = new FormParameters(headers.get(CONTENT_TYPE), body);
-        return new HttpRequest(requestLine, headers, body, formParameters);
+        return new HttpRequest(requestLine, headers, formParameters);
     }
 
     private Map<String, String> readHeaders() throws IOException {

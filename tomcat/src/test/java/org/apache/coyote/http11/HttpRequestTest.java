@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpRequestTest {
 
@@ -22,10 +23,11 @@ class HttpRequestTest {
     }
 
     @Test
-    void Content_Length_바이트_크기_만큼_body를_읽는다() throws IOException {
+    void Content_Length만큼_본문을_읽어_한글_폼_값을_해석하고_뒤의_데이터는_포함하지_않는다() throws IOException {
         // given
         String body = "memo=한글";
         String rawRequest = "POST /register HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
                 + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n"
                 + "\r\n"
                 + body
@@ -35,7 +37,7 @@ class HttpRequestTest {
         HttpRequest request = request(rawRequest);
 
         // then
-        assertThat(request.getBody()).isEqualTo(body);
+        assertThat(request.getParameter("memo")).isEqualTo("한글");
     }
 
     @Test
@@ -90,8 +92,16 @@ class HttpRequestTest {
 
         // then
         assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
-        assertThat(request.getBody()).isEqualTo(body);
         assertThat(request.getParameter("account")).isEqualTo("usher");
+    }
+
+    @Test
+    void 본문이_Content_Length보다_짧으면_요청을_거부한다() {
+        // given
+        String rawRequest = "POST /login HTTP/1.1\r\nContent-Length: 100\r\n\r\naccount=usher";
+
+        // when & then
+        assertThatThrownBy(() -> request(rawRequest)).isInstanceOf(IllegalArgumentException.class);
     }
 
     private String formRequest(String body) {

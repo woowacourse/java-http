@@ -5,11 +5,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
-    private final String version;
-    private final int statusCode;
-    private final String reasonPhrase;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private final String responseBody;
+    private String version;
+    private int statusCode;
+    private String reasonPhrase;
+    private String responseBody;
+
+    public HttpResponse() {
+    }
 
     public HttpResponse(String version, int statusCode, String reasonPhrase, String responseBody) {
         this.version = version;
@@ -41,4 +44,19 @@ public class HttpResponse {
         return response.toString().getBytes(StandardCharsets.UTF_8);
     }
 
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setReasonPhrase(String reasonPhrase) {
+        this.reasonPhrase = reasonPhrase;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
 }

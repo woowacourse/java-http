@@ -1,17 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpCookie {
+    private final Map<String, String> values;
 
-    public HttpCookie() {
-    }
-
-    public UUID issueCookie() {
-        return UUID.randomUUID();
+    public HttpCookie(String cookie) {
+        this.values = parseCookie(cookie);
     }
 
     // 아래와 같은 쿠키 값을 파싱해서 map으로 저장한다.
@@ -34,5 +30,16 @@ public class HttpCookie {
             cookieValue.put(data[0].trim(), data[1].trim());
         }
         return cookieValue;
+    }
+
+    public void add(String key, String value) {
+        values.put(key, value);
+    }
+
+    public String getSessionId() {
+        if (values.containsKey("JSESSIONID")) {
+            values.get("JSESSIONID");
+        }
+        throw new IllegalArgumentException("쿠기에 JSESSIONID 정보 없음");
     }
 }

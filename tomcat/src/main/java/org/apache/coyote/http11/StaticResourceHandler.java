@@ -1,0 +1,59 @@
+package org.apache.coyote.http11;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+class StaticResourceHandler {
+
+    private final ClassLoader classLoader;
+
+    StaticResourceHandler(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    HttpResponse respond(String path) throws IOException {
+        if (!isResourcePath(path)) {
+            return error(HttpStatus.NOT_FOUND);
+        }
+        try (InputStream resource = classLoader.getResourceAsStream("static" + path)) {
+            if (resource == null) {
+                return error(HttpStatus.NOT_FOUND);
+            }
+            return HttpResponse.of(HttpStatus.OK, resource.readAllBytes(), contentType(path));
+        }
+    }
+
+    HttpResponse error(HttpStatus status) {
+        try (InputStream resource = classLoader.getResourceAsStream("static/" + status.getCode() + ".html")) {
+            if (resource != null) {
+                return HttpResponse.of(status, resource.readAllBytes(), "text/html;charset=utf-8");
+            }
+        } catch (IOException ignored) {
+            // 오류 페이지를 읽지 못해도 같은 상태 코드의 기본 본문을 응답한다.
+        }
+        byte[] body = status.getReasonPhrase().getBytes(StandardCharsets.UTF_8);
+        return HttpResponse.of(status, body, "text/plain;charset=utf-8");
+    }
+
+    private boolean isResourcePath(String path) {
+        if (!path.startsWith("/") || path.endsWith("/") || path.contains("\\") || path.indexOf('\0') >= 0) {
+            return false;
+        }
+        return Arrays.stream(path.split("/"))
+                .noneMatch(segment -> segment.equals("..") || segment.equals("."));
+    }
+
+    private String contentType(String path) {
+        String contentType = URLConnection.guessContentTypeFromName(path);
+        if (contentType == null) {
+            return "application/octet-stream";
+        }
+        if (contentType.equals("text/html")) {
+            return "text/html;charset=utf-8";
+        }
+        return contentType;
+    }
+}

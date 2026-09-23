@@ -23,7 +23,7 @@ class HttpRequestParser {
     HttpRequest parse() throws IOException {
         String firstLine = readLine();
         if (firstLine == null) {
-            return emptyRequest();
+            throw new IllegalArgumentException("Missing HTTP request line");
         }
 
         RequestLine requestLine = new RequestLine(firstLine);
@@ -31,15 +31,6 @@ class HttpRequestParser {
         byte[] body = readBody(headers);
         FormParameters formParameters = new FormParameters(headers.get(CONTENT_TYPE), body);
         return new HttpRequest(requestLine, headers, body, formParameters);
-    }
-
-    private HttpRequest emptyRequest() {
-        return new HttpRequest(
-                new RequestLine("GET / HTTP/1.1"),
-                Map.of(),
-                new byte[0],
-                new FormParameters(null, new byte[0])
-        );
     }
 
     private Map<String, String> readHeaders() throws IOException {

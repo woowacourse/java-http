@@ -253,7 +253,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 요청_첫_줄이_없어도_예외가_발생하지_않는다() {
+    void 요청_첫_줄이_없으면_400을_응답한다() {
         // given
         final var socket = new StubSocket("");
         final var processor = new Http11Processor(socket);
@@ -262,7 +262,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found");
+        assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request");
     }
 
     @Test

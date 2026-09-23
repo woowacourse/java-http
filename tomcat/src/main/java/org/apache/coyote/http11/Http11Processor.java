@@ -39,15 +39,23 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = new HttpRequestParser(inputStream).parse();
-            Cookies cookies = new Cookies(request.getHeader("Cookie"));
-            Optional<Session> session = SessionManager.find(cookies.getValue(SESSION_COOKIE_KEY));
-
-            HttpResponse response = createResponseSafely(request, session);
+            HttpResponse response = readResponse(inputStream);
             response.writeTo(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse readResponse(InputStream inputStream) throws IOException {
+        HttpRequest request;
+        try {
+            request = new HttpRequestParser(inputStream).parse();
+        } catch (IllegalArgumentException e) {
+            return resources.error(HttpStatus.BAD_REQUEST);
+        }
+        Cookies cookies = new Cookies(request.getHeader("Cookie"));
+        Optional<Session> session = SessionManager.find(cookies.getValue(SESSION_COOKIE_KEY));
+        return createResponseSafely(request, session);
     }
 
     private HttpResponse createResponseSafely(HttpRequest request, Optional<Session> session) {
@@ -68,26 +76,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(HttpRequest request, Optional<Session> session) throws IOException {
-        if (isRequest(request, HttpMethod.GET, "/register")) {
-            return staticResourceResponse("/register.html");
-        }
-        if (isRequest(request, HttpMethod.POST, "/register")) {
-            return register(request);
-        }
-        if (isRequest(request, HttpMethod.GET, "/login")) {
-            if (session.isPresent() && session.get().getAttribute(USER_ATTRIBUTE_KEY) != null) {
-                return HttpResponse.redirect("/index.html");
-            }
-            return staticResourceResponse("/login.html");
-        }
-        if (isRequest(request, HttpMethod.POST, "/login")) {
-            return login(request, session);
-        }
-        return staticResourceResponse(request.getPath());
+        return switch (Route.find(request.getMethod(), request.getPath())) {
+            case HOME -> staticResourceResponse("/index.html");
+            case REGISTER_PAGE -> staticResourceResponse("/register.html");
+            case REGISTER -> register(request);
+            case LOGIN_PAGE -> loginPage(session);
+            case LOGIN -> login(request, session);
+            case STATIC_RESOURCE -> staticResourceResponse(request.getPath());
+            case NOT_FOUND -> resources.error(HttpStatus.NOT_FOUND);
+        };
     }
 
-    private boolean isRequest(HttpRequest request, HttpMethod method, String path) {
-        return request.getMethod() == method && request.getPath().equals(path);
+    private HttpResponse loginPage(Optional<Session> session) throws IOException {
+        if (session.isPresent() && session.get().getAttribute(USER_ATTRIBUTE_KEY) != null) {
+            return HttpResponse.redirect("/index.html");
+        }
+        return staticResourceResponse("/login.html");
     }
 
     private HttpResponse register(HttpRequest request) {

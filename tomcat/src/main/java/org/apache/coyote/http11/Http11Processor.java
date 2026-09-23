@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -39,11 +40,14 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final String requestLine = bufferedReader.readLine();
-            final String[] requestLineComponents = requestLine.split(" ");
-            final String requestURI = requestLineComponents[1];
+            if (requestLine == null) return;
 
-            final var responseBody = readResource(requestURI);
-            final String contentType = requestURI.endsWith(".css") ? "text/css" : "text/html;charset=utf-8";
+            final String requestTarget = requestLine.split("\\s+")[1];
+
+            final String resourcePath = handleRequest(requestTarget);
+
+            final var responseBody = readResource(resourcePath);
+            final String contentType = requestTarget.endsWith(".css") ? "text/css" : "text/html;charset=utf-8";
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -59,27 +63,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readResource(final String requestURI) throws IOException {
-        if (requestURI.equals("/")) {
-            return "Hello world!";
+    private String handleRequest(final String requestTarget) {
+        if (requestTarget.equals("/")) {
+            return "static/index.html";
         }
 
-        if (requestURI.startsWith("/login")) {
-            if (requestURI.contains("?")) {
-                loginAndRetrieveUserInfo(requestURI);
+        if (requestTarget.startsWith("/login")) {
+            if (requestTarget.contains("?")) {
+                loginAndRetrieveUserInfo(requestTarget);
             }
-
-            final String resourceURL = getClass().getClassLoader().getResource("static/login.html").getPath();
-            final Path path = Path.of(resourceURL);
-
-            return Files.readString(path);
+            return "static/login.html";
         }
 
-        // 자바 프로젝트를 빌드하면 src/main/resources 폴더 안에 있는 파일들이 빌드 결과물(클래스패스)의 최상위 루트로 복사된다. 따라서 앞에 /static을 붙여줘야 함
-        final String resourceURL = getClass().getClassLoader().getResource("static" + requestURI).getPath();
-        final Path path = Path.of(resourceURL);
+        return "static" + requestTarget;
+    }
 
-        return Files.readString(path);
+    private String readResource(final String resourcePath) throws IOException {
+        try {
+            final String resourceURI = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(resourcePath)).getPath();
+            final Path path = Path.of(resourceURI);
+            return Files.readString(path);
+        } catch (NullPointerException e) {
+            log.error("{} 자료가 존재하지 않습니다.", resourcePath);
+        }
+        return "";
     }
 
     private void loginAndRetrieveUserInfo(final String requestURI) {

@@ -55,6 +55,10 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
+    public boolean hasStatus() {
+        return status != null;
+    }
+
     public void writeTo(final OutputStream outputStream) throws IOException {
         final StringBuilder responseHeaders = new StringBuilder();
 

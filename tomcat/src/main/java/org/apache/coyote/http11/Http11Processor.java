@@ -1,10 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import jakarta.servlet.http.HttpSession;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,25 +25,25 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String GET = "GET";
-    private static final String POST = "POST";
-
     private static final String LOGIN_PATH = "/login";
     private static final String REGISTER_PATH = "/register";
 
-    private static final String COOKIE = "Cookie";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String USER_SESSION_KEY = "user";
 
     private final Socket connection;
+    private final Controller loginController;
+    private final Controller registerController;
     private static final SessionManager SESSION_MANAGER =
             SessionManager.getInstance();
 
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.loginController = new LoginController(SESSION_MANAGER);
+        this.registerController = new RegisterController();
     }
+
 
     @Override
     public void run() {
@@ -66,135 +65,42 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = optionalRequest.get();
             final HttpResponse response = new HttpResponse();
 
-            final String sessionId = resolveSessionId(request, response);
-
-            boolean handled = handleLogin(request, sessionId, response);
-
-            if (!handled) {
-                handled = handleRegister(request, response);
-            }
-
-            if (!handled) {
+            addSessionIdCookieIfAbsent(request, response);
+            serviceController(request, response);
+            if (!response.hasStatus()) {
                 handleResource(request, response);
             }
             response.writeTo(outputStream);
-        } catch (IOException
-                 | URISyntaxException
-                 | UncheckedServletException e) {
-
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String resolveSessionId(
-            final HttpRequest request,
-            final HttpResponse response
-    ) {
-
+    private void addSessionIdCookieIfAbsent(
+            final HttpRequest request, final HttpResponse response) {
         final Optional<String> existingSessionId = request.getCookie(JSESSIONID);
 
         if (existingSessionId.isPresent() && !existingSessionId.get().isBlank()) {
-            return existingSessionId.get();
+            return;
         }
 
         final String newSessionId = UUID.randomUUID().toString();
+
         response.addHeader(SET_COOKIE, JSESSIONID + "=" + newSessionId);
-        return newSessionId;
     }
 
-    private boolean handleLogin(
-            final HttpRequest request,
-            final String sessionId,
-            final HttpResponse response
-    ) {
-        if (!LOGIN_PATH.equals(request.getPath())) {
-            return false;
+    private void serviceController(
+            final HttpRequest request, final HttpResponse response) throws Exception {
+        if (LOGIN_PATH.equals(request.getPath())) {
+            loginController.service(request, response);
+            return;
         }
 
-        if (GET.equals(request.getMethod())) {// 이미 로그인한 사용자가 GET /login
-            final HttpSession session = SESSION_MANAGER.findSession(sessionId);
-
-            if (session != null && getUser(session) != null) {
-                response.sendRedirect("/index.html");
-                return true;
-            }
-            // Session이 없거나 로그인하지 않았다면 새로 만들지 않고 login.html을 보여준다.
-            return false;
+        if (REGISTER_PATH.equals(request.getPath())) {
+            registerController.service(request, response);
         }
-
-        if (!POST.equals(request.getMethod())) {
-            return false;
-        }
-
-        final String account = request.getParameter("account").orElse(null);
-
-        final String password = request.getParameter("password").orElse(null);
-
-        if (account == null || password == null) {
-            response.sendRedirect("/401.html");
-            return true;
-        }
-
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
-                .filter(foundUser -> foundUser.checkPassword(password));
-
-        if (user.isEmpty()) {
-            log.info("login failed account: {}", account);
-            response.sendRedirect("/401.html");
-            return true;
-        }
-        final User loginUser = user.get();
-
-        // 로그인에 성공했을 때에만 Session을 생성한다.
-        final HttpSession session = SESSION_MANAGER.createSession();
-        // 서버 Session에 로그인 User 저장
-        session.setAttribute(USER_SESSION_KEY, loginUser);
-        response.addHeader(SET_COOKIE, JSESSIONID + "=" + session.getId());
-        log.info("login success account: {}", loginUser.getAccount());
-        response.sendRedirect("/index.html");
-        return true;
-
     }
 
-    private User getUser(final HttpSession session) {
-        final Object value = session.getAttribute(USER_SESSION_KEY);
-        if (value instanceof User user) {
-            return user;
-        }
-        return null;
-    }
-
-    private boolean handleRegister(final HttpRequest request, final HttpResponse response) {
-        if (!REGISTER_PATH.equals(request.getPath())) {
-            return false;
-        }
-
-        if (GET.equals(request.getMethod())) {
-            return false;
-        }
-
-        if (!POST.equals(request.getMethod())) {
-            return false;
-        }
-
-        final String account = request.getParameter("account").orElse(null);
-
-        final String password = request.getParameter("password").orElse(null);
-
-        final String email = request.getParameter("email").orElse(null);
-
-        if (account == null || password == null || email == null) {
-            return false;
-        }
-
-        final User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-
-        log.info("register success account: {}", account);
-
-        response.sendRedirect("/index.html");
-        return true;
-    }
 
     private void handleResource(
             final HttpRequest request,

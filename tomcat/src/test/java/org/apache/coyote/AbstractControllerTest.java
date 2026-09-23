@@ -1,0 +1,80 @@
+package org.apache.coyote;
+
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class AbstractControllerTest {
+
+    @Test
+    void GET_요청이면_doGet을_호출한다() throws Exception {
+
+        // given
+        final HttpRequest request = createRequest("GET");
+        final HttpResponse response = new HttpResponse();
+        final TestController controller = new TestController();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        assertThat(controller.getCalled).isTrue();
+        assertThat(controller.postCalled).isFalse();
+    }
+
+    @Test
+    void POST_요청이면_doPost를_호출한다() throws Exception {
+
+        // given
+        final HttpRequest request = createRequest("POST");
+
+        final HttpResponse response = new HttpResponse();
+
+        final TestController controller = new TestController();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        assertThat(controller.postCalled).isTrue();
+
+        assertThat(controller.getCalled).isFalse();
+    }
+
+    private HttpRequest createRequest(final String method) throws Exception {
+        final String rawRequest = String.join(
+                "\r\n",
+                method
+                        + " /test HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                ""
+        );
+
+        final ByteArrayInputStream inputStream =
+                new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+
+        return HttpRequest.from(inputStream).orElseThrow();
+    }
+
+    private static class TestController extends AbstractController {
+
+        private boolean getCalled;
+        private boolean postCalled;
+
+        @Override
+        protected void doGet(final HttpRequest request, final HttpResponse response) {
+            getCalled = true;
+        }
+
+        @Override
+        protected void doPost(final HttpRequest request, final HttpResponse response) {
+            postCalled = true;
+        }
+    }
+}

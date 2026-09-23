@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REGISTER_PAGE = "register.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String SESSION_USER = "user";
 
     private final Socket connection;
 
@@ -52,16 +55,22 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final String uri = readRequestUri(reader);
+            final String[] requestLine = readRequestLine(reader);
+            final String method = requestLine[0];
+            final String uri = requestLine[1].substring(1);
             final String path = extractPath(uri);
             final Map<String, String> headers = readHeaders(reader);
             final String body = readBody(reader, headers);
             final Map<String, String> queryParams = parseQueryString(extractQueryString(uri));
             final Map<String, String> formData = parseQueryString(body);
+            final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
 
             if (isLoginRequest(path, formData)) {
-                String cookie = "JSESSIONID=" + UUID.randomUUID();
-                write(outputStream, redirectResponse(loginLocation(formData), cookie));
+                write(outputStream, loginResponse(formData));
+                return;
+            }
+            if (isLoginPageRequest(method, path) && isLoggedIn(cookie)) {
+                write(outputStream, redirectResponse(INDEX_PAGE));
                 return;
             }
             if (isRegisterRequest(path, formData)) {
@@ -89,8 +98,8 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String readRequestUri(final BufferedReader reader) throws IOException {
-        return reader.readLine().split(" ")[1].substring(1);
+    private String[] readRequestLine(final BufferedReader reader) throws IOException {
+        return reader.readLine().split(" ");
     }
 
     private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
@@ -135,15 +144,29 @@ public class Http11Processor implements Runnable, Processor {
         return path.equals(LOGIN_PATH) && params.containsKey("account");
     }
 
-    private String loginLocation(final Map<String, String> params) {
+    private String loginResponse(final Map<String, String> params) {
         final User existUser = InMemoryUserRepository.findByAccount(params.get("account"))
                 .filter(user -> user.checkPassword(params.get("password")))
                 .orElse(null);
         if (existUser == null) {
-            return UNAUTHORIZED_PAGE;
+            return redirectResponse(UNAUTHORIZED_PAGE);
         }
         log.info("user : {}", existUser);
-        return INDEX_PAGE;
+        final Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute(SESSION_USER, existUser);
+        SessionManager.getInstance().add(session);
+        return redirectResponse(INDEX_PAGE, HttpCookie.ofJSessionId(session.getId()));
+    }
+
+    private boolean isLoginPageRequest(final String method, final String path) {
+        return method.equals("GET") && path.equals(LOGIN_PATH);
+    }
+
+    private boolean isLoggedIn(final HttpCookie cookie) {
+        return cookie.getJSessionId()
+                .map(SessionManager.getInstance()::findSession)
+                .map(session -> session.getAttribute(SESSION_USER))
+                .isPresent();
     }
 
     private boolean isRegisterRequest(String path, Map<String, String> params) {

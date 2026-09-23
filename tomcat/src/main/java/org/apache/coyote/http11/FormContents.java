@@ -19,16 +19,16 @@ public class FormContents {
         this.contents = contents;
     }
 
-    public static FormContents empty() {
-        return new FormContents(Map.of());
-    }
-
     public static FormContents of(String contentType, byte[] body) {
         if (body == null || contentType == null
                 || !contentType.startsWith(MimeType.APPLICATION_FORM_URLENCODED.getTypeName())) {
             return empty();
         }
         return parse(new String(body, StandardCharsets.UTF_8));
+    }
+
+    public static FormContents empty() {
+        return new FormContents(Map.of());
     }
 
     private static FormContents parse(String encodedContents) {

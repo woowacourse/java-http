@@ -31,6 +31,10 @@ class HttpResponseProcessorTest {
                         "\r\n");
     }
 
+    private String output(ByteArrayOutputStream outputStream) {
+        return outputStream.toString(StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("쿠키를 주면 Set-Cookie 헤더로 내려보낸다")
     void redirectWithCookie() throws IOException {
@@ -69,9 +73,5 @@ class HttpResponseProcessorTest {
                         "Set-Cookie: JSESSIONID=abc123 \r\n" +
                         "Set-Cookie: theme=dark \r\n" +
                         "\r\n");
-    }
-
-    private String output(ByteArrayOutputStream outputStream) {
-        return outputStream.toString(StandardCharsets.UTF_8);
     }
 }

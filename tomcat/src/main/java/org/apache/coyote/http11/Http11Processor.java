@@ -132,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Optional<HttpSession> findSession(HttpRequest httpRequest) throws IOException {
         Optional<String> sessionId = httpRequest.getCookie(SessionManager.SESSION_ID)
-                .map(Cookie::getValue);
+                .map(Cookie::value);
         if (sessionId.isEmpty()) {
             return Optional.empty();
         }

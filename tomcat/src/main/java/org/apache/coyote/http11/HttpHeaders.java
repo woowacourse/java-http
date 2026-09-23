@@ -17,14 +17,6 @@ public class HttpHeaders {
         headers.forEach(this::add);
     }
 
-    public static HttpHeaders empty() {
-        return new HttpHeaders(Map.of());
-    }
-
-    public void addContentType(MimeType mimeType) {
-        add(CONTENT_TYPE_HEADER, mimeType.getTypeName());
-    }
-
     public void add(String name, String value) {
         this.headers.put(findName(name).orElse(name), value);
     }
@@ -33,6 +25,14 @@ public class HttpHeaders {
         return this.headers.keySet().stream()
                 .filter(headerName -> headerName.equalsIgnoreCase(name))
                 .findFirst();
+    }
+
+    public static HttpHeaders empty() {
+        return new HttpHeaders(Map.of());
+    }
+
+    public void addContentType(MimeType mimeType) {
+        add(CONTENT_TYPE_HEADER, mimeType.getTypeName());
     }
 
     public int getContentLength() {

@@ -1,12 +1,8 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 public abstract class AbstractController implements Controller {
 

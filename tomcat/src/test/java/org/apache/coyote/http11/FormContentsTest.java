@@ -23,6 +23,10 @@ class FormContentsTest {
         assertThat(contents.find("password")).contains("secret");
     }
 
+    private byte[] body(String value) {
+        return value.getBytes(StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("퍼센트 인코딩된 값을 디코딩한다")
     void decodePercentEncodedValue() {
@@ -94,9 +98,5 @@ class FormContentsTest {
         assertThat(contents.find("account")).contains("gugu");
         assertThat(contents.find("password")).contains("secret");
         assertThat(contents.find("broken")).isEmpty();
-    }
-
-    private byte[] body(String value) {
-        return value.getBytes(StandardCharsets.UTF_8);
     }
 }

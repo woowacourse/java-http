@@ -6,17 +6,15 @@ import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.HttpHeaders;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 
 public class HttpResponse {
     private static final String VERSION = "HTTP/1.1";
-
-    private HttpStatus status;
     private final HttpHeaders headers;
-    private Cookies cookies = Cookies.empty();
     private final byte[] body;
+    private HttpStatus status;
+    private Cookies cookies = Cookies.empty();
 
     public HttpResponse(HttpStatus status) {
         this(status, HttpHeaders.empty());
@@ -36,7 +34,7 @@ public class HttpResponse {
         this.cookies = cookies;
     }
 
-    public byte[] toHttpBytes()  {
+    public byte[] toHttpBytes() {
         String responseLine = String.join(" ",
                 VERSION, String.valueOf(status.getCode()), status.getMessage());
         StringBuilder headBuilder = new StringBuilder();

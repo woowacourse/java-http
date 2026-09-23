@@ -88,6 +88,26 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(staticResponse("css/styles.css", "text/css;charset=utf-8"));
     }
 
+    private String getRequest(String path) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+    }
+
+    private String staticResponse(String resourceName, String contentType) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
+        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        return "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: " + contentType + " \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n" +
+                new String(body, StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("존재하지 않는 리소스는 404로 응답한다")
     void notFound() {
@@ -100,6 +120,13 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).isEqualTo(errorResponse(HttpStatus.NOT_FOUND));
+    }
+
+    private String errorResponse(HttpStatus status) {
+        return "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
     }
 
     @Test
@@ -128,6 +155,16 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).isEqualTo(errorResponse(HttpStatus.BAD_REQUEST));
+    }
+
+    private String postRequest(String path, String body) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                body);
     }
 
     @Test
@@ -161,6 +198,13 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).isEqualTo(redirectResponse("/401.html"));
+    }
+
+    private String redirectResponse(String location) {
+        return "HTTP/1.1 302 Found \r\n" +
+                "Location: " + location + " \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
     }
 
     @Test
@@ -254,6 +298,12 @@ class Http11ProcessorTest {
         assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("gugu");
     }
 
+    private String extractSessionId(String response) {
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
+        assertThat(matcher.find()).isTrue();
+        return matcher.group(1);
+    }
+
     @Test
     @DisplayName("로그인된 상태로 로그인 페이지에 접근하면 index.html로 리다이렉트한다")
     void redirectWhenAlreadyLoggedIn() {
@@ -270,6 +320,15 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
+    }
+
+    private String getRequestWithCookie(String path, String cookie) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: " + cookie + " ",
+                "",
+                "");
     }
 
     @Test
@@ -303,64 +362,5 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).isEqualTo(staticResponse("login.html", "text/html;charset=utf-8"));
-    }
-
-    private String extractSessionId(String response) {
-        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
-        assertThat(matcher.find()).isTrue();
-        return matcher.group(1);
-    }
-
-    private String getRequestWithCookie(String path, String cookie) {
-        return String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Cookie: " + cookie + " ",
-                "",
-                "");
-    }
-
-    private String getRequest(String path) {
-        return String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-    }
-
-    private String postRequest(String path, String body) {
-        return String.join("\r\n",
-                "POST " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                body);
-    }
-
-    private String staticResponse(String resourceName, String contentType) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
-        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        return "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + contentType + " \r\n" +
-                "Content-Length: " + body.length + " \r\n" +
-                "\r\n" +
-                new String(body, StandardCharsets.UTF_8);
-    }
-
-    private String redirectResponse(String location) {
-        return "HTTP/1.1 302 Found \r\n" +
-                "Location: " + location + " \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-    }
-
-    private String errorResponse(HttpStatus status) {
-        return "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + " \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
     }
 }

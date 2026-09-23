@@ -19,7 +19,7 @@ public class Cookies {
     private static Cookies toCookies(List<Cookie> cookiePairs) {
         Map<String, Cookie> cookies = new LinkedHashMap<>();
         for (Cookie cookie : cookiePairs) {
-            cookies.put(cookie.getName(), cookie);
+            cookies.put(cookie.name(), cookie);
         }
         return new Cookies(cookies);
     }

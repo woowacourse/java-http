@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -128,8 +130,10 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(index + 1);
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
+    private Map<String, String> parseQueryString(String queryString) {
         final Map<String, String> params = new HashMap<>();
+        queryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+
         final String[] pairs = queryString.split("&");
         for (String pair : pairs) {
             final String[] keyValue = pair.split("=");

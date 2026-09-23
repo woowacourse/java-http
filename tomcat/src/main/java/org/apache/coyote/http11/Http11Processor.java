@@ -132,25 +132,35 @@ public class Http11Processor implements Runnable, Processor {
         String resourcePath = extractResourcePath(target);
 
         if ("GET".equals(method)) {
-            Session session = findSession(sessionCookie);
-
-            if ("/login".equals(resourcePath) && isLoggedIn(session)) {
-                return generateRedirectResponse("/index.html");
-            }
-
-            return serveStaticResource(resourcePath);
+            return handleGetRequest(resourcePath, sessionCookie);
         }
 
         if ("POST".equals(method)) {
-            Map<String, String> formData = parseFormData(body);
+            return handlePostRequest(resourcePath, body);
+        }
 
-            if (resourcePath.equals("/register")) {
-                return handleRegister(formData);
-            }
+        return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+    }
 
-            if (resourcePath.equals("/login")) {
-                return handleLogin(formData);
-            }
+    private String handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie) throws IOException {
+        Session session = findSession(sessionCookie);
+
+        if ("/login".equals(resourcePath) && isLoggedIn(session)) {
+            return generateRedirectResponse("/index.html");
+        }
+
+        return serveStaticResource(resourcePath);
+    }
+
+    private String handlePostRequest(String resourcePath, String body) {
+        Map<String, String> formData = parseFormData(body);
+
+        if (resourcePath.equals("/register")) {
+            return handleRegister(formData);
+        }
+
+        if (resourcePath.equals("/login")) {
+            return handleLogin(formData);
         }
 
         return emptyResponse("HTTP/1.1 405 Method Not Allowed");

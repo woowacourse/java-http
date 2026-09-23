@@ -2,15 +2,16 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Headers {
 
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers;
 
     public Headers(Map<String, String> headers) {
-        this.headers.putAll(headers);
+        this.headers = Collections.unmodifiableMap(headers);
     }
 
     public static Headers of(BufferedReader reader) throws IOException {
@@ -25,7 +26,7 @@ public class Headers {
         return new Headers(headers);
     }
 
-    public Map<String, String> getHeaders() {
-        return Map.copyOf(headers);
+    public String getValue(String key) {
+        return headers.getOrDefault(key, "");
     }
 }

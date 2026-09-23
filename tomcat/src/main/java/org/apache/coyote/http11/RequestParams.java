@@ -1,14 +1,15 @@
 package org.apache.coyote.http11;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RequestParams {
 
-    private final Map<String, String> params = new HashMap<>();
+    private final Map<String, String> params;
 
     public RequestParams(Map<String, String> params) {
-        this.params.putAll(params);
+        this.params = Collections.unmodifiableMap(params);
     }
 
     public static RequestParams of(String queryString) {
@@ -18,6 +19,10 @@ public class RequestParams {
             putParams(param, params);
         }
         return new RequestParams(params);
+    }
+
+    public static RequestParams empty() {
+        return new RequestParams(Collections.<String, String>emptyMap());
     }
 
     private static void putParams(String param, Map<String, String> params) {

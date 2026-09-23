@@ -208,12 +208,6 @@ public class Http11Processor implements Runnable, Processor {
         String email = formData.get("email");
         String password = formData.get("password");
 
-        if (account == null || account.isBlank()
-                || email == null || email.isBlank()
-                || password == null || password.isBlank()) {
-            return emptyResponse("HTTP/1.1 400 Bad Request");
-        }
-
         InMemoryUserRepository.save(new User(account, password, email));
 
         return generateRedirectResponse("/index.html");

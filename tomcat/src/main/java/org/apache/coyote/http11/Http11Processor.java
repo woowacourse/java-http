@@ -45,6 +45,21 @@ public class Http11Processor implements Runnable, Processor {
             if (requestLine == null) {
                 return;
             }
+//            String requestHeader = reader.readLine();
+//            int contentLength = 0;
+//            while (requestHeader != null && !requestHeader.equals("")) {
+//                log.info("RH {}", requestHeader);
+//                requestHeader = reader.readLine();
+//                if (requestHeader.contains("Content-Length")) {
+//                    int start = requestHeader.indexOf(" ");
+//                    contentLength = Integer.parseInt(requestHeader.substring(start + 1));
+//                    char[] buffer = new char[contentLength];
+//                    reader.read(buffer, 0, contentLength);
+//                    String requestBody = new String(buffer);
+//                    log.info("RB: {}", requestBody);
+//
+//                }
+//            }
             String[] parts = requestLine.split(" ");
 
             RequestTarget requestTarget = new RequestTarget(parts[1]);
@@ -77,10 +92,11 @@ public class Http11Processor implements Runnable, Processor {
                 String location = resolveLocation(loginSuccess);
                 response = new HttpResponse("302 FOUND", contentType, responseBody)
                         .addHeader("Location", location);
+            } else if (requestTarget.hasPath("register")) {
+                response = new HttpResponse("200 OK", contentType, responseBody);
             } else {
                 response = new HttpResponse("200 OK", contentType, responseBody);
             }
-
             outputStream.write(response.toByteArray());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -98,6 +114,8 @@ public class Http11Processor implements Runnable, Processor {
     private String resolveResourcePath(RequestTarget requestTarget) {
         if (requestTarget.hasPath(LOGIN_PATH)) {
             return LOGIN_RESOURCE_PATH;
+        } else if (requestTarget.hasPath("/register")) {
+            return "/register.html";
         }
         return requestTarget.getPath();
     }

@@ -17,7 +17,8 @@ class Http11ProcessorTest {
             "/index.html, static/index.html",
             "/css/styles.css, static/css/styles.css",
             "/login, static/login.html",
-            "/login?account=gugu&password=password, static/login.html"
+            "/login?account=gugu&password=password, static/login.html",
+            "/register, static/register.html"
     })
     void 요청_대상에_맞는_정적_리소스를_반환한다(
             String requestTarget,

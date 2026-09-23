@@ -20,6 +20,9 @@ public class Headers {
 
     public int contentLength() {
         final String length = headers.get("Content-Length");
+        if (length == null) {
+            return 0;
+        }
         return Integer.parseInt(length);
     }
 

@@ -7,4 +7,8 @@ public class RequestBody {
     public RequestBody(String requestBody) {
         this.requestBody = requestBody;
     }
+
+    public String getValue() {
+        return requestBody;
+    }
 }

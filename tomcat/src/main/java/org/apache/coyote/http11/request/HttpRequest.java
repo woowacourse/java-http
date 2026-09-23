@@ -14,4 +14,24 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
+    public String getCookie() {
+        return headers.cookie();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getBody() {
+        return requestBody.getValue();
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
 }

@@ -20,6 +20,8 @@ import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,21 +50,16 @@ public class Http11Processor implements Runnable, Processor {
                 final var inputStream = new BufferedInputStream(connection.getInputStream());
                 final var outputStream = connection.getOutputStream()
         ) {
-            final RequestLine requestLine = new RequestLine(readLine(inputStream));
-            final Headers headers = readHeaders(inputStream);
-            final Cookies cookies = new Cookies(headers.cookie());
+            final HttpRequest request = readHttpRequest(inputStream);
+            final Cookies cookies = new Cookies(request.getCookie());
             final Session session = getSession(cookies);
 
-            String path = requestLine.getPath();
+            String path = request.getPath();
             String code = "200";
             String status = "OK";
 
-            if (requestLine.isPost()) {
-                final int contentLength = headers.contentLength();
-                final byte[] buffer = inputStream.readNBytes(contentLength);
-                final String requestBody = new String(buffer, StandardCharsets.UTF_8);
-                final Map<String, String> parameters = parseQueryString(requestBody);
-
+            if (request.isPost()) {
+                final Map<String, String> parameters = parseQueryString(request.getBody());
                 if ("/register".equals(path)) {
                     register(parameters);
                     path = "/index";
@@ -81,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 path += ".html";
             }
-            if (requestLine.isGet()) {
+            if (request.isGet()) {
                 if ("/login".equals(path) && session.getAttribute("user") != null) {
                     path = "/";
                     code = "302";
@@ -209,6 +206,18 @@ public class Http11Processor implements Runnable, Processor {
         log.info("회원가입 성공: {}", user);
     }
 
+    private static HttpRequest readHttpRequest(final BufferedInputStream inputStream) throws IOException {
+        final RequestLine requestLine = readRequestLine(inputStream);
+        final Headers headers = readHeaders(inputStream);
+        final RequestBody requestBody = readRequestBody(inputStream, headers.contentLength());
+
+        return new HttpRequest(requestLine, headers, requestBody);
+    }
+
+    private static RequestLine readRequestLine(final BufferedInputStream inputStream) throws IOException {
+        return new RequestLine(readLine(inputStream));
+    }
+
     private static Headers readHeaders(final BufferedInputStream inputStream) throws IOException {
         final Headers headers = new Headers();
 
@@ -221,6 +230,14 @@ public class Http11Processor implements Runnable, Processor {
             line = readLine(inputStream);
         }
         return headers;
+    }
+
+    private static RequestBody readRequestBody(
+            final BufferedInputStream inputStream,
+            final int contentLength
+    ) throws IOException {
+        final byte[] body = inputStream.readNBytes(contentLength);
+        return new RequestBody(new String(body, StandardCharsets.UTF_8));
     }
 
     private static String readLine(final BufferedInputStream inputStream) throws IOException {

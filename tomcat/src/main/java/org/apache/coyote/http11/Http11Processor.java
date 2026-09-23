@@ -54,9 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie httpCookie = new HttpCookie(findCookies(request));
             boolean hasJSessionId = hasJSessionId(httpCookie);
             String jSessionId = httpCookie.get("JSESSIONID");
-            if (!hasJSessionId) {
-                jSessionId = UUID.randomUUID().toString();
-            }
+            String setCookie = "";
 
             final SessionManager manager = SessionManager.getInstance();
 
@@ -78,6 +76,7 @@ public class Http11Processor implements Runnable, Processor {
                     if (userMatching(pairs.get("account"), pairs.get("password"))) {
                         log.info("로그인 성공! id: {}", pairs.get("account"));
                         if (manager.findSession(jSessionId) == null) {
+                            jSessionId = UUID.randomUUID().toString();
                             String account = pairs.get("account");
                             Session session = new Session(jSessionId);
                             boolean isPresent = InMemoryUserRepository.findByAccount(account).isPresent();
@@ -85,6 +84,8 @@ public class Http11Processor implements Runnable, Processor {
                                 User user = InMemoryUserRepository.findByAccount(account).get();
                                 session.setAttribute("user", user);
                                 manager.add(session);
+                                setCookie = "Set-Cookie: JSESSIONID=" + jSessionId + " ";
+                                log.info("set cookie: {}", setCookie);
                             }
                         }
                         status = "302 FOUND";
@@ -103,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("uri: {}", uri);
 
             final String responseBody = makeResponseBody(uri);
-            final String response = makeResponse(status, type, responseBody, hasJSessionId, jSessionId);
+            final String response = makeResponse(status, type, responseBody, setCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -187,23 +188,18 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private String setCookie(boolean hasJSessionId, String jSessionId) {
-        if (hasJSessionId) {
-            return "";
-        }
-        return "Set-Cookie: JSESSIONID=" + jSessionId + " ";
-    }
-
-    private String makeResponse(String status, String type, String responseBody, boolean hasJSessionId,
-                                String jSessionId) {
-
-        final String setCookie = setCookie(hasJSessionId, jSessionId);
-        return String.join("\r\n",
+    private String makeResponse(String status, String type, String responseBody, String setCookie) {
+        String response = String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                setCookie,
-                "",
-                responseBody);
+                "Content-Length: " + responseBody.getBytes().length + " ");
+
+        if (!setCookie.isBlank()) {
+            response = String.join("\r\n", response, setCookie);
+        }
+
+        response = String.join("\r\n", response, "", responseBody);
+
+        return response;
     }
 }

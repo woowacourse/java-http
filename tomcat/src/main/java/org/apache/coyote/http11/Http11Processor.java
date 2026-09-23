@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -187,7 +188,10 @@ public class Http11Processor implements Runnable, Processor {
             if (nameAndValue.length != 2) {
                 return Map.of();
             }
-            parametersByName.put(nameAndValue[0], nameAndValue[1]);
+
+            String name = URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8);
+            parametersByName.put(name, value);
         }
 
         return parametersByName;

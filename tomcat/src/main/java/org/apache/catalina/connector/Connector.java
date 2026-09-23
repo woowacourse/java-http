@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.Adapter;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,11 +91,17 @@ public class Connector implements Runnable {
             executorService.execute(processor);
         } catch (RejectedExecutionException e) {
             log.warn("Request processing rejected: worker queue is full or executor is shut down");
-            try {
-                connection.close();
-            } catch (IOException closeException) {
-                log.error("Failed to close rejected connection", closeException);
-            }
+            sendServiceUnavailableAndClose(connection);
+        }
+    }
+
+    private void sendServiceUnavailableAndClose(Socket connection) {
+        try (connection) {
+            var outputStream = connection.getOutputStream();
+            outputStream.write(HttpResponse.serviceUnavailable().toBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error("Failed to send 503 response or close rejected connection", e);
         }
     }
 

@@ -2,30 +2,38 @@ package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
+        final Map<String, String> headers = new HashMap<>();
         try {
             login(httpRequest.params());
         } catch (IllegalArgumentException e) {
-            return new HttpResponse("/401.html", HttpStatus.UNAUTHORIZED);
+            headers.put("Location", "/401.html");
+            return new HttpResponse("/401.html", HttpStatus.UNAUTHORIZED, headers);
         }
-        return new HttpResponse("/index.html", HttpStatus.FOUND);
+        headers.put("Location", "/index.html");
+        return new HttpResponse("/index.html", HttpStatus.FOUND, headers);
     }
 
     private void login(Map<String, String> paramsMap) {
         User user = getValidatedUser(paramsMap);
         log.info("user: {}", user.toString());
+        saveSession(user);
     }
 
     private User getValidatedUser(Map<String, String> paramsMap) {
@@ -40,5 +48,14 @@ public class LoginRequestHandler implements RequestHandler {
             throw new IllegalArgumentException("비밀번호 불일치");
         }
         return user;
+    }
+
+    private void saveSession(User user) {
+        String sessionId = UUID.randomUUID().toString();
+
+        Session session = new Session(sessionId);
+        session.setAttribute("account", user.getAccount());
+
+        SessionManager.getInstance().add(session);
     }
 }

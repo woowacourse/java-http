@@ -40,9 +40,9 @@ public class HttpRequestParser {
 
     private HttpRequestLine parseRequestLine(String line) {
         final String[] tokens = line.split(" ", 3);
-        final HttpMethod method = HttpMethod.of(tokens[0]);
-        final String uri = tokens[1];
-        final String version = tokens[2];
+        final HttpMethod method = HttpMethod.of(tokens[0].trim());
+        final String uri = tokens[1].trim();
+        final String version = tokens[2].trim();
 
         final String path = getPath(uri);
         final Map<String, String> params = getParams(uri);

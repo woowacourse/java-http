@@ -8,6 +8,7 @@ import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterRequestHandler implements RequestHandler{
@@ -15,13 +16,16 @@ public class RegisterRequestHandler implements RequestHandler{
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest){
+        final Map<String, String> headers = new HashMap<>();
         try{
             register(httpRequest.params());
             log.info("계정 : {} 회원가입 완료", httpRequest.params().get("account"));
             log.info("이메일 : {}", httpRequest.params().get("email"));
-            return new HttpResponse("/index.html", HttpStatus.CREATED);
+            headers.put("Location", "/500.html");
+            return new HttpResponse("/index.html", HttpStatus.CREATED, headers);
         } catch (IllegalArgumentException e){
-            return new HttpResponse("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+            headers.put("Location", "/500.html");
+            return new HttpResponse("/500.html", HttpStatus.INTERNAL_SERVER_ERROR, headers);
         }
     }
 

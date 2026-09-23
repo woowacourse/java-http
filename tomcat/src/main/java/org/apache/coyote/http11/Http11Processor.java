@@ -53,29 +53,20 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             HttpResponse httpResponse = handleRequest(httpRequest);
 
-            final Optional<String> newCookie = getNewCookie(httpRequest, httpResponse);
+            String header = "";
+            addResponseHeaderInfo(httpRequest, httpResponse, header);
+
             final var responseBody = createResponseBody(httpResponse.path());
             final String contentType = getContentType(httpResponse.path());
 
             var response = "";
-            if (newCookie.isPresent()) {
-                response = String.join("\r\n",
-                        "HTTP/1.1 " + httpResponse.httpStatus().getMessage() + " ",
-                        "Set-Cookie: JSESSIONID=" + newCookie.get(),
-                        "Content-Type: " + contentType + " ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "Location: " + httpResponse.path(),
-                        "",
-                        new String(responseBody));
-            } else {
-                response = String.join("\r\n",
-                        "HTTP/1.1 " + httpResponse.httpStatus().getMessage() + " ",
-                        "Content-Type: " + contentType + " ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "Location: " + httpResponse.path(),
-                        "",
-                        new String(responseBody));
-            }
+            String responseLine = httpRequest.version() + " " + httpResponse.httpStatus().getMessage() + " ";
+            header = String.join("\r\n",
+                    "Content-Type: " + contentType + " ",
+                    "Content-Length: " + responseBody.length + " ");
+            String body = new String(responseBody);
+
+            response = String.join("\r\n", responseLine, header + "\r\n", body);
 
             log.info("mehtod: {} , path: {}, http status: {}",
                     httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
@@ -86,26 +77,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<String> getNewCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpCookie httpCookie = new HttpCookie();
-        final Map<String, String> parsedCookie = httpCookie.parseCookie(
-                httpRequest.headers().getOrDefault("cookie", ""));
-
-        if (!parsedCookie.containsKey("JSESSIONID") &&
-                httpRequest.path().equals("/login") && httpResponse.httpStatus() == HttpStatus.FOUND) {
-            return Optional.of(httpCookie.issueCookie().toString());
-        }
-        return Optional.empty();
-    }
-
     private HttpResponse handleRequest(HttpRequest request) {
         final RequestHandler requestHandler = handlers.get(new Route(request.httpMethod(), request.path()));
 
         if (requestHandler == null) {
-            return new HttpResponse(request.path(), HttpStatus.OK);
+            return new HttpResponse(request.path(), HttpStatus.OK, new HashMap<>());
         }
 
         return requestHandler.handle(request);
+    }
+
+    private void addResponseHeaderInfo(HttpRequest httpRequest, HttpResponse httpResponse, String header) {
+        String cookie = httpRequest.headers().getOrDefault("cookie", "");
+        HttpCookie httpCookie = new HttpCookie(cookie);
+
+        if (httpResponse.headers().containsKey("cookie")) {
+            httpCookie.add("JSESSIONID", httpResponse.headers().get("cookie"));
+            header = String.join("\r\n", "Set-Cookie: JSESSIONID=" + httpCookie.getSessionId());
+        }
+
+        if (httpResponse.headers().containsKey("path")) {
+            header = String.join("\r\n", header, "Location: " + httpResponse.path());
+        }
     }
 
     private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {

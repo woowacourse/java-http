@@ -3,10 +3,11 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,12 +45,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream();
-                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+                final var inputStream = new BufferedInputStream(connection.getInputStream());
+                final var outputStream = connection.getOutputStream()
         ) {
-            final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-            final Headers headers = readHeaders(bufferedReader);
+            final RequestLine requestLine = new RequestLine(readLine(inputStream));
+            final Headers headers = readHeaders(inputStream);
             final Cookies cookies = new Cookies(headers.cookie());
             final Session session = getSession(cookies);
 
@@ -59,10 +59,8 @@ public class Http11Processor implements Runnable, Processor {
 
             if (requestLine.isPost()) {
                 final int contentLength = headers.contentLength();
-                final char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-
-                final String requestBody = new String(buffer);
+                final byte[] buffer = inputStream.readNBytes(contentLength);
+                final String requestBody = new String(buffer, StandardCharsets.UTF_8);
                 final Map<String, String> parameters = parseQueryString(requestBody);
 
                 if ("/register".equals(path)) {
@@ -211,17 +209,35 @@ public class Http11Processor implements Runnable, Processor {
         log.info("회원가입 성공: {}", user);
     }
 
-    private static Headers readHeaders(final BufferedReader bufferedReader) throws IOException {
+    private static Headers readHeaders(final BufferedInputStream inputStream) throws IOException {
         final Headers headers = new Headers();
 
-        String line = bufferedReader.readLine();
+        String line = readLine(inputStream);
         while (!"".equals(line)) {
             if (line == null) {
                 throw new IllegalArgumentException("헤더가 올바르지 않습니다.");
             }
             headers.add(line);
-            line = bufferedReader.readLine();
+            line = readLine(inputStream);
         }
         return headers;
+    }
+
+    private static String readLine(final BufferedInputStream inputStream) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int value;
+        while ((value = inputStream.read()) != -1 && value != '\n') {
+            buffer.write(value);
+        }
+        if (value == -1 && buffer.size() == 0) {
+            return null;
+        }
+
+        final byte[] bytes = buffer.toByteArray();
+        final int length = (bytes.length > 0) && (bytes[bytes.length - 1] == '\r')
+                ? bytes.length - 1
+                : bytes.length;
+        return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 }

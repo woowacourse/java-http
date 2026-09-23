@@ -16,8 +16,8 @@ public final class SessionController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElseThrow();
-        Optional<User> loginUser = userSessions.findUser(sessionId);
+        Optional<User> loginUser = request.getCookie(HttpCookie.JSESSION_ID)
+                .flatMap(userSessions::findUser);
         String responseBody = loginUser
                 .map(user -> "{\"loggedIn\":true,\"account\":\""
                         + escapeJson(user.getAccount()) + "\"}")

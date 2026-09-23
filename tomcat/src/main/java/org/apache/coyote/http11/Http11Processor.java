@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,8 +47,9 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.parse(inputStream);
             HttpResponse response = new HttpResponse();
 
-            request.createJSessionIdIfAbsent()
-                    .ifPresent(sessionId -> response.setCookie(HttpCookie.JSESSION_ID, sessionId));
+            if (request.getCookie(HttpCookie.JSESSION_ID).isEmpty()) {
+                response.setCookie(HttpCookie.JSESSION_ID, UUID.randomUUID().toString());
+            }
 
             adapter.service(request, response);
             return response;

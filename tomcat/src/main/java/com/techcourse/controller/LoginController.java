@@ -23,8 +23,7 @@ public final class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElseThrow();
-        if (userSessions.findUser(sessionId).isPresent()) {
+        if (request.getCookie(HttpCookie.JSESSION_ID).flatMap(userSessions::findUser).isPresent()) {
             response.sendRedirect("/index.html");
             return;
         }
@@ -42,7 +41,7 @@ public final class LoginController extends AbstractController {
         User user = loginUser.get();
         log.info("회원 조회 성공: account={}", user.getAccount());
 
-        String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElseThrow();
+        String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElse(null);
         Session session = userSessions.getOrCreate(sessionId);
         session.setAttribute(UserSessionService.SESSION_USER, user);
         if (!session.getId().equals(sessionId)) {

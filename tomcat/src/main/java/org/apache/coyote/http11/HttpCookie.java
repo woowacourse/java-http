@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class HttpCookie {
 
@@ -29,13 +28,4 @@ public class HttpCookie {
         return Optional.ofNullable(cookies.get(name));
     }
 
-    public Optional<String> createJSessionIdIfAbsent() {
-        if (cookies.containsKey(JSESSION_ID)) {
-            return Optional.empty();
-        }
-
-        String sessionId = UUID.randomUUID().toString();
-        cookies.put(JSESSION_ID, sessionId);
-        return Optional.of(sessionId);
-    }
 }

@@ -13,8 +13,7 @@ public final class LogoutController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElseThrow();
-        userSessions.invalidate(sessionId);
+        request.getCookie(HttpCookie.JSESSION_ID).ifPresent(userSessions::invalidate);
 
         response.setStatus(HttpStatus.NO_CONTENT);
     }

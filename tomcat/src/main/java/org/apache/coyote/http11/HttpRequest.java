@@ -96,10 +96,6 @@ public final class HttpRequest {
         return cookies.get(name);
     }
 
-    public Optional<String> createJSessionIdIfAbsent() {
-        return cookies.createJSessionIdIfAbsent();
-    }
-
     private static Map<String, String> readHeaders(InputStream inputStream) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;

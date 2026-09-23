@@ -85,6 +85,49 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void loginWithoutCookieCreatesSessionAndKeepsRequestCookieAbsent() {
+        String body = "account=gugu&password=password";
+        final var socket = new StubSocket(String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
+                "",
+                body
+        ));
+
+        processor(socket).process(socket);
+
+        String sessionId = socket.output().lines()
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .map(line -> line.substring("Set-Cookie: JSESSIONID=".length()))
+                .findFirst().orElseThrow();
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+        assertThat(SessionManager.getInstance().findSession(sessionId).getAttribute("user"))
+                .isInstanceOf(User.class);
+    }
+
+    @Test
+    void requestCookieContainsOnlyClientValues() {
+        final var socket = new StubSocket("GET / HTTP/1.1\r\n\r\n");
+        Http11Processor processor = new Http11Processor(socket, (request, response) ->
+                assertThat(request.getCookie(HttpCookie.JSESSION_ID)).isEmpty());
+
+        processor.process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\nSet-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    void sessionEndpointWithoutCookieReturnsLoggedOutState() {
+        final var socket = new StubSocket("GET /session HTTP/1.1\r\n\r\n");
+
+        processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n")
+                .endsWith("{\"loggedIn\":false}");
+    }
+
+    @Test
     void registerPageIsServedForGetRequest() throws IOException {
         final var socket = new StubSocket(getRequest("/register"));
 

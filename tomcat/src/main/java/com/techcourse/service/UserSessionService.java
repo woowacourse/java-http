@@ -27,7 +27,7 @@ public final class UserSessionService {
     }
 
     public Session getOrCreate(String sessionId) {
-        Session session = sessionManager.findSession(sessionId);
+        Session session = sessionId == null ? null : sessionManager.findSession(sessionId);
         if (session != null) {
             return session;
         }

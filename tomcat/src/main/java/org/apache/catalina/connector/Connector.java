@@ -25,18 +25,20 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_THREAD_POOL_SIZE = 250;
     private static final int DEFAULT_WORK_QUEUE_CAPACITY = 100;
+    private static final int DEFAULT_TIMEOUT = 30000;
 
     private final ServerSocket serverSocket;
     private final Adapter adapter;
     private final SessionManager sessionManager = new SessionManager();
     private final ExecutorService executorService;
+    private final int timeout;
     private volatile boolean stopped;
 
     public Connector(Adapter adapter) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter, DEFAULT_THREAD_POOL_SIZE);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter, DEFAULT_THREAD_POOL_SIZE, DEFAULT_TIMEOUT);
     }
 
-    public Connector(final int port, final int acceptCount, final Adapter adapter, final int maxThreads) {
+    public Connector(final int port, final int acceptCount, final Adapter adapter, final int maxThreads, final int timeout) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.adapter = adapter;
@@ -46,6 +48,7 @@ public class Connector implements Runnable {
                 new ArrayBlockingQueue<>(DEFAULT_WORK_QUEUE_CAPACITY),
                 new ThreadPoolExecutor.AbortPolicy()
         );
+        this.timeout = timeout;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -88,7 +91,15 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection, adapter, sessionManager);
         try {
+            connection.setSoTimeout(timeout);
             executorService.execute(processor);
+        } catch (IOException e) {
+            log.error("Failed to configure read timeout", e);
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error("Failed to close connection", closeException);
+            }
         } catch (RejectedExecutionException e) {
             log.warn("Request processing rejected: worker queue is full or executor is shut down");
             sendServiceUnavailableAndClose(connection);

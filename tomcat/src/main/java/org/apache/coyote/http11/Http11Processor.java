@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
+        try (connection;
+             final var inputStream = new BufferedInputStream(connection.getInputStream());
              final var outputStream = connection.getOutputStream()) {
 
             Optional<HttpResponse> response = handleRequest(inputStream);
@@ -52,6 +54,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             writeResponse(outputStream, response.get());
+        } catch (SocketTimeoutException e) {
+            log.warn("Request read timed out: {}:{}", connection.getInetAddress(), connection.getPort());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

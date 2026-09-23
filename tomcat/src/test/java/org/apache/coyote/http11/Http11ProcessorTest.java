@@ -236,9 +236,9 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void process() {
+    void 존재하지_않는_파일을_요청하면_404_상태와_오류_페이지를_응답한다() throws IOException {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket("GET /missing.html HTTP/1.1\r\n\r\n");
         final var processor = new Http11Processor(socket);
 
         // when
@@ -246,11 +246,10 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 200 OK \r\n")
+                .startsWith("HTTP/1.1 404 Not Found \r\n")
                 .contains("Content-Type: text/html;charset=utf-8 \r\n")
-                .contains("Content-Length: 12 \r\n")
                 .doesNotContain("Set-Cookie")
-                .endsWith("\r\n\r\nHello world!");
+                .endsWith(new String(getClass().getResourceAsStream("/static/404.html").readAllBytes(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -263,7 +262,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("Hello world!");
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found");
     }
 
     @Test

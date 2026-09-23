@@ -13,17 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String SESSION_COOKIE_KEY = "JSESSIONID";
     private static final String USER_ATTRIBUTE_KEY = "user";
 
     private final Socket connection;
+    private final StaticResourceHandler resources = new StaticResourceHandler(getClass().getClassLoader());
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
@@ -44,10 +43,19 @@ public class Http11Processor implements Runnable, Processor {
             Cookies cookies = new Cookies(request.getHeader("Cookie"));
             Optional<Session> session = SessionManager.find(cookies.getValue(SESSION_COOKIE_KEY));
 
-            HttpResponse response = createResponse(request, session);
+            HttpResponse response = createResponseSafely(request, session);
             response.writeTo(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse createResponseSafely(HttpRequest request, Optional<Session> session) {
+        try {
+            return createResponse(request, session);
+        } catch (IOException | RuntimeException e) {
+            log.error(e.getMessage(), e);
+            return resources.error(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -125,27 +133,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse staticResourceResponse(String requestPath) throws IOException {
-        String responseBody = readStaticResource(requestPath);
-        return HttpResponse.ok(responseBody, contentType(requestPath));
-    }
-
-    private String readStaticResource(String requestPath) throws IOException {
-        if (!requestPath.endsWith(".html") && !requestPath.endsWith(".css")) {
-            return DEFAULT_RESPONSE_BODY;
-        }
-
-        try (InputStream resource = getClass().getResourceAsStream("/static" + requestPath)) {
-            if (resource == null) {
-                return DEFAULT_RESPONSE_BODY;
-            }
-            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
-        }
-    }
-
-    private String contentType(String requestPath) {
-        if (requestPath.endsWith(".css")) {
-            return "text/css";
-        }
-        return "text/html;charset=utf-8";
+        return resources.respond(requestPath);
     }
 }

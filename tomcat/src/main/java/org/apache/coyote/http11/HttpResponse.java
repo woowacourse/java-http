@@ -14,20 +14,24 @@ public class HttpResponse {
     private final Map<String, String> headers;
     private final byte[] body;
 
-    private HttpResponse(HttpStatus status, String body) {
+    private HttpResponse(HttpStatus status, byte[] body) {
         this.status = status;
         this.headers = new LinkedHashMap<>();
-        this.body = body.getBytes(StandardCharsets.UTF_8);
+        this.body = body.clone();
     }
 
     public static HttpResponse ok(String body, String contentType) {
-        HttpResponse response = new HttpResponse(HttpStatus.OK, body);
+        return of(HttpStatus.OK, body.getBytes(StandardCharsets.UTF_8), contentType);
+    }
+
+    static HttpResponse of(HttpStatus status, byte[] body, String contentType) {
+        HttpResponse response = new HttpResponse(status, body);
         response.addHeader("Content-Type", contentType);
         return response;
     }
 
     public static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, "");
+        HttpResponse response = new HttpResponse(HttpStatus.FOUND, new byte[0]);
         response.addHeader("Location", location);
         return response;
     }

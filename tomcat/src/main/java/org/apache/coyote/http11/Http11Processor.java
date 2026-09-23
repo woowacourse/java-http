@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -48,11 +49,17 @@ public class Http11Processor implements Runnable, Processor {
             String method = httpRequest.getMethod();
             String pathUri = httpRequest.getPathUri();
             String requestBody = httpRequest.getRequestBody();
-            String status = "200 OK";
+            HttpStatus httpStatus = HttpStatus.OK;
 
             if (pathUri.equals("/register") && method.equals("POST")) {
                 if (isLogin(httpRequest.getHeader("Cookie"))) {
-                    writeAndFlush(outputStream, createForbiddenResponse("403 Forbidden"));
+                    writeAndFlush(
+                            outputStream,
+                            new HttpResponse()
+                                    .status(HttpStatus.FORBIDDEN)
+                                    .contentType("plain")
+                                    .body("권한이 없습니다.")
+                    );
                     return;
                 }
                 handleRegister(requestBody, outputStream);
@@ -61,14 +68,21 @@ public class Http11Processor implements Runnable, Processor {
 
             if (pathUri.equals("/login") && method.equals("GET")) {
                 if (isLogin(httpRequest.getHeader("Cookie"))) {
-                    writeAndFlush(outputStream, createRedirectResponse("302 Found"));
+                    writeAndFlush(
+                            outputStream,
+                            new HttpResponse().redirectTo("/index.html")
+                    );
                     return;
                 }
             }
 
             if (pathUri.equals("/logout") && method.equals("POST")) {
                 handleLogout(httpRequest.getHeader("Cookie"));
-                writeAndFlush(outputStream, createLogoutResponse("302 Found"));
+                writeAndFlush(outputStream,
+                        new HttpResponse()
+                                .redirectTo("/login")
+                                .expiresCookie("JSESSIONID", "/")
+                );
                 return;
             }
 
@@ -80,13 +94,15 @@ public class Http11Processor implements Runnable, Processor {
 
                     writeAndFlush(
                             outputStream,
-                            createLoginResponse("302 Found", jsessionId)
+                            new HttpResponse()
+                                    .addCookie("JSESSIONID", jsessionId)
+                                    .redirectTo("/index.html")
                     );
                     return;
                 }
 
                 pathUri = "/401.html";
-                status = "401 Unauthorized";
+                httpStatus = HttpStatus.UNAUTHORIZED;
             }
 
             pathUri = normalizePathUri(pathUri);
@@ -94,13 +110,19 @@ public class Http11Processor implements Runnable, Processor {
 
             if (path == null) {
                 pathUri = "/404.html";
-                status = "404 Not Found";
+                httpStatus = HttpStatus.NOT_FOUND;
                 path = getPath("static" + pathUri);
             }
 
             String responseBody = findResponseBody(pathUri, path);
             String contentType = extractType(path);
-            writeAndFlush(outputStream, createStaticFileResponse(status, responseBody, contentType));
+            writeAndFlush(
+                    outputStream,
+                    new HttpResponse()
+                            .status(httpStatus)
+                            .contentType(contentType)
+                            .body(responseBody)
+            );
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -138,12 +160,21 @@ public class Http11Processor implements Runnable, Processor {
         String email = requestBodyParams.get("email");
 
         if (isBlank(account) || isBlank(password) || isBlank(email)) {
-            writeAndFlush(outputStream, createBadRequestResponse("400 Bad Request"));
+            writeAndFlush(
+                    outputStream,
+                    new HttpResponse()
+                            .status(HttpStatus.BAD_REQUEST)
+                            .body("요청이 잘못되었습니다.")
+                            .contentType("plain")
+            );
             return;
         }
 
         InMemoryUserRepository.save(new User(account, password, email));
-        writeAndFlush(outputStream, createRedirectResponse("302 Found"));
+        writeAndFlush(
+                outputStream,
+                new HttpResponse().redirectTo("/index.html")
+        );
     }
 
     private static boolean isBlank(String value) {
@@ -170,74 +201,9 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path, StandardCharsets.UTF_8);
     }
 
-    private static void writeAndFlush(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+    private static void writeAndFlush(OutputStream outputStream, HttpResponse response) throws IOException {
+        outputStream.write(response.toBytes());
         outputStream.flush();
-    }
-
-    private static String createStaticFileResponse(String status, String responseBody, String type) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
-    }
-
-    private static String createLoginResponse(String status, String jsessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Set-Cookie: JSESSIONID=" + jsessionId,
-                "Location: /index.html",
-                "Content-Length: 0",
-                "",
-                ""
-        );
-    }
-
-    private static String createLogoutResponse(String status) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Location: /login",
-                "Set-Cookie: JSESSIONID=; Max-Age=0; Path=/",
-                "Content-Length: 0",
-                "",
-                ""
-        );
-    }
-
-    private static String createRedirectResponse(String status) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Location: /index.html",
-                "Content-Length: 0",
-                "",
-                ""
-            );
-    }
-
-    private static String createForbiddenResponse(String status) {
-        String responseBody = "권한이 없습니다.";
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: text/plain; charset=utf-8",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
-                "",
-                responseBody
-        );
-    }
-
-    private static String createBadRequestResponse(String status) {
-        String responseBody = "요청이 잘못되었습니다.";
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: text/plain; charset=utf-8",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length,
-                "",
-                responseBody
-        );
     }
 
     private static String extractType(Path path) {

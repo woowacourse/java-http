@@ -4,11 +4,9 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Optional;
+
 
 public class StaticResourceController extends AbstractController {
 
@@ -23,21 +21,27 @@ public class StaticResourceController extends AbstractController {
     private static final byte[] HELLO_WORLD =
             "Hello world!".getBytes(StandardCharsets.UTF_8);
 
+    private final ResourceReader resourceReader;
+
+    public StaticResourceController(final ResourceReader resourceReader) {
+        this.resourceReader = resourceReader;
+    }
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response)
-            throws IOException, URISyntaxException {
+            throws IOException {
         serveResource(request, response);
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response)
-            throws IOException, URISyntaxException {
+            throws IOException {
 
         serveResource(request, response);
     }
 
     private void serveResource(final HttpRequest request, final HttpResponse response)
-            throws IOException, URISyntaxException {
+            throws IOException {
 
         final String path = request.getPath();
 
@@ -48,16 +52,18 @@ public class StaticResourceController extends AbstractController {
 
         final String resourcePath = resolveResourcePath(path);
 
-        final URL resource = getClass().getClassLoader().getResource(resourcePath);
+        final Optional<byte[]> resource =
+                resourceReader.read(
+                        resourcePath
+                );
 
-        if (resource == null) {
+        if (resource.isEmpty()) {
             setNotFoundResponse(response);
             return;
         }
 
-        final byte[] responseBody = Files.readAllBytes(Path.of(resource.toURI()));
 
-        response.ok(resolveContentType(path), responseBody);
+        response.ok(resolveContentType(path), resource.get());
     }
 
     private void setNotFoundResponse(final HttpResponse response) {

@@ -12,8 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class StaticResourceControllerTest {
 
-    private final StaticResourceController controller =
-            new StaticResourceController();
+    private final ResourceReader resourceReader = new ResourceReader();
+
+    private final StaticResourceController controller = new StaticResourceController(resourceReader);
 
     @Test
     void 루트_요청에_Hello_world를_응답한다() throws Exception {

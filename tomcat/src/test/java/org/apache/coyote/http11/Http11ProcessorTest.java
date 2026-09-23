@@ -5,6 +5,7 @@ import com.techcourse.controller.RegisterController;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.RequestMapping;
+import org.apache.coyote.ResourceReader;
 import org.apache.coyote.StaticResourceController;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -33,7 +34,7 @@ class Http11ProcessorTest {
         );
 
         return new Http11Processor(socket, requestMapping,
-                new StaticResourceController(), sessionService);
+                new StaticResourceController(new ResourceReader()), sessionService);
     }
 
     @Test

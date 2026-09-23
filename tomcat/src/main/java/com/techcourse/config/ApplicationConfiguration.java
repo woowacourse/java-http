@@ -7,6 +7,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.Controller;
 import org.apache.coyote.RequestMapping;
+import org.apache.coyote.ResourceReader;
 import org.apache.coyote.StaticResourceController;
 import org.apache.coyote.http11.HttpSessionService;
 
@@ -35,8 +36,10 @@ public class ApplicationConfiguration {
                     )
             );
 
-    private final Controller staticResourceController = new StaticResourceController();
+    private final ResourceReader resourceReader = new ResourceReader();
 
+    private final Controller staticResourceController =
+            new StaticResourceController(resourceReader);
     private final Connector connector = new Connector(requestMapping, staticResourceController, sessionService);
 
     private final Tomcat tomcat = new Tomcat(connector);

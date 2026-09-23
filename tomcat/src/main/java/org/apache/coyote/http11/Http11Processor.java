@@ -1,10 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,23 +24,16 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
-    private static final String LOGIN_PATH = "/login";
-    private static final String REGISTER_PATH = "/register";
 
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
-    private final Controller loginController;
-    private final Controller registerController;
-    private static final SessionManager SESSION_MANAGER =
-            SessionManager.getInstance();
-
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.loginController = new LoginController(SESSION_MANAGER);
-        this.registerController = new RegisterController();
+        this.requestMapping = new RequestMapping(SessionManager.getInstance());
     }
 
 
@@ -91,14 +83,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private void serviceController(
             final HttpRequest request, final HttpResponse response) throws Exception {
-        if (LOGIN_PATH.equals(request.getPath())) {
-            loginController.service(request, response);
+        final Optional<Controller> controller = requestMapping.getController(request);
+
+        if (controller.isEmpty()) {
             return;
         }
-
-        if (REGISTER_PATH.equals(request.getPath())) {
-            registerController.service(request, response);
-        }
+        controller.get().service(request, response);
     }
 
 
@@ -135,11 +125,15 @@ public class Http11Processor implements Runnable, Processor {
         response.notFound("text/plain;charset=utf-8", responseBody);
     }
 
-    private String resolveResourcePath(final String path) {
+    private String resolveResourcePath(
+            final String path
+    ) {
+
         if ("/login".equals(path)) {
             return "static/login.html";
         }
-        if (REGISTER_PATH.equals(path)) {
+
+        if ("/register".equals(path)) {
             return "static/register.html";
         }
 

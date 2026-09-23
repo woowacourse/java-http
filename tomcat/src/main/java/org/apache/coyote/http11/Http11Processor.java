@@ -4,18 +4,13 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
+import org.apache.coyote.StaticResourceController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,17 +18,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final byte[] HELLO_WORLD = "Hello world!".getBytes(StandardCharsets.UTF_8);
-
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
     private final RequestMapping requestMapping;
+    private final Controller staticResourceController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestMapping = new RequestMapping(SessionManager.getInstance());
+        this.staticResourceController = new StaticResourceController();
     }
 
 
@@ -59,8 +54,8 @@ public class Http11Processor implements Runnable, Processor {
 
             addSessionIdCookieIfAbsent(request, response);
             serviceController(request, response);
-            if (!response.hasStatus()) {
-                handleResource(request, response);
+            if (!response.hasStatus()) {// fallback구조
+                staticResourceController.service(request, response);
             }
             response.writeTo(outputStream);
         } catch (Exception e) {
@@ -89,67 +84,6 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         controller.get().service(request, response);
-    }
-
-
-    private void handleResource(
-            final HttpRequest request,
-            final HttpResponse response
-    ) throws IOException, URISyntaxException {
-        if ("/".equals(request.getPath())) {
-            response.ok("text/html;charset=utf-8", HELLO_WORLD);
-            return;
-        }
-
-        setStaticResourceResponse(response, request.getPath());
-    }
-
-    private void setStaticResourceResponse(
-            final HttpResponse response,
-            final String path
-    ) throws IOException, URISyntaxException {
-        final String resourcePath = resolveResourcePath(path);
-        final URL resource = getClass().getClassLoader().getResource(resourcePath);
-
-        if (resource == null) {
-            setNotFoundResponse(response);
-            return;
-        }
-
-        final byte[] responseBody = Files.readAllBytes(Path.of(resource.toURI()));
-        response.ok(resolveContentType(path), responseBody);
-    }
-
-    private void setNotFoundResponse(final HttpResponse response) {
-        final byte[] responseBody = "Not Found".getBytes(StandardCharsets.UTF_8);
-        response.notFound("text/plain;charset=utf-8", responseBody);
-    }
-
-    private String resolveResourcePath(
-            final String path
-    ) {
-
-        if ("/login".equals(path)) {
-            return "static/login.html";
-        }
-
-        if ("/register".equals(path)) {
-            return "static/register.html";
-        }
-
-        return "static" + path;
-    }
-
-    private String resolveContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-
-        if (path.endsWith(".js")) {
-            return "application/javascript";
-        }
-
-        return "text/html;charset=utf-8";
     }
 }
 

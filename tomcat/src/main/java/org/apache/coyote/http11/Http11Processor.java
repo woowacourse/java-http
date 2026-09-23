@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readResource(final String requestURI) throws IOException {
-        if (requestURI.matches("/")) {
+        if (requestURI.equals("/")) {
             return "Hello world!";
         }
 
@@ -91,11 +91,11 @@ public class Http11Processor implements Runnable, Processor {
             final String[] keyAndValue = loginInfo.split("=");
             final String key = keyAndValue[0];
             final String value = keyAndValue[1];
-            if (key.matches("account")) {
+            if (key.equals("account")) {
                 account = value;
                 continue;
             }
-            if (key.matches("password")) {
+            if (key.equals("password")) {
                 password = value;
             }
         }

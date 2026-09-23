@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
+import org.apache.coyote.http11.session.SessionManager;
 import support.StubSocket;
 
 import java.io.File;
@@ -16,10 +17,11 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
+        final String sessionCookie = "JSESSIONID=" + SessionManager.createSession().getId();
         final String httpRequest = String.join("\r\n",
                 "GET / HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Cookie: JSESSIONID=test-session ",
+                "Cookie: " + sessionCookie,
                 "",
                 "");
 
@@ -43,11 +45,12 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
+        final String sessionCookie = "JSESSIONID=" + SessionManager.createSession().getId();
         final String httpRequest= String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=test-session ",
+                "Cookie: " + sessionCookie,
                 "",
                 "");
 
@@ -71,13 +74,15 @@ class Http11ProcessorTest {
     @Test
     void loginSuccessRedirectsToIndex() {
         // given
+        final String requestBody = "account=gugu&password=password";
+        final String sessionCookie = "JSESSIONID=" + SessionManager.createSession().getId();
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: JSESSIONID=test-session ",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + requestBody.length(),
+                "Cookie: " + sessionCookie,
                 "",
-                "");
+                requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -94,6 +99,48 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void getLoginWithQueryStringServesLoginPage() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=query-login-test",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+
+        // when
+        new Http11Processor(socket).process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK ")
+                .contains("Content-Type: text/html;charset=utf-8 ");
+    }
+
+    @Test
+    void replacesUnknownSessionIdWithServerGeneratedSessionId() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=client-controlled-session-id",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+
+        // when
+        new Http11Processor(socket).process(socket);
+
+        // then
+        assertThat(socket.output())
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36} ")
+                .doesNotContain("JSESSIONID=client-controlled-session-id");
     }
 
     @Test

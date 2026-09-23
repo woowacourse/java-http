@@ -15,11 +15,8 @@ public class SessionManager {
     }
 
     public static Session findOrCreate(final String id) {
-        if (id == null || id.isBlank()) {
-            return createSession();
-        }
-
-        return SESSIONS.computeIfAbsent(id, Session::new);
+        final Session session = findSession(id);
+        return session != null ? session : createSession();
     }
 
     public static Session findSession(final String id) {

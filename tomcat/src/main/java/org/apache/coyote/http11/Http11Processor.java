@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -20,10 +21,9 @@ import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.net.URLDecoder;
-
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URLDecoder;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -62,33 +62,20 @@ public class Http11Processor implements Runnable, Processor {
             final String requestTarget = requestParts[1];
             final String httpVersion = requestParts[2];
 
-            final String[] targetParts = requestTarget.split("\\?", 2);
-            final String requestUri = targetParts[0];
-            final String queryString = targetParts.length > 1
-                    ? targetParts[1]
-                    : "";
+            final String requestUri = requestTarget.split("\\?", 2)[0];
 
             /**
              * header
              */
-            int contentLength = 0;
-            String cookieHeader = null;
-            //null: 연결이 끊겼거나 입력이 끝남
-            //"": HTTP 헤더가 끝났다는 뜻
-            String line;
-            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                if (line.regionMatches(true, 0, "Content-Length:", 0, "Content-Length:".length())) {
-                    contentLength = Integer.parseInt(
-                            line.substring("Content-Length:".length()).trim()
-                    );
-                }
-                if (line.regionMatches(true, 0, "Cookie:", 0, "Cookie:".length())) {
-                    cookieHeader = line.substring("Cookie:".length()).trim();
-                }
-            }
+            final Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
+            final int contentLength = parseContentLength(requestHeaders);
+            final String cookieHeader = requestHeaders.get("cookie");
             final String requestSessionId = Cookie.getValue(cookieHeader, "JSESSIONID");
-            final Session session = SessionManager.findOrCreate(requestSessionId);
-            final String sessionCookie = requestSessionId == null || requestSessionId.isBlank()
+            final Session existingSession = SessionManager.findSession(requestSessionId);
+            final Session session = existingSession != null
+                    ? existingSession
+                    : SessionManager.createSession();
+            final String sessionCookie = existingSession == null
                     ? "JSESSIONID=" + session.getId()
                     : null;
 
@@ -110,15 +97,8 @@ public class Http11Processor implements Runnable, Processor {
                         return;
                     }
 
-                    final boolean hasLoginRequest = "POST".equalsIgnoreCase(method)
-                            || !queryString.isBlank();
-
-                    if (hasLoginRequest) {
-                        final String parameterSource = "POST".equalsIgnoreCase(method)
-                                ? requestBody
-                                : queryString;
-                        final Map<String, String> queryParams =
-                                parseQueryString(parameterSource);
+                    if ("POST".equalsIgnoreCase(method)) {
+                        final Map<String, String> queryParams = parseQueryString(requestBody);
 
                         final String account = queryParams.get("account");
                         final String password = queryParams.get("password");
@@ -232,6 +212,36 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new String(body, 0, offset);
+    }
+
+    private Map<String, String> readRequestHeaders(final BufferedReader bufferedReader)
+            throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            final int separatorIndex = line.indexOf(':');
+            if (separatorIndex <= 0) {
+                continue;
+            }
+
+            final String name = line.substring(0, separatorIndex)
+                    .trim()
+                    .toLowerCase(Locale.ROOT);
+            final String value = line.substring(separatorIndex + 1).trim();
+            headers.put(name, value);
+        }
+
+        return headers;
+    }
+
+    private int parseContentLength(final Map<String, String> headers) {
+        final String contentLength = headers.get("content-length");
+        if (contentLength == null || contentLength.isBlank()) {
+            return 0;
+        }
+
+        return Integer.parseInt(contentLength);
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

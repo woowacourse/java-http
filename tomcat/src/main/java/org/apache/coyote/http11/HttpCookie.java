@@ -38,7 +38,7 @@ public class HttpCookie {
 
     public String getSessionId() {
         if (values.containsKey("JSESSIONID")) {
-            values.get("JSESSIONID");
+            return values.get("JSESSIONID");
         }
         throw new IllegalArgumentException("쿠기에 JSESSIONID 정보 없음");
     }

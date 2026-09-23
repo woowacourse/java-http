@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
@@ -21,7 +22,7 @@ public class LoginRequestHandler implements RequestHandler {
     public HttpResponse handle(HttpRequest httpRequest) {
         final Map<String, String> headers = new HashMap<>();
         try {
-            login(httpRequest.params());
+            login(httpRequest.params(), headers);
         } catch (IllegalArgumentException e) {
             headers.put("Location", "/401.html");
             return new HttpResponse("/401.html", HttpStatus.UNAUTHORIZED, headers);
@@ -30,10 +31,11 @@ public class LoginRequestHandler implements RequestHandler {
         return new HttpResponse("/index.html", HttpStatus.FOUND, headers);
     }
 
-    private void login(Map<String, String> paramsMap) {
+    private void login(Map<String, String> paramsMap, Map<String, String> headers) {
         User user = getValidatedUser(paramsMap);
         log.info("user: {}", user.toString());
-        saveSession(user);
+        String sessionId = saveSession(user);
+        headers.put("cookie", sessionId);
     }
 
     private User getValidatedUser(Map<String, String> paramsMap) {
@@ -50,12 +52,13 @@ public class LoginRequestHandler implements RequestHandler {
         return user;
     }
 
-    private void saveSession(User user) {
+    private String saveSession(User user) {
         String sessionId = UUID.randomUUID().toString();
 
         Session session = new Session(sessionId);
-        session.setAttribute("account", user.getAccount());
+        session.setAttribute("user", user);
 
         SessionManager.getInstance().add(session);
+        return sessionId;
     }
 }

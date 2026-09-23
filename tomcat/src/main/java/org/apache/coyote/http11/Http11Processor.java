@@ -53,24 +53,26 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             HttpResponse httpResponse = handleRequest(httpRequest);
 
-            String header = "";
+            var header = new StringBuilder();
             addResponseHeaderInfo(httpRequest, httpResponse, header);
 
             final var responseBody = createResponseBody(httpResponse.path());
             final String contentType = getContentType(httpResponse.path());
 
-            var response = "";
+            var response = new StringBuilder();
             String responseLine = httpRequest.version() + " " + httpResponse.httpStatus().getMessage() + " ";
-            header = String.join("\r\n",
+            header.append(String.join("\r\n",
                     "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.length + " ");
+                    "Content-Length: " + responseBody.length + " "));
             String body = new String(responseBody);
 
-            response = String.join("\r\n", responseLine, header + "\r\n", body);
+            response.append(String.join("\r\n", responseLine, header.toString() + "\r\n", body));
+
+            System.out.println(response.toString());
 
             log.info("mehtod: {} , path: {}, http status: {}",
                     httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -87,17 +89,22 @@ public class Http11Processor implements Runnable, Processor {
         return requestHandler.handle(request);
     }
 
-    private void addResponseHeaderInfo(HttpRequest httpRequest, HttpResponse httpResponse, String header) {
+    private void addResponseHeaderInfo(HttpRequest httpRequest, HttpResponse httpResponse, StringBuilder header) {
         String cookie = httpRequest.headers().getOrDefault("cookie", "");
         HttpCookie httpCookie = new HttpCookie(cookie);
 
-        if (httpResponse.headers().containsKey("cookie")) {
+        if (cookie.isBlank() && httpResponse.headers().containsKey("cookie")) {
             httpCookie.add("JSESSIONID", httpResponse.headers().get("cookie"));
-            header = String.join("\r\n", "Set-Cookie: JSESSIONID=" + httpCookie.getSessionId());
+
+            header.append("Set-Cookie: JSESSIONID=")
+                    .append(httpResponse.headers().get("cookie"))
+                    .append("\r\n");
         }
 
-        if (httpResponse.headers().containsKey("path")) {
-            header = String.join("\r\n", header, "Location: " + httpResponse.path());
+        if (httpResponse.headers().containsKey("Location")) {
+            header.append("Location: ")
+                    .append(httpResponse.headers().get("Location"))
+                    .append("\r\n");
         }
     }
 

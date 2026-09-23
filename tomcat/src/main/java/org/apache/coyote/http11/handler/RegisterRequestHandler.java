@@ -21,7 +21,7 @@ public class RegisterRequestHandler implements RequestHandler{
             register(httpRequest.params());
             log.info("계정 : {} 회원가입 완료", httpRequest.params().get("account"));
             log.info("이메일 : {}", httpRequest.params().get("email"));
-            headers.put("Location", "/500.html");
+            headers.put("Location", "/index.html");
             return new HttpResponse("/index.html", HttpStatus.CREATED, headers);
         } catch (IllegalArgumentException e){
             headers.put("Location", "/500.html");

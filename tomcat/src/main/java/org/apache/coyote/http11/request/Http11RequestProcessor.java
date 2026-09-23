@@ -1,7 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.HttpHeaders;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -9,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 public class Http11RequestProcessor {

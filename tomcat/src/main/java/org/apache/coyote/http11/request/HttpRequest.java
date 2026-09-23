@@ -58,6 +58,10 @@ public class HttpRequest {
         return formContents.find(key);
     }
 
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
     public boolean isGet() {
         return requestLine.getMethod() == HttpMethod.GET;
     }

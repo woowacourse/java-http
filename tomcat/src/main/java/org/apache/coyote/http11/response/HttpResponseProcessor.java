@@ -1,14 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.HttpHeaders;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -68,15 +69,12 @@ public class HttpResponseProcessor {
     }
 
     public void sendStaticResource(HttpStatus status, MimeType mimeType, byte[] body) throws IOException {
-        final String head = String.join("\r\n",
-                "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + " ",
-                "Content-Type: " + mimeType.getTypeName() + " ",
-                "Content-Length: " + body.length + " ",
-                "",
-                "");
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.addContentType(mimeType);
+        headers.addContentLength(body.length);
+        HttpResponse response = new HttpResponse(status, headers, body);
 
-        outputStream.write(head.getBytes(StandardCharsets.ISO_8859_1));
-        outputStream.write(body);
+        outputStream.write(response.toHttpBytes());
         outputStream.flush();
     }
 
@@ -86,17 +84,13 @@ public class HttpResponseProcessor {
 
     public void sendRedirect(String path, Cookies cookies) throws IOException {
         HttpStatus found = HttpStatus.FOUND;
-        final StringBuilder head = new StringBuilder()
-                .append("HTTP/1.1 ").append(found.getCode()).append(" ").append(found.getMessage()).append(" \r\n")
-                .append("Location: ").append(path).append(" \r\n")
-                .append("Content-Length: 0 \r\n");
+        HttpHeaders headers = HttpHeaders.empty();
+        headers.add("Location", path);
+        headers.addContentLength(0);
+        HttpResponse response = new HttpResponse(found, headers);
+        response.setCookies(cookies);
 
-        for (Cookie cookie : cookies.values()) {
-            head.append("Set-Cookie: ").append(cookie.toHeaderValue()).append(" \r\n");
-        }
-        head.append("\r\n");
-
-        outputStream.write(head.toString().getBytes(StandardCharsets.ISO_8859_1));
+        outputStream.write(response.toHttpBytes());
         outputStream.flush();
     }
 }

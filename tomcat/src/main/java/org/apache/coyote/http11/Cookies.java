@@ -1,10 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Cookies {
@@ -13,15 +9,19 @@ public class Cookies {
     private final Map<String, Cookie> cookies;
 
     private Cookies(Map<String, Cookie> cookies) {
-        this.cookies = cookies;
-    }
-
-    public static Cookies empty() {
-        return new Cookies(Map.of());
+        this.cookies = Collections.unmodifiableMap(new LinkedHashMap<>(cookies));
     }
 
     public static Cookies of(Cookie... cookies) {
         return toCookies(List.of(cookies));
+    }
+
+    private static Cookies toCookies(List<Cookie> cookiePairs) {
+        Map<String, Cookie> cookies = new LinkedHashMap<>();
+        for (Cookie cookie : cookiePairs) {
+            cookies.put(cookie.getName(), cookie);
+        }
+        return new Cookies(cookies);
     }
 
     public static Cookies from(String cookieHeaderValue) {
@@ -37,12 +37,8 @@ public class Cookies {
         return toCookies(cookiePairs);
     }
 
-    private static Cookies toCookies(List<Cookie> cookiePairs) {
-        Map<String, Cookie> cookies = new LinkedHashMap<>();
-        for (Cookie cookie : cookiePairs) {
-            cookies.put(cookie.getName(), cookie);
-        }
-        return new Cookies(cookies);
+    public static Cookies empty() {
+        return new Cookies(Map.of());
     }
 
     public Optional<Cookie> find(String name) {

@@ -4,6 +4,7 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserSessionService;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -13,6 +14,10 @@ import java.util.Optional;
 public final class SessionController extends AbstractController {
 
     private final UserSessionService userSessions = new UserSessionService();
+
+    public SessionController() {
+        super(HttpMethod.GET);
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

@@ -5,12 +5,17 @@ import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.resource.StaticResourceService;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
 public final class RegisterController extends AbstractController {
 
     private final StaticResourceService resources = new StaticResourceService();
+
+    public RegisterController() {
+        super(HttpMethod.GET, HttpMethod.POST);
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

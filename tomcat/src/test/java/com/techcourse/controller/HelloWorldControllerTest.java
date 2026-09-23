@@ -46,6 +46,7 @@ class HelloWorldControllerTest {
         assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo(
                 "HTTP/1.1 405 Method Not Allowed\r\n"
                         + "Content-Type: text/plain;charset=utf-8\r\n"
+                        + "Allow: GET\r\n"
                         + "Content-Length: 18\r\n"
                         + "\r\n"
                         + "Method Not Allowed"

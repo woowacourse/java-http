@@ -227,6 +227,17 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void getOnPostOnlyResourceListsAllowedMethod() {
+        final var socket = new StubSocket(getRequest("/logout"));
+
+        processor(socket).process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 405 Method Not Allowed\r\n")
+                .contains("Allow: POST\r\n");
+    }
+
+    @Test
     void controllerFailureReturnsInternalServerError() {
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);

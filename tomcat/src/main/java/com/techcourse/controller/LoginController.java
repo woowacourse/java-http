@@ -7,6 +7,7 @@ import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.resource.StaticResourceService;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -20,6 +21,10 @@ public final class LoginController extends AbstractController {
 
     private final StaticResourceService resources = new StaticResourceService();
     private final UserSessionService userSessions = new UserSessionService();
+
+    public LoginController() {
+        super(HttpMethod.GET, HttpMethod.POST);
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

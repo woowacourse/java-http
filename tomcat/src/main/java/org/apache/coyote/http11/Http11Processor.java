@@ -35,7 +35,9 @@ public class Http11Processor implements Runnable, Processor {
     public static final String SUCCESS_CODE = "200";
     public static final String SUCCESS_STATUS_RESPONSE = "OK";
     public static final String ERROR_STATUS_RESPONSE = "ERROR";
+    public static final String FOUND_STATUS_RESPONSE = "Found";
     public static final String INDEX = "index";
+    public static final String UNAUTHORIZED_STATUS_RESPONSE = "Unauthorized";
 
     private final Socket connection;
 
@@ -129,8 +131,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String statusResponse = SUCCESS_STATUS_RESPONSE;
-        if (!statusCode.equals(SUCCESS_CODE)) {
-            statusResponse = ERROR_STATUS_RESPONSE;
+        if (statusCode.equals(UNAUTHORIZED_CODE)) {
+            statusResponse = UNAUTHORIZED_STATUS_RESPONSE;
+        }
+        if (statusCode.equals(REDIRECTION_FOUND_CODE)) {
+            statusResponse = FOUND_STATUS_RESPONSE;
         }
 
         return String.join("\r\n",

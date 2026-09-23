@@ -43,6 +43,26 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse unsupportedMediaType() {
+        return new HttpResponse(
+            "415",
+                "Unsupported Media Type",
+                null,
+                "",
+                null
+        );
+    }
+
+    public static HttpResponse badRequest() {
+        return new HttpResponse(
+                "400",
+                "Bad Request",
+                null,
+                "",
+                null
+        );
+    }
+
     public String convertString() {
         StringBuilder response = new StringBuilder()
                 .append("HTTP/1.1 ")

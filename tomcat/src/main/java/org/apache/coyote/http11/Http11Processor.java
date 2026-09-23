@@ -30,6 +30,21 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
+    private static boolean hasBlankParameter(Map<String, String> parameters, String... requiredKeys) {
+        for (String key : requiredKeys) {
+            String value = parameters.get(key);
+            if (value == null || value.isBlank()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isFormUrlEncoded(HttpRequest request) {
+        return request.getHeaders().getOrDefault("Content-Type", "").equals("application/x-www-form-urlencoded");
+    }
+
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -54,22 +69,58 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(HttpRequest request) throws IOException, URISyntaxException {
-        if ("/".equals(request.getPath())) {
+        String resourcePath = request.getPath();
+
+        if ("/".equals(resourcePath)) {
             return HttpResponse.ok(CONTENT_TYPE_HTML, "Hello world!");
         }
 
-        String resourcePath = request.getPath();
+        if ("/login".equals(resourcePath) && request.getMethod().equals("GET")) {
+            return HttpResponse.ok(CONTENT_TYPE_HTML, loadResponseBody("/login.html"));
+        }
 
-        if ("/login".equals(resourcePath)) {
-            resourcePath = "/login.html";
-
-            if (!request.getQueries().isEmpty()) {
-                if (login(request.getQueries())) {
-                    return HttpResponse.found("/index.html");
-                }
-
-                return HttpResponse.found("/401.html");
+        if ("/login".equals(resourcePath) && request.getMethod().equals("POST")) {
+            if (!isFormUrlEncoded(request)) {
+                return HttpResponse.unsupportedMediaType();
             }
+
+            Map<String, String> userInfo = request.getFormParameters();
+
+            if (hasBlankParameter(userInfo, "account", "password")) {
+                return HttpResponse.badRequest();
+            }
+
+            if (login(userInfo)) {
+                return HttpResponse.found("/index.html");
+            }
+
+            return HttpResponse.found("/401.html");
+        }
+
+        if ("/register".equals(resourcePath) && request.getMethod().equals("GET")) {
+            resourcePath = "/register.html";
+            return HttpResponse.ok(CONTENT_TYPE_HTML, loadResponseBody(resourcePath));
+        }
+
+        if ("/register".equals(resourcePath) && request.getMethod().equals("POST")) {
+            if (!isFormUrlEncoded(request)) {
+                return HttpResponse.unsupportedMediaType();
+            }
+
+            Map<String, String> userInfo = request.getFormParameters();
+
+            if (hasBlankParameter(userInfo, "account", "password", "email")) {
+                return HttpResponse.badRequest();
+            }
+
+            String account = userInfo.get("account");
+            String password = userInfo.get("password");
+            String email = userInfo.get("email");
+
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+
+            return HttpResponse.found("/index.html");
         }
 
         String responseBody = loadResponseBody(resourcePath);
@@ -84,9 +135,9 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private boolean login(Map<String, String> queries) {
-        String account = queries.getOrDefault("account", "");
-        String password = queries.getOrDefault("password", "");
+    private boolean login(Map<String, String> parameters) {
+        String account = parameters.getOrDefault("account", "");
+        String password = parameters.getOrDefault("password", "");
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 

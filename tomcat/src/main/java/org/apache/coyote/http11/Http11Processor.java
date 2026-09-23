@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -17,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,13 +56,44 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String requestUri = getRequestUri(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String requestHead = getRequestMessage(bufferedReader);
+            String[] requestHeadLines = requestHead.split(CRLF);
+
+            String[] requestLineParts = requestHeadLines[0].split(" ");
+            String httpMethod = requestLineParts[0];
+            String requestUri = requestLineParts[1];
 
             String location = null;
             if (requestUri.contains("?")) {
                 String[] uriParts = requestUri.split("\\?", 2);
                 requestUri = uriParts[0];
-                location = resolveRequestUri(requestUri, uriParts[1]);
+            }
+
+            if ("POST".equals(httpMethod)) {
+                Integer contentLength = getContentLength(requestHeadLines);
+
+                char[] buffer = new char[Objects.requireNonNull(contentLength)];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+
+                Map<String, String> parameters = parseFormParameters(requestBody);
+
+                if (requestUri.equals(REGISTER_PATH)) {
+                    User user = new User(parameters.get("account"), parameters.get("password"),
+                            parameters.get("email"));
+
+                    InMemoryUserRepository.save(user);
+                    location = "/index.html";
+                }
+
+                if (requestUri.equals(LOGIN_PATH)) {
+                    String account = parameters.get("account");
+                    String password = parameters.get("password");
+
+                    location = resolveLoginRedirectLocation(account, password);
+                }
             }
 
             final String responseBody = getResponseBody(requestUri);
@@ -77,8 +108,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getRequestUri(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    private String resolveLoginRedirectLocation(String account, String password) {
+        if (authenticate(account, password)) {
+            return "/index.html";
+        }
+        return "/401.html";
+    }
+
+    private Integer getContentLength(String[] requestHeadLines) {
+        for (String requestHeadLine : requestHeadLines) {
+            if (requestHeadLine.contains("Content-Length")) {
+                return Integer.parseInt(requestHeadLine.split(" ")[1]);
+            }
+        }
+        return null;
+    }
+
+    private String getRequestMessage(BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
 
         String line = bufferedReader.readLine();
@@ -87,22 +133,7 @@ public class Http11Processor implements Runnable, Processor {
             line = bufferedReader.readLine();
         }
 
-        return stringBuilder.toString().split(" ")[1];
-    }
-
-    private String resolveRequestUri(String requestUri, String queryString) {
-        if (requestUri.contains(LOGIN_PATH)) {
-            Map<String, String> queryParameters = getQueryParameters(queryString);
-
-            String account = queryParameters.get("account");
-            String password = queryParameters.get("password");
-
-            if (authenticate(account, password)) {
-                return "/index.html";
-            }
-            return "/401.html";
-        }
-        return null;
+        return stringBuilder.toString();
     }
 
     private void sendResponse(String requestUri, String location, String responseBody, OutputStream outputStream)
@@ -133,15 +164,15 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private Map<String, String> getQueryParameters(String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
+    private Map<String, String> parseFormParameters(String queryString) {
+        Map<String, String> encodedParameters = new HashMap<>();
 
         String[] queryPairs = queryString.split("&");
         for (String queryPair : queryPairs) {
             String[] keyAndValue = queryPair.split("=");
-            queryParameters.put(keyAndValue[0], keyAndValue[1]);
+            encodedParameters.put(keyAndValue[0], keyAndValue[1]);
         }
-        return queryParameters;
+        return encodedParameters;
     }
 
     private boolean authenticate(String account, String password) {
@@ -152,7 +183,7 @@ public class Http11Processor implements Runnable, Processor {
 
         User foundUser = user.get();
         if (foundUser.checkPassword(password)) {
-            log.info("user : {}", foundUser);
+            log.info("로그인 성공! 아이디 : {}", foundUser.getAccount());
             return true;
         }
         return false;

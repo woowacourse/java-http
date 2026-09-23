@@ -4,7 +4,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         HttpMethod method = request.getRequestLine().getHttpMethod();

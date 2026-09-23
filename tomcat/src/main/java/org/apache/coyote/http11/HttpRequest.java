@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
@@ -14,6 +15,7 @@ public final class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
+    private Map<String, String> parameters;
 
     private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
         this.requestLine = requestLine;
@@ -52,6 +54,30 @@ public final class HttpRequest {
 
     public String body() {
         return body;
+    }
+
+    public String parameter(String name) {
+        if (parameters == null) {
+            parameters = parseForm(body);
+        }
+        return parameters.get(name);
+    }
+
+    private static Map<String, String> parseForm(String form) {
+        final Map<String, String> parameters = new HashMap<>();
+
+        for (String parameter : form.split("&")) {
+            final String[] pair = parameter.split("=", 2);
+            if (pair.length != 2) {
+                continue;
+            }
+
+            final String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
+            final String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+            parameters.put(key, value);
+        }
+
+        return parameters;
     }
 
     private static String readHttpLine(InputStream input) throws IOException {

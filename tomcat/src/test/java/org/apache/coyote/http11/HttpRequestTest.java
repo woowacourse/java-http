@@ -83,6 +83,64 @@ class HttpRequestTest {
                 .isThrownBy(() -> HttpRequest.readFrom(input(message)));
     }
 
+    @Test
+    void readsFormParametersAndPreservesBody() throws IOException {
+        String body = "account=gugu&password=password";
+        HttpRequest request = formRequest(body);
+
+        assertThat(request.parameter("account")).isEqualTo("gugu");
+        assertThat(request.parameter("password")).isEqualTo("password");
+        assertThat(request.body()).isEqualTo(body);
+    }
+
+    @Test
+    void decodesFormNamesAndValues() throws IOException {
+        HttpRequest request = formRequest(
+                "acc%6Funt=%67ugu&password=pass%77ord&note=%EA%B0%80+%2B");
+
+        assertThat(request.parameter("account")).isEqualTo("gugu");
+        assertThat(request.parameter("password")).isEqualTo("password");
+        assertThat(request.parameter("note")).isEqualTo("가 +");
+    }
+
+    @Test
+    void preservesEqualsInValueAndUsesLastDuplicate() throws IOException {
+        HttpRequest request = formRequest("token=a=b&account=first&account=last");
+
+        assertThat(request.parameter("token")).isEqualTo("a=b");
+        assertThat(request.parameter("account")).isEqualTo("last");
+    }
+
+    @Test
+    void distinguishesEmptyAndMissingParameters() throws IOException {
+        HttpRequest request = formRequest("account=&ignored&password=password");
+
+        assertThat(request.parameter("account")).isEmpty();
+        assertThat(request.parameter("ignored")).isNull();
+        assertThat(request.parameter("email")).isNull();
+        assertThat(request.parameter("password")).isEqualTo("password");
+    }
+
+    @Test
+    void rejectsInvalidEncodingWhenParametersAreRequested() throws IOException {
+        for (String value : List.of("%AZ", "%", "%1")) {
+            String body = "account=gugu&password=" + value;
+            HttpRequest request = formRequest(body);
+
+            assertThat(request.body()).isEqualTo(body);
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> request.parameter("account"));
+        }
+    }
+
+    private HttpRequest formRequest(String body) throws IOException {
+        String message = "POST /login HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + body;
+        return HttpRequest.readFrom(input(message));
+    }
+
     private ByteArrayInputStream input(String message) {
         return new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
     }

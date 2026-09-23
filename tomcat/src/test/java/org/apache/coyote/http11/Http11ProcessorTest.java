@@ -139,6 +139,16 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void malformedEncodedLoginBodyIsNotProcessed() {
+        final var socket = new StubSocket(
+                postLoginRequest("account=gugu&password=%AZ"));
+
+        new Http11Processor(socket, sessionManager).process(socket);
+
+        assertThat(socket.output()).isEmpty();
+    }
+
+    @Test
     void postLoginWithWrongPasswordRedirectsToUnauthorized() {
         final var socket = new StubSocket(
                 postLoginRequest("account=gugu&password=wrong"));

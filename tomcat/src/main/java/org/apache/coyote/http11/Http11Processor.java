@@ -5,10 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.io.OutputStream;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
@@ -59,7 +56,6 @@ public class Http11Processor implements Runnable, Processor {
             log.info("method: {}, path: {}, version: {}",
                     method, path, httpVersion);
 
-            final String body = request.body();
             final String sessionId = findSessionId(request.header("cookie"));
             HttpSession session = sessionManager.findSession(sessionId);
             String setCookieHeader = "";
@@ -68,10 +64,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if ("/register".equals(path) && "POST".equals(method)) {
-                final Map<String, String> parameters = parseQuery(body);
-                final String account = parameters.get("account");
-                final String password = parameters.get("password");
-                final String email = parameters.get("email");
+                final String account = request.parameter("account");
+                final String password = request.parameter("password");
+                final String email = request.parameter("email");
 
                 if (account == null || password == null || email == null) {
                     throw new IOException("회원가입 필수 항목이 누락되었습니다.");
@@ -86,10 +81,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if ("/login".equals(path) && "POST".equals(method)) {
-                final Map<String, String> parameters = parseQuery(body);
-
-                final String account = parameters.get("account");
-                final String password = parameters.get("password");
+                final String account = request.parameter("account");
+                final String password = request.parameter("password");
 
                 final User user = account == null || password == null
                         ? null
@@ -228,23 +221,6 @@ public class Http11Processor implements Runnable, Processor {
 
         output.write(response.getBytes(StandardCharsets.UTF_8));
         output.flush();
-    }
-
-    private Map<String, String> parseQuery(String query) {
-        final Map<String, String> parameters = new HashMap<>();
-
-        for (String parameter : query.split("&")) {
-            final String[] pair = parameter.split("=", 2);
-            if (pair.length != 2) {
-                continue;
-            }
-
-            final String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
-            final String value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
-            parameters.put(key, value);
-        }
-
-        return parameters;
     }
 
     private byte[] readResource(String resourcePath) throws IOException {

@@ -4,14 +4,10 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Manager;
@@ -46,29 +42,25 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var input = new BufferedInputStream(inputStream);
-            final String line = readHttpLine(input);
-            if (line == null) {
-                return;
-            }
-
-            final RequestLine requestLine;
+            final HttpRequest request;
             try {
-                requestLine = RequestLine.parse(line);
+                request = HttpRequest.readFrom(inputStream);
             } catch (IllegalArgumentException e) {
                 return;
             }
+            if (request == null) {
+                return;
+            }
 
-            final String method = requestLine.method();
-            final String path = requestLine.path();
-            final String httpVersion = requestLine.httpVersion();
+            final String method = request.method();
+            final String path = request.path();
+            final String httpVersion = request.httpVersion();
 
             log.info("method: {}, path: {}, version: {}",
                     method, path, httpVersion);
 
-            final Map<String, String> headers = readHeaders(input);
-            final String body = readBody(input, headers);
-            final String sessionId = findSessionId(headers.get("cookie"));
+            final String body = request.body();
+            final String sessionId = findSessionId(request.header("cookie"));
             HttpSession session = sessionManager.findSession(sessionId);
             String setCookieHeader = "";
             if (session == null) {
@@ -236,60 +228,6 @@ public class Http11Processor implements Runnable, Processor {
 
         output.write(response.getBytes(StandardCharsets.UTF_8));
         output.flush();
-    }
-
-    private String readHttpLine(InputStream input) throws IOException {
-        final var bytes = new ByteArrayOutputStream();
-        int value;
-
-        while ((value = input.read()) != -1) {
-            if (value == '\n') {
-                final String line = bytes.toString(StandardCharsets.UTF_8);
-                return line.endsWith("\r") ? line.substring(0, line.length() - 1) : line;
-            }
-            bytes.write(value);
-        }
-
-        return bytes.size() == 0 ? null : bytes.toString(StandardCharsets.UTF_8);
-    }
-
-    private Map<String, String> readHeaders(InputStream input) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        String line;
-
-        while ((line = readHttpLine(input)) != null) {
-            if (line.isEmpty()) {
-                return headers;
-            }
-
-            final String[] parts = line.split(":", 2);
-            if (parts.length != 2) {
-                throw new IOException("잘못된 요청 헤더입니다.");
-            }
-            headers.put(parts[0].trim().toLowerCase(Locale.ROOT), parts[1].trim());
-        }
-
-        throw new IOException("요청 헤더가 완전히 도착하지 않았습니다.");
-    }
-
-    private String readBody(InputStream input, Map<String, String> headers) throws IOException {
-        final int contentLength;
-        try {
-            contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
-        } catch (NumberFormatException e) {
-            throw new IOException("잘못된 Content-Length입니다.");
-        }
-
-        if (contentLength < 0) {
-            throw new IOException("잘못된 Content-Length입니다.");
-        }
-
-        final byte[] body = input.readNBytes(contentLength);
-        if (body.length != contentLength) {
-            throw new IOException("요청 본문이 완전히 도착하지 않았습니다.");
-        }
-
-        return new String(body, StandardCharsets.UTF_8);
     }
 
     private Map<String, String> parseQuery(String query) {

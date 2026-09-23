@@ -39,6 +39,17 @@ class Http11ProcessorTest {
     private final Manager sessionManager = new SessionManager();
 
     @Test
+    void stopsWithoutResponseWhenRequestLineIsMissingOrMalformed() {
+        for (String request : List.of("", "\r\n", "GET\r\n\r\n", "GET / HTTP/1.1 EXTRA\r\n\r\n")) {
+            var socket = new StubSocket(request);
+
+            new Http11Processor(socket, sessionManager).process(socket);
+
+            assertThat(socket.output()).isEmpty();
+        }
+    }
+
+    @Test
     void process() {
         // given
         final var socket = new StubSocket();

@@ -47,22 +47,21 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var input = new BufferedInputStream(inputStream);
-            final String requestLine = readHttpLine(input);
-
-            if (requestLine == null) {
+            final String line = readHttpLine(input);
+            if (line == null) {
                 return;
             }
 
-            final String[] parts = requestLine.split(" ");
-            if (parts.length != 3) {
+            final RequestLine requestLine;
+            try {
+                requestLine = RequestLine.parse(line);
+            } catch (IllegalArgumentException e) {
                 return;
             }
 
-            final String method = parts[0];
-            final String requestTarget = parts[1];
-            final String[] targetParts = requestTarget.split("\\?", 2);
-            final String path = targetParts[0];
-            final String httpVersion = parts[2];
+            final String method = requestLine.method();
+            final String path = requestLine.path();
+            final String httpVersion = requestLine.httpVersion();
 
             log.info("method: {}, path: {}, version: {}",
                     method, path, httpVersion);

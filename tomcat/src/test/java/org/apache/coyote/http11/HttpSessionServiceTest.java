@@ -97,6 +97,55 @@ class HttpSessionServiceTest {
         assertThat(sessionManager.findSession(session.getId())).isSameAs(session);
     }
 
+    @Test
+    void 기존_세션이_있으면_무효화하고_새로운_세션으로_교체한다() throws Exception {
+
+        // given
+        final HttpSession existingSession = sessionManager.createSession();
+
+        final String existingSessionId = existingSession.getId();
+
+        final HttpRequest request =
+                createRequest(String.join(
+                                "\r\n",
+                                "POST /login HTTP/1.1",
+                                "Host: localhost:8080",
+                                "Cookie: JSESSIONID="
+                                        + existingSessionId,
+                                "",
+                                ""
+                        )
+                );
+
+        final HttpResponse response = new HttpResponse();
+
+        HttpSession newSession = null;
+
+        try {
+            // when
+            newSession = sessionService.replaceSession(request, response);
+
+            // then
+            assertThat(sessionManager.findSession(existingSessionId)).isNull();
+
+            assertThat(newSession.getId()).isNotEqualTo(existingSessionId);
+
+            assertThat(sessionManager.findSession(newSession.getId())).isSameAs(newSession);
+
+            response.ok("text/html;charset=utf-8", new byte[0]);
+
+            final String result = writeResponse(response);
+
+            assertThat(result).contains("Set-Cookie: JSESSIONID=" + newSession.getId());
+
+        } finally {
+            if (newSession != null) {
+                newSession.invalidate();
+            }
+        }
+    }
+
+
     private HttpRequest createRequest(final String rawRequest) throws Exception {
 
         return HttpRequest.from(new ByteArrayInputStream(

@@ -49,6 +49,19 @@ public class HttpSessionService {
         return session;
     }
 
+    public HttpSession replaceSession(
+            final HttpRequest request,
+            final HttpResponse response
+    ) {
+        final HttpSession existingSession = findSession(request);
+
+        if (existingSession != null) {
+            existingSession.invalidate();
+        }
+
+        return createSession(response);
+    }
+
     private void setSessionCookie(final HttpResponse response, final String sessionId) {
         response.addHeader(SET_COOKIE, COOKIE_NAME + "=" + sessionId);
     }

@@ -67,7 +67,7 @@ public class LoginController extends AbstractController {
 
         final User loginUser = user.get();
 
-        final HttpSession session = sessionService.createSession(response);
+        final HttpSession session = sessionService.replaceSession(request, response);
 
         session.setAttribute(USER_SESSION_KEY, loginUser);
         log.info("login success account: {}", loginUser.getAccount());

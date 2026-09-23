@@ -22,3 +22,8 @@
 - [x] 'GET /register HTTP/1.1' HTTP 요청을 전달하면 회원가입 페이지를 응답한다.
 - [x] `POST /register`로 회원가입하면 `Location: /index.html`로 리다이렉트한다.
 - [x] 로그인 페이지에서 로그인 버튼을 누르면 POST 요청을 보낸다.
+
+### Cookie에 JSESSIONID 값 저장하기
+
+- [x] 요청에 `JSESSIONID` 쿠키가 없으면 응답에 새 `JSESSIONID`를 `Set-Cookie`로 보낸다.
+- [x] 요청에 `JSESSIONID` 쿠키가 있으면 응답에 새 `JSESSIONID`를 설정하지 않는다.

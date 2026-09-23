@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -97,5 +98,40 @@ class Step2Test {
 
         // then
         assertThat(socket.output()).contains("<form method=\"post\" action=\"login\">");
+    }
+
+    @Test
+    void JSESSIONID가_없는_요청에는_새_쿠키를_설정한다() {
+        String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry",
+                "",
+                "");
+        var socket = new StubSocket(httpRequest);
+
+        new Http11Processor(socket).process(socket);
+
+        String cookieHeader = socket.output().lines()
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .findFirst()
+                .orElseThrow();
+        String sessionId = cookieHeader.substring("Set-Cookie: JSESSIONID=".length());
+        assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
+    }
+
+    @Test
+    void JSESSIONID가_있는_요청에는_새_쿠키를_설정하지_않는다() {
+        String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "",
+                "");
+        var socket = new StubSocket(httpRequest);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
     }
 }

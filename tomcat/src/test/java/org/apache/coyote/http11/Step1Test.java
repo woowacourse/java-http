@@ -25,14 +25,13 @@ class Step1Test {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        var expectedHeaders = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+                "Content-Length: 12 ");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).startsWith(expectedHeaders);
+        assertThat(socket.output()).endsWith("\r\n\r\nHello world!");
     }
 
     @Test

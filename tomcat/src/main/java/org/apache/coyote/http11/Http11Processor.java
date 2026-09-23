@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,21 +46,15 @@ public class Http11Processor implements Runnable, Processor {
             if (requestLine == null) {
                 return;
             }
-//            String requestHeader = reader.readLine();
-//            int contentLength = 0;
-//            while (requestHeader != null && !requestHeader.equals("")) {
-//                log.info("RH {}", requestHeader);
-//                requestHeader = reader.readLine();
-//                if (requestHeader.contains("Content-Length")) {
-//                    int start = requestHeader.indexOf(" ");
-//                    contentLength = Integer.parseInt(requestHeader.substring(start + 1));
-//                    char[] buffer = new char[contentLength];
-//                    reader.read(buffer, 0, contentLength);
-//                    String requestBody = new String(buffer);
-//                    log.info("RB: {}", requestBody);
-//
-//                }
-//            }
+            String cookieHeader = "";
+            String requestHeader;
+            while ((requestHeader = reader.readLine()) != null && !requestHeader.isEmpty()) {
+                int colonIndex = requestHeader.indexOf(':');
+                if (colonIndex > 0 && requestHeader.substring(0, colonIndex).equalsIgnoreCase("Cookie")) {
+                    cookieHeader = requestHeader.substring(colonIndex + 1).trim();
+                }
+            }
+            HttpCookie cookies = new HttpCookie(cookieHeader);
             String[] parts = requestLine.split(" ");
 
             RequestTarget requestTarget = new RequestTarget(parts[1]);
@@ -100,6 +95,9 @@ public class Http11Processor implements Runnable, Processor {
                         .addHeader("Location", "/index.html");
             } else {
                 response = new HttpResponse("200 OK", contentType, responseBody);
+            }
+            if (!cookies.hasJSessionId()) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
             }
             outputStream.write(response.toByteArray());
             outputStream.flush();

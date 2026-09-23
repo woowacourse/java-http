@@ -32,8 +32,4 @@ public class HttpCookie {
     public Optional<String> getValue(String name) {
         return Optional.ofNullable(cookies.get(name));
     }
-
-    public boolean hasCookie(String name) {
-        return cookies.containsKey(name);
-    }
 }

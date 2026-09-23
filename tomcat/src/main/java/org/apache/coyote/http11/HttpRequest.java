@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ public class HttpRequest {
     private final Map<String, List<String>> bodyParams;
     private final String body;
     private final HttpCookie cookie;
+    private HttpSession session;
 
     private HttpRequest(
             HttpMethod method,
@@ -270,6 +272,14 @@ public class HttpRequest {
 
     public Optional<String> getSessionId() {
         return cookie.getValue("JSESSIONID");
+    }
+
+    public HttpSession getSession() {
+        return session;
+    }
+
+    public void setSession(HttpSession session) {
+        this.session = session;
     }
 
     private String getFirstValue(Map<String, List<String>> params, String name) {

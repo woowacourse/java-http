@@ -20,9 +20,9 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final SimpleSessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SimpleSessionManager sessionManager) {
         this.connection = connection;
-        this.sessionManager = new SimpleSessionManager();
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -36,12 +36,46 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequest.from(inputStream);
+            final HttpRequest request = HttpRequest.from(inputStream);
+            attachExistingSession(request);
 
-            HttpResponse response = handleRequest(request);
+            final HttpResponse response = handleRequest(request);
+
+            applySessionCookie(request, response);
+
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void attachExistingSession(HttpRequest request) {
+        request.getSessionId()
+                .map(sessionManager::findSession)
+                .ifPresent(request::setSession);
+    }
+
+    private HttpSession getOrCreateSession(HttpRequest request) {
+        HttpSession session = request.getSession();
+        if (session != null) {
+            return session;
+        }
+
+        SimpleSession newSession = SimpleSession.create();
+        sessionManager.add(newSession);
+        request.setSession(newSession);
+        return newSession;
+    }
+
+    private void applySessionCookie(HttpRequest request, HttpResponse response) {
+        HttpSession session = request.getSession();
+        if (session == null || !session.isNew()) {
+            return;
+        }
+
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
+        if (session instanceof SimpleSession simpleSession) {
+            simpleSession.markEstablished();
         }
     }
 
@@ -82,10 +116,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(HttpRequest request) {
-        return request.getSessionId()
-                .map(sessionManager::findSession)
-                .map(session -> session.getAttribute("user") != null)
-                .orElse(false);
+        HttpSession session = request.getSession();
+        return session != null && session.getAttribute("user") != null;
     }
 
     private HttpResponse handleLogin(HttpRequest request) {
@@ -99,15 +131,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         User user = authenticatedUser.get();
-
-        HttpSession session = SimpleSession.create();
+        HttpSession session = getOrCreateSession(request);
         session.setAttribute("user", user);
-
-        sessionManager.add(session);
 
         log.info(user.toString());
 
-        return HttpResponse.redirectWithSession("/index.html", session.getId());
+        return HttpResponse.redirect("/index.html");
     }
 
     private Optional<User> authenticate(String account, String password) {

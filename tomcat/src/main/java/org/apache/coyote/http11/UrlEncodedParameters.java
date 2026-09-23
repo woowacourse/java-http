@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class UrlEncodedParameters {
+final class UrlEncodedParameters {
 
     private static final String PARAMETER_DELIMITER = "&";
     private static final String NAME_VALUE_DELIMITER = "=";
@@ -19,7 +19,7 @@ public final class UrlEncodedParameters {
         this.values = Map.copyOf(values);
     }
 
-    public static Optional<UrlEncodedParameters> parse(final String encodedParameters) {
+    static Optional<UrlEncodedParameters> parse(final String encodedParameters) {
         if (encodedParameters.isEmpty()) {
             return Optional.of(new UrlEncodedParameters(Map.of()));
         }
@@ -40,7 +40,7 @@ public final class UrlEncodedParameters {
         return Optional.of(new UrlEncodedParameters(values));
     }
 
-    public Optional<String> get(final String name) {
+    Optional<String> get(final String name) {
         return Optional.ofNullable(values.get(name));
     }
 

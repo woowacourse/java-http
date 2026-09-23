@@ -1,15 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Optional;
 
 public final class HttpResponse {
-
-    private static final String HTTP_VERSION = "HTTP/1.1";
-    private static final String CRLF = "\r\n";
 
     private final HttpStatus status;
     private final HttpHeaders headers;
@@ -61,21 +55,5 @@ public final class HttpResponse {
                 status,
                 HttpHeaders.empty(),
                 new ResponseContent("text/plain;charset=utf-8", body));
-    }
-
-    public void writeTo(final OutputStream outputStream) throws IOException {
-        final var headerLines = new ArrayList<String>();
-        headerLines.add(HTTP_VERSION + " " + status.code() + " " + status.reasonPhrase() + " ");
-        for (final var header : headers) {
-            headerLines.add(header.name() + ": " + header.value() + " ");
-        }
-        headerLines.add("Content-Type: " + content.contentType() + " ");
-        headerLines.add("Content-Length: " + content.body().length + " ");
-        headerLines.add("");
-        headerLines.add("");
-
-        outputStream.write(String.join(CRLF, headerLines).getBytes(StandardCharsets.UTF_8));
-        outputStream.write(content.body());
-        outputStream.flush();
     }
 }

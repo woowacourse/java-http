@@ -7,7 +7,6 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.UrlEncodedParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public final class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
-        final var loginUser = findLoginUser(request.body());
+        final var loginUser = findLoginUser(request);
         if (loginUser.isEmpty()) {
             return HttpResponse.redirect(UNAUTHORIZED_PATH);
         }
@@ -65,14 +64,9 @@ public final class LoginController extends AbstractController {
         return response.addHeader("Set-Cookie", SESSION_COOKIE_NAME + "=" + session.getId());
     }
 
-    private Optional<User> findLoginUser(final String requestBody) {
-        return UrlEncodedParameters.parse(requestBody)
-                .flatMap(this::findLoginUser);
-    }
-
-    private Optional<User> findLoginUser(final UrlEncodedParameters parameters) {
-        final var account = parameters.get("account");
-        final var password = parameters.get("password");
+    private Optional<User> findLoginUser(final HttpRequest request) {
+        final var account = request.parameter("account");
+        final var password = request.parameter("password");
         if (account.isEmpty() || password.isEmpty()) {
             return Optional.empty();
         }

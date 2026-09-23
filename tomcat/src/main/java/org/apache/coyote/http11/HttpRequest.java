@@ -12,15 +12,18 @@ public final class HttpRequest {
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final String body;
+    private final Optional<UrlEncodedParameters> parameters;
 
     private HttpRequest(
             final HttpRequestLine requestLine,
             final HttpHeaders headers,
-            final String body
+            final String body,
+            final Optional<UrlEncodedParameters> parameters
     ) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.parameters = parameters;
     }
 
     public static Optional<HttpRequest> readFrom(final BufferedReader reader) throws IOException {
@@ -38,7 +41,12 @@ public final class HttpRequest {
         if (body.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(new HttpRequest(requestLine.get(), headers.get(), body.get()));
+        final var parameters = UrlEncodedParameters.parse(body.get());
+        return Optional.of(new HttpRequest(
+                requestLine.get(),
+                headers.get(),
+                body.get(),
+                parameters));
     }
 
     public String method() {
@@ -61,6 +69,10 @@ public final class HttpRequest {
 
     public String body() {
         return body;
+    }
+
+    public Optional<String> parameter(final String name) {
+        return parameters.flatMap(values -> values.get(name));
     }
 
     private static Optional<HttpRequestLine> readRequestLine(final BufferedReader reader) throws IOException {

@@ -72,6 +72,20 @@ class HttpRequestTest {
             // then
             assertThat(request.cookie("JSESSIONID")).contains("session-id");
         }
+
+        @Test
+        @DisplayName("이름으로 URL 인코딩된 요청 파라미터를 조회한다")
+        void providesUrlEncodedParameterByName() throws Exception {
+            // given
+            final var body = "account=gugu+user&email=gugu%40example.com";
+            final var reader = requestReader("Content-Length: " + body.length(), body);
+
+            // when
+            final var request = HttpRequest.readFrom(reader).orElseThrow();
+
+            // then
+            assertThat(request.parameter("account")).contains("gugu user");
+        }
     }
 
     @Nested

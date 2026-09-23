@@ -27,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REGISTER_PATH = "/register";
     private final Socket connection;
     private final RequestMapping requestMapping;
+    private final HttpResponseWriter responseWriter;
 
     public Http11Processor(final Socket connection) {
         this(connection, new ResponseContentResolver(), SessionManager.getInstance());
@@ -45,8 +46,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     Http11Processor(final Socket connection, final RequestMapping requestMapping) {
-        this.connection = connection;
+        this(connection, requestMapping, new HttpResponseWriter());
+    }
+
+    Http11Processor(
+            final Socket connection,
+            final RequestMapping requestMapping,
+            final HttpResponseWriter responseWriter
+    ) {
+        this.connection = Objects.requireNonNull(connection);
         this.requestMapping = Objects.requireNonNull(requestMapping);
+        this.responseWriter = Objects.requireNonNull(responseWriter);
     }
 
     @Override
@@ -81,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
             final var response = controller.service(request);
 
             try {
-                response.writeTo(outputStream);
+                responseWriter.write(response, outputStream);
             } catch (IOException e) {
                 log.warn("Failed to write HTTP response", e);
             }

@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.UrlEncodedParameters;
 
 import java.util.Objects;
 
@@ -30,15 +29,9 @@ public final class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
-        return UrlEncodedParameters.parse(request.body())
-                .map(this::register)
-                .orElseGet(() -> HttpResponse.error(HttpStatus.BAD_REQUEST));
-    }
-
-    private HttpResponse register(final UrlEncodedParameters parameters) {
-        final var account = parameters.get("account");
-        final var password = parameters.get("password");
-        final var email = parameters.get("email");
+        final var account = request.parameter("account");
+        final var password = request.parameter("password");
+        final var email = request.parameter("email");
         if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
             return HttpResponse.error(HttpStatus.BAD_REQUEST);
         }

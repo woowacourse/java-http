@@ -57,4 +57,27 @@ class Step2Test {
         assertThat(socket.output()).startsWith("HTTP/1.1 302");
         assertThat(socket.output()).contains("Location: /401.html");
     }
+
+    @Test
+    void 회원가입_하면_index_html로_리다이렉트한다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 56 ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "");
+
+        var socket = new StubSocket(httpRequest);
+        var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 302");
+        assertThat(socket.output()).contains("Location: /index.html");
+    }
 }

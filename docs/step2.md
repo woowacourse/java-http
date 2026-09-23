@@ -20,7 +20,5 @@
 ### POST 방식으로 회원가입
 
 - [x] 'GET /register HTTP/1.1' HTTP 요청을 전달하면 회원가입 페이지를 응답한다.
-
-회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
-회원가입을 완료하면 index.html로 리다이렉트한다.
-로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
+- [x] `POST /register`로 회원가입하면 `Location: /index.html`로 리다이렉트한다.
+- [ ] 로그인 페이지에서 로그인 버튼을 누르면 `POST /login` 요청을 보낸다.

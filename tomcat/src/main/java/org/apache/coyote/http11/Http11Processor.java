@@ -92,8 +92,9 @@ public class Http11Processor implements Runnable, Processor {
                 String location = resolveLocation(loginSuccess);
                 response = new HttpResponse("302 FOUND", contentType, responseBody)
                         .addHeader("Location", location);
-            } else if (requestTarget.hasPath("register")) {
-                response = new HttpResponse("200 OK", contentType, responseBody);
+            } else if (requestTarget.hasPath("/register") && parts[0].equals("POST")) {
+                response = new HttpResponse("302 FOUND", contentType, responseBody)
+                        .addHeader("Location", "/index.html");
             } else {
                 response = new HttpResponse("200 OK", contentType, responseBody);
             }

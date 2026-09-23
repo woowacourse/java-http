@@ -65,44 +65,48 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String uri = getUri(bufferedReader);
+            String[] requestLine = bufferedReader.readLine().split(" ");
+            String method = requestLine[0];
+            String uri = requestLine[1];
             if (uri.equals(FAVICON_PATH)) {
                 return;
             }
 
             int index = uri.indexOf(QUERY_DELIMITER);
             String path = findPath(uri, index);
-            Map<String, String> queryParams = findQueryString(uri, index);
 
-            HttpStatus httpStatus = HttpStatus.OK;
-
-            if (uri.contains("login")) {
-                httpStatus = findUser(queryParams);
+            String line;
+            int contentLength = 0;
+            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.split(":", 2)[1].trim());
+                }
             }
 
-            if (httpStatus == HttpStatus.FOUND) {
+            HttpStatus httpStatus = HttpStatus.OK;
+            if (method.equals("POST")) {
+                String requestBody = readRequestBody(bufferedReader, contentLength);
+                Map<String, String> params = parseParams(requestBody);
+
+                if (path.equals("static/register.html")) {
+                    User user = new User(params.get("account"), params.get("password"), params.get("email"));
+                    InMemoryUserRepository.save(user);
+                    httpStatus = HttpStatus.FOUND;
+                }
+
+                if (path.equals("static/login.html")) {
+                    httpStatus = findUser(params);
+                }
+            }
+
+            if (httpStatus == HttpStatus.FOUND || httpStatus == HttpStatus.UNAUTHORIZED) {
+                String location = httpStatus == HttpStatus.FOUND ? "/index.html" : "/401.html";
                 final String response = String.join("\r\n",
-                        "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
-                        "Location: /index.html ",
+                        "HTTP/1.1 " + HttpStatus.FOUND.getHttpStatus() + " ",
+                        "Location: " + location + " ",
                         "Content-Length: 0 ",
                         "",
                         "");
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-
-                return;
-            }
-
-            if (httpStatus == HttpStatus.UNAUTHORIZED) {
-                final Path filePath = getPath("static/401.html");
-                final String responseBody = findResponseBody(filePath);
-
-                final String response = String.join("\r\n",
-                        "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
-                        "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
 
@@ -126,9 +130,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getUri(BufferedReader bufferedReader) throws IOException {
-        String[] header = bufferedReader.readLine().split(" ");
-        return header[1];
+    private String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+        StringBuilder requestBody = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            int character = bufferedReader.read();
+
+            if (character == -1) {
+                break;
+            }
+
+            requestBody.append((char) character);
+        }
+
+        return requestBody.toString();
     }
 
     private String findPath(String uri, int index) {
@@ -146,19 +160,14 @@ public class Http11Processor implements Runnable, Processor {
         return STATIC_PATH + path;
     }
 
-    private Map<String, String> findQueryString(String uri, int index) {
-        String queryString = "";
-        if (index != -1) {
-            queryString = uri.substring(index + 1);
-        }
-
+    private Map<String, String> parseParams(String params) {
         Map<String, String> queryParams = new HashMap<>();
 
-        if (queryString.isBlank()) {
+        if (params.isBlank()) {
             return queryParams;
         }
 
-        for (String query : queryString.split(PARAM_DELIMITER)) {
+        for (String query : params.split(PARAM_DELIMITER)) {
             String[] q = query.split(PARAM_EQUAL, 2);
             if (q.length != 2) {
                 continue;

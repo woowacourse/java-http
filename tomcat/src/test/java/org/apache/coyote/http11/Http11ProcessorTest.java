@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -12,6 +13,67 @@ import java.nio.file.Files;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @Test
+    void 로그인_페이지를_GET으로_조회한다() throws URISyntaxException {
+        var socket = new StubSocket("GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(socket.output()).contains("<title>로그인</title>");
+    }
+
+    @Test
+    void POST_로그인에_성공하면_index로_리다이렉트한다() throws URISyntaxException {
+        var socket = post("/login", "account=gugu&password=password");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).contains("Location: /index.html");
+    }
+
+    @Test
+    void POST_로그인에_실패하면_401페이지로_리다이렉트한다() throws URISyntaxException {
+        var socket = post("/login", "account=gugu&password=wrong");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).contains("Location: /401.html");
+    }
+
+    @Test
+    void 회원가입_페이지를_GET으로_조회한다() throws URISyntaxException {
+        var socket = new StubSocket("GET /register HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(socket.output()).contains("<title>회원가입</title>");
+    }
+
+    @Test
+    void POST로_회원가입하면_저장하고_index로_리다이렉트한다() throws URISyntaxException {
+        var socket = post("/register",
+                "account=new-user&password=password&email=new%40example.com");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(InMemoryUserRepository.findByAccount("new-user")).isPresent();
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).contains("Location: /index.html");
+    }
+
+    private StubSocket post(String uri, String body) {
+        return new StubSocket(String.join("\r\n",
+                "POST " + uri + " HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
+                "",
+                body));
+    }
 
     @Test
     void process() throws URISyntaxException {

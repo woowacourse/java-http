@@ -80,4 +80,22 @@ class Step2Test {
         assertThat(socket.output()).startsWith("HTTP/1.1 302");
         assertThat(socket.output()).contains("Location: /index.html");
     }
+
+    @Test
+    void 로그인_페이지에서_로그인_버튼을_누르면_POST_요청을_보낸다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        var socket = new StubSocket(httpRequest);
+        var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("<form method=\"post\" action=\"login\">");
+    }
 }

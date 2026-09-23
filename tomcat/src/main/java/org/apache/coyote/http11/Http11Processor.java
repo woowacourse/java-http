@@ -77,6 +77,9 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpResponse response;
             if (requestTarget.hasPath(LOGIN_PATH) && requestTarget.hasQueryParameters()) {
+                // 쿼리스트링일 때와 POST로 payload, Request body로 요청이 오는 경우 해결 필요
+                // 로그인 버튼 클릭 시 POST 변경이라는 말은 쿼리스트링 방법에서 추가를 요구하는 것일까? 아니면 입력폼으로만 로그인되도록 요구하는 것일까?
+                // 각 장단점 파악 후 선택 필요
                 String account = requestTarget.findQueryParameter("account")
                         .orElseThrow(() -> new IllegalArgumentException("필수 Query Parameter 누락: account"));
                 String password = requestTarget.findQueryParameter("password")

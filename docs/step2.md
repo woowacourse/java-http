@@ -21,4 +21,4 @@
 
 - [x] 'GET /register HTTP/1.1' HTTP 요청을 전달하면 회원가입 페이지를 응답한다.
 - [x] `POST /register`로 회원가입하면 `Location: /index.html`로 리다이렉트한다.
-- [ ] 로그인 페이지에서 로그인 버튼을 누르면 `POST /login` 요청을 보낸다.
+- [x] 로그인 페이지에서 로그인 버튼을 누르면 POST 요청을 보낸다.

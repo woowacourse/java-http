@@ -68,6 +68,11 @@ public final class HttpResponse {
         return create("400 Bad Request", "text/html;charset=utf-8", body, Map.of());
     }
 
+    public static HttpResponse serviceUnavailable() {
+        return new HttpResponse("HTTP/1.1", "503 Service Unavailable",
+                Map.of("Connection", "close"), new byte[0]);
+    }
+
     public static HttpResponse redirect(String location) {
         return create("302 Found", "text/html;charset=utf-8", new byte[0],
                 Map.of("Location", location));

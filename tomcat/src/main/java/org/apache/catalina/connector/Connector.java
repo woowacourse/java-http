@@ -1,7 +1,13 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.Adapter;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +23,32 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 250;
+    private static final int DEFAULT_WORK_QUEUE_CAPACITY = 100;
+    private static final int DEFAULT_TIMEOUT = 30000;
 
     private final ServerSocket serverSocket;
     private final Adapter adapter;
     private final SessionManager sessionManager = new SessionManager();
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private final int timeout;
+    private volatile boolean stopped;
 
     public Connector(Adapter adapter) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter, DEFAULT_THREAD_POOL_SIZE, DEFAULT_TIMEOUT);
     }
 
-    public Connector(final int port, final int acceptCount, final Adapter adapter) {
+    public Connector(final int port, final int acceptCount, final Adapter adapter, final int maxThreads, final int timeout) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.adapter = adapter;
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads, maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_WORK_QUEUE_CAPACITY),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+        this.timeout = timeout;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -44,10 +62,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -72,7 +90,30 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, adapter, sessionManager);
-        new Thread(processor).start();
+        try {
+            connection.setSoTimeout(timeout);
+            executorService.execute(processor);
+        } catch (IOException e) {
+            log.error("Failed to configure read timeout", e);
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error("Failed to close connection", closeException);
+            }
+        } catch (RejectedExecutionException e) {
+            log.warn("Request processing rejected: worker queue is full or executor is shut down");
+            sendServiceUnavailableAndClose(connection);
+        }
+    }
+
+    private void sendServiceUnavailableAndClose(Socket connection) {
+        try (connection) {
+            var outputStream = connection.getOutputStream();
+            outputStream.write(HttpResponse.serviceUnavailable().toBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error("Failed to send 503 response or close rejected connection", e);
+        }
     }
 
     public void stop() {
@@ -81,6 +122,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

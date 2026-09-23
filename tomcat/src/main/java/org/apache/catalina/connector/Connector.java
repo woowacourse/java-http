@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -15,17 +20,46 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_MAX_QUEUE_SIZE = 100;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE);
     }
 
     public Connector(final int port, final int acceptCount) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this(port, acceptCount, maxThreads, DEFAULT_MAX_QUEUE_SIZE);
+    }
+
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final int maxQueueSize
+    ) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = createExecutorService(maxThreads, maxQueueSize);
         this.stopped = false;
+    }
+
+    private ExecutorService createExecutorService(final int maxThreads, final int maxQueueSize) {
+        final int checkedMaxThreads = checkMaxThreads(maxThreads);
+        final int checkedMaxQueueSize = checkMaxQueueSize(maxQueueSize);
+        return new ThreadPoolExecutor(
+                checkedMaxThreads,
+                checkedMaxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(checkedMaxQueueSize)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -39,10 +73,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
+        stopped = false;
+        final var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -66,12 +100,18 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        final var processor = new Http11Processor(connection);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            close(connection);
+            log.warn("HTTP request rejected because the thread pool is full or stopping", e);
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -91,5 +131,27 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        if (maxThreads <= 0) {
+            return DEFAULT_MAX_THREADS;
+        }
+        return maxThreads;
+    }
+
+    private int checkMaxQueueSize(final int maxQueueSize) {
+        if (maxQueueSize <= 0) {
+            return DEFAULT_MAX_QUEUE_SIZE;
+        }
+        return maxQueueSize;
+    }
+
+    private void close(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.warn("Failed to close rejected connection", e);
+        }
     }
 }

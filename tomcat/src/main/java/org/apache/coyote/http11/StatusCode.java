@@ -8,7 +8,8 @@ public enum StatusCode {
 
     private int code;
     private String description;
-    private StatusCode(int code, String description) {
+
+    StatusCode(int code, String description) {
         this.code = code;
     }
 

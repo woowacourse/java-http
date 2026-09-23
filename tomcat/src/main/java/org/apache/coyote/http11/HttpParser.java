@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 public class HttpParser {
 
@@ -11,7 +12,8 @@ public class HttpParser {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         RequestHeader requestHeader = parseHeader(reader);
         RequestBody requestBody = parseBody(reader, requestHeader);
-        return Request.from(requestHeader, requestBody);
+        RequestParams requestParams = parseParams(requestHeader, requestBody);
+        return Request.from(requestHeader, requestBody, requestParams);
     }
 
     private static RequestHeader parseHeader(BufferedReader reader) throws IOException {
@@ -23,13 +25,20 @@ public class HttpParser {
     private static RequestBody parseBody(BufferedReader reader, RequestHeader requestHeader) throws IOException {
         int contentLength = requestHeader.contentLength();
         if (contentLength <= 0) {
-            return new RequestBody();
+            return new RequestBody("");
         }
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
-        if (requestHeader.contentLength() == 0) {
-            return RequestBody.empty();
+        return new RequestBody(requestBody);
+    }
+
+    private static RequestParams parseParams(RequestHeader requestHeader, RequestBody requestBody)
+            throws UnsupportedEncodingException {
+        String queryString = requestHeader.getQueryString();
+        if (requestHeader.method() == HttpMethod.POST) {
+            queryString = requestBody.rawBody();
         }
+        return RequestParams.of(queryString);
     }
 }

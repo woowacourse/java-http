@@ -5,13 +5,13 @@ public enum ContentType {
     CSS("css"),
     ;
 
-    private final String type;
+    private final String name;
 
-    ContentType(String type) {
-        this.type = type;
+    ContentType(String name) {
+        this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public String getName() {
+        return name;
     }
 }

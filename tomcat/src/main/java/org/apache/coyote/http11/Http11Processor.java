@@ -24,9 +24,10 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
-    private void response(String responseBody, OutputStream outputStream, StatusCode statusCode, String type) throws IOException {
+    private void response(String responseBody, OutputStream outputStream, StatusCode statusCode, String type)
+            throws IOException {
         final var response = String.join("\r\n",
-                "HTTP/1.1 "+ statusCode,
+                "HTTP/1.1 " + statusCode,
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -48,9 +49,9 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void empty(OutputStream outputStream, String contentType) throws IOException {
+    private void empty(OutputStream outputStream, Request request) throws IOException {
         final var responseBody = "Hello world!";
-        response(responseBody, outputStream, StatusCode.OK, contentType);
+        response(responseBody, outputStream, StatusCode.OK, request.getContentTypeName());
     }
 
     private void login(OutputStream outputStream, Request request) throws IOException {
@@ -59,19 +60,19 @@ public class Http11Processor implements Runnable, Processor {
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
             log.info(user.toString());
-            loginSuccess(outputStream, request);
+            loginSuccess(outputStream);
         }
         if ((user != null && !user.checkPassword(password))) {
-            loginFail(outputStream, request);
+            loginFail(outputStream);
         }
         handling(outputStream, request, StatusCode.OK);
     }
 
-    private void loginFail(OutputStream outputStream, Request request) throws IOException {
+    private void loginFail(OutputStream outputStream) throws IOException {
         redirect("/401", outputStream);
     }
 
-    private void loginSuccess(OutputStream outputStream, Request request) throws IOException {
+    private void loginSuccess(OutputStream outputStream) throws IOException {
         redirect("/index", outputStream);
     }
 
@@ -88,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
             Request request = HttpParser.getRequest(inputStream);
             log.info("request: {}", request);
             if (request.getPath().equals("/")) {
-                empty(outputStream, request.getContentType());
+                empty(outputStream, request);
                 return;
             }
             if (request.getPath().startsWith("/login")) {
@@ -103,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handling(OutputStream outputStream, Request request, StatusCode statusCode) throws IOException {
         String path = request.getPath();
-        String contentType = request.getContentType();
+        String contentType = request.getContentTypeName();
         if (!path.contains(".")) {
             path += "." + contentType;
         }

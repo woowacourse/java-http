@@ -1,4 +1,6 @@
 package org.apache.coyote.http11;
 
-public record RequestBody() {
+public record RequestBody(
+        String rawBody
+) {
 }

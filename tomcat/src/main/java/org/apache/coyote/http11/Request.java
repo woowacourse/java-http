@@ -1,45 +1,23 @@
 package org.apache.coyote.http11;
 
-import java.util.Map;
-import java.util.StringTokenizer;
-import javax.annotation.Nonnull;
-
 public class Request {
 
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
+    private final RequestParams requestParams;
 
-    private Request(RequestHeader requestHeader, RequestBody requestBody) {
+    private Request(RequestHeader requestHeader, RequestBody requestBody, RequestParams requestParams) {
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
+        this.requestParams = requestParams;
     }
 
-    public static Request from(String requestLine, Map<String, String> headers) {
-        StringTokenizer tokenizer = new StringTokenizer(requestLine);
-        String method = tokenizer.nextToken();
-        ContentType contentType = parseContentType(headers);
-        return splitUri(tokenizer, method, contentType);
-    }
-
-    public static Request from(RequestHeader requestHeader, RequestBody requestBody) {
-        return new Request(requestHeader, requestBody);
-    }
-
-    @Nonnull
-    private static Request splitUri(StringTokenizer tokenizer, String method, ContentType contentType) {
-        String uri = tokenizer.nextToken();
-        int separatorIndex = uri.indexOf('?');
-        if (separatorIndex != -1) {
-            String path = uri.substring(0, separatorIndex);
-            String queryString = uri.substring(separatorIndex + 1);
-            RequestParams requestParams = RequestParams.of(queryString);
-            return new Request(method, path, requestParams, contentType);
-        }
-        return new Request(method, uri, null, contentType);
+    public static Request from(RequestHeader requestHeader, RequestBody requestBody, RequestParams requestParams) {
+        return new Request(requestHeader, requestBody, requestParams);
     }
 
     public String getPath() {
-        return path;
+        return requestHeader.getPath();
     }
 
     public String getRequestParam(String key) {
@@ -49,12 +27,15 @@ public class Request {
         return requestParams.getParams(key);
     }
 
-    public String getContentType() {
-        return contentType.getType();
+    public String getContentTypeName() {
+        return requestHeader.getContentTypeName();
     }
 
     @Override
     public String toString() {
+        String method = requestHeader.getMethodName();
+        String path = requestHeader.getPath();
+        String contentType = requestHeader.getContentTypeName();
         return "Request{" +
                 "method='" + method + '\'' +
                 ", path='" + path + '\'' +

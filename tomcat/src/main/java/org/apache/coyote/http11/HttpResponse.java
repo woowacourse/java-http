@@ -1,28 +1,74 @@
 package org.apache.coyote.http11;
 
-public class HttpResponse {
-    private String status;
-    private String message;
-    private String contentType;
-    private String responseBody;
+import java.nio.charset.StandardCharsets;
 
-    private HttpResponse(String status, String message, String contentType, String responseBody) {
+public class HttpResponse {
+    private final String status;
+    private final String message;
+    private final String contentType;
+    private final String responseBody;
+    private final String location;
+
+    private HttpResponse(
+            String status,
+            String message,
+            String contentType,
+            String responseBody,
+            String location
+    ) {
         this.status = status;
         this.message = message;
         this.contentType = contentType;
         this.responseBody = responseBody;
+        this.location = location;
     }
 
-    public static HttpResponse isOk(String contentType, String responseBody) {
-        return new HttpResponse("200", "OK", contentType, responseBody);
+    public static HttpResponse ok(String contentType, String responseBody) {
+        return new HttpResponse(
+                "200",
+                "OK",
+                contentType,
+                responseBody,
+                null
+        );
     }
 
-    public String convertString(){
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " " + message + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+    public static HttpResponse found(String path) {
+        return new HttpResponse(
+                "302",
+                "Found",
+                null,
                 "",
-                responseBody);
+                path
+        );
+    }
+
+    public String convertString() {
+        StringBuilder response = new StringBuilder()
+                .append("HTTP/1.1 ")
+                .append(status)
+                .append(" ")
+                .append(message)
+                .append(" \r\n");
+
+        if (location != null) {
+            response.append("Location: ")
+                    .append(location)
+                    .append(" \r\n");
+        }
+
+        if (contentType != null) {
+            response.append("Content-Type: ")
+                    .append(contentType)
+                    .append(";charset=utf-8 \r\n");
+        }
+
+        response.append("Content-Length: ")
+                .append(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                .append(" \r\n")
+                .append("\r\n")
+                .append(responseBody);
+
+        return response.toString();
     }
 }

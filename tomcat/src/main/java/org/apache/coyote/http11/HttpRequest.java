@@ -9,11 +9,13 @@ public class HttpRequest {
     private final String method;
     private final String path;
     private Map<String, String> queries;
+    private Map<String, String> headers;
 
-    private HttpRequest(String method, String path, Map<String, String> queries) {
+    private HttpRequest(String method, String path, Map<String, String> queries, Map<String, String>  headers) {
         this.method = method;
         this.path = path;
         this.queries = queries;
+        this.headers = headers;
     }
 
     public static HttpRequest parseFrom(BufferedReader br) throws IOException {
@@ -35,7 +37,15 @@ public class HttpRequest {
             uri = uri.substring(0, index);
         }
 
-        return new HttpRequest(method, uri, queryMap);
+        Map<String, String> headerMap = new HashMap<>();
+        while((line = br.readLine()) != null && !line.isEmpty()) {
+            String[] headerToken = line.split(":", 2);
+            if (headerToken.length == 2) {
+                headerMap.put(headerToken[0].trim(), headerToken[1].trim());
+            }
+        }
+
+        return new HttpRequest(method, uri, queryMap, headerMap);
     }
 
     private static Map<String, String> splitQuery(String queryString) {
@@ -60,5 +70,9 @@ public class HttpRequest {
 
     public Map<String, String> getQueries() {
         return queries;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }

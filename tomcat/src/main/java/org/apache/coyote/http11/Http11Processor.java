@@ -238,6 +238,6 @@ public class Http11Processor implements Runnable, Processor {
         final int length = (bytes.length > 0) && (bytes[bytes.length - 1] == '\r')
                 ? bytes.length - 1
                 : bytes.length;
-        return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
+        return new String(bytes, 0, length, StandardCharsets.UTF_8);
     }
 }

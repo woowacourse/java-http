@@ -5,9 +5,7 @@ import org.apache.coyote.HttpStatus;
 import org.apache.coyote.MimeType;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +39,6 @@ public class HttpResponse {
         write(String.join("\r\n", lines).getBytes(StandardCharsets.UTF_8));
     }
 
-    public void sendStaticResource(String resourcePath) {
-        URL resource = findResource(resourcePath);
-
-        if (resource == null) {
-            sendError(HttpStatus.NOT_FOUND);
-            return;
-        }
-
-        byte[] body = readBody(resource);
-        send(HttpStatus.OK, resourcePath, body);
-    }
-
     public void sendError(HttpStatus status) {
         String errorPage = status.getErrorPage();
         if (errorPage == null) {
@@ -60,16 +46,10 @@ public class HttpResponse {
             return;
         }
 
-        URL resource = findResource(errorPage);
-        if (resource == null) {
-            send(status, errorPage, new byte[0]);
-            return;
-        }
-
-        send(status, errorPage, readBody(resource));
+        send(status, errorPage, new byte[0]);
     }
 
-    private void send(HttpStatus status, String resourcePath, byte[] body) {
+    public void send(HttpStatus status, String resourcePath, byte[] body) {
         List<String> lines = new ArrayList<>();
         lines.add("HTTP/1.1 " + status.getStatusLine());
         addCookies(lines);
@@ -85,20 +65,6 @@ public class HttpResponse {
     private void addCookies(List<String> lines) {
         for (String cookie : cookies) {
             lines.add("Set-Cookie: " + cookie);
-        }
-    }
-
-    private URL findResource(String resourcePath) {
-        return getClass()
-                .getClassLoader()
-                .getResource("static" + resourcePath);
-    }
-
-    private byte[] readBody(URL resource) {
-        try (InputStream resourceStream = resource.openStream()) {
-            return resourceStream.readAllBytes();
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
         }
     }
 

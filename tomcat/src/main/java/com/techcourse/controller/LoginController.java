@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -12,6 +13,9 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String LOGIN_PAGE = "/login.html";
+
+    private final StaticResourceResolver staticResourceResolver = new StaticResourceResolver();
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
@@ -20,7 +24,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.sendStaticResource(request.getResourcePath());
+        sendLoginPage(response);
     }
 
     @Override
@@ -52,6 +56,14 @@ public class LoginController extends AbstractController {
     private boolean isLoggedIn(String sessionId) {
         Session session = SessionManager.findSession(sessionId);
         return session != null && session.getAttribute("user") != null;
+    }
+
+    private void sendLoginPage(HttpResponse response) {
+        staticResourceResolver.read(LOGIN_PAGE)
+                .ifPresentOrElse(
+                        body -> response.send(HttpStatus.OK, LOGIN_PAGE, body),
+                        () -> response.sendError(HttpStatus.NOT_FOUND)
+                );
     }
 
 }

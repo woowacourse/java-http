@@ -45,20 +45,21 @@ class HttpResponseTest {
     }
 
     @Test
-    @DisplayName("정적 리소스를 응답하면 Content-Type과 Content-Length를 포함한다.")
-    void sendStaticResource() {
+    @DisplayName("응답 body를 전달하면 Content-Type과 Content-Length를 포함한다.")
+    void send() {
         // given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse response = new HttpResponse(outputStream);
 
         // when
-        response.sendStaticResource("/index.html");
+        response.send(HttpStatus.OK, "/index.html", "Hello".getBytes(StandardCharsets.UTF_8));
 
         // then
         assertThat(outputStream.toString(StandardCharsets.UTF_8))
                 .contains("HTTP/1.1 200 OK")
                 .contains("Content-Type: text/html;charset=utf-8")
-                .contains("Content-Length:");
+                .contains("Content-Length: 5")
+                .contains("Hello");
     }
 
     @Test

@@ -2,14 +2,19 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
+    private static final String REGISTER_PAGE = "/register.html";
+
+    private final StaticResourceResolver staticResourceResolver = new StaticResourceResolver();
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.sendStaticResource(request.getResourcePath());
+        sendRegisterPage(response);
     }
 
     @Override
@@ -26,5 +31,13 @@ public class RegisterController extends AbstractController {
         }
 
         response.redirect("/index.html");
+    }
+
+    private void sendRegisterPage(HttpResponse response) {
+        staticResourceResolver.read(REGISTER_PAGE)
+                .ifPresentOrElse(
+                        body -> response.send(HttpStatus.OK, REGISTER_PAGE, body),
+                        () -> response.sendError(HttpStatus.NOT_FOUND)
+                );
     }
 }

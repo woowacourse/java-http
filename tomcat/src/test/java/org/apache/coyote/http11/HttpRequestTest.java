@@ -118,4 +118,29 @@ class HttpRequestTest {
                 "moca@email.com"
         );
     }
+
+    @Test
+    void GET_요청의_Query_String_파라미터를_파싱한다() throws Exception {
+
+        // given
+        final String rawRequest = String.join(
+                "\r\n",
+                "GET /search?keyword=hello%20world&page=2 HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                ""
+        );
+
+        final ByteArrayInputStream inputStream =
+                new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
+
+        // when
+        final HttpRequest request = HttpRequest.from(inputStream).orElseThrow();
+
+        // then
+        assertThat(request.getPath()).isEqualTo("/search");
+        assertThat(request.getParameter("keyword")).hasValue("hello world");
+        assertThat(request.getParameter("page")).hasValue("2");
+    }
+
 }

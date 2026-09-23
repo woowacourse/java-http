@@ -26,7 +26,7 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = Map.copyOf(headers);
         this.body = body;
-        this.parameters = Map.copyOf(parseParameters(body));
+        this.parameters = Map.copyOf(parseParameters(requestLine, body));
         this.cookies = HttpCookie.from(headers.get(COOKIE));
     }
 
@@ -157,6 +157,14 @@ public class HttpRequest {
         final byte[] body = inputStream.readNBytes(contentLength);
 
         return new String(body, StandardCharsets.UTF_8);
+    }
+
+    private static Map<String, String> parseParameters(final RequestLine requestLine, final String body) {
+        final Map<String, String> parameters = new HashMap<>();
+        parameters.putAll(parseParameters(requestLine.getQueryString()));
+        parameters.putAll(parseParameters(body));
+
+        return parameters;
     }
 
     private static Map<String, String> parseParameters(

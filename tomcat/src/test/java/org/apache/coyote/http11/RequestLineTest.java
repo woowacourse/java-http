@@ -28,22 +28,16 @@ class RequestLineTest {
     }
 
     @Test
-    void URI에_Query_String이_있어도_Path만_반환한다() {
+    void URI에서_Path와_Query_String을_분리한다() {
         // given
-        final String rawRequestLine =
-                "GET /login?account=gugu HTTP/1.1";
+        final String rawRequestLine = "GET /search?keyword=moca&page=2 HTTP/1.1";
 
         // when
-        final RequestLine requestLine =
-                RequestLine.from(rawRequestLine);
+        final RequestLine requestLine = RequestLine.from(rawRequestLine);
 
         // then
-        assertThat(requestLine.getUri())
-                .isEqualTo(
-                        "/login?account=gugu"
-                );
-
-        assertThat(requestLine.getPath())
-                .isEqualTo("/login");
+        assertThat(requestLine.getUri()).isEqualTo("/search?keyword=moca&page=2");
+        assertThat(requestLine.getPath()).isEqualTo("/search");
+        assertThat(requestLine.getQueryString()).isEqualTo("keyword=moca&page=2");
     }
 }

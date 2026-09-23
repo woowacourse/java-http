@@ -50,4 +50,14 @@ public class RequestLine {
     public String getProtocolVersion() {
         return protocolVersion;
     }
+
+    public String getQueryString() {
+        final int queryIndex = uri.indexOf("?");
+
+        if (queryIndex == -1 || queryIndex == uri.length() - 1) {
+            return "";
+        }
+
+        return uri.substring(queryIndex + 1);
+    }
 }

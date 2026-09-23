@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.resource;
 
 import java.io.IOException;
 import java.io.InputStream;

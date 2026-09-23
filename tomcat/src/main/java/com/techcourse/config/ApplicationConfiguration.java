@@ -2,16 +2,16 @@ package com.techcourse.config;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import java.util.Map;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.Controller;
-import org.apache.coyote.RequestMapping;
-import org.apache.coyote.ResourceReader;
-import org.apache.coyote.StaticResourceController;
-import org.apache.coyote.http11.HttpSessionService;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestMapping;
+import org.apache.coyote.controller.StaticResourceController;
+import org.apache.coyote.http11.session.HttpSessionService;
 
-import java.util.Map;
+import org.apache.coyote.resource.ResourceReader;
 
 public class ApplicationConfiguration {
 

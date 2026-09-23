@@ -3,13 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.db.InMemoryUserRepository;
-import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.RequestMapping;
-import org.apache.coyote.ResourceReader;
-import org.apache.coyote.StaticResourceController;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -17,6 +10,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.controller.RequestMapping;
+import org.apache.coyote.controller.StaticResourceController;
+import org.apache.coyote.http11.session.HttpSessionService;
+
+import org.apache.coyote.resource.ResourceReader;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

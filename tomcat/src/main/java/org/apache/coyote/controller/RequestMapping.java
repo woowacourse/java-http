@@ -1,9 +1,9 @@
-package org.apache.coyote;
+package org.apache.coyote.controller;
 
-import org.apache.coyote.http11.HttpRequest;
 
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 

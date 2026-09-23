@@ -1,9 +1,9 @@
-package org.apache.coyote.http11;
-
-import org.junit.jupiter.api.Test;
+package org.apache.coyote.http11.request;
 
 import java.io.ByteArrayInputStream;
+
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

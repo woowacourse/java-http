@@ -1,12 +1,14 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.session.SessionManager;
-import org.junit.jupiter.api.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

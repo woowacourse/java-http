@@ -3,12 +3,12 @@ package org.apache.catalina.session;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionContext;
-import org.apache.catalina.Manager;
-
 import java.util.Collections;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Manager;
 
 public class Session implements HttpSession {
 

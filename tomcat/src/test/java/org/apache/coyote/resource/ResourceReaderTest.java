@@ -1,9 +1,9 @@
-package org.apache.coyote;
-
-import org.junit.jupiter.api.Test;
+package org.apache.coyote.resource;
 
 import java.nio.charset.StandardCharsets;
+
 import java.util.Optional;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

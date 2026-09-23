@@ -1,11 +1,12 @@
-package org.apache.coyote;
+package org.apache.coyote.controller;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.resource.ResourceReader;
 
 
 public class StaticResourceController extends AbstractController {

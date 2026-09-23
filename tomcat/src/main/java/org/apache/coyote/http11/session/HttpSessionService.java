@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.session.SessionManager;
-
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.session.SessionManager;
+
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class HttpSessionService {
 

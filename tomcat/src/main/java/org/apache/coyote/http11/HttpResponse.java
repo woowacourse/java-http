@@ -10,12 +10,6 @@ public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private static final String STATUS_OK = "200 OK";
-
-    private static final String STATUS_FOUND = "302 Found";
-
-    private static final String STATUS_NOT_FOUND = "404 Not Found";
-
     private static final String CONTENT_TYPE = "Content-Type";
 
     private static final String CONTENT_LENGTH = "Content-Length";
@@ -24,7 +18,7 @@ public class HttpResponse {
 
     private static final byte[] EMPTY_BODY = new byte[0];
 
-    private String status;
+    private HttpStatus status;
     private String contentType;
 
     private final Map<String, String> headers = new LinkedHashMap<>();
@@ -32,19 +26,19 @@ public class HttpResponse {
     private byte[] body = EMPTY_BODY;
 
     public void ok(final String contentType, final byte[] body) {
-        this.status = STATUS_OK;
+        this.status = HttpStatus.OK;
         this.contentType = contentType;
         this.body = body;
     }
 
     public void notFound(final String contentType, final byte[] body) {
-        this.status = STATUS_NOT_FOUND;
+        this.status = HttpStatus.NOT_FOUND;
         this.contentType = contentType;
         this.body = body;
     }
 
     public void sendRedirect(final String location) {
-        this.status = STATUS_FOUND;
+        this.status = HttpStatus.FOUND;
         this.contentType = null;
         this.body = EMPTY_BODY;
 
@@ -65,7 +59,9 @@ public class HttpResponse {
         responseHeaders
                 .append(HTTP_VERSION)
                 .append(" ")
-                .append(status)
+                .append(status.getCode())
+                .append(" ")
+                .append(status.getReasonPhrase())
                 .append(" \r\n");
 
         if (contentType != null) {

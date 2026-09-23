@@ -4,11 +4,11 @@ public class RequestLine {
 
     private static final int REQUEST_LINE_PARTS = 3;
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String protocolVersion;
 
-    private RequestLine(final String method, final String uri, final String protocolVersion
+    private RequestLine(final HttpMethod method, final String uri, final String protocolVersion
     ) {
         this.method = method;
         this.uri = uri;
@@ -26,10 +26,10 @@ public class RequestLine {
             throw new IllegalArgumentException("올바르지 않은 Request Line입니다: " + rawRequestLine);
         }
 
-        return new RequestLine(parts[0], parts[1], parts[2]);
+        return new RequestLine(HttpMethod.from(parts[0]), parts[1], parts[2]);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

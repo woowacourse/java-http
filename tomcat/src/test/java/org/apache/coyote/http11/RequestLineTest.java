@@ -18,7 +18,7 @@ class RequestLineTest {
 
         // then
         assertThat(requestLine.getMethod())
-                .isEqualTo("GET");
+                .isEqualTo(HttpMethod.GET);
 
         assertThat(requestLine.getPath())
                 .isEqualTo("/index.html");
@@ -39,5 +39,19 @@ class RequestLineTest {
         assertThat(requestLine.getUri()).isEqualTo("/search?keyword=moca&page=2");
         assertThat(requestLine.getPath()).isEqualTo("/search");
         assertThat(requestLine.getQueryString()).isEqualTo("keyword=moca&page=2");
+    }
+
+    @Test
+    void 지원하지_않는_HTTP_Method는_UNKNOWN으로_파싱한다() {
+
+        // given
+        final String rawRequestLine = "PUT /index.html HTTP/1.1";
+
+        // when
+        final RequestLine requestLine = RequestLine.from(rawRequestLine);
+
+        // then
+        assertThat(requestLine.getMethod())
+                .isEqualTo(HttpMethod.UNKNOWN);
     }
 }

@@ -36,7 +36,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request.getMethod())
-                .isEqualTo("GET");
+                .isEqualTo(HttpMethod.GET);
 
         assertThat(request.getPath())
                 .isEqualTo("/index.html");
@@ -96,7 +96,7 @@ class HttpRequestTest {
 
         // then
         assertThat(request.getMethod())
-                .isEqualTo("POST");
+                .isEqualTo(HttpMethod.POST);
 
         assertThat(request.getPath())
                 .isEqualTo("/register");

@@ -49,7 +49,7 @@ public class HttpRequest {
         return Optional.of(new HttpRequest(requestLine, headers, body));
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 

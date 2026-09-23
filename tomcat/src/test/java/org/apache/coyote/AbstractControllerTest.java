@@ -46,6 +46,25 @@ class AbstractControllerTest {
         assertThat(controller.getCalled).isFalse();
     }
 
+    @Test
+    void 지원하지_않는_HTTP_Method는_doGet과_doPost를_호출하지_않는다() throws Exception {
+
+        // given
+        final HttpRequest request = createRequest("PUT");
+
+        final HttpResponse response = new HttpResponse();
+
+        final TestController controller = new TestController();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        assertThat(controller.getCalled).isFalse();
+
+        assertThat(controller.postCalled).isFalse();
+    }
+
     private HttpRequest createRequest(final String method) throws Exception {
         final String rawRequest = String.join(
                 "\r\n",

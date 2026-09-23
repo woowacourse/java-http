@@ -1,22 +1,20 @@
 package org.apache.coyote;
 
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
-    private static final String GET = "GET";
-    private static final String POST = "POST";
-
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
 
-        if (GET.equals(request.getMethod())) {
+        if (HttpMethod.GET == request.getMethod()) {
             doGet(request, response);
             return;
         }
 
-        if (POST.equals(request.getMethod())) {
+        if (HttpMethod.POST == request.getMethod()) {
             doPost(request, response);
         }
     }

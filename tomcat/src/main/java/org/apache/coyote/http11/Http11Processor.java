@@ -27,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String INDEX_PAGE = "/index.html";
+    private static final String LOGIN_PAGE = "/login.html";
     private static final String REGISTER_PAGE = "/register.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
@@ -119,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         String resourcePath = path;
         if ("/login".equals(path)) {
-            resourcePath = "/login.html";
+            resourcePath = LOGIN_PAGE;
         }
         if ("/register".equals(path)) {
             resourcePath = REGISTER_PAGE;
@@ -177,7 +178,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String login(String requestBody, String setCookie) {
-        Map<String, String> parameters = parseQueryString(requestBody);
+        Map<String, String> parameters = parseFormParameters(requestBody);
         String account = parameters.get("account");
         String password = parameters.get("password");
         if (account == null || password == null) {
@@ -204,7 +205,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String register(String requestBody, String setCookie) {
-        Map<String, String> parameters = parseQueryString(requestBody);
+        Map<String, String> parameters = parseFormParameters(requestBody);
         String account = parameters.get("account");
         String password = parameters.get("password");
         String email = parameters.get("email");
@@ -217,14 +218,14 @@ public class Http11Processor implements Runnable, Processor {
         return buildRedirectResponse(INDEX_PAGE, setCookie);
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> queryParams = new HashMap<>();
-        for (String pair : queryString.split("&")) {
+    private Map<String, String> parseFormParameters(String requestBody) {
+        Map<String, String> parameters = new HashMap<>();
+        for (String pair : requestBody.split("&")) {
             String[] keyValue = pair.split("=", 2);
             if (keyValue.length == 2) {
-                queryParams.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                parameters.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
             }
         }
-        return queryParams;
+        return parameters;
     }
 }

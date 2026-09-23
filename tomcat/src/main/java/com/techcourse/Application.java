@@ -1,11 +1,13 @@
 package com.techcourse;
 
+import com.techcourse.config.ApplicationConfiguration;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
 
     public static void main(String[] args) {
-        final var tomcat = new Tomcat();
+        final ApplicationConfiguration configuration = new ApplicationConfiguration();
+        final Tomcat tomcat = configuration.tomcat();
         tomcat.start();
     }
 }

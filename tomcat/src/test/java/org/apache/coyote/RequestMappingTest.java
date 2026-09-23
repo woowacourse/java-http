@@ -1,46 +1,47 @@
 package org.apache.coyote;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestMappingTest {
 
-    private final RequestMapping requestMapping
-            = new RequestMapping(SessionManager.getInstance());
+    private final Controller loginController = new TestController();
+
+    private final Controller registerController = new TestController();
+
+    private final RequestMapping requestMapping = new RequestMapping(
+            Map.of(
+                    "/login",
+                    loginController,
+                    "/register",
+                    registerController
+            )
+    );
+
+    private static class TestController implements Controller {
+        @Override
+        public void service(final HttpRequest request, final HttpResponse response) {
+        }
+    }
 
     @Test
-    void login_요청에_LoginController를_반환한다() throws Exception {
+    void 등록된_경로의_Controller를_반환한다() throws Exception {
 
         // given
         final HttpRequest request = createRequest("GET /login HTTP/1.1");
 
         // when
-        final Controller controller = requestMapping.getController(request)
-                .orElseThrow();
-
-        // then
-        assertThat(controller).isInstanceOf(LoginController.class);
-    }
-
-    @Test
-    void register_요청에_RegisterController를_반환한다() throws Exception {
-
-        // given
-        final HttpRequest request = createRequest("GET /register HTTP/1.1");
-
-        // when
         final Controller controller = requestMapping.getController(request).orElseThrow();
 
         // then
-        assertThat(controller).isInstanceOf(RegisterController.class);
+        assertThat(controller).isSameAs(loginController);
     }
 
     @Test

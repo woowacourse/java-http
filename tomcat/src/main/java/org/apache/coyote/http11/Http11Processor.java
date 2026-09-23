@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
-import org.apache.coyote.StaticResourceController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +23,15 @@ public class Http11Processor implements Runnable, Processor {
     private final RequestMapping requestMapping;
     private final Controller staticResourceController;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(
+            final Socket connection,
+            final RequestMapping requestMapping,
+            final Controller staticResourceController
+    ) {
         this.connection = connection;
-        this.requestMapping = new RequestMapping(SessionManager.getInstance());
-        this.staticResourceController = new StaticResourceController();
+        this.requestMapping = requestMapping;
+        this.staticResourceController = staticResourceController;
     }
-
 
     @Override
     public void run() {

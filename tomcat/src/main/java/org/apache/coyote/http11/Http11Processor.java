@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static com.techcourse.db.InMemoryUserRepository.findByAccount;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.File;
@@ -76,6 +77,19 @@ public class Http11Processor implements Runnable, Processor {
         redirect("/index", outputStream);
     }
 
+    private void register(OutputStream outputStream, Request request) throws IOException {
+        if (request.getMethod() == HttpMethod.GET) {
+            handling(outputStream, request, StatusCode.OK);
+            return;
+        }
+        String account = request.getRequestParam("account");
+        String password = request.getRequestParam("password");
+        String email = request.getRequestParam("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        redirect("/index", outputStream);
+    }
+
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -88,18 +102,27 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             Request request = HttpParser.getRequest(inputStream);
             log.info("request: {}", request);
-            if (request.getPath().equals("/")) {
-                empty(outputStream, request);
-                return;
-            }
-            if (request.getPath().startsWith("/login")) {
-                login(outputStream, request);
-                return;
-            }
-            handling(outputStream, request, StatusCode.OK);
+
+            dispatch(request, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void dispatch(Request request, OutputStream outputStream) throws IOException {
+        if (request.getPath().equals("/")) {
+            empty(outputStream, request);
+            return;
+        }
+        if (request.getPath().startsWith("/login")) {
+            login(outputStream, request);
+            return;
+        }
+        if (request.getPath().startsWith("/register")) {
+            register(outputStream, request);
+            return;
+        }
+        handling(outputStream, request, StatusCode.OK);
     }
 
     private void handling(OutputStream outputStream, Request request, StatusCode statusCode) throws IOException {

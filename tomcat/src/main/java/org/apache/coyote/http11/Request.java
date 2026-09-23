@@ -16,6 +16,10 @@ public class Request {
         return new Request(requestHeader, requestBody, requestParams);
     }
 
+    public HttpMethod getMethod() {
+        return requestHeader.method();
+    }
+
     public String getPath() {
         return requestHeader.getPath();
     }

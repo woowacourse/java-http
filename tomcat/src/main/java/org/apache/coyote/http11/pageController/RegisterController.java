@@ -8,7 +8,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class RegisterController extends AbstractController {
+public class RegisterController extends UserSessionController {
     private static final String REGISTER_PAGE = "/register.html";
     private static final String SUCCESS_PAGE = "/index.html";
 

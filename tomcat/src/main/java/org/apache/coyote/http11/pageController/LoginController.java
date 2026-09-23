@@ -11,7 +11,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController extends AbstractController {
+public class LoginController extends UserSessionController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private static final String LOGIN_PAGE = "/login.html";

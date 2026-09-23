@@ -14,6 +14,7 @@ public class SessionManager implements Manager {
         return INSTANCE;
     }
 
+    @Override
     public Session createSession() {
         final var session = new StandardSession(UUID.randomUUID().toString(), this);
         add(session);

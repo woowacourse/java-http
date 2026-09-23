@@ -1,10 +1,11 @@
 package org.apache.coyote.http11;
 
-enum HttpStatus {
+public enum HttpStatus {
 
     OK(200, "OK"),
     FOUND(302, "Found"),
     BAD_REQUEST(400, "Bad Request"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private final int code;
@@ -15,11 +16,11 @@ enum HttpStatus {
         this.reasonPhrase = reasonPhrase;
     }
 
-    int code() {
+    public int code() {
         return code;
     }
 
-    String reasonPhrase() {
+    public String reasonPhrase() {
         return reasonPhrase;
     }
 }

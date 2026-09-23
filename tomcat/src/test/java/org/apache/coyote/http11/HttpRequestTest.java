@@ -16,6 +16,79 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpRequestTest {
 
     @Nested
+    @DisplayName("요청 정보 조회")
+    class RequestInformation {
+
+        @Test
+        @DisplayName("요청 메서드를 조회한다")
+        void providesMethod() throws Exception {
+            // given
+            final var reader = requestReader("Host: localhost:8080", "");
+
+            // when
+            final var request = HttpRequest.readFrom(reader).orElseThrow();
+
+            // then
+            assertThat(request.method()).isEqualTo("POST");
+        }
+
+        @Test
+        @DisplayName("요청 경로를 조회한다")
+        void providesPath() throws Exception {
+            // given
+            final var reader = requestReader("Host: localhost:8080", "");
+
+            // when
+            final var request = HttpRequest.readFrom(reader).orElseThrow();
+
+            // then
+            assertThat(request.path()).isEqualTo("/register");
+        }
+
+        @Test
+        @DisplayName("이름으로 요청 헤더를 조회한다")
+        void providesHeaderByName() throws Exception {
+            // given
+            final var reader = requestReader("Host: localhost:8080", "");
+
+            // when
+            final var request = HttpRequest.readFrom(reader).orElseThrow();
+
+            // then
+            assertThat(request.header("Host")).contains("localhost:8080");
+        }
+
+        @Test
+        @DisplayName("이름으로 요청 쿠키를 조회한다")
+        void providesCookieByName() throws Exception {
+            // given
+            final var reader = requestReader(
+                    "Cookie: yummy_cookie=choco; JSESSIONID=session-id",
+                    "");
+
+            // when
+            final var request = HttpRequest.readFrom(reader).orElseThrow();
+
+            // then
+            assertThat(request.cookie("JSESSIONID")).contains("session-id");
+        }
+
+        @Test
+        @DisplayName("이름으로 URL 인코딩된 요청 파라미터를 조회한다")
+        void providesUrlEncodedParameterByName() throws Exception {
+            // given
+            final var body = "account=gugu+user&email=gugu%40example.com";
+            final var reader = requestReader("Content-Length: " + body.length(), body);
+
+            // when
+            final var request = HttpRequest.readFrom(reader).orElseThrow();
+
+            // then
+            assertThat(request.parameter("account")).contains("gugu user");
+        }
+    }
+
+    @Nested
     @DisplayName("요청 본문 읽기")
     class RequestBodyReading {
 

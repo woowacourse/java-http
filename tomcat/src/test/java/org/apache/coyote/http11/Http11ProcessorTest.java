@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.StaticResourceController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
@@ -187,7 +189,7 @@ class Http11ProcessorTest {
             final var processor = new Http11Processor(socket, resolver);
 
             // when
-            final var events = processorLogs(() -> processor.process(socket));
+            final var events = staticResourceControllerLogs(() -> processor.process(socket));
 
             // then
             assertThat(events)
@@ -829,7 +831,7 @@ class Http11ProcessorTest {
     }
 
     private List<String> loginMessages(final String requestBody) {
-        final var logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final var logger = (Logger) LoggerFactory.getLogger(LoginController.class);
         final var appender = new ListAppender<ILoggingEvent>();
         appender.start();
         logger.addAppender(appender);
@@ -854,6 +856,21 @@ class Http11ProcessorTest {
 
     private List<ILoggingEvent> processorLogs(final Runnable action) {
         final var logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            action.run();
+            return List.copyOf(appender.list);
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    private List<ILoggingEvent> staticResourceControllerLogs(final Runnable action) {
+        final var logger = (Logger) LoggerFactory.getLogger(StaticResourceController.class);
         final var appender = new ListAppender<ILoggingEvent>();
         appender.start();
         logger.addAppender(appender);

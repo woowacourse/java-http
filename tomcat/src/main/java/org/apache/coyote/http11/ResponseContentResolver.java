@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 
-class ResponseContentResolver {
+public class ResponseContentResolver {
 
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
@@ -24,15 +24,15 @@ class ResponseContentResolver {
 
     private final ClassLoader classLoader;
 
-    ResponseContentResolver() {
+    public ResponseContentResolver() {
         this(ResponseContentResolver.class.getClassLoader());
     }
 
-    ResponseContentResolver(final ClassLoader classLoader) {
+    public ResponseContentResolver(final ClassLoader classLoader) {
         this.classLoader = Objects.requireNonNull(classLoader);
     }
 
-    ResponseContent resolve(final String path) {
+    public ResponseContent resolve(final String path) {
         final var resource = RESOURCES.get(path);
         if (resource == null) {
             return new ResponseContent(HTML_CONTENT_TYPE, "Hello world!".getBytes(StandardCharsets.UTF_8));

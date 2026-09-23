@@ -26,13 +26,16 @@ public final class UserSessionService {
         return Optional.empty();
     }
 
-    public Session getOrCreate(String sessionId) {
-        Session session = sessionId == null ? null : sessionManager.findSession(sessionId);
-        if (session != null) {
-            return session;
+    public Session startAuthenticatedSession(String previousSessionId, User user) {
+        if (previousSessionId != null) {
+            Session previousSession = sessionManager.findSession(previousSessionId);
+            if (previousSession != null) {
+                previousSession.invalidate();
+            }
         }
 
         Session newSession = new Session(UUID.randomUUID().toString());
+        newSession.setAttribute(SESSION_USER, user);
         sessionManager.add(newSession);
         return newSession;
     }

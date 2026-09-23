@@ -47,11 +47,8 @@ public final class LoginController extends AbstractController {
         log.info("회원 조회 성공: account={}", user.getAccount());
 
         String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElse(null);
-        Session session = userSessions.getOrCreate(sessionId);
-        session.setAttribute(UserSessionService.SESSION_USER, user);
-        if (!session.getId().equals(sessionId)) {
-            response.setCookie(HttpCookie.JSESSION_ID, session.getId());
-        }
+        Session session = userSessions.startAuthenticatedSession(sessionId, user);
+        response.setCookie(HttpCookie.JSESSION_ID, session.getId());
         response.sendRedirect("/index.html");
     }
 

@@ -97,7 +97,8 @@ public class LoginController extends AbstractController {
         httpResponse.setReasonPhrase("Found");
         httpResponse.addHeader("Location", location);
         httpResponse.addHeader("Content-Type", contentType);
-        httpResponse.addHeader("Content-Length", String.valueOf(contentType.length()));
+        httpResponse.addHeader("Content-Length",
+                String.valueOf(httpResponse.getResponseBody().getBytes().length) + " ");
         addSessionCookie(httpResponse, sessionCookie);
     }
 

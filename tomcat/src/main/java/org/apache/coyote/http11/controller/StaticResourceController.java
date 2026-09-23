@@ -17,6 +17,11 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = request.getPath();
+        if (path.equals("/")) {
+            String resource = "Hello world!";
+            getOkResponse(request, response, resource);
+            return;
+        }
         String resource = getStaticResource(path);
         if (resource != null && response != null) {
             getOkResponse(request, response, resource);

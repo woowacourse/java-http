@@ -44,6 +44,14 @@ public class HttpResponse {
         return response.toString().getBytes(StandardCharsets.UTF_8);
     }
 
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
     public void setVersion(String version) {
         this.version = version;
     }
@@ -54,9 +62,5 @@ public class HttpResponse {
 
     public void setReasonPhrase(String reasonPhrase) {
         this.reasonPhrase = reasonPhrase;
-    }
-
-    public void setResponseBody(String responseBody) {
-        this.responseBody = responseBody;
     }
 }

@@ -18,10 +18,10 @@ public class HttpCookie {
         if (cookieHeader == null || cookieHeader.isBlank()) {
             return cookies;
         }
-        for (String pair : cookieHeader.split("; ")) {
-            String[] keyValue = pair.split("=", 2);
+        for (String pair : cookieHeader.split(";")) {
+            String[] keyValue = pair.trim().split("=", 2);
             if (keyValue.length == 2) {
-                cookies.put(keyValue[0], keyValue[1]);
+                cookies.put(keyValue[0].trim(), keyValue[1].trim());
             }
         }
         return cookies;

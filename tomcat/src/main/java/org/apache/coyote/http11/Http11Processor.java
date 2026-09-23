@@ -62,14 +62,37 @@ public class Http11Processor implements Runnable, Processor {
         String requestBody = readBody(reader, headers);
         HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
 
+        Session session = findSession(cookie);
+        boolean isNewSession = session == null;
+        if (isNewSession) {
+            session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+        }
+
+        String response = routeRequest(httpMethod, requestUri, requestBody, session);
+        if (isNewSession) {
+            return withSessionCookie(response, session.getId());
+        }
+        return response;
+    }
+
+    private Session findSession(HttpCookie cookie) {
+        if (!cookie.hasJSessionId()) {
+            return null;
+        }
+        return sessionManager.findSession(cookie.getJSessionId());
+    }
+
+    private String routeRequest(String httpMethod, String requestUri, String requestBody, Session session)
+            throws IOException {
         String path = parsePathFrom(requestUri);
 
         if (path.startsWith("/login")) {
-            if (httpMethod.equals("GET") && isLoggedIn(cookie)) {
+            if (httpMethod.equals("GET") && isLoggedIn(session)) {
                 return redirect("/index.html");
             }
             if (httpMethod.equals("POST")) {
-                return loginResponse(parseFormData(requestBody));
+                return loginResponse(parseFormData(requestBody), session);
             }
         }
 
@@ -115,25 +138,18 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private String loginResponse(Map<String, String> params) {
+    private String loginResponse(Map<String, String> params, Session session) {
         Optional<User> account = findAccount(params.get("account"), params.get("password"));
         if (account.isEmpty()) {
             return redirect("/401.html");
         }
 
-        Session session = new Session(UUID.randomUUID().toString());
         session.setAttribute("user", account.get());
-        sessionManager.add(session);
-
-        return redirectWithSessionCookie("/index.html", session.getId());
+        return redirect("/index.html");
     }
 
-    private boolean isLoggedIn(HttpCookie cookie) {
-        if (!cookie.hasJSessionId()) {
-            return false;
-        }
-        Session session = sessionManager.findSession(cookie.getJSessionId());
-        return session != null && session.getAttribute("user") != null;
+    private boolean isLoggedIn(Session session) {
+        return session.getAttribute("user") != null;
     }
 
     private String registerResponse(Map<String, String> params) {
@@ -163,12 +179,11 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String redirectWithSessionCookie(String location, String jSessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location + " ",
-                "Set-Cookie: JSESSIONID=" + jSessionId + " "
-        );
+    private String withSessionCookie(String response, String jSessionId) {
+        int statusLineEnd = response.indexOf("\r\n");
+        return response.substring(0, statusLineEnd)
+                + "\r\nSet-Cookie: JSESSIONID=" + jSessionId + " "
+                + response.substring(statusLineEnd);
     }
 
     private String staticResponse(String path) throws IOException {

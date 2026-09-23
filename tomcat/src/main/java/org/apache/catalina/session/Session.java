@@ -30,5 +30,6 @@ public class Session {
 
     public void invalidate() {
         values.clear();
+        SessionManager.getInstance().remove(id);
     }
 }

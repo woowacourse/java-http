@@ -171,6 +171,27 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void loginFailWithUnknownAccount() {
+        final String body = "account=unknown&password=password";
+        final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found ")
+                .contains("Location: /401.html ");
+    }
+
+    @Test
     void register() {
         final String body = "account=dongkey&password=password&email=dongkey%40woowahan.com";
         final String httpRequest= String.join("\r\n",

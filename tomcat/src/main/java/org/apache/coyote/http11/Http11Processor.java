@@ -3,9 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -41,23 +39,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = reader.readLine();
-            if (requestLine == null) {
+            HttpRequest request = HttpRequest.readFrom(inputStream);
+            if (request == null) {
                 return;
             }
-            String cookieHeader = "";
-            String requestHeader;
-            while ((requestHeader = reader.readLine()) != null && !requestHeader.isEmpty()) {
-                int colonIndex = requestHeader.indexOf(':');
-                if (colonIndex > 0 && requestHeader.substring(0, colonIndex).equalsIgnoreCase("Cookie")) {
-                    cookieHeader = requestHeader.substring(colonIndex + 1).trim();
-                }
-            }
-            HttpCookie cookies = new HttpCookie(cookieHeader);
-            String[] parts = requestLine.split(" ");
-
-            RequestTarget requestTarget = new RequestTarget(parts[1]);
+            HttpCookie cookies = new HttpCookie(request.findHeader("Cookie").orElse(""));
+            RequestTarget requestTarget = request.getRequestTarget();
             String resourcePath = resolveResourcePath(requestTarget);
             byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
             if (!resourcePath.equals("/")) {
@@ -71,14 +58,11 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = contentTypeOf(requestTarget.getExtension());
 
             HttpResponse response;
-            if (requestTarget.hasPath(LOGIN_PATH) && requestTarget.hasQueryParameters()) {
-                // 쿼리스트링일 때와 POST로 payload, Request body로 요청이 오는 경우 해결 필요
-                // 로그인 버튼 클릭 시 POST 변경이라는 말은 쿼리스트링 방법에서 추가를 요구하는 것일까? 아니면 입력폼으로만 로그인되도록 요구하는 것일까?
-                // 각 장단점 파악 후 선택 필요
-                String account = requestTarget.findQueryParameter("account")
-                        .orElseThrow(() -> new IllegalArgumentException("필수 Query Parameter 누락: account"));
-                String password = requestTarget.findQueryParameter("password")
-                        .orElseThrow(() -> new IllegalArgumentException("필수 Query Parameter 누락: password"));
+            if (requestTarget.hasPath(LOGIN_PATH) && request.hasMethod("POST")) {
+                String account = request.findFormParameter("account")
+                        .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
+                String password = request.findFormParameter("password")
+                        .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: password"));
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(account);
                 user.ifPresent(value -> log.info("user : {}", value));
@@ -90,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
                 String location = resolveLocation(loginSuccess);
                 response = new HttpResponse("302 FOUND", contentType, responseBody)
                         .addHeader("Location", location);
-            } else if (requestTarget.hasPath("/register") && parts[0].equals("POST")) {
+            } else if (requestTarget.hasPath("/register") && request.hasMethod("POST")) {
                 response = new HttpResponse("302 FOUND", contentType, responseBody)
                         .addHeader("Location", "/index.html");
             } else {

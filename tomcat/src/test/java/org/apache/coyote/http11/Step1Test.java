@@ -8,6 +8,7 @@ import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -131,12 +132,15 @@ class Step1Test {
         appender.start();
         logger.addAppender(appender);
 
+        String body = "account=gugu&password=password";
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
-                "");
+                body);
 
         var socket = new StubSocket(httpRequest);
         var processor = new Http11Processor(socket);

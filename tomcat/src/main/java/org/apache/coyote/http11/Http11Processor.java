@@ -23,6 +23,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +87,16 @@ public class Http11Processor implements Runnable, Processor {
                 path = resolveGetPath(path);
             }
 
-            final var response = makeResponse(path, code, status, session.getId(), request.getSessionId());
-            outputStream.write(response.getBytes());
+            if ("200".equals(code) && "/index.html".equals(path)) {
+                final HttpResponse response = HttpResponse.ok("/index.html");
+                if (request.getSessionId() == null) {
+                    response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+                }
+                outputStream.write(response.getBytes());
+            } else {
+                final String response = makeResponse(path, code, status, session.getId(), request.getSessionId());
+                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            }
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

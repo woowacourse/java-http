@@ -15,7 +15,15 @@ public class Headers {
 
         final String name = header.substring(0, separator).trim();
         final String value = header.substring(separator + 1).trim();
+        add(name, value);
+    }
+
+    public void add(final String name, final String value) {
         headers.put(name, value);
+    }
+
+    public Map<String, String> entries() {
+        return Map.copyOf(headers);
     }
 
     public int contentLength() {

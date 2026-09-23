@@ -7,6 +7,7 @@ import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
@@ -111,6 +112,22 @@ class Http11ProcessorTest {
         );
 
         assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    void css_uses_ok_response_with_requested_resource() throws IOException {
+        final var socket = new StubSocket("GET /css/styles.css HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket, sessionManager);
+
+        processor.process(socket);
+
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final byte[] expectedBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .contains("Content-Type: text/css;charset=utf-8\r\n")
+                .contains("Content-Length: " + expectedBody.length + "\r\n")
+                .endsWith(new String(expectedBody, StandardCharsets.UTF_8));
     }
 
     @Test

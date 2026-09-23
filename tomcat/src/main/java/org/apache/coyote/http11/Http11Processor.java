@@ -3,12 +3,12 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SimpleSessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SimpleSessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -34,30 +36,68 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = reader.readLine();
+            final HttpRequest request = HttpRequest.from(inputStream);
+            attachExistingSession(request);
 
-            if (requestLine == null || requestLine.isBlank()) {
-                return;
-            }
+            final HttpResponse response = handleRequest(request);
 
-            HttpRequest request = HttpRequest.from(requestLine);
-            HttpResponse response = handleRequest(request);
+            applySessionCookie(request, response);
 
             writeResponse(outputStream, response);
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
+    private void attachExistingSession(HttpRequest request) {
+        request.getSessionId()
+                .map(sessionManager::findSession)
+                .ifPresent(request::setSession);
+    }
+
+    private HttpSession getOrCreateSession(HttpRequest request) {
+        HttpSession session = request.getSession();
+        if (session != null) {
+            return session;
+        }
+
+        SimpleSession newSession = SimpleSession.create();
+        sessionManager.add(newSession);
+        request.setSession(newSession);
+        return newSession;
+    }
+
+    private void applySessionCookie(HttpRequest request, HttpResponse response) {
+        HttpSession session = request.getSession();
+        if (session == null || !session.isNew()) {
+            return;
+        }
+
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
+        if (session instanceof SimpleSession simpleSession) {
+            simpleSession.markEstablished();
+        }
+    }
+
     private HttpResponse handleRequest(HttpRequest request) throws IOException {
         if (request.isMatched(HttpMethod.GET, "/login")) {
+            return handleLoginPage(request);
+        }
+
+        if (request.isMatched(HttpMethod.POST, "/login")) {
             return handleLogin(request);
         }
 
+        if (request.isMatched(HttpMethod.GET, "/register")) {
+            return createStaticResourceResponse("/register.html");
+        }
+
+        if (request.isMatched(HttpMethod.POST, "/register")) {
+            return handleRegister(request);
+        }
+
         if (request.isMatched(HttpMethod.GET, "/")) {
-            return handleRoot();
+            return createRootResponse();
         }
 
         if (request.isGet() && isStaticResource(request.getPath())) {
@@ -67,48 +107,83 @@ public class Http11Processor implements Runnable, Processor {
         return createNotFoundResponse();
     }
 
-    private HttpResponse handleLogin(HttpRequest request) throws IOException {
-        User user = authenticate(request);
-        log.info(user.toString());
+    private HttpResponse handleLoginPage(HttpRequest request) throws IOException {
+        if (isLoggedIn(request)) {
+            return HttpResponse.redirect("/index.html");
+        }
 
         return createStaticResourceResponse("/login.html");
     }
 
-    private User authenticate(HttpRequest request) {
-        User user = InMemoryUserRepository.findByAccount(request.getParamValue("account"))
-                .orElseThrow(() -> new RuntimeException("아이디 또는 비밀번호가 틀렸습니다."));
+    private boolean isLoggedIn(HttpRequest request) {
+        HttpSession session = request.getSession();
+        return session != null && session.getAttribute("user") != null;
+    }
 
-        if (!user.checkPassword(request.getParamValue("password"))) {
-            throw new RuntimeException("아이디 또는 비밀번호가 틀렸습니다.");
+    private HttpResponse handleLogin(HttpRequest request) {
+        final String account = request.getBodyParamValue("account");
+        final String password = request.getBodyParamValue("password");
+
+        Optional<User> authenticatedUser = authenticate(account, password);
+
+        if (authenticatedUser.isEmpty()) {
+            return HttpResponse.redirect("/401.html");
         }
 
-        return user;
+        User user = authenticatedUser.get();
+        HttpSession session = getOrCreateSession(request);
+        session.setAttribute("user", user);
+
+        log.info(user.toString());
+
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private Optional<User> authenticate(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+    }
+
+    private HttpResponse handleRegister(HttpRequest request) {
+        String account = request.getBodyParamValue("account");
+        String email = request.getBodyParamValue("email");
+        String password = request.getBodyParamValue("password");
+
+        saveUser(account, email, password);
+
+        return HttpResponse.redirect("/index.html");
+    }
+
+    private void saveUser(String account, String email, String password) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 account 입니다: " + account);
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        log.info("회원가입 완료: {}", account);
     }
 
     private HttpResponse createStaticResourceResponse(String path) throws IOException {
         String resourcePath = "static" + path;
 
-        byte[] body = getResourceFileBytes(resourcePath);
+        byte[] body = readResourceBytes(resourcePath);
         String contentType = resolveContentType(path);
 
         return HttpResponse.ok(contentType, body);
     }
 
-    private HttpResponse handleRoot() {
+    private HttpResponse createRootResponse() {
         byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-
-        return HttpResponse.ok(
-                "text/html;charset=utf-8",
-                body
-        );
+        return HttpResponse.ok("text/html;charset=utf-8", body);
     }
 
     private HttpResponse createNotFoundResponse() throws IOException {
-        byte[] body = getResourceFileBytes("static/404.html");
+        byte[] body = readResourceBytes("static/404.html");
         return HttpResponse.notFound(body);
     }
 
-    private byte[] getResourceFileBytes(String path) throws IOException {
+    private byte[] readResourceBytes(String path) throws IOException {
         try (final var fileStream = getClass().getClassLoader().getResourceAsStream(path)) {
             if (fileStream == null) {
                 throw new RuntimeException(path + "을 찾을 수 없습니다.");

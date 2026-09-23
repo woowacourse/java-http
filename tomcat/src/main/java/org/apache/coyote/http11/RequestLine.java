@@ -32,6 +32,11 @@ public final class RequestLine {
         return requestTarget.split("\\?", 2)[0];
     }
 
+    public String query() {
+        String[] parts = requestTarget.split("\\?", 2);
+        return parts.length == 2 ? parts[1] : "";
+    }
+
     public String httpVersion() {
         return httpVersion;
     }

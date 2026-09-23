@@ -190,6 +190,13 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void postLoginDoesNotUseCredentialsFromQuery() {
+        String request = postRequest("/login?account=gugu&password=password", "note=present");
+
+        assertRedirect(new StubSocket(request), "/401.html");
+    }
+
+    @Test
     void postLoginReadsHeadersUntilBlankLine() {
         final String request = postLoginRequest("account=gugu&password=password")
                 .replace("Content-Length:", "content-length:")

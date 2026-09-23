@@ -133,6 +133,53 @@ class HttpRequestTest {
         }
     }
 
+    @Test
+    void readsDecodedQueryParameters() throws IOException {
+        HttpRequest request = HttpRequest.readFrom(input(
+                "GET /login?acc%6Funt=%67ugu&note=a%2Bb+c HTTP/1.1\r\n\r\n"));
+
+        assertThat(request.queryParameter("account")).isEqualTo("gugu");
+        assertThat(request.queryParameter("note")).isEqualTo("a+b c");
+        assertThat(request.path()).isEqualTo("/login");
+    }
+
+    @Test
+    void keepsQueryAndFormParametersSeparate() throws IOException {
+        String body = "account=bob&bodyOnly=body-value";
+        String message = "POST /login?account=alice&queryOnly=query-value HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + body;
+        HttpRequest request = HttpRequest.readFrom(input(message));
+
+        assertThat(request.queryParameter("account")).isEqualTo("alice");
+        assertThat(request.parameter("account")).isEqualTo("bob");
+        assertThat(request.parameter("queryOnly")).isNull();
+        assertThat(request.queryParameter("bodyOnly")).isNull();
+        assertThat(request.parameter("bodyOnly")).isEqualTo("body-value");
+        assertThat(request.queryParameter("queryOnly")).isEqualTo("query-value");
+    }
+
+    @Test
+    void returnsNullForMissingQueryParameter() throws IOException {
+        for (String target : List.of("/login", "/login?", "/login?other=value")) {
+            HttpRequest request = HttpRequest.readFrom(input("GET " + target + " HTTP/1.1\r\n\r\n"));
+
+            assertThat(request.queryParameter("account")).isNull();
+        }
+    }
+
+    @Test
+    void rejectsInvalidQueryEncodingOnlyWhenQueried() throws IOException {
+        HttpRequest request = HttpRequest.readFrom(input(
+                "GET /login?note=%AZ HTTP/1.1\r\n\r\n"));
+
+        assertThat(request.path()).isEqualTo("/login");
+        assertThat(request.parameter("note")).isNull();
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> request.queryParameter("note"));
+    }
+
     private HttpRequest formRequest(String body) throws IOException {
         String message = "POST /login HTTP/1.1\r\n"
                 + "Content-Type: application/x-www-form-urlencoded\r\n"

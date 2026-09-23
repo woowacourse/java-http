@@ -16,6 +16,7 @@ public final class HttpRequest {
     private final Map<String, String> headers;
     private final String body;
     private Map<String, String> parameters;
+    private Map<String, String> queryParameters;
 
     private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
         this.requestLine = requestLine;
@@ -61,6 +62,13 @@ public final class HttpRequest {
             parameters = parseForm(body);
         }
         return parameters.get(name);
+    }
+
+    public String queryParameter(String name) {
+        if (queryParameters == null) {
+            queryParameters = parseForm(requestLine.query());
+        }
+        return queryParameters.get(name);
     }
 
     private static Map<String, String> parseForm(String form) {

@@ -27,6 +27,24 @@ class RequestLineTest {
     }
 
     @Test
+    void extractsRawQueryAfterFirstQuestionMark() {
+        RequestLine requestLine = RequestLine.parse(
+                "GET /login?next=a?b&name=%EA%B0%80 HTTP/1.1");
+
+        assertThat(requestLine.path()).isEqualTo("/login");
+        assertThat(requestLine.query()).isEqualTo("next=a?b&name=%EA%B0%80");
+    }
+
+    @Test
+    void returnsEmptyQueryWhenMissingOrEmpty() {
+        for (String target : List.of("/login", "/login?")) {
+            RequestLine requestLine = RequestLine.parse("GET " + target + " HTTP/1.1");
+
+            assertThat(requestLine.query()).isEmpty();
+        }
+    }
+
+    @Test
     void preservesTrailingSpaceSupport() {
         RequestLine requestLine = RequestLine.parse("POST /login HTTP/1.1 ");
 

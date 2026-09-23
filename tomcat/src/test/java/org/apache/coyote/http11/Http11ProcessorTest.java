@@ -32,6 +32,7 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
         assertThat(socket.output()).contains("Location: /index.html");
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
     }
 
     @Test
@@ -78,7 +79,11 @@ class Http11ProcessorTest {
     @Test
     void process() throws URISyntaxException {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket(
+                "GET / HTTP/1.1\r\n"
+                        + "Host: localhost:8080\r\n"
+                        + "Cookie: JSESSIONID=existing-id\r\n"
+                        + "\r\n");
         final var processor = new Http11Processor(socket);
 
         // when
@@ -102,6 +107,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-id",
                 "",
                 "");
 

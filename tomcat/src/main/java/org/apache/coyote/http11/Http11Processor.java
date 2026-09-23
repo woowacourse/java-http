@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,10 +78,20 @@ public class Http11Processor implements Runnable, Processor {
 
             String line;
             int contentLength = 0;
+            String cookieHeader = "";
             while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
                 if (line.startsWith("Content-Length:")) {
                     contentLength = Integer.parseInt(line.split(":", 2)[1].trim());
                 }
+                if (line.startsWith("Cookie:")) {
+                    cookieHeader = line.split(":", 2)[1].trim();
+                }
+            }
+
+            HttpCookie cookie = new HttpCookie(cookieHeader);
+            String setCookieHeader = "";
+            if (cookie.get("JSESSIONID") == null) {
+                setCookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "\r\n";
             }
 
             HttpStatus httpStatus = HttpStatus.OK;
@@ -103,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
                 String location = httpStatus == HttpStatus.FOUND ? "/index.html" : "/401.html";
                 final String response = String.join("\r\n",
                         "HTTP/1.1 " + HttpStatus.FOUND.getHttpStatus() + " ",
-                        "Location: " + location + " ",
+                        setCookieHeader + "Location: " + location + " ",
                         "Content-Length: 0 ",
                         "",
                         "");
@@ -118,7 +129,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
-                    "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
+                    setCookieHeader + "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -242,6 +253,24 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return true;
+    }
+
+    public static class HttpCookie {
+
+        private final Map<String, String> cookies = new HashMap<>();
+
+        public HttpCookie(String cookieHeader) {
+            for (String cookie : cookieHeader.split(";")) {
+                String[] pair = cookie.trim().split("=", 2);
+                if (pair.length == 2) {
+                    cookies.put(pair[0].trim(), pair[1].trim());
+                }
+            }
+        }
+
+        public String get(String name) {
+            return cookies.get(name);
+        }
     }
 
     public enum HttpStatus {

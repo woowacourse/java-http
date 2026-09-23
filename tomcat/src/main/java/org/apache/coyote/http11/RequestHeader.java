@@ -13,7 +13,7 @@ public record RequestHeader(
     public static RequestHeader from(String requestLine, Headers headers) {
         String[] splitRequestLine = requestLine.split(" ");
         String method = splitRequestLine[0];
-        HttpMethod httpMethod = HttpMethod.valueOf(splitRequestLine[1]);
+        HttpMethod httpMethod = HttpMethod.valueOf(method);
         String uri = splitRequestLine[1];
         String version = splitRequestLine[2];
         return RequestHeader.from(httpMethod, uri, version, headers);
@@ -25,7 +25,11 @@ public record RequestHeader(
                 .filter(type -> acceptLine.contains(type.getName()))
                 .findFirst()
                 .orElse(ContentType.HTML);
-        int contentLength = Integer.parseInt(headers.getValue("content-length"));
+        String contentLengthValue = headers.getValue("content-length");
+        if (contentLengthValue.isEmpty()) {
+            contentLengthValue = "0";
+        }
+        int contentLength = Integer.parseInt(contentLengthValue);
         return new RequestHeader(method, path, version, contentLength, contentType);
     }
 

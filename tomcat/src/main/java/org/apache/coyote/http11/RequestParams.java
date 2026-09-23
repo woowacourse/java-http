@@ -33,11 +33,15 @@ public class RequestParams {
             String key = keyValue[0].trim();
             String value = keyValue[1].trim();
             String decodedValue = URLDecoder.decode(value, "UTF-8");
-            params.put(key, value);
+            params.put(key, decodedValue);
         }
     }
 
     public String getParams(String key) {
         return params.getOrDefault(key, "");
+    }
+
+    public String toString() {
+        return params.entrySet().toString();
     }
 }

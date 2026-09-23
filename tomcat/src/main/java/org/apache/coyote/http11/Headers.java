@@ -19,8 +19,8 @@ public class Headers {
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             String[] parts = line.split(":", 2);
-            String key = parts[0].toLowerCase();
-            String value = parts[1];
+            String key = parts[0].trim().toLowerCase();
+            String value = parts[1].trim();
             headers.put(key, value);
         }
         return new Headers(headers);

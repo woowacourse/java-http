@@ -107,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final User retrievedUser = retrieveResult.get();
             if (retrievedUser.checkPassword(password)) {
-                System.out.println("user : " + retrievedUser);
+                log.info("user : {}", retrievedUser);
             }
         }
     }

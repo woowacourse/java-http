@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -80,11 +82,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readResource(final String resourcePath) throws IOException {
         try {
-            final String resourceURI = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(resourcePath)).getPath();
+            final URI resourceURI = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(resourcePath)).toURI();
             final Path path = Path.of(resourceURI);
             return Files.readString(path);
         } catch (NullPointerException e) {
             log.error("{} 자료가 존재하지 않습니다.", resourcePath);
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage(), e);
         }
         return "";
     }

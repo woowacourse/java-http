@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.model.User;
+import org.apache.coyote.http11.session.Session;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

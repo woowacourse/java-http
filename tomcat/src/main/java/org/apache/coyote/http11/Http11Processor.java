@@ -4,7 +4,9 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +27,17 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final int REQUEST_TARGET_INDEX = 1;
-    public static final String HTTP_1_1_200_OK = "HTTP/1.1 200 OK ";
-    public static final String CONTENT_TYPE_TEXT_HTML_CHARSET_UTF_8 = "Content-Type: text/html;charset=utf-8 ";
-    public static final String CONTENT_TYPE_CSS = "Content-Type: text/css;charset=utf-8 ";
+    public static final String HTTP_VERSION = "HTTP/1.1";
 
-    public static final String CONTENT_LENGTH = "Content-Length: ";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type:";
+    public static final String CHARSET_UTF_8 = "charset=utf-8";
+    public static final String CONTENT_LENGTH = "Content-Length:";
+
     public static final String HOME_PATH = "/";
+    public static final String LOGIN_PATH = "/login";
     public static final String CRLF = "\r\n";
+    public static final String HTML_EXTENSION = ".html";
+    public static final String REGISTER_PATH = "/register";
 
     private final Socket connection;
 
@@ -52,39 +56,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final StringBuilder stringBuilder = new StringBuilder();
+            String requestUri = getRequestUri(inputStream);
 
-            String line = bufferedReader.readLine();
-            while (line != null && !line.isBlank()) {
-                stringBuilder.append(line).append(CRLF);
-                line = bufferedReader.readLine();
-            }
-
-            String requestUri = stringBuilder.toString().split(" ")[REQUEST_TARGET_INDEX];
-            boolean isAuthenticate = false;
-
+            String location = null;
             if (requestUri.contains("?")) {
                 String[] uriParts = requestUri.split("\\?", 2);
                 requestUri = uriParts[0];
-
-                Map<String, String> queryParameters = getQueryParameters(uriParts);
-
-                if (requestUri.contains("/login")) {
-                    String account = queryParameters.get("account");
-                    String password = queryParameters.get("password");
-
-                    if (authenticate(account, password)) {
-                        isAuthenticate = true;
-                    } else {
-                        requestUri = "/401.html";
-                    }
-                }
-            }
-
-            String location = null;
-            if(isAuthenticate){
-                location = "/index.html";
+                location = resolveRequestUri(requestUri, uriParts[1]);
             }
 
             final String responseBody = getResponseBody(requestUri);
@@ -92,52 +70,72 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String contentType = getContentType(requestUri);
-            final var response = getResponse(contentType, location, responseBody);
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-
-            if(location != null){
-                String nextContentType = getContentType(location);
-                String nextResponseBody = getResponseBody(location);
-                final var nextResponse = getResponse(nextContentType, null, nextResponseBody);
-                outputStream.write(nextResponse.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-            }
+            sendResponse(requestUri, location, responseBody, outputStream);
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    @Nonnull
-    private static String getResponse(String contentType, String location, String responseBody) {
-        String httpStatus = HTTP_1_1_200_OK;
+    private String getRequestUri(InputStream inputStream) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final StringBuilder stringBuilder = new StringBuilder();
 
-        if(location != null && !location.isBlank()){
-            httpStatus = "HTTP/1.1 302 FOUND";
+        String line = bufferedReader.readLine();
+        while (line != null && !line.isBlank()) {
+            stringBuilder.append(line).append(CRLF);
+            line = bufferedReader.readLine();
+        }
+
+        return stringBuilder.toString().split(" ")[1];
+    }
+
+    private String resolveRequestUri(String requestUri, String queryString) {
+        if (requestUri.contains(LOGIN_PATH)) {
+            Map<String, String> queryParameters = getQueryParameters(queryString);
+
+            String account = queryParameters.get("account");
+            String password = queryParameters.get("password");
+
+            if (authenticate(account, password)) {
+                return "/index.html";
+            }
+            return "/401.html";
+        }
+        return null;
+    }
+
+    private void sendResponse(String requestUri, String location, String responseBody, OutputStream outputStream)
+            throws IOException {
+        String contentType = getContentType(requestUri);
+        final var response = getResponse(contentType, location, responseBody);
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private String getResponse(String contentType, String location, String responseBody) {
+        if (location != null && !location.isBlank()) {
             return String.join(CRLF,
-                    httpStatus,
+                    HTTP_VERSION + " " + "302 FOUND" + " ",
                     "Location:" + location,
                     contentType,
-                    CONTENT_LENGTH + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                    CONTENT_LENGTH + " " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
                     responseBody);
-
         }
+
         return String.join(CRLF,
-                httpStatus,
+                HTTP_VERSION + " " + "200 OK" + " ",
                 contentType,
-                CONTENT_LENGTH + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                CONTENT_LENGTH + " " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
     }
 
-    private Map<String, String> getQueryParameters(String[] uriParts) {
+    private Map<String, String> getQueryParameters(String queryString) {
         Map<String, String> queryParameters = new HashMap<>();
 
-        String queryString = uriParts[1];
         String[] queryPairs = queryString.split("&");
         for (String queryPair : queryPairs) {
             String[] keyAndValue = queryPair.split("=");
@@ -162,9 +160,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(String requestUri) {
         if (requestUri.endsWith(".css")) {
-            return CONTENT_TYPE_CSS;
+            return CONTENT_TYPE_HEADER + " " + "text/css;" + CHARSET_UTF_8 + " ";
         }
-        return CONTENT_TYPE_TEXT_HTML_CHARSET_UTF_8;
+        return CONTENT_TYPE_HEADER + " " + "text/html;" + CHARSET_UTF_8 + " ";
     }
 
     private String getResponseBody(String requestUri) throws URISyntaxException, IOException {
@@ -172,9 +170,14 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        if (requestUri.contains("/login")) {
-            requestUri = "/login.html";
+        if (requestUri.contains(LOGIN_PATH)) {
+            requestUri = LOGIN_PATH + HTML_EXTENSION;
         }
+
+        if (requestUri.equals(REGISTER_PATH)) {
+            requestUri = REGISTER_PATH + HTML_EXTENSION;
+        }
+
         final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         if (resource == null) {
             log.warn("존재하지 않는 경로 : {}", requestUri);

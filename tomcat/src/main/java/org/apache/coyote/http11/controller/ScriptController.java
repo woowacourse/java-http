@@ -19,6 +19,6 @@ public class ScriptController extends AbstractController {
 
         response.setContentType(ContentType.TEXT_JAVASCRIPT);
         response.setHttpBody(new HttpBody(body));
-        response.write();
+        response.send();
     }
 }

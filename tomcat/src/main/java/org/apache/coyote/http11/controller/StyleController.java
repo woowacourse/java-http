@@ -19,6 +19,6 @@ public class StyleController extends AbstractController {
 
         response.setContentType(ContentType.TEXT_CSS);
         response.setHttpBody(new HttpBody(body));
-        response.write();
+        response.send();
     }
 }

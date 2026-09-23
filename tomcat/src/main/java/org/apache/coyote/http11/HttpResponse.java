@@ -22,14 +22,17 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public void write() throws IOException {
+    public void send() throws IOException {
         setContentLength();
         outputStream.write(buildResponse().getBytes());
         outputStream.flush();
     }
 
-    public void setResponseLine(HttpVersion httpVersion, HttpStatusCode httpStatus, ReasonPhrase reasonPhrase) {
-        this.responseLine = new ResponseLine(httpVersion, httpStatus, reasonPhrase);
+    public void sendRedirect(String redirectUrl) throws IOException {
+        responseLine = new ResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
+                new ReasonPhrase("Found"));
+        setLocation(redirectUrl);
+        send();
     }
 
     public void setHttpBody(HttpBody body) {

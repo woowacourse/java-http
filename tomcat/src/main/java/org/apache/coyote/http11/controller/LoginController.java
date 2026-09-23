@@ -12,9 +12,6 @@ import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.HttpVersion;
-import org.apache.coyote.http11.ReasonPhrase;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 import org.apache.util.FileReader;
@@ -44,14 +41,14 @@ public class LoginController extends AbstractController {
             final Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
 
             if (foundUser.isEmpty()) {
-                redirectToUnauthorized(response);
+                response.sendRedirect("/401.html");
                 return;
             }
 
             final User user = foundUser.get();
 
             if (!user.checkPassword(password)) {
-                redirectToUnauthorized(response);
+                response.sendRedirect("/401.html");
                 return;
             }
 
@@ -61,13 +58,11 @@ public class LoginController extends AbstractController {
 
             final Session session = createSession(user);
 
-            response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
             response.setSession(session);
-            response.setLocation("/index.html");
-            response.write();
+            response.sendRedirect("/index.html");
             return;
         }
-        redirectToUnauthorized(response);
+        response.sendRedirect("/401.html");
     }
 
     @Override
@@ -78,11 +73,7 @@ public class LoginController extends AbstractController {
             final HttpSession session = SessionManager.getInstance().findSession(httpCookie.get(JSESSIONID));
 
             if (session != null) {
-                response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302,
-                        new ReasonPhrase("Found"));
-
-                response.setLocation("/index.html");
-                response.write();
+                response.sendRedirect("/index.html");
                 return;
             }
         }
@@ -91,14 +82,7 @@ public class LoginController extends AbstractController {
 
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpBody(new HttpBody(body));
-
-        response.write();
-    }
-
-    private void redirectToUnauthorized(HttpResponse response) throws IOException {
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
-        response.setLocation("/401.html");
-        response.write();
+        response.send();
     }
 
     private Session createSession(User user) {

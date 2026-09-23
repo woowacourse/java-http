@@ -16,6 +16,6 @@ public class DefaultController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpBody(new HttpBody("Hello world!"));
-        response.write();
+        response.send();
     }
 }

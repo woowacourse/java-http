@@ -19,6 +19,6 @@ public class IndexController extends AbstractController {
 
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpBody(new HttpBody(body));
-        response.write();
+        response.send();
     }
 }

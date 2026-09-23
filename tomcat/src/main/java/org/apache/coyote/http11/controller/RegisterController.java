@@ -7,9 +7,6 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.HttpVersion;
-import org.apache.coyote.http11.ReasonPhrase;
 import org.apache.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +27,7 @@ public class RegisterController extends AbstractController {
             log.info("가입 성공, account = {}, email = {}, password = {}", account, email, password);
         }
 
-        response.setResponseLine(HttpVersion.HTTP_1_1, HttpStatusCode.HTTP_STATUS_302, new ReasonPhrase("Found"));
-        response.setLocation("/index.html");
-
-        response.write();
+        response.sendRedirect("/index.html");
     }
 
     @Override
@@ -42,6 +36,6 @@ public class RegisterController extends AbstractController {
 
         response.setContentType(ContentType.TEXT_HTML);
         response.setHttpBody(new HttpBody(body));
-        response.write();
+        response.send();
     }
 }

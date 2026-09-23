@@ -51,7 +51,13 @@ public class Http11Processor implements Runnable, Processor {
                 response.setCookie(HttpCookie.JSESSION_ID, UUID.randomUUID().toString());
             }
 
-            adapter.service(request, response);
+            try {
+                adapter.service(request, response);
+            } catch (Exception e) {
+                log.error("요청 처리 중 오류가 발생했습니다.", e);
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR,
+                        HttpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            }
             return response;
         } catch (UnsupportedHttpMethodException e) {
             log.warn(e.getMessage());

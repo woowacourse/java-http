@@ -65,6 +65,7 @@ public final class HttpResponse {
 
     public void sendError(HttpStatus status, String message) {
         setStatus(status);
+        headers.keySet().removeIf(name -> !name.equalsIgnoreCase("Set-Cookie"));
         setContentType("text/plain");
         setBody(message);
     }

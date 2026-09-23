@@ -241,6 +241,22 @@ class Http11ProcessorTest {
                 .endsWith("Internal Server Error");
     }
 
+    @Test
+    void controllerFailurePreservesNewSessionCookieAndClearsPartialResponse() {
+        final var socket = new StubSocket("GET / HTTP/1.1\r\n\r\n");
+        Http11Processor processor = new Http11Processor(socket, (request, response) -> {
+            response.setHeader("Location", "/incomplete");
+            throw new IllegalStateException("controller failed");
+        });
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 500 Internal Server Error\r\nSet-Cookie: JSESSIONID=")
+                .doesNotContain("Location:")
+                .endsWith("Internal Server Error");
+    }
+
     private String postRequest(String path, String body) {
         return postRequest(path, body, UUID.randomUUID().toString());
     }

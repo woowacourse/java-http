@@ -43,43 +43,8 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) {
                 return;
             }
-            HttpCookie cookies = new HttpCookie(request.findHeader("Cookie").orElse(""));
-            RequestTarget requestTarget = request.getRequestTarget();
-            String resourcePath = resolveResourcePath(requestTarget);
-            byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
-            if (!resourcePath.equals("/")) {
-                String fileName = STATIC_RESOURCE_PREFIX + resourcePath;
-                URL resource = getClass().getClassLoader().getResource(fileName);
-                if (resource != null) {
-                    Path path = Paths.get(resource.toURI());
-                    responseBody = Files.readAllBytes(path);
-                }
-            }
-            String contentType = contentTypeOf(requestTarget.getExtension());
-
-            HttpResponse response;
-            if (requestTarget.hasPath(LOGIN_PATH) && request.hasMethod("POST")) {
-                String account = request.findFormParameter("account")
-                        .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
-                String password = request.findFormParameter("password")
-                        .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: password"));
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                user.ifPresent(value -> log.info("user : {}", value));
-
-                boolean loginSuccess = user
-                        .map(value -> value.checkPassword(password))
-                        .orElse(false);
-
-                String location = resolveLocation(loginSuccess);
-                response = new HttpResponse("302 FOUND", contentType, responseBody)
-                        .addHeader("Location", location);
-            } else if (requestTarget.hasPath("/register") && request.hasMethod("POST")) {
-                response = new HttpResponse("302 FOUND", contentType, responseBody)
-                        .addHeader("Location", "/index.html");
-            } else {
-                response = new HttpResponse("200 OK", contentType, responseBody);
-            }
+            HttpCookie cookies = request.getCookies();
+            HttpResponse response = route(request);
             if (!cookies.hasJSessionId()) {
                 response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
             }
@@ -90,20 +55,57 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String resolveLocation(boolean loginSuccess) {
-        if (loginSuccess) {
-            return "/index.html";
+    private HttpResponse route(HttpRequest request) throws IOException, URISyntaxException {
+        if (request.matches("POST", LOGIN_PATH)) {
+            return login(request);
         }
-        return "/401.html";
+        if (request.matches("POST", "/register")) {
+            return register();
+        }
+        return handleResourceRequest(request);
     }
 
-    private String resolveResourcePath(RequestTarget requestTarget) {
-        if (requestTarget.hasPath(LOGIN_PATH)) {
+    private HttpResponse register() {
+        return HttpResponse.redirectTo("/index.html");
+    }
+
+    private HttpResponse login(HttpRequest request) {
+        String account = request.findFormParameter("account")
+                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
+        String password = request.findFormParameter("password")
+                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: password"));
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        user.ifPresent(value -> log.info("user : {}", value));
+        Optional<User> authenticatedUser = user.filter(value -> value.checkPassword(password));
+        if (authenticatedUser.isEmpty()) {
+            return HttpResponse.redirectTo("/401.html");
+        }
+        return HttpResponse.redirectTo("/index.html");
+    }
+
+    private HttpResponse handleResourceRequest(HttpRequest request) throws IOException, URISyntaxException {
+        String resourcePath = resolveResourcePath(request.getPath());
+        byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
+        if (!resourcePath.equals("/")) {
+            String fileName = STATIC_RESOURCE_PREFIX + resourcePath;
+            URL resource = getClass().getClassLoader().getResource(fileName);
+            if (resource != null) {
+                Path path = Paths.get(resource.toURI());
+                responseBody = Files.readAllBytes(path);
+            }
+        }
+        String contentType = contentTypeOf(request.getExtension());
+        return new HttpResponse("200 OK", contentType, responseBody);
+    }
+
+    private String resolveResourcePath(String requestPath) {
+        if (requestPath.equals(LOGIN_PATH)) {
             return LOGIN_RESOURCE_PATH;
-        } else if (requestTarget.hasPath("/register")) {
+        } else if (requestPath.equals("/register")) {
             return "/register.html";
         }
-        return requestTarget.getPath();
+        return requestPath;
     }
 
     private String contentTypeOf(String extension) {

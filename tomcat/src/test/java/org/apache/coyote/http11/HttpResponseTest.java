@@ -11,8 +11,8 @@ class HttpResponseTest {
     void 상태_코드와_헤더와_본문으로_HTTP_응답_메시지를_만든다() {
         // given
         byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-        var response = new HttpResponse("302 FOUND", "text/html;charset=utf-8 ", body)
-                .addHeader("Location", "/index.html");
+        var response = new HttpResponse("302 FOUND", "text/html;charset=utf-8 ", body);
+        response.addHeader("Location", "/index.html");
 
         // when
         byte[] actual = response.toByteArray();

@@ -16,12 +16,14 @@ public final class HttpRequest {
     private final String method;
     private final RequestTarget target;
     private final Map<String, String> headers;
+    private final HttpCookie cookies;
     private final String body;
 
     private HttpRequest(String method, RequestTarget target, Map<String, String> headers, String body) {
         this.method = method;
         this.target = target;
         this.headers = Map.copyOf(headers);
+        this.cookies = new HttpCookie(this.headers.getOrDefault("cookie", ""));
         this.body = body;
     }
 
@@ -68,16 +70,24 @@ public final class HttpRequest {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
-    public boolean hasMethod(String expectedMethod) {
-        return method.equals(expectedMethod);
+    public boolean matches(String expectedMethod, String expectedPath) {
+        return method.equals(expectedMethod) && target.hasPath(expectedPath);
     }
 
-    public RequestTarget getRequestTarget() {
-        return target;
+    public String getPath() {
+        return target.getPath();
+    }
+
+    public String getExtension() {
+        return target.getExtension();
     }
 
     public Optional<String> findHeader(String name) {
         return Optional.ofNullable(headers.get(name.toLowerCase(Locale.ROOT)));
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
     }
 
     public Optional<String> findFormParameter(String name) {

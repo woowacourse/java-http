@@ -20,9 +20,20 @@ public final class HttpResponse {
         this.body = body.clone();
     }
 
-    public HttpResponse addHeader(String name, String value) {
+    private HttpResponse(String status) {
+        this.status = status;
+        this.headers.put("Content-Length", "0 ");
+        this.body = new byte[0];
+    }
+
+    public static HttpResponse redirectTo(String location) {
+        HttpResponse response = new HttpResponse("302 FOUND");
+        response.addHeader("Location", location);
+        return response;
+    }
+
+    public void addHeader(String name, String value) {
         headers.put(name, value);
-        return this;
     }
 
     public byte[] toByteArray() {

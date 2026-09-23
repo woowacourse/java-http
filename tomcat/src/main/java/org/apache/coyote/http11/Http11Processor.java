@@ -51,8 +51,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = readHttpRequest(inputStream);
-            final Cookies cookies = new Cookies(request.getCookie());
-            final Session session = getSession(cookies);
+            final Session session = findSession(request.getSessionId());
 
             String path = request.getPath();
             String code = "200";
@@ -87,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
                 path = resolveGetPath(path);
             }
 
-            final var response = makeResponse(path, code, status, session.getId(), cookies.getSessionId());
+            final var response = makeResponse(path, code, status, session.getId(), request.getSessionId());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -104,8 +103,7 @@ public class Http11Processor implements Runnable, Processor {
         };
     }
 
-    private Session getSession(final Cookies cookies) throws IOException {
-        String sessionId = cookies.getSessionId();
+    private Session findSession(final String sessionId) throws IOException {
         if (sessionId == null) {
             Session session = new Session(UUID.randomUUID().toString());
             sessionManager.add(session);

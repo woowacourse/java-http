@@ -24,7 +24,7 @@ public class HttpResponse {
         return of(HttpStatus.OK, body.getBytes(StandardCharsets.UTF_8), contentType);
     }
 
-    static HttpResponse of(HttpStatus status, byte[] body, String contentType) {
+    public static HttpResponse of(HttpStatus status, byte[] body, String contentType) {
         HttpResponse response = new HttpResponse(status, body);
         response.addHeader("Content-Type", contentType);
         return response;

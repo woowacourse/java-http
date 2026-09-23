@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-enum HttpStatus {
+public enum HttpStatus {
 
     OK(200, "OK"),
     FOUND(302, "Found"),
@@ -17,11 +17,11 @@ enum HttpStatus {
         this.reasonPhrase = reasonPhrase;
     }
 
-    int getCode() {
+    public int getCode() {
         return code;
     }
 
-    String getReasonPhrase() {
+    public String getReasonPhrase() {
         return reasonPhrase;
     }
 }

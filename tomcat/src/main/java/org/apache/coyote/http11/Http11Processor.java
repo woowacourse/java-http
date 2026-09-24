@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
             if (requestPath.equals("/")) {
                 httpResponse = new HttpResponse(
                         "200 OK ",
-                        Map.of("Content-Type", "text/html;charset=utf-8 "),
+                        Map.of("Content-Type", List.of("text/html;charset=utf-8 ")),
                         "Hello world!".getBytes()
                 );
             } else if (requestPath.startsWith("/login")) {
@@ -186,9 +186,17 @@ public class Http11Processor implements Runnable, Processor {
                 .append(httpResponse.statusCode())
                 .append("\r\n");
 
-        httpResponse.headers().forEach((name, value) ->
-                header.append(name).append(": ")
-                        .append(value).append("\r\n"));
+        for (Map.Entry<String, List<String>> entry : httpResponse.headers().entrySet()) {
+
+            String headerName = entry.getKey();
+
+            for (String value : entry.getValue()) {
+                header.append(headerName)
+                        .append(": ")
+                        .append(value)
+                        .append("\r\n");
+            }
+        }
 
         header.append("Content-Length: ")
                 .append(body.length)
@@ -236,18 +244,18 @@ public class Http11Processor implements Runnable, Processor {
 
         HttpCookie cookie = new HttpCookie(session.getId());
 
-        return createLoginSuccessResponse(cookie.toString());
+        return createLoginSuccessResponse(List.of(cookie.toString()));
     }
     private HttpResponse createRedirectResponse(String url) {
         return new HttpResponse(
                 "302 FOUND ",
-                Map.of("Location", url),
+                Map.of("Location", List.of(url)),
                 new byte[0]);
     }
-    private HttpResponse createLoginSuccessResponse(String httpCookie) {
+    private HttpResponse createLoginSuccessResponse(List<String> httpCookie) {
         return new HttpResponse(
                 "302 FOUND ",
-                Map.of("Location", "/index.html",
+                Map.of("Location", List.of("/index.html"),
                         "Set-Cookie", httpCookie),
                 new byte[0]);
     }
@@ -255,7 +263,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse createRegisterSuccessResponse() {
         return new HttpResponse(
                 "302 FOUND ",
-                Map.of("Location", "/index.html"),
+                Map.of("Location", List.of("/index.html")),
                 new byte[0]);
     }
 
@@ -265,7 +273,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return new HttpResponse(
                 "302 FOUND ",
-                Map.of("Content-Type", "text/html; charset=UTF-8"),
+                Map.of("Content-Type", List.of("text/html; charset=UTF-8")),
                 body);
     }
 
@@ -277,7 +285,7 @@ public class Http11Processor implements Runnable, Processor {
                 "200 OK ",
                 Map.of(
                         "Content-Type",
-                        resolveContentType(filePath.getFileName().toString())
+                        List.of(resolveContentType(filePath.getFileName().toString()))
                 ), body);
     }
 

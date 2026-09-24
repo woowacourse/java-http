@@ -22,6 +22,8 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
+
+    private static final String JSESSIONID = "JSESSIONID";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -72,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = HttpRequest.from(br);
-            final String response = handle(request);
+            final HttpResponse response = handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -81,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handle(HttpRequest request) throws IOException {
+    private HttpResponse handle(HttpRequest request) throws IOException {
         HttpRequestStartLine startLine = request.startLine();
         HttpRequestHeader header = request.requestHeader();
         HttpCookie cookie = header.cookie();
@@ -94,28 +98,32 @@ public class Http11Processor implements Runnable, Processor {
 
         if (url == null || url.getPath().endsWith(ROOT_PATH)) {
             responseBody = "Hello world!";
-            return buildResponse(HttpStatus.OK, contentType, responseBody);
+
+            return HttpResponse.ok().contentType(contentType).body(responseBody);
         }
 
         if (startLine.method().equals(GET) && startLine.path().endsWith("login")) {
+            if (hasValidSession(cookie)) {
+                return HttpResponse.found().location(INDEX_PAGE);
+            }
+
             Path path = new File(url.getFile()).toPath();
             responseBody = Files.readString(path);
-            return buildResponse(HttpStatus.OK, contentType, responseBody);
+            return HttpResponse.ok().contentType(contentType).body(responseBody);
         }
 
         if (startLine.method().equals(POST) && startLine.path().endsWith("login")) {
-            return handleLogin(cookie, header, body);
+            return handleLogin(header, body);
         }
 
         if (startLine.path().endsWith("register") && header.hasContain("Content-Length")) {
             String location = registerUser(body);
-            return redirectResponse(HttpStatus.FOUND, location);
+            return HttpResponse.found().location(location);
         }
 
         Path path = new File(url.getFile()).toPath();
         responseBody = Files.readString(path);
-
-        return buildResponse(HttpStatus.OK, contentType, responseBody);
+        return HttpResponse.ok().contentType(contentType).body(responseBody);
     }
 
     private String resolveContentType(HttpRequestHeader header) {
@@ -176,55 +184,22 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("new user : {}", newUser);
 
-        return "/index.html";
+        return INDEX_PAGE;
     }
 
-    private static String buildResponse(HttpStatus status, String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.status() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
-    }
-
-    private String handleLogin(HttpCookie cookie, HttpRequestHeader header, HttpRequestBody body) {
-        if (hasValidSession(cookie)) {
-            return redirectResponse(HttpStatus.FOUND, "/index.html");
-        }
-
+    private HttpResponse handleLogin(HttpRequestHeader header, HttpRequestBody body) {
         if (!header.hasContain("Content-Length")) {
-            return redirectResponse(HttpStatus.LENGTH_REQUIRED, "");
+            return HttpResponse.status(HttpStatus.LENGTH_REQUIRED);
         }
 
         User user = loginUser(body);
         if (user == null) {
-            return redirectResponse(HttpStatus.FOUND, UNAUTHORIZED_PAGE);
+            return HttpResponse.found().location(UNAUTHORIZED_PAGE);
         }
 
         String sessionId = sessionIdGenerator.generate();
         sessionManager.add(new Session(sessionId, "user", user));
-        return redirectResponseWithCookie(HttpStatus.FOUND, INDEX_PAGE, sessionId);
-    }
-
-    private String redirectResponse(HttpStatus status, String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.status() + " ",
-                "Location: " + location + " ",
-                "",
-                ""
-        );
-    }
-
-    private String redirectResponseWithCookie(HttpStatus status, String location, String sessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.status() + " ",
-                "Location: " + location + " ",
-                "Set-Cookie: " + "JSESSIONID=" + sessionId + " ",
-                "",
-                ""
-        );
+        return HttpResponse.found().location(INDEX_PAGE).setCookie(JSESSIONID, sessionId);
     }
 
     private boolean hasValidSession(HttpCookie cookie) {

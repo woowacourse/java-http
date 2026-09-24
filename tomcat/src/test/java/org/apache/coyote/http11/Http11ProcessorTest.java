@@ -125,6 +125,7 @@ class Http11ProcessorTest {
                 "HTTP/1.1 302 FOUND ",
                 "Location: /index.html ",
                 "Set-Cookie: JSESSIONID=" + SESSION_ID + " ",
+                "Content-Length: 0 ",
                 "",
                 "");
 
@@ -152,6 +153,7 @@ class Http11ProcessorTest {
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: /401.html ",
+                "Content-Length: 0 ",
                 "",
                 "");
 
@@ -179,6 +181,7 @@ class Http11ProcessorTest {
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: /401.html ",
+                "Content-Length: 0 ",
                 "",
                 "");
 
@@ -206,6 +209,7 @@ class Http11ProcessorTest {
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: /index.html ",
+                "Content-Length: 0 ",
                 "",
                 "");
 
@@ -238,6 +242,7 @@ class Http11ProcessorTest {
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: /index.html ",
+                "Content-Length: 0 ",
                 "",
                 "");
 

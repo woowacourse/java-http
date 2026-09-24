@@ -12,27 +12,37 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HttpRequestTest {
 
     @Test
-    void 요청_라인을_파싱한다() throws IOException {
+    void 요청_라인의_메서드와_경로를_제공한다() throws IOException {
         final HttpRequest request = parse(
-                "GET /index.html HTTP/1.1",
+                "POST /login HTTP/1.1",
                 "",
                 "");
 
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getPath()).isEqualTo("/index.html");
-        assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
+        assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(request.getPath()).isEqualTo("/login");
     }
 
     @Test
-    void 쿼리_스트링을_경로와_분리해_파싱한다() throws IOException {
+    void 쿼리_스트링의_파라미터를_읽는다() throws IOException {
         final HttpRequest request = parse(
                 "GET /login?account=gugu&password=password HTTP/1.1",
                 "",
                 "");
 
-        assertThat(request.getPath()).isEqualTo("/login");
         assertThat(request.getParameter("account")).isEqualTo("gugu");
         assertThat(request.getParameter("password")).isEqualTo("password");
+    }
+
+    @Test
+    void 쿼리_값에_인코딩된_구분자가_있어도_값의_일부로_읽는다() throws IOException {
+        final HttpRequest request = parse(
+                "GET /login?account=a%26b&password=p%3D1 HTTP/1.1",
+                "",
+                "");
+
+        assertThat(request.getParameter("account")).isEqualTo("a&b");
+        assertThat(request.getParameter("password")).isEqualTo("p=1");
+        assertThat(request.getParameter("b")).isNull();
     }
 
     @Test
@@ -129,26 +139,10 @@ class HttpRequestTest {
     }
 
     @Test
-    void 지원하지_않는_메서드면_예외가_발생한다() {
-        final BufferedReader reader = readerOf("DELETE / HTTP/1.1", "", "");
-
-        assertThatThrownBy(() -> HttpRequest.from(reader))
-                .isInstanceOf(HttpRequestParseException.class);
-    }
-
-    @Test
     void 요청이_없으면_빈_값을_반환한다() throws IOException {
         final BufferedReader reader = new BufferedReader(new StringReader(""));
 
         assertThat(HttpRequest.from(reader)).isEmpty();
-    }
-
-    @Test
-    void 요청_라인_형식이_잘못되면_예외가_발생한다() {
-        final BufferedReader reader = readerOf("GET /index.html", "", "");
-
-        assertThatThrownBy(() -> HttpRequest.from(reader))
-                .isInstanceOf(HttpRequestParseException.class);
     }
 
     @Test

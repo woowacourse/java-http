@@ -24,4 +24,19 @@ class HttpCookieTest {
         assertThat(cookie.contains("JSESSIONID")).isFalse();
         assertThat(cookie.get("JSESSIONID")).isNull();
     }
+
+    @Test
+    void parsesCookieValueContainingEquals() {
+        HttpCookie cookie = new HttpCookie("token=abc=def");
+
+        assertThat(cookie.get("token")).isEqualTo("abc=def");
+    }
+
+    @Test
+    void parsesEmptyCookieValue() {
+        HttpCookie cookie = new HttpCookie("token=");
+
+        assertThat(cookie.contains("token")).isTrue();
+        assertThat(cookie.get("token")).isEmpty();
+    }
 }

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.coyote.HttpHandler;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

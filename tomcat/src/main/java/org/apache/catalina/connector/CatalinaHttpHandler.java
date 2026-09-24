@@ -1,11 +1,11 @@
 package org.apache.catalina.connector;
 
-import com.techcourse.api.Controller;
 import com.techcourse.api.RequestMapping;
+import org.apache.catalina.Controller;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.StaticResourceLoader;
-import org.apache.coyote.HttpHandler;
+import org.apache.coyote.http11.HttpHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;

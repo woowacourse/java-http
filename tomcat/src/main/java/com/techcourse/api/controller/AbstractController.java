@@ -1,7 +1,7 @@
 package com.techcourse.api.controller;
 
-import com.techcourse.api.Controller;
 import java.io.IOException;
+import org.apache.catalina.Controller;
 import org.apache.catalina.StaticResourceLoader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

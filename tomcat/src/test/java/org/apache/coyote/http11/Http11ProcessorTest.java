@@ -17,7 +17,6 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.connector.CatalinaHttpHandler;
-import org.apache.coyote.HttpHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

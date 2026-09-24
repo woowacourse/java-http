@@ -5,9 +5,9 @@ import com.techcourse.api.RequestMappingFactory;
 import java.io.IOException;
 import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
-import org.apache.catalina.connector.Connector;
 import org.apache.catalina.connector.CatalinaHttpHandler;
-import org.apache.coyote.HttpHandler;
+import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.HttpHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

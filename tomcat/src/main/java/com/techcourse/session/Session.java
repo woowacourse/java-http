@@ -1,4 +1,4 @@
-package org.apache.session;
+package com.techcourse.session;
 
 import java.util.Map;
 import java.util.UUID;

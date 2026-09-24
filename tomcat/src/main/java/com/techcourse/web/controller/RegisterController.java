@@ -1,10 +1,14 @@
-package org.apache.coyote.http11;
+package com.techcourse.web.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.cookie.HttpCookie;
-import org.apache.session.Session;
-import org.apache.session.SessionManager;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
+import com.techcourse.web.cookie.HttpCookie;
+import com.techcourse.web.resource.StaticResourceHandler;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 import java.io.IOException;
 import java.util.Map;

@@ -1,8 +1,10 @@
-package org.apache.coyote.http11;
+package com.techcourse.web.controller;
 
-import org.apache.cookie.HttpCookie;
-import org.apache.session.Session;
-import org.apache.session.SessionManager;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
+import com.techcourse.web.cookie.HttpCookie;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 import java.io.IOException;
 

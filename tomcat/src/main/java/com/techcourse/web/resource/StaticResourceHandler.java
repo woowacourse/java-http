@@ -1,4 +1,7 @@
-package org.apache.coyote.http11;
+package com.techcourse.web.resource;
+
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -1,10 +1,13 @@
 package org.apache.coyote.http11;
 
+import java.util.UUID;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final String requestBody;
+    private Session session;
 
     public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final String requestBody) {
         this.requestLine = requestLine;
@@ -12,15 +15,44 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
+    public HttpMethod method() {
+        return requestLine.method();
+    }
+
+    public String path() {
+        return requestLine.path();
+    }
+
     public RequestLine line() {
         return requestLine;
     }
 
-    public String headerValueOf(final String headerKey) {
-        return headers.valueOf(headerKey);
+    public HttpCookie cookie() {
+        return HttpCookie.from(headers.valueOf("Cookie"));
     }
 
     public String requestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        if (session != null) {
+            return session;
+        }
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final String jSessionId = cookie().getValue("JSESSIONID");
+
+        session = sessionManager.findSession(jSessionId)
+            .orElseGet(this::createSession);
+        return session;
+    }
+
+    private Session createSession() {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final UUID uuid = UUID.randomUUID();
+        final Session newSession = Session.init(uuid.toString());
+        sessionManager.add(newSession);
+
+        return newSession;
     }
 }

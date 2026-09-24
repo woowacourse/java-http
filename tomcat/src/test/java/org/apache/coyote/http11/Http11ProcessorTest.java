@@ -26,7 +26,7 @@ class Http11ProcessorTest {
     void setUp() {
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.remove(SESSION_ID);
-        sessionManager.add(new Session(SESSION_ID));
+        sessionManager.add(Session.init(SESSION_ID));
     }
 
     @Test
@@ -158,7 +158,8 @@ class Http11ProcessorTest {
             final User user = InMemoryUserRepository.findByAccount("gugu")
                 .orElseThrow();
             final Session session = SessionManager.getInstance()
-                .findSession(SESSION_ID);
+                .findSession(SESSION_ID)
+                .orElseThrow();
             session.addAttribute("user", user);
 
             final String httpRequest= String.join("\r\n",
@@ -181,10 +182,7 @@ class Http11ProcessorTest {
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index ",
-                "Content-Type: text/html;charset=utf-8 ",
-                String.format("Content-Length: %d ", body.getBytes().length),
-                "",
-                body);
+                "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -210,15 +208,10 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
-                "",
-                body);
+                "Location: /index ",
+                "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -248,8 +241,8 @@ class Http11ProcessorTest {
             assertAll(
                 () -> assertThat(actual).contains(
                     "HTTP/1.1 302 Found ",
-                    "Location: /index.html ",
-                    "Content-Type: text/html;charset=utf-8 "),
+                    "Location: /index ",
+                    "Content-Length: 0 "),
                 () -> assertThat(actual).containsPattern(
                     "Set-Cookie: JSESSIONID=[^;]+")
             );
@@ -282,8 +275,7 @@ class Http11ProcessorTest {
             assertAll(
                 () -> assertThat(actual).contains(
                     "HTTP/1.1 302 Found ",
-                    "Location: /index.html ",
-                    "Content-Type: text/html;charset=utf-8 "),
+                    "Location: /index "),
                 () -> assertThat(actual).containsPattern(
                     "Set-Cookie: JSESSIONID=[^;]+")
                     .doesNotContain("Set-Cookie: JSESSIONID=wrong-jsessionid")
@@ -316,7 +308,6 @@ class Http11ProcessorTest {
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ",
-                "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
@@ -350,7 +341,6 @@ class Http11ProcessorTest {
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ",
-                "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
@@ -414,15 +404,10 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 303 See Other ",
                 "Location: /index ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
-                "",
-                body);
+                "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);
         }

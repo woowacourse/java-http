@@ -56,4 +56,27 @@ class HttpRequestTest {
         assertThat(request.getPath()).isEqualTo("/users");
         assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
     }
+
+    @Test
+    void getBody_success() {
+        // given
+        final String body = "account=gugu&password=1234";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body
+        );
+        final BufferedReader reader = new BufferedReader(
+                new StringReader(httpRequest)
+        );
+
+        // when
+        final HttpRequest request = new HttpRequest(reader);
+
+        // then
+        assertThat(request.getBody().getRawBody())
+                .isEqualTo(body);
+    }
 }

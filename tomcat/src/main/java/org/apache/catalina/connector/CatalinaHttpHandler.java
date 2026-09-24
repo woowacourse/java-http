@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import com.techcourse.api.RequestMapping;
+import java.io.FileNotFoundException;
 import org.apache.catalina.Controller;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -38,9 +39,15 @@ public final class CatalinaHttpHandler implements HttpHandler {
         }
 
         if (request.isGet()) {
-            response.setStatus(HttpStatus.OK);
-            response.setContentType(ContentType.fromResourceName(request.getPath()));
-            response.setBody(StaticResourceLoader.read(request.getPath()));
+            try {
+                response.setStatus(HttpStatus.OK);
+                response.setContentType(ContentType.fromResourceName(request.getPath()));
+                response.setBody(StaticResourceLoader.read(request.getPath()));
+            } catch (FileNotFoundException e) {
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setContentType(ContentType.HTML);
+                response.setBody(StaticResourceLoader.read("/404.html"));
+            }
             return;
         }
 

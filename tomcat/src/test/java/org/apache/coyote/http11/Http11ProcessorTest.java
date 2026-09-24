@@ -136,6 +136,23 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void missing_static_resource_returns_not_found_without_redirect() throws IOException {
+        final var socket = new StubSocket("GET /favicon.ico HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var processor = new Http11Processor(socket, httpHandler);
+
+        processor.process(socket);
+
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final byte[] expectedBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 404 NOT_FOUND\r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("Content-Length: " + expectedBody.length + "\r\n")
+                .doesNotContain("Location:")
+                .endsWith(new String(expectedBody, StandardCharsets.UTF_8));
+    }
+
+    @Test
     void login_success_redirect_with_post() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

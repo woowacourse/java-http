@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String NOT_FOUND_PAGE = "/404.html";
 
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -72,6 +76,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> headers = readHeaders(reader);
             String requestBody = readBody(reader, headers);
+            HttpCookie cookie = HttpCookie.from(headers.get(COOKIE_HEADER));
 
             String[] uriParts = requestUri.split("\\?");
             String path = uriParts[0];
@@ -81,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (path.equals(LOGIN_REQUEST) && httpMethod.equals(POST_METHOD)) {
-                writeResponse(outputStream, handleLogin(requestBody));
+                writeResponse(outputStream, handleLogin(requestBody), cookie);
                 return;
             }
             if (path.equals(LOGIN_REQUEST) && httpMethod.equals(GET_METHOD)) {
@@ -89,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (path.equals(REGISTER_REQUEST) && httpMethod.equals(POST_METHOD)) {
-                writeResponse(outputStream, handleRegister(requestBody));
+                writeResponse(outputStream, handleRegister(requestBody), cookie);
                 return;
             }
             if (path.equals(REGISTER_REQUEST) && httpMethod.equals(GET_METHOD)) {
@@ -98,10 +103,10 @@ public class Http11Processor implements Runnable, Processor {
 
             URL url = getClass().getClassLoader().getResource(STATIC_ROOT + path);
             if (url == null) {
-                writeResponse(outputStream, makeNotFoundResponse());
+                writeResponse(outputStream, makeNotFoundResponse(), cookie);
                 return;
             }
-            writeResponse(outputStream, makeOkResponse(path));
+            writeResponse(outputStream, makeOkResponse(path), cookie);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -133,6 +138,11 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirect(INDEX_PAGE);
     }
 
+    private HttpResponse makeOkResponse(String resourcePath) throws IOException, URISyntaxException {
+        String body = readResource(resourcePath);
+        return HttpResponse.ok(contentTypeOf(resourcePath), body);
+    }
+
     private HttpResponse makeNotFoundResponse() throws IOException, URISyntaxException {
         String body = readResource(NOT_FOUND_PAGE);
         return HttpResponse.notFound(contentTypeOf(NOT_FOUND_PAGE), body);
@@ -148,7 +158,11 @@ public class Http11Processor implements Runnable, Processor {
         return CONTENT_TYPE.getOrDefault(extension, "text/html") + ";charset=utf-8";
     }
 
-    private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+    private void writeResponse(OutputStream outputStream, HttpResponse response, HttpCookie cookie) throws IOException {
+        if (!cookie.hasJSessionId()) {
+            response.addHeader(SET_COOKIE_HEADER, JSESSIONID + "=" + UUID.randomUUID());
+        }
+
         outputStream.write(response.toHttpMessage().getBytes());
         outputStream.flush();
     }
@@ -212,11 +226,6 @@ public class Http11Processor implements Runnable, Processor {
             return user;
         }
         return Optional.empty();
-    }
-
-    private HttpResponse makeOkResponse(String resourcePath) throws IOException, URISyntaxException {
-        String body = readResource(resourcePath);
-        return HttpResponse.ok(contentTypeOf(resourcePath), body);
     }
 
     private String getExtension(String resourcePath) {

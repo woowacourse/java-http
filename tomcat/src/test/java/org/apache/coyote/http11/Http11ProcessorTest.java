@@ -37,10 +37,11 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException, URISyntaxException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 

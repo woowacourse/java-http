@@ -8,10 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public Session getOrCreate(final String id) {
-        return SESSIONS.computeIfAbsent(id, Session::new);
+        return sessions.computeIfAbsent(id, Session::new);
     }
 
     @Override
@@ -19,18 +19,18 @@ public class SessionManager implements Manager {
         if (!(session instanceof Session)) {
             throw new IllegalArgumentException("Only Session is supported");
         }
-        SESSIONS.put(session.getId(), (Session) session);
+        sessions.put(session.getId(), (Session) session);
     }
 
     @Override
     public HttpSession findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(final HttpSession session) {
         if (session != null) {
-            SESSIONS.remove(session.getId(), session);
+            sessions.remove(session.getId(), session);
         }
     }
 }

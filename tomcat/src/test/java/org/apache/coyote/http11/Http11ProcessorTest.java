@@ -17,7 +17,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -41,7 +41,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -67,7 +67,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -91,7 +91,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -115,7 +115,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -139,7 +139,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -161,7 +161,8 @@ class Http11ProcessorTest {
                 "",
                 loginBody);
         final var loginSocket = new StubSocket(loginRequest);
-        new Http11Processor(loginSocket).process(loginSocket);
+        final SessionManager sessionManager = new SessionManager();
+        new Http11Processor(loginSocket, sessionManager).process(loginSocket);
 
         final String request = String.join("\r\n",
                 "GET /login HTTP/1.1",
@@ -172,7 +173,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(request);
 
         // when
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, sessionManager).process(socket);
 
         // then
         assertThat(socket.output())

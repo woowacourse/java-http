@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -46,14 +47,15 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestTarget = requestLine.split("\\s+")[1];
 
-            final String resourcePath = handleRequest(requestTarget);
+            final RedirectResponse redirectResponse = handleRequest(requestTarget);
 
-            final var responseBody = readResource(resourcePath);
-            final String contentType = requestTarget.endsWith(".css") ? "text/css" : "text/html;charset=utf-8";
+            final HttpStatusCode httpStatusCode = redirectResponse.httpStatusCode();
+            final String contentType = URLConnection.guessContentTypeFromName(redirectResponse.resourcePath());
+            final var responseBody = readResource(redirectResponse.resourcePath());
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
+                    "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -65,19 +67,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(final String requestTarget) {
+    private RedirectResponse handleRequest(final String requestTarget) {
         if (requestTarget.equals("/")) {
-            return "static/index.html";
+            return new RedirectResponse(HttpStatusCode.OK, "static/index.html");
         }
 
         if (requestTarget.startsWith("/login")) {
             if (requestTarget.contains("?")) {
-                loginAndRetrieveUserInfo(requestTarget);
+               final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(requestTarget);
+               if (hasLoginSucceeded) {
+                   return new RedirectResponse(HttpStatusCode.FOUND, "static/index.html");
+               }
+               return new RedirectResponse(HttpStatusCode.OK, "static/401.html");
             }
-            return "static/login.html";
+            return new RedirectResponse(HttpStatusCode.OK, "static/login.html");
         }
 
-        return "static" + requestTarget;
+        return new RedirectResponse(HttpStatusCode.OK, "static" + requestTarget);
     }
 
     private String readResource(final String resourcePath) throws IOException {
@@ -93,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private void loginAndRetrieveUserInfo(final String requestURI) {
+    private boolean loginAndRetrieveUserInfo(final String requestURI) {
         final int index = requestURI.indexOf("?");
         final String[] loginInfos = requestURI.substring(index + 1).split("&");
         String account = "";
@@ -114,12 +120,15 @@ public class Http11Processor implements Runnable, Processor {
         if (!account.isBlank() && !password.isBlank()) {
             Optional<User> retrieveResult = InMemoryUserRepository.findByAccount(account);
             if (retrieveResult.isEmpty()) {
-                return;
+                return false;
             }
             final User retrievedUser = retrieveResult.get();
             if (retrievedUser.checkPassword(password)) {
                 log.info("user : {}", retrievedUser);
+                return true;
             }
         }
+
+        return false;
     }
 }

@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import javax.annotation.Nonnull;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +45,14 @@ public class Http11Processor implements Runnable, Processor {
     public static final String CRLF = "\r\n";
     public static final String HTML_EXTENSION = ".html";
     public static final String REGISTER_PATH = "/register";
+    public static final String INDEX_HTML = "/index.html";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -73,10 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> responseHeaders = new LinkedHashMap<>();
 
             HttpCookie cookie = HttpCookie.parse(cookieLine);
-            if (!cookie.contains("JSESSIONID")) {
-                String sessionId = UUID.randomUUID().toString();
-                responseHeaders.put(SET_COOKIE, "JSESSIONID=" + sessionId + ";");
-            }
+            Session session = getOrCreateJSessionId(cookie, responseHeaders);
 
             if (requestUri.contains("?")) {
                 String[] uriParts = requestUri.split("\\?", 2);
@@ -97,14 +100,31 @@ public class Http11Processor implements Runnable, Processor {
                             parameters.get("email"));
 
                     InMemoryUserRepository.save(user);
-                    responseHeaders.put(LOCATION, "/index.html");
+                    responseHeaders.put(LOCATION, INDEX_HTML);
                 }
 
                 if (requestUri.equals(LOGIN_PATH)) {
                     String account = parameters.get("account");
                     String password = parameters.get("password");
 
-                    responseHeaders.put(LOCATION, resolveLoginRedirectLocation(account, password));
+                    Optional<User> authenticatedUser = authenticate(account, password);
+                    if (authenticatedUser.isPresent()) {
+                        User user = authenticatedUser.get();
+                        session.setAttribute("user", user);
+
+                        log.info("로그인 성공! 아이디 : {}", user.getAccount());
+                        responseHeaders.put(LOCATION, INDEX_HTML);
+                    } else {
+                        responseHeaders.put(LOCATION, "/401.html");
+                    }
+
+                }
+            }
+
+            if ("GET".equals(httpMethod) && LOGIN_PATH.equals(requestUri)) {
+                User user = (User) session.getAttribute("user");
+                if (user != null) {
+                    responseHeaders.put(LOCATION, INDEX_HTML);
                 }
             }
 
@@ -120,6 +140,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private Session getOrCreateJSessionId(HttpCookie cookie, Map<String, String> headers) throws IOException {
+        if (!cookie.contains("JSESSIONID")) {
+            return createSession(headers);
+        }
+
+        String jSessionId = cookie.getJSessionId();
+        Session session = sessionManager.findSession(jSessionId);
+
+        if (session == null) {
+            return createSession(headers);
+        }
+
+        return session;
+    }
+
+    @Nonnull
+    private Session createSession(Map<String, String> headers) {
+        Session session;
+        String sessionId = UUID.randomUUID().toString();
+        headers.put(SET_COOKIE, "JSESSIONID=" + sessionId + ";");
+
+        session = new Session(sessionId);
+        sessionManager.add(session);
+        return session;
+    }
+
     private String getCookieLine(String[] requestHeadLines) {
         for (String requestHeadLine : requestHeadLines) {
             if (requestHeadLine.startsWith(COOKIE + ":")) {
@@ -127,13 +173,6 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return null;
-    }
-
-    private String resolveLoginRedirectLocation(String account, String password) {
-        if (authenticate(account, password)) {
-            return "/index.html";
-        }
-        return "/401.html";
     }
 
     private Integer getContentLength(String[] requestHeadLines) {
@@ -175,7 +214,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         StringBuilder response = new StringBuilder();
-        response.append(HTTP_VERSION).append(" ").append(httpStatus).append(CRLF);
+        response.append(HTTP_VERSION).append(" ").append(httpStatus).append(" ").append(CRLF);
 
         for (Map.Entry<String, String> header : headers.entrySet()) {
             response.append(header.getKey())
@@ -187,6 +226,7 @@ public class Http11Processor implements Runnable, Processor {
         response.append(contentType).append(CRLF);
         response.append(CONTENT_LENGTH).append(": ")
                 .append(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                .append(" ")
                 .append(CRLF);
         response.append(CRLF);
         response.append(responseBody);
@@ -205,18 +245,9 @@ public class Http11Processor implements Runnable, Processor {
         return encodedParameters;
     }
 
-    private boolean authenticate(String account, String password) {
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return false;
-        }
-
-        User foundUser = user.get();
-        if (foundUser.checkPassword(password)) {
-            log.info("로그인 성공! 아이디 : {}", foundUser.getAccount());
-            return true;
-        }
-        return false;
+    private Optional<User> authenticate(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
     }
 
     private String getContentType(String requestUri) {

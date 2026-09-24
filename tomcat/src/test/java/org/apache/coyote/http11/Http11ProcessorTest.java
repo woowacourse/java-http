@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -16,14 +17,17 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
 
         // then
+        String setCookie = socket.output().split("\r\n")[1];
+        assertThat(setCookie).matches("Set-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12};");
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                setCookie,
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
@@ -43,14 +47,17 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
 
         // then
+        String setCookie = socket.output().split("\r\n")[1];
+        assertThat(setCookie).matches("Set-Cookie: JSESSIONID=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12};");
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
+                setCookie + "\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+

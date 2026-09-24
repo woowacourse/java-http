@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,6 +25,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final String INDEX_PATH = "index.html";
 
     private final Socket connection;
 
@@ -74,27 +77,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void readRequestBody(BufferedReader reader) throws IOException {
-        String value = headers.get("Content-Length:");
-        if (value == null) {
-            throw new IOException("Content-Length header is missing");
-        }
-
-        int length = Integer.parseInt(value);
-        char[] body = new char[length];
-        int offset = 0;
-
-        while (offset < length) {
-            int count = reader.read(body, offset, length - offset);
-            if (count == -1) {
-                throw new IOException("요청 바디가 Content-Length보다 짧습니다.");
-            }
-            offset += count;
-        }
-
-        requestBody = new String(body);
-    }
-
     private void parseRequestLine(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if (line == null) {
@@ -123,26 +105,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleGetRequest() throws IOException {
-        if (path.equals("/login")) {
-            serveStaticFile(path + ".html");
-            return;
-        }
-        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
-            serveStaticFile(path);
-            return;
-        }
-        if (path.equals("/")) {
-            serverHomePage();
-        }
-    }
-
-    private void handlePostRequest() throws IOException {
-        if (path.equals("/login")) {
-            loginResult();
-        }
-    }
-
     private Map<String, String> parseParameters(String queryString) {
         Map<String, String> parameters = new HashMap<>();
         for (String param : queryString.split("&")) {
@@ -159,6 +121,56 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
+    private void readRequestBody(BufferedReader reader) throws IOException {
+        String value = headers.get("Content-Length:");
+        if (value == null) {
+            throw new IOException("Content-Length header is missing");
+        }
+
+        int length = Integer.parseInt(value);
+        char[] body = new char[length];
+        int offset = 0;
+
+        while (offset < length) {
+            int count = reader.read(body, offset, length - offset);
+            if (count == -1) {
+                throw new IOException("요청 바디가 Content-Length보다 짧습니다.");
+            }
+            offset += count;
+        }
+
+        requestBody = new String(body);
+    }
+
+    private void handleGetRequest() throws IOException {
+        if (path.equals("/login") || path.equals("/register")) {
+            serveStaticFile(path + ".html");
+            return;
+        }
+        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
+            serveStaticFile(path);
+            return;
+        }
+        if (path.equals("/")) {
+            serverHomePage();
+            return;
+        }
+        notFound();
+    }
+
+    private void notFound() {
+        httpResponse = createNotFoundResponse("404.html").getBytes(UTF_8);
+    }
+
+    private void handlePostRequest() {
+        if (path.equals("/login")) {
+            loginResult();
+        }
+        if (path.equals("/register")) {
+            registerResult();
+        }
+    }
+
     private void loginResult() {
         String account = formParameters.get("account");
         String password = formParameters.get("password");
@@ -169,20 +181,20 @@ public class Http11Processor implements Runnable, Processor {
 
         String location = "/401.html";
         if (loginSucceeded) {
-            location = "/index.html";
+            location = INDEX_PATH;
         }
 
-        httpResponse = contentRedirectResponse(location).getBytes(UTF_8);
+        httpResponse = createRedirectResponse(location).getBytes(UTF_8);
     }
 
-    private String contentRedirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
-                ""
-        );
+    private void registerResult() {
+        String account = formParameters.get("account");
+        String password = formParameters.get("password");
+        String email = formParameters.get("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        httpResponse = createRedirectResponse(INDEX_PATH).getBytes(UTF_8);
     }
 
     private void serveStaticFile(String requestUri) throws IOException {
@@ -223,6 +235,26 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + contentLength + " ",
                 "",
                 bodyBuilder.toString()
+        );
+    }
+
+    private String createRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                ""
+        );
+    }
+
+    private String createNotFoundResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 404 NOT FOUND ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                ""
         );
     }
 

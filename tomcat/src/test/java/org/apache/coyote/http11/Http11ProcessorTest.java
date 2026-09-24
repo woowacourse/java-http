@@ -116,6 +116,34 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.")
+    @Test
+    void redirectToRegisterHtmlWhenRegisterPageRequested() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final byte[] resource = readResource("static/register.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+ resource.length + " \r\n" +
+                "\r\n"+
+                new String(resource);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     private byte[] readResource(String resourceName) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(resourceName);
         return Files.readAllBytes(new File(resource.getFile()).toPath());

@@ -83,6 +83,10 @@ public class Http11Processor implements Runnable, Processor {
             return new RedirectResponse(HttpStatusCode.OK, "static/login.html");
         }
 
+        if (requestTarget.equals("/register")) {
+            return new RedirectResponse(HttpStatusCode.OK, "static/register.html");
+        }
+
         return new RedirectResponse(HttpStatusCode.OK, "static" + requestTarget);
     }
 

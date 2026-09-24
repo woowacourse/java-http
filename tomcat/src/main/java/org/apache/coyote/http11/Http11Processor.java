@@ -1,25 +1,16 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.FrontController;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final FrontController FRONT_CONTROLLER = new FrontController();
 
     private final Socket connection;
 
@@ -44,133 +35,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = new HttpRequest(inputStream);
-            final String method = request.getMethod().name();
-            final String requestUri = request.getPath();
-            final String cookieHeader = request.getHeader("cookie");
-            final String requestSessionId = Cookie.getValue(cookieHeader, "JSESSIONID");
-            final Session existingSession = SessionManager.findSession(requestSessionId);
-            final Session session = existingSession != null
-                    ? existingSession
-                    : SessionManager.createSession();
-            final String sessionCookie = existingSession == null
-                    ? "JSESSIONID=" + session.getId()
-                    : null;
             final HttpResponse response = new HttpResponse(outputStream);
             response.setProtocolVersion(request.getProtocolVersion());
+            final Controller controller = FRONT_CONTROLLER.handle(request);
+            controller.service(request, response);
 
-            final String responseBody;
-            if ("/".equals(requestUri)) {
-                responseBody = "Hello world!";
-            } else {
-                final String resourcePath;
-
-                if ("/login".equals(requestUri)) {
-                    if ("GET".equalsIgnoreCase(method)
-                            && session.getAttribute("user") != null) {
-                        writeRedirectResponse(response, "/index.html", sessionCookie);
-                        return;
-                    }
-
-                    if ("POST".equalsIgnoreCase(method)) {
-                        final Map<String, String> queryParams = request.getParameters();
-
-                        final String account = queryParams.get("account");
-                        final String password = queryParams.get("password");
-
-                        final Optional<User> optionalUser = account == null
-                                ? Optional.empty()
-                                : InMemoryUserRepository.findByAccount(account);
-                        final boolean loginSuccess = password != null
-                                && optionalUser
-                                .map(user -> user.checkPassword(password))
-                                .orElse(false);
-
-                        if (loginSuccess) {
-                            final User user = optionalUser.orElseThrow();
-                            session.setAttribute("user", user);
-                            log.info("회원 조회 결과: {}", user);
-                        }
-
-                        writeRedirectResponse(
-                                response,
-                                loginSuccess ? "/index.html" : "/401.html",
-                                sessionCookie
-                        );
-                        return;
-                    }
-
-                    resourcePath = "/login.html";
-                } else if ("/register".equals(requestUri)) {
-                    if ("POST".equalsIgnoreCase(method)) {
-                        final Map<String, String> formData = request.getParameters();
-                        final String account = formData.get("account");
-                        final String password = formData.get("password");
-                        final String email = formData.get("email");
-
-                        if (account != null && password != null && email != null) {
-                            final User user = new User(account, password, email);
-                            InMemoryUserRepository.save(user);
-                            log.info("회원가입 결과: {}", user);
-                        }
-
-                        writeRedirectResponse(response, "/index.html", sessionCookie);
-                        return;
-                    }
-
-                    resourcePath = "/register.html";
-                } else {
-                    resourcePath = requestUri;
-                }
-
-                final var resource = getClass().getClassLoader()
-                        .getResource("static" + resourcePath);
-
-                if (resource == null) {
-                    return;
-                }
-
-                try {
-                    final byte[] body =
-                            Files.readAllBytes(Path.of(resource.toURI()));
-
-                    responseBody = new String(body, StandardCharsets.UTF_8);
-                } catch (URISyntaxException e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-
-            final String contentType;
-            if (requestUri.endsWith(".css")) {
-                contentType = "text/css";
-            } else {
-                contentType = "text/html;charset=utf-8";
-            }
-
-            response.setStatusCode(200);
-
-            if (sessionCookie != null) {
-                response.setHeader("Set-Cookie", sessionCookie);
-            }
-
-            response.setHeader("Content-Type", contentType);
-            response.setBody(responseBody);
+            response.setAppendTrailingSpaces(response.getStatusCode() == 200);
             response.send();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void writeRedirectResponse(final HttpResponse response,
-                                       final String location,
-                                       final String sessionCookie) throws IOException {
-        response.setStatusCode(302);
-
-        if (sessionCookie != null) {
-            response.setHeader("Set-Cookie", sessionCookie);
-        }
-
-        response.setHeader("Location", location);
-        response.setBody("");
-        response.send();
     }
 }

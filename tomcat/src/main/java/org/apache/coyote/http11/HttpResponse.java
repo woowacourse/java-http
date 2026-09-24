@@ -17,6 +17,7 @@ public class HttpResponse {
     private int statusCode;
     private String reasonPhrase;
     private byte[] body;
+    private boolean appendTrailingSpaces;
 
     public HttpResponse() {
         this(null);
@@ -29,6 +30,7 @@ public class HttpResponse {
         this.reasonPhrase = "OK";
         this.headers = new Headers();
         this.body = new byte[0];
+        this.appendTrailingSpaces = false;
     }
 
     public void setProtocolVersion(final String protocolVersion) {
@@ -98,17 +100,24 @@ public class HttpResponse {
         return body.clone();
     }
 
+    void setAppendTrailingSpaces(final boolean appendTrailingSpaces) {
+        this.appendTrailingSpaces = appendTrailingSpaces;
+    }
+
     public byte[] toByteArray() {
         final StringBuilder response = new StringBuilder();
-        response.append(getStatusLine()).append(CRLF);
+        final String trailingSpace = appendTrailingSpaces ? " " : "";
+        response.append(getStatusLine()).append(trailingSpace).append(CRLF);
 
         final Map<String, String> responseHeaders = headers.asMap();
         responseHeaders.forEach((name, value) ->
-                response.append(name).append(": ").append(value).append(CRLF)
+                response.append(name).append(": ").append(value)
+                        .append(trailingSpace).append(CRLF)
         );
 
         if (!headers.contains("Content-Length")) {
-            response.append("Content-Length: ").append(body.length).append(CRLF);
+            response.append("Content-Length: ").append(body.length)
+                    .append(trailingSpace).append(CRLF);
         }
         response.append(CRLF);
 

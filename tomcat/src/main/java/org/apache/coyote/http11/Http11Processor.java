@@ -6,27 +6,29 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
+
+    private static final String GET = "GET";
+    private static final String POST = "POST";
 
     private static final String STATIC_ROOT = "static";
     private static final String ROOT_PATH = "/";
@@ -66,9 +68,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            HttpRequest request = parseRequest(inputStream);
+             final var br = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream()
+        ) {
+            HttpRequest request = HttpRequest.from(br);
             final String response = handle(request);
 
             outputStream.write(response.getBytes());
@@ -78,60 +81,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest parseRequest(InputStream inputStream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
-        HttpRequestHeader header = parseRequestHeader(br);
-
-        if (!header.hasContain("Content-Length")) {
-            return new HttpRequest(header, HttpRequestBody.empty());
-        }
-
-        int contentLength = Integer.parseInt(header.header().get("Content-Length"));
-        HttpRequestBody body = parseRequestBody(br, contentLength);
-        return new HttpRequest(header, body);
-    }
-
-    private HttpRequestHeader parseRequestHeader(BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        HttpCookie cookie = HttpCookie.empty();
-        String line = br.readLine();
-        RequestLine firstLine = RequestLine.from(line);
-
-        while ((line = br.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            String[] parts = line.split(": ", 2);
-            if (parts[0].equals("Cookie")) {
-                cookie = HttpCookie.from(parts[1]);
-                continue;
-            }
-            if (parts.length == 2) {
-                headers.put(parts[0], parts[1]);
-            }
-        }
-        return new HttpRequestHeader(firstLine, headers, cookie);
-    }
-
-    private HttpRequestBody parseRequestBody(BufferedReader br, int contentLength) throws IOException {
-        String requestBody;
-
-        char[] buffer = new char[contentLength];
-        int offset = 0;
-        while (offset < contentLength) {
-            int result = br.read(buffer, offset, contentLength - offset);
-            if (result == -1) {
-                break;
-            }
-            offset += result;
-        }
-        requestBody = new String(buffer);
-
-        return new HttpRequestBody(requestBody);
-    }
-
     private String handle(HttpRequest request) throws IOException {
+        HttpRequestStartLine startLine = request.startLine();
         HttpRequestHeader header = request.requestHeader();
         HttpCookie cookie = header.cookie();
         HttpRequestBody body = request.requestBody();
@@ -139,18 +90,24 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody;
 
         String contentType = resolveContentType(header);
-        URL url = findStaticResource(header.path(), contentType);
+        URL url = findStaticResource(startLine.path(), contentType);
 
         if (url == null || url.getPath().endsWith(ROOT_PATH)) {
             responseBody = "Hello world!";
             return buildResponse(HttpStatus.OK, contentType, responseBody);
         }
 
-        if (header.path().contains("login")) {
+        if (startLine.method().equals(GET) && startLine.path().endsWith("login")) {
+            Path path = new File(url.getFile()).toPath();
+            responseBody = Files.readString(path);
+            return buildResponse(HttpStatus.OK, contentType, responseBody);
+        }
+
+        if (startLine.method().equals(POST) && startLine.path().endsWith("login")) {
             return handleLogin(cookie, header, body);
         }
 
-        if (header.path().contains("register") && header.hasContain("Content-Length")) {
+        if (startLine.path().endsWith("register") && header.hasContain("Content-Length")) {
             String location = registerUser(body);
             return redirectResponse(HttpStatus.FOUND, location);
         }

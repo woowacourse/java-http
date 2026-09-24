@@ -18,6 +18,17 @@ public class HttpResponse {
         return new HttpResponse();
     }
 
+    public void forward(final HttpStatus status, final String forwardPath) {
+        addStatusLine(StatusLine.http11(status));
+        this.forwardPath = forwardPath;
+    }
+
+    public void sendRedirect(final HttpStatus status, final String redirectPath) {
+        addStatusLine(StatusLine.http11(status));
+        addHeader("Location", redirectPath);
+        addHeader("Content-Length", String.valueOf(0));
+    }
+
     public String forwardPath() {
         return forwardPath;
     }
@@ -30,7 +41,7 @@ public class HttpResponse {
         this.statusLine = statusLine;
     }
 
-    public void addHeader(final String key, final Object value) {
+    public void addHeader(final String key, final String value) {
         headers.put(key, String.valueOf(value));
     }
 
@@ -38,17 +49,8 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void sendRedirect(final String url) {
-        addHeader("Location", url);
-        addHeader("Content-Length", 0);
-    }
-
     public boolean hasForwardPath() {
         return forwardPath != null;
-    }
-
-    public void forward(final String forwardPath) {
-        this.forwardPath = forwardPath;
     }
 
     public String getMessage() {

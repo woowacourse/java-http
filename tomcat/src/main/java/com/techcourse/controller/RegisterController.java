@@ -9,7 +9,6 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RegisterRequest;
-import org.apache.coyote.http11.StatusLine;
 
 public class RegisterController extends AbstractController {
 
@@ -22,13 +21,11 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(newUser);
         log.info("register: {}", newUser);
 
-        response.addStatusLine(StatusLine.http11(HttpStatus.SEE_OTHER));
-        response.sendRedirect("/index");
+        response.sendRedirect(HttpStatus.SEE_OTHER, "/index");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.addStatusLine(StatusLine.http11(HttpStatus.OK));
-        response.forward("/register.html");
+        response.forward(HttpStatus.OK, "/register.html");
     }
 }

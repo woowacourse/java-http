@@ -26,24 +26,21 @@ public class LoginController extends AbstractController {
             final Session session = request.getSession();
             log.info("user: {}", user);
             session.addAttribute("user", user);
-            response.addStatusLine(StatusLine.http11(HttpStatus.FOUND));
-            response.sendRedirect("/index");
+            response.sendRedirect(HttpStatus.FOUND, "/index");
             return;
         }
 
-        response.addStatusLine(StatusLine.http11(HttpStatus.UNAUTHORIZED));
-        response.forward("/401.html");
+        response.forward(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final Session session = request.getSession(false);
         if (session != null && session.hasAttribute("user")) {
-            response.addStatusLine(StatusLine.http11(HttpStatus.FOUND));
-            response.sendRedirect("/index");
+            response.sendRedirect(HttpStatus.FOUND, "/index");
             return;
         }
-        response.addStatusLine(StatusLine.http11(HttpStatus.OK));
-        response.forward("/login.html");
+
+        response.forward(HttpStatus.OK, "/login.html");
     }
 }

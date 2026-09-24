@@ -4,6 +4,7 @@ import com.techcourse.controller.IndexController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.controller.Controller;
 
 public class HandlerMapping {
@@ -14,13 +15,9 @@ public class HandlerMapping {
         "/register", new RegisterController()
     );
 
-    public boolean containsPath(final String path) {
-        return requestControllerMap.containsKey(path);
-    }
-
-    public Controller getController(final HttpRequest request) {
+    public Optional<Controller> getController(final HttpRequest request) {
         final String path = request.path();
-        return requestControllerMap.get(path);
+        return Optional.ofNullable(requestControllerMap.get(path));
     }
 
 }

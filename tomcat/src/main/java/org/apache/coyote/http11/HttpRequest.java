@@ -67,7 +67,7 @@ public class HttpRequest {
     }
 
     public boolean isRoot() {
-        return ROOT_PATH.equals(path);
+        return "GET".equals(method) && ROOT_PATH.equals(path);
     }
 
     public boolean hasBodyParameters(String ... names) {

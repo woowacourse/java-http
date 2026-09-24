@@ -13,10 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     public static final String HTTP_VERSION = "HTTP/1.1";
 
-    public static final String CONTENT_TYPE_HEADER = "Content-Type:";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type";
     public static final String CHARSET_UTF_8 = "charset=utf-8";
-    public static final String CONTENT_LENGTH = "Content-Length:";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String SET_COOKIE = "Set-Cookie";
+    private static final String LOCATION = "Location";
+    public static final String COOKIE = "Cookie";
 
     public static final String HOME_PATH = "/";
     public static final String LOGIN_PATH = "/login";
@@ -64,8 +68,16 @@ public class Http11Processor implements Runnable, Processor {
             String[] requestLineParts = requestHeadLines[0].split(" ");
             String httpMethod = requestLineParts[0];
             String requestUri = requestLineParts[1];
+            String cookieLine = getCookieLine(requestHeadLines);
 
-            String location = null;
+            Map<String, String> responseHeaders = new LinkedHashMap<>();
+
+            HttpCookie cookie = HttpCookie.parse(cookieLine);
+            if (!cookie.contains("JSESSIONID")) {
+                String sessionId = UUID.randomUUID().toString();
+                responseHeaders.put(SET_COOKIE, "JSESSIONID=" + sessionId + ";");
+            }
+
             if (requestUri.contains("?")) {
                 String[] uriParts = requestUri.split("\\?", 2);
                 requestUri = uriParts[0];
@@ -85,14 +97,14 @@ public class Http11Processor implements Runnable, Processor {
                             parameters.get("email"));
 
                     InMemoryUserRepository.save(user);
-                    location = "/index.html";
+                    responseHeaders.put(LOCATION, "/index.html");
                 }
 
                 if (requestUri.equals(LOGIN_PATH)) {
                     String account = parameters.get("account");
                     String password = parameters.get("password");
 
-                    location = resolveLoginRedirectLocation(account, password);
+                    responseHeaders.put(LOCATION, resolveLoginRedirectLocation(account, password));
                 }
             }
 
@@ -101,11 +113,20 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            sendResponse(requestUri, location, responseBody, outputStream);
+            sendResponse(requestUri, responseHeaders, responseBody, outputStream);
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getCookieLine(String[] requestHeadLines) {
+        for (String requestHeadLine : requestHeadLines) {
+            if (requestHeadLine.startsWith(COOKIE + ":")) {
+                return requestHeadLine;
+            }
+        }
+        return null;
     }
 
     private String resolveLoginRedirectLocation(String account, String password) {
@@ -117,7 +138,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Integer getContentLength(String[] requestHeadLines) {
         for (String requestHeadLine : requestHeadLines) {
-            if (requestHeadLine.contains("Content-Length")) {
+            if (requestHeadLine.contains(CONTENT_LENGTH + ":")) {
                 return Integer.parseInt(requestHeadLine.split(" ")[1]);
             }
         }
@@ -136,32 +157,41 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private void sendResponse(String requestUri, String location, String responseBody, OutputStream outputStream)
+    private void sendResponse(String requestUri, Map<String, String> headers, String responseBody,
+                              OutputStream outputStream)
             throws IOException {
         String contentType = getContentType(requestUri);
-        final var response = getResponse(contentType, location, responseBody);
+
+        final var response = getResponse(contentType, headers, responseBody);
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 
-    private String getResponse(String contentType, String location, String responseBody) {
-        if (location != null && !location.isBlank()) {
-            return String.join(CRLF,
-                    HTTP_VERSION + " " + "302 FOUND" + " ",
-                    "Location:" + location,
-                    contentType,
-                    CONTENT_LENGTH + " " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
+    private String getResponse(String contentType, Map<String, String> headers, String responseBody) {
+        String httpStatus = "200 OK";
+        if (headers.containsKey(LOCATION)) {
+            httpStatus = "302 FOUND";
         }
 
-        return String.join(CRLF,
-                HTTP_VERSION + " " + "200 OK" + " ",
-                contentType,
-                CONTENT_LENGTH + " " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
+        StringBuilder response = new StringBuilder();
+        response.append(HTTP_VERSION).append(" ").append(httpStatus).append(CRLF);
+
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            response.append(header.getKey())
+                    .append(": ")
+                    .append(header.getValue())
+                    .append(CRLF);
+        }
+
+        response.append(contentType).append(CRLF);
+        response.append(CONTENT_LENGTH).append(": ")
+                .append(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                .append(CRLF);
+        response.append(CRLF);
+        response.append(responseBody);
+
+        return response.toString();
     }
 
     private Map<String, String> parseFormParameters(String queryString) {
@@ -191,9 +221,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(String requestUri) {
         if (requestUri.endsWith(".css")) {
-            return CONTENT_TYPE_HEADER + " " + "text/css;" + CHARSET_UTF_8 + " ";
+            return CONTENT_TYPE_HEADER + ": " + "text/css;" + CHARSET_UTF_8 + " ";
         }
-        return CONTENT_TYPE_HEADER + " " + "text/html;" + CHARSET_UTF_8 + " ";
+        return CONTENT_TYPE_HEADER + ": " + "text/html;" + CHARSET_UTF_8 + " ";
     }
 
     private String getResponseBody(String requestUri) throws URISyntaxException, IOException {

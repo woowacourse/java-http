@@ -4,6 +4,8 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +65,15 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            final SessionManager sessionManager = SessionManager.getInstance();
             final String sessionId = new HttpCookie(headers.get("cookie")).getValue("JSESSIONID");
-            final String setCookie = sessionId == null
-                    ? "JSESSIONID=" + UUID.randomUUID() + "; Path=/; HttpOnly" : null;
+            Session session = sessionId == null ? null : sessionManager.findSession(sessionId);
+            String setCookie = null;
+            if (session == null) {
+                session = new Session(UUID.randomUUID().toString());
+                sessionManager.add(session);
+                setCookie = "JSESSIONID=" + session.getId() + "; Path=/; HttpOnly";
+            }
 
             String requestBody = "";
             if ("POST".equals(method)) {
@@ -98,9 +106,19 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if ("GET".equals(method) && "/login".equals(requestPath)
+                    && session.getAttribute("user") != null) {
+                sendRedirect(outputStream, "/index.html", setCookie);
+                return;
+            }
+
             if ("POST".equals(method) && "/login".equals(requestPath)) {
                 final Map<String, String> loginParameters = queryParameters(requestBody);
                 final boolean logInIsSuccess = logIn(loginParameters);
+                if (logInIsSuccess) {
+                    session.setAttribute("user", InMemoryUserRepository
+                            .findByAccount(loginParameters.get("account")).orElseThrow());
+                }
                 final String location = logInIsSuccess ? "/index.html" : "/401.html";
                 sendRedirect(outputStream, location, setCookie);
                 return;

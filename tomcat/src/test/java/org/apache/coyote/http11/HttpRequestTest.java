@@ -88,9 +88,9 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("HTTP 메서드와 경로가 모두 일치할 때만 요청이 일치한다")
-    void matchesMethodAndPath() {
+    void matchesMethodAndPath() throws IOException {
         // given
-        final HttpRequest request = HttpRequest.of(List.of("GET /login HTTP/1.1"), null);
+        final HttpRequest request = createRequest(List.of("GET /login HTTP/1.1"), null);
 
         // when & then
         assertThat(request.matches("GET", "/login")).isTrue();
@@ -100,9 +100,9 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("요청 헤더 이름은 대소문자를 구분하지 않고 조회한다")
-    void getsHeaderIgnoringCase() {
+    void getsHeaderIgnoringCase() throws IOException {
         // given
-        final HttpRequest request = HttpRequest.of(List.of(
+        final HttpRequest request = createRequest(List.of(
                 "GET /index.html HTTP/1.1",
                 "Content-Type: text/html;charset=utf-8"
         ), null);
@@ -306,7 +306,7 @@ class HttpRequestTest {
         // given
         final Manager manager = new SessionManager();
         manager.removeAll();
-        final HttpRequest request = HttpRequest.of(
+        final HttpRequest request = createRequest(
                 List.of("GET /index.html HTTP/1.1"),
                 null,
                 manager
@@ -322,11 +322,11 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("세션이 없을 때 getSession false를 호출하면 세션을 생성하지 않는다")
-    void doesNotCreateSessionWhenNotRequested() {
+    void doesNotCreateSessionWhenNotRequested() throws IOException {
         // given
         final Manager manager = new SessionManager();
         manager.removeAll();
-        final HttpRequest request = HttpRequest.of(
+        final HttpRequest request = createRequest(
                 List.of("GET /index.html HTTP/1.1"),
                 null,
                 manager
@@ -341,7 +341,7 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("Cookie의 JSESSIONID로 기존 세션을 조회한다")
-    void findsSessionByJSessionIdCookie() {
+    void findsSessionByJSessionIdCookie() throws IOException {
         // given
         final Manager manager = new SessionManager();
         manager.removeAll();
@@ -355,7 +355,7 @@ class HttpRequestTest {
         );
 
         // when
-        final HttpRequest request = HttpRequest.of(headers, null, manager);
+        final HttpRequest request = createRequest(headers, null, manager);
 
         // then
         assertThat(request.getSession()).isSameAs(session);
@@ -363,7 +363,7 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("요청 헤더의 Cookie를 파싱한다")
-    void parsesCookieHeader() {
+    void parsesCookieHeader() throws IOException {
         // given
         final List<String> headers = List.of(
                 "GET /index.html HTTP/1.1",
@@ -372,24 +372,26 @@ class HttpRequestTest {
         );
 
         // when
-        final HttpRequest request = HttpRequest.of(headers, null);
+        final HttpRequest request = createRequest(headers, null);
 
         // then
         assertThat(request.getCookie().get("JSESSIONID")).contains("abc-123");
     }
 
     @Test
-    void requestLine에서_method와_path를_분리한다() {
-        HttpRequest request = HttpRequest.of(List.of("GET /index.html HTTP/1.1"), null);
+    @DisplayName("요청 라인에서 HTTP 메서드와 경로를 분리한다")
+    void parsesMethodAndPathFromRequestLine() throws IOException {
+        final HttpRequest request = createRequest(List.of("GET /index.html HTTP/1.1"), null);
 
         assertThat(request.getMethod()).isEqualTo("GET");
         assertThat(request.getPath()).isEqualTo("/index.html");
     }
 
     @Test
-    void URI의_query_string을_파라미터로_분리한다() {
-        HttpRequest request = HttpRequest.from(List.of(
-                "GET /login?account=gugu&password=password HTTP/1.1"));
+    @DisplayName("URI의 쿼리 문자열을 파라미터로 분리한다")
+    void parsesQueryStringParameters() throws IOException {
+        final HttpRequest request = createRequest(List.of(
+                "GET /login?account=gugu&password=password HTTP/1.1"), null);
 
         assertThat(request.getPath()).isEqualTo("/login");
         assertThat(request.getParameter("account")).isEqualTo("gugu");
@@ -397,29 +399,49 @@ class HttpRequestTest {
     }
 
     @Test
-    void query_string이_없으면_parameter는_null이다() {
-        HttpRequest request = HttpRequest.from(List.of("GET /login HTTP/1.1"));
+    @DisplayName("쿼리 문자열이 없으면 파라미터는 null이다")
+    void returnsNullWhenQueryStringIsMissing() throws IOException {
+        final HttpRequest request = createRequest(List.of("GET /login HTTP/1.1"), null);
 
         assertThat(request.getParameter("account")).isNull();
     }
 
     @Test
-    void query_string의_인코딩된_문자를_디코딩한다() {
-        HttpRequest request = HttpRequest.from(List.of(
+    @DisplayName("쿼리 문자열의 인코딩된 문자를 디코딩한다")
+    void decodesEncodedQueryString() throws IOException {
+        final HttpRequest request = createRequest(List.of(
                 "GET /login?account=gugu%40email.com&password=pass%20word HTTP/1.1"
-        ));
+        ), null);
 
         assertThat(request.getParameter("account")).isEqualTo("gugu@email.com");
         assertThat(request.getParameter("password")).isEqualTo("pass word");
     }
 
     @Test
-    void RequestHeader의_body를_분리한다() {
-        HttpRequest request = HttpRequest.of(List.of(
-                        "POST /login?account=gugu&password=password HTTP/1.1"),
-                "account=tion&email=ehfrhfo9494@naver.com&password=password");
+    @DisplayName("요청 본문의 파라미터를 분리한다")
+    void parsesBodyParameters() throws IOException {
+        final String body = "account=tion&email=ehfrhfo9494@naver.com&password=password";
+        final HttpRequest request = createRequest(List.of(
+                "POST /login?account=gugu&password=password HTTP/1.1",
+                "Content-Length: " + body.length()
+        ), body);
 
         assertThat(request.getBodyParameter("account")).isEqualTo("tion");
+    }
+
+    private static HttpRequest createRequest(final List<String> headerLines,
+                                             final String body) throws IOException {
+        return createRequest(headerLines, body, new SessionManager());
+    }
+
+    private static HttpRequest createRequest(final List<String> headerLines,
+                                             final String body,
+                                             final Manager manager) throws IOException {
+        final String rawRequest = String.join("\r\n", headerLines)
+                + "\r\n\r\n"
+                + (body == null ? "" : body);
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+        return HttpRequest.from(reader, manager);
     }
 
     private static final class ChunkedBufferedReader extends BufferedReader {

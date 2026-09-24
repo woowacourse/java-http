@@ -4,46 +4,38 @@ import com.techcourse.exception.UncheckedServletException;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 
 final class HttpRequest {
 
     private static final String JSESSIONID = "JSESSIONID";
-
-    private final String method;
-    private final URI uri;
-    private final QueryParameters queryParameters;
+    private final RequestLine requestLine;
     private final QueryParameters bodyParameters;
     private final HttpHeaders headers;
     private final Manager manager;
     private HttpSession session;
 
-    private HttpRequest(final String method,
-                        final URI uri,
-                        final QueryParameters queryParameters,
+    private HttpRequest(final RequestLine requestLine,
                         final QueryParameters bodyParameters,
                         final HttpHeaders headers,
                         final Manager manager) {
-        this.method = method;
-        this.uri = uri;
-        this.queryParameters = queryParameters;
+        this.requestLine = requestLine;
         this.bodyParameters = bodyParameters;
         this.headers = headers;
         this.manager = manager;
     }
 
     static HttpRequest from(final BufferedReader reader, final Manager manager) throws IOException {
-        List<String> headerLines = readHeaderLines(reader);
+        List<String> headerLines = readLines(reader);
+        RequestLine requestLine = RequestLine.from(headerLines.getFirst());
         HttpHeaders headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
-        String body = readBody(reader, headers);
-        return of(headerLines.getFirst(), headers, body, manager);
+        QueryParameters bodyParams = QueryParameters.from(readBody(reader, headers));
+        return new HttpRequest(requestLine, bodyParams, headers, manager);
     }
 
     @Nonnull
@@ -90,7 +82,7 @@ final class HttpRequest {
     }
 
     @Nonnull
-    private static List<String> readHeaderLines(BufferedReader reader) throws IOException {
+    private static List<String> readLines(BufferedReader reader) throws IOException {
         String line;
         List<String> headerLines = new ArrayList<>();
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -102,59 +94,17 @@ final class HttpRequest {
         return headerLines;
     }
 
-    static HttpRequest from(final List<String> headerLines) {
-        return of(headerLines, null);
-    }
-
-    static HttpRequest of(final List<String> headerLines, String body) {
-        return of(headerLines, body, new SessionManager());
-    }
-
-    static HttpRequest of(final List<String> headerLines, final String body, final Manager manager) {
-        final HttpHeaders headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
-        return of(headerLines.getFirst(), headers, body, manager);
-    }
-
-    private static HttpRequest of(final String requestLine,
-                                  final HttpHeaders headers,
-                                  final String body,
-                                  final Manager manager) {
-        final String[] requestLineParts = parseRequestLine(requestLine);
-        final URI uri = createURI(requestLineParts[1]);
-        final QueryParameters queryParameters = QueryParameters.from(uri.getRawQuery());
-
-        final QueryParameters bodyParameters = QueryParameters.from(body);
-        return new HttpRequest(requestLineParts[0], uri, queryParameters, bodyParameters, headers, manager);
-    }
-
-    @Nonnull
-    private static String[] parseRequestLine(String requestLine) {
-        final String[] requestLineParts = requestLine.split(" ", 3);
-        if (requestLineParts.length != 3) {
-            throw new InvalidHttpRequestException("Invalid request line: " + requestLine);
-        }
-        return requestLineParts;
-    }
-
-    @Nonnull
-    private static URI createURI(String uri) {
-        try {
-            return URI.create(uri);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidHttpRequestException("Invalid URI: " + uri);
-        }
-    }
 
     String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     String getPath() {
-        return uri.getPath();
+        return requestLine.getPath();
     }
 
     boolean matches(final String method, final String path) {
-        return this.method.equals(method) && getPath().equals(path);
+        return requestLine.matches(method, path);
     }
 
     String getHeader(final String name) {
@@ -162,7 +112,7 @@ final class HttpRequest {
     }
 
     String getParameter(final String name) {
-        return queryParameters.get(name).orElse(null);
+        return requestLine.getParameter(name);
     }
 
     String getBodyParameter(final String name) {

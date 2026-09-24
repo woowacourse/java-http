@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-final class QueryParameters {
+public final class QueryParameters {
 
     private final Map<String, String> values;
 

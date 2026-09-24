@@ -116,13 +116,28 @@ public class Http11Processor implements Runnable, Processor {
             String body,
             Map<String, String> requestHeaders) {
 
-        if ("GET".equals(method) && "/login".equals(requestPath)) {
-            return handleLoginRequest(queryParameters, requestHeaders);
+        if ("GET".equals(method) && "/login".equals(requestPath) && isLoggedIn(requestHeaders)) {
+            return handleLoginRequest(body, requestHeaders);
+        }
+        if ("POST".equals(method) && "/login".equals(requestPath)) {
+            return handleLoginRequest(body, requestHeaders);
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
             return Optional.of(HttpResponse.createRedirectResponse(handleRegister(body), Map.of()));
         }
         return Optional.empty();
+    }
+
+    private boolean isLoggedIn(Map<String, String> requestHeaders) {
+        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
+        String sessionId = cookie.get("JSESSIONID");
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            return false;
+        }
+        User user = getUser(session);
+        return user != null;
     }
 
     private String handleRegister(String body) {
@@ -145,7 +160,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Optional<HttpResponse> handleLoginRequest(
-            Map<String, String> queryParameters,
+            String body,
             Map<String, String> requestHeaders) {
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");
@@ -154,12 +169,10 @@ public class Http11Processor implements Runnable, Processor {
         if (session != null && getUser(session) != null) {
             return Optional.of(HttpResponse.createRedirectResponse("/index.html", Map.of()));
         }
-        if (queryParameters.isEmpty()) {
-            return Optional.empty();
-        }
+        final Map<String, String> params = parseParams(body);
 
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
+        String account = params.get("account");
+        String password = params.get("password");
         Optional<User> user = login(account, password);
         if (user.isEmpty()) {
             return Optional.of(HttpResponse.createRedirectResponse("/401.html", Map.of()));

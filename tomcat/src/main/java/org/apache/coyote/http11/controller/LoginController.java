@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class LoginController extends AbstractController {
 
             final Session session = createSession(user);
 
-            response.setSession(session);
+            response.setCookie(new Cookie(JSESSIONID, session.getId()));
             response.sendRedirect("/index.html");
             return;
         }

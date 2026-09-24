@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.apache.coyote.session.Session;
 
 public class HttpResponse {
     private static final String CONTENT_LENGTH = "Content-Length";
@@ -39,8 +39,8 @@ public class HttpResponse {
         this.httpBody = body;
     }
 
-    public void setSession(Session session) {
-        httpHeaders.put(SET_COOKIE, JSESSIONID + "=" + session.getId());
+    public void setCookie(Cookie cookie) {
+        httpHeaders.put(SET_COOKIE, cookie.getName() + "=" + cookie.getValue());
     }
 
     public void setLocation(String location) {

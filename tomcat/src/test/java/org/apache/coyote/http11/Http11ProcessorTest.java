@@ -27,10 +27,10 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 200 OK \r\n")
+                .startsWith("HTTP/1.1 200 OK\r\n")
                 .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n")
-                .contains("Content-Type: text/html;charset=utf-8 \r\n")
-                .contains("Content-Length: 12 \r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("Content-Length: 12\r\n")
                 .endsWith("\r\n\r\nHello world!");
     }
 
@@ -53,10 +53,10 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 200 OK \r\n")
+                .startsWith("HTTP/1.1 200 OK\r\n")
                 .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n")
-                .contains("Content-Type: text/html;charset=utf-8 \r\n")
-                .contains("Content-Length: 5564 \r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("Content-Length: 5564\r\n")
                 .endsWith("\r\n\r\n" + new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
@@ -95,7 +95,7 @@ class Http11ProcessorTest {
         final var user = (User) sessionAfterLogin.getAttribute("user");
 
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 302 Found \r\n")
+                .startsWith("HTTP/1.1 302 Found\r\n")
                 .contains("Location: /index.html\r\n")
                 .doesNotContain("Set-Cookie");
         assertThat(sessionAfterLogin).isSameAs(sessionBeforeLogin);
@@ -122,7 +122,7 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 302 Found \r\n")
+                .startsWith("HTTP/1.1 302 Found\r\n")
                 .contains("Location: /401.html\r\n")
                 .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n");
     }
@@ -161,7 +161,7 @@ class Http11ProcessorTest {
 
         // then
         final var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+                "HTTP/1.1 302 Found",
                 "Location: /index.html",
                 "\r\n");
 

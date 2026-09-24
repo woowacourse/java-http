@@ -22,8 +22,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        String setCookieHeader = socket.output().split("\r\n")[1];
+        assertThat(setCookieHeader).startsWith("Set-Cookie: JSESSIONID=");
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                setCookieHeader,
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
@@ -49,8 +52,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        String setCookieHeader = socket.output().split("\r\n")[1];
+        assertThat(setCookieHeader).startsWith("Set-Cookie: JSESSIONID=");
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
+                setCookieHeader + "\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+

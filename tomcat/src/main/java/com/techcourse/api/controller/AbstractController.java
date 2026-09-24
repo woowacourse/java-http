@@ -9,7 +9,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.isPost()) {
             doPost(request, response);
             return;
@@ -21,9 +21,9 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException("지원하지 않는 HTTP 메서드입니다.");
     }
 
-    protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;
+    protected abstract void doPost(final HttpRequest request, final HttpResponse response) throws Exception;
 
-    protected abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
+    protected abstract void doGet(final HttpRequest request, final HttpResponse response) throws Exception;
 
     // TODO: 지금 login만 (파라미터가 2개인 경우만) 신경쓰는 중
     protected final Map<String, String> parseRequestBody(final HttpRequest request) {

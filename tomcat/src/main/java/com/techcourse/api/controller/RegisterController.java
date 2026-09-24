@@ -18,14 +18,14 @@ public final class RegisterController extends AbstractController {
     private static final String INDEX_PAGE = "/index.html";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
         response.setBody(HttpResponse.resolveResource(REGISTER_PAGE));
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final Map<String, String> parameters = parseRequestBody(request);
         final User user = new User(
                 parameters.get("account"),
@@ -35,6 +35,7 @@ public final class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공: {}", user);
+
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
         response.setBody(HttpResponse.resolveResource(INDEX_PAGE));

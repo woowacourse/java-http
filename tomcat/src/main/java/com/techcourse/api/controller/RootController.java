@@ -9,14 +9,14 @@ import org.apache.coyote.http11.response.HttpStatus;
 public final class RootController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
         response.setBody(HttpResponse.resolveResource("/index.html"));
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         throw new UnsupportedOperationException();
     }
 

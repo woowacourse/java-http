@@ -28,7 +28,7 @@ public final class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final Session session = findSession(request);
         if (isLoggedIn(session)) {
             response.setStatus(HttpStatus.FOUND);
@@ -44,7 +44,7 @@ public final class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final Map<String, String> parameters = parseRequestBody(request);
         final Optional<User> loginUser = InMemoryUserRepository.findByAccount(parameters.get("account"))
                 .filter(user -> user.checkPassword(parameters.get("password")));

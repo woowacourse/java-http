@@ -14,7 +14,6 @@ class HttpCookieTest {
 
         assertThat(cookie.get("yummy_cookie")).contains("choco");
         assertThat(cookie.get("tasty_cookie")).contains("strawberry");
-        assertThat(cookie.get(HttpCookie.JSESSION_ID)).contains("existing-session-id");
+        assertThat(cookie.get("JSESSIONID")).contains("existing-session-id");
     }
-
 }

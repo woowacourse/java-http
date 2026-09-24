@@ -6,8 +6,6 @@ import java.util.Optional;
 
 public class HttpCookie {
 
-    public static final String JSESSION_ID = "JSESSIONID";
-
     private final Map<String, String> cookies = new HashMap<>();
 
     public HttpCookie(String rawCookie) {
@@ -27,5 +25,4 @@ public class HttpCookie {
     public Optional<String> get(String name) {
         return Optional.ofNullable(cookies.get(name));
     }
-
 }

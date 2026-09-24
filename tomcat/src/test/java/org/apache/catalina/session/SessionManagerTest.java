@@ -2,11 +2,18 @@ package org.apache.catalina.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class SessionManagerTest {
 
     private final SessionManager sessionManager = SessionManager.getInstance();
+
+    @AfterEach
+    void tearDown() {
+        sessionManager.remove("session-id");
+        sessionManager.remove("session-to-remove");
+    }
 
     @Test
     void addsAndFindsSession() {

@@ -15,29 +15,20 @@ import java.util.UUID;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
-    private final Map<String, String> queryParams;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final Map<String, String> bodyParams;
     private Session session;
 
-    private HttpRequest(final String method, final String path, final Map<String, String> queryParams,
+    private HttpRequest(final RequestLine requestLine,
                         final Map<String, String> headers, final Map<String, String> bodyParams) {
-        this.method = method;
-        this.path = path;
-        this.queryParams = queryParams;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.bodyParams = bodyParams;
     }
 
     public static HttpRequest from(final String requestLine) {
-        final String[] tokens = requestLine.split(" ");
-        final String method = tokens[0];
-        final String uri = tokens[1];
-        final String path = extractPath(uri);
-        final Map<String, String> queryParams = extractQueryParams(uri);
-        return new HttpRequest(method, path, queryParams,
+        return new HttpRequest(RequestLine.from(requestLine),
                 new TreeMap<>(String.CASE_INSENSITIVE_ORDER), new HashMap<>());
     }
 
@@ -102,36 +93,16 @@ public class HttpRequest {
         return params;
     }
 
-    private static String extractPath(final String uri) {
-        if (uri.contains("?")) {
-            return uri.substring(0, uri.indexOf("?"));
-        }
-        return uri;
-    }
-
-    private static Map<String, String> extractQueryParams(final String uri) {
-        final Map<String, String> params = new HashMap<>();
-        if (!uri.contains("?")) {
-            return params;
-        }
-        final String queryString = uri.substring(uri.indexOf("?") + 1);
-        for (String param : queryString.split("&")) {
-            String[] kv = param.split("=");
-            params.put(kv[0], kv[1]);
-        }
-        return params;
-    }
-
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public Map<String, String> getQueryParams() {
-        return queryParams;
+        return requestLine.getQueryParams();
     }
 
     public String getHeader(final String name) {

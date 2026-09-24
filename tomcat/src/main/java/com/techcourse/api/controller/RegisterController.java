@@ -20,7 +20,7 @@ public final class RegisterController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
-        response.setBody(HttpResponse.resolveResource(REGISTER_PAGE));
+        response.setBody(readResource(REGISTER_PAGE));
     }
 
     @Override
@@ -36,7 +36,7 @@ public final class RegisterController extends AbstractController {
 
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
-        response.setBody(HttpResponse.resolveResource(INDEX_PAGE));
+        response.setBody(readResource(INDEX_PAGE));
     }
 
 }

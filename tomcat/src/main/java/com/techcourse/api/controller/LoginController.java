@@ -32,14 +32,14 @@ public final class LoginController extends AbstractController {
         if (isLoggedIn(session)) {
             response.setStatus(HttpStatus.FOUND);
             response.setContentType(ContentType.HTML);
-            response.setBody(HttpResponse.resolveResource(INDEX_PAGE));
+            response.setBody(readResource(INDEX_PAGE));
             response.setHeader("Location", INDEX_PAGE);
             return;
         }
 
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
-        response.setBody(HttpResponse.resolveResource(LOGIN_PAGE));
+        response.setBody(readResource(LOGIN_PAGE));
     }
 
     @Override
@@ -50,7 +50,7 @@ public final class LoginController extends AbstractController {
         if (loginUser.isEmpty()) {
             response.setStatus(HttpStatus.UNAUTHORIZED);
             response.setContentType(ContentType.HTML);
-            response.setBody(HttpResponse.resolveResource(UNAUTHORIZED_PAGE));
+            response.setBody(readResource(UNAUTHORIZED_PAGE));
             return;
         }
 
@@ -61,7 +61,7 @@ public final class LoginController extends AbstractController {
 
         response.setStatus(HttpStatus.FOUND);
         response.setContentType(ContentType.HTML);
-        response.setBody(HttpResponse.resolveResource(INDEX_PAGE));
+        response.setBody(readResource(INDEX_PAGE));
         response.setHeader("Location", INDEX_PAGE);
         if (!session.getId().equals(request.getSessionId())) {
             response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());

@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
+import org.apache.catalina.StaticResourceLoader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -72,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         if (request.isGet()) {
             response.setStatus(HttpStatus.OK);
             response.setContentType(ContentType.fromResourceName(request.getPath()));
-            response.setBody(HttpResponse.resolveResource(request.getPath()));
+            response.setBody(StaticResourceLoader.read(request.getPath()));
             return;
         }
 

@@ -1,10 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,16 +17,6 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    // TODO: 리소스해석 책임 분리
-    public static File resolveResource(final String name) {
-        final String resourceName = "static" + name;
-        final URL resource = Objects.requireNonNull(
-                HttpResponse.class.getClassLoader().getResource(resourceName),
-                "리소스를 찾을 수 없음: " + resourceName
-        );
-        return new File(resource.getFile());
-    }
-
     public void setHeader(final String name, final String value) {
         headers.add(name, value);
     }
@@ -41,10 +27,6 @@ public class HttpResponse {
 
     public void setContentType(final ContentType contentType) {
         this.contentType = Objects.requireNonNull(contentType, "Content-Type은 null일 수 없습니다.");
-    }
-
-    public void setBody(final File resource) throws IOException {
-        setBody(Files.readString(Objects.requireNonNull(resource, "본문 파일은 null일 수 없습니다.").toPath()));
     }
 
     public void setBody(final String responseBody) {

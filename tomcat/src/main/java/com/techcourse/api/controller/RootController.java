@@ -12,7 +12,7 @@ public final class RootController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.HTML);
-        response.setBody(HttpResponse.resolveResource("/index.html"));
+        response.setBody(readResource("/index.html"));
     }
 
     @Override

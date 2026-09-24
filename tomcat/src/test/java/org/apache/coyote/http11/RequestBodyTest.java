@@ -20,5 +20,7 @@ public class RequestBodyTest {
         // then
         assertThat(account)
                 .isEqualTo("gugu@email.com");
+        assertThat(requestBody.getParameter("password"))
+                .isEqualTo("1234");
     }
 }

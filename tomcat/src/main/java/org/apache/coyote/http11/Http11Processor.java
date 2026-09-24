@@ -11,7 +11,10 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -55,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = requestTarget.split("\\?")[0];
 
             // 헤더 읽기
-            Map<String, String> requestHeaders = readRequestHeaders(inputStream);
+            Map<String, List<String>> requestHeaders = readRequestHeaders(inputStream);
 
             // 바디 읽기
             String requestBody = readRequestBody(inputStream, requestHeaders);
@@ -90,23 +93,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 }
 
-    private String getSessionId(Map<String, String> requestHeaders) {
-        String cookieHeader = requestHeaders.get("Cookie");
+    private String getSessionId(Map<String, List<String>> requestHeaders) {
+        List<String> cookieHeaders = requestHeaders.get("cookie");
 
-        if (cookieHeader == null) { return null;}
+        if (cookieHeaders == null) { return null;}
 
-        for (String cookie : cookieHeader.split(";")) {
-            String[] parts = cookie.trim().split("=", 2);
+        for (String cookieHeader : cookieHeaders) {
+            for (String cookie : cookieHeader.split(";")) {
+                String[] parts = cookie.trim().split("=", 2);
 
-            if (parts.length == 2 && parts[0].equals("JSESSIONID")) {
-                return parts[1];
+                if (parts.length == 2 && parts[0].equals("JSESSIONID")) {
+                    return parts[1].trim();
+                }
             }
         }
 
         return null;
     }
 
-    private Session getSession(Map<String, String> requestHeaders, boolean create) {
+    private Session getSession(Map<String, List<String>> requestHeaders, boolean create) {
         String sessionId = getSessionId(requestHeaders);
 
         if (sessionId != null) {
@@ -195,7 +200,7 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private HttpResponse handleLoginRequest(Map<String, String> formParameters, Map<String, String> requestHeaders, String requestMethod) throws URISyntaxException, IOException {
+    private HttpResponse handleLoginRequest(Map<String, String> formParameters, Map<String, List<String>> requestHeaders, String requestMethod) throws URISyntaxException, IOException {
 
         // 로그인 페이지 접근
         if (requestMethod.equals("GET")) {
@@ -295,29 +300,56 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // 헤더 분리
-    private Map<String, String> readRequestHeaders(InputStream inputStream) throws IOException {
+    private Map<String, List<String>> readRequestHeaders(InputStream inputStream) throws IOException {
         String headerLine;
-        Map<String, String> requestHeaders = new HashMap<>();
+        Map<String, List<String>> requestHeaders = new HashMap<>();
 
         while ((headerLine = readLine(inputStream)) != null && !headerLine.isEmpty()) {
-            String[] headerParts = headerLine.split(":", 2);
+            int colonIndex = headerLine.indexOf(':');
 
-            if (headerParts.length != 2) {
-                continue;
+            if (colonIndex <= 0) {
+                throw new IOException("Invalid header line: " + headerLine);
             }
 
-            String headerName = headerParts[0].trim().toLowerCase();
-            String headerValue = headerParts[1].trim().toLowerCase();
+            String headerName = headerLine.substring(0, colonIndex).trim().toLowerCase(Locale.ROOT);
+            String headerValue = headerLine.substring(colonIndex + 1).trim();
 
-            requestHeaders.put(headerName, headerValue);
+            requestHeaders.computeIfAbsent(headerName, key -> new ArrayList<>())
+                    .add(headerValue);
         }
 
         return requestHeaders;
     }
 
     // requestBody 읽기
-    private String readRequestBody(InputStream inputStream, Map<String, String> requestHeaders) throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.getOrDefault("content-length", "0"));
+    private String readRequestBody(InputStream inputStream, Map<String, List<String>> requestHeaders) throws IOException {
+
+        List<String> contentLengthValues = requestHeaders.getOrDefault("content-length", List.of("0"));
+
+        if (contentLengthValues.isEmpty()) {
+            return "";
+        }
+
+        String contentLengthValue = contentLengthValues.getFirst().trim();
+
+        if (!contentLengthValue.matches("\\d+")) {
+            throw new IOException(
+                    "Invalid Content-Length: " + contentLengthValue
+            );
+        }
+
+        for (String value : contentLengthValues) {
+            if (!contentLengthValue.equals(value.trim())) {
+                throw new IOException("Conflicting Content-Length headers");
+            }
+        }
+
+        int contentLength = Integer.parseInt(contentLengthValue);
+
+        if (contentLength < 0) {
+            throw new IOException("Invalid Content-Length");
+        }
+
         byte[] body = new byte[contentLength];
         inputStream.read(body, 0, contentLength);
 

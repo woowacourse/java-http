@@ -42,17 +42,7 @@ public class HttpRequest {
         final SessionManager sessionManager = SessionManager.getInstance();
         final String jSessionId = cookie().getValue("JSESSIONID");
 
-        session = sessionManager.findSession(jSessionId)
-            .orElseGet(this::createSession);
-        return session;
-    }
-
-    private Session createSession() {
-        final SessionManager sessionManager = SessionManager.getInstance();
-        final UUID uuid = UUID.randomUUID();
-        final Session newSession = Session.init(uuid.toString());
-        sessionManager.add(newSession);
-
-        return newSession;
+        return sessionManager.findSession(jSessionId)
+            .orElseGet(SessionProvider::provide);
     }
 }

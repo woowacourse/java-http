@@ -11,7 +11,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -38,32 +39,20 @@ public class Http11Processor implements Runnable, Processor {
 
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            final var reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String readLine = bufferedReader.readLine();
+            String readLine = reader.readLine();
             if (readLine == null) {
                 return;
             }
 
-            String[] requestHeader = readLine.split(" ");
-            String path = requestHeader[1];
-            String resourcePath = extractResourcePath(path);
+            RequestLine requestLine = RequestLine.parse(readLine);
 
-            byte[] bytes = resolveResponseBody(resourcePath);
-            String responseBody = new String(bytes, StandardCharsets.UTF_8);
+            Map<String, String> headers = readHeaders(reader);
+            String body = readBody(reader, headers);
 
-            String contentType = resolveContentType(resourcePath);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + bytes.length,
-                    "",
-                    responseBody
-            );
-
-            logUser(path);
+            Optional<Cookie> sessionCookie = findSessionCookie(headers);
+            String response = handleRequest(requestLine.method(), requestLine.target(), body, sessionCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -72,44 +61,231 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logUser(String path) {
-        String queryString = extractQueryString(path);
-        Map<String, String> queryParams = parseQueryParams(queryString);
+    private Optional<Cookie> findSessionCookie(Map<String, String> headers) {
+        String cookieHeader = headers.get("cookie");
 
-        String account = queryParams.get("account");
-        if (account == null || account.isBlank()) {
-            return;
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
+            return Optional.empty();
         }
 
-        String password = queryParams.get("password");
-        if (password == null || password.isBlank()) {
-            return;
-        }
+        String[] cookiePairs = cookieHeader.split(";");
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchElementException("해당 계정을 찾을 수 없습니다"));
+        for (String pair : cookiePairs) {
+            Optional<Cookie> parsed = Cookie.parse(pair);
+            if (parsed.isEmpty()) {
+                continue;
+            }
 
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("아이디 또는 패스워드가 일치하지 않습니다");
-        }
-
-        log.info(String.valueOf(user));
-    }
-
-    @Nonnull
-    private static Map<String, String> parseQueryParams(String queryString) {
-        Map<String, String> queryParams = new HashMap<>();
-
-        String[] params = queryString.split("&");
-        for (String param : params) {
-            String[] values = param.split("=");
-
-            if (values.length == 2) {
-                queryParams.put(values[0], values[1]);
+            String cookieName = parsed.get().name();
+            if ("JSESSIONID".equals(cookieName)) {
+                return parsed;
             }
         }
 
-        return queryParams;
+        return Optional.empty();
+    }
+
+    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+
+        char[] body = new char[contentLength];
+        int current = 0;
+
+        while (current < contentLength) {
+            int read = reader.read(body, current, contentLength - current);
+
+            if (read == -1) {
+                throw new IOException("요청 body가 예상된 값보다 짧습니다.");
+            }
+
+            current += read;
+        }
+
+        return new String(body);
+    }
+
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            int colonIndex = line.indexOf(":");
+
+            if (colonIndex == -1) {
+                continue;
+            }
+
+            String name = line.substring(0, colonIndex)
+                    .trim()
+                    .toLowerCase();
+
+            String value = line.substring(colonIndex + 1).trim();
+
+            headers.put(name, value);
+        }
+
+        return headers;
+    }
+
+    private String handleRequest(String method, String target, String body, Optional<Cookie> sessionCookie)
+            throws IOException {
+        String resourcePath = extractResourcePath(target);
+
+        if ("GET".equals(method)) {
+            return handleGetRequest(resourcePath, sessionCookie);
+        }
+
+        if ("POST".equals(method)) {
+            return handlePostRequest(resourcePath, body);
+        }
+
+        return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+    }
+
+    private String handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie) throws IOException {
+        Session session = findSession(sessionCookie);
+
+        if ("/login".equals(resourcePath) && isLoggedIn(session)) {
+            return generateRedirectResponse("/index.html");
+        }
+
+        return serveStaticResource(resourcePath);
+    }
+
+    private String handlePostRequest(String resourcePath, String body) {
+        Map<String, String> formData = parseFormData(body);
+
+        if (resourcePath.equals("/register")) {
+            return handleRegister(formData);
+        }
+
+        if (resourcePath.equals("/login")) {
+            return handleLogin(formData);
+        }
+
+        return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+    }
+
+    private Session findSession(Optional<Cookie> sessionCookie) {
+        if (sessionCookie.isEmpty()) {
+            return null;
+        }
+
+        return SessionManager.findSession(sessionCookie.get().value());
+    }
+
+    private boolean isLoggedIn(Session session) {
+        return session != null && session.getAttribute("user") != null;
+    }
+
+    private Map<String, String> parseFormData(String body) {
+        Map<String, String> formData = new HashMap<>();
+
+        if (body == null || body.isBlank()) {
+            return formData;
+        }
+
+        String[] parameters = body.split("&");
+
+        for (String parameter : parameters) {
+            String[] values = parameter.split("=", 2);
+
+            if (values.length != 2) {
+                continue;
+            }
+
+            String key = java.net.URLDecoder.decode(values[0], StandardCharsets.UTF_8);
+            String value = java.net.URLDecoder.decode(values[1], StandardCharsets.UTF_8);
+
+            formData.put(key, value);
+        }
+
+        return formData;
+    }
+
+    private String handleRegister(Map<String, String> formData) {
+        String account = formData.get("account");
+        String email = formData.get("email");
+        String password = formData.get("password");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        return generateRedirectResponse("/index.html");
+    }
+
+    private String handleLogin(Map<String, String> formData) {
+        String account = formData.get("account");
+        String password = formData.get("password");
+
+        Optional<User> authenticatedUser = authenticate(account, password);
+
+        if (authenticatedUser.isEmpty()) {
+            return generateRedirectResponse("/401.html");
+        }
+
+        Session session = createSession(authenticatedUser);
+
+        return generateRedirectResponse("/index.html", session.getId());
+    }
+
+    @Nonnull
+    private static Session createSession(Optional<User> authenticatedUser) {
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        session.setAttribute("user", authenticatedUser.get());
+        SessionManager.add(session);
+
+        return session;
+    }
+
+    private String generateRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+    }
+
+    private String generateRedirectResponse(String location, String sessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Set-Cookie: JSESSIONID=" + sessionId,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+    }
+
+    private Optional<User> authenticate(String account, String password) {
+        if (account == null || account.isBlank()) {
+            return Optional.empty();
+        }
+
+        if (password == null || password.isBlank()) {
+            return Optional.empty();
+        }
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+    }
+
+    private String serveStaticResource(String resourcePath) throws IOException {
+        byte[] bytes = resolveResponseBody(resourcePath);
+        String responseBody = new String(bytes, StandardCharsets.UTF_8);
+        String contentType = resolveContentType(resourcePath);
+
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: " + contentType,
+                "Content-Length: " + bytes.length,
+                "",
+                responseBody
+        );
+
+        return response;
     }
 
     private String resolveContentType(String resourcePath) {
@@ -129,7 +305,7 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);
         }
 
-        if (resourcePath.equals("/login")) {
+        if (resourcePath.equals("/login") || resourcePath.equals("/register")) {
             return readResource("static" + resourcePath + ".html");
         }
 
@@ -145,15 +321,6 @@ public class Http11Processor implements Runnable, Processor {
         return path.substring(0, index);
     }
 
-    private String extractQueryString(String path) {
-        int index = path.indexOf("?");
-        if (index == -1) {
-            return "";
-        }
-
-        return path.substring(index + 1);
-    }
-
     private byte[] readResource(String resourcePath) throws IOException {
         try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
@@ -162,5 +329,14 @@ public class Http11Processor implements Runnable, Processor {
 
             return resourceStream.readAllBytes();
         }
+    }
+
+    private String emptyResponse(String statusLine) {
+        return String.join("\r\n",
+                statusLine,
+                "Content-Length: 0",
+                "",
+                ""
+        );
     }
 }

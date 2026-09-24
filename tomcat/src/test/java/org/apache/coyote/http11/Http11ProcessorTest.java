@@ -14,7 +14,12 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket(String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=test-session-id",
+                "",
+                ""));
         final var processor = new Http11Processor(socket);
 
         // when
@@ -38,6 +43,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
+                "Cookie: JSESSIONID=test-session-id",
                 "",
                 "");
 

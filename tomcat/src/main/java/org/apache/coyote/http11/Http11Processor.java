@@ -75,22 +75,20 @@ public class Http11Processor implements Runnable, Processor {
             Session session = SessionManager.getInstance().findSession(sessionId);
             HttpCookie responseCookie = null;
 
-            if (session == null) {
-                session = new Session(UUID.randomUUID().toString());
-                SessionManager.getInstance().add(session);
-                responseCookie = HttpCookie.ofJSessionId(session.getId());
-            }
-
             if (path.equals("/login") && method.equals("GET") && queryString.isEmpty()) {
-                if (getUser(session) != null) {
-                    sendRedirect(outputStream, "/index.html", responseCookie);
+                if (session != null && getUser(session) != null) {
+                    sendRedirect(outputStream, "/index.html", null);
                     return;
                 }
             }
 
             if (path.equals("/login") && (method.equals("POST") || !queryString.isEmpty())) {
-                String loginData = method.equals("POST") ? requestBody : queryString;
+                if (session == null) {
+                    session = new Session(UUID.randomUUID().toString());
+                    SessionManager.getInstance().add(session);
+                }
 
+                String loginData = method.equals("POST") ? requestBody : queryString;
                 boolean loginSuccess = login(loginData, session);
 
                 if (loginSuccess) {
@@ -98,7 +96,6 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 String redirectPath = loginSuccess ? "/index.html" : "/401.html";
-
                 sendRedirect(outputStream, redirectPath, responseCookie);
                 return;
             }

@@ -18,4 +18,8 @@ public enum HttpVersion {
             .findFirst()
             .orElseThrow();
     }
+
+    public String getName() {
+        return name;
+    }
 }

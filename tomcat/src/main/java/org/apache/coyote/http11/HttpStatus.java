@@ -22,4 +22,9 @@ public enum HttpStatus {
     public int code() {
         return code;
     }
+
+    @Override
+    public String toString() {
+        return code + " " + name;
+    }
 }

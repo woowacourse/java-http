@@ -29,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Map<RequestLine, BiFunction<HttpRequest, SessionContext, Response>> requestHandlerMap = Map.of(
+    private final Map<RequestLine, BiFunction<HttpRequest, SessionContext, HttpResponse>> requestHandlerMap = Map.of(
         RequestLine.from("GET /index HTTP/1.1"), this::handleIndex,
         RequestLine.from("GET /login HTTP/1.1"), this::handleGetLogin,
         RequestLine.from("POST /login HTTP/1.1"), this::handlePostLogin,
@@ -49,14 +49,14 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-            final BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(inputStream));
+        try (final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream()));
             final var outputStream = connection.getOutputStream()) {
+
             final HttpRequest request = readRequest(bufferedReader);
             final HttpCookie httpCookie = HttpCookie.from(request.headerValueOf("Cookie"));
 
-            Response response = dispatchRequest(request, httpCookie);
+            HttpResponse response = dispatchRequest(request, httpCookie);
             completeResponse(response);
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
@@ -78,16 +78,14 @@ public class Http11Processor implements Runnable, Processor {
         return SessionContext.created(newSession);
     }
 
-    private void completeResponse(final Response response) throws IOException {
+    private void completeResponse(final HttpResponse response) throws IOException {
         response.addBody(readStaticResource(response.filePath()));
-        response.addHeader("Content-Type", getContentType(response.filePath()) + ";charset=utf-8");
-        response.addHeader("Content-Length", String.valueOf(response.body()
-            .getBytes().length));
+        response.addEntityHeaders();
     }
 
-    private void writeResponse(final OutputStream outputStream, final Response response)
+    private void writeResponse(final OutputStream outputStream, final HttpResponse response)
         throws IOException {
-        final String message = generateResponseMessage(response);
+        final String message = response.getMessage();
 
         outputStream.write(message.getBytes());
         outputStream.flush();
@@ -129,17 +127,17 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer).trim();
     }
 
-    private Response dispatchRequest(final HttpRequest request, final HttpCookie httpCookie) {
+    private HttpResponse dispatchRequest(final HttpRequest request, final HttpCookie httpCookie) {
         final RequestLine requestLine = request.line();
         if (requestLine.isStaticResource()) {
-            return Response.ok(requestLine.path());
+            return HttpResponse.ok(requestLine.path());
         }
         if (!requestHandlerMap.containsKey(requestLine)) {
-            return Response.notFound();
+            return HttpResponse.notFound();
         }
 
         final SessionContext sessionContext = getOrCreateSession(httpCookie);
-        final Response response = requestHandlerMap.get(requestLine)
+        final HttpResponse response = requestHandlerMap.get(requestLine)
             .apply(request, sessionContext);
         if (sessionContext.created()) {
             response.addHeader("Set-Cookie", "JSESSIONID=" + sessionContext.session().id());
@@ -147,19 +145,19 @@ public class Http11Processor implements Runnable, Processor {
         return response;
     }
 
-    private Response handleIndex(final HttpRequest request, final SessionContext sessionContext) {
-        return new Response(HttpStatus.OK, "/index.html");
+    private HttpResponse handleIndex(final HttpRequest request, final SessionContext sessionContext) {
+        return HttpResponse.ok("/index.html");
     }
 
-    private Response handleGetLogin(final HttpRequest request, final SessionContext sessionContext) {
+    private HttpResponse handleGetLogin(final HttpRequest request, final SessionContext sessionContext) {
         final Session session = sessionContext.session();
         if (session != null && session.hasAttribute("user")) {
-            return Response.found("/index.html", "/index");
+            return HttpResponse.found("/index.html", "/index");
         }
-        return new Response(HttpStatus.OK, "/login.html");
+        return HttpResponse.ok("/login.html");
     }
 
-    private Response handlePostLogin(final HttpRequest request, final SessionContext sessionContext) {
+    private HttpResponse handlePostLogin(final HttpRequest request, final SessionContext sessionContext) {
         final LoginRequest loginRequest = LoginRequest.from(request.requestBody());
         final Session session = sessionContext.session();
         final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
@@ -169,17 +167,17 @@ public class Http11Processor implements Runnable, Processor {
             final User user = filteredUser.get();
             log.info("user: {}", user);
             session.addAttribute("user", user);
-            return Response.found("/index.html", "/index.html");
+            return HttpResponse.found("/index.html", "/index.html");
         }
 
-        return Response.unauthorized();
+        return HttpResponse.unauthorized();
     }
 
-    private Response handleGetRegister(final HttpRequest request, final SessionContext sessionContext) {
-        return Response.ok("/register.html");
+    private HttpResponse handleGetRegister(final HttpRequest request, final SessionContext sessionContext) {
+        return HttpResponse.ok("/register.html");
     }
 
-    private Response handlePostRegister(final HttpRequest request, final SessionContext sessionContext) {
+    private HttpResponse handlePostRegister(final HttpRequest request, final SessionContext sessionContext) {
         final RegisterRequest registerRequest = parseRegisterRequest(request.requestBody());
         final User newUser =
             new User(registerRequest.account(), registerRequest.password(),
@@ -187,7 +185,7 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(newUser);
         log.info("register: {}", newUser);
 
-        return Response.seeOther("/index.html", "/index");
+        return HttpResponse.seeOther("/index.html", "/index");
     }
 
     private RegisterRequest parseRegisterRequest(final String requestBody) {
@@ -204,19 +202,6 @@ public class Http11Processor implements Runnable, Processor {
             registerParams.get("email"));
     }
 
-    private String getContentType(final String filePath) {
-        final String defaultContentType = "text/html";
-        if (filePath.equals("/")) {
-            return defaultContentType;
-        }
-        final String prefix = "text/";
-        final int lastDotIndex = filePath.lastIndexOf(".");
-        if (lastDotIndex == 0) {
-            throw new IllegalArgumentException("유효한 타겟 uri가 아닙니다.");
-        }
-        return prefix + filePath.substring(lastDotIndex + 1);
-    }
-
     private String readStaticResource(final String filePath) throws IOException {
         if (filePath.equals("/")) {
             return "Hello world!";
@@ -229,13 +214,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
-    }
-
-    private String generateResponseMessage(final Response response) {
-        return String.join("\r\n",
-            "HTTP/1.1 " + response.httpStatusCode() + " " + response.httpStatusName() + " ",
-            response.headerString(),
-            "",
-            response.body());
     }
 }

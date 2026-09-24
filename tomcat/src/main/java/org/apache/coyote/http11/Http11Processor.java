@@ -48,87 +48,48 @@ public class Http11Processor implements Runnable, Processor {
                 response.addCookie("JSESSIONID", jsessionId);
             }
 
-            final String method = request.getMethod();
-            final String path = request.getPath();
-
-            // POST 로그인 처리
-            if ("POST".equals(method) && "/login".equals(path)) {
-                String account = request.getParameters().get("account");
-                String password = request.getParameters().get("password");
-
-                final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-                // 회원 정보가 존재하고 비밀번호가 일치하는 경우
-                if (user.isPresent() && user.get().checkPassword(password)) {
-                    // 기존 세션을 찾거나 없으면 신규 세션 생성 후 저장 (조회+생성을 원자적으로 수행)
-                    Session session = SessionManager.getOrCreate(jsessionId);
-                    if (session == null) {
-                        session = new Session(jsessionId);
-                        SessionManager.add(session);
-                    }
-                    session.setAttribute("user", user.get());
-                    response.sendRedirect("/index.html");
-                } else {
-                    response.sendRedirect("/401.html");
-                }
-                response.flush();
-                return;
-            }
-
-            // POST 회원가입 처리
-            if ("POST".equals(method) && "/register".equals(path)) {
-                String account = request.getParameters().get("account");
-                String password = request.getParameters().get("password");
-                String email = request.getParameters().get("email");
-
-                User user = new User(account, password, email);
-                InMemoryUserRepository.save(user);
-
-                response.sendRedirect("/index.html");
-                response.flush();
-                return;
-            }
-
-            // GET 로그인에 접근할 때, 세션에 user가 들어있는지 검사하여 이미 로그인했다면 index.html로 리다이렉트
-            if ("GET".equals(method) && ("/login".equals(path) || "/login.html".equals(path))) {
-                final Session session = SessionManager.findSession(jsessionId);
-                if (session != null && session.getAttribute("user") != null) {
-                    response.sendRedirect("/index.html");
-                    response.flush();
-                    return;
-                }
-            }
-
-            // GET 정적 파일 응답 (200 OK)
-            String targetPath = path;
-            if ("/".equals(targetPath)) {
-                targetPath = "/index.html";
-            } else if ("/login".equals(targetPath)) {
-                targetPath = "/login.html";
-            } else if("/register".equals(targetPath)) {
-                targetPath = "/register.html";
-            }
-            byte[] body;
-            final String contentType;
-            final var resourceUrl = getClass().getClassLoader().getResource("static" + targetPath);
-
-            if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
-                body = Files.readAllBytes(Path.of(resourceUrl.toURI()));
-                if (targetPath.endsWith(".css")) {
-                    contentType = "text/css;charset=utf-8";
-                } else if (targetPath.endsWith(".js")) {
-                    contentType = "application/javascript;charset=utf-8";
-                } else {
-                    contentType = "text/html;charset=utf-8";
-                }
+            Controller controller = RequestMapping.getController(request.getPath());
+            if(controller != null) {
+                controller.service(request, response);
             } else {
-                body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-                contentType = "text/html;charset=utf-8";
+                // 매칭된 컨트롤러가 없으면, 정적 리소스 파일처리
+                serveStaticResource(request, response);
             }
-            response.writeBody(body, contentType);
+
             response.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void serveStaticResource(HttpRequest request, HttpResponse response) throws Exception {
+        String targetPath = request.getPath();
+        if ("/".equals(targetPath)) {
+            targetPath = "/index.html";
+        } else if ("/login".equals(targetPath)) {
+            targetPath = "/login.html";
+        } else if ("/register".equals(targetPath)) {
+            targetPath = "/register.html";
+        }
+
+        byte[] body;
+        final String contentType;
+        final var resourceUrl = getClass().getClassLoader().getResource("static" + targetPath);
+
+        if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
+            body = Files.readAllBytes(Path.of(resourceUrl.toURI()));
+            if (targetPath.endsWith(".css")) {
+                contentType = "text/css;charset=utf-8";
+            } else if (targetPath.endsWith(".js")) {
+                contentType = "application/javascript;charset=utf-8";
+            } else {
+                contentType = "text/html;charset=utf-8";
+            }
+        } else {
+            body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+            contentType = "text/html;charset=utf-8";
+        }
+
+        response.writeBody(body, contentType);
     }
 }

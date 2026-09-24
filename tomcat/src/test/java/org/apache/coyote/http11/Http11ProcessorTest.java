@@ -33,6 +33,34 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expected);
     }
 
+    @DisplayName("존재하지 않는 URL에 대해 404를 반환한다.")
+    @Test
+    void redirectTo404HtmlWhenHttpMethodNotSupported() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "METHOD /index.html ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final byte[] resource = readResource("static/404.html");
+        var expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + resource.length + " \r\n" +
+                "\r\n"+
+                new String(resource);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     @Test
     void index() throws IOException {
         // given
@@ -62,7 +90,7 @@ class Http11ProcessorTest {
 
     @DisplayName("로그인에 성공하면 응답 헤더에 HTTP Status Code를 302로 반환하고 /index.html로 리다이렉트 한다.")
     @Test
-    void return302HTTPStatusCodeAndRedirectToIndexHtmlWhenLoginSucceeds() throws IOException {
+    void return302HTTPStatusCodeAndRedirectToIndexHtmlWhenLoginSucceeds() {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -78,19 +106,17 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final byte[] resource = readResource("static/index.html");
         var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+ resource.length + " \r\n" +
-                "\r\n"+
-                new String(resource);
+                "Location: /index.html \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @DisplayName("로그인에 실패하면 401.html로 리다이렉트 한다.")
     @Test
-    void redirectTo401HtmlWhenLoginFails() throws IOException {
+    void redirectTo401HtmlWhenLoginFails() {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /login?account=gugu&password=false HTTP/1.1 ",
@@ -106,12 +132,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final byte[] resource = readResource("static/401.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resource.length + " \r\n" +
-                "\r\n"+
-                new String(resource);
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /401.html \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -136,6 +160,64 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/register.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+ resource.length + " \r\n" +
+                "\r\n"+
+                new String(resource);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("회원가입을 완료하면 /index.html로 리다이렉트 한다.")
+    @Test
+    void redirectToIndexHtmlWhenRegisterFinished() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 56 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                "account=tester&email=tester@gmail.com&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("회원가입에 실패하면 상태코드 400을 반환한다.")
+    @Test
+    void return400HTTPStatusCodeAndRedirectToRegisterHtmlWhenRegisterFails() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 56 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                "account=tester&email=tester@gmail.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final byte[] resource = readResource("static/register.html");
+        var expected = "HTTP/1.1 400 Bad Request \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: "+ resource.length + " \r\n" +
                 "\r\n"+

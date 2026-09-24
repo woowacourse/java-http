@@ -1,5 +1,6 @@
 package org.apache.catalina;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -11,12 +12,16 @@ public final class StaticResources {
 
     private StaticResources() {}
 
-    public static Optional<Path> find(String path) throws URISyntaxException {
+    public static Optional<StaticResource> find(String path) throws URISyntaxException, IOException {
         URL resourceUrl = StaticResources.class.getClassLoader().getResource(STATIC_RESOURCE_PREFIX + path);
         if (resourceUrl == null) {
             return Optional.empty();
         }
-        return Optional.of(Path.of(resourceUrl.toURI()))
-                .filter(Files::isRegularFile);
+
+        Path resourcePath = Path.of(resourceUrl.toURI());
+        if (!Files.isRegularFile(resourcePath)) {
+            return Optional.empty();
+        }
+        return Optional.of(StaticResource.from(resourcePath));
     }
 }

@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String COOKIE_HEADER = "Cookie";
     private static final String SET_COOKIE_HEADER = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER_ATTRIBUTE = "user";
 
     private final Socket connection;
 
@@ -77,6 +80,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> headers = readHeaders(reader);
             String requestBody = readBody(reader, headers);
             HttpCookie cookie = HttpCookie.from(headers.get(COOKIE_HEADER));
+            Session session = findSession(cookie);
 
             String[] uriParts = requestUri.split("\\?");
             String path = uriParts[0];
@@ -86,10 +90,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (path.equals(LOGIN_REQUEST) && httpMethod.equals(POST_METHOD)) {
-                writeResponse(outputStream, handleLogin(requestBody), cookie);
+                writeResponse(outputStream, handleLogin(requestBody, session), cookie);
                 return;
             }
             if (path.equals(LOGIN_REQUEST) && httpMethod.equals(GET_METHOD)) {
+                if (isLoggedIn(session)) {
+                    writeResponse(outputStream, HttpResponse.redirect(INDEX_PAGE), cookie);
+                    return;
+                }
                 path = LOGIN_PAGE;
             }
 
@@ -114,14 +122,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handleLogin(String requestBody) {
+    private HttpResponse handleLogin(String requestBody, Session session) {
         Map<String, String> params = parseFormData(requestBody);
         Optional<User> user = login(params);
 
-        if (user.isPresent()) {
+        if (user.isEmpty()) {
+            return HttpResponse.redirect(UNAUTHORIZED_PAGE);
+        }
+
+        if (session != null) {
+            session.setAttribute(USER_ATTRIBUTE, user.get());
             return HttpResponse.redirect(INDEX_PAGE);
         }
-        return HttpResponse.redirect(UNAUTHORIZED_PAGE);
+
+        Session newSession = new Session(UUID.randomUUID().toString());
+        newSession.setAttribute(USER_ATTRIBUTE, user.get());
+        SessionManager.getInstance().add(newSession);
+
+        HttpResponse response = HttpResponse.redirect(INDEX_PAGE);
+        response.addHeader(SET_COOKIE_HEADER, JSESSIONID + "=" + newSession.getId());
+        return response;
     }
 
     private HttpResponse handleRegister(String requestBody) {
@@ -160,7 +180,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeResponse(OutputStream outputStream, HttpResponse response, HttpCookie cookie) throws IOException {
         if (!cookie.hasJSessionId()) {
-            response.addHeader(SET_COOKIE_HEADER, JSESSIONID + "=" + UUID.randomUUID());
+            Session session = new Session(UUID.randomUUID().toString());
+            SessionManager.getInstance().add(session);
+            response.addHeader(SET_COOKIE_HEADER, JSESSIONID + "=" + session.getId());
         }
 
         outputStream.write(response.toHttpMessage().getBytes());
@@ -195,6 +217,16 @@ public class Http11Processor implements Runnable, Processor {
         reader.read(buffer, 0, length);
 
         return new String(buffer);
+    }
+
+    private Session findSession(HttpCookie cookie) {
+        return cookie.getValue(JSESSIONID)
+                .map(id -> SessionManager.getInstance().findSession(id))
+                .orElse(null);
+    }
+
+    private boolean isLoggedIn(Session session) {
+        return session != null && session.getAttribute(USER_ATTRIBUTE) != null;
     }
 
     private Map<String, String> parseFormData(String formData) {

@@ -7,6 +7,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,35 +163,26 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeResponse(final OutputStream outputStream, final byte[] bytes, String contentType, final String sessionId) throws IOException {
-        final var response = new StringBuilder();
-        response.append("HTTP/1.1 200 OK \r\n");
+        final var response = new HttpResponse(200, "OK", bytes);
 
         if (sessionId != null) {
-            response.append("Set-Cookie: JSESSIONID=").append(sessionId).append("\r\n");
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         }
 
-        response.append("Content-Type: ").append(contentType).append(" \r\n");
-        response.append("Content-Length: ").append(bytes.length).append(" \r\n");
-        response.append("\r\n");
-
-        outputStream.write(response.toString().getBytes());
-        outputStream.write(bytes);
-        outputStream.flush();
+        response.addHeader("Content-Type", contentType);
+        response.addHeader("Content-Length", String.valueOf(bytes.length));
+        response.writeTo(outputStream);
     }
 
     private void writeRedirectResponse(final OutputStream outputStream, final String location, final String sessionId) throws IOException {
-        final var response = new StringBuilder();
-        response.append("HTTP/1.1 302 Found \r\n");
-        response.append("Location: ").append(location).append("\r\n");
+        final var response = new HttpResponse(302, "Found", new byte[0]);
+        response.addHeader("Location", location);
 
         if (sessionId != null) {
-            response.append("Set-Cookie: JSESSIONID=").append(sessionId).append("\r\n");
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         }
 
-        response.append("\r\n");
-
-        outputStream.write(response.toString().getBytes());
-        outputStream.flush();
+        response.writeTo(outputStream);
     }
 
     private String determineContentType(final String path) {

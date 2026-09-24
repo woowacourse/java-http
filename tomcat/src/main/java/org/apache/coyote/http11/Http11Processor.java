@@ -1,17 +1,18 @@
 package org.apache.coyote.http11;
 
-import static java.nio.charset.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,22 +21,21 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
 
-    // 요청 필드
+    // 요청
     private String method;
     private String path;
+    private String requestBody;
     private final Map<String, String> queryParameters = new HashMap<>();
+    private final Map<String, String> formParameters = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
 
-    // 응답 필드
+    // 응답
     private byte[] httpResponse;
     private final StringBuilder bodyBuilder = new StringBuilder();
 
@@ -58,11 +58,15 @@ public class Http11Processor implements Runnable, Processor {
             parseHeaders(reader);
 
             if (method.equals("GET")) {
-                handleGetRequest(outputStream);
+                handleGetRequest();
+                writeResponse(outputStream);
                 return;
             }
             if (method.equals("POST")) {
-//                handlePostRequest(outputStream);
+                readRequestBody(reader);
+                formParameters.putAll(parseParameters(requestBody));
+                handlePostRequest();
+                writeResponse(outputStream);
             }
 
         } catch (IOException | UncheckedServletException e) {
@@ -70,22 +74,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleGetRequest(OutputStream outputStream) throws IOException {
-        if (path.equals("/login")) {
-            logLoginResult(queryParameters);
-            serveStaticFile( path + ".html");
-            writeResponse(outputStream);
-            return;
+    private void readRequestBody(BufferedReader reader) throws IOException {
+        String value = headers.get("Content-Length:");
+        if (value == null) {
+            throw new IOException("Content-Length header is missing");
         }
-        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
-            serveStaticFile(path);
-            writeResponse(outputStream);
-            return;
+
+        int length = Integer.parseInt(value);
+        char[] body = new char[length];
+        int offset = 0;
+
+        while (offset < length) {
+            int count = reader.read(body, offset, length - offset);
+            if (count == -1) {
+                throw new IOException("요청 바디가 Content-Length보다 짧습니다.");
+            }
+            offset += count;
         }
-        if (path.equals("/")) {
-            serverHomePage();
-            writeResponse(outputStream);
-        }
+
+        requestBody = new String(body);
     }
 
     private void parseRequestLine(BufferedReader reader) throws IOException {
@@ -104,18 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         path = pathParts[0];
 
         if (pathParts.length > 1) {
-            parseQueryParameters(pathParts[1]);
-        }
-    }
-
-    private void parseQueryParameters(String queryString) {
-        for (String param : queryString.split("&")) {
-            if (param.isEmpty()) continue;
-
-            String[] keyValue = param.split("=", 2);
-            String key = URLDecoder.decode(keyValue[0], UTF_8);
-            String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], UTF_8) : "";
-            queryParameters.put(key, value);
+            queryParameters.putAll(parseParameters(pathParts[1]));
         }
     }
 
@@ -127,20 +123,66 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logLoginResult(Map<String, String> queryParameters) {
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
-
-        if (account == null || password == null) {
+    private void handleGetRequest() throws IOException {
+        if (path.equals("/login")) {
+            serveStaticFile(path + ".html");
             return;
         }
+        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
+            serveStaticFile(path);
+            return;
+        }
+        if (path.equals("/")) {
+            serverHomePage();
+        }
+    }
 
-        InMemoryUserRepository.findByAccount(account)
+    private void handlePostRequest() throws IOException {
+        if (path.equals("/login")) {
+            loginResult();
+        }
+    }
+
+    private Map<String, String> parseParameters(String queryString) {
+        Map<String, String> parameters = new HashMap<>();
+        for (String param : queryString.split("&")) {
+            if (param.isEmpty()) {
+                continue;
+            }
+
+            String[] keyValue = param.split("=", 2);
+            String key = URLDecoder.decode(keyValue[0], UTF_8);
+            String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], UTF_8) : "";
+            parameters.put(key, value);
+        }
+
+        return parameters;
+    }
+
+    private void loginResult() {
+        String account = formParameters.get("account");
+        String password = formParameters.get("password");
+
+        boolean loginSucceeded = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(
-                        user -> log.info("user: {}", user),
-                        () -> log.info("로그인 실패: account={}", account)
-                );
+                .isPresent();
+
+        String location = "/401.html";
+        if (loginSucceeded) {
+            location = "/index.html";
+        }
+
+        httpResponse = contentRedirectResponse(location).getBytes(UTF_8);
+    }
+
+    private String contentRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location + " ",
+                "Content-Length: 0 ",
+                "",
+                ""
+        );
     }
 
     private void serveStaticFile(String requestUri) throws IOException {

@@ -16,6 +16,8 @@ import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.catalina.connector.CatalinaHttpHandler;
+import org.apache.coyote.HttpHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -23,12 +25,13 @@ class Http11ProcessorTest {
 
     private final Manager sessionManager = SessionManager.getInstance();
     private final RequestMapping requestMapping = RequestMappingFactory.create(sessionManager);
+    private final HttpHandler httpHandler = new CatalinaHttpHandler(sessionManager, requestMapping);
 
     @Test
     void process() throws IOException {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final var processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -58,7 +61,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -79,7 +82,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -99,7 +102,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -120,7 +123,7 @@ class Http11ProcessorTest {
     @Test
     void css_uses_ok_response_with_requested_resource() throws IOException {
         final var socket = new StubSocket("GET /css/styles.css HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
-        final var processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final var processor = new Http11Processor(socket, httpHandler);
 
         processor.process(socket);
 
@@ -147,7 +150,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -180,7 +183,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -213,7 +216,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=wrong");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -246,7 +249,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);
@@ -272,7 +275,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, httpHandler);
 
         // when
         processor.process(socket);

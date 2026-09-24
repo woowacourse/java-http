@@ -1,22 +1,16 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.api.Controller;
-import com.techcourse.api.RequestMapping;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Session;
-import org.apache.catalina.StaticResourceLoader;
+import org.apache.coyote.HttpHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
-import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,17 +19,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Manager sessionManager;
-    private final RequestMapping requestMapping;
+    private final HttpHandler httpHandler;
 
     public Http11Processor(
             final Socket connection,
-            final Manager sessionManager,
-            final RequestMapping requestMapping
+            final HttpHandler httpHandler
     ) {
         this.connection = connection;
-        this.sessionManager = sessionManager;
-        this.requestMapping = requestMapping;
+        this.httpHandler = httpHandler;
     }
 
     @Override
@@ -53,40 +44,13 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = readHttpRequest(inputStream);
             final HttpResponse response = new HttpResponse();
 
-            service(request, response);
-            addSessionCookieIfNecessary(request, response);
+            httpHandler.handle(request, response);
 
             outputStream.write(response.getResponse());
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void service(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Controller controller = requestMapping.getController(request.getMethod(), request.getPath());
-        if (controller != null) {
-            controller.service(request, response);
-            return;
-        }
-
-        if (request.isGet()) {
-            response.setStatus(HttpStatus.OK);
-            response.setContentType(ContentType.fromResourceName(request.getPath()));
-            response.setBody(StaticResourceLoader.read(request.getPath()));
-            return;
-        }
-
-        throw new UnsupportedOperationException("지원하지 않는 요청입니다: " + request.getMethod() + " " + request.getPath());
-    }
-
-    private void addSessionCookieIfNecessary(final HttpRequest request, final HttpResponse response) {
-        if (request.getSessionId() != null || response.containsHeader("Set-Cookie")) {
-            return;
-        }
-
-        final Session session = sessionManager.createSession(null);
-        response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     private static HttpRequest readHttpRequest(final BufferedInputStream inputStream) throws IOException {

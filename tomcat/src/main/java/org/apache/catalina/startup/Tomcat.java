@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.connector.CatalinaHttpHandler;
+import org.apache.coyote.HttpHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +18,9 @@ public class Tomcat {
     public void start() {
         final Manager sessionManager = SessionManager.getInstance();
         final RequestMapping requestMapping = RequestMappingFactory.create(sessionManager);
+        final HttpHandler httpHandler = new CatalinaHttpHandler(sessionManager, requestMapping);
 
-        final Connector connector = new Connector(sessionManager, requestMapping);
+        final Connector connector = new Connector(httpHandler);
         connector.start();
 
         try {

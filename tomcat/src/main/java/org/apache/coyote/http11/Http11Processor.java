@@ -115,9 +115,14 @@ public class Http11Processor implements Runnable, Processor {
                 Map<String, String> params = parseParams(requestBody);
 
                 if (path.equals("static/register.html")) {
-                    User user = new User(params.get("account"), params.get("password"), params.get("email"));
-                    InMemoryUserRepository.save(user);
-                    httpStatus = HttpStatus.FOUND;
+                    String account = params.get("account");
+                    if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+                        httpStatus = HttpStatus.CONFLICT;
+                    } else {
+                        User user = new User(account, params.get("password"), params.get("email"));
+                        InMemoryUserRepository.save(user);
+                        httpStatus = HttpStatus.FOUND;
+                    }
                 }
 
                 if (path.equals("static/login.html")) {
@@ -145,7 +150,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final Path filePath = getPath(path);
-            final String responseBody = findResponseBody(filePath);
+            final String responseBody = httpStatus == HttpStatus.CONFLICT
+                    ? "이미 존재하는 아이디입니다."
+                    : findResponseBody(filePath);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
@@ -453,7 +460,8 @@ public class Http11Processor implements Runnable, Processor {
 
         OK(200, "OK"),
         FOUND(302, "Found"),
-        UNAUTHORIZED(401, "Unauthorized");
+        UNAUTHORIZED(401, "Unauthorized"),
+        CONFLICT(409, "Conflict");
 
         int value;
         String message;

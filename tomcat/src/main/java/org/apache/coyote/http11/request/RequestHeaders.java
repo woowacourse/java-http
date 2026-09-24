@@ -66,6 +66,18 @@ public class RequestHeaders {
         return values.getFirst();
     }
 
+    public List<String> getHeaders(final String name) {
+        final List<String> values = headers.get(
+                name.toLowerCase(Locale.ROOT)
+        );
+
+        if (values == null) {
+            return List.of();
+        }
+
+        return List.copyOf(values);
+    }
+
     public int getContentLength() {
         final List<String> values = headers.get(CONTENT_LENGTH);
 

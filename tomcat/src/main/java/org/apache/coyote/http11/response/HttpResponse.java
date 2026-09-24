@@ -13,31 +13,16 @@ import org.apache.coyote.http11.Headers;
 public class HttpResponse {
 
     private final String protocolVersion = "HTTP/1.1";
-    private final HttpStatus httpStatus;
-    private final ContentType contentType;
-    private final Headers headers;
-    private final String responseBody;
+    private final Headers headers = new Headers();
+    private HttpStatus httpStatus = HttpStatus.OK;
+    private ContentType contentType = ContentType.HTML;
+    private String responseBody = "";
 
-    public HttpResponse(HttpStatus httpStatus, ContentType contentType, String responseBody) {
-        this(httpStatus, contentType, new Headers(), responseBody);
+    public HttpResponse() {
     }
 
-    public HttpResponse(HttpStatus httpStatus, ContentType contentType, Headers headers, String responseBody) {
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.headers = headers;
-        this.responseBody = responseBody;
-    }
-
-    public static HttpResponse ok(final String name) throws IOException {
-        return new HttpResponse(
-                HttpStatus.OK,
-                ContentType.HTML,
-                Files.readString(resolveResource(name).toPath())
-        );
-    }
-
-    private static File resolveResource(final String name) {
+    // TODO: 리소스해석 책임 분리
+    public static File resolveResource(final String name) {
         final String resourceName = "static" + name;
         final URL resource = Objects.requireNonNull(
                 HttpResponse.class.getClassLoader().getResource(resourceName),
@@ -46,11 +31,31 @@ public class HttpResponse {
         return new File(resource.getFile());
     }
 
-    public void addHeader(final String name, final String value) {
+    public void setHeader(final String name, final String value) {
         headers.add(name, value);
     }
 
-    public byte[] getBytes() {
+    public void setStatus(final HttpStatus httpStatus) {
+        this.httpStatus = Objects.requireNonNull(httpStatus, "HTTP 상태는 null일 수 없습니다.");
+    }
+
+    public void setContentType(final ContentType contentType) {
+        this.contentType = Objects.requireNonNull(contentType, "Content-Type은 null일 수 없습니다.");
+    }
+
+    public void setBody(final File resource) throws IOException {
+        setBody(Files.readString(Objects.requireNonNull(resource, "본문 파일은 null일 수 없습니다.").toPath()));
+    }
+
+    public void setBody(final String responseBody) {
+        this.responseBody = Objects.requireNonNull(responseBody, "응답 본문은 null일 수 없습니다.");
+    }
+
+    public boolean containsHeader(final String name) {
+        return headers.contains(name);
+    }
+
+    public byte[] getResponse() {
         final List<String> responseLines = new ArrayList<>();
         responseLines.add(protocolVersion + " " + httpStatus.statusCode() + " " + httpStatus.name());
         responseLines.add("Content-Type: " + contentType.value() + ";charset=utf-8");

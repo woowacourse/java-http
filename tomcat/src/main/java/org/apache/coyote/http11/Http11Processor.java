@@ -1,21 +1,15 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.api.Controller;
+import com.techcourse.api.RequestMapping;
+import com.techcourse.api.controller.LoginController;
+import com.techcourse.api.controller.RegisterController;
+import com.techcourse.api.controller.RootController;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -23,7 +17,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +29,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Manager sessionManager;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection, final Manager sessionManager) {
         this.connection = connection;
         this.sessionManager = sessionManager;
+        this.requestMapping = createRequestMapping(sessionManager);
     }
 
     @Override
@@ -52,165 +50,60 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = readHttpRequest(inputStream);
-            final Session session = findSession(request.getSessionId());
+            final HttpResponse response = new HttpResponse();
 
-            String path = request.getPath();
-            String code = "200";
-            String status = "OK";
+            service(request, response);
+            addSessionCookieIfNecessary(request, response);
 
-            if (request.isPost()) {
-                final Map<String, String> parameters = parseQueryString(request.getBody());
-                if ("/register".equals(path)) {
-                    register(parameters);
-                    path = "/index";
-                    code = "200";
-                    status = "OK";
-                } else if ("/login".equals(path)) {
-                    if (login(parameters, session)) {
-                        path = "/index";
-                        code = "302";
-                        status = "FOUND";
-                    } else {
-                        path = "/401";
-                        code = "401";
-                        status = "UNAUTHORIZED";
-                    }
-                }
-                path += ".html";
-            }
-            if (request.isGet()) {
-                if ("/login".equals(path) && session.getAttribute("user") != null) {
-                    path = "/";
-                    code = "302";
-                    status = "FOUND";
-                }
-                path = resolveGetPath(path);
-            }
-
-            if ("200".equals(code) && "/index.html".equals(path)) {
-                final HttpResponse response = HttpResponse.ok("/index.html");
-                if (request.getSessionId() == null) {
-                    response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-                }
-                outputStream.write(response.getBytes());
-            } else {
-                final String response = makeResponse(path, code, status, session.getId(), request.getSessionId());
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            }
+            outputStream.write(response.getResponse());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static String resolveGetPath(final String requestPath) {
-        return switch (requestPath) {
-            case "/" -> "/index.html";
-            case "/login" -> "/login.html";
-            case "/register" -> "/register.html";
-            default -> requestPath;
-        };
-    }
-
-    private Session findSession(final String sessionId) throws IOException {
-        if (sessionId == null) {
-            Session session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
-            return session;
+    private void service(final HttpRequest request, final HttpResponse response) throws Exception {
+        final Controller controller = requestMapping.getController(request.getMethod(), request.getPath());
+        if (controller != null) {
+            controller.service(request, response);
+            return;
         }
 
-        Session session = sessionManager.findSession(sessionId);
-        if (session == null) {
-            session = new Session(sessionId);
-            sessionManager.add(session);
-            return session;
+        if (request.isGet()) {
+            response.setStatus(HttpStatus.OK);
+            response.setContentType(ContentType.fromResourceName(request.getPath()));
+            response.setBody(HttpResponse.resolveResource(request.getPath()));
+            return;
         }
 
-        return session;
+        throw new UnsupportedOperationException("지원하지 않는 요청입니다: " + request.getMethod() + " " + request.getPath());
     }
 
-    private String makeResponse(
-            final String path,
-            final String code,
-            final String status,
-            final String sessionId,
-            final String sessionIdFromCookie
-    ) throws IOException {
-        final String responseBody = getResponseBody(path);
-        final String contentType = resolveContentType(path);
-
-        final List<String> responseLines = new ArrayList<>();
-        responseLines.add("HTTP/1.1 " + code + " " + status);
-        responseLines.add("Content-Type: " + contentType + ";charset=utf-8");
-        responseLines.add("Content-Length: " + responseBody.getBytes().length);
-        if (sessionIdFromCookie == null) {
-            responseLines.add("Set-Cookie: JSESSIONID=" + sessionId);
-        }
-        responseLines.add("");
-        responseLines.add(responseBody);
-
-        return String.join("\r\n", responseLines);
-    }
-
-    private String getResponseBody(final String requestPath) throws IOException {
-        final String resourceName = "static" + requestPath;
-        final String resourcePath = Objects.requireNonNull(
-                getClass().getClassLoader().getResource(resourceName),
-                "리소스를 찾을 수 없음: " + resourceName
-        ).getPath();
-
-        return Files.readString(Path.of(resourcePath));
-    }
-
-    private String resolveContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        return "text/html";
-    }
-
-    private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> parameters = new HashMap<>();
-        if (queryString.isBlank()) {
-            return parameters;
+    private void addSessionCookieIfNecessary(final HttpRequest request, final HttpResponse response) {
+        if (request.getSessionId() != null || response.containsHeader("Set-Cookie")) {
+            return;
         }
 
-        for (String pair : queryString.split("&")) {
-            final String[] nameAndValue = pair.split("=", 2);
-            if (nameAndValue.length != 2) {
-                continue;
-            }
-            parameters.put(nameAndValue[0].trim(), nameAndValue[1].trim());
-        }
-        return parameters;
+        // TODO: 세션 생성 책임을 processor로부터 분리
+        final Session session = new Session(UUID.randomUUID().toString());
+        sessionManager.add(session);
+        response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
-    private boolean login(final Map<String, String> parameters, final Session session) {
-        final String account = parameters.get("account");
-        final String password = parameters.get("password");
+    private static RequestMapping createRequestMapping(final Manager sessionManager) {
+        final RequestMapping requestMapping = new RequestMapping();
 
-        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
-        if (loginUser.isEmpty()) {
-            return false;
-        }
+        final RootController rootController = new RootController();
+        final LoginController loginController = new LoginController(sessionManager);
+        final RegisterController registerController = new RegisterController();
 
-        final User user = loginUser.get();
-        log.info("로그인 성공: {}", user);
-        session.setAttribute("user", user);
-
-        return true;
-    }
-
-    private void register(final Map<String, String> parameters) {
-        final User user = new User(
-                parameters.get("account"),
-                parameters.get("password"),
-                parameters.get("email")
-        );
-
-        InMemoryUserRepository.save(user);
-        log.info("회원가입 성공: {}", user);
+        requestMapping.add("GET", "/", rootController);
+        requestMapping.add("GET", "/index.html", rootController);
+        requestMapping.add("GET", "/login", loginController);
+        requestMapping.add("POST", "/login", loginController);
+        requestMapping.add("GET", "/register", registerController);
+        requestMapping.add("POST", "/register", registerController);
+        return requestMapping;
     }
 
     private static HttpRequest readHttpRequest(final BufferedInputStream inputStream) throws IOException {

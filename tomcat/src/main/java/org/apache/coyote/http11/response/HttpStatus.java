@@ -2,7 +2,9 @@ package org.apache.coyote.http11.response;
 
 public enum HttpStatus {
 
-    OK(200);
+    OK(200),
+    FOUND(302),
+    UNAUTHORIZED(401);
 
     private final int statusCode;
 

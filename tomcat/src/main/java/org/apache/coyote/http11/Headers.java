@@ -26,6 +26,10 @@ public class Headers {
         return Map.copyOf(headers);
     }
 
+    public boolean contains(final String name) {
+        return headers.containsKey(name);
+    }
+
     public int contentLength() {
         final String length = headers.get("Content-Length");
         if (length == null) {

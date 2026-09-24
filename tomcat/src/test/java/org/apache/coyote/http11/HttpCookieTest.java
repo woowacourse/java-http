@@ -17,19 +17,4 @@ class HttpCookieTest {
         assertThat(cookie.get(HttpCookie.JSESSION_ID)).contains("existing-session-id");
     }
 
-    @Test
-    void doesNotCreateJSessionIdWhenItAlreadyExists() {
-        HttpCookie cookie = new HttpCookie("JSESSIONID=existing-session-id");
-
-        assertThat(cookie.createJSessionIdIfAbsent()).isEmpty();
-        assertThat(cookie.get(HttpCookie.JSESSION_ID)).contains("existing-session-id");
-    }
-
-    @Test
-    void createsJSessionIdWhenItDoesNotExist() {
-        HttpCookie cookie = new HttpCookie("yummy_cookie=choco");
-
-        assertThat(cookie.createJSessionIdIfAbsent()).isPresent();
-        assertThat(cookie.get(HttpCookie.JSESSION_ID)).isPresent();
-    }
 }

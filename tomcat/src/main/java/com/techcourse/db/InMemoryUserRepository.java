@@ -15,8 +15,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static void save(User user) {
-        database.put(user.getAccount(), user);
+    public static boolean save(User user) {
+        return database.putIfAbsent(user.getAccount(), user) == null;
     }
 
     public static Optional<User> findByAccount(String account) {

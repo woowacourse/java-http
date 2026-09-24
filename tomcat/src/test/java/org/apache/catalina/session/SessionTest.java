@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +24,7 @@ class SessionTest {
         SessionManager manager = SessionManager.getInstance();
         Session session = new Session(UUID.randomUUID().toString());
         manager.add(session);
+        session.setAttribute("name", "gugu");
 
         session.invalidate();
 

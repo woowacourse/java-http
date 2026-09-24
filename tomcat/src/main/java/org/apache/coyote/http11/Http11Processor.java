@@ -9,6 +9,8 @@ import com.techcourse.model.User;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -148,7 +150,14 @@ public class Http11Processor implements Runnable, Processor {
             if (keyValue.length != 2) {
                 continue;
             }
-            partsMap.put(keyValue[0], keyValue[1]);
+
+            String key = keyValue[0].trim();
+            String value = keyValue[1].trim();
+
+            String encodedKey = URLDecoder.decode(key, "UTF-8");
+            String encodedValue = URLDecoder.decode(value, "UTF-8");
+
+            partsMap.put(encodedKey, encodedValue);
         }
         return partsMap;
     }
@@ -379,7 +388,7 @@ public class Http11Processor implements Runnable, Processor {
             String queryString = targetParts[1];
 
             // 본격 쿼리 파싱
-            String[] parameters = queryString.split("&");
+            String[] parameters = queryString.split("&", -1);
             for (String parameter : parameters) {
                 String[] parameterParts = parameter.split("=", 2);
                 String parameterName = parameterParts[0];

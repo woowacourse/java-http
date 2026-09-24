@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionContext;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -13,10 +16,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +101,15 @@ public class Http11Processor implements Runnable, Processor {
                 setCookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "\r\n";
             }
 
+            SessionManager sessionManager = SessionManager.getInstance();
+            HttpSession session = sessionManager.findSession(cookie.get("JSESSIONID"));
+
             HttpStatus httpStatus = HttpStatus.OK;
+            if (method.equals("GET") && path.equals("static/login.html")
+                    && session != null && session.getAttribute("user") != null) {
+                httpStatus = HttpStatus.FOUND;
+            }
+
             if (method.equals("POST")) {
                 String requestBody = readRequestBody(bufferedReader, contentLength);
                 Map<String, String> params = parseParams(requestBody);
@@ -106,7 +121,12 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if (path.equals("static/login.html")) {
-                    httpStatus = findUser(params);
+                    Session loginSession = new Session(UUID.randomUUID().toString());
+                    httpStatus = findUser(params, loginSession);
+                    if (httpStatus == HttpStatus.FOUND) {
+                        sessionManager.add(loginSession);
+                        setCookieHeader = "Set-Cookie: JSESSIONID=" + loginSession.getId() + "\r\n";
+                    }
                 }
             }
 
@@ -215,7 +235,7 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(filePath);
     }
 
-    private HttpStatus findUser(Map<String, String> queryParams) {
+    private HttpStatus findUser(Map<String, String> queryParams, Session session) {
         if (queryParams.isEmpty()) {
             return HttpStatus.OK;
         }
@@ -239,6 +259,7 @@ public class Http11Processor implements Runnable, Processor {
 
         User foundUser = user.get();
         if (checkPassword(queryParams, foundUser)) {
+            session.setAttribute("user", foundUser);
             log.info("user: {}", foundUser);
             return HttpStatus.FOUND;
         }
@@ -253,6 +274,161 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return true;
+    }
+
+    public static class Session implements HttpSession {
+
+        private final String id;
+        private final Map<String, Object> values = new HashMap<>();
+        private boolean valid = true;
+
+        public Session(final String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public void setAttribute(String name, Object value) {
+            checkValid();
+            if (value == null) {
+                removeAttribute(name);
+                return;
+            }
+            values.put(name, value);
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            checkValid();
+            return values.get(name);
+        }
+
+        @Override
+        public void removeAttribute(String name) {
+            checkValid();
+            values.remove(name);
+        }
+
+        @Override
+        public void invalidate() {
+            checkValid();
+            SessionManager.getInstance().remove(id);
+            values.clear();
+            valid = false;
+        }
+
+        private void checkValid() {
+            if (!valid) {
+                throw new IllegalStateException("무효화된 세션입니다.");
+            }
+        }
+
+        @Override
+        public Enumeration<String> getAttributeNames() {
+            checkValid();
+            return Collections.enumeration(values.keySet());
+        }
+
+        @Override
+        @Deprecated
+        public Object getValue(String name) {
+            return getAttribute(name);
+        }
+
+        @Override
+        @Deprecated
+        public String[] getValueNames() {
+            checkValid();
+            return values.keySet().toArray(new String[0]);
+        }
+
+        @Override
+        @Deprecated
+        public void putValue(String name, Object value) {
+            setAttribute(name, value);
+        }
+
+        @Override
+        @Deprecated
+        public void removeValue(String name) {
+            removeAttribute(name);
+        }
+
+        // 아래 HttpSession API는 이번 로그인 미션에서 사용하지 않는다.
+        @Override
+        public long getCreationTime() {
+            throw new UnsupportedOperationException("세션 생성 시간은 아직 지원하지 않습니다.");
+        }
+
+        @Override
+        public long getLastAccessedTime() {
+            throw new UnsupportedOperationException("세션 접근 시간은 아직 지원하지 않습니다.");
+        }
+
+        @Override
+        public ServletContext getServletContext() {
+            throw new UnsupportedOperationException("ServletContext는 아직 지원하지 않습니다.");
+        }
+
+        @Override
+        public void setMaxInactiveInterval(int interval) {
+            throw new UnsupportedOperationException("세션 만료 시간은 아직 지원하지 않습니다.");
+        }
+
+        @Override
+        public int getMaxInactiveInterval() {
+            throw new UnsupportedOperationException("세션 만료 시간은 아직 지원하지 않습니다.");
+        }
+
+        @Override
+        @Deprecated
+        public HttpSessionContext getSessionContext() {
+            throw new UnsupportedOperationException("HttpSessionContext는 지원하지 않습니다.");
+        }
+
+        @Override
+        public boolean isNew() {
+            throw new UnsupportedOperationException("신규 세션 여부는 아직 지원하지 않습니다.");
+        }
+    }
+
+    public static class SessionManager implements Manager {
+
+        private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+        private static final SessionManager INSTANCE = new SessionManager();
+
+        private SessionManager() {
+        }
+
+        public static SessionManager getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public void add(final HttpSession session) {
+            SESSIONS.put(session.getId(), session);
+        }
+
+        @Override
+        public HttpSession findSession(final String id) {
+            if (id == null) {
+                return null;
+            }
+            return SESSIONS.get(id);
+        }
+
+        @Override
+        public void remove(final HttpSession session) {
+            remove(session.getId());
+        }
+
+        public void remove(final String id) {
+            SESSIONS.remove(id);
+        }
     }
 
     public static class HttpCookie {

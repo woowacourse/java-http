@@ -2,20 +2,19 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class HttpRequest {
-    private static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final RequestLine requestLine;
     private final RequestHeaders headers;
-    private final Map<String, String> parameters;
+    private final RequestParameters parameters;
     private final String body;
 
     private HttpRequest(final RequestLine requestLine, final RequestHeaders headers,
-                        final Map<String, String> parameters, final String body) {
+                        final RequestParameters parameters, final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.parameters = parameters;
@@ -30,12 +29,10 @@ public class HttpRequest {
         final RequestLine requestLine = RequestLine.from(startLine);
         final RequestHeaders headers = RequestHeaders.from(readHeaderLines(reader));
         final String body = readBody(reader, headers.getContentLength());
+        final RequestParameters parameters = RequestParameters.of(
+                requestLine.getQueryString(), headers.getHeader("Content-Type"), body);
 
-        return Optional.of(new HttpRequest(
-                requestLine,
-                headers,
-                parseParameters(requestLine.getQueryString(), headers.getHeader("Content-Type"), body),
-                body));
+        return Optional.of(new HttpRequest(requestLine, headers, parameters, body));
     }
 
     private static List<String> readHeaderLines(final BufferedReader reader) throws IOException {
@@ -61,49 +58,6 @@ public class HttpRequest {
         return new String(buffer, 0, total);
     }
 
-    private static Map<String, String> parseParameters(
-            final String queryString, final String contentType, final String body) {
-
-        final Map<String, String> parameters = new HashMap<>();
-        if (isFormUrlEncoded(contentType)) {
-            parameters.putAll(parseFormData(body));
-        }
-        parameters.putAll(parseFormData(queryString));
-        return parameters;
-    }
-
-    private static Map<String, String> parseFormData(final String formData) {
-        final Map<String, String> parameters = new HashMap<>();
-        if (formData.isEmpty()) {
-            return parameters;
-        }
-        for (final String pair : formData.split("&")) {
-            putParameter(parameters, pair);
-        }
-        return parameters;
-    }
-
-    private static boolean isFormUrlEncoded(final String contentType) {
-        return contentType != null && contentType.startsWith(FORM_URLENCODED);
-    }
-
-    private static void putParameter(final Map<String, String> parameters, final String pair) {
-        final int idx = pair.indexOf("=");
-        if (idx == -1) {
-            parameters.put(decode(pair), "");
-            return;
-        }
-        parameters.put(decode(pair.substring(0, idx)), decode(pair.substring(idx + 1)));
-    }
-
-    private static String decode(final String value) {
-        try {
-            return URLDecoder.decode(value, StandardCharsets.UTF_8);
-        } catch (IllegalArgumentException e) {
-            throw new HttpRequestParseException("URL 인코딩 형식이 잘못되었습니다.");
-        }
-    }
-
     public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
@@ -121,7 +75,7 @@ public class HttpRequest {
     }
 
     public String getParameter(final String name) {
-        return parameters.get(name);
+        return parameters.getParameter(name);
     }
 
     public String getHeader(final String name) {

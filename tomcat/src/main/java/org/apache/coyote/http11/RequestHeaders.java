@@ -28,8 +28,8 @@ public class RequestHeaders {
         headers.put(line.substring(0, idx).trim(), line.substring(idx + 1).trim());
     }
 
-    public String getHeader(final String key) {
-        return headers.get(key);
+    public String getHeader(final String name) {
+        return headers.get(name);
     }
 
     public int getContentLength() {

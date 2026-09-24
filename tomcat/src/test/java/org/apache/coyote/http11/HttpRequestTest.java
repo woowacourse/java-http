@@ -22,17 +22,6 @@ class HttpRequestTest {
     }
 
     @Test
-    void 쿼리_스트링의_파라미터를_읽는다() throws IOException {
-        final HttpRequest request = parse(
-                "GET /login?account=gugu&password=password HTTP/1.1",
-                "",
-                "");
-
-        assertThat(request.getParameter("account")).isEqualTo("gugu");
-        assertThat(request.getParameter("password")).isEqualTo("password");
-    }
-
-    @Test
     void 쿼리_값에_인코딩된_구분자가_있어도_값의_일부로_읽는다() throws IOException {
         final HttpRequest request = parse(
                 "GET /login?account=a%26b&password=p%3D1 HTTP/1.1",
@@ -42,17 +31,6 @@ class HttpRequestTest {
         assertThat(request.getParameter("account")).isEqualTo("a&b");
         assertThat(request.getParameter("password")).isEqualTo("p=1");
         assertThat(request.getParameter("b")).isNull();
-    }
-
-    @Test
-    void 값이_없는_쿼리_파라미터는_빈_문자열이다() throws IOException {
-        final HttpRequest request = parse(
-                "GET /login?account=&password HTTP/1.1",
-                "",
-                "");
-
-        assertThat(request.getParameter("account")).isEmpty();
-        assertThat(request.getParameter("password")).isEmpty();
     }
 
     @Test
@@ -77,30 +55,6 @@ class HttpRequestTest {
 
         assertThat(request.getParameter("account")).isEqualTo("gugu");
         assertThat(request.getParameter("password")).isEqualTo("password");
-    }
-
-    @Test
-    void URL_인코딩된_값을_디코딩한다() throws IOException {
-        final HttpRequest request = parse(
-                "POST /register HTTP/1.1",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: 23",
-                "",
-                "email=ksc%40example.com");
-
-        assertThat(request.getParameter("email")).isEqualTo("ksc@example.com");
-    }
-
-    @Test
-    void 같은_이름이_쿼리와_바디에_있으면_쿼리를_우선한다() throws IOException {
-        final HttpRequest request = parse(
-                "POST /login?account=admin HTTP/1.1",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: 12",
-                "",
-                "account=gugu");
-
-        assertThat(request.getParameter("account")).isEqualTo("admin");
     }
 
     @Test

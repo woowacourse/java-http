@@ -10,9 +10,14 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -21,11 +26,28 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_MAX_QUEUED_REQUESTS = 100;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 30_000;
+    private static final int DEFAULT_QUEUE_WAIT_TIMEOUT_MILLIS = 30_000;
+    private static final int DEFAULT_SHUTDOWN_TIMEOUT_MILLIS = 5_000;
 
     private final ServerSocket serverSocket;
     private final Adapter adapter;
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executorService;
+    private final ScheduledExecutorService queueTimeoutExecutor;
+    private final Set<Socket> openConnections = ConcurrentHashMap.newKeySet();
+    private final Limits limits;
     private volatile boolean stopped;
+
+    record Limits(int maxThreads, int maxQueuedRequests, int readTimeoutMillis,
+                  int queueWaitTimeoutMillis, int shutdownTimeoutMillis) {
+        Limits {
+            if (maxThreads <= 0 || maxQueuedRequests <= 0 || readTimeoutMillis <= 0
+                    || queueWaitTimeoutMillis <= 0 || shutdownTimeoutMillis <= 0) {
+                throw new IllegalArgumentException("Connector 제한 값은 0보다 커야 합니다.");
+            }
+        }
+    }
 
     public Connector(Adapter adapter) {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, adapter);
@@ -37,8 +59,22 @@ public class Connector implements Runnable {
             final int maxThreads,
             final Adapter adapter
     ) {
+        this(port, acceptCount, adapter, new Limits(maxThreads, DEFAULT_MAX_QUEUED_REQUESTS,
+                DEFAULT_READ_TIMEOUT_MILLIS, DEFAULT_QUEUE_WAIT_TIMEOUT_MILLIS,
+                DEFAULT_SHUTDOWN_TIMEOUT_MILLIS));
+    }
+
+    Connector(final int port, final int acceptCount, final Adapter adapter, final Limits limits) {
         this.adapter = Objects.requireNonNull(adapter);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.limits = Objects.requireNonNull(limits);
+        // acceptCount limits connections before accept; this queue holds accepted connections.
+        this.executorService = new ThreadPoolExecutor(limits.maxThreads(), limits.maxThreads(),
+                0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(limits.maxQueuedRequests()));
+        this.queueTimeoutExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "connector-queue-timeout");
+            thread.setDaemon(true);
+            return thread;
+        });
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -55,6 +91,9 @@ public class Connector implements Runnable {
 
     public void start() {
         stopped = false;
+        long checkInterval = Math.min(1_000, Math.max(1, limits.queueWaitTimeoutMillis() / 2));
+        queueTimeoutExecutor.scheduleWithFixedDelay(this::expireQueuedRequests,
+                checkInterval, checkInterval, TimeUnit.MILLISECONDS);
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
@@ -73,7 +112,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -81,12 +122,22 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, adapter);
+        if (stopped) {
+            closeConnection(connection);
+            return;
+        }
         try {
-            executorService.execute(processor);
+            connection.setSoTimeout(limits.readTimeoutMillis());
+            openConnections.add(connection);
+            executorService.execute(new ConnectionTask(connection));
         } catch (RejectedExecutionException e) {
             closeConnection(connection);
-            log.warn("Request rejected because the connector is stopping.", e);
+            if (!stopped) {
+                log.warn("Request rejected because the connector queue is full.");
+            }
+        } catch (IOException e) {
+            closeConnection(connection);
+            log.warn("Failed to configure a connection timeout.", e);
         }
     }
 
@@ -97,14 +148,47 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        queueTimeoutExecutor.shutdownNow();
         executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(limits.shutdownTimeoutMillis(), TimeUnit.MILLISECONDS)) {
+                forceStop();
+                if (!executorService.awaitTermination(limits.shutdownTimeoutMillis(), TimeUnit.MILLISECONDS)) {
+                    log.warn("Connector workers did not stop within the shutdown timeout.");
+                }
+            }
+        } catch (InterruptedException e) {
+            forceStop();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void expireQueuedRequests() {
+        for (Runnable queued : executorService.getQueue()) {
+            ConnectionTask task = (ConnectionTask) queued;
+            if (task.hasTimedOut() && executorService.remove(task)) {
+                closeConnection(task.connection);
+            }
+        }
+    }
+
+    int queuedRequestCount() {
+        return executorService.getQueue().size();
+    }
+
+    private void forceStop() {
+        executorService.shutdownNow();
+        for (Socket connection : openConnections) {
+            closeConnection(connection);
+        }
     }
 
     private void closeConnection(final Socket connection) {
+        openConnections.remove(connection);
         try {
             connection.close();
         } catch (IOException e) {
-            log.warn("Failed to close a rejected connection.", e);
+            log.warn("Failed to close a connection.", e);
         }
     }
 
@@ -120,5 +204,32 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private final class ConnectionTask implements Runnable {
+
+        private final Socket connection;
+        private final long queuedAt = System.nanoTime();
+
+        private ConnectionTask(Socket connection) {
+            this.connection = connection;
+        }
+
+        private boolean hasTimedOut() {
+            return System.nanoTime() - queuedAt >= TimeUnit.MILLISECONDS.toNanos(limits.queueWaitTimeoutMillis());
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (hasTimedOut()) {
+                    closeConnection(connection);
+                    return;
+                }
+                new Http11Processor(connection, adapter).run();
+            } finally {
+                closeConnection(connection);
+            }
+        }
     }
 }

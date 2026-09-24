@@ -9,6 +9,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
@@ -54,6 +55,9 @@ public class Http11Processor implements Runnable, Processor {
                         HttpStatus.INTERNAL_SERVER_ERROR.getMessage());
             }
             return response;
+        } catch (SocketTimeoutException e) {
+            log.warn("Request timed out while reading from the connection.");
+            return errorResponse(HttpStatus.REQUEST_TIMEOUT);
         } catch (UnsupportedHttpMethodException e) {
             log.warn(e.getMessage());
             return errorResponse(HttpStatus.NOT_IMPLEMENTED);

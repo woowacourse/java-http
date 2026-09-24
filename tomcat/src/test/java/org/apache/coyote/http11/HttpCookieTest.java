@@ -15,4 +15,26 @@ class HttpCookieTest {
         assertThat(cookies.get("tasty_cookie")).contains("strawberry");
         assertThat(cookies.get(HttpCookie.JSESSIONID)).contains("session-id");
     }
+
+    @Test
+    void returnsEmptyCookiesWhenHeaderIsNull() {
+        final HttpCookie cookies = HttpCookie.parse(null);
+
+        assertThat(cookies.get(HttpCookie.JSESSIONID)).isEmpty();
+    }
+
+    @Test
+    void returnsEmptyCookiesWhenHeaderIsEmpty() {
+        final HttpCookie cookies = HttpCookie.parse("");
+
+        assertThat(cookies.get(HttpCookie.JSESSIONID)).isEmpty();
+    }
+
+    @Test
+    void ignoresCookieWithoutEqualsSign() {
+        final HttpCookie cookies = HttpCookie.parse("invalid-cookie; JSESSIONID=session-id");
+
+        assertThat(cookies.get("invalid-cookie")).isEmpty();
+        assertThat(cookies.get(HttpCookie.JSESSIONID)).contains("session-id");
+    }
 }

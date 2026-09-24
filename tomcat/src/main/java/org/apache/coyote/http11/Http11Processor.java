@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -92,6 +91,11 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse = createResourceResponse(requestPath);
             }
 
+            httpResponse = addSessionCookieIfNeeded(
+                    requestHeaders,
+                    httpResponse
+            );
+
         writeHttpResponse(outputStream, httpResponse);
     } catch (IOException | UncheckedServletException e) {
         log.error(e.getMessage(), e);
@@ -99,6 +103,35 @@ public class Http11Processor implements Runnable, Processor {
         throw new RuntimeException(e);
     }
 }
+
+    private HttpResponse addSessionCookieIfNeeded(Map<String, List<String>> requestHeaders, HttpResponse response) {
+
+        // 이미 JSESSIONID 있으면 추가 발급 x
+        if (getSessionId(requestHeaders) != null) {
+            return response;
+        }
+
+        boolean hasSetCookie = requestHeaders.containsKey("set-cookie");
+        if (hasSetCookie) {
+            return response;
+        }
+
+        Session session = Session.create();
+        sessionManager.add(session);
+
+        Map<String, List<String>> headers = new HashMap<>(response.headers());
+
+        headers.put(
+                "Set-Cookie",
+                List.of(new HttpCookie(session.getId()).toString())
+        );
+
+        return new HttpResponse(
+                response.statusCode(),
+                headers,
+                response.body()
+        );
+    }
 
     private String getSessionId(Map<String, List<String>> requestHeaders) {
         List<String> cookieHeaders = requestHeaders.get("cookie");

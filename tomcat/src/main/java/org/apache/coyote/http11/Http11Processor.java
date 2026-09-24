@@ -306,8 +306,8 @@ public class Http11Processor implements Runnable, Processor {
                 continue;
             }
 
-            String headerName = headerParts[0].trim();
-            String headerValue = headerParts[1].trim();
+            String headerName = headerParts[0].trim().toLowerCase();
+            String headerValue = headerParts[1].trim().toLowerCase();
 
             requestHeaders.put(headerName, headerValue);
         }
@@ -317,7 +317,7 @@ public class Http11Processor implements Runnable, Processor {
 
     // requestBody 읽기
     private String readRequestBody(InputStream inputStream, Map<String, String> requestHeaders) throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
+        int contentLength = Integer.parseInt(requestHeaders.getOrDefault("content-length", "0"));
         byte[] body = new byte[contentLength];
         inputStream.read(body, 0, contentLength);
 

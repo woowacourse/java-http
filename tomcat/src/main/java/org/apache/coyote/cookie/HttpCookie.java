@@ -34,6 +34,10 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
+    public void add(String name, String value) {
+        cookies.put(name, value);
+    }
+
     public boolean has(String name) {
         return cookies.containsKey(name);
     }

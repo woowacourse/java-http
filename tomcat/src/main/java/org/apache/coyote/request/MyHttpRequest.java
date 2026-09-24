@@ -2,57 +2,41 @@ package org.apache.coyote.request;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.EntityHeader;
+import org.apache.coyote.GeneralHeader;
 import org.apache.coyote.cookie.HttpCookie;
+import org.apache.coyote.http11.ContentType;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MyHttpRequest {
-
-    private static final String RESOURCE_PATH_PREFIX = "static";
 
     private SessionManager manager = SessionManager.getInstance();
     private Session session;
     private boolean isNewSession;
-    private Method method;
-    private String uri;
-    private String resourcePath;
-    private ContentType contentType;
-    private String version;
+    private RequestLine requestLine;
+    private Map<String, Object> headerFields = new LinkedHashMap<>();
     private HttpCookie cookie;
     private String body;
 
-    public MyHttpRequest(Method method, String uri, String resourcePath, ContentType contentType, String version,
-                         HttpCookie cookie, String body) {
-        this.method = method;
-        this.uri = uri;
-        this.resourcePath = RESOURCE_PATH_PREFIX + resolveResourcePath(resourcePath);
-        this.contentType = contentType;
-        this.version = version;
-        this.cookie = cookie;
+
+    public MyHttpRequest(RequestLine requestLine, Map<String, Object> headerFields, String body) {
+        this.requestLine = requestLine;
+        setHeaders(headerFields);
+        String cookieString = headerFields.entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase("Cookie"))
+                .map(Entry::getValue)
+                .map(Object::toString)
+                .collect(Collectors.joining("; "));
+        cookie = HttpCookie.from(cookieString);
+
         this.body = body;
-    }
-
-    public static MyHttpRequest of(String rawRequest) {
-        String requestLine = extractRequestLine(rawRequest);
-        String[] split = requestLine.split(" ");
-
-        if (split.length != 3) {
-            throw new IllegalArgumentException("잘못된 Http request 입니다: " + requestLine);
-        }
-
-        return new MyHttpRequest(
-                Method.valueOf(split[0]),
-                split[1],
-                extractResourcePath(split[1]),
-                contentTypeOf(split[1]),
-                split[2],
-                extractCookie(rawRequest),
-                extractBody(rawRequest)
-        );
     }
 
     public Session getSession(boolean create) throws IOException {
@@ -76,63 +60,43 @@ public class MyHttpRequest {
         return this.session;
     }
 
-    private static HttpCookie extractCookie(String rawRequest) {
-        return rawRequest.lines()
-                .filter(line -> line.startsWith("Cookie: "))
-                .map(line -> line.substring("Cookie: ".length()))
-                .map(HttpCookie::from)
-                .findFirst()
-                .orElse(HttpCookie.from(""));
+    public boolean isNewSession() {
+        return isNewSession;
     }
 
-    private static String extractBody(String rawRequest) {
-        final String bodySeparator = "\r\n\r\n";
-        int startIndexOfBody = rawRequest.indexOf(bodySeparator);
-        if (startIndexOfBody == -1) {
-            return "";
-        }
-        return rawRequest.substring(startIndexOfBody + bodySeparator.length());
+    public Method method() {
+        return requestLine.getMethod();
     }
 
-    public boolean hasCookie(String cookieKeyName) {
-        return cookie.has(cookieKeyName);
+    public boolean isGet() {
+        return requestLine.hasMethod(Method.GET);
     }
 
-    public boolean hasRequestBody() {
-        return !body.isEmpty();
+    public boolean isPost() {
+        return requestLine.hasMethod(Method.POST);
     }
 
-    public boolean hasQueryParameter() {
-        return uri.contains("?");
+    public boolean isPath(String path) {
+        return path.equals(path);
     }
 
-    public Map<String, String> queryParameters() {
-        Map<String, String> params = new HashMap<>();
-        String queryParams = uri.split("\\?")[1];
-        for (String queryParam : queryParams.split("&")) {
-            String[] keyValue = queryParam.split("=");
-            params.put(keyValue[0], keyValue[1]);
-        }
-        return params;
+    public String getUri() {
+        return requestLine.getUri();
     }
 
-    private static String extractRequestLine(String rawRequest) {
-        return rawRequest.lines()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("http 요청을 읽을 수 없습니다."));
+    public Optional<String> getCookie(String name) {
+        return cookie.getValue(name);
     }
 
-    private static String extractResourcePath(String uri) {
-        int startIndexOfPath = uri.indexOf("/");
-        int startIndexOfQueryString = uri.indexOf("?");
-
-        if (startIndexOfQueryString == -1) {
-            return uri.substring(startIndexOfPath);
-        }
-        return uri.substring(startIndexOfPath, startIndexOfQueryString);
+    public boolean hasCookie(String name) {
+        return cookie.has(name);
     }
 
-    private static ContentType contentTypeOf(String url) {
+    public ContentType getContentType() {
+        return contentTypeOf(requestLine.getRequestTarget().getPath());
+    }
+
+    private ContentType contentTypeOf(String url) {
         int lastDotIndex = url.lastIndexOf(".");
         String fileNameExtension = url.substring(lastDotIndex + 1);
         return switch (fileNameExtension) {
@@ -142,6 +106,19 @@ public class MyHttpRequest {
             case "ico" -> ContentType.ICO;
             default -> ContentType.HTML;
         };
+    }
+
+    public boolean hasBody() {
+        return body != null && !body.isEmpty();
+    }
+
+    public boolean isStaticResourcePath(String staticResourcePath) {
+        return getResourcePath().contains(staticResourcePath);
+    }
+
+    public String getResourcePath() {
+        final String RESOURCE_PATH_PREFIX = "static";
+        return RESOURCE_PATH_PREFIX + resolveResourcePath(extractResourcePath(requestLine.getRequestTarget()));
     }
 
     private String resolveResourcePath(String resourcePath) {
@@ -162,35 +139,48 @@ public class MyHttpRequest {
                 && dotIndex != fileName.length() - 1;
     }
 
-    public boolean isNewSession() {
-        return isNewSession;
+    private static String extractResourcePath(RequestTarget requestTarget) {
+        return requestTarget.getPath();
     }
 
-    public Method getMethod() {
-        return method;
+
+    public Map<String, String> getFormParameters() {
+        Map<String, String> params = new HashMap<>();
+        for (String parameter : body.split("&")) {
+            String[] keyValue = parameter.split("=", 3);
+            params.put(keyValue[0], keyValue[1]);
+        }
+        return Map.copyOf(params);
     }
 
-    public String getUri() {
-        return uri;
-    }
+    /**
+     * RFC 2616에서 good practice로 언급한 순서를 따르도록 세팅한다.
+     * @param headers 순서가 보장되지 않는 헤더 목록
+     */
+    private void setHeaders(Map<String, Object> headers) {
+        for (GeneralHeader headerField : GeneralHeader.values()) {
+            if (headers.containsKey(headerField.name())) {
+                headerFields.put(headerField.name(), headers.remove(headerField.name()));
+            }
+        }
 
-    public String getResourcePath() {
-        return resourcePath;
-    }
+        for (RequestHeader headerField : RequestHeader.values()) {
+            Object fieldValue = null;
+            if (headers.containsKey(headerField.name())) {
+                fieldValue = headers.remove(headerField.name());
+                headerFields.put(headerField.name(), fieldValue);
+            }
+            if (headerField.name().equalsIgnoreCase("Cookie")) {
+                cookie.add(headerField.name(), (String) fieldValue);
+            }
+        }
 
-    public ContentType getContentType() {
-        return contentType;
-    }
+        for (EntityHeader headerField : EntityHeader.values()) {
+            if (headers.containsKey(headerField.name())) {
+                headerFields.put(headerField.name(), headers.remove(headerField.name()));
+            }
+        }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public HttpCookie getCookie() {
-        return cookie;
-    }
-
-    public String getBody() {
-        return body;
+        headerFields.putAll(headers);
     }
 }

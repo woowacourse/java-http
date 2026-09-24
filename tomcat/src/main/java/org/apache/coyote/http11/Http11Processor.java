@@ -8,7 +8,7 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.Method;
+import org.apache.coyote.request.HttpRequestParser;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
 import org.apache.coyote.response.StatusCode;
@@ -24,7 +24,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,27 +51,27 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             MyHttpRequest httpRequest =
-                    MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
+                    HttpRequestParser.parse(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
             MyHttpResponse httpResponse = new MyHttpResponse();
-            log.info("start request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+            log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
                 Session session = httpRequest.getSession(true);
                 httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
 
-            if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null
-                    && httpRequest.getMethod() == Method.GET
-                    && httpRequest.getUri().endsWith("/login")) {
+            if (manager.findSession(httpRequest.getCookie("JSESSIONID").orElse(null)) != null
+                    && httpRequest.isGet()
+                    && httpRequest.isPath("/login")) {
 
-                Session session = manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").get());
+                Session session = manager.findSession(httpRequest.getCookie("JSESSIONID").get());
                 if (getUser(session) != null) {
                     httpResponse.setStatusCode(StatusCode.FOUND);
                     httpResponse.setContentType(ContentType.HTML);
                     httpResponse.sendRedirect("index.html");
                     outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                     outputStream.flush();
-                    log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                    log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
                     return;
                 }
             }
@@ -81,7 +80,7 @@ public class Http11Processor implements Runnable, Processor {
                 authenticate(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
                 return;
             }
 
@@ -90,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
                 register(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+                log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
                 return;
             }
 
@@ -101,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-            log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+            log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -138,23 +137,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private static boolean isLoginRequest(MyHttpRequest httpRequest) {
         return httpRequest.getResourcePath().contains("static/login.html")
-                && httpRequest.getMethod() == Method.POST
-                && httpRequest.hasRequestBody();
+                && httpRequest.isPost()
+                && httpRequest.hasBody();
     }
 
     private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
-        return httpRequest.getResourcePath().contains("static/register.html")
-                && httpRequest.getMethod() == Method.POST
-                && httpRequest.hasRequestBody();
+        return httpRequest.isStaticResourcePath("static/register.html")
+                && httpRequest.isPost()
+                && httpRequest.hasBody();
     }
 
     // TODO json도 처리 가능하도록
     private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) throws IOException {
-        Map<String, String> params = new HashMap<>();
-        for (String parameter : httpRequest.getBody().split("&")) {
-            String[] keyValue = parameter.split("=", 2);
-            params.put(keyValue[0], keyValue[1]);
-        }
+        Map<String, String> params = httpRequest.getFormParameters();
         Optional<User> foundUser = findUserByAccount(params.get("account"));
         if (foundUser.isEmpty()) {
             log.info("authenticate failed: user not found");
@@ -183,11 +178,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
-        Map<String, String> params = new HashMap<>();
-        for (String parameter : httpRequest.getBody().split("&")) {
-            String[] keyValue = parameter.split("=", 3);
-            params.put(keyValue[0], keyValue[1]);
-        }
+        Map<String, String> params = httpRequest.getFormParameters();
 
         try {
             User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));

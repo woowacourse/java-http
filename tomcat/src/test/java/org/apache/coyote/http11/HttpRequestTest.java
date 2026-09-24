@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpRequestTest {
 
@@ -54,19 +53,6 @@ class HttpRequestTest {
 
         assertThat(request.getParameter("account")).isEmpty();
         assertThat(request.getParameter("password")).isEmpty();
-    }
-
-    @Test
-    void 헤더를_파싱한다() throws IOException {
-        final HttpRequest request = parse(
-                "GET / HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "",
-                "");
-
-        assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
-        assertThat(request.getHeader("Accept")).isEqualTo("text/html");
     }
 
     @Test
@@ -143,14 +129,6 @@ class HttpRequestTest {
         final BufferedReader reader = new BufferedReader(new StringReader(""));
 
         assertThat(HttpRequest.from(reader)).isEmpty();
-    }
-
-    @Test
-    void 헤더_형식이_잘못되면_예외가_발생한다() {
-        final BufferedReader reader = readerOf("GET / HTTP/1.1", "InvalidHeader", "", "");
-
-        assertThatThrownBy(() -> HttpRequest.from(reader))
-                .isInstanceOf(HttpRequestParseException.class);
     }
 
     @Test

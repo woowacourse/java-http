@@ -4,19 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class HttpRequest {
     private static final String FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final RequestHeaders headers;
     private final Map<String, String> parameters;
     private final String body;
 
-    private HttpRequest(final RequestLine requestLine, final Map<String, String> headers,
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers,
                         final Map<String, String> parameters, final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -30,32 +28,28 @@ public class HttpRequest {
             return Optional.empty();
         }
         final RequestLine requestLine = RequestLine.from(startLine);
-        final Map<String, String> headers = parseHeaders(reader);
-        final String body = readBody(reader, headers);
+        final RequestHeaders headers = RequestHeaders.from(readHeaderLines(reader));
+        final String body = readBody(reader, headers.getContentLength());
 
         return Optional.of(new HttpRequest(
                 requestLine,
                 headers,
-                parseParameters(requestLine.getQueryString(), headers, body),
+                parseParameters(requestLine.getQueryString(), headers.getHeader("Content-Type"), body),
                 body));
     }
 
-    private static Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+    private static List<String> readHeaderLines(final BufferedReader reader) throws IOException {
+        final List<String> headerLines = new ArrayList<>();
         String line = reader.readLine();
         while (line != null && !line.isEmpty()) {
-            putHeader(headers, line);
+            headerLines.add(line);
             line = reader.readLine();
         }
-        return headers;
+        return headerLines;
     }
 
-    private static String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
-        final String contentLength = headers.get("Content-Length");
-        if (contentLength == null) {
-            return "";
-        }
-        final char[] buffer = new char[toContentLength(contentLength)];
+    private static String readBody(final BufferedReader reader, final int contentLength) throws IOException {
+        final char[] buffer = new char[contentLength];
         int total = 0;
         while (total < buffer.length) {
             final int read = reader.read(buffer, total, buffer.length - total);
@@ -67,23 +61,11 @@ public class HttpRequest {
         return new String(buffer, 0, total);
     }
 
-    private static int toContentLength(final String contentLength) {
-        try {
-            final int length = Integer.parseInt(contentLength);
-            if (length < 0) {
-                throw new HttpRequestParseException("Content-Length가 음수입니다: " + contentLength);
-            }
-            return length;
-        } catch (NumberFormatException e) {
-            throw new HttpRequestParseException("Content-Length 형식이 잘못되었습니다: " + contentLength);
-        }
-    }
-
     private static Map<String, String> parseParameters(
-            final String queryString, final Map<String, String> headers, final String body) {
+            final String queryString, final String contentType, final String body) {
 
         final Map<String, String> parameters = new HashMap<>();
-        if (isFormUrlEncoded(headers)) {
+        if (isFormUrlEncoded(contentType)) {
             parameters.putAll(parseFormData(body));
         }
         parameters.putAll(parseFormData(queryString));
@@ -101,17 +83,8 @@ public class HttpRequest {
         return parameters;
     }
 
-    private static boolean isFormUrlEncoded(final Map<String, String> headers) {
-        final String contentType = headers.get("Content-Type");
+    private static boolean isFormUrlEncoded(final String contentType) {
         return contentType != null && contentType.startsWith(FORM_URLENCODED);
-    }
-
-    private static void putHeader(final Map<String, String> headers, final String line) {
-        final int idx = line.indexOf(":");
-        if (idx == -1) {
-            throw new HttpRequestParseException("헤더 형식이 잘못되었습니다: " + line);
-        }
-        headers.put(line.substring(0, idx).trim(), line.substring(idx + 1).trim());
     }
 
     private static void putParameter(final Map<String, String> parameters, final String pair) {
@@ -144,7 +117,7 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(headers.get("Cookie"));
+        return HttpCookie.from(headers.getHeader("Cookie"));
     }
 
     public String getParameter(final String name) {
@@ -152,7 +125,7 @@ public class HttpRequest {
     }
 
     public String getHeader(final String name) {
-        return headers.get(name);
+        return headers.getHeader(name);
     }
 
     public String getBody() {

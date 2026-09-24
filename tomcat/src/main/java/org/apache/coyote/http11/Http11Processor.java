@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
@@ -68,12 +69,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> readHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> httpRequestHeaders = new HashMap<>();
+        Map<String, String> httpRequestHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         String line;
 
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] headers = line.split(": ");
-            httpRequestHeaders.put(headers[0], headers[1]);
+            String[] headers = line.split(":", 2);
+            httpRequestHeaders.put(headers[0].trim(), headers[1].trim());
         }
 
         return httpRequestHeaders;

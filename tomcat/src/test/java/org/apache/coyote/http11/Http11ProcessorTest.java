@@ -39,6 +39,56 @@ class Http11ProcessorTest {
     private final Manager sessionManager = new SessionManager();
 
     @Test
+    void javascriptResourcePreservesItsContentTypeAndBody() throws IOException {
+        final var socket = new StubSocket("GET /js/scripts.js HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket, sessionManager).process(socket);
+
+        try (var resource = getClass().getClassLoader().getResourceAsStream("static/js/scripts.js")) {
+            assertThat(resource).isNotNull();
+            final byte[] body = resource.readAllBytes();
+            final String[] response = socket.output().split("\r\n\r\n", 2);
+            assertThat(response).hasSize(2);
+            assertThat(response[0]).contains("Content-Type: text/javascript;charset=utf-8");
+            assertThat(response[0]).contains("Content-Length: " + body.length);
+            assertThat(response[1]).isEqualTo(new String(body, StandardCharsets.UTF_8));
+        }
+    }
+
+    @Test
+    void missingJavascriptDoesNotWriteASuccessResponse() {
+        final var socket = new StubSocket("GET /missing.js HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket, sessionManager).process(socket);
+
+        assertThat(socket.output()).isEmpty();
+    }
+
+    @Test
+    void unknownPathUsesHelloWorldFallback() {
+        final var socket = new StubSocket("GET /unknown HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket, sessionManager).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
+        assertThat(socket.output().split("\r\n\r\n", 2)[1]).isEqualTo("Hello world!");
+    }
+
+    @Test
+    void putLoginStillServesPageForAnAuthenticatedSession() throws IOException {
+        final var login = new StubSocket(postLoginRequest("account=gugu&password=password"));
+        assertRedirect(login, "/index.html");
+        final String sessionId = assertNewSessionCookie(login.output());
+        final var socket = new StubSocket(withCookie("PUT /login HTTP/1.1\r\n\r\n", sessionId));
+
+        new Http11Processor(socket, sessionManager).process(socket);
+
+        assertHtmlResponseBody(socket.output(), "static/login.html");
+        assertThat(responseHeaders(socket.output())).noneMatch(header -> header.startsWith("Location:"));
+    }
+
+
+    @Test
     void stopsWithoutResponseWhenRequestLineIsMissingOrMalformed() {
         for (String request : List.of("", "\r\n", "GET\r\n\r\n", "GET / HTTP/1.1 EXTRA\r\n\r\n")) {
             var socket = new StubSocket(request);

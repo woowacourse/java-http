@@ -16,7 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -143,13 +145,17 @@ public class Http11Processor implements Runnable, Processor {
                 cookieHeader = "Set-Cookie: " + responseCookie.toHeaderValue();
             }
 
-            final var response = String.join("\r\n",
-                    statusLine,
-                    "Content-Type: " + contentType + " ",
-                    cookieHeader,
-                    "Content-Length: " + contentLength + " ",
-                    "",
-                    responseBody);
+            List<String> headers = new ArrayList<>();
+            headers.add(statusLine);
+            headers.add("Content-Type: " + contentType + " ");
+            if (!cookieHeader.isBlank()) {
+                headers.add(cookieHeader);
+            }
+            headers.add("Content-Length: " + contentLength + " ");
+            headers.add("");
+            headers.add(responseBody);
+
+            final var response = String.join("\r\n", headers);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

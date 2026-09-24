@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -22,14 +25,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .contains("Content-Length: 12")
+                .contains("Set-Cookie: JSESSIONID=")
+                .endsWith("\r\n\r\nHello world!");
     }
 
     @Test
@@ -50,13 +50,11 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK \r\n")
+                .contains("Content-Type: text/html;charset=utf-8")
+                .contains("Set-Cookie: JSESSIONID=")
+                .endsWith(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
     @Test
@@ -82,10 +80,10 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void queryString() {
+    void getLoginPage() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -102,5 +100,104 @@ class Http11ProcessorTest {
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/html;charset=utf-8 "))
                 .contains("<title>로그인</title>");
+    }
+
+    @Test
+    void loginSuccessRedirectionToIndex() {
+        // given
+        final String body = "account=gugu&password=password";
+        final String httpRequest = "POST /login HTTP/1.1\r\n"
+                + "Content-Length: " + body.length() + "\r\n\r\n" + body;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith(String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: /index.html"));
+    }
+
+    @Test
+    void loginFailureRedirectionToUnauthorizedPage() {
+        // given
+        final String body = "account=gugu&password=wrong";
+        final String httpRequest = "POST /login HTTP/1.1\r\n"
+                + "Content-Length: " + body.length() + "\r\n\r\n" + body;
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith(String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: /401.html"));
+    }
+
+    @Test
+    void getRegisterPage() {
+        final var socket = new StubSocket("GET /register HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK").contains("<title>회원가입</title>");
+    }
+
+    @Test
+    void registerWithPostBody() {
+        final String body = "account=new-user&password=secret&email=new%40example.com";
+        final String request = "POST /register HTTP/1.1\r\n"
+                + "Content-Length: " + body.length() + "\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n\r\n" + body;
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html");
+        assertThat(InMemoryUserRepository.findByAccount("new-user"))
+                .hasValueSatisfying(user -> assertThat(user.checkPassword("secret")).isTrue());
+    }
+
+    @Test
+    void existingSessionCookieIsNotSetAgain() {
+        final var firstSocket = new StubSocket();
+        new Http11Processor(firstSocket).process(firstSocket);
+        final String sessionId = firstSocket.output().split("JSESSIONID=")[1].split(";")[0];
+
+        final String request = "GET /index.html HTTP/1.1\r\n"
+                + "Cookie: other=value; JSESSIONID=" + sessionId + "\r\n\r\n";
+        final var secondSocket = new StubSocket(request);
+        new Http11Processor(secondSocket).process(secondSocket);
+
+        assertThat(secondSocket.output()).startsWith("HTTP/1.1 200 OK")
+                .doesNotContain("Set-Cookie:");
+    }
+
+    @Test
+    void loggedInUserIsRedirectedFromLoginPage() {
+        final String body = "account=gugu&password=password";
+        final String loginRequest = "POST /login HTTP/1.1\r\n"
+                + "Content-Length: " + body.length() + "\r\n\r\n" + body;
+        final var loginSocket = new StubSocket(loginRequest);
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final String sessionId = loginSocket.output().split("JSESSIONID=")[1].split(";")[0];
+        final User user = (User) SessionManager.getInstance().findSession(sessionId).getAttribute("user");
+        assertThat(user.getAccount()).isEqualTo("gugu");
+
+        final String pageRequest = "GET /login HTTP/1.1\r\n"
+                + "Cookie: other=value; JSESSIONID=" + sessionId + "\r\n\r\n";
+        final var pageSocket = new StubSocket(pageRequest);
+        new Http11Processor(pageSocket).process(pageSocket);
+
+        assertThat(pageSocket.output())
+                .startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html")
+                .doesNotContain("Set-Cookie:");
     }
 }

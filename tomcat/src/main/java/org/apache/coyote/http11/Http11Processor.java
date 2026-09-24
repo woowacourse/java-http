@@ -50,15 +50,9 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String[] requestMessage = extractRequestMessage(bufferedReader);
-            final Map<String, String> headers = extractHeaders(bufferedReader);
-            final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-            final Map<String, String> responseHeaders = new LinkedHashMap<>();
-            String sessionId = cookie.get("JSESSIONID");
-            if (sessionId == null) {
-                sessionId = UUID.randomUUID().toString();
-                responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
-            }
-            String body = extractRequestBody(bufferedReader, headers);
+            Map<String, String> requestHeaders = extractRequestHeaders(bufferedReader);
+
+            String body = extractRequestBody(bufferedReader, requestHeaders);
 
             String method = requestMessage[0];
             String requestTarget = requestMessage[1];
@@ -70,8 +64,7 @@ public class Http11Processor implements Runnable, Processor {
                     requestPath,
                     queryParameters,
                     body,
-                    responseHeaders,
-                    sessionId
+                    requestHeaders
             );
             if (handledResponse.isPresent()) {
                 outputStream.write(handledResponse.get().getBytes());
@@ -82,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
             String contentType = resolveContentType(resourcePath);
-            String response = createOkResponse(contentType, responseBody, responseHeaders);
+            String response = createOkResponse(contentType, responseBody, Map.of());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -144,13 +137,13 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath,
             Map<String, String> queryParameters,
             String body,
-            Map<String, String> responseHeaders,
-            String sessionId) {
+            Map<String, String> requestHeaders) {
+
         if ("GET".equals(method) && "/login".equals(requestPath)) {
-            return handleLoginRequest(queryParameters, responseHeaders, sessionId);
+            return handleLoginRequest(queryParameters, requestHeaders);
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
-            return Optional.of(createRedirectResponse(handleRegister(body), responseHeaders));
+            return Optional.of(createRedirectResponse(handleRegister(body), Map.of()));
         }
         return Optional.empty();
     }
@@ -176,11 +169,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private Optional<String> handleLoginRequest(
             Map<String, String> queryParameters,
-            Map<String, String> responseHeaders,
-            String sessionId) {
+            Map<String, String> requestHeaders) {
+        HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
+        String sessionId = cookie.get("JSESSIONID");
+
         Session session = sessionManager.findSession(sessionId);
         if (session != null && getUser(session) != null) {
-            return Optional.of(createRedirectResponse("/index.html", responseHeaders));
+            return Optional.of(createRedirectResponse("/index.html", Map.of()));
         }
         if (queryParameters.isEmpty()) {
             return Optional.empty();
@@ -190,7 +185,14 @@ public class Http11Processor implements Runnable, Processor {
         String password = queryParameters.get("password");
         Optional<User> user = login(account, password);
         if (user.isEmpty()) {
-            return Optional.of(createRedirectResponse("/401.html", responseHeaders));
+            return Optional.of(createRedirectResponse("/401.html", Map.of()));
+        }
+
+        Map<String, String> responseHeaders = new LinkedHashMap<>();
+
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
         }
 
         Session loginSession = new Session(sessionId);
@@ -277,15 +279,15 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private Map<String, String> extractHeaders(final BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private Map<String, String> extractRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+        Map<String, String> requestHeaders = new HashMap<>();
 
         String headerLine;
-        while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
+        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isEmpty()) {
             String[] parts = headerLine.split(":", 2);
-            headers.put(parts[0], parts[1].trim());
+            requestHeaders.put(parts[0], parts[1].trim());
         }
 
-        return headers;
+        return requestHeaders;
     }
 }

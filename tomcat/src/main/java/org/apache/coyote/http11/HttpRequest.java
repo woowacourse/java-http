@@ -33,6 +33,25 @@ public class HttpRequest {
         return requestHeaders.get(header);
     }
 
+    public Map<String, String> parseQueryParams(String queryParams) {
+        Map<String, String> queries = new HashMap<>();
+
+        if (queryParams == null || queryParams.isBlank()) {
+            return queries;
+        }
+
+        for (String parameter : queryParams.split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length != 2) {
+                continue;
+            }
+            queries.put(keyValue[0], keyValue[1]);
+        }
+
+        return queries;
+    }
+
     private static HttpRequest parse(BufferedInputStream input) throws IOException {
         String headerFirstLine = readLine(input);
 

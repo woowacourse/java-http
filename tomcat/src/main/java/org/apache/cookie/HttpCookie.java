@@ -11,6 +11,12 @@ public class HttpCookie {
         this.cookieMap = new HashMap<>();
     }
 
+    public static String getJsessionId(String cookie) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookie(cookie);
+        return httpCookie.getCookieValue("JSESSIONID");
+    }
+
     public void parseCookie(String cookie) {
         if (cookie == null || cookie.isBlank()) {
             return;

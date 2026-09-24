@@ -10,14 +10,27 @@ public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private final int statusCode;
-    private final String statusMessage;
+    private int statusCode;
+    private String statusMessage;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private final byte[] body;
+    private byte[] body;
+
+    public HttpResponse() {
+        this(200, "OK", new byte[0]);
+    }
 
     public HttpResponse(final int statusCode, final String statusMessage, final byte[] body) {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
+        this.body = body;
+    }
+
+    public void setStatus(final int statusCode, final String statusMessage) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+    }
+
+    public void setBody(final byte[] body) {
         this.body = body;
     }
 

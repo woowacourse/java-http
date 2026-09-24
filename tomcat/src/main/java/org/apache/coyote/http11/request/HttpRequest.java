@@ -1,19 +1,26 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.session.Session;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
+    private final Map<String, String> parameters;
+    private Session session;
 
     public HttpRequest(final InputStream inputStream) throws IOException {
         final var reader  = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
@@ -23,6 +30,7 @@ public class HttpRequest {
         this.requestLine = RequestLine.parse(firstLine);
         this.headers = readHeaders(reader);
         this.body = readBody(reader);
+        this.parameters = parseParameters();
     }
 
     private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
@@ -105,6 +113,18 @@ public class HttpRequest {
         return body;
     }
 
+    public String getParameter(final String name) {
+        return parameters.get(name);
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(final Session session) {
+        this.session = session;
+    }
+
     public String getPath() {
         final var uri = requestLine.getUri();
         final var queryIndex = uri.indexOf("?");
@@ -114,6 +134,45 @@ public class HttpRequest {
         }
 
         return uri.substring(0, queryIndex);
+    }
+
+    private Map<String, String> parseParameters() {
+        final String rawParameters;
+
+        if ("POST".equals(getMethod())) {
+            rawParameters = body;
+        } else {
+            final var queryIndex = getUri().indexOf('?');
+            if (queryIndex < 0 || queryIndex == getUri().length() - 1) {
+                return Map.of();
+            }
+            rawParameters = getUri().substring(queryIndex + 1);
+        }
+
+        if (rawParameters.isEmpty()) {
+            return Map.of();
+        }
+
+        return Arrays.stream(rawParameters.split("&"))
+                .map(this::parseParameter)
+                .collect(Collectors.toMap(
+                        pair -> decode(pair[0]),
+                        pair -> decode(pair[1])
+                ));
+    }
+
+    private String[] parseParameter(final String parameter) {
+        final var pair = parameter.split("=", 2);
+
+        if (pair.length != 2 || pair[0].isEmpty()) {
+            throw new IllegalArgumentException("잘못된 요청 파라미터입니다. " + parameter);
+        }
+
+        return pair;
+    }
+
+    private String decode(final String parameter) {
+        return URLDecoder.decode(parameter, StandardCharsets.UTF_8);
     }
 
 }

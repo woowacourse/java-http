@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -53,8 +54,8 @@ public class Connector implements Runnable {
     }
 
     Connector(final ServerSocket serverSocket, final ExecutorService executorService) {
-        this.serverSocket = serverSocket;
-        this.executorService = executorService;
+        this.serverSocket = Objects.requireNonNull(serverSocket);
+        this.executorService = Objects.requireNonNull(executorService);
         this.stopped = false;
     }
 

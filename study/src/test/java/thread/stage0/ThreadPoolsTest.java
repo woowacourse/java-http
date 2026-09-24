@@ -167,7 +167,8 @@ class ThreadPoolsTest {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                return;
             }
             log.info(message);
         };

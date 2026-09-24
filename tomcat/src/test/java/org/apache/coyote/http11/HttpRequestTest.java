@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
@@ -133,6 +136,171 @@ class HttpRequestTest {
     }
 
     @Test
+    @DisplayName("요청 본문이 여러 번에 나뉘어 읽혀도 Content-Length만큼 누적해서 읽는다")
+    void readsBodyAcrossMultipleReads() throws IOException {
+        // given
+        final String body = "account=gugu&password=password";
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "",
+                body
+        );
+        final BufferedReader reader = new ChunkedBufferedReader(rawRequest, 3);
+
+        // when
+        final HttpRequest request = HttpRequest.from(reader, new SessionManager());
+
+        // then
+        assertThat(request.getBodyParameter("account")).isEqualTo("gugu");
+        assertThat(request.getBodyParameter("password")).isEqualTo("password");
+    }
+
+    @Test
+    @DisplayName("큰 요청 본문이 여러 번에 나뉘어 읽혀도 잘리지 않는다")
+    void readsLargeBodyAcrossMultipleReadsWithoutTruncation() throws IOException {
+        // given
+        final String account = "a".repeat(20_000);
+        final String body = "account=" + account;
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "",
+                body
+        );
+        final BufferedReader reader = new ChunkedBufferedReader(rawRequest, 128);
+
+        // when
+        final HttpRequest request = HttpRequest.from(reader, new SessionManager());
+
+        // then
+        assertThat(request.getBodyParameter("account"))
+                .hasSize(20_000)
+                .isEqualTo(account);
+    }
+
+    @Test
+    @DisplayName("요청 본문을 읽을 때 Reader의 ready 상태를 폴링하지 않는다")
+    void readsBodyWithoutPollingReaderReadiness() throws IOException {
+        // given
+        final String body = "account=gugu";
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "",
+                body
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest)) {
+            @Override
+            public boolean ready() {
+                throw new AssertionError("본문을 읽기 전에 ready()를 호출하면 안 됩니다.");
+            }
+        };
+
+        // when
+        final HttpRequest request = HttpRequest.from(reader, new SessionManager());
+
+        // then
+        assertThat(request.getBodyParameter("account")).isEqualTo("gugu");
+    }
+
+    @Test
+    @DisplayName("요청 본문이 Content-Length보다 먼저 끝나면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenBodyEndsBeforeContentLength() {
+        // given
+        final String body = "account=gugu";
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + (body.length() + 1),
+                "",
+                body
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("요청 본문을 읽는 중 발생한 SocketTimeoutException은 그대로 전달한다")
+    void propagatesSocketTimeoutExceptionWhenReadingBodyTimesOut() {
+        // given
+        final SocketTimeoutException expected = new SocketTimeoutException("요청 본문 읽기 시간 초과");
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: 1",
+                "",
+                "a"
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest)) {
+            @Override
+            public int read(final char[] buffer, final int offset, final int length) throws IOException {
+                throw expected;
+            }
+        };
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isSameAs(expected);
+    }
+
+    @Test
+    @DisplayName("Content-Length가 음수이면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenContentLengthIsNegative() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: -1",
+                "",
+                ""
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("Content-Length가 int 범위를 넘으면 InvalidHttpRequestException을 던진다")
+    void throwsInvalidHttpRequestExceptionWhenContentLengthOverflowsInteger() {
+        // given
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: 2147483648",
+                "",
+                ""
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequest.from(reader, new SessionManager()))
+                .isInstanceOf(InvalidHttpRequestException.class);
+    }
+
+    @Test
+    @DisplayName("URL 인코딩된 UTF-8 form 본문을 읽고 한글로 복원한다")
+    void readsAndDecodesUrlEncodedUtf8FormBody() throws IOException {
+        // given
+        final String account = "한글";
+        final String body = "account=" + URLEncoder.encode(account, StandardCharsets.UTF_8);
+        final String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body
+        );
+        final BufferedReader reader = new BufferedReader(new StringReader(rawRequest));
+
+        // when
+        final HttpRequest request = HttpRequest.from(reader, new SessionManager());
+
+        // then
+        assertThat(request.getBodyParameter("account")).isEqualTo(account);
+    }
+
+    @Test
     @DisplayName("세션이 없을 때 getSession true를 호출하면 새 세션을 등록한다")
     void createsAndRegistersSessionWhenRequested() throws IOException {
         // given
@@ -252,5 +420,20 @@ class HttpRequestTest {
                 "account=tion&email=ehfrhfo9494@naver.com&password=password");
 
         assertThat(request.getBodyParameter("account")).isEqualTo("tion");
+    }
+
+    private static final class ChunkedBufferedReader extends BufferedReader {
+
+        private final int chunkSize;
+
+        private ChunkedBufferedReader(final String source, final int chunkSize) {
+            super(new StringReader(source));
+            this.chunkSize = chunkSize;
+        }
+
+        @Override
+        public int read(final char[] buffer, final int offset, final int length) throws IOException {
+            return super.read(buffer, offset, Math.min(length, chunkSize));
+        }
     }
 }

@@ -54,15 +54,29 @@ final class HttpRequest {
                 .map(HttpRequest::parseInt)
                 .orElse(0);
 
-        if (contentLength > 0) {
-            char[] bodyBuffer = new char[contentLength];
-            int read = reader.read(bodyBuffer, 0, contentLength);
-            if (read != contentLength) {
+        validateNonNegative(contentLength);
+
+        char[] bodyBuffer = new char[contentLength];
+        int restLength = contentLength;
+        while (true) {
+            int readLength = reader.read(bodyBuffer, contentLength - restLength, restLength);
+            if (readLength == -1) {
                 throw new InvalidHttpRequestException("Invalid Content-Length: " + contentLength);
             }
-            body = new String(bodyBuffer);
+            restLength -= readLength;
+            if (restLength == 0) {
+                break;
+            }
         }
+        body = new String(bodyBuffer);
+
         return body;
+    }
+
+    private static void validateNonNegative(Integer integer) {
+        if (integer == null || integer < 0) {
+            throw new InvalidHttpRequestException("Invalid integer value: " + integer);
+        }
     }
 
     private static int parseInt(String contentLengthString) {

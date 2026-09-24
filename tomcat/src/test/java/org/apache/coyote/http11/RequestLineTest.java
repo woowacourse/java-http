@@ -44,4 +44,17 @@ public class RequestLineTest {
         // then
         assertThat(result).isEqualTo("HTTP/1.1");
     }
+
+    @Test
+    void getPath_success() {
+        // given
+        final String httpRequest = "GET /users?id=1 HTTP/1.1";
+        RequestLine requestLine = new RequestLine(httpRequest);
+
+        // when
+        String result = requestLine.getPath();
+
+        // then
+        assertThat(result).isEqualTo("/users");
+    }
 }

@@ -47,7 +47,20 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestUri = requestLine.split(" ")[1];
             final String requestPath = requestPath(requestUri);
-            logIn(requestPath, requestUri);
+
+            if ("/login".equals(requestPath) && requestUri.contains("?")) {
+                final boolean success = logIn(requestPath, requestUri);
+                final String location = success ? "/index.html" : "/401.html";
+                final String redirectResponse = String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: " + location,
+                        "Content-Length: 0",
+                        "",
+                        "");
+                outputStream.write(redirectResponse.getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             final String responseBody = responseBody(requestPath);
             final String contentType = contentType(requestPath);
@@ -74,10 +87,10 @@ public class Http11Processor implements Runnable, Processor {
         return requestUri.substring(0, queryStringIndex);
     }
 
-    private void logIn(final String requestPath, final String requestUri) {
+    private boolean logIn(final String requestPath, final String requestUri) {
         final int queryStringIndex = requestUri.indexOf("?");
         if (!"/login".equals(requestPath) || queryStringIndex < 0) {
-            return;
+            return false;
         }
 
         final String queryString = requestUri.substring(queryStringIndex + 1);
@@ -85,12 +98,15 @@ public class Http11Processor implements Runnable, Processor {
         final String account = queryParameters.get("account");
         final String password = queryParameters.get("password");
         if (account == null || password == null) {
-            return;
+            return false;
         }
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("login user: {}", user.getAccount()));
+        final var user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            return false;
+        }
+        log.info("login user: {}", account);
+        return true;
     }
 
     private Map<String, String> queryParameters(final String queryString) {

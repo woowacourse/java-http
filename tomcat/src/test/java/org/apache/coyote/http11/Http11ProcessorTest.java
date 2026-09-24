@@ -82,10 +82,10 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void queryString() {
+    void getLoginPage() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -102,5 +102,25 @@ class Http11ProcessorTest {
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/html;charset=utf-8 "))
                 .contains("<title>로그인</title>");
+    }
+
+    @Test
+    void loginSuccessRedirectionToIndex() {
+        final String request = "GET /login?account=gugu&password=password HTTP/1.1\r\n\r\n";
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html");
+    }
+
+    @Test
+    void loginFailureRedirectionToUnauthorizedPage() {
+        final String request = "GET /login?account=gugu&password=wrong HTTP/1.1\r\n\r\n";
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\nLocation: /401.html");
     }
 }

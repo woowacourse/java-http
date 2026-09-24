@@ -13,11 +13,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -28,21 +28,13 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final List<String> STATIC_RESOURCE_PATHS = List.of(
-        "/",
-        "/401.html",
-        "/assets/chart-area.js",
-        "/assets/chart-bar.js",
-        "/assets/chart-pie.js",
-        "/css/styles.css",
-        "/js/scripts.js");
 
-    private final Map<Route, BiFunction<Request, SessionContext, Response>> routeHandlerMap = Map.of(
-        new Route(HttpMethod.GET, "/index"), this::handleIndex,
-        new Route(HttpMethod.GET, "/login"), this::handleGetLogin,
-        new Route(HttpMethod.POST, "/login"), this::handlePostLogin,
-        new Route(HttpMethod.GET, "/register"), this::handleGetRegister,
-        new Route(HttpMethod.POST, "/register"), this::handlePostRegister);
+    private final Map<RequestLine, BiFunction<HttpRequest, SessionContext, Response>> requestHandlerMap = Map.of(
+        RequestLine.from("GET /index HTTP/1.1"), this::handleIndex,
+        RequestLine.from("GET /login HTTP/1.1"), this::handleGetLogin,
+        RequestLine.from("POST /login HTTP/1.1"), this::handlePostLogin,
+        RequestLine.from("GET /register HTTP/1.1"), this::handleGetRegister,
+        RequestLine.from("POST /register HTTP/1.1"), this::handlePostRegister);
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -61,8 +53,8 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream));
             final var outputStream = connection.getOutputStream()) {
-            final Request request = readRequest(bufferedReader);
-            final HttpCookie httpCookie = HttpCookie.from(request.headerValue("Cookie"));
+            final HttpRequest request = readRequest(bufferedReader);
+            final HttpCookie httpCookie = HttpCookie.from(request.headerValueOf("Cookie"));
 
             Response response = dispatchRequest(request, httpCookie);
             completeResponse(response);
@@ -101,41 +93,27 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private Request readRequest(final BufferedReader bufferedReader) throws IOException {
-        final String[] requestLineTokens = bufferedReader.readLine()
-            .split(" ");
-        final Map<String, String> headers = readRequestHeaders(bufferedReader);
+    private HttpRequest readRequest(final BufferedReader bufferedReader) throws IOException {
+        final String rawRequestLine = bufferedReader.readLine().trim();
+        final HttpHeaders headers = HttpHeaders.from(readRequestHeaderLines(bufferedReader));
         final String requestBody =
-            readRequestBody(bufferedReader, headers.get("Content-Length"));
-        final ParsedTarget target = parseTarget(requestLineTokens[1]);
+            readRequestBody(bufferedReader, headers.valueOf("Content-Length"));
 
-        return new Request(
-            HttpMethod.valueOf(requestLineTokens[0]),
-            PathAliasesResolver.normalize(target.path()),
+        return new HttpRequest(
+            RequestLine.from(rawRequestLine),
             headers,
             requestBody);
     }
 
-    private ParsedTarget parseTarget(final String uri) {
-        final String queryDelimiter = "?";
-        final int queryIndex = uri.indexOf(queryDelimiter);
-        if (queryIndex == -1) {
-            return new ParsedTarget(uri, "");
-        }
-
-        return new ParsedTarget(uri.substring(0, queryIndex), uri.substring(queryIndex + 1));
-    }
-
-    private Map<String, String> readRequestHeaders(final BufferedReader bufferedReader)
+    private List<String> readRequestHeaderLines(final BufferedReader bufferedReader)
         throws IOException {
-        final Map<String, String> headers = new LinkedHashMap<>();
+        final List<String> requestHeaderLines = new ArrayList<>();
         String line;
-        while (!Objects.equals(line = bufferedReader.readLine(), "")) {
-            final String[] headerLineTokens = line.split(": ");
-            headers.put(headerLineTokens[0], headerLineTokens[1]);
+        while (!(line = bufferedReader.readLine()).isBlank()) {
+            requestHeaderLines.add(line);
         }
 
-        return headers;
+        return requestHeaderLines;
     }
 
     private String readRequestBody(final BufferedReader bufferedReader,
@@ -151,18 +129,17 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer).trim();
     }
 
-    private Response dispatchRequest(final Request request, final HttpCookie httpCookie) {
-        final Route route = Route.from(request);
-        if (request.httpMethod() == HttpMethod.GET
-            && STATIC_RESOURCE_PATHS.contains(request.path())) {
-            return Response.ok(request.path());
+    private Response dispatchRequest(final HttpRequest request, final HttpCookie httpCookie) {
+        final RequestLine requestLine = request.line();
+        if (requestLine.isStaticResource()) {
+            return Response.ok(requestLine.path());
         }
-        if (!routeHandlerMap.containsKey(route)) {
+        if (!requestHandlerMap.containsKey(requestLine)) {
             return Response.notFound();
         }
 
         final SessionContext sessionContext = getOrCreateSession(httpCookie);
-        final Response response = routeHandlerMap.get(route)
+        final Response response = requestHandlerMap.get(requestLine)
             .apply(request, sessionContext);
         if (sessionContext.created()) {
             response.addHeader("Set-Cookie", "JSESSIONID=" + sessionContext.session().id());
@@ -170,11 +147,11 @@ public class Http11Processor implements Runnable, Processor {
         return response;
     }
 
-    private Response handleIndex(final Request request, final SessionContext sessionContext) {
+    private Response handleIndex(final HttpRequest request, final SessionContext sessionContext) {
         return new Response(HttpStatus.OK, "/index.html");
     }
 
-    private Response handleGetLogin(final Request request, final SessionContext sessionContext) {
+    private Response handleGetLogin(final HttpRequest request, final SessionContext sessionContext) {
         final Session session = sessionContext.session();
         if (session != null && session.hasAttribute("user")) {
             return Response.found("/index.html", "/index");
@@ -182,8 +159,8 @@ public class Http11Processor implements Runnable, Processor {
         return new Response(HttpStatus.OK, "/login.html");
     }
 
-    private Response handlePostLogin(final Request request, final SessionContext sessionContext) {
-        final LoginRequest loginRequest = parseLoginRequest(request.requestBody());
+    private Response handlePostLogin(final HttpRequest request, final SessionContext sessionContext) {
+        final LoginRequest loginRequest = LoginRequest.from(request.requestBody());
         final Session session = sessionContext.session();
         final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
             .filter(foundUser -> foundUser.checkPassword(loginRequest.password()));
@@ -198,22 +175,11 @@ public class Http11Processor implements Runnable, Processor {
         return Response.unauthorized();
     }
 
-    private LoginRequest parseLoginRequest(final String requestBody) {
-        final Map<String, String> loginParams = new LinkedHashMap<>();
-        Arrays.stream(requestBody.split("&"))
-            .map(paramToken -> paramToken.split("="))
-            .forEach(paramPair -> loginParams.put(paramPair[0], paramPair[1]));
-
-        return new LoginRequest(
-            loginParams.get("account"),
-            loginParams.get("password"));
-    }
-
-    private Response handleGetRegister(final Request request, final SessionContext sessionContext) {
+    private Response handleGetRegister(final HttpRequest request, final SessionContext sessionContext) {
         return Response.ok("/register.html");
     }
 
-    private Response handlePostRegister(final Request request, final SessionContext sessionContext) {
+    private Response handlePostRegister(final HttpRequest request, final SessionContext sessionContext) {
         final RegisterRequest registerRequest = parseRegisterRequest(request.requestBody());
         final User newUser =
             new User(registerRequest.account(), registerRequest.password(),

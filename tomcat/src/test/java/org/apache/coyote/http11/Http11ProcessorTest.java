@@ -282,9 +282,10 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = List.of(
-                "HTTP/1.1 200 OK",
+                "HTTP/1.1 302 FOUND",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 5564",
+                "Location: /index.html",
                 "",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );

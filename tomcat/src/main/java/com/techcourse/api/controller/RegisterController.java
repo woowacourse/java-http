@@ -34,9 +34,10 @@ public final class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공: {}", user);
 
-        response.setStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.FOUND);
         response.setContentType(ContentType.HTML);
         response.setBody(readResource(INDEX_PAGE));
+        response.setHeader("Location", INDEX_PAGE);
     }
 
 }

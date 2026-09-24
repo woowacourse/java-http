@@ -126,8 +126,7 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/index.html", httpCookie);
         }
 
-        filePath = resolveResourcePath("static/401.html");
-        return new HttpResponse("401 Unauthorized", getContentType(filePath), getResponseBody(filePath), null, httpCookie);
+        return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/401.html", httpCookie);
     }
 
     private boolean isLoggedIn(final HttpCookie httpCookie) throws IOException {

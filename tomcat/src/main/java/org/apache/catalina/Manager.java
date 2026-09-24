@@ -45,7 +45,7 @@ public interface Manager {
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    Optional<Session> findSession(String id) throws IOException;
+    Session findSession(String id) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.

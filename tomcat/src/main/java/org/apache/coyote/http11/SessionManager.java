@@ -23,13 +23,8 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Optional<Session> findSession(final String id) {
-        if (!SESSIONS.containsKey(id)) {
-            return Optional.empty();
-        }
-        final Session foundSession = SESSIONS.get(id);
-        foundSession.found();
-        return Optional.of(foundSession);
+    public Session findSession(final String id) {
+        return SESSIONS.get(id);
     }
 
     @Override

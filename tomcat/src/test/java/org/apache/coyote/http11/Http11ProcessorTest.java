@@ -158,8 +158,7 @@ class Http11ProcessorTest {
             final User user = InMemoryUserRepository.findByAccount("gugu")
                 .orElseThrow();
             final Session session = SessionManager.getInstance()
-                .findSession(SESSION_ID)
-                .orElseThrow();
+                .findSession(SESSION_ID);
             session.addAttribute("user", user);
 
             final String httpRequest= String.join("\r\n",

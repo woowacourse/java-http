@@ -12,12 +12,12 @@ public class RequestDispatcher {
             staticResourceHandler.handle(request, response);
             return;
         }
-        final Session session = request.getSession();
-        if (session.isCreated()) {
-            response.addHeader("Set-Cookie", "JSESSIONID=" + session.id());
-        }
         handlerMapping.getController(request)
             .service(request, response);
+
+        request.createdSession()
+            .ifPresent(session ->
+                response.addHeader("Set-Cookie", "JSESSIONID=" + session.id()));
 
         if (response.hasForwardPath()) {
             staticResourceHandler.handle(request, response);

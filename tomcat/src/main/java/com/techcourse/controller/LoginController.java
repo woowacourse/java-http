@@ -18,12 +18,12 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final LoginRequest loginRequest = LoginRequest.from(request.requestBody());
-        final Session session = request.getSession();
         final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
             .filter(foundUser -> foundUser.checkPassword(loginRequest.password()));
 
         if (filteredUser.isPresent()) {
             final User user = filteredUser.get();
+            final Session session = request.getSession();
             log.info("user: {}", user);
             session.addAttribute("user", user);
             response.addStatusLine(StatusLine.http11(HttpStatus.FOUND));
@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final Session session = request.getSession();
+        final Session session = request.getSession(false);
         if (session != null && session.hasAttribute("user")) {
             response.addStatusLine(StatusLine.http11(HttpStatus.FOUND));
             response.sendRedirect("/index");

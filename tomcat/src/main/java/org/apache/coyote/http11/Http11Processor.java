@@ -71,11 +71,9 @@ public class Http11Processor implements Runnable, Processor {
             // 요청 경로 없을 경우 문자열 반환
             if ("/".equals(uriPath)) {
                 String responseBody = "Hello world!";
-                responseHeaders.put("Content-Type", "text/html;charset=utf-8");
-                responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
 
-                HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, responseBody);
-                sendResponse(outputStream, httpResponse.toResponse());
+                HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, "text/html;charset=utf-8", responseBody);
+                sendResponse(outputStream, httpResponse);
             } else if ("/login".equals(uriPath)) {
                 if ("POST".equals(httpRequest.getMethod())) {
                     Map<String, String> bodyParameters = httpRequest.getBodyParameters();
@@ -91,21 +89,17 @@ public class Http11Processor implements Runnable, Processor {
                                             Session session = new Session(sessionId);
                                             session.setAttribute("loginUser", user);
                                             SessionManager.add(session);
-                                            responseHeaders.put("Location", "/index.html");
                                             responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
-                                            responseHeaders.put("Content-Length", "0");
-                                            HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, null);
-                                            sendResponse(outputStream, httpResponse.toResponse());
+                                            HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, "/index.html");
+                                            sendResponse(outputStream, httpResponse);
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
                                     },
                                     () -> {
                                         try {
-                                            responseHeaders.put("Location", "/401.html");
-                                            responseHeaders.put("Content-Length", "0");
-                                            HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, null);
-                                            sendResponse(outputStream, httpResponse.toResponse());
+                                            HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, "/401.html");
+                                            sendResponse(outputStream, httpResponse);
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
@@ -120,10 +114,8 @@ public class Http11Processor implements Runnable, Processor {
                     if (session != null) {
                         User loginUser = (User) session.getAttribute("loginUser");
                         if (loginUser != null) {
-                            responseHeaders.put("Location", "/index.html");
-                            responseHeaders.put("Content-Length", "0");
-                            HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, null);
-                            sendResponse(outputStream, httpResponse.toResponse());
+                            HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, "/index.html");
+                            sendResponse(outputStream, httpResponse);
                             return;
                         }
                     }
@@ -136,10 +128,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
                     String responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-                    responseHeaders.put("Content-Type", "text/html" + ";charset=utf-8");
-                    responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-                    HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, responseBody);
-                    sendResponse(outputStream, httpResponse.toResponse());
+                    HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, "text/html;charset=utf-8", responseBody);
+                    sendResponse(outputStream, httpResponse);
                 }
             } else if ("/register".equals(uriPath)) {
                 if ("GET".equals(httpRequest.getMethod())) {
@@ -150,10 +140,8 @@ public class Http11Processor implements Runnable, Processor {
                     }
                     try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
                         String responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-                        responseHeaders.put("Content-Type", "text/html" + ";charset=utf-8");
-                        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-                        HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, responseBody);
-                        sendResponse(outputStream, httpResponse.toResponse());
+                        HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, "text/html;charset=utf-8", responseBody);
+                        sendResponse(outputStream, httpResponse);
                     }
                     return;
                 }
@@ -167,12 +155,10 @@ public class Http11Processor implements Runnable, Processor {
                     session.setAttribute("loginUser", savedUser);
                     SessionManager.add(session);
 
-                    responseHeaders.put("Location", "/index.html");
                     responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId + "; Path=/");
-                    responseHeaders.put("Content-Length", "0");
 
-                    HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, null);
-                    sendResponse(outputStream, httpResponse.toResponse());
+                    HttpResponse httpResponse = HttpResponse.createRedirectResponse(responseHeaders, "/index.html");
+                    sendResponse(outputStream, httpResponse);
                 }
 
             } else {
@@ -190,10 +176,8 @@ public class Http11Processor implements Runnable, Processor {
                 // 정적 파일 반환
                 try (BufferedInputStream bufferedInputStream = new BufferedInputStream(resourceAsStream)) {
                     String responseBody = new String(bufferedInputStream.readAllBytes(), StandardCharsets.UTF_8);
-                    responseHeaders.put("Content-Type", contentType + ";charset=utf-8");
-                    responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-                    HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, responseBody);
-                    sendResponse(outputStream, httpResponse.toResponse());
+                    HttpResponse httpResponse = HttpResponse.createSuccessResponse(responseHeaders, contentType + ";charset=utf-8", responseBody);
+                    sendResponse(outputStream, httpResponse);
                 }
             }
         } catch (IOException | UncheckedServletException e) {
@@ -255,15 +239,15 @@ public class Http11Processor implements Runnable, Processor {
                 .getResourceAsStream("static" + uriPath);
 
         if (resourceAsStream == null) {
-            responseHeaders.put("Content-Type", "text/plain;charset=utf-8");
-            HttpResponse httpResponse = HttpResponse.createNotFoundResponse(responseHeaders, "Not Found");
-            sendResponse(outputStream, httpResponse.toResponse());
+            HttpResponse httpResponse = HttpResponse.createNotFoundResponse(responseHeaders);
+            sendResponse(outputStream, httpResponse);
             return null;
         }
         return resourceAsStream;
     }
 
-    private static void sendResponse(OutputStream outputStream, String response) throws IOException {
+    private static void sendResponse(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
+        String response = httpResponse.toResponse();
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }

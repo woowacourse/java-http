@@ -60,6 +60,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -132,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
                     final String sessionId = UUID.randomUUID().toString();
                     final Session session = new Session(sessionId);
                     session.setAttribute("user", user.get());
-                    SessionManager.add(session);
+                    SESSION_MANAGER.add(session);
 
                     final Map<String, String> responseHeaders = new LinkedHashMap<>();
                     responseHeaders.put(LOCATION, INDEX_PATH);
@@ -158,9 +160,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (LOGIN_PATH.equals(requestPath)) {
             final String sessionId = cookies.get(JSESSIONID);
-            if (sessionId != null && SessionManager.findSession(sessionId) != null) {
-                log.info("이미 로그인된 사용자: {}", SessionManager.findSession(sessionId).getAttribute("user"));
-                return buildRedirect(INDEX_PATH);
+            if (sessionId != null) {
+                final Session session = SESSION_MANAGER.findSession(sessionId);
+                if (session != null) {
+                    log.info("이미 로그인된 사용자: {}", SESSION_MANAGER.findSession(sessionId).getAttribute("user"));
+                    return buildRedirect(INDEX_PATH);
+                }
             }
         }
 

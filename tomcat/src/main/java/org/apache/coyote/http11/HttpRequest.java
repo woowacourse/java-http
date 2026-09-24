@@ -55,8 +55,8 @@ public class HttpRequest {
         Map<String, String> httpRequestHeaders = new HashMap<>();
 
         while (!(line = bufferedReader.readLine()).isEmpty()) {
-            String[] header = line.split(": ");
-            httpRequestHeaders.put(header[0], header[1]);
+            String[] header = line.split(":", 2);
+            httpRequestHeaders.put(header[0].strip(), header[1].strip());
         }
         HttpCookie httpCookie = HttpCookie.from(httpRequestHeaders.get("Cookie"));
 

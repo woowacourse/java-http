@@ -50,7 +50,6 @@ public class Http11Processor implements Runnable, Processor {
 
             String[] requestMessage = extractRequestMessage(bufferedReader);
             Map<String, String> requestHeaders = extractRequestHeaders(bufferedReader);
-
             String body = extractRequestBody(bufferedReader, requestHeaders);
 
             String method = requestMessage[0];
@@ -148,7 +147,7 @@ public class Http11Processor implements Runnable, Processor {
     private Optional<HttpResponse> handleLoginRequest(
             Map<String, String> queryParameters,
             Map<String, String> requestHeaders) {
-        HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
+        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");
 
         Session session = sessionManager.findSession(sessionId);

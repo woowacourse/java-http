@@ -7,7 +7,7 @@ public class HttpCookie {
 
     private final Map<String, String> cookies = new LinkedHashMap<>();
 
-    public HttpCookie(String cookieHeader) {
+    private HttpCookie(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isBlank()) {
             return;
         }
@@ -18,6 +18,10 @@ public class HttpCookie {
                 cookies.put(nameAndValue[0], nameAndValue[1]);
             }
         }
+    }
+
+    public static HttpCookie from(String cookieHeader) {
+        return new HttpCookie(cookieHeader);
     }
 
     public boolean contains(String name) {

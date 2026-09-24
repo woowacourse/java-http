@@ -8,7 +8,7 @@ class HttpCookieTest {
 
     @Test
     void parsesCookies() {
-        HttpCookie cookie = new HttpCookie(
+        HttpCookie cookie = HttpCookie.from(
                 "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
         );
 
@@ -19,7 +19,7 @@ class HttpCookieTest {
 
     @Test
     void handlesMissingCookieHeader() {
-        HttpCookie cookie = new HttpCookie(null);
+        HttpCookie cookie = HttpCookie.from(null);
 
         assertThat(cookie.contains("JSESSIONID")).isFalse();
         assertThat(cookie.get("JSESSIONID")).isNull();
@@ -27,14 +27,14 @@ class HttpCookieTest {
 
     @Test
     void parsesCookieValueContainingEquals() {
-        HttpCookie cookie = new HttpCookie("token=abc=def");
+        HttpCookie cookie = HttpCookie.from("token=abc=def");
 
         assertThat(cookie.get("token")).isEqualTo("abc=def");
     }
 
     @Test
     void parsesEmptyCookieValue() {
-        HttpCookie cookie = new HttpCookie("token=");
+        HttpCookie cookie = HttpCookie.from("token=");
 
         assertThat(cookie.contains("token")).isTrue();
         assertThat(cookie.get("token")).isEmpty();

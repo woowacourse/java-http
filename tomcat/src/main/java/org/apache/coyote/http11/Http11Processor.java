@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,28 +67,93 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String uri = getUri(bufferedReader);
+            String[] requestLine = bufferedReader.readLine().split(" ");
+            String method = requestLine[0];
+            String uri = requestLine[1];
             if (uri.equals(FAVICON_PATH)) {
                 return;
             }
 
             int index = uri.indexOf(QUERY_DELIMITER);
             String path = findPath(uri, index);
-            Map<String, String> queryParams = findQueryString(uri, index);
+
+            String line;
+            int contentLength = 0;
+            String cookieHeader = "";
+            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.split(":", 2)[1].trim());
+                }
+                if (line.startsWith("Cookie:")) {
+                    cookieHeader = line.split(":", 2)[1].trim();
+                }
+            }
+
+            HttpCookie cookie = new HttpCookie(cookieHeader);
+            String setCookieHeader = "";
+            if (cookie.get("JSESSIONID") == null) {
+                setCookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "\r\n";
+            }
+
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = sessionManager.findSession(cookie.get("JSESSIONID"));
+
+            HttpStatus httpStatus = HttpStatus.OK;
+            if (method.equals("GET") && path.equals("static/login.html")
+                    && session != null && session.getAttribute("user") != null) {
+                httpStatus = HttpStatus.FOUND;
+            }
+
+            if (method.equals("POST")) {
+                String requestBody = readRequestBody(bufferedReader, contentLength);
+                Map<String, String> params = parseParams(requestBody);
+
+                if (path.equals("static/register.html")) {
+                    String account = params.get("account");
+                    if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+                        httpStatus = HttpStatus.CONFLICT;
+                    } else {
+                        User user = new User(account, params.get("password"), params.get("email"));
+                        InMemoryUserRepository.save(user);
+                        httpStatus = HttpStatus.FOUND;
+                    }
+                }
+
+                if (path.equals("static/login.html")) {
+                    Session loginSession = new Session(UUID.randomUUID().toString());
+                    httpStatus = findUser(params, loginSession);
+                    if (httpStatus == HttpStatus.FOUND) {
+                        sessionManager.add(loginSession);
+                        setCookieHeader = "Set-Cookie: JSESSIONID=" + loginSession.getId() + "\r\n";
+                    }
+                }
+            }
+
+            if (httpStatus == HttpStatus.FOUND || httpStatus == HttpStatus.UNAUTHORIZED) {
+                String location = httpStatus == HttpStatus.FOUND ? "/index.html" : "/401.html";
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 " + HttpStatus.FOUND.getHttpStatus() + " ",
+                        setCookieHeader + "Location: " + location + " ",
+                        "Content-Length: 0 ",
+                        "",
+                        "");
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                return;
+            }
 
             final Path filePath = getPath(path);
-            final String responseBody = findResponseBody(filePath);
+            final String responseBody = httpStatus == HttpStatus.CONFLICT
+                    ? "이미 존재하는 아이디입니다."
+                    : findResponseBody(filePath);
 
             final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: "+ findContentType(filePath) + ";charset=utf-8 ",
+                    "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
+                    setCookieHeader + "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-
-            if (uri.contains("login")) {
-                loggingUser(queryParams);
-            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -95,9 +162,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getUri(BufferedReader bufferedReader) throws IOException {
-        String[] header = bufferedReader.readLine().split(" ");
-        return header[1];
+    private String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+        StringBuilder requestBody = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            int character = bufferedReader.read();
+
+            if (character == -1) {
+                break;
+            }
+
+            requestBody.append((char) character);
+        }
+
+        return requestBody.toString();
     }
 
     private String findPath(String uri, int index) {
@@ -115,19 +192,14 @@ public class Http11Processor implements Runnable, Processor {
         return STATIC_PATH + path;
     }
 
-    private Map<String, String> findQueryString(String uri, int index) {
-        String queryString = "";
-        if (index != -1) {
-            queryString = uri.substring(index + 1);
-        }
-
+    private Map<String, String> parseParams(String params) {
         Map<String, String> queryParams = new HashMap<>();
 
-        if (queryString.isBlank()) {
+        if (params.isBlank()) {
             return queryParams;
         }
 
-        for (String query : queryString.split(PARAM_DELIMITER)) {
+        for (String query : params.split(PARAM_DELIMITER)) {
             String[] q = query.split(PARAM_EQUAL, 2);
             if (q.length != 2) {
                 continue;
@@ -164,32 +236,36 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(filePath);
     }
 
-    private void loggingUser(Map<String, String> queryParams) {
+    private HttpStatus findUser(Map<String, String> queryParams, Session session) {
         if (queryParams.isEmpty()) {
-            return;
+            return HttpStatus.OK;
         }
 
         final String account = queryParams.get("account");
         if (account == null || account.isBlank()) {
             log.info("아이디는 필수값입니다.");
-            return;
+            return HttpStatus.UNAUTHORIZED;
         }
 
         final String password = queryParams.get("password");
         if (password == null || password.isBlank()) {
             log.info("비밀번호는 필수값입니다.");
-            return;
+            return HttpStatus.UNAUTHORIZED;
         }
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            return;
+            return HttpStatus.UNAUTHORIZED;
         }
 
         User foundUser = user.get();
         if (checkPassword(queryParams, foundUser)) {
+            session.setAttribute("user", foundUser);
             log.info("user: {}", foundUser);
+            return HttpStatus.FOUND;
         }
+
+        return HttpStatus.UNAUTHORIZED;
     }
 
     private boolean checkPassword(Map<String, String> queryParams, User user) {
@@ -199,5 +275,123 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return true;
+    }
+
+    public static class Session {
+
+        private final String id;
+        private final Map<String, Object> values = new HashMap<>();
+        private boolean valid = true;
+
+        public Session(final String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setAttribute(String name, Object value) {
+            checkValid();
+            if (value == null) {
+                removeAttribute(name);
+                return;
+            }
+            values.put(name, value);
+        }
+
+        public Object getAttribute(String name) {
+            checkValid();
+            return values.get(name);
+        }
+
+        public void removeAttribute(String name) {
+            checkValid();
+            values.remove(name);
+        }
+
+        public void invalidate() {
+            checkValid();
+            SessionManager.getInstance().remove(id);
+            values.clear();
+            valid = false;
+        }
+
+        private void checkValid() {
+            if (!valid) {
+                throw new IllegalStateException("무효화된 세션입니다.");
+            }
+        }
+
+    }
+
+    public static class SessionManager {
+
+        private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+        private static final SessionManager INSTANCE = new SessionManager();
+
+        private SessionManager() {
+        }
+
+        public static SessionManager getInstance() {
+            return INSTANCE;
+        }
+
+        public void add(final Session session) {
+            SESSIONS.put(session.getId(), session);
+        }
+
+        public Session findSession(final String id) {
+            if (id == null) {
+                return null;
+            }
+            return SESSIONS.get(id);
+        }
+
+        public void remove(final Session session) {
+            remove(session.getId());
+        }
+
+        public void remove(final String id) {
+            SESSIONS.remove(id);
+        }
+    }
+
+    public static class HttpCookie {
+
+        private final Map<String, String> cookies = new HashMap<>();
+
+        public HttpCookie(String cookieHeader) {
+            for (String cookie : cookieHeader.split(";")) {
+                String[] pair = cookie.trim().split("=", 2);
+                if (pair.length == 2) {
+                    cookies.put(pair[0].trim(), pair[1].trim());
+                }
+            }
+        }
+
+        public String get(String name) {
+            return cookies.get(name);
+        }
+    }
+
+    public enum HttpStatus {
+
+        OK(200, "OK"),
+        FOUND(302, "Found"),
+        UNAUTHORIZED(401, "Unauthorized"),
+        CONFLICT(409, "Conflict");
+
+        int value;
+        String message;
+
+        HttpStatus(int value, String message) {
+            this.value = value;
+            this.message = message;
+        }
+
+        public String getHttpStatus() {
+            return this.value + " " + this.message;
+        }
     }
 }

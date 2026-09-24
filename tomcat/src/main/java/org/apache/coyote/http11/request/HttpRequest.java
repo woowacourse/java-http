@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import com.techcourse.exception.UncheckedServletException;
 import jakarta.servlet.http.HttpSession;
@@ -10,8 +10,10 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.header.Cookie;
+import org.apache.coyote.http11.header.HttpHeaders;
 
-final class HttpRequest {
+public final class HttpRequest {
 
     private static final String JSESSIONID = "JSESSIONID";
     private final RequestLine requestLine;
@@ -30,7 +32,7 @@ final class HttpRequest {
         this.manager = manager;
     }
 
-    static HttpRequest from(final BufferedReader reader, final Manager manager) throws IOException {
+    public static HttpRequest from(final BufferedReader reader, final Manager manager) throws IOException {
         List<String> headerLines = readLines(reader);
         RequestLine requestLine = RequestLine.from(headerLines.getFirst());
         HttpHeaders headers = HttpHeaders.from(headerLines.subList(1, headerLines.size()));
@@ -42,7 +44,7 @@ final class HttpRequest {
     private static String readBody(BufferedReader reader, HttpHeaders headers) throws IOException {
         String body = "";
 
-        final int contentLength = headers.getFirst("Content-Length")
+        final int contentLength = headers.get("Content-Length")
                 .map(HttpRequest::parseInt)
                 .orElse(0);
 
@@ -95,39 +97,39 @@ final class HttpRequest {
     }
 
 
-    String getMethod() {
+    public String getMethod() {
         return requestLine.getMethod();
     }
 
-    String getPath() {
+    public String getPath() {
         return requestLine.getPath();
     }
 
-    boolean matches(final String method, final String path) {
+    public boolean matches(final String method, final String path) {
         return requestLine.matches(method, path);
     }
 
-    String getHeader(final String name) {
-        return headers.getFirst(name).orElse(null);
+    public String getHeader(final String name) {
+        return headers.get(name).orElse(null);
     }
 
-    String getParameter(final String name) {
+    public String getParameter(final String name) {
         return requestLine.getParameter(name);
     }
 
-    String getBodyParameter(final String name) {
+    public String getBodyParameter(final String name) {
         return bodyParameters.get(name).orElse(null);
     }
 
-    Cookie getCookie() {
-        return Cookie.from(headers.getFirst("Cookie").orElse(null));
+    public Cookie getCookie() {
+        return Cookie.from(headers.get("Cookie").orElse(null));
     }
 
-    HttpSession getSession() {
+    public HttpSession getSession() {
         return getSession(true);
     }
 
-    HttpSession getSession(final boolean create) {
+    public HttpSession getSession(final boolean create) {
         if (session != null) {
             return session;
         }

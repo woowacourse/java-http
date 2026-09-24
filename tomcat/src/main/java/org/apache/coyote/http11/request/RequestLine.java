@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.net.URI;
 import javax.annotation.Nonnull;
 
 
-public class RequestLine {
+class RequestLine {
     private final HttpMethod method;
     private final URI uri;
     private final String protocol;
@@ -18,7 +18,7 @@ public class RequestLine {
     }
 
 
-    public static RequestLine from(String requestLine) {
+    static RequestLine from(String requestLine) {
         final String[] requestLineParts = parseRequestLine(requestLine);
         final HttpMethod method = HttpMethod.parse(requestLineParts[0]);
         final URI uri = createURI(requestLineParts[1]);
@@ -46,24 +46,24 @@ public class RequestLine {
         }
     }
 
-    public String getMethod() {
+    String getMethod() {
         return method.name();
     }
 
-    public String getPath() {
+    String getPath() {
         return uri.getPath();
     }
 
-    public String getProtocol() {
+    String getProtocol() {
         return protocol;
     }
 
-    public String getParameter(String name) {
+    String getParameter(String name) {
         return queryParameters.get(name)
                 .orElse(null);
     }
 
-    public boolean matches(String method, String path) {
+    boolean matches(String method, String path) {
         return this.method.equals(method) && this.uri.getPath().equals(path);
     }
 }

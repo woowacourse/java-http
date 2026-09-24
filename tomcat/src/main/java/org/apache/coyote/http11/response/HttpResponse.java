@@ -1,9 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import org.apache.coyote.http11.header.HttpHeaders;
 
-final class HttpResponse {
+public final class HttpResponse {
 
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
 
@@ -19,20 +20,20 @@ final class HttpResponse {
         headers.add("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 
-    static HttpResponse badRequest(String message) {
+    public static HttpResponse badRequest(String message) {
         return new HttpResponse(HttpStatus.BAD_REQUEST, "text/plain", message);
     }
 
-    static HttpResponse ok(final String contentType, final String body) {
+    public static HttpResponse ok(final String contentType, final String body) {
         return new HttpResponse(HttpStatus.OK, contentType, body);
     }
 
-    static HttpResponse redirect(final String location) {
+    public static HttpResponse redirect(final String location) {
         return new HttpResponse(HttpStatus.FOUND, HTML_CONTENT_TYPE, "")
                 .addHeader("Location", location);
     }
 
-    HttpResponse addHeader(final String name, final String value) {
+    public HttpResponse addHeader(final String name, final String value) {
         headers.add(name, value);
         return this;
     }

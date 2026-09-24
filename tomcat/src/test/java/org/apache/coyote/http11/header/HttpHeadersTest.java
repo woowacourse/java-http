@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +16,7 @@ class HttpHeadersTest {
         final HttpHeaders headers = HttpHeaders.from(List.of("Host: localhost:8080"));
 
         // then
-        assertThat(headers.getFirst("Host")).contains("localhost:8080");
+        assertThat(headers.get("Host")).contains("localhost:8080");
     }
 
     @Test
@@ -26,7 +26,7 @@ class HttpHeadersTest {
         final HttpHeaders headers = HttpHeaders.from(List.of("Content-Length: 10"));
 
         // when & then
-        assertThat(headers.getFirst("content-length")).contains("10");
-        assertThat(headers.getFirst("CONTENT-LENGTH")).contains("10");
+        assertThat(headers.get("content-length")).contains("10");
+        assertThat(headers.get("CONTENT-LENGTH")).contains("10");
     }
 }

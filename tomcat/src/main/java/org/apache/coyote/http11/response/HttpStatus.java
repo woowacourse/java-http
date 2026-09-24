@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 public enum HttpStatus {
     OK(200, "OK"),
@@ -10,7 +10,7 @@ public enum HttpStatus {
     private final int code;
     private final String reasonPhrase;
 
-    private HttpStatus(int code, String reasonPhrase) {
+    HttpStatus(int code, String reasonPhrase) {
         this.code = code;
         this.reasonPhrase = reasonPhrase;
     }

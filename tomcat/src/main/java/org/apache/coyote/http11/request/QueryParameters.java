@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class QueryParameters {
+final class QueryParameters {
 
     private final Map<String, String> values;
 

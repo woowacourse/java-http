@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-final class HttpHeaders {
+public final class HttpHeaders {
 
     private final Map<String, List<String>> values = new LinkedHashMap<>();
 
-    static HttpHeaders from(final List<String> headerLines) {
+    public static HttpHeaders from(final List<String> headerLines) {
         final HttpHeaders headers = new HttpHeaders();
         for (String headerLine : headerLines) {
             final int separatorIndex = headerLine.indexOf(':');
@@ -29,19 +29,19 @@ final class HttpHeaders {
         return headers;
     }
 
-    void add(final String name, final String value) {
+    public void add(final String name, final String value) {
         values.computeIfAbsent(Objects.requireNonNull(name), key -> new ArrayList<>())
                 .add(Objects.requireNonNull(value));
     }
 
-    Optional<String> getFirst(final String name) {
+    public Optional<String> get(final String name) {
         return values.entrySet().stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase(name))
                 .flatMap(entry -> entry.getValue().stream())
-                .findFirst();
+                .findAny();
     }
 
-    String toHeaderLines() {
+    public String toHeaderLines() {
         return values.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream()
                         .map(value -> entry.getKey() + ": " + value + " "))

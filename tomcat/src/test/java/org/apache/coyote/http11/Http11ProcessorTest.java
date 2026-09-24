@@ -26,14 +26,34 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String response = socket.output();
-        String sessionId = response.split("Set-Cookie: JSESSIONID=")[1].split("\r\n")[0];
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
+                "",
+                "Hello world!");
 
-        assertThat(response).startsWith("HTTP/1.1 200 OK\r\nSet-Cookie: JSESSIONID=");
-        assertThat(response).endsWith(
-                "\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: 12\r\n\r\nHello world!"
-        );
-        assertThat(sessionId).matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void missingResourceReturnsNotFoundPage() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /favicon.ico HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found\r\n");
+        assertThat(socket.output()).contains("Content-Type: text/html;charset=utf-8");
+        assertThat(socket.output()).contains("404");
     }
 
     @Test

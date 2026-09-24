@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -59,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = extractRequestPath(requestTarget);
             Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            Optional<String> handledResponse = dispatchRequest(
+            Optional<HttpResponse> handledResponse = dispatchRequest(
                     method,
                     requestPath,
                     queryParameters,
@@ -67,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
                     requestHeaders
             );
             if (handledResponse.isPresent()) {
-                outputStream.write(handledResponse.get().getBytes());
+                outputStream.write(handledResponse.get().toString().getBytes());
                 outputStream.flush();
                 return;
             }
@@ -75,13 +74,19 @@ public class Http11Processor implements Runnable, Processor {
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
             if (responseBody == null) {
-                String response = createNotFoundResponse();
-                outputStream.write(response.getBytes());
+                HttpResponse httpResponse = HttpResponse.createNotFoundResponse(
+                        readNotFoundPage()
+                );
+                outputStream.write(httpResponse.toString().getBytes());
                 outputStream.flush();
             } else {
                 String contentType = resolveContentType(resourcePath);
-                String response = createOkResponse(contentType, responseBody, Map.of());
-                outputStream.write(response.getBytes());
+                HttpResponse httpResponse = HttpResponse.createOkResponse(
+                        contentType,
+                        responseBody,
+                        Map.of()
+                );
+                outputStream.write(httpResponse.toString().getBytes());
                 outputStream.flush();
             }
 
@@ -100,61 +105,12 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private String createOkResponse(
-            String contentType,
-            String responseBody,
-            Map<String, String> responseHeaders) {
-        Map<String, String> headers = new LinkedHashMap<>(responseHeaders);
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
-
-        return createResponse(createHeader("HTTP/1.1 200 OK", headers), responseBody);
-    }
-
-    private static String createHeader(String statusLine, Map<String, String> headers) {
-        return Stream.concat(
-                        Stream.of(statusLine),
-                        headers.entrySet().stream()
-                                .map(header -> header.getKey() + ": " + header.getValue())
-                )
-                .collect(Collectors.joining("\r\n"));
-    }
-
-    private static String createResponse(String header, String responseBody) {
-        return String.join("\r\n",
-                header,
-                "",
-                responseBody);
-    }
-
-    private static String createRedirectResponse(
-            String redirectPath,
-            Map<String, String> responseHeaders) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", redirectPath);
-        headers.putAll(responseHeaders);
-        headers.put("Content-Length", "0");
-
-        return createResponse(createHeader("HTTP/1.1 302 Found", headers), "");
-    }
-
-    private String createNotFoundResponse() throws IOException {
+    private String readNotFoundPage() throws IOException {
         URL resourceUrl = getClass().getClassLoader().getResource("static/404.html");
-
-        String responseBody = readStaticResource(resourceUrl);
-
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
-
-        return createResponse(
-                createHeader("HTTP/1.1 404 Not Found", headers),
-                responseBody
-        );
+        return readStaticResource(resourceUrl);
     }
 
-
-    private Optional<String> dispatchRequest(
+    private Optional<HttpResponse> dispatchRequest(
             String method,
             String requestPath,
             Map<String, String> queryParameters,
@@ -165,7 +121,7 @@ public class Http11Processor implements Runnable, Processor {
             return handleLoginRequest(queryParameters, requestHeaders);
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
-            return Optional.of(createRedirectResponse(handleRegister(body), Map.of()));
+            return Optional.of(HttpResponse.createRedirectResponse(handleRegister(body), Map.of()));
         }
         return Optional.empty();
     }
@@ -189,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
-    private Optional<String> handleLoginRequest(
+    private Optional<HttpResponse> handleLoginRequest(
             Map<String, String> queryParameters,
             Map<String, String> requestHeaders) {
         HttpCookie cookie = new HttpCookie(requestHeaders.get("Cookie"));
@@ -197,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
 
         Session session = sessionManager.findSession(sessionId);
         if (session != null && getUser(session) != null) {
-            return Optional.of(createRedirectResponse("/index.html", Map.of()));
+            return Optional.of(HttpResponse.createRedirectResponse("/index.html", Map.of()));
         }
         if (queryParameters.isEmpty()) {
             return Optional.empty();
@@ -207,7 +163,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = queryParameters.get("password");
         Optional<User> user = login(account, password);
         if (user.isEmpty()) {
-            return Optional.of(createRedirectResponse("/401.html", Map.of()));
+            return Optional.of(HttpResponse.createRedirectResponse("/401.html", Map.of()));
         }
 
         Map<String, String> responseHeaders = new LinkedHashMap<>();
@@ -220,7 +176,7 @@ public class Http11Processor implements Runnable, Processor {
         Session loginSession = new Session(sessionId);
         loginSession.setAttribute("user", user.get());
         sessionManager.add(loginSession);
-        return Optional.of(createRedirectResponse("/index.html", responseHeaders));
+        return Optional.of(HttpResponse.createRedirectResponse("/index.html", responseHeaders));
     }
 
     private Optional<User> login(String account, String password) {

@@ -68,7 +68,7 @@ class LoginControllerTest {
                 "POST /login HTTP/1.1", headers, new HttpBody("account=gugu&password=password"));
 
         // when
-        final String response = toString(loginController.run(request));
+        final String response = toString(service(request));
 
         // then
         assertThat(response)
@@ -134,13 +134,13 @@ class LoginControllerTest {
     private String get(String requestLine) throws IOException {
         final HttpRequest request = request(requestLine, HttpHeaders.empty(), HttpBody.empty());
 
-        return toString(loginController.run(request));
+        return toString(service(request));
     }
 
     private String post(String body) throws IOException {
         final HttpRequest request = request("POST /login HTTP/1.1", FORM_HEADERS, new HttpBody(body));
 
-        return toString(loginController.run(request));
+        return toString(service(request));
     }
 
     private void assertLoginPage(String response) throws IOException {
@@ -159,6 +159,12 @@ class LoginControllerTest {
 
     private String toString(HttpResponse response) {
         return new String(response.toBytes(), StandardCharsets.UTF_8);
+    }
+
+    private HttpResponse service(HttpRequest request) throws IOException {
+        final HttpResponse response = new HttpResponse();
+        loginController.service(request, response);
+        return response;
     }
 
     private String redirectResponse(String location) {
@@ -228,7 +234,7 @@ class LoginControllerTest {
         final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: " + cookie));
         final HttpRequest request = request("GET /login HTTP/1.1", headers, HttpBody.empty());
 
-        return toString(loginController.run(request));
+        return toString(service(request));
     }
 
     private String sessionIdOf(String response) {

@@ -23,7 +23,8 @@ class AbstractControllerTest {
         final HttpRequest request = request("POST /login HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
 
         // when
-        final HttpResponse response = controller.run(request);
+        final HttpResponse response = new HttpResponse();
+        controller.service(request, response);
 
         // then
         final String actual = new String(response.toBytes(), StandardCharsets.UTF_8);

@@ -57,17 +57,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(InputStream inputStream) throws IOException {
+        HttpResponse response = new HttpResponse();
+
         try {
             HttpRequest request = requestReader.read(inputStream);
 
-            HttpResponse response = requestDispatcher.dispatch(request);
+            requestDispatcher.dispatch(request, response);
             issueSessionCookie(request, response);
-
-            return response;
         } catch (BadRequestException e) {
             log.warn(e.getMessage());
-            return HttpResponse.of(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
+            response.reset();
+            response.setBody(HttpStatus.BAD_REQUEST, "text/plain", e.getMessage());
         }
+
+        return response;
     }
 
     private void issueSessionCookie(HttpRequest request, HttpResponse response) {

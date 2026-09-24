@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpResponseTest {
     @Test
     void toBytes() {
         // given
-        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "Hello world!");
+        final HttpResponse response = new HttpResponse();
+        response.setBody(HttpStatus.OK, "text/html", "Hello world!");
 
         // when
         final String actual = new String(response.toBytes(), StandardCharsets.UTF_8);
@@ -29,7 +31,8 @@ class HttpResponseTest {
     @Test
     void contentLengthIsByteLength() {
         // given
-        final HttpResponse response = HttpResponse.of(HttpStatus.BAD_REQUEST, "text/plain", "잘못된 요청");
+        final HttpResponse response = new HttpResponse();
+        response.setBody(HttpStatus.BAD_REQUEST, "text/plain", "잘못된 요청");
 
         // when
         final String actual = new String(response.toBytes(), StandardCharsets.UTF_8);
@@ -46,7 +49,8 @@ class HttpResponseTest {
         final StaticResource staticResource = new StaticResource("body { }", "text/css");
 
         // when
-        final HttpResponse response = HttpResponse.of(HttpStatus.OK, staticResource);
+        final HttpResponse response = new HttpResponse();
+        response.setStaticResource(HttpStatus.OK, staticResource);
 
         // then
         final String expected = String.join("\r\n",
@@ -61,7 +65,8 @@ class HttpResponseTest {
     @Test
     void addCookie() {
         // given
-        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "Hello world!");
+        final HttpResponse response = new HttpResponse();
+        response.setBody(HttpStatus.OK, "text/html", "Hello world!");
 
         // when
         response.addCookie("JSESSIONID", "abc");
@@ -80,7 +85,8 @@ class HttpResponseTest {
     @Test
     void eachCookieIsWrittenAsSeparateSetCookieHeader() {
         // given
-        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "");
+        final HttpResponse response = new HttpResponse();
+        response.setBody(HttpStatus.OK, "text/html", "");
 
         // when
         response.addCookie("JSESSIONID", "abc");
@@ -94,7 +100,8 @@ class HttpResponseTest {
     @Test
     void sameNameCookieIsReplaced() {
         // given
-        final HttpResponse response = HttpResponse.of(HttpStatus.OK, "text/html", "");
+        final HttpResponse response = new HttpResponse();
+        response.setBody(HttpStatus.OK, "text/html", "");
 
         // when
         response.addCookie("JSESSIONID", "old");
@@ -104,5 +111,15 @@ class HttpResponseTest {
         assertThat(new String(response.toBytes(), StandardCharsets.UTF_8))
                 .contains("Set-Cookie: JSESSIONID=new ")
                 .doesNotContain("JSESSIONID=old");
+    }
+
+    @Test
+    void responseMustBeConfiguredBeforeSerialization() {
+        final HttpResponse response = new HttpResponse();
+        response.addCookie("JSESSIONID", "abc");
+
+        assertThatThrownBy(response::toBytes)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("HTTP 응답이 설정되지 않았습니다.");
     }
 }

@@ -13,11 +13,11 @@ public class StaticResourceController extends AbstractController {
     private final StaticResourceLoader staticResourceLoader = new StaticResourceLoader();
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
-            return HttpResponse.of(HttpStatus.OK, staticResourceLoader.load(httpRequest.getHttpPath()));
+            httpResponse.setStaticResource(HttpStatus.OK, staticResourceLoader.load(httpRequest.getHttpPath()));
         } catch (FileNotFoundException e) {
-            return HttpResponse.of(HttpStatus.NOT_FOUND, staticResourceLoader.load(NOT_FOUND_PAGE));
+            httpResponse.setStaticResource(HttpStatus.NOT_FOUND, staticResourceLoader.load(NOT_FOUND_PAGE));
         }
     }
 }

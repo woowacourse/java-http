@@ -481,7 +481,7 @@ class Http11ProcessorTest {
     @Test
     void badRequestWhenControllerThrowsBadRequestException() {
         // given
-        final PageController controller = request -> {
+        final PageController controller = (request, response) -> {
             throw new BadRequestException("잘못된 정적 리소스 경로입니다: /../secret");
         };
         final StubSocket socket = new StubSocket(String.join("\r\n",

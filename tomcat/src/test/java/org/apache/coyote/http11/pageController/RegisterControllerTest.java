@@ -33,7 +33,7 @@ class RegisterControllerTest {
         final HttpRequest request = request("GET /register HTTP/1.1", HttpHeaders.empty(), HttpBody.empty());
 
         // when
-        final String response = toString(registerController.run(request));
+        final String response = toString(service(request));
 
         // then
         assertThat(response)
@@ -108,7 +108,7 @@ class RegisterControllerTest {
     private String post(String body) throws IOException {
         final HttpRequest request = request("POST /register HTTP/1.1", FORM_HEADERS, new HttpBody(body));
 
-        return toString(registerController.run(request));
+        return toString(service(request));
     }
 
     private void assertBadRequestRegisterPage(String response) throws IOException {
@@ -127,6 +127,12 @@ class RegisterControllerTest {
 
     private String toString(HttpResponse response) {
         return new String(response.toBytes(), StandardCharsets.UTF_8);
+    }
+
+    private HttpResponse service(HttpRequest request) throws IOException {
+        final HttpResponse response = new HttpResponse();
+        registerController.service(request, response);
+        return response;
     }
 
     private String readResource(String resourceName) throws IOException {
@@ -159,7 +165,7 @@ class RegisterControllerTest {
         final HttpRequest request = request("GET /register HTTP/1.1", headers, HttpBody.empty());
 
         // when
-        final String response = toString(registerController.run(request));
+        final String response = toString(service(request));
 
         // then
         assertThat(response)

@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +45,17 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) {
                 return;
             }
-            HttpCookie cookies = request.getCookies();
-            HttpResponse response = route(request);
-            if (!cookies.hasJSessionId()) {
-                response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            SessionManager sessionManager = new SessionManager();
+            Optional<Session> existingSession = request.findCookie("JSESSIONID")
+                    .flatMap(sessionManager::findSession);
+            Session session = existingSession.orElseGet(() -> {
+                Session newSession = new Session(UUID.randomUUID().toString());
+                sessionManager.add(newSession);
+                return newSession;
+            });
+            HttpResponse response = route(request, session);
+            if (existingSession.isEmpty() && !response.hasHeader("Set-Cookie")) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
             outputStream.write(response.toByteArray());
             outputStream.flush();
@@ -55,21 +64,31 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse route(HttpRequest request) throws IOException, URISyntaxException {
+    private HttpResponse route(HttpRequest request, Session session) throws IOException, URISyntaxException {
         if (request.matches("POST", LOGIN_PATH)) {
-            return login(request);
+            return login(request, session);
         }
         if (request.matches("POST", "/register")) {
-            return register();
+            return register(request);
+        }
+        if (request.matches("GET", LOGIN_PATH) && session.getAttribute("user") instanceof User) {
+            return HttpResponse.redirectTo("/index.html");
         }
         return handleResourceRequest(request);
     }
 
-    private HttpResponse register() {
+    private HttpResponse register(HttpRequest request) {
+        String account = request.findFormParameter("account")
+                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
+        String password = request.findFormParameter("password")
+                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: password"));
+        String email = request.findFormParameter("email")
+                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: email"));
+        InMemoryUserRepository.save(new User(account, password, email));
         return HttpResponse.redirectTo("/index.html");
     }
 
-    private HttpResponse login(HttpRequest request) {
+    private HttpResponse login(HttpRequest request, Session session) {
         String account = request.findFormParameter("account")
                 .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
         String password = request.findFormParameter("password")
@@ -81,7 +100,12 @@ public class Http11Processor implements Runnable, Processor {
         if (authenticatedUser.isEmpty()) {
             return HttpResponse.redirectTo("/401.html");
         }
-        return HttpResponse.redirectTo("/index.html");
+
+        session.setAttribute("user", authenticatedUser.get());
+
+        HttpResponse response = HttpResponse.redirectTo("/index.html");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        return response;
     }
 
     private HttpResponse handleResourceRequest(HttpRequest request) throws IOException, URISyntaxException {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class HttpCookie {
     private final Map<String, String> values = new HashMap<>();
@@ -15,7 +16,7 @@ public final class HttpCookie {
         }
     }
 
-    public boolean hasJSessionId() {
-        return values.containsKey("JSESSIONID");
+    public Optional<String> findValue(String name) {
+        return Optional.ofNullable(values.get(name));
     }
 }

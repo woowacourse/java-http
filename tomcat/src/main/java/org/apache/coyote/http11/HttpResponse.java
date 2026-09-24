@@ -36,6 +36,10 @@ public final class HttpResponse {
         headers.put(name, value);
     }
 
+    public boolean hasHeader(String name) {
+        return headers.containsKey(name);
+    }
+
     public byte[] toByteArray() {
         var responseHead = new StringBuilder()
                 .append("HTTP/1.1 ")

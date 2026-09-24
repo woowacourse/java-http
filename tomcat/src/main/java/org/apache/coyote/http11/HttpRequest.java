@@ -86,8 +86,8 @@ public final class HttpRequest {
         return Optional.ofNullable(headers.get(name.toLowerCase(Locale.ROOT)));
     }
 
-    public HttpCookie getCookies() {
-        return cookies;
+    public Optional<String> findCookie(String name) {
+        return cookies.findValue(name);
     }
 
     public Optional<String> findFormParameter(String name) {

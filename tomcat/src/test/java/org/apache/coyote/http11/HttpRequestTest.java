@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class HttpRequestTest {
 
     @Test
-    void 요청에_JSESSIONID_쿠키가_있는지_확인한다() throws IOException {
+    void 요청에서_이름으로_쿠키_값을_찾는다() throws IOException {
         String rawRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Cookie: yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
@@ -20,7 +20,8 @@ class HttpRequestTest {
 
         HttpRequest request = HttpRequest.readFrom(input);
 
-        assertThat(request.getCookies().hasJSessionId()).isTrue();
+        assertThat(request.findCookie("JSESSIONID"))
+                .contains("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 
     @Test

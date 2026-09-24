@@ -32,12 +32,12 @@ public class HttpRequest {
         return requestLine == null;
     }
 
-    public boolean isGet(final String path) {
-        return requestLine.isGet() && requestLine.matchesPath(path);
+    public boolean isGet() {
+        return requestLine.isGet();
     }
 
-    public boolean isPost(final String path) {
-        return requestLine.isPost() && requestLine.matchesPath(path);
+    public boolean isPost() {
+        return requestLine.isPost();
     }
 
     public String getPath() {

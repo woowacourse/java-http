@@ -44,8 +44,8 @@ public final class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
-        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(request.getParameter("account"))
-                .filter(user -> user.checkPassword(request.getParameter("password")));
+        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(request.getBodyParameter("account"))
+                .filter(user -> user.checkPassword(request.getBodyParameter("password")));
 
         if (loginUser.isEmpty()) {
             response.setStatus(HttpStatus.UNAUTHORIZED);

@@ -26,9 +26,9 @@ public final class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final User user = new User(
-                request.getParameter("account"),
-                request.getParameter("password"),
-                request.getParameter("email")
+                request.getBodyParameter("account"),
+                request.getBodyParameter("password"),
+                request.getBodyParameter("email")
         );
 
         InMemoryUserRepository.save(user);

@@ -19,7 +19,6 @@ public class RequestLine {
         this.method = HttpMethod.from(components[0]);
         this.uri = new RequestUri(components[1]);
         this.protocolVersion = components[2];
-
     }
 
     public boolean isPost() {
@@ -36,6 +35,10 @@ public class RequestLine {
 
     public String getPath() {
         return uri.getPath();
+    }
+
+    public String getParameter(final String name) {
+        return uri.getParameter(name);
     }
 
 }

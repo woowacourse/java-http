@@ -1,5 +1,7 @@
 package org.apache.catalina;
 
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +9,7 @@ import java.util.Map;
 public class SessionManager implements Manager {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
     private SessionManager() {
     }
@@ -17,12 +19,12 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void add(final Session session) {
+    public void add(final HttpSession session) {
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public Session findSession(String id) throws IOException {
+    public HttpSession findSession(String id) throws IOException {
         if (id == null) {
             return null;
         }
@@ -30,7 +32,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(Session session) {
+    public void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
     }
 }

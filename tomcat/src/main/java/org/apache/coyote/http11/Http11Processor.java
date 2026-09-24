@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import org.apache.catalina.Session;
+import jakarta.servlet.http.HttpSession;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(HttpRequest httpRequest) throws IOException {
-        Session session = httpRequest.getSession(false);
+        HttpSession session = httpRequest.getSession(false);
         return session != null && session.getAttribute("user") != null;
     }
 
@@ -95,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = userOpt.get();
         String password = httpRequest.getBodyParameter("password");
         if (user.checkPassword(password)) {
-            Session session = httpRequest.getSession(true);
+            HttpSession session = httpRequest.getSession(true);
             session.setAttribute("user", user);
             log.info("로그인 성공! 아이디: {}", user.getAccount());
             String jsessionid = decideJsessionidToSet(httpRequest, session.getId());

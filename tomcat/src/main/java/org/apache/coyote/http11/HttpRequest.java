@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -102,8 +103,8 @@ public class HttpRequest {
         return "POST".equals(method) && "/register".equals(path);
     }
 
-    public Session getSession(boolean isCreate) throws IOException {
-        Session session = SESSION_MANAGER.findSession(httpCookie.getJsessionid());
+    public HttpSession getSession(boolean isCreate) throws IOException {
+        HttpSession session = SESSION_MANAGER.findSession(httpCookie.getJsessionid());
         if (isCreate && session == null) {
             String id = UUID.randomUUID().toString();
             Session newSession = new Session(id);

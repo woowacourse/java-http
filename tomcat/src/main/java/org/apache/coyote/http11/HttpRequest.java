@@ -13,6 +13,8 @@ public class HttpRequest {
     private Map<String, String> queries;
     private Map<String, String> headers;
     private String requestBody;
+    private final HttpCookie cookies;
+    private Session session;
 
     private HttpRequest(String method, String path, Map<String, String> queries, Map<String, String> headers, String requestBody) {
         this.method = method;
@@ -20,6 +22,7 @@ public class HttpRequest {
         this.queries = queries;
         this.headers = headers;
         this.requestBody = requestBody;
+        this.cookies = HttpCookie.parse(headers.get("Cookie"));
     }
 
     public static HttpRequest parseFrom(BufferedReader br) throws IOException {
@@ -141,5 +144,20 @@ public class HttpRequest {
 
     public String getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession(boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        String sessionId = cookies.get(HttpCookie.JSESSIONID);
+        session = SessionManager.getInstance().findSession(sessionId);
+
+        if (session == null && create) {
+            session = SessionManager.getInstance().createSession();
+        }
+
+        return session;
     }
 }

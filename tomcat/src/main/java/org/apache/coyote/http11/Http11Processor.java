@@ -76,6 +76,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(resourcePath) && request.getMethod().equals("GET")) {
+            Session session = request.getSession(false);
+            if (session != null && session.getAttribute("user") != null) {
+                return HttpResponse.found("/index.html");
+            }
+
             return HttpResponse.ok(CONTENT_TYPE_HTML, loadResponseBody("/login.html"));
         }
 
@@ -90,8 +95,14 @@ public class Http11Processor implements Runnable, Processor {
                 return HttpResponse.badRequest();
             }
 
-            if (login(userInfo)) {
-                return HttpResponse.found("/index.html");
+            Optional<User> user = login(userInfo);
+            if (user.isPresent()) {
+                Session session = request.getSession(true);
+                session.setAttribute("user", user.get());
+
+                HttpResponse response = HttpResponse.found("/index.html");
+                response.addCookie(HttpCookie.ofJSessionId(session.getId()));
+                return response;
             }
 
             return HttpResponse.found("/401.html");
@@ -135,22 +146,22 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private boolean login(Map<String, String> parameters) {
+    private Optional<User> login(Map<String, String> parameters) {
         String account = parameters.getOrDefault("account", "");
         String password = parameters.getOrDefault("password", "");
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
 
         if (user.get().checkPassword(password)) {
-            log.info("user : {}", user.toString());
-            return true;
+            log.info("user : {}", user.get());
+            return user;
         }
 
-        return false;
+        return Optional.empty();
     }
 
     private String findContentType(String resourcePath) {

@@ -8,6 +8,7 @@ public class HttpResponse {
     private final String contentType;
     private final String responseBody;
     private final String location;
+    private HttpCookie cookie;
 
     private HttpResponse(
             String status,
@@ -63,6 +64,10 @@ public class HttpResponse {
         );
     }
 
+    public void addCookie(HttpCookie cookie) {
+        this.cookie = cookie;
+    }
+
     public String convertString() {
         StringBuilder response = new StringBuilder()
                 .append("HTTP/1.1 ")
@@ -74,6 +79,12 @@ public class HttpResponse {
         if (location != null) {
             response.append("Location: ")
                     .append(location)
+                    .append(" \r\n");
+        }
+
+        if (cookie != null) {
+            response.append("Set-Cookie: ")
+                    .append(cookie.toHeaderValue())
                     .append(" \r\n");
         }
 

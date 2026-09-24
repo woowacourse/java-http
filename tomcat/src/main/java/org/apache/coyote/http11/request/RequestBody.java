@@ -4,7 +4,7 @@ public class RequestBody {
 
     private final String requestBody;
 
-    public RequestBody(String requestBody) {
+    public RequestBody(final String requestBody) {
         this.requestBody = requestBody;
     }
 

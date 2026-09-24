@@ -28,12 +28,12 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void add(Session session) {
+    public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public Session findSession(String id) {
+    public Session findSession(final String id) {
         if (id == null) {
             return null;
         }
@@ -41,7 +41,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(Session session) {
+    public void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }
 }

@@ -9,7 +9,7 @@ public enum ContentType {
 
     private final String value;
 
-    ContentType(String value) {
+    ContentType(final String value) {
         this.value = value;
     }
 
@@ -17,7 +17,7 @@ public enum ContentType {
         return value;
     }
 
-    public static ContentType fromResourceName(String resourceName) {
+    public static ContentType fromResourceName(final String resourceName) {
         final int extensionSeparator = resourceName.lastIndexOf('.');
         final String extension = resourceName.substring(extensionSeparator + 1);
 

@@ -1,18 +1,13 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.Manager;
-import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.HttpStatus;
-import org.apache.coyote.MimeType;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.HttpParseException;
 import org.apache.coyote.http11.request.Http11RequestProcessor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponseProcessor;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,20 +16,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
-    private static final byte[] DEFAULT_BODY = "Hello world!".getBytes();
-    private static final String USER_ATTRIBUTE = "user";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
     private final Manager manager;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection, final Manager manager) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping, final Manager manager) {
         this.connection = connection;
         this.manager = manager;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -47,109 +41,33 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            final HttpResponseProcessor responseProcessor = new HttpResponseProcessor(outputStream);
+            final HttpResponse httpResponse = new HttpResponse();
+
             try {
-                final HttpRequest httpRequest = new Http11RequestProcessor(inputStream).process();
-                if (processEndpoints(httpRequest, responseProcessor)) {
-                    return;
-                }
-                responseProcessor.sendStaticResource(httpRequest.getPath());
+                final HttpRequest httpRequest = new Http11RequestProcessor(inputStream, manager).process();
+                handleEndpoints(httpRequest, httpResponse);
+                attachSessionCookie(httpRequest, httpResponse);
             } catch (HttpParseException | URISyntaxException e) {
                 log.warn("잘못된 HTTP 요청입니다.");
-                responseProcessor.sendError(HttpStatus.BAD_REQUEST);
+                httpResponse.setError(HttpStatus.BAD_REQUEST);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                httpResponse.setError(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        } catch (IOException | UncheckedServletException e) {
+            outputStream.write(httpResponse.toHttpBytes());
+            outputStream.flush();
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private boolean processEndpoints(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
-        String requestPath = httpRequest.getPath();
-        if ("/".equals(requestPath)) {
-            responseProcessor.sendStaticResource(HttpStatus.OK, MimeType.TEXT_HTML, DEFAULT_BODY);
-            return true;
-        }
-        if ("/login".equals(requestPath)) {
-            processLogin(httpRequest, responseProcessor);
-            return true;
-        }
-        if ("/register".equals(requestPath)) {
-            if (httpRequest.isGet()) {
-                responseProcessor.sendStaticResource("/register.html");
-                return true;
-            }
-            if (httpRequest.isPost()) {
-                processRegister(httpRequest, responseProcessor);
-                return true;
-            }
-        }
-        return false;
+    private void handleEndpoints(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        requestMapping.getController(httpRequest).service(httpRequest, httpResponse);
     }
 
-    private void processRegister(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException {
-        Optional<String> account = httpRequest.getParameter("account");
-        Optional<String> password = httpRequest.getParameter("password");
-        Optional<String> email = httpRequest.getParameter("email");
-        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            responseProcessor.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        User user = new User(account.get(), password.get(), email.get());
-        InMemoryUserRepository.save(user);
-        log.info("registered user : {}", user);
-        responseProcessor.sendRedirect("/index.html");
-    }
-
-    private void processLogin(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
-        if (httpRequest.isGet()) {
-            showLoginPage(httpRequest, responseProcessor);
-            return;
-        }
-
-        Optional<String> account = httpRequest.getParameter("account");
-        Optional<String> password = httpRequest.getParameter("password");
-        if (account.isEmpty() || password.isEmpty()) {
-            responseProcessor.sendError(HttpStatus.BAD_REQUEST);
-            return;
-        }
-
-        Optional<User> loginUser = login(account.get(), password.get());
-        if (loginUser.isEmpty()) {
-            responseProcessor.sendRedirect("/401.html");
-            return;
-        }
-        doNewLogin(httpRequest, responseProcessor, loginUser.get());
-    }
-
-    private void showLoginPage(HttpRequest httpRequest, HttpResponseProcessor responseProcessor) throws IOException, URISyntaxException {
-        if (findSession(httpRequest).isPresent()) {
-            responseProcessor.sendRedirect("/index.html");
-            return;
-        }
-        responseProcessor.sendStaticResource("/login.html");
-    }
-
-    private Optional<HttpSession> findSession(HttpRequest httpRequest) throws IOException {
-        Optional<String> sessionId = httpRequest.getCookie(SessionManager.SESSION_ID)
-                .map(Cookie::value);
-        if (sessionId.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(manager.findSession(sessionId.get()));
-    }
-
-    private void doNewLogin(HttpRequest request, HttpResponseProcessor responseProcessor, User user) throws IOException {
-        findSession(request).ifPresent(manager::remove);
-        HttpSession session = manager.createSession();
-        session.setAttribute(USER_ATTRIBUTE, user);
-
-        Cookies cookies = Cookies.of(new Cookie(SessionManager.SESSION_ID, session.getId()));
-        responseProcessor.sendRedirect("/index.html", cookies);
-    }
-
-    private Optional<User> login(String account, String password) {
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
+    private void attachSessionCookie(HttpRequest request, HttpResponse response) {
+        request.createdSession().ifPresent(
+                session -> response.addCookie(new Cookie(HttpRequest.SESSION_ID, session.getId()))
+        );
     }
 }

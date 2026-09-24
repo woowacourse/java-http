@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.Manager;
 import org.apache.coyote.http11.HttpHeaders;
 
 import java.io.ByteArrayOutputStream;
@@ -14,16 +15,18 @@ public class Http11RequestProcessor {
     private static final char CR = '\r';
     private static final char LF = '\n';
     private final InputStream inputStream;
+    private final Manager manager;
 
-    public Http11RequestProcessor(InputStream inputStream) {
+    public Http11RequestProcessor(InputStream inputStream, Manager manager) {
         this.inputStream = inputStream;
+        this.manager = manager;
     }
 
     public HttpRequest process() throws IOException {
         RequestLine requestLine = RequestLine.from(readLine());
         HttpHeaders headers = readHeaders();
 
-        return new HttpRequest(requestLine, headers, readBody(headers.getContentLength()));
+        return new HttpRequest(requestLine, headers, readBody(headers.getContentLength()), manager);
     }
 
     private HttpHeaders readHeaders() throws IOException {

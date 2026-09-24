@@ -52,4 +52,10 @@ public class Cookies {
     public boolean isEmpty() {
         return cookies.isEmpty();
     }
+
+    public Cookies add(Cookie cookie) {
+        Map<String, Cookie> newCookies = new LinkedHashMap<>(cookies);
+        newCookies.put(cookie.name(), cookie);
+        return new Cookies(newCookies);
+    }
 }

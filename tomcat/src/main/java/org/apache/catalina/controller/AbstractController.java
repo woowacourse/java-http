@@ -15,11 +15,11 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) {
-
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        response.setError(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) {
-
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        response.setError(HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

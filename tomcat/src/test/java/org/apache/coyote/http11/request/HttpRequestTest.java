@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -78,5 +80,61 @@ class HttpRequestTest {
         // then
         assertThat(request.getBody().getRawBody())
                 .isEqualTo(body);
+    }
+
+    @Test
+    void getSession_existingSession_success() {
+        // given
+        final String sessionId = "existing-session-id";
+        final Session session = new Session(sessionId);
+
+        SessionManager.getInstance().add(session);
+
+        final String httpRequest = String.join(
+                "\r\n",
+                "GET /login HTTP/1.1",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                ""
+        );
+
+        final HttpRequest request = new HttpRequest(
+                new BufferedReader(
+                        new StringReader(httpRequest)
+                )
+        );
+
+        // when
+        final Session result = request.getSession();
+
+        // then
+        assertThat(result).isSameAs(session);
+    }
+
+    @Test
+    void getSession_withoutCookie_createSession_success() {
+        // given
+        final String httpRequest = String.join(
+                "\r\n",
+                "GET /login HTTP/1.1",
+                "",
+                ""
+        );
+
+        // when
+        final HttpRequest request = new HttpRequest(
+                new BufferedReader(
+                        new StringReader(httpRequest)
+                )
+        );
+
+        // then
+        assertThat(request.getSession()).isNotNull();
+        assertThat(request.isNewSession()).isTrue();
+
+        assertThat(
+                SessionManager.getInstance()
+                        .findSession(request.getSession().getId())
+        ).isSameAs(request.getSession());
     }
 }

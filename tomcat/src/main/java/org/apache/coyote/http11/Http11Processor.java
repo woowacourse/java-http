@@ -8,11 +8,9 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 
@@ -65,18 +63,19 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String statusLine = "200 OK";
-            byte[] responseBody = createResponseBody(request.getPath());
-            if (responseBody == null) {
-                statusLine = "404 Not Found";
-                responseBody = createResponseBody("/404.html");
+            String path = request.getPath();
+            if (path.equals("/")) {
+                response.setStatus("200 OK");
+                response.addHeader("Content-Type", "text/html;charset=utf-8");
+                response.setBody("Hello world!".getBytes(StandardCharsets.UTF_8));
+                response.send();
+                return;
             }
-            String contentType = determineContentType(request.getPath());
 
-            response.setStatus(statusLine);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(responseBody);
-            response.send();
+            if (path.equals("/login") || path.equals("/register")) {
+                path += ".html";
+            }
+            response.forward(path);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -115,26 +114,4 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private byte[] createResponseBody(final String path) throws IOException {
-        if (path.equals("/")) {
-            return "Hello world!".getBytes();
-        }
-        String resourcePath = path;
-        if (path.equals("/login") || path.equals("/register")) {
-            resourcePath = path + ".html";
-        }
-        final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
-        if (resource == null) {
-            return null;
-        }
-        final File file = new File(resource.getFile());
-        return Files.readAllBytes(file.toPath());
-    }
-
-    private String determineContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
-    }
 }

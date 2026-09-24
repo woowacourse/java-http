@@ -3,7 +3,6 @@ package com.techcourse.api.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -26,11 +25,10 @@ public final class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
-        final Map<String, String> parameters = parseRequestBody(request);
         final User user = new User(
-                parameters.get("account"),
-                parameters.get("password"),
-                parameters.get("email")
+                request.getParameter("account"),
+                request.getParameter("password"),
+                request.getParameter("email")
         );
 
         InMemoryUserRepository.save(user);

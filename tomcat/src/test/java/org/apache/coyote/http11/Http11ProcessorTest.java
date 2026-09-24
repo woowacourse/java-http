@@ -254,7 +254,7 @@ class Http11ProcessorTest {
         // then
         Optional<User> user = InMemoryUserRepository.findByAccount("gugu");
         assertThat(user.isPresent()).isTrue();
-        assertThat(user.get().toString()).contains("email='hkkang%40woowahan.com'");
+        assertThat(user.get().toString()).contains("email='hkkang@woowahan.com'");
     }
 
     @Test

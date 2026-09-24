@@ -3,7 +3,6 @@ package com.techcourse.api.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -45,9 +44,8 @@ public final class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
-        final Map<String, String> parameters = parseRequestBody(request);
-        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(parameters.get("account"))
-                .filter(user -> user.checkPassword(parameters.get("password")));
+        final Optional<User> loginUser = InMemoryUserRepository.findByAccount(request.getParameter("account"))
+                .filter(user -> user.checkPassword(request.getParameter("password")));
 
         if (loginUser.isEmpty()) {
             response.setStatus(HttpStatus.UNAUTHORIZED);

@@ -19,6 +19,15 @@ public class ResponseHeaders {
         ).add(value);
     }
 
+    public void setHeader(final String name, final String value) {
+        final String normalizedName = name.toLowerCase(Locale.ROOT);
+
+        headers.put(
+                normalizedName,
+                new ArrayList<>(List.of(value))
+        );
+    }
+
     public String getHeader(final String name) {
         final String normalizedName = name.toLowerCase(Locale.ROOT);
         final List<String> values = headers.get(normalizedName);

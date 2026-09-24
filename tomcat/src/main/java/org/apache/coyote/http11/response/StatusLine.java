@@ -2,9 +2,9 @@ package org.apache.coyote.http11.response;
 
 public class StatusLine {
 
-    private String version;
-    private int statusCode;
-    private String reasonPhrase;
+    private final String version;
+    private final int statusCode;
+    private final String reasonPhrase;
 
     public StatusLine(
             final String version,

@@ -5,10 +5,10 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -46,15 +46,15 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line = bufferedReader.readLine();
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        String line = readLine(bufferedInputStream);
         StringTokenizer stringTokenizer = new StringTokenizer(line, " ");
         String method = stringTokenizer.nextToken();
         String requestUri = stringTokenizer.nextToken();
         String version = stringTokenizer.nextToken();
         Map<String, String> httpRequestHeaders = new HashMap<>();
 
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
+        while (!(line = readLine(bufferedInputStream)).isEmpty()) {
             String[] header = line.split(":", 2);
             httpRequestHeaders.put(header[0].strip(), header[1].strip());
         }
@@ -63,7 +63,7 @@ public class HttpRequest {
         if (method.equals("GET")) {
             return createGetRequest(method, requestUri, version, httpRequestHeaders, httpCookie);
         }
-        return createPostRequest(method, requestUri, version, httpRequestHeaders, bufferedReader, httpCookie);
+        return createPostRequest(method, requestUri, version, httpRequestHeaders, bufferedInputStream, httpCookie);
     }
 
     public boolean isRoot() {
@@ -126,6 +126,38 @@ public class HttpRequest {
         return "";
     }
 
+    private static String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream line = new ByteArrayOutputStream();
+
+        int current;
+        while ((current = inputStream.read()) != '\r' && current != -1) {
+            line.write(current);
+        }
+
+        if (current == -1) {
+            return convertLineOrNull(line);
+        }
+        validateLineFeed(inputStream);
+        return convertToString(line);
+    }
+
+    private static String convertLineOrNull(ByteArrayOutputStream line) {
+        if (line.size() == 0) {
+            return null;
+        }
+        return convertToString(line);
+    }
+
+    private static void validateLineFeed(InputStream inputStream) throws IOException {
+        if (inputStream.read() != '\n') {
+            throw new IOException("잘못된 HTTP 줄바꿈입니다.");
+        }
+    }
+
+    private static String convertToString(ByteArrayOutputStream line) {
+        return line.toString(StandardCharsets.ISO_8859_1);
+    }
+
     private static HttpRequest createGetRequest(
             String method, String requestUri, String version,
             Map<String, String> httpRequestHeaders, HttpCookie httpCookie) {
@@ -140,11 +172,15 @@ public class HttpRequest {
 
     private static HttpRequest createPostRequest(
             String method, String requestUri, String version, Map<String, String> httpRequestHeaders,
-            BufferedReader bufferedReader, HttpCookie httpCookie) throws IOException {
+            InputStream inputStream, HttpCookie httpCookie) throws IOException {
         int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
+        byte[] body = inputStream.readNBytes(contentLength);
+
+        if (body.length != contentLength) {
+            throw new IOException("요청 본문의 길이가 Content-Length와 일치하지 않습니다.");
+        }
+
+        String requestBody = new String(body, StandardCharsets.UTF_8);
         return new HttpRequest(
                 method, requestUri, Map.of(), version, httpRequestHeaders, parseParameters(requestBody), httpCookie);
     }

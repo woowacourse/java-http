@@ -40,7 +40,7 @@
     - [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
     - [x] 회원가입을 완료하면 index.html로 리다이렉트한다.
   - [x] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경한다.
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기
   - [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
   - [ ] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크한다.

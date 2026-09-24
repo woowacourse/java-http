@@ -52,13 +52,14 @@ class Http11ProcessorTest {
 
         // then
         final byte[] resource = readResource("static/404.html");
-        var expected = "HTTP/1.1 404 Not Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resource.length + " \r\n" +
-                "\r\n"+
-                new String(resource);
+        var expected = List.of(
+                "HTTP/1.1 404 Not Found \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: " + resource.length + " \r\n",
+                new String(resource)
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @Test
@@ -79,13 +80,14 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = List.of(
+                "HTTP/1.1 200 OK \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: 5564 \r\n",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @DisplayName("로그인에 성공하면 응답 헤더에 HTTP Status Code를 302로 반환하고 /index.html로 리다이렉트 한다.")
@@ -109,12 +111,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
+        var expected = List.of(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: /index.html \r\n",
+                "Content-Length: 0 \r\n"
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @DisplayName("로그인에 실패하면 401.html로 리다이렉트 한다.")
@@ -138,12 +141,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /401.html \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
+        var expected = List.of(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: /401.html \r\n",
+                "Content-Length: 0 \r\n"
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @DisplayName("/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.")
@@ -165,13 +169,14 @@ class Http11ProcessorTest {
 
         // then
         final byte[] resource = readResource("static/register.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+ resource.length + " \r\n" +
-                "\r\n"+
-                new String(resource);
+        var expected = List.of(
+                "HTTP/1.1 200 OK \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: "+ resource.length + " \r\n",
+                new String(resource)
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @DisplayName("회원가입을 완료하면 /index.html로 리다이렉트 한다.")
@@ -195,12 +200,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
+        var expected = List.of(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: /index.html \r\n",
+                "Content-Length: 0 \r\n"
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @DisplayName("회원가입에 실패하면 상태코드 400을 반환한다.")
@@ -225,13 +231,40 @@ class Http11ProcessorTest {
 
         // then
         final byte[] resource = readResource("static/register.html");
-        var expected = "HTTP/1.1 400 Bad Request \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+ resource.length + " \r\n" +
-                "\r\n"+
-                new String(resource);
+        var expected = List.of(
+                "HTTP/1.1 400 Bad Request \r\n",
+                "Content-Type: text/html;charset=utf-8 \r\n",
+                "Content-Length: "+ resource.length + " \r\n",
+                new String(resource)
+        );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @DisplayName("브라우저에 세션 ID가 저장되어 있지 않으면, 세션 ID를 쿠키로 저장한다.")
+    @Test
+    void saveSessionIDAsCookieWhenLoginSucceeds() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = List.of(
+                "Set-Cookie:",
+                "JSESSIONID="
+        );
+
+        assertThat(socket.output()).contains(expected);
     }
 
     private byte[] readResource(String resourceName) throws IOException {

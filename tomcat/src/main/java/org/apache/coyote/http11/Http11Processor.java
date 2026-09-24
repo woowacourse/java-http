@@ -18,8 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,10 +50,16 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> messageHeaders = readMessageHeaders(inputStream);
 
+            final Map<String, String> responseHeader  = new HashMap<>();
+
+            final HttpCookie httpCookie = HttpCookie.from(messageHeaders.get("Cookie"));
+            if (!httpCookie.contains("JSESSIONID")) {
+                responseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            }
+
             final int contentLength = Integer.parseInt(messageHeaders.getOrDefault("Content-Length", "0"));
             final String messageBody = readMessageBody(contentLength, inputStream);
-
-            final String response = handleRequest(requestLine, messageBody);
+            final String response = handleRequest(requestLine, messageBody, responseHeader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -87,21 +95,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(final String requestLine, final String messageBody) throws IOException {
+    private String handleRequest(final String requestLine, final String messageBody, final Map<String, String> responseHeaders) throws IOException {
         final String[] parsedRequestLine = requestLine.split("\\s+");
 
         final String httpMethod = parsedRequestLine[0];
         final String requestTarget = parsedRequestLine[1];
 
         if (httpMethod.equals("GET")) {
-            return handleGetRequest(requestTarget);
+            return handleGetRequest(requestTarget, responseHeaders);
         }
 
         if (httpMethod.equals("POST")) {
-            return handlePostRequest(requestTarget, messageBody);
+            return handlePostRequest(requestTarget, messageBody, responseHeaders);
         }
 
-        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html");
+        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
     }
 
     private Map<String, String> readMessageHeaders(final InputStream reader) throws IOException {
@@ -122,52 +130,64 @@ public class Http11Processor implements Runnable, Processor {
         return new String(messageBody);
     }
 
-    private String handleGetRequest(final String requestTarget) throws IOException {
+    private String handleGetRequest(final String requestTarget, final Map<String, String> responseHeaders) throws IOException {
         if (requestTarget.equals("/")) {
-            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html");
+            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html", responseHeaders);
         }
 
         if (requestTarget.equals("/login")) {
-            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html");
+            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html", responseHeaders);
         }
 
         if (requestTarget.equals("/register")) {
-            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/register.html");
+            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/register.html", responseHeaders);
         }
 
-        return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + requestTarget);
+        return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + requestTarget, responseHeaders);
     }
 
-    private String createForwardResponse(final HttpStatusCode httpStatusCode, final String resourcePath) throws IOException {
+    private String createForwardResponse(final HttpStatusCode httpStatusCode, final String resourcePath, final Map<String, String> responseHeaders) throws IOException {
+        final String headers = parseResponseHeaders(responseHeaders);
         final String contentType = URLConnection.guessContentTypeFromName(resourcePath);
-        final var responseBody = readResource(resourcePath);
+        final String responseBody = readResource(resourcePath);
 
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
+                headers,
                 "",
                 responseBody);
     }
 
-    private String handlePostRequest(final String requestTarget, final String messageBody) throws IOException {
+    private String parseResponseHeaders(final Map<String, String> responseHeaders) {
+        final StringBuilder response = new StringBuilder();
+        for (Entry<String, String> entry : responseHeaders.entrySet()) {
+            response.append(entry.getKey()).append(": ");
+            response.append(entry.getValue()).append(" ");
+            response.append("\r\n");
+        }
+        return response.toString();
+    }
+
+    private String handlePostRequest(final String requestTarget, final String messageBody, final Map<String, String> responseHeaders) throws IOException {
         if (requestTarget.equals("/login")) {
             final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(messageBody);
             if (hasLoginSucceeded) {
-                return createRedirectResponse(HttpStatusCode.FOUND, "/index.html");
+                return createRedirectResponse("/index.html", responseHeaders);
             }
-            return createRedirectResponse(HttpStatusCode.FOUND, "/401.html");
+            return createRedirectResponse("/401.html", responseHeaders);
         }
 
         if (requestTarget.equals("/register")) {
             final boolean isRegistered  = registerNewUser(messageBody);
             if (isRegistered) {
-                return createRedirectResponse(HttpStatusCode.FOUND, "/index.html");
+                return createRedirectResponse("/index.html", responseHeaders);
             }
-            return createForwardResponse(HttpStatusCode.BAD_REQUEST, DEFAULT_RESOURCE_FOLDER + "/register.html");
+            return createForwardResponse(HttpStatusCode.BAD_REQUEST, DEFAULT_RESOURCE_FOLDER + "/register.html", responseHeaders);
         }
 
-        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html");
+        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
     }
 
     private boolean loginAndRetrieveUserInfo(final String requestURI) {
@@ -202,11 +222,13 @@ public class Http11Processor implements Runnable, Processor {
         return queryPairs;
     }
 
-    private String createRedirectResponse(final HttpStatusCode httpStatusCode, final String redirectURL) {
+    private String createRedirectResponse(final String redirectURL, final Map<String, String> responseHeaders) {
+        final String headers = parseResponseHeaders(responseHeaders);
         return String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
+                "HTTP/1.1 " + HttpStatusCode.FOUND.getStatusCode() + " " + HttpStatusCode.FOUND.getReasonPhrase() + " ",
                 "Location: " + redirectURL + " ",
                 "Content-Length: 0 ",
+                headers,
                 "",
                 ""
         );

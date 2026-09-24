@@ -46,7 +46,12 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = readLine(inputStream);
             if (requestLine == null) return;
 
-            final String response = handleRequest(requestLine, inputStream);
+            final Map<String, String> messageHeaders = readMessageHeaders(inputStream);
+
+            final int contentLength = Integer.parseInt(messageHeaders.getOrDefault("Content-Length", "0"));
+            final String messageBody = readMessageBody(contentLength, inputStream);
+
+            final String response = handleRequest(requestLine, messageBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -82,14 +87,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(final String requestLine, final InputStream inputStream) throws IOException {
+    private String handleRequest(final String requestLine, final String messageBody) throws IOException {
         final String[] parsedRequestLine = requestLine.split("\\s+");
 
         final String httpMethod = parsedRequestLine[0];
         final String requestTarget = parsedRequestLine[1];
-
-        final int contentLength = getContentLength(inputStream);
-        final String messageBody = readMessageBody(contentLength, inputStream);
 
         if (httpMethod.equals("GET")) {
             return handleGetRequest(requestTarget);
@@ -99,12 +101,7 @@ public class Http11Processor implements Runnable, Processor {
             return handlePostRequest(requestTarget, messageBody);
         }
 
-        return createResponse(new ForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html"));
-    }
-
-    private int getContentLength(final InputStream reader) throws IOException {
-        final Map<String, String> messageHeaders = readMessageHeaders(reader);
-        return Integer.parseInt(messageHeaders.getOrDefault("Content-Length", "0"));
+        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html");
     }
 
     private Map<String, String> readMessageHeaders(final InputStream reader) throws IOException {
@@ -125,10 +122,25 @@ public class Http11Processor implements Runnable, Processor {
         return new String(messageBody);
     }
 
-    private String createResponse(final ForwardResponse redirectResponse) throws IOException {
-        final HttpStatusCode httpStatusCode = redirectResponse.httpStatusCode();
-        final String contentType = URLConnection.guessContentTypeFromName(redirectResponse.resourcePath());
-        final var responseBody = readResource(redirectResponse.resourcePath());
+    private String handleGetRequest(final String requestTarget) throws IOException {
+        if (requestTarget.equals("/")) {
+            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html");
+        }
+
+        if (requestTarget.equals("/login")) {
+            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html");
+        }
+
+        if (requestTarget.equals("/register")) {
+            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/register.html");
+        }
+
+        return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + requestTarget);
+    }
+
+    private String createForwardResponse(final HttpStatusCode httpStatusCode, final String resourcePath) throws IOException {
+        final String contentType = URLConnection.guessContentTypeFromName(resourcePath);
+        final var responseBody = readResource(resourcePath);
 
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
@@ -138,51 +150,24 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String createResponse(final RedirectResponse redirectResponse) {
-        final HttpStatusCode httpStatusCode = redirectResponse.httpStatusCode();
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
-                "Location: " + redirectResponse.redirectURL() + " ",
-                "Content-Length: 0 ",
-                "",
-                ""
-        );
-    }
-
-    private String handleGetRequest(final String requestTarget) throws IOException {
-        if (requestTarget.equals("/")) {
-            return createResponse(new ForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html"));
-        }
-
-        if (requestTarget.equals("/login")) {
-            return createResponse(new ForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html"));
-        }
-
-        if (requestTarget.equals("/register")) {
-            return createResponse(new ForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/register.html"));
-        }
-
-        return createResponse(new ForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + requestTarget));
-    }
-
     private String handlePostRequest(final String requestTarget, final String messageBody) throws IOException {
         if (requestTarget.equals("/login")) {
             final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(messageBody);
             if (hasLoginSucceeded) {
-                return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/index.html"));
+                return createRedirectResponse(HttpStatusCode.FOUND, "/index.html");
             }
-            return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/401.html"));
+            return createRedirectResponse(HttpStatusCode.FOUND, "/401.html");
         }
 
         if (requestTarget.equals("/register")) {
             final boolean isRegistered  = registerNewUser(messageBody);
             if (isRegistered) {
-                return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/index.html"));
+                return createRedirectResponse(HttpStatusCode.FOUND, "/index.html");
             }
-            return createResponse(new ForwardResponse(HttpStatusCode.BAD_REQUEST, DEFAULT_RESOURCE_FOLDER + "/register.html"));
+            return createForwardResponse(HttpStatusCode.BAD_REQUEST, DEFAULT_RESOURCE_FOLDER + "/register.html");
         }
 
-        return createResponse(new ForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html"));
+        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html");
     }
 
     private boolean loginAndRetrieveUserInfo(final String requestURI) {
@@ -215,6 +200,16 @@ public class Http11Processor implements Runnable, Processor {
             queryPairs.put(key, value);
         }
         return queryPairs;
+    }
+
+    private String createRedirectResponse(final HttpStatusCode httpStatusCode, final String redirectURL) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
+                "Location: " + redirectURL + " ",
+                "Content-Length: 0 ",
+                "",
+                ""
+        );
     }
 
     private boolean registerNewUser(final String messageBody) {

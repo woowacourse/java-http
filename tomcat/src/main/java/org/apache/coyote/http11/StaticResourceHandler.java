@@ -9,7 +9,7 @@ public class StaticResourceHandler {
 
     public void handle(final HttpRequest request, final HttpResponse response) throws IOException {
         final String filePath = getFilePath(request, response);
-        final String body = readResource(filePath);
+        final String body = readResource(request, response);
         response.addBody(body);
         if (!response.hasStatusLine()) {
             response.addStatusLine(StatusLine.http11(HttpStatus.OK));
@@ -25,7 +25,8 @@ public class StaticResourceHandler {
         return request.path();
     }
 
-    private String readResource(final String filePath) throws IOException {
+    private String readResource(final HttpRequest request, final HttpResponse response) throws IOException {
+        final String filePath = getFilePath(request, response);
         if (filePath.equals("/")) {
             return "Hello world!";
         }
@@ -33,10 +34,20 @@ public class StaticResourceHandler {
 
         final URL resource = getClass().getResource(staticResourceTarget);
         if (resource == null) {
-            throw new RuntimeException("요청한 리소스가 존재하지 않습니다 (filePath: " + staticResourceTarget);
+            response.addStatusLine(StatusLine.http11(HttpStatus.NOT_FOUND));
+            return readNotFound();
         }
 
         return new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+    }
+
+    private String readNotFound() throws IOException {
+        final URL notFoundResource = getClass().getResource("/static/404.html");
+
+        if (notFoundResource == null) {
+            throw new RuntimeException("404.html이 존재하지 않습니다.");
+        }
+        return new String(Files.readAllBytes(new File(notFoundResource.getPath()).toPath()));
     }
 
     private String getContentType(final String filePath) {

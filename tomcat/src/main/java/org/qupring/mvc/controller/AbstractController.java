@@ -3,6 +3,7 @@ package org.qupring.mvc.controller;
 import org.apache.http.HttpMethod;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
+import org.qupring.file.HtmlReader;
 
 public abstract class AbstractController implements Controller {
 
@@ -15,7 +16,11 @@ public abstract class AbstractController implements Controller {
 
         if (request.getHttpMethod() == HttpMethod.POST) {
             doPost(request, response);
+            return;
         }
+
+        response.setBody(HtmlReader.read("static/404.html"));
+        response.setStatus(404);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

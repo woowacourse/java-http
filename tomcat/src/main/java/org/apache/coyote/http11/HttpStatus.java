@@ -4,7 +4,6 @@ public enum HttpStatus {
     OK("OK", 200),
     FOUND("Found", 302),
     SEE_OTHER("See Other", 303),
-    PERMANENT_REDIRECT("Permanent Redirect", 308),
     UNAUTHORIZED("Unauthorized", 401),
     NOT_FOUND("Not Found", 404);
 
@@ -21,5 +20,10 @@ public enum HttpStatus {
     }
     public int code() {
         return code;
+    }
+
+    @Override
+    public String toString() {
+        return code + " " + name;
     }
 }

@@ -26,7 +26,7 @@ class Http11ProcessorTest {
     void setUp() {
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.remove(SESSION_ID);
-        sessionManager.add(new Session(SESSION_ID));
+        sessionManager.add(Session.init(SESSION_ID));
     }
 
     @Test
@@ -114,6 +114,54 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"/index", "/login", "/register"})
+    void 세션이_필요하지_않은_GET_요청은_세션_쿠키를_발급하지_않는다(
+        final String path
+    ) {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "GET " + path + " HTTP/1.1",
+            "Host: localhost:8080",
+            "",
+            "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void 존재하지_않는_정적_리소스를_요청하면_404를_응답한다() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "GET /not-found.html HTTP/1.1",
+            "Host: localhost:8080",
+            "",
+            "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+        final String expected = String.join("\r\n",
+            "HTTP/1.1 404 Not Found ",
+            "Content-Type: text/html;charset=utf-8 ",
+            String.format("Content-Length: %d ", body.getBytes().length),
+            "",
+            body);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     private String parseExtension(String filePath) {
         final int startIndex = filePath.indexOf(".");
         return filePath.substring(startIndex + 1);
@@ -181,10 +229,7 @@ class Http11ProcessorTest {
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index ",
-                "Content-Type: text/html;charset=utf-8 ",
-                String.format("Content-Length: %d ", body.getBytes().length),
-                "",
-                body);
+                "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -210,15 +255,10 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
-                "",
-                body);
+                "Location: /index ",
+                "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -248,8 +288,8 @@ class Http11ProcessorTest {
             assertAll(
                 () -> assertThat(actual).contains(
                     "HTTP/1.1 302 Found ",
-                    "Location: /index.html ",
-                    "Content-Type: text/html;charset=utf-8 "),
+                    "Location: /index ",
+                    "Content-Length: 0 "),
                 () -> assertThat(actual).containsPattern(
                     "Set-Cookie: JSESSIONID=[^;]+")
             );
@@ -282,12 +322,56 @@ class Http11ProcessorTest {
             assertAll(
                 () -> assertThat(actual).contains(
                     "HTTP/1.1 302 Found ",
-                    "Location: /index.html ",
-                    "Content-Type: text/html;charset=utf-8 "),
+                    "Location: /index "),
                 () -> assertThat(actual).containsPattern(
                     "Set-Cookie: JSESSIONID=[^;]+")
                     .doesNotContain("Set-Cookie: JSESSIONID=wrong-jsessionid")
             );
+        }
+
+        @Test
+        void 로그인에_실패하면_세션_쿠키를_발급하지_않는다() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: 36",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=wrong-password");
+            final StubSocket socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output())
+                .startsWith("HTTP/1.1 401 Unauthorized ")
+                .doesNotContain("Set-Cookie");
+        }
+
+        @Test
+        void 존재하지_않는_세션_ID로_로그인에_실패해도_세션_쿠키를_발급하지_않는다() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: 36",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Cookie: JSESSIONID=unknown-session-id",
+                "",
+                "account=gugu&password=wrong-password");
+            final StubSocket socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output())
+                .startsWith("HTTP/1.1 401 Unauthorized ")
+                .doesNotContain("Set-Cookie");
         }
 
 
@@ -316,7 +400,6 @@ class Http11ProcessorTest {
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ",
-                "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
@@ -350,7 +433,6 @@ class Http11ProcessorTest {
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ",
-                "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
@@ -414,15 +496,10 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 303 See Other ",
                 "Location: /index ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
-                "",
-                body);
+                "Content-Length: 0 ");
 
             assertThat(socket.output()).isEqualTo(expected);
         }

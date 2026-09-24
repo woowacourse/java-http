@@ -7,10 +7,24 @@ public class Session {
 
     private final String id;
     private final Map<String, Object> values;
+    private boolean created;
 
-    public Session(final String id) {
+    private Session(final String id, final boolean created) {
         this.id = id;
+        this.created = created;
         this.values = new LinkedHashMap<>();
+    }
+
+    public static Session init(final String id) {
+        return new Session(id, true);
+    }
+
+    public void found() {
+        this.created = false;
+    }
+
+    public boolean isCreated() {
+        return created;
     }
 
     public String id() {

@@ -79,7 +79,12 @@ public class Http11Processor implements Runnable, Processor {
             } else if (requestPath.startsWith("/register") && requestMethod.equals("POST")) {
                 User user = new User(formParameters.get("account"), formParameters.get("password"), formParameters.get("email"));
                 InMemoryUserRepository.save(user);
-                httpResponse = createRegisterSuccessResponse();
+
+                Session session = getSession(requestHeaders, true);
+                session.setAttribute("user", user);
+                HttpCookie cookie = new HttpCookie(session.getId());
+
+                httpResponse = createRegisterSuccessResponse(List.of(cookie.toString()));
                 log.info("회원가입 성공 : {}", user.toString());
             } else {
                 httpResponse = createResourceResponse(requestPath);
@@ -260,10 +265,11 @@ public class Http11Processor implements Runnable, Processor {
                 new byte[0]);
     }
 
-    private HttpResponse createRegisterSuccessResponse() {
+    private HttpResponse createRegisterSuccessResponse(List<String> httpCookie) {
         return new HttpResponse(
                 "302 FOUND ",
-                Map.of("Location", List.of("/index.html")),
+                Map.of("Location", List.of("/index.html"),
+                        "Set-Cookie", httpCookie),
                 new byte[0]);
     }
 

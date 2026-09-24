@@ -3,9 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.IOException;
 import java.util.UUID;
-import org.apache.catalina.Manager;
 import org.apache.coyote.http11.Http11Processor.Session;
 import org.apache.coyote.http11.Http11Processor.SessionManager;
 import org.junit.jupiter.api.Test;
@@ -27,8 +25,8 @@ class SessionTest {
     }
 
     @Test
-    void Manager로_세션을_등록하고_조회하고_삭제한다() throws IOException {
-        Manager manager = SessionManager.getInstance();
+    void Manager로_세션을_등록하고_조회하고_삭제한다() {
+        SessionManager manager = SessionManager.getInstance();
         Session session = new Session(UUID.randomUUID().toString());
         manager.add(session);
 

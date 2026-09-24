@@ -3,9 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.http.HttpSessionContext;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -16,14 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             SessionManager sessionManager = SessionManager.getInstance();
-            HttpSession session = sessionManager.findSession(cookie.get("JSESSIONID"));
+            Session session = sessionManager.findSession(cookie.get("JSESSIONID"));
 
             HttpStatus httpStatus = HttpStatus.OK;
             if (method.equals("GET") && path.equals("static/login.html")
@@ -283,7 +277,7 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    public static class Session implements HttpSession {
+    public static class Session {
 
         private final String id;
         private final Map<String, Object> values = new HashMap<>();
@@ -293,12 +287,10 @@ public class Http11Processor implements Runnable, Processor {
             this.id = id;
         }
 
-        @Override
         public String getId() {
             return id;
         }
 
-        @Override
         public void setAttribute(String name, Object value) {
             checkValid();
             if (value == null) {
@@ -308,19 +300,16 @@ public class Http11Processor implements Runnable, Processor {
             values.put(name, value);
         }
 
-        @Override
         public Object getAttribute(String name) {
             checkValid();
             return values.get(name);
         }
 
-        @Override
         public void removeAttribute(String name) {
             checkValid();
             values.remove(name);
         }
 
-        @Override
         public void invalidate() {
             checkValid();
             SessionManager.getInstance().remove(id);
@@ -334,78 +323,11 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        @Override
-        public Enumeration<String> getAttributeNames() {
-            checkValid();
-            return Collections.enumeration(values.keySet());
-        }
-
-        @Override
-        @Deprecated
-        public Object getValue(String name) {
-            return getAttribute(name);
-        }
-
-        @Override
-        @Deprecated
-        public String[] getValueNames() {
-            checkValid();
-            return values.keySet().toArray(new String[0]);
-        }
-
-        @Override
-        @Deprecated
-        public void putValue(String name, Object value) {
-            setAttribute(name, value);
-        }
-
-        @Override
-        @Deprecated
-        public void removeValue(String name) {
-            removeAttribute(name);
-        }
-
-        // 아래 HttpSession API는 이번 로그인 미션에서 사용하지 않는다.
-        @Override
-        public long getCreationTime() {
-            throw new UnsupportedOperationException("세션 생성 시간은 아직 지원하지 않습니다.");
-        }
-
-        @Override
-        public long getLastAccessedTime() {
-            throw new UnsupportedOperationException("세션 접근 시간은 아직 지원하지 않습니다.");
-        }
-
-        @Override
-        public ServletContext getServletContext() {
-            throw new UnsupportedOperationException("ServletContext는 아직 지원하지 않습니다.");
-        }
-
-        @Override
-        public void setMaxInactiveInterval(int interval) {
-            throw new UnsupportedOperationException("세션 만료 시간은 아직 지원하지 않습니다.");
-        }
-
-        @Override
-        public int getMaxInactiveInterval() {
-            throw new UnsupportedOperationException("세션 만료 시간은 아직 지원하지 않습니다.");
-        }
-
-        @Override
-        @Deprecated
-        public HttpSessionContext getSessionContext() {
-            throw new UnsupportedOperationException("HttpSessionContext는 지원하지 않습니다.");
-        }
-
-        @Override
-        public boolean isNew() {
-            throw new UnsupportedOperationException("신규 세션 여부는 아직 지원하지 않습니다.");
-        }
     }
 
-    public static class SessionManager implements Manager {
+    public static class SessionManager {
 
-        private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+        private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
         private static final SessionManager INSTANCE = new SessionManager();
 
         private SessionManager() {
@@ -415,21 +337,18 @@ public class Http11Processor implements Runnable, Processor {
             return INSTANCE;
         }
 
-        @Override
-        public void add(final HttpSession session) {
+        public void add(final Session session) {
             SESSIONS.put(session.getId(), session);
         }
 
-        @Override
-        public HttpSession findSession(final String id) {
+        public Session findSession(final String id) {
             if (id == null) {
                 return null;
             }
             return SESSIONS.get(id);
         }
 
-        @Override
-        public void remove(final HttpSession session) {
+        public void remove(final Session session) {
             remove(session.getId());
         }
 

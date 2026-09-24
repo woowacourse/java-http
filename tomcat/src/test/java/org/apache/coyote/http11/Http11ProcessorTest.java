@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import jakarta.servlet.http.HttpSession;
 import java.net.URISyntaxException;
+import org.apache.coyote.http11.Http11Processor.Session;
 import org.apache.coyote.http11.Http11Processor.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -36,7 +36,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains("Location: /index.html");
         assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
 
-        HttpSession session = SessionManager.getInstance().findSession(findSessionId(socket));
+        Session session = SessionManager.getInstance().findSession(findSessionId(socket));
         assertThat(session.getAttribute("user"))
                 .isEqualTo(InMemoryUserRepository.findByAccount("gugu").orElseThrow());
     }

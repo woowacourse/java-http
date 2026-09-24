@@ -7,7 +7,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
@@ -85,9 +84,7 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        // TODO: 세션 생성 책임을 processor로부터 분리
-        final Session session = new Session(UUID.randomUUID().toString());
-        sessionManager.add(session);
+        final Session session = sessionManager.createSession(null);
         response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 

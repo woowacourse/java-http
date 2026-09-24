@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
@@ -16,12 +17,26 @@ public class SessionManager implements Manager {
     }
 
     @Override
+    public Session createSession(final String sessionId) {
+        final String id = sessionId == null
+                ? UUID.randomUUID().toString()
+                : sessionId;
+
+        final Session session = new Session(id);
+        add(session);
+        return session;
+    }
+
+    @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 

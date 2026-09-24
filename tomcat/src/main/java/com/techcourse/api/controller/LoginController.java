@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -31,7 +30,7 @@ public final class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         final Session session = findSession(request);
-        if (session != null && session.getAttribute("user") != null) {
+        if (isLoggedIn(session)) {
             response.setStatus(HttpStatus.FOUND);
             response.setContentType(ContentType.HTML);
             response.setBody(HttpResponse.resolveResource(INDEX_PAGE));
@@ -66,17 +65,17 @@ public final class LoginController extends AbstractController {
         response.setContentType(ContentType.HTML);
         response.setBody(HttpResponse.resolveResource(INDEX_PAGE));
         response.setHeader("Location", INDEX_PAGE);
-        if (request.getSessionId() == null) {
+        if (!session.getId().equals(request.getSessionId())) {
             response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
         }
     }
 
+    private boolean isLoggedIn(final Session session) {
+        return session != null && session.getAttribute("user") != null;
+    }
+
     private Session findSession(final HttpRequest request) throws IOException {
-        final String sessionId = request.getSessionId();
-        if (sessionId == null) {
-            return null;
-        }
-        return sessionManager.findSession(sessionId);
+        return sessionManager.findSession(request.getSessionId());
     }
 
     private Session getOrCreateSession(final HttpRequest request) throws IOException {
@@ -84,13 +83,7 @@ public final class LoginController extends AbstractController {
         if (session != null) {
             return session;
         }
-
-        final String sessionId = request.getSessionId() == null
-                ? UUID.randomUUID().toString()
-                : request.getSessionId();
-        final Session newSession = new Session(sessionId);
-        sessionManager.add(newSession);
-        return newSession;
+        return sessionManager.createSession(null);
     }
 
 }

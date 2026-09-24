@@ -25,6 +25,7 @@ public abstract class AbstractController implements Controller {
 
     protected abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
 
+    // TODO: 지금 login만 (파라미터가 2개인 경우만) 신경쓰는 중
     protected final Map<String, String> parseRequestBody(final HttpRequest request) {
         final Map<String, String> parameters = new HashMap<>();
         if (request.getBody().isBlank()) {

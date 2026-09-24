@@ -168,9 +168,8 @@ class Http11ProcessorTest {
     @Test
     void logged_in_user_redirect_to_index_with_get() throws IOException {
         // given
-        final Session session = new Session("logged-in-session-id");
+        final Session session = sessionManager.createSession("logged-in-session-id");
         session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
-        sessionManager.add(session);
 
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",

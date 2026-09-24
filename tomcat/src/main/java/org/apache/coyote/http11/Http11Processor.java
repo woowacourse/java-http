@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,38 +48,80 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            final String method = requestLine.split(" ")[0];
             final String requestUri = requestLine.split(" ")[1];
             final String requestPath = requestPath(requestUri);
 
-            if ("/login".equals(requestPath) && requestUri.contains("?")) {
-                final boolean success = logIn(requestPath, requestUri);
-                final String location = success ? "/index.html" : "/401.html";
-                final String redirectResponse = String.join("\r\n",
-                        "HTTP/1.1 302 Found",
-                        "Location: " + location,
-                        "Content-Length: 0",
-                        "",
-                        "");
-                outputStream.write(redirectResponse.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+            final Map<String, String> headers = new HashMap<>();
+            String headerLine;
+            while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isEmpty()) {
+                final int colonIndex = headerLine.indexOf(":");
+                if (colonIndex > 0) {
+                    headers.put(headerLine.substring(0, colonIndex).toLowerCase(),
+                            headerLine.substring(colonIndex + 1).trim());
+                }
+            }
+
+            String requestBody = "";
+            if ("POST".equals(method)) {
+                final int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+                final char[] buffer = new char[contentLength];
+                int readCount = 0;
+                while (readCount < contentLength) {
+                    final int count = bufferedReader.read(buffer, readCount, contentLength - readCount);
+                    if (count == -1) {
+                        throw new IOException("Request body ended early");
+                    }
+                    readCount += count;
+                }
+                requestBody = new String(buffer);
+            }
+
+            if ("POST".equals(method) && "/register".equals(requestPath)) {
+                final Map<String, String> parameters = queryParameters(requestBody);
+                final String account = parameters.get("account");
+                final String password = parameters.get("password");
+                final String email = parameters.get("email");
+                if (account == null || password == null || email == null) {
+                    final String response = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
+                    outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+                    return;
+                }
+                InMemoryUserRepository.save(new User(account, password, email));
+                sendRedirect(outputStream, "/index.html");
+                return;
+            }
+
+            if ("POST".equals(method) && "/login".equals(requestPath)) {
+                final Map<String, String> loginParameters = queryParameters(requestBody);
+                final boolean logInIsSuccess = logIn(loginParameters);
+                final String location = logInIsSuccess ? "/index.html" : "/401.html";
+                sendRedirect(outputStream, location);
                 return;
             }
 
             final String responseBody = responseBody(requestPath);
             final String contentType = contentType(requestPath);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                    "",
-                    responseBody);
+            final String response = "HTTP/1.1 200 OK \r\n"
+                    + "Content-Type: " + contentType + " \r\n"
+                    + "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " \r\n\r\n"
+                    + responseBody;
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+
+    }
+
+    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
+        final String response = "HTTP/1.1 302 Found\r\n"
+                + "Location: " + location + "\r\n"
+                + "Content-Length: 0\r\n\r\n";
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private String requestPath(final String requestUri) {
@@ -87,16 +132,9 @@ public class Http11Processor implements Runnable, Processor {
         return requestUri.substring(0, queryStringIndex);
     }
 
-    private boolean logIn(final String requestPath, final String requestUri) {
-        final int queryStringIndex = requestUri.indexOf("?");
-        if (!"/login".equals(requestPath) || queryStringIndex < 0) {
-            return false;
-        }
-
-        final String queryString = requestUri.substring(queryStringIndex + 1);
-        final Map<String, String> queryParameters = queryParameters(queryString);
-        final String account = queryParameters.get("account");
-        final String password = queryParameters.get("password");
+    private boolean logIn(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
         if (account == null || password == null) {
             return false;
         }
@@ -114,7 +152,8 @@ public class Http11Processor implements Runnable, Processor {
         for (String parameter : queryString.split("&")) {
             final String[] nameAndValue = parameter.split("=", 2);
             if (nameAndValue.length == 2) {
-                queryParameters.put(nameAndValue[0], nameAndValue[1]);
+                queryParameters.put(URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8));
             }
         }
         return queryParameters;
@@ -125,7 +164,12 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        final String resourcePath = "/login".equals(requestPath) ? "/login.html" : requestPath;
+        final String resourcePath;
+        if ("/login".equals(requestPath) || "/register".equals(requestPath)) {
+            resourcePath = requestPath + ".html";
+        } else {
+            resourcePath = requestPath;
+        }
         final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
         if (resource == null) {
             return "";

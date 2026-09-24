@@ -8,16 +8,20 @@ import java.util.Map;
 public class Headers {
 
     private final Map<String, String> values;
+    private final Map<String, String> names;
 
     public Headers() {
         this.values = new LinkedHashMap<>();
+        this.names = new LinkedHashMap<>();
     }
 
     public void put(final String name, final String value) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("헤더 이름은 비어 있을 수 없습니다.");
         }
-        values.put(normalize(name), value == null ? "" : value.trim());
+        final String normalizedName = normalize(name);
+        names.putIfAbsent(normalizedName, name.trim());
+        values.put(normalizedName, value == null ? "" : value.trim());
     }
 
     public String get(final String name) {
@@ -36,7 +40,9 @@ public class Headers {
     }
 
     public Map<String, String> asMap() {
-        return Collections.unmodifiableMap(values);
+        final Map<String, String> result = new LinkedHashMap<>();
+        values.forEach((name, value) -> result.put(names.get(name), value));
+        return Collections.unmodifiableMap(result);
     }
 
     private String normalize(final String name) {

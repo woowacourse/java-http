@@ -4,14 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -58,6 +55,8 @@ public class Http11Processor implements Runnable, Processor {
             final String sessionCookie = existingSession == null
                     ? "JSESSIONID=" + session.getId()
                     : null;
+            final HttpResponse response = new HttpResponse(outputStream);
+            response.setProtocolVersion(request.getProtocolVersion());
 
             final String responseBody;
             if ("/".equals(requestUri)) {
@@ -68,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
                 if ("/login".equals(requestUri)) {
                     if ("GET".equalsIgnoreCase(method)
                             && session.getAttribute("user") != null) {
-                        writeRedirectResponse(outputStream, "/index.html", sessionCookie);
+                        writeRedirectResponse(response, "/index.html", sessionCookie);
                         return;
                     }
 
@@ -93,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
                         }
 
                         writeRedirectResponse(
-                                outputStream,
+                                response,
                                 loginSuccess ? "/index.html" : "/401.html",
                                 sessionCookie
                         );
@@ -114,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
                             log.info("회원가입 결과: {}", user);
                         }
 
-                        writeRedirectResponse(outputStream, "/index.html", sessionCookie);
+                        writeRedirectResponse(response, "/index.html", sessionCookie);
                         return;
                     }
 
@@ -147,46 +146,31 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "text/html;charset=utf-8";
             }
 
-            final List<String> responseHeaders = new ArrayList<>();
-            responseHeaders.add("HTTP/1.1 200 OK ");
+            response.setStatusCode(200);
 
             if (sessionCookie != null) {
-                responseHeaders.add("Set-Cookie: " + sessionCookie + " ");
+                response.setHeader("Set-Cookie", sessionCookie);
             }
 
-            responseHeaders.add("Content-Type: " + contentType + " ");
-            responseHeaders.add("Content-Length: "
-                    + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
-            responseHeaders.add("");
-            responseHeaders.add(responseBody);
-
-            final String response = String.join("\r\n", responseHeaders);
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            response.setHeader("Content-Type", contentType);
+            response.setBody(responseBody);
+            response.send();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void writeRedirectResponse(final OutputStream outputStream,
+    private void writeRedirectResponse(final HttpResponse response,
                                        final String location,
                                        final String sessionCookie) throws IOException {
-        final List<String> responseHeaders = new ArrayList<>();
-        responseHeaders.add("HTTP/1.1 302 Found");
+        response.setStatusCode(302);
 
         if (sessionCookie != null) {
-            responseHeaders.add("Set-Cookie: " + sessionCookie);
+            response.setHeader("Set-Cookie", sessionCookie);
         }
 
-        responseHeaders.add("Location: " + location);
-        responseHeaders.add("Content-Length: 0");
-        responseHeaders.add("");
-        responseHeaders.add("");
-
-        final String response = String.join("\r\n", responseHeaders);
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+        response.setHeader("Location", location);
+        response.setBody("");
+        response.send();
     }
 }

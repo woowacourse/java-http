@@ -259,7 +259,7 @@ public class Http11Processor implements Runnable, Processor {
         byte[] body = Files.readAllBytes(filePath);
 
         return new HttpResponse(
-                "401 Unauthorized ",
+                "302 FOUND ",
                 Map.of("Content-Type", "text/html; charset=UTF-8"),
                 body);
     }

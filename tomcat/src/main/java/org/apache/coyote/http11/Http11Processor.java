@@ -99,8 +99,15 @@ public class Http11Processor implements Runnable, Processor {
         }
         final int length = Integer.parseInt(contentLength);
         final char[] buffer = new char[length];
-        reader.read(buffer, 0, length);
-        return new String(buffer);
+        int totalRead = 0;
+        while (totalRead < length) {
+            final int read = reader.read(buffer, totalRead, length - totalRead);
+            if (read == -1) {
+                break;
+            }
+            totalRead += read;
+        }
+        return new String(buffer, 0, totalRead);
     }
 
     private String createResponse(final String requestLine, final Map<String, String> headers, final String requestBody) throws IOException {

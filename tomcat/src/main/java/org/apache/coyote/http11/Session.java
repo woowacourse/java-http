@@ -17,6 +17,7 @@ public class Session implements HttpSession {
     private volatile long lastAccessedTime;
     private volatile int maxInactiveInterval;
     private volatile boolean valid = true;
+    private volatile boolean isNew = true;
 
     public Session(final String id) {
         this.id = id;
@@ -122,7 +123,12 @@ public class Session implements HttpSession {
 
     @Override
     public boolean isNew() {
-        return false;
+        ensureValid();
+        return isNew;
+    }
+
+    void markAsJoined() {
+        isNew = false;
     }
 
     private void ensureValid() {

@@ -57,6 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             final Optional<String> sessionId = cookies.get(HttpCookie.JSESSIONID);
             final Session session = sessionManager.getOrCreate(
                     sessionId.orElseGet(HttpCookie::newSessionId));
+            sessionId.ifPresent(ignored -> session.markAsJoined());
             final String setCookie = sessionId.isPresent()
                     ? null
                     : HttpCookie.JSESSIONID + "=" + session.getId();

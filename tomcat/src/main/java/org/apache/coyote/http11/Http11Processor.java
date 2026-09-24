@@ -2,9 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.api.Controller;
 import com.techcourse.api.RequestMapping;
-import com.techcourse.api.controller.LoginController;
-import com.techcourse.api.controller.RegisterController;
-import com.techcourse.api.controller.RootController;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,10 +28,14 @@ public class Http11Processor implements Runnable, Processor {
     private final Manager sessionManager;
     private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection, final Manager sessionManager) {
+    public Http11Processor(
+            final Socket connection,
+            final Manager sessionManager,
+            final RequestMapping requestMapping
+    ) {
         this.connection = connection;
         this.sessionManager = sessionManager;
-        this.requestMapping = createRequestMapping(sessionManager);
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -88,22 +89,6 @@ public class Http11Processor implements Runnable, Processor {
         final Session session = new Session(UUID.randomUUID().toString());
         sessionManager.add(session);
         response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-    }
-
-    private static RequestMapping createRequestMapping(final Manager sessionManager) {
-        final RequestMapping requestMapping = new RequestMapping();
-
-        final RootController rootController = new RootController();
-        final LoginController loginController = new LoginController(sessionManager);
-        final RegisterController registerController = new RegisterController();
-
-        requestMapping.add("GET", "/", rootController);
-        requestMapping.add("GET", "/index.html", rootController);
-        requestMapping.add("GET", "/login", loginController);
-        requestMapping.add("POST", "/login", loginController);
-        requestMapping.add("GET", "/register", registerController);
-        requestMapping.add("POST", "/register", registerController);
-        return requestMapping;
     }
 
     private static HttpRequest readHttpRequest(final BufferedInputStream inputStream) throws IOException {

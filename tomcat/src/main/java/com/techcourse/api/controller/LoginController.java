@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -24,10 +23,6 @@ public final class LoginController extends AbstractController {
     private static final String UNAUTHORIZED_PAGE = "/401.html";
 
     private final Manager sessionManager;
-
-    public LoginController() {
-        this(SessionManager.getInstance());
-    }
 
     public LoginController(final Manager sessionManager) {
         this.sessionManager = sessionManager;

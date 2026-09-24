@@ -1,6 +1,9 @@
 package org.apache.catalina.startup;
 
+import com.techcourse.api.RequestMapping;
+import com.techcourse.api.RequestMappingFactory;
 import java.io.IOException;
+import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
@@ -11,7 +14,10 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        var connector = new Connector(SessionManager.getInstance());
+        final Manager sessionManager = SessionManager.getInstance();
+        final RequestMapping requestMapping = RequestMappingFactory.create(sessionManager);
+
+        final Connector connector = new Connector(sessionManager, requestMapping);
         connector.start();
 
         try {

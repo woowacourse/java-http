@@ -74,11 +74,17 @@ public class Http11Processor implements Runnable, Processor {
 
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
-            String contentType = resolveContentType(resourcePath);
-            String response = createOkResponse(contentType, responseBody, Map.of());
+            if (responseBody == null) {
+                String response = createNotFoundResponse();
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } else {
+                String contentType = resolveContentType(resourcePath);
+                String response = createOkResponse(contentType, responseBody, Map.of());
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -131,6 +137,22 @@ public class Http11Processor implements Runnable, Processor {
 
         return createResponse(createHeader("HTTP/1.1 302 Found", headers), "");
     }
+
+    private String createNotFoundResponse() throws IOException {
+        URL resourceUrl = getClass().getClassLoader().getResource("static/404.html");
+
+        String responseBody = readStaticResource(resourceUrl);
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "text/html;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+
+        return createResponse(
+                createHeader("HTTP/1.1 404 Not Found", headers),
+                responseBody
+        );
+    }
+
 
     private Optional<String> dispatchRequest(
             String method,
@@ -259,7 +281,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
         if (resourceUrl == null) {
-            throw new RuntimeException("resource not found");
+            return null;
         }
         return readStaticResource(resourceUrl);
     }

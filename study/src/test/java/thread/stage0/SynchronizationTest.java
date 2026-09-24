@@ -31,7 +31,7 @@ class SynchronizationTest {
         var synchronizedMethods = new SynchronizedMethods();
 
         IntStream.range(0, 1000)
-                .forEach(count -> executorService.submit(synchronizedMethods::calculate));
+                .forEach(count -> executorService.submit(synchronizedMethods::synchronizedCalculate));
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
 
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
@@ -40,6 +40,10 @@ class SynchronizationTest {
     private static final class SynchronizedMethods {
 
         private int sum = 0;
+
+        public synchronized void synchronizedCalculate() {
+            setSum(getSum() + 1);
+        }
 
         public void calculate() {
             setSum(getSum() + 1);

@@ -10,6 +10,9 @@ public record HttpRequestHeader(
         Map<String, String> header,
         HttpCookie cookie
 ) {
+    private static final String MIME_TYPE_DEFAULT = "text/html";
+    private static final String MIME_TYPES_WILDCARD = "*/*";
+
     private static final String CONTENT_LENGTH = "Content-Length";
 
     public static HttpRequestHeader from(BufferedReader br) throws IOException {
@@ -39,5 +42,21 @@ public record HttpRequestHeader(
     public Optional<Integer> getContentLength() {
         return Optional.ofNullable((header.get(CONTENT_LENGTH)))
                 .map(Integer::parseInt);
+    }
+
+    public String resolveContentType() {
+        String accept = header().get("Accept");
+
+        if (accept == null || accept.isEmpty()) {
+            return MIME_TYPE_DEFAULT;
+        }
+
+        String preferred = accept.split(",")[0].split(";")[0].trim();
+
+        if (MIME_TYPES_WILDCARD.equals(preferred)) {
+            return MIME_TYPE_DEFAULT;
+        }
+
+        return preferred;
     }
 }

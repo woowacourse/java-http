@@ -37,6 +37,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String SESSION_USER = "user";
+    private static final String GET = "GET";
+    private static final String POST = "POST";
 
     private final Socket connection;
 
@@ -63,11 +65,10 @@ public class Http11Processor implements Runnable, Processor {
             final String path = extractPath(uri);
             final Map<String, String> headers = readHeaders(reader);
             final String body = readBody(reader, headers);
-            final Map<String, String> queryParams = parseQueryString(extractQueryString(uri));
             final Map<String, String> formData = parseQueryString(body);
             final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
 
-            if (isLoginRequest(path, formData)) {
+            if (isLoginPostRequest(method, path)) {
                 write(outputStream, loginResponse(formData));
                 return;
             }
@@ -75,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
                 write(outputStream, redirectResponse(INDEX_PAGE));
                 return;
             }
-            if (isRegisterRequest(path, formData)) {
+            if (isRegisterPostRequest(method, path)) {
                 write(outputStream, redirectResponse(registerLocation(formData)));
                 return;
             }
@@ -122,14 +123,6 @@ public class Http11Processor implements Runnable, Processor {
         return uri.substring(0, index);
     }
 
-    private String extractQueryString(final String uri) {
-        final int index = uri.indexOf("?");
-        if (index == -1) {
-            return "";
-        }
-        return uri.substring(index + 1);
-    }
-
     private Map<String, String> parseQueryString(String queryString) {
         final Map<String, String> params = new HashMap<>();
         queryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
@@ -144,8 +137,8 @@ public class Http11Processor implements Runnable, Processor {
         return params;
     }
 
-    private boolean isLoginRequest(final String path, final Map<String, String> params) {
-        return path.equals(LOGIN_PATH) && params.containsKey("account");
+    private boolean isLoginPostRequest(final String method, final String path) {
+        return method.equals(POST) && path.equals(LOGIN_PATH);
     }
 
     private String loginResponse(final Map<String, String> params) {
@@ -163,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoginPageRequest(final String method, final String path) {
-        return method.equals("GET") && path.equals(LOGIN_PATH);
+        return method.equals(GET) && path.equals(LOGIN_PATH);
     }
 
     private boolean isLoggedIn(final HttpCookie cookie) {
@@ -173,8 +166,8 @@ public class Http11Processor implements Runnable, Processor {
                 .isPresent();
     }
 
-    private boolean isRegisterRequest(String path, Map<String, String> params) {
-        return path.equals(REGISTER_PATH) && params.containsKey("account") && params.containsKey("password");
+    private boolean isRegisterPostRequest(final String method, final String path) {
+        return method.equals(POST) && path.equals(REGISTER_PATH);
     }
 
     private String registerLocation(final Map<String, String> params) {

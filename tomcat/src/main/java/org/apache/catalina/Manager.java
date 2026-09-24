@@ -21,6 +21,14 @@ import java.io.IOException;
 public interface Manager {
 
     /**
+     * Construct and return a new Session. If {@code sessionId} is {@code null}, this Manager generates the session ID.
+     *
+     * @param sessionId session ID to use, or {@code null} to generate one
+     * @return newly created and registered Session
+     */
+    Session createSession(String sessionId);
+
+    /**
      * Add this Session to the set of active Sessions for this Manager.
      *
      * @param session Session to be added

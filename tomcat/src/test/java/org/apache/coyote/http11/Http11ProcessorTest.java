@@ -26,6 +26,7 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK \r\n")
                 .contains("Content-Length: 12")
+                .contains("Set-Cookie: JSESSIONID=")
                 .endsWith("\r\n\r\nHello world!");
     }
 
@@ -50,6 +51,7 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK \r\n")
                 .contains("Content-Type: text/html;charset=utf-8")
+                .contains("Set-Cookie: JSESSIONID=")
                 .endsWith(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 
@@ -158,6 +160,18 @@ class Http11ProcessorTest {
         assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html");
         assertThat(InMemoryUserRepository.findByAccount("new-user"))
                 .hasValueSatisfying(user -> assertThat(user.checkPassword("secret")).isTrue());
+    }
+
+    @Test
+    void existingSessionCookieIsNotSetAgain() {
+        final String request = "GET /index.html HTTP/1.1\r\n"
+                + "Cookie: other=value; JSESSIONID=existing-id\r\n\r\n";
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK")
+                .doesNotContain("Set-Cookie:");
     }
 
 }

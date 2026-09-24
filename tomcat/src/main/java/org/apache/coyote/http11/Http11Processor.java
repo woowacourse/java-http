@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -62,6 +63,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            final String sessionId = new HttpCookie(headers.get("cookie")).getValue("JSESSIONID");
+            final String setCookie = sessionId == null
+                    ? "JSESSIONID=" + UUID.randomUUID() + "; Path=/; HttpOnly" : null;
+
             String requestBody = "";
             if ("POST".equals(method)) {
                 final int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
@@ -83,12 +88,13 @@ public class Http11Processor implements Runnable, Processor {
                 final String password = parameters.get("password");
                 final String email = parameters.get("email");
                 if (account == null || password == null || email == null) {
-                    final String response = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
+                    final String response = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n"
+                            + cookieHeader(setCookie) + "\r\n";
                     outputStream.write(response.getBytes(StandardCharsets.UTF_8));
                     return;
                 }
                 InMemoryUserRepository.save(new User(account, password, email));
-                sendRedirect(outputStream, "/index.html");
+                sendRedirect(outputStream, "/index.html", setCookie);
                 return;
             }
 
@@ -96,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
                 final Map<String, String> loginParameters = queryParameters(requestBody);
                 final boolean logInIsSuccess = logIn(loginParameters);
                 final String location = logInIsSuccess ? "/index.html" : "/401.html";
-                sendRedirect(outputStream, location);
+                sendRedirect(outputStream, location, setCookie);
                 return;
             }
 
@@ -105,8 +111,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final String response = "HTTP/1.1 200 OK \r\n"
                     + "Content-Type: " + contentType + " \r\n"
-                    + "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " \r\n\r\n"
-                    + responseBody;
+                    + "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " \r\n"
+                    + cookieHeader(setCookie) + "\r\n" + responseBody;
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -116,12 +122,18 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private void sendRedirect(final OutputStream outputStream, final String location) throws IOException {
+    private void sendRedirect(final OutputStream outputStream, final String location,
+                              final String setCookie) throws IOException {
         final String response = "HTTP/1.1 302 Found\r\n"
                 + "Location: " + location + "\r\n"
-                + "Content-Length: 0\r\n\r\n";
+                + "Content-Length: 0\r\n"
+                + cookieHeader(setCookie) + "\r\n";
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
+    }
+
+    private String cookieHeader(final String setCookie) {
+        return setCookie == null ? "" : "Set-Cookie: " + setCookie + "\r\n";
     }
 
     private String requestPath(final String requestUri) {

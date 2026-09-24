@@ -11,12 +11,16 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final String CONTENT_LENGTH = "content-length";
+
     private final RequestLine requestLine;
     private final Map<String, List<String>> headers;
+    private final RequestBody body;
 
     public HttpRequest(final BufferedReader reader) {
         requestLine = resolveRequestLine(reader);
         headers = resolveHeaders(reader);
+        body = resolveBody(reader);
     }
 
     private RequestLine resolveRequestLine(final BufferedReader reader) {
@@ -64,6 +68,79 @@ public class HttpRequest {
         }
     }
 
+    private RequestBody resolveBody(final BufferedReader reader) {
+        final int contentLength = resolveContentLength();
+
+        if (contentLength == 0) {
+            return new RequestBody("");
+        }
+
+        final char[] buffer = new char[contentLength];
+
+        try {
+            int offset = 0;
+
+            while (offset < contentLength) {
+                final int read = reader.read(
+                        buffer,
+                        offset,
+                        contentLength - offset
+                );
+
+                if (read == -1) {
+                    throw new IllegalArgumentException("Content-Length보다 Body가 짧습니다.");
+                }
+
+                offset += read;
+            }
+
+            return new RequestBody(new String(buffer));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private int resolveContentLength() {
+        final List<String> values = headers.get(CONTENT_LENGTH);
+
+        if (values == null || values.isEmpty()) {
+            return 0;
+        }
+
+        String contentLength = null;
+
+        for (String headerValue : values) {
+            for (String value : headerValue.split(",")) {
+                final String trimmedValue = value.trim();
+
+                if (contentLength == null) {
+                    contentLength = trimmedValue;
+                    continue;
+                }
+
+                if (!contentLength.equals(trimmedValue)) {
+                    throw new IllegalArgumentException("conflicting Content-Length: " + values);
+                }
+            }
+        }
+
+        if (contentLength == null) {
+            return 0;
+        }
+
+        try {
+            final int length = Integer.parseInt(contentLength);
+
+            if (length < 0) {
+                throw new IllegalArgumentException("Invalid Content-Length: " + contentLength);
+            }
+
+            return length;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid Content-Length: " + contentLength, e);
+        }
+    }
+
     public String getMethod() {
         return requestLine.getMethod();
     }
@@ -90,5 +167,9 @@ public class HttpRequest {
         }
 
         return values.getFirst();
+    }
+
+    public RequestBody getBody() {
+        return body;
     }
 }

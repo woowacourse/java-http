@@ -152,7 +152,10 @@ class Step1Test {
             // then
             assertThat(appender.list)
                     .extracting(ILoggingEvent::getFormattedMessage)
-                    .contains("user : User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}");
+                    .anyMatch(message -> message.startsWith("user : ")
+                            && message.contains("gugu")
+                            && message.contains("hkkang@woowahan.com"))
+                    .noneMatch(message -> message.contains("password"));
         } finally {
             logger.detachAppender(appender);
             appender.stop();

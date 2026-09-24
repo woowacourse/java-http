@@ -26,5 +26,4 @@ CSS 리소스 요청에 해당 파일의 내용과 CSS `Content-Type`으로 응�
 `/login?account=gugu&password=password` 요청의 경로와 Query String을 구분하고, 전달된 계정 정보로 회원을 조회한다.
 
 - [x] Query String이 있는 로그인 요청에 로그인 페이지를 반환한다.
-- [x] 전달된 계정 정보와 일치하는 회원 조회 결과를 로그로 남긴다.
-
+- [x] 전달된 계정 정보와 일치하는 회원 조회 결과를 비밀번호를 제외하고 로그로 남긴다.

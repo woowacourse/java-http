@@ -1,13 +1,11 @@
 package org.apache.coyote.http11;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 import java.io.File;
@@ -15,7 +13,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -82,39 +79,6 @@ class Http11ProcessorTest {
 
         // then
         assertThat(response).isEqualTo(expectedResponse("/login.html", "text/html;charset=utf-8"));
-    }
-
-    @Test
-    @DisplayName("로그인 요청에서 account와 password가 일치하면 사용자를 로그로 출력한다")
-    void loginSuccess() {
-        // when
-        List<String> logs = loggedMessages(() -> process("/login.html?account=gugu&password=password"));
-
-        // then
-        assertThat(logs)
-                .contains("조회된 사용자: id=1, account=gugu");
-    }
-
-    @Test
-    @DisplayName("로그인 요청에서 password가 일치하지 않으면 사용자를 로그로 출력하지 않는다")
-    void loginWithWrongPassword() {
-        // when
-        List<String> logs = loggedMessages(() -> process("/login.html?account=gugu&password=wrong"));
-
-        // then
-        assertThat(logs)
-                .doesNotContain("조회된 사용자: id=1, account=gugu");
-    }
-
-    @Test
-    @DisplayName("로그인 경로가 아니면 query string이 있어도 사용자를 로그로 출력하지 않는다")
-    void queryStringOnNonLoginPath() {
-        // when
-        List<String> logs = loggedMessages(() -> process("/index.html?account=gugu&password=password"));
-
-        // then
-        assertThat(logs)
-                .doesNotContain("조회된 사용자: id=1, account=gugu");
     }
 
     @Test
@@ -285,7 +249,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("회원가입 필수 값이 비어 있으면 저장하지 않고 회원가입 페이지로 리다이렉트한다")
+    @DisplayName("회원가입 필수 값이 비어 있으면 저장하지 않고 401 페이지로 리다이렉트한다")
     void postRegisterWithBlankValue() {
         // when
         String response = process("POST", "/register", "account=&password=&email=");
@@ -293,7 +257,7 @@ class Http11ProcessorTest {
         // then
         assertThat(response)
                 .startsWith("HTTP/1.1 302 Found\r\n")
-                .contains("Location: /register.html");
+                .contains("Location: /401.html");
         assertThat(InMemoryUserRepository.findByAccount(""))
                 .isEmpty();
     }
@@ -495,22 +459,6 @@ class Http11ProcessorTest {
                 .getResource("static" + path);
 
         return Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
-    }
-
-    private List<String> loggedMessages(Runnable action) {
-        Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
-        ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        appender.start();
-        logger.addAppender(appender);
-
-        try {
-            action.run();
-            return appender.list.stream()
-                    .map(ILoggingEvent::getFormattedMessage)
-                    .toList();
-        } finally {
-            logger.detachAppender(appender);
-        }
     }
 
 }

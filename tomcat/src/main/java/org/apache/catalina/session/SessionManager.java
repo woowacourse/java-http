@@ -1,11 +1,19 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.session;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+
+    public static Session create() {
+        Session session = new Session(UUID.randomUUID().toString());
+        add(session);
+
+        return session;
+    }
 
     public static void add(Session session) {
         SESSIONS.put(session.getId(), session);

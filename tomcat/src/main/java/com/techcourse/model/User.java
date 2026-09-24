@@ -8,6 +8,10 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateRequired(account);
+        validateRequired(password);
+        validateRequired(email);
+
         this.id = id;
         this.account = account;
         this.password = password;
@@ -28,6 +32,12 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    private void validateRequired(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

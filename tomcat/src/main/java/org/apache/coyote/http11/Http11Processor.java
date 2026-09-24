@@ -154,14 +154,7 @@ public class Http11Processor implements Runnable, Processor {
             return createResponse(new ForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html"));
         }
 
-        if (requestTarget.startsWith("/login")) {
-            if (requestTarget.contains("?")) {
-                final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(requestTarget);
-                if (hasLoginSucceeded) {
-                    return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/index.html"));
-                }
-                return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/401.html"));
-            }
+        if (requestTarget.equals("/login")) {
             return createResponse(new ForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html"));
         }
 
@@ -173,6 +166,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handlePostRequest(final String requestTarget, final String messageBody) throws IOException {
+        if (requestTarget.equals("/login")) {
+            final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(messageBody);
+            if (hasLoginSucceeded) {
+                return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/index.html"));
+            }
+            return createResponse(new RedirectResponse(HttpStatusCode.FOUND, "/401.html"));
+        }
+
         if (requestTarget.equals("/register")) {
             final boolean isRegistered  = registerNewUser(messageBody);
             if (isRegistered) {
@@ -184,16 +185,22 @@ public class Http11Processor implements Runnable, Processor {
         return createResponse(new ForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html"));
     }
 
-    private boolean registerNewUser(final String messageBody) {
-        final Map<String, String> registerInfoPairs = parseQuery(messageBody);
-        String account = registerInfoPairs.get("account");
-        String password = registerInfoPairs.get("password");
-        String email = registerInfoPairs.get("email");
+    private boolean loginAndRetrieveUserInfo(final String requestURI) {
+        final int index = requestURI.indexOf("?");
+        final Map<String, String> loginInfoPairs = parseQuery(requestURI.substring(index + 1));
+        String account = loginInfoPairs.getOrDefault("account", "");
+        String password = loginInfoPairs.getOrDefault("password", "");
 
-        if (account != null && password != null && email != null) {
-            final User newUser = new User(account, password, email);
-            InMemoryUserRepository.save(newUser);
-            return true;
+        if (!account.isBlank() && !password.isBlank()) {
+            Optional<User> retrieveResult = InMemoryUserRepository.findByAccount(account);
+            if (retrieveResult.isEmpty()) {
+                return false;
+            }
+            final User retrievedUser = retrieveResult.get();
+            if (retrievedUser.checkPassword(password)) {
+                log.info("로그인 성공! 아이디 : {}", retrievedUser.getAccount());
+                return true;
+            }
         }
 
         return false;
@@ -210,22 +217,16 @@ public class Http11Processor implements Runnable, Processor {
         return queryPairs;
     }
 
-    private boolean loginAndRetrieveUserInfo(final String requestURI) {
-        final int index = requestURI.indexOf("?");
-        final Map<String, String> loginInfoPairs = parseQuery(requestURI.substring(index + 1));
-        String account = loginInfoPairs.get("account");
-        String password = loginInfoPairs.get("password");
+    private boolean registerNewUser(final String messageBody) {
+        final Map<String, String> registerInfoPairs = parseQuery(messageBody);
+        String account = registerInfoPairs.getOrDefault("account", "");
+        String password = registerInfoPairs.getOrDefault("password", "");
+        String email = registerInfoPairs.getOrDefault("email", "");
 
-        if (account != null && password != null) {
-            Optional<User> retrieveResult = InMemoryUserRepository.findByAccount(account);
-            if (retrieveResult.isEmpty()) {
-                return false;
-            }
-            final User retrievedUser = retrieveResult.get();
-            if (retrievedUser.checkPassword(password)) {
-                log.info("로그인 성공! 아이디 : {}", retrievedUser.getAccount());
-                return true;
-            }
+        if (!account.isBlank() && !password.isBlank() && !email.isBlank()) {
+            final User newUser = new User(account, password, email);
+            InMemoryUserRepository.save(newUser);
+            return true;
         }
 
         return false;

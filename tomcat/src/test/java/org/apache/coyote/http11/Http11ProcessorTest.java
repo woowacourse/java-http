@@ -92,12 +92,15 @@ class Http11ProcessorTest {
     @Test
     void return302HTTPStatusCodeAndRedirectToIndexHtmlWhenLoginSucceeds() {
         // given
+        final String loginInfo = "account=gugu&password=password";
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + loginInfo.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "");
+                loginInfo);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -118,12 +121,15 @@ class Http11ProcessorTest {
     @Test
     void redirectTo401HtmlWhenLoginFails() {
         // given
+        final String loginInfo = "account=gugu&password=false";
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=false HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + loginInfo.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "");
+                loginInfo);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -172,14 +178,15 @@ class Http11ProcessorTest {
     @Test
     void redirectToIndexHtmlWhenRegisterFinished() {
         // given
+        final String registerInfo = "account=tester&email=tester@gmail.com&password=password";
         final String httpRequest= String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 56 ",
+                "Content-Length: " + registerInfo.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "account=tester&email=tester@gmail.com&password=password");
+                registerInfo);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -200,14 +207,15 @@ class Http11ProcessorTest {
     @Test
     void return400HTTPStatusCodeAndRedirectToRegisterHtmlWhenRegisterFails() throws IOException {
         // given
+        final String registerInfo = "account=tester&email=tester@gmail.com";
         final String httpRequest= String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 56 ",
+                "Content-Length: " + registerInfo.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "account=tester&email=tester@gmail.com");
+                registerInfo);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

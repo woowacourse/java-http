@@ -20,43 +20,57 @@ public class RequestHandler {
     private static final String SESSION_USER_KEY = "user";
 
     public HttpResponse handle(final HttpRequest request) throws IOException, URISyntaxException {
+        final HttpResponse response = new HttpResponse();
         final String path = request.getPath();
         if (path.equals("/")) {
-            return HttpResponse.ok("text/html", "Hello world!");
+            response.setBody("text/html", "Hello world!");
+            return response;
         }
 
         if (path.equals("/login")) {
-            return handleLogin(request);
+            handleLogin(request, response);
+            return response;
         }
 
         if (path.equals("/register")) {
-            return handleRegister(request);
+            handleRegister(request, response);
+            return response;
         }
 
         final var resource = findResource(path);
         if (resource == null) {
-            return HttpResponse.notFound("text/html", page("/404.html"));
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setBody("text/html", page("/404.html"));
+            return response;
         }
 
-        return HttpResponse.ok(contentType(path), readResource(resource));
+        response.setBody(contentType(path), readResource(resource));
+        return response;
     }
 
-    private HttpResponse handleLogin(final HttpRequest request) throws IOException, URISyntaxException {
+    private void handleLogin(final HttpRequest request, final HttpResponse response) throws IOException, URISyntaxException {
         if (request.getMethod() != HttpMethod.POST) {
             if (isLoggedIn(request)) {
-                return HttpResponse.redirect("/index.html");
+                response.sendRedirect("/index.html");
+                return;
             }
-            return HttpResponse.ok("text/html", page("/login.html"));
+            response.setBody("text/html", page("/login.html"));
+            return;
         }
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
         if (isBlank(account) || isBlank(password)) {
-            return HttpResponse.redirect("/401.html");
+            response.sendRedirect("/401.html");
+            return;
         }
 
         final Optional<User> user = findUser(account, password);
-        return user.map(this::loginSuccess)
-                .orElseGet(() -> HttpResponse.redirect("/401.html"));
+        if (user.isEmpty()) {
+            response.sendRedirect("/401.html");
+            return;
+        }
+
+        loginSuccess(user.get(), response);
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
@@ -70,27 +84,28 @@ public class RequestHandler {
                 .filter(user -> user.checkPassword(password));
     }
 
-    private HttpResponse loginSuccess(final User user) {
+    private void loginSuccess(final User user, final HttpResponse response) {
         final Session session = SessionManager.INSTANCE.createSession();
         session.setAttribute(SESSION_USER_KEY, user);
 
-        final HttpResponse response = HttpResponse.redirect("/index.html");
+        response.sendRedirect("/index.html");
         response.addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
-        return response;
     }
 
-    private HttpResponse handleRegister(final HttpRequest request) throws IOException, URISyntaxException {
+    private void handleRegister(final HttpRequest request, final HttpResponse response) throws IOException, URISyntaxException {
         if (request.getMethod() != HttpMethod.POST) {
-            return HttpResponse.ok("text/html", page("/register.html"));
+            response.setBody("text/html", page("/register.html"));
+            return;
         }
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
         final String email = request.getParameter("email");
         if (isBlank(account) || isBlank(password) || isBlank(email)) {
-            return HttpResponse.ok("text/html", page("/register.html"));
+            response.setBody("text/html", page("/register.html"));
+            return;
         }
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponse.redirect("/index.html");
+        response.sendRedirect("/index.html");
     }
 
     private boolean isBlank(final String value) {

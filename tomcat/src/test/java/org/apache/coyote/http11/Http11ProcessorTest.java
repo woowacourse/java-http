@@ -2,6 +2,10 @@ package org.apache.coyote.http11;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.techcourse.Application;
+import com.techcourse.controller.LoginController;
+import org.apache.catalina.controller.RequestMapping;
+import java.util.Map;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
@@ -37,12 +41,42 @@ import static org.mockito.Mockito.verify;
 class Http11ProcessorTest {
 
     private final Manager sessionManager = new SessionManager();
+    private final RequestMapping requestMapping = Application.requestMapping();
+
+    @Test
+    void injectedApplicationControlsTheResponse() {
+        final var socket = new StubSocket("GET /custom?name=moa HTTP/1.1\r\n\r\n");
+        final RequestMapping customMapping = new RequestMapping(Map.of("/custom", (request, response) -> {
+            response.status(201, "Created");
+            response.header("Content-Type", "text/plain;charset=utf-8");
+            response.body(request.queryParameter("name").getBytes(StandardCharsets.UTF_8));
+        }), (request, response) -> response.status(404, "Not Found"));
+
+        new Http11Processor(socket, sessionManager, customMapping).process(socket);
+
+        assertResponseIgnoringSetCookie(socket.output(),
+                "HTTP/1.1 201 Created\r\nContent-Type: text/plain;charset=utf-8\r\n"
+                        + "Content-Length: 3\r\n\r\nmoa");
+    }
+
+    @Test
+    void controllerFailureDoesNotWriteAPartialSuccessResponse() {
+        final var socket = new StubSocket();
+        final RequestMapping failingMapping = new RequestMapping(Map.of(), (request, response) -> {
+            response.body("partial".getBytes(StandardCharsets.UTF_8));
+            throw new IOException("controller failed");
+        });
+
+        new Http11Processor(socket, sessionManager, failingMapping).process(socket);
+
+        assertThat(socket.output()).isEmpty();
+    }
 
     @Test
     void javascriptResourcePreservesItsContentTypeAndBody() throws IOException {
         final var socket = new StubSocket("GET /js/scripts.js HTTP/1.1\r\n\r\n");
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         try (var resource = getClass().getClassLoader().getResourceAsStream("static/js/scripts.js")) {
             assertThat(resource).isNotNull();
@@ -59,7 +93,7 @@ class Http11ProcessorTest {
     void missingJavascriptDoesNotWriteASuccessResponse() {
         final var socket = new StubSocket("GET /missing.js HTTP/1.1\r\n\r\n");
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertThat(socket.output()).isEmpty();
     }
@@ -68,7 +102,7 @@ class Http11ProcessorTest {
     void unknownPathUsesHelloWorldFallback() {
         final var socket = new StubSocket("GET /unknown HTTP/1.1\r\n\r\n");
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
         assertThat(socket.output().split("\r\n\r\n", 2)[1]).isEqualTo("Hello world!");
@@ -81,7 +115,7 @@ class Http11ProcessorTest {
         final String sessionId = assertNewSessionCookie(login.output());
         final var socket = new StubSocket(withCookie("PUT /login HTTP/1.1\r\n\r\n", sessionId));
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertHtmlResponseBody(socket.output(), "static/login.html");
         assertThat(responseHeaders(socket.output())).noneMatch(header -> header.startsWith("Location:"));
@@ -93,7 +127,7 @@ class Http11ProcessorTest {
         for (String request : List.of("", "\r\n", "GET\r\n\r\n", "GET / HTTP/1.1 EXTRA\r\n\r\n")) {
             var socket = new StubSocket(request);
 
-            new Http11Processor(socket, sessionManager).process(socket);
+            new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
             assertThat(socket.output()).isEmpty();
         }
@@ -103,16 +137,16 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, sessionManager);
+        final var processor = new Http11Processor(socket, sessionManager, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -130,16 +164,16 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -151,7 +185,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(
                 "GET /css/styles.css HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         try (var resource = getClass().getClassLoader()
                 .getResourceAsStream("static/css/styles.css")) {
@@ -162,9 +196,9 @@ class Http11ProcessorTest {
 
             assertThat(response).hasSize(2);
             assertThat(response[0].split("\r\n")).contains(
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;charset=utf-8 ",
-                    "Content-Length: " + expectedBody.length + " ");
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/css;charset=utf-8",
+                    "Content-Length: " + expectedBody.length);
             assertThat(response[1])
                     .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
         }
@@ -180,7 +214,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(
                 postLoginRequest("account=gugu&password=password"));
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertResponseIgnoringSetCookie(socket.output(),
                 "HTTP/1.1 302 Found\r\n"
@@ -193,7 +227,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(
                 postLoginRequest("account=gugu&password=%AZ"));
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertThat(socket.output()).isEmpty();
     }
@@ -203,7 +237,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(
                 postLoginRequest("account=gugu&password=wrong"));
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertResponseIgnoringSetCookie(socket.output(),
                 "HTTP/1.1 302 Found\r\n"
@@ -216,7 +250,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(
                 "GET /401.html HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         try (var resource = getClass().getClassLoader()
                 .getResourceAsStream("static/401.html")) {
@@ -224,9 +258,9 @@ class Http11ProcessorTest {
             final byte[] expectedBody = resource.readAllBytes();
 
             final String expected =
-                    "HTTP/1.1 200 OK \r\n"
-                            + "Content-Type: text/html;charset=utf-8 \r\n"
-                            + "Content-Length: " + expectedBody.length + " \r\n"
+                    "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: text/html;charset=utf-8\r\n"
+                            + "Content-Length: " + expectedBody.length + "\r\n"
                             + "\r\n"
                             + new String(expectedBody, StandardCharsets.UTF_8);
 
@@ -286,7 +320,7 @@ class Http11ProcessorTest {
         final String request = postLoginRequest("account=gugu&password=password");
         final var socket = new StubSocket(request.substring(0, request.length() - 1));
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertThat(socket.output()).isEmpty();
     }
@@ -326,7 +360,7 @@ class Http11ProcessorTest {
         final var duplicate = new StubSocket(postRequest("/register",
                 "account=" + account + "&password=replacement&email=replacement%40example.com"));
 
-        new Http11Processor(duplicate, sessionManager).process(duplicate);
+        new Http11Processor(duplicate, sessionManager, requestMapping).process(duplicate);
 
         final String[] response = duplicate.output().split("\\r\\n\\r\\n", 2);
         final String message = "이미 사용 중인 계정입니다.";
@@ -350,7 +384,7 @@ class Http11ProcessorTest {
                 "account=incomplete-register-user&email=moa%40example.com"
         ));
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
         assertThat(InMemoryUserRepository.findByAccount("incomplete-register-user"))
                 .isEmpty();
@@ -488,7 +522,7 @@ class Http11ProcessorTest {
 
         for (String request : requests) {
             final var socket = new StubSocket(request);
-            new Http11Processor(socket, manager).process(socket);
+            new Http11Processor(socket, manager, requestMapping).process(socket);
 
             final String id = assertNewSessionCookie(socket.output());
             assertThat(manager.findSession(id)).isNull();
@@ -519,13 +553,13 @@ class Http11ProcessorTest {
         final Clock clock = mock(Clock.class);
         final SessionManager manager = new SessionManager(clock);
         final var login = new StubSocket(postLoginRequest("account=gugu&password=password"));
-        new Http11Processor(login, manager).process(login);
+        new Http11Processor(login, manager, requestMapping).process(login);
         final String expiredId = assertNewSessionCookie(login.output());
         when(clock.millis()).thenReturn(Duration.ofMinutes(30).toMillis());
         final var revisit = new StubSocket(withCookie(
                 "GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n", expiredId));
 
-        new Http11Processor(revisit, manager).process(revisit);
+        new Http11Processor(revisit, manager, requestMapping).process(revisit);
 
         assertThat(revisit.output()).startsWith("HTTP/1.1 200 OK");
         assertThat(revisit.output()).doesNotContain("Location: /index.html");
@@ -541,7 +575,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(withCookie(
                 "GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n", "expired-during-request"));
 
-        new Http11Processor(socket, manager).process(socket);
+        new Http11Processor(socket, manager, requestMapping).process(socket);
 
         assertHtmlResponseBody(socket.output(), "static/login.html");
         final String id = assertNewSessionCookie(socket.output());
@@ -554,7 +588,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(withCookie(
                 postLoginRequest("account=gugu&password=password"), "expired-during-request"));
 
-        new Http11Processor(socket, manager).process(socket);
+        new Http11Processor(socket, manager, requestMapping).process(socket);
 
         assertRedirectResponse(socket.output(), "/index.html");
         final String id = assertNewSessionCookie(socket.output());
@@ -586,7 +620,7 @@ class Http11ProcessorTest {
                 "GET /login HTTP/1.1\r\nHost: localhost\r\n" + cookieHeader + "\r\n"
         );
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
         return socket.output();
     }
 
@@ -645,7 +679,7 @@ class Http11ProcessorTest {
     }
 
     private void assertRedirect(StubSocket socket, String location) {
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
         assertRedirectResponse(socket.output(), location);
     }
 
@@ -660,7 +694,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(
                 "GET " + requestTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
-        new Http11Processor(socket, sessionManager).process(socket);
+        new Http11Processor(socket, sessionManager, requestMapping).process(socket);
         assertHtmlResponseBody(socket.output(), resourceName);
     }
 
@@ -674,9 +708,9 @@ class Http11ProcessorTest {
 
             assertThat(response).hasSize(2);
             assertThat(response[0].split("\r\n")).contains(
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + expectedBody.length + " ");
+                    "HTTP/1.1 200 OK",
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: " + expectedBody.length);
             assertThat(response[1])
                     .isEqualTo(new String(expectedBody, StandardCharsets.UTF_8));
         }
@@ -684,7 +718,7 @@ class Http11ProcessorTest {
 
     private List<String> loginSuccessLogs(String body) {
         final Logger logger =
-                (Logger) LoggerFactory.getLogger(Http11Processor.class);
+                (Logger) LoggerFactory.getLogger(LoginController.class);
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         appender.setContext(logger.getLoggerContext());
         appender.start();
@@ -693,7 +727,7 @@ class Http11ProcessorTest {
         try {
             final var socket = new StubSocket(postLoginRequest(body));
 
-            new Http11Processor(socket, sessionManager).process(socket);
+            new Http11Processor(socket, sessionManager, requestMapping).process(socket);
 
             return appender.list.stream()
                     .map(ILoggingEvent::getFormattedMessage)

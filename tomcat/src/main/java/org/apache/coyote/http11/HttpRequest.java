@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.RequestSession;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,6 +20,7 @@ public final class HttpRequest {
     private final String body;
     private Map<String, String> parameters;
     private Map<String, String> queryParameters;
+    private RequestSession sessionContext;
 
     private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
         this.requestLine = requestLine;
@@ -35,6 +39,30 @@ public final class HttpRequest {
         Map<String, String> headers = readHeaders(input);
         String body = readBody(input, headers);
         return new HttpRequest(requestLine, headers, body);
+    }
+
+    public static HttpRequest readFrom(InputStream inputStream, Manager sessionManager) throws IOException {
+        HttpRequest request = readFrom(inputStream);
+        if (request != null) {
+            request.sessionContext = new RequestSession(sessionManager, request.header("cookie"));
+        }
+        return request;
+    }
+
+    public HttpSession session() {
+        return sessionContext.current();
+    }
+
+    public HttpSession renewSession() {
+        return sessionContext.renew();
+    }
+
+    public void refreshSessionCookie() {
+        sessionContext.refreshCookie();
+    }
+
+    public String sessionCookie() {
+        return sessionContext.cookie();
     }
 
     public String method() {

@@ -1,20 +1,20 @@
 package org.qupring.mvc;
 
-import java.lang.reflect.Method;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponse;
 import org.qupring.file.HtmlReader;
-import org.qupring.mvc.handler.HandlerMapping;
+import org.qupring.mvc.controller.Controller;
+import org.qupring.mvc.handler.RequestMapping;
 
 public class QupringMvc {
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String NOT_FOUND_PAGE = "static/404.html";
 
-    private final HandlerMapping handlerMapping;
+    private final RequestMapping requestMapping;
 
-    public QupringMvc(HandlerMapping handlerMapping) {
-        this.handlerMapping = handlerMapping;
+    public QupringMvc(RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
     }
 
     public void run(HttpRequest request, HttpResponse response) {
@@ -34,41 +34,17 @@ public class QupringMvc {
     }
 
     private boolean runController(HttpRequest request, HttpResponse response) {
-        Method method = handlerMapping.getControllerMethod(request.getUrl(), request.getHttpMethod());
-        if (method == null) {
+        Controller controller = requestMapping.getController(request);
+        if (controller == null) {
             return false;
         }
+
         try {
-            Object controller = method
-                    .getDeclaringClass()
-                    .getDeclaredConstructor()
-                    .newInstance(); // 실행가능 메소드 상태로 만듦
-
-            Object result = method.invoke(controller, request, response);
-            setControllerResponse(response, result);
-
+            controller.service(request, response);
             return true;
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("컨트롤러 메소드를 실패했습니다.", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("컨트롤러를 실행하지 못했습니다.", exception);
         }
-    }
-
-    private void setControllerResponse(HttpResponse response, Object result) {
-        if (result instanceof String viewName) {
-            String filePath = handlerMapping.getResource("/" + viewName + ".html");
-            setResponse(response, filePath);
-        }
-    }
-
-
-    private void setResponse(HttpResponse response, String filePath) {
-        if (filePath != null) {
-            response.setBody(HtmlReader.read(filePath));
-            response.setHeader("Content-Type", contentType(filePath));
-            return;
-        }
-        response.setStatus(404);
-        response.setBody(HtmlReader.read(NOT_FOUND_PAGE));
     }
 
     private boolean runStaticResources(HttpRequest request, HttpResponse response) {
@@ -77,7 +53,7 @@ public class QupringMvc {
             return true;
         }
 
-        String filePath = handlerMapping.getResource(request.getUrl());
+        String filePath = requestMapping.getResource(request.getUrl());
 
         if (filePath == null) {
             return false;

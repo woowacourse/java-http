@@ -1,24 +1,24 @@
 package org.qupring;
 
-import java.util.List;
+import com.techcourse.RegisterController;
 import org.apache.catalina.startup.Tomcat;
 import org.qupring.annotation.QupringApplication;
 import org.qupring.mvc.ApplicationScanner;
-import org.qupring.mvc.LoginController;
+import com.techcourse.LoginController;
 import org.qupring.mvc.QupringMvc;
-import org.qupring.mvc.handler.HandlerMapping;
+import org.qupring.mvc.handler.RequestMapping;
 
 public class Qupring {
     public void run(Class<?> application) {
         validateApplicationClass(application);
 
         ApplicationScanner applicationScanner = new ApplicationScanner();
-        HandlerMapping handlerMapping = new HandlerMapping();
-        handlerMapping.addResourceMappings(applicationScanner.scanForResources());
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.addResourceMappings(applicationScanner.scanForResources());
+        requestMapping.addController("/login", new LoginController());
+        requestMapping.addController("/register", new RegisterController());
 
-        handlerMapping.addControllerMappings(List.of(LoginController.class));
-
-        QupringMvc qupringMvc = new QupringMvc(handlerMapping);
+        QupringMvc qupringMvc = new QupringMvc(requestMapping);
 
         final var tomcat = new Tomcat(qupringMvc);
         tomcat.start();

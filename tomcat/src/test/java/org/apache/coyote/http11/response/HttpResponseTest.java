@@ -69,4 +69,20 @@ class HttpResponseTest {
                 .contains("Set-Cookie: JSESSIONID=abc-123")
                 .contains("Set-Cookie: theme=dark");
     }
+
+    @Test
+    @DisplayName("본문을 변경하면 직렬화 시점의 바이트 길이로 Content-Length를 계산한다")
+    void calculatesContentLengthFromLatestBodyWhenSerializing() {
+        // given
+        final HttpResponse response = new HttpResponse();
+        response.setBody("안녕");
+
+        // when
+        final String actual = new String(response.toBytes(), java.nio.charset.StandardCharsets.UTF_8);
+
+        // then
+        assertThat(actual)
+                .contains("Content-Length: 6")
+                .endsWith("안녕");
+    }
 }

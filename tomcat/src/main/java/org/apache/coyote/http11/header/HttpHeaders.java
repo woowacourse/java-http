@@ -34,6 +34,14 @@ public final class HttpHeaders {
                 .add(Objects.requireNonNull(value));
     }
 
+    public void set(final String name, final String value) {
+        final String headerName = values.keySet().stream()
+                .filter(key -> key.equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(Objects.requireNonNull(name));
+        values.put(headerName, new ArrayList<>(List.of(Objects.requireNonNull(value))));
+    }
+
     public Optional<String> get(final String name) {
         return values.entrySet().stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase(name))

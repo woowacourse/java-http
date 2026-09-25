@@ -1,10 +1,11 @@
-package com.techcourse.session;
+package org.apache.catalina.session;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
+
     private final String jsessionId;
     private final Map<String, Object> values = new ConcurrentHashMap<>();
 

@@ -1,8 +1,8 @@
 package com.techcourse.web.controller;
 
-import com.techcourse.session.Session;
-import com.techcourse.session.SessionManager;
-import com.techcourse.web.cookie.HttpCookie;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.cookie.HttpCookie;
 import org.apache.catalina.connector.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

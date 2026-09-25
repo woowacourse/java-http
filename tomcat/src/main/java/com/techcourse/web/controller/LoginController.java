@@ -2,9 +2,9 @@ package com.techcourse.web.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.session.Session;
-import com.techcourse.session.SessionManager;
-import com.techcourse.web.cookie.HttpCookie;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.cookie.HttpCookie;
 import com.techcourse.web.resource.StaticResourceHandler;
 import org.apache.catalina.connector.AbstractController;
 import org.apache.coyote.http11.HttpRequest;

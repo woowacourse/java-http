@@ -1,4 +1,4 @@
-package com.techcourse.web.cookie;
+package org.apache.catalina.cookie;
 
 import java.util.HashMap;
 import java.util.Map;

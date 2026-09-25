@@ -8,7 +8,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.controller.StaticResourceController;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -17,7 +22,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var requestMapping = new RequestMapping();
+        final var requestMapping = createRequestMapping();
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket, requestMapping);
 
@@ -46,7 +51,7 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var requestMapping = new RequestMapping();
+        final var requestMapping = createRequestMapping();
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
@@ -74,7 +79,7 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "",
                 "");
-        final var requestMapping = new RequestMapping();
+        final var requestMapping = createRequestMapping();
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
@@ -105,7 +110,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
 
-        final var requestMapping = new RequestMapping();
+        final var requestMapping = createRequestMapping();
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
@@ -137,7 +142,7 @@ class Http11ProcessorTest {
                 "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 requestBody);
-        final var requestMapping = new RequestMapping();
+        final var requestMapping = createRequestMapping();
         var socket = new StubSocket(httpRequest);
         var processor = new Http11Processor(socket, requestMapping);
         assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
@@ -156,5 +161,13 @@ class Http11ProcessorTest {
             assertThat(user.getAccount()).isEqualTo(account);
             assertThat(user.checkPassword(password)).isTrue();
         });
+    }
+
+    private RequestMapping createRequestMapping() {
+        Map<String, Controller> controllersByPath = Map.of(
+                "/login", new LoginController(),
+                "/register", new RegisterController(),
+                "/", new StaticResourceController());
+        return new RequestMapping(controllersByPath);
     }
 }

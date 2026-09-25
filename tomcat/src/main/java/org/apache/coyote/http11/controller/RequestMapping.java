@@ -7,10 +7,8 @@ public class RequestMapping {
 
     private final Map<String, Controller> controllers;
 
-    public RequestMapping() {
-        this.controllers = Map.of("/login", new LoginController(),
-                "/register", new RegisterController(),
-                "/", new StaticResourceController());
+    public RequestMapping(final Map<String, Controller> controllers) {
+        this.controllers = controllers;
     }
 
     public Controller getController(HttpRequest request) {

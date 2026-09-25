@@ -44,6 +44,10 @@ public class HttpResponse {
         return of(STATUS_BAD_REQUEST, contentType, body);
     }
 
+    public static HttpResponse error(final ContentType contentType, final byte[] body) {
+        return of(STATUS_BAD_REQUEST, contentType, body);
+    }
+
     public static HttpResponse redirect(final String location) {
         final HttpResponse response = new HttpResponse(STATUS_FOUND);
         response.headers.put(LOCATION, location);

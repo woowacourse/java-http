@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
+import org.apache.coyote.http11.request.requestline.RequestLine;
 
 import java.util.Optional;
 
@@ -35,11 +37,11 @@ public class HttpRequest {
     }
 
     public String getMethod() {
-        return requestLine.getMethod();
+        return requestLine.getMethod().name();
     }
 
     public String getPath() {
-        return requestLine.getPath();
+        return requestLine.getPath().getValue();
 
     }
     public Optional<String> getParameter(String name) {
@@ -57,6 +59,12 @@ public class HttpRequest {
         return getCookie().get(HttpCookie.JSESSIONID)
                 .flatMap(sessionManager::findSession);
     }
+
+    public boolean isMethod(final HttpMethod method) {
+        return requestLine.isMethod(method);
+    }
+
+
 
     public Session getSession() {
         return findSession().orElseGet(this::createSession);

@@ -5,10 +5,12 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.HttpException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
+import org.apache.coyote.http11.request.requestline.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_DIRECTORY = "static";
     private static final String USER = "user";
 
-    private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_PATH = "; Path=/";
 
@@ -82,12 +83,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handle(final InputStream inputStream, final OutputStream outputStream)
             throws IOException, URISyntaxException {
-        final String rawRequestLine = readLine(inputStream);
-        if (rawRequestLine == null) {
-            return;
-        }
-
         try {
+            final String rawRequestLine = readLine(inputStream);
             final RequestLine requestLine = RequestLine.from(rawRequestLine);
             final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
             final RequestBody body = RequestBody.from(readBody(inputStream, headers.getContentLength()));
@@ -98,10 +95,9 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = route(request);
             addSessionCookie(request, response);
             response.writeTo(outputStream);
-        } catch (InvalidRequestException e) {
-            log.warn("bad request: {}", e.getMessage());
-            HttpResponse.badRequest(ContentType.HTML, "400 Bad Request".getBytes(UTF_8))
-                    .writeTo(outputStream);
+        } catch (HttpException e) {
+            log.warn("invalid request [{}]: {}", e.getStatus().getCode(), e.getMessage());
+//            HttpResponse.error().writeTo(outputStream);
         }
     }
 
@@ -122,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (LOGIN_PATH.equals(path)) {
-            if (POST.equals(request.getMethod())) {
+            if (request.isMethod(HttpMethod.POST)) {
                 return HttpResponse.redirect(login(request));
             }
             if (isLoggedIn(request)) {
@@ -132,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (REGISTER_PATH.equals(path)) {
-            if (POST.equals(request.getMethod())) {
+            if (request.isMethod(HttpMethod.POST)) {
                 return HttpResponse.redirect(register(request));
             }
             return staticFile(REGISTER_PAGE);

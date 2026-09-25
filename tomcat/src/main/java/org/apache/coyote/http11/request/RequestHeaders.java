@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.InvalidRequestException;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,13 +28,13 @@ public class RequestHeaders {
             }
             final int delimiterIndex = line.indexOf(HEADER_DELIMITER);
             if (delimiterIndex == NOT_FOUND) {
-                throw new InvalidRequestException("잘못된 형식의 헤더: " + line);
+                throw new BadRequestException("잘못된 형식의 헤더: " + line);
             }
             final String name = line.substring(0, delimiterIndex);
             final String value = line.substring(delimiterIndex + 1).strip();
 
             if (CONTENT_LENGTH.equals(name) && parsed.containsKey(name)) {
-                throw new InvalidRequestException("Content-Length 헤더가 중복되었습니다.");
+                throw new BadRequestException("Content-Length 헤더가 중복되었습니다.");
             }
             parsed.putIfAbsent(name, value);
         }
@@ -49,7 +49,7 @@ public class RequestHeaders {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            throw new InvalidRequestException("Content-Length가 숫자가 아닙니다.");
+            throw new BadRequestException("Content-Length가 숫자가 아닙니다.");
         }
     }
 

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.request.RequestUri;
+import org.apache.coyote.http11.request.requestline.RequestUri;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -10,7 +10,7 @@ public class RequestUriTest {
     void 쿼리가_없으면_경로만_가진다() {
         final RequestUri uri = RequestUri.from("/index.html");
 
-        assertThat(uri.getPath()).isEqualTo("/index.html");
+        assertThat(uri.getRequestPath()).isEqualTo("/index.html");
         assertThat(uri.getQueryParameter("account")).isEmpty();
     }
 
@@ -18,7 +18,7 @@ public class RequestUriTest {
     void 경로와_쿼리_파라미터를_분리한다() {
         final RequestUri uri = RequestUri.from("/login?account=gugu&password=password");
 
-        assertThat(uri.getPath()).isEqualTo("/login");
+        assertThat(uri.getRequestPath()).isEqualTo("/login");
         assertThat(uri.getQueryParameter("account")).hasValue("gugu");
         assertThat(uri.getQueryParameter("password")).hasValue("password");
     }

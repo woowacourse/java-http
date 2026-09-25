@@ -1,16 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.request.HttpRequestParser;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
-import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Manager manager = SessionManager.getInstance();
 
     private final Socket connection;
 

@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-            final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
             HttpResponse response = handleRequest(httpRequest);
 
@@ -87,11 +87,11 @@ public class Http11Processor implements Runnable, Processor {
         return resourcePath;
     }
 
-    private String getContentType(String requestTarget){
-        if(requestTarget.endsWith(".css")){
+    private String getContentType(String requestTarget) {
+        if (requestTarget.endsWith(".css")) {
             return "text/css";
         }
-        if(requestTarget.endsWith(".js")){
+        if (requestTarget.endsWith(".js")) {
             return "text/javascript";
         }
         return "text/html";
@@ -153,6 +153,12 @@ public class Http11Processor implements Runnable, Processor {
         String account = body.get("account");
         String password = body.get("password");
         String email = body.get("email");
+
+        if (account == null || account.isBlank()
+                || password == null || password.isBlank()
+                || email == null || email.isBlank()) {
+            return HttpResponse.create("400 Bad Request", "text/plain", "Missing required fields");
+        }
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

@@ -9,3 +9,6 @@
 - [x] 회원가입을 완료하면 /index.html로 리다이렉트 된다.
 - [x] 요청 헤더에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환한다.
 - [x] 로그인 한 상태에서 /login에 접근하면, /index.html로 리다이렉트 된다.
+- [x] HttpRequest로 요청 책임을 분리한다.
+- [x] HttpResponse로 응답 책임을 분리한다.
+- [x] Controller를 도입해 분기를 처리한다.

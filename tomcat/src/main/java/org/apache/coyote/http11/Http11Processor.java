@@ -11,9 +11,8 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.UuidGenerator;
-import org.apache.coyote.http11.model.Cookie;
 import org.apache.coyote.http11.model.FormParameters;
-import org.apache.coyote.http11.model.RequestLine;
+import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,24 +39,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            HttpRequest httpRequest = HttpRequest.from(reader);
             SessionManager sessionManager = new SessionManager();
 
-            RequestLine requestLine = RequestLine.from(reader);
-            String line;
-            int requestContentLength = 0;
-            String cookieForm = "";
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                if (line.contains("Content-Length")) {
-                    String[] contentLengthLine = line.split(":", 2);
-                    requestContentLength = Integer.parseInt(contentLengthLine[1].trim());
-                }
-                if (line.contains("Cookie")) {
-                    String[] cookieLine = line.split(":", 2);
-                    cookieForm = cookieLine[1].trim();
-                }
-            }
-            Cookie cookie = Cookie.from(cookieForm);
-            String jsessionid = cookie.getCookie("JSESSIONID");
+            String jsessionid = httpRequest.getRequestHeader().cookie().getCookie("JSESSIONID");
             boolean isGenerated = false;
             Session session;
             if (jsessionid == null) {
@@ -71,14 +56,14 @@ public class Http11Processor implements Runnable, Processor {
                 isGenerated = true;
             }
 
-            String url = requestLine.requestUrl();
-            String method = requestLine.httpMethod();
+            String url = httpRequest.getRequestLine().requestUrl();
+            String method = httpRequest.getRequestLine().httpMethod();
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
 
             if ("GET".equals(method)) {
                 getProcess(outputStream, uriInfo, isGenerated, session);
             } else if ("POST".equals(method)) {
-                String requestBodyForm = extractRequestBodyForm(requestContentLength, reader);
+                String requestBodyForm = httpRequest.getRequestBody().value();
                 FormParameters requestBody = FormParameters.from(requestBodyForm);
                 postProcess(outputStream, uriInfo, requestBody, isGenerated, session);
             }
@@ -86,19 +71,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
-    }
-
-    private String extractRequestBodyForm(int requestContentLength, BufferedReader reader) throws IOException {
-        int readLength = 0;
-        char[] buffer = new char[requestContentLength];
-        while (readLength < requestContentLength) {
-            int nowReadLength = reader.read(buffer, readLength, requestContentLength - readLength);
-            if (nowReadLength == -1) {
-                throw new IOException("잘못된 요청");
-            }
-            readLength += nowReadLength;
-        }
-        return new String(buffer);
     }
 
     private void getProcess(

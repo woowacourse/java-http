@@ -1,33 +1,32 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import java.util.Map;
 
 public final class HttpRequest {
 
-    private final String method;              // GET, POST
-    private final String requestTarget;       // /login?account=gugu
-    private final String path;                // /login
-    private final String queryString;         // account=gugu
-    private final String protocol;            // HTTP/1.1
+    private final String method;
+    private final String requestTarget;
+    private final String path;
+    private final String queryString;
+    private final String protocol;
     private final Map<String, String> headers;
     private final String body;
-
-    public HttpRequest(final String method, final String requestTarget,
-                       final Map<String, String> headers, final String body) {
-        this(method, requestTarget, "HTTP/1.1", headers, body);
-    }
 
     public HttpRequest(final String method, final String requestTarget, final String protocol,
                        final Map<String, String> headers, final String body) {
         this.method = method;
         this.requestTarget = requestTarget;
         this.protocol = protocol;
-        final int queryIndex = requestTarget.indexOf('?');
-        this.path = queryIndex >= 0 ? requestTarget.substring(0, queryIndex) : requestTarget;
-        this.queryString = queryIndex >= 0 ? requestTarget.substring(queryIndex + 1) : "";
         this.headers = Map.copyOf(headers);
         this.body = body;
+        final int queryIndex = requestTarget.indexOf('?');
+        if (queryIndex >= 0) {
+            this.path = requestTarget.substring(0, queryIndex);
+            this.queryString = requestTarget.substring(queryIndex + 1);
+            return;
+        }
+        this.path = requestTarget;
+        this.queryString = "";
     }
 
     public String getMethod() {

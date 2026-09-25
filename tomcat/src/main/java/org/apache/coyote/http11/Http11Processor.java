@@ -3,13 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,21 +38,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = reader.readLine();
-            if (requestLine == null) {
+            HttpRequest request = HttpRequest.from(inputStream);
+            if (request == null) {
                 return;
             }
-
-            String[] requestParts = requestLine.split(" ");
-
-            String method = requestParts[0];
-            String requestUri = requestParts[1];
-
-            Map<String, String> headers = readHeaders(reader);
-
-            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-            String sessionId = cookie.get("JSESSIONID");
+            String sessionId = request.getCookie("JSESSIONID");
 
             String setCookieHeader = "";
             if (sessionId == null) {
@@ -73,41 +58,10 @@ public class Http11Processor implements Runnable, Processor {
                 sessionManager.add(session);
             }
 
-            String requestBody = "";
-            if (method.equals("POST")) {
-                String contentLengthHeader = headers.get("Content-Length");
-                if (contentLengthHeader != null) {
-                    int contentLength = Integer.parseInt(contentLengthHeader);
-                    char[] buffer = new char[contentLength];
-                    int totalRead = 0;
-                    while (totalRead < contentLength) {
-                        int readLength = reader.read(buffer, totalRead, contentLength - totalRead);
-
-                        if (readLength == -1) {
-                            return;
-                        }
-
-                        totalRead += readLength;
-                    }
-
-                    requestBody = new String(buffer);
-                }
-            }
-
-            String path = parsePath(requestUri);
-
-            String queryString = parseQueryString(requestUri);
-
-            String  parameters;
-            if (method.equals("POST")) {
-                parameters = requestBody;
-            } else {
-                parameters = queryString;
-            }
-
-            String redirectLocation = handleLogin(method, path, parameters, session);
+            String path = request.getPath();
+            String redirectLocation = handleLogin(request, session);
             if (redirectLocation == null) {
-                redirectLocation = handleRegister(method, path, parameters);
+                redirectLocation = handleRegister(request);
             }
 
             if (redirectLocation != null) {
@@ -142,8 +96,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleLogin(String method, String path, String parameters, Session session) {
-        if (!"/login".equals(path)) {
+    private String handleLogin(HttpRequest request, Session session) {
+        if (!"/login".equals(request.getPath())) {
             return null;
         }
 
@@ -152,14 +106,12 @@ public class Http11Processor implements Runnable, Processor {
             return "/index.html";
         }
 
-        if (!method.equals("POST") || parameters.isEmpty()) {
+        if (!"POST".equals(request.getMethod()) || request.getBody().isEmpty()) {
             return null;
         }
 
-        Map<String, String> parametersByName = parseParameters(parameters);
-
-        String account = parametersByName.get("account");
-        String password = parametersByName.get("password");
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
 
         if (account == null || password == null) {
             return "/401.html";
@@ -178,35 +130,14 @@ public class Http11Processor implements Runnable, Processor {
         return "/index.html";
     }
 
-    private Map<String, String> parseParameters(String parameters) {
-        Map<String, String> parametersByName = new HashMap<>();
-        String[] parameterPairs = parameters.split("&");
-
-        for (String parameter : parameterPairs) {
-            String[] nameAndValue = parameter.split("=");
-
-            if (nameAndValue.length != 2) {
-                return Map.of();
-            }
-
-            String name = URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8);
-            String value = URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8);
-            parametersByName.put(name, value);
-        }
-
-        return parametersByName;
-    }
-
-    private String handleRegister(String method, String path, String parameters) {
-        if (!method.equals("POST") || !"/register".equals(path) || parameters.isEmpty()) {
+    private String handleRegister(HttpRequest request) {
+        if (!"POST".equals(request.getMethod()) || !"/register".equals(request.getPath()) || request.getBody().isEmpty()) {
             return null;
         }
 
-        Map<String, String> parametersByName = parseParameters(parameters);
-
-        String account = parametersByName.get("account");
-        String password = parametersByName.get("password");
-        String email = parametersByName.get("email");
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
 
         if (account == null || password == null || email == null) {
             return null;
@@ -214,23 +145,6 @@ public class Http11Processor implements Runnable, Processor {
 
         InMemoryUserRepository.save(new User(account, password, email));
         return "/index.html";
-    }
-
-    private String parsePath(String requestUri) {
-        int queryIndex = requestUri.indexOf("?");
-        if (queryIndex >= 0) {
-            return requestUri.substring(0, queryIndex);
-        }
-        return requestUri;
-    }
-
-    private String parseQueryString(String requestUri) {
-        int queryIndex = requestUri.indexOf("?");
-        if (queryIndex >= 0) {
-            return requestUri.substring(queryIndex + 1);
-        }
-
-        return "";
     }
 
     private String resolveContentType(String requestUri) {
@@ -260,24 +174,4 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
-        while (true) {
-            String headerLine = reader.readLine();
-
-            if (headerLine == null || headerLine.isEmpty()) {
-                break;
-            }
-
-            String[] parts = headerLine.split(":", 2);
-
-            String left = parts[0].strip();
-            String right = parts[1].strip();
-
-            headers.put(left, right);
-        }
-
-        return headers;
-    }
 }

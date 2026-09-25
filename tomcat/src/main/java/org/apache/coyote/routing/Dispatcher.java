@@ -32,14 +32,19 @@ public class Dispatcher {
 
         String handle = handler.handle(request, response);
         render(handle, response);
-        addSessionCookieIfMissing(request, response);
+        addSessionCookieIfCreated(request, response);
     }
 
-    private void addSessionCookieIfMissing(final HttpRequest request, final HttpResponse response) {
-        if (request.getCookie().get(JSESSIONID).isPresent()) {
+    private void addSessionCookieIfCreated(final HttpRequest request, final HttpResponse response) {
+        final HttpSession session = request.getSession(false);
+        if (session == null) {
             return;
         }
-        final HttpSession session = request.getSession(true);
+        if (request.getCookie().get(JSESSIONID)
+                .filter(session.getId()::equals)
+                .isPresent()) {
+            return;
+        }
         response.addHeader(
                 "Set-Cookie",
                 Cookie.of(JSESSIONID, session.getId()).toHeaderValue()

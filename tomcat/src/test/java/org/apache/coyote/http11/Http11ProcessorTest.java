@@ -77,15 +77,18 @@ class Http11ProcessorTest {
     class CookieTest {
 
         @Test
-        @DisplayName("요청에 JSESSIONID가 없으면 새 세션을 등록하고 응답 쿠키에 ID를 추가한다")
-        void createsSessionAndAddsJSessionIdWhenRequestDoesNotContainOne() throws IOException {
+        @DisplayName("로그인에 성공해 새 세션이 만들어지면 응답 쿠키에 ID를 추가한다")
+        void addsJSessionIdWhenLoginCreatesSession() throws IOException {
             // given
             final Manager manager = new SessionManager();
             manager.removeAll();
+            final String body = "account=gugu&password=password";
             final String httpRequest = String.join("\r\n",
-                    "GET /index.html HTTP/1.1 ",
+                    "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
+                    "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
                     "",
+                    body,
                     "");
             final var socket = new StubSocket(httpRequest);
             final var processor = createProcessor(socket, manager);
@@ -97,7 +100,28 @@ class Http11ProcessorTest {
             final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=([0-9a-f\\-]{36})")
                     .matcher(socket.output());
             assertThat(matcher.find()).isTrue();
-            assertThat(manager.findSession(matcher.group(1))).isNotNull();
+            final HttpSession session = manager.findSession(matcher.group(1));
+            assertThat(session).isNotNull();
+            assertThat(session.getAttribute("loginUser")).isNotNull();
+        }
+
+        @Test
+        @DisplayName("세션을 사용하지 않는 요청에는 JSESSIONID를 발급하지 않는다")
+        void doesNotAddJSessionIdWhenRequestDoesNotUseSession() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "GET /index.html HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "",
+                    "");
+            final var socket = new StubSocket(httpRequest);
+            final var processor = createProcessor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
         }
 
         @Test
@@ -226,6 +250,7 @@ class Http11ProcessorTest {
             assertThat(socket.output())
                     .contains("HTTP/1.1 302 Found")
                     .contains("Location: /index.html");
+            assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
             assertThat(InMemoryUserRepository.findByAccount(account)).isPresent();
         }
     }
@@ -336,7 +361,8 @@ class Http11ProcessorTest {
             // then
             assertThat(socket.output())
                     .contains("HTTP/1.1 302 Found")
-                    .contains("Location: /401.html");
+                    .contains("Location: /401.html")
+                    .doesNotContain("Set-Cookie: JSESSIONID=");
         }
 
         @Test

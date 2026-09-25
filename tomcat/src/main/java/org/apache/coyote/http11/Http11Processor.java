@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.web.controller.Controller;
-import com.techcourse.web.routing.RequestMapping;
+import org.apache.catalina.connector.Controller;
+import org.apache.catalina.connector.RequestMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

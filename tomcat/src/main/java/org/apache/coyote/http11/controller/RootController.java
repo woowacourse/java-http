@@ -7,6 +7,8 @@ public class RootController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.ok().contentType("text/html").body("Hello world!");
+        return HttpResponse.ok()
+                .contentType("text/html")
+                .body("Hello world!");
     }
 }

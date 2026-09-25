@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.SessionIdGenerator;
 import org.apache.coyote.http11.StaticResourceResolver;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -31,6 +27,8 @@ public class DefaultController extends AbstractController {
 
         Path path = new File(url.getFile()).toPath();
         String responseBody = Files.readString(path);
-        return HttpResponse.ok().contentType(contentType).body(responseBody);
+        return HttpResponse.ok()
+                .contentType(contentType)
+                .body(responseBody);
     }
 }

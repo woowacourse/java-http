@@ -40,7 +40,8 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException, HttpException {
         if (hasValidSession(request.requestHeader().cookie())) {
-            return HttpResponse.found().location(INDEX_PAGE);
+            return HttpResponse.found()
+                    .location(INDEX_PAGE);
         }
 
         return firstVisit(request);
@@ -59,7 +60,9 @@ public class LoginController extends AbstractController {
 
         String sessionId = sessionIdGenerator.generate();
         sessionManager.add(new Session(sessionId, "user", user));
-        return HttpResponse.found().location(INDEX_PAGE).setCookie(JSESSIONID, sessionId);
+        return HttpResponse.found()
+                .location(INDEX_PAGE)
+                .setCookie(JSESSIONID, sessionId);
     }
 
     private HttpResponse firstVisit(HttpRequest request) throws IOException, HttpException {
@@ -72,7 +75,9 @@ public class LoginController extends AbstractController {
 
         Path path = new File(url.getFile()).toPath();
         String responseBody = Files.readString(path);
-        return HttpResponse.ok().contentType(contentType).body(responseBody);
+        return HttpResponse.ok()
+                .contentType(contentType)
+                .body(responseBody);
     }
 
     private boolean hasValidSession(HttpCookie cookie) {

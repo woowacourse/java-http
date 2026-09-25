@@ -28,7 +28,8 @@ public class RegisterController extends AbstractController {
 
         registerUser(request.requestBody());
 
-        return HttpResponse.found().location(INDEX_PAGE);
+        return HttpResponse.found()
+                .location(INDEX_PAGE);
     }
 
     private void registerUser(HttpRequestBody body) {

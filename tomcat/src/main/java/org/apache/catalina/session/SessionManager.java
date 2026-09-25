@@ -40,6 +40,9 @@ public class SessionManager implements Manager {
     }
 
     public void invalidate(final String id) {
+        if (id == null) {
+            return;
+        }
         final Session session = SESSIONS.remove(id);
         if (session != null) {
             session.clear();

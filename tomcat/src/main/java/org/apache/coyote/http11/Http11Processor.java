@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String NOT_FOUND_FILE_PATH = "static/404.html";
+    private static final String ROOT_PATH = "/";
+    private static final String STATIC_TARGET_PATH = "static";
 
     private final Socket connection;
 
@@ -49,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isRoot()) {
+        if (isRoot(httpRequest)) {
             return HttpResponse.ok(
                     "", "text/html", "Hello world!".getBytes(StandardCharsets.UTF_8));
         }
@@ -57,17 +60,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResourceResponse(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isPostLoginRequest()) {
+        if (isPostLoginRequest(httpRequest)) {
             return createLoginResponse(httpRequest);
         }
-        if (httpRequest.isPostRegisterRequest()) {
+        if (isPostRegisterRequest(httpRequest)) {
             return createRegisterResponse(httpRequest);
         }
-        String resourcePath = httpRequest.getResourcePath();
-        if (httpRequest.isGetLoginRequest() && isLoggedIn(httpRequest)) {
+        String resourcePath = STATIC_TARGET_PATH + httpRequest.getPath();
+        if (isGetLoginRequest(httpRequest) && isLoggedIn(httpRequest)) {
             return HttpResponse.sendRedirect("", "/index.html");
         }
-        if (httpRequest.isGetLoginRequest() || httpRequest.isGetRegisterRequest()) {
+        if (isGetLoginRequest(httpRequest) || isGetRegisterRequest(httpRequest)) {
             resourcePath += ".html";
         }
         URL resource = getClass().getClassLoader().getResource(resourcePath);
@@ -145,5 +148,25 @@ public class Http11Processor implements Runnable, Processor {
             return "";
         }
         return otherJsessionid;
+    }
+
+    private boolean isRoot(HttpRequest httpRequest) {
+        return httpRequest.isMatched("GET", ROOT_PATH);
+    }
+
+    private boolean isGetLoginRequest(HttpRequest httpRequest) {
+        return httpRequest.isMatched("GET", "/login");
+    }
+
+    private boolean isGetRegisterRequest(HttpRequest httpRequest) {
+        return httpRequest.isMatched("GET", "/register");
+    }
+
+    private boolean isPostLoginRequest(HttpRequest httpRequest) {
+        return httpRequest.isMatched("POST", "/login");
+    }
+
+    private boolean isPostRegisterRequest(HttpRequest httpRequest) {
+        return httpRequest.isMatched("POST", "/register");
     }
 }

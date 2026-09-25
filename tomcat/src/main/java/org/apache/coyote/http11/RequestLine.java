@@ -21,29 +21,29 @@ public class RequestLine {
 
     private void validateRequestLine(String requestLine) {
         if (requestLine == null) {
-            throw new IllegalArgumentException("[ERROR] 요청 줄은 null일 수 없습니다");
+            throw new IllegalArgumentException("요청 줄은 null일 수 없습니다");
         }
     }
 
     private void validateLine(String[] parts) {
         if (parts.length != 3) {
-            throw new IllegalArgumentException("[ERROR] 요청 줄은 'METHOD REQUEST_TARGET HTTP_VERSION' 형식이어야 합니다.");
+            throw new IllegalArgumentException("요청 줄은 'METHOD REQUEST_TARGET HTTP_VERSION' 형식이어야 합니다.");
         }
 
         for (String part : parts) {
             if (part.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] 요청 대상은 비어 있을 수 없습니다.");
+                throw new IllegalArgumentException("요청 대상은 비어 있을 수 없습니다.");
             }
         }
 
         if (!parts[2].equals("HTTP/1.1")) {
-            throw new IllegalArgumentException("[ERROR] 지원하지 않는 HTTP 버전입니다.");
+            throw new IllegalArgumentException("지원하지 않는 HTTP 버전입니다.");
         }
     }
 
     private void validatePath(String[] targets) {
         if (targets[0].isBlank()) {
-            throw new IllegalArgumentException("[ERROR] 요청 경로는 비어 있을 수 없습니다.");
+            throw new IllegalArgumentException("요청 경로는 비어 있을 수 없습니다.");
         }
     }
 

@@ -53,7 +53,7 @@ class RequestLineTest {
 
     @Test
     void 지원하지_않는_메서드면_예외가_발생한다() {
-        assertThatThrownBy(() -> RequestLine.from("DELETE / HTTP/1.1"))
+        assertThatThrownBy(() -> RequestLine.from("FOO / HTTP/1.1"))
                 .isInstanceOf(HttpRequestParseException.class);
     }
 

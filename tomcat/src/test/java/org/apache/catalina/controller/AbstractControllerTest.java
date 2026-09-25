@@ -55,6 +55,15 @@ class AbstractControllerTest {
         assertThat(toString(response)).startsWith("HTTP/1.1 405 Method Not Allowed ");
     }
 
+    @Test
+    void GET과_POST가_아닌_메서드로_요청하면_405를_응답한다() throws Exception {
+        final HttpResponse response = new HttpResponse();
+
+        getOnlyController.service(request("DELETE / HTTP/1.1"), response);
+
+        assertThat(toString(response)).startsWith("HTTP/1.1 405 Method Not Allowed ");
+    }
+
     private HttpRequest request(final String requestLine) {
         return HttpRequest.of(RequestLine.from(requestLine), RequestHeaders.from(List.of()), "");
     }

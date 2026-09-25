@@ -14,16 +14,19 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final Map<String, String> formData = request.getParameters();
         final String account = formData.get("account");
         final String password = formData.get("password");
         final String email = formData.get("email");
 
-        if (hasText(account) && hasText(password) && hasText(email)) {
-            InMemoryUserRepository.save(new User(account, password, email));
+        if (!hasText(account) || !hasText(password) || !hasText(email)) {
+            renderResource(response, "/register.html");
+            response.setStatusCode(400);
+            return;
         }
 
+        InMemoryUserRepository.save(new User(account, password, email));
         redirect(response, "/index.html");
     }
 

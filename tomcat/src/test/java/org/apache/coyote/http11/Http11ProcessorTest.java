@@ -205,6 +205,9 @@ class Http11ProcessorTest {
 
         // then
         assertThat(InMemoryUserRepository.findByAccount(" ")).isEmpty();
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request\r\n")
+                .contains("<form method=\"post\" action=\"/register\">");
     }
 
     @Test

@@ -1,8 +1,8 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.RequestHeaders;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestHeaders;
+import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 import java.util.Map;
 

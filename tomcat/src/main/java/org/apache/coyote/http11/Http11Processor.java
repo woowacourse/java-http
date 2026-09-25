@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestReader;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

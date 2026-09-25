@@ -48,8 +48,8 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body, cookie);
     }
 
-    public boolean isMatched(String method, String path) {
-        return requestLine.isMatched(method, path);
+    public boolean isMatchedMethod(String method) {
+        return requestLine.isMatchedMethod(method);
     }
 
     public boolean hasBodyParameters(String... names) {

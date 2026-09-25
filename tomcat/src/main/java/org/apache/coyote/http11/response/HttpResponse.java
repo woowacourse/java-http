@@ -12,9 +12,9 @@ public final class HttpResponse {
     private static final String LOCATION_HEADER = "Location";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
-    private final HttpResponseLine httpResponseLine;
+    private HttpResponseLine httpResponseLine;
     private final Map<String, String> headers;
-    private final byte[] body;
+    private byte[] body;
 
     private HttpResponse(
             HttpResponseLine httpResponseLine, Map<String, String> headers, byte[] body) {
@@ -23,31 +23,56 @@ public final class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse ok(String version, String jsessionid, String contentType, byte[] body) {
-        HttpResponseLine httpResponseLine = HttpResponseLine.of(version, 200, "OK");
-        Map<String, String> headers = new LinkedHashMap<>();
-        addHeader(headers, SET_COOKIE_HEADER, jsessionid);
-        addHeader(headers, LOCATION_HEADER, "");
-        addHeader(headers, CONTENT_TYPE_HEADER, contentType);
-        return new HttpResponse(httpResponseLine, headers, body);
+    public static HttpResponse empty() {
+        return new HttpResponse(null, new LinkedHashMap<>(), null);
     }
 
-    public static HttpResponse sendRedirect(String version, String jsessionid, String location) {
-        HttpResponseLine httpResponseLine = HttpResponseLine.of(version, 302, "Found");
-        Map<String, String> headers = new LinkedHashMap<>();
-        addHeader(headers, SET_COOKIE_HEADER, jsessionid);
-        addHeader(headers, LOCATION_HEADER, location);
-        addHeader(headers, CONTENT_TYPE_HEADER, "");
-        return new HttpResponse(httpResponseLine, headers, new byte[0]);
+    public void writeOk(String version, String jsessionid, String contentType, byte[] body) {
+        setHttpResponseLine(HttpResponseLine.of(version, 200, "OK"));
+        headers.clear();
+        addHeader(SET_COOKIE_HEADER, jsessionid);
+        addHeader(LOCATION_HEADER, "");
+        addHeader(CONTENT_TYPE_HEADER, contentType);
+        setBody(body);
     }
 
-    public static HttpResponse notFound(String version, String jsessionid, String contentType, byte[] body) {
-        HttpResponseLine httpResponseLine = HttpResponseLine.of(version, 404, "Not Found");
-        Map<String, String> headers = new LinkedHashMap<>();
-        addHeader(headers, SET_COOKIE_HEADER, jsessionid);
-        addHeader(headers, LOCATION_HEADER, "");
-        addHeader(headers, CONTENT_TYPE_HEADER, contentType);
-        return new HttpResponse(httpResponseLine, headers, body);
+    public void sendRedirect(String version, String jsessionid, String location) {
+        setHttpResponseLine(HttpResponseLine.of(version, 302, "Found"));
+        headers.clear();
+        addHeader(SET_COOKIE_HEADER, jsessionid);
+        addHeader(LOCATION_HEADER, location);
+        addHeader(CONTENT_TYPE_HEADER, "");
+        setBody(new byte[0]);
+    }
+
+    public void writeNotFound(String version, String jsessionid, String contentType, byte[] body) {
+        setHttpResponseLine(HttpResponseLine.of(version, 404, "Not Found"));
+        headers.clear();
+        addHeader(SET_COOKIE_HEADER, jsessionid);
+        addHeader(LOCATION_HEADER, "");
+        addHeader(CONTENT_TYPE_HEADER, contentType);
+        setBody(body);
+    }
+
+    private void setHttpResponseLine(HttpResponseLine httpResponseLine) {
+        this.httpResponseLine = httpResponseLine;
+    }
+
+    private void addHeader(String key, String value) {
+        if (value.isEmpty()) {
+            return;
+        }
+        if (key.equals(SET_COOKIE_HEADER)) {
+            value = "JSESSIONID=" + value;
+        }
+        if (key.equals(CONTENT_TYPE_HEADER)) {
+            value += ";charset=utf-8";
+        }
+        headers.put(key, value);
+    }
+
+    private void setBody(byte[] body) {
+        this.body = body;
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {
@@ -65,18 +90,5 @@ public final class HttpResponse {
 
         outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
-    }
-
-    private static void addHeader(Map<String, String> headers, String key, String value) {
-        if (value.isEmpty()) {
-            return;
-        }
-        if (key.equals(SET_COOKIE_HEADER)) {
-            value = "JSESSIONID=" + value;
-        }
-        if (key.equals(CONTENT_TYPE_HEADER)) {
-            value += ";charset=utf-8";
-        }
-        headers.put(key, value);
     }
 }

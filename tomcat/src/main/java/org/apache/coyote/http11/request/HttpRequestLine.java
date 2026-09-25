@@ -40,8 +40,8 @@ public class HttpRequestLine {
         return new HttpRequestLine(method, path, queryParameters, version);
     }
 
-    public boolean isMatched(String otherMethod, String otherPath) {
-        return method.equals(otherMethod) && path.equals(otherPath);
+    public boolean isMatchedMethod(String otherMethod) {
+        return method.equals(otherMethod);
     }
 
     public String getPath() {

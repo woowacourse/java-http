@@ -5,14 +5,19 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -39,46 +45,161 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String requestTarget = extractRequestTarget(inputStream);
+            String[] requestMessage = extractRequestMessage(bufferedReader);
+            Map<String, String> requestHeaders = extractRequestHeaders(bufferedReader);
+            String body = extractRequestBody(bufferedReader, requestHeaders);
+
+            String method = requestMessage[0];
+            String requestTarget = requestMessage[1];
             String requestPath = extractRequestPath(requestTarget);
             Map<String, String> queryParameters = parseQueryParameters(requestTarget);
 
-            dispatchRequest(requestPath, queryParameters);
+            Optional<HttpResponse> handledResponse = dispatchRequest(
+                    method,
+                    requestPath,
+                    queryParameters,
+                    body,
+                    requestHeaders
+            );
+            if (handledResponse.isPresent()) {
+                outputStream.write(handledResponse.get().toString().getBytes());
+                outputStream.flush();
+                return;
+            }
 
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
-            String contentType = resolveContentType(resourcePath);
+            if (responseBody == null) {
+                HttpResponse httpResponse = HttpResponse.createNotFoundResponse(
+                        readNotFoundPage()
+                );
+                outputStream.write(httpResponse.toString().getBytes());
+                outputStream.flush();
+            } else {
+                String contentType = resolveContentType(resourcePath);
+                HttpResponse httpResponse = HttpResponse.createOkResponse(
+                        contentType,
+                        responseBody,
+                        Map.of()
+                );
+                outputStream.write(httpResponse.toString().getBytes());
+                outputStream.flush();
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void dispatchRequest(String requestPath, Map<String, String> queryParameters) {
-        if ("/login".equals(requestPath) && !queryParameters.isEmpty()) {
-            handleLogin(queryParameters.get("account"), queryParameters.get("password"));
+    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+        final String contentLength = headers.get("Content-Length");
+        if (contentLength == null) {
+            return "";
         }
+        final char[] buffer = new char[Integer.parseInt(contentLength)];
+        bufferedReader.read(buffer);
+        return new String(buffer);
     }
 
-    private void handleLogin(String account, String password) {
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("user not found"));
-        if (user.checkPassword(password)) {
-            log.info("user={}", user);
-        } else {
-            throw new RuntimeException("invalid account or password");
+    private String readNotFoundPage() throws IOException {
+        URL resourceUrl = getClass().getClassLoader().getResource("static/404.html");
+        return readStaticResource(resourceUrl);
+    }
+
+    private Optional<HttpResponse> dispatchRequest(
+            String method,
+            String requestPath,
+            Map<String, String> queryParameters,
+            String body,
+            Map<String, String> requestHeaders) {
+
+        if ("GET".equals(method) && "/login".equals(requestPath) && isLoggedIn(requestHeaders)) {
+            return handleLoginRequest(body, requestHeaders);
         }
+        if ("POST".equals(method) && "/login".equals(requestPath)) {
+            return handleLoginRequest(body, requestHeaders);
+        }
+        if ("POST".equals(method) && "/register".equals(requestPath)) {
+            return Optional.of(HttpResponse.createRedirectResponse(handleRegister(body), Map.of()));
+        }
+        return Optional.empty();
+    }
+
+    private boolean isLoggedIn(Map<String, String> requestHeaders) {
+        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
+        String sessionId = cookie.get("JSESSIONID");
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            return false;
+        }
+        User user = getUser(session);
+        return user != null;
+    }
+
+    private String handleRegister(String body) {
+        final Map<String, String> params = parseParams(body);
+        User user = new User(
+                params.get("account"),
+                params.get("password"),
+                params.get("email")
+        );
+        InMemoryUserRepository.save(user);
+        return "/index.html";
+    }
+
+    private Map<String, String> parseParams(String body) {
+        String[] parameterPairs = body.split("&");
+
+        return Arrays.stream(parameterPairs)
+                .map(parameterPair -> parameterPair.split("="))
+                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
+    }
+
+    private Optional<HttpResponse> handleLoginRequest(
+            String body,
+            Map<String, String> requestHeaders) {
+        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
+        String sessionId = cookie.get("JSESSIONID");
+
+        Session session = sessionManager.findSession(sessionId);
+        if (session != null && getUser(session) != null) {
+            return Optional.of(HttpResponse.createRedirectResponse("/index.html", Map.of()));
+        }
+        final Map<String, String> params = parseParams(body);
+
+        String account = params.get("account");
+        String password = params.get("password");
+        Optional<User> user = login(account, password);
+        if (user.isEmpty()) {
+            return Optional.of(HttpResponse.createRedirectResponse("/401.html", Map.of()));
+        }
+
+        Map<String, String> responseHeaders = new LinkedHashMap<>();
+
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+        }
+
+        Session loginSession = new Session(sessionId);
+        loginSession.setAttribute("user", user.get());
+        sessionManager.add(loginSession);
+        return Optional.of(HttpResponse.createRedirectResponse("/index.html", responseHeaders));
+    }
+
+    private Optional<User> login(String account, String password) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(foundUser -> foundUser.checkPassword(password));
+        user.ifPresent(foundUser -> log.info("user={}", foundUser));
+        return user;
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private String extractRequestPath(String requestTarget) {
@@ -116,21 +237,10 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + requestPath;
     }
 
-    private String extractRequestTarget(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    private String[] extractRequestMessage(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
 
-        String[] requestLineParts = requestLine.split(" ");
-        skipHeaders(bufferedReader);
-        return requestLineParts[1];
-    }
-
-    private void skipHeaders(BufferedReader bufferedReader) throws IOException {
-        String headerLine = bufferedReader.readLine();
-
-        while (headerLine != null && !headerLine.isEmpty()) {
-            headerLine = bufferedReader.readLine();
-        }
+        return requestLine.split(" ");
     }
 
     private String resolveResponseBody(String resourcePath) throws IOException {
@@ -139,7 +249,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
         if (resourceUrl == null) {
-            throw new RuntimeException("resource not found");
+            return null;
         }
         return readStaticResource(resourceUrl);
     }
@@ -157,5 +267,17 @@ public class Http11Processor implements Runnable, Processor {
             return "application/javascript;charset=utf-8";
         }
         return "text/html;charset=utf-8";
+    }
+
+    private Map<String, String> extractRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+        Map<String, String> requestHeaders = new HashMap<>();
+
+        String headerLine;
+        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isEmpty()) {
+            String[] parts = headerLine.split(":", 2);
+            requestHeaders.put(parts[0], parts[1].trim());
+        }
+
+        return requestHeaders;
     }
 }

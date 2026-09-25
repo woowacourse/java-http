@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -55,5 +56,25 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getQueryString() {
+        return requestLine.getQueryString();
+    }
+
+    public String getHeader(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("[ERROR] HTTP 요청 헤더 이름은 null일 수 없습니다.");
+        }
+
+        return headers.get(name.toLowerCase(Locale.ROOT));
     }
 }

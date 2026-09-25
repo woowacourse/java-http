@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
@@ -18,6 +19,30 @@ import java.util.UUID;
 
 
 class Http11ProcessorTest {
+
+    @Test
+    void 존재하지_않는_정적_리소스는_404로_응답한다() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /not-found.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        assertThatCode(() -> processor.process(socket))
+                .doesNotThrowAnyException();
+
+        // then
+        String notFoundPage = Files.readString(new File(
+                getClass().getClassLoader().getResource("static/404.html").getFile()
+        ).toPath());
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 404 Not Found ")
+                .contains(notFoundPage);
+    }
 
     @Test
     void process() {

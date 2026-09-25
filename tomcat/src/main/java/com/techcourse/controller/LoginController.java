@@ -37,7 +37,8 @@ public class LoginController extends AbstractController {
 
         response.setStatusCode(StatusCode.OK);
         response.setContentType(request.getContentType());
-        final var responseBody = StaticResourceReader.read(request.getResourcePath());
+        final var responseBody = StaticResourceReader.read(request.getResourcePath())
+                .orElseThrow(() -> new IllegalArgumentException("정적 리소스를 찾을 수 없습니다."));
         response.writeBody(responseBody);
     }
 

@@ -17,6 +17,6 @@ public class RequestMapping {
     }
 
     private String normalizePath(final String path) {
-        return path.replaceFirst("(\\.html)?(\\?.*)?$", "");
+        return path.replaceFirst("(\\.html)?$", "");
     }
 }

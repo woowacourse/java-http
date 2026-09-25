@@ -6,13 +6,16 @@ import java.util.Map;
 public class HttpRequest {
     private final String method;
     private final String path;
+    private final String queryString;
     private final String version;
     private final Map<String, String> headers = new HashMap<String, String>();
     private final String requestBody;
 
-    public HttpRequest(String method, String path, String version, Map<String, String> headers, String requestBody) {
+    public HttpRequest(String method, String path, String queryString, String version,
+                       Map<String, String> headers, String requestBody) {
         this.method = method;
         this.path = path;
+        this.queryString = queryString;
         this.version = version;
         this.headers.putAll(headers);
         this.requestBody = requestBody;
@@ -37,6 +40,10 @@ public class HttpRequest {
 
     public String getPath() {
         return path;
+    }
+
+    public String getQueryString() {
+        return queryString;
     }
 
     public String getVersion() {

@@ -13,13 +13,24 @@ public class HttpRequestParser {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String[] requestLineParts = readRequestLineParts(bufferedReader);
         String method = requestLineParts[0];
-        String path = requestLineParts[1];
+        String[] requestTargetParts = parseRequestTarget(requestLineParts[1]);
         String version = requestLineParts[2];
 
         Map<String, String> requestHeaders = readRequestHeaders(bufferedReader);
         int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
         String requestBody = readRequestBody(bufferedReader, contentLength);
-        return new HttpRequest(method, path, version, requestHeaders, requestBody);
+        return new HttpRequest(method, requestTargetParts[0], requestTargetParts[1], version, requestHeaders,
+                requestBody);
+    }
+
+    private static String[] parseRequestTarget(String requestTarget) {
+        int queryStart = requestTarget.indexOf('?');
+        if (queryStart == -1) {
+            return new String[]{requestTarget, ""};
+        }
+        String path = requestTarget.substring(0, queryStart);
+        String queryString = requestTarget.substring(queryStart + 1);
+        return new String[]{path, queryString};
     }
 
     private static String[] readRequestLineParts(BufferedReader reader) throws IOException {

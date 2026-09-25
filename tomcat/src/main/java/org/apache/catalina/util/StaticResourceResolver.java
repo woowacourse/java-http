@@ -1,8 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.util;
 
 import java.net.URL;
 import java.util.Map;
-import org.apache.coyote.http11.request.HttpRequestHeader;
 
 public final class StaticResourceResolver {
     private static final String STATIC_ROOT = "static";
@@ -16,22 +15,6 @@ public final class StaticResourceResolver {
     );
 
     private StaticResourceResolver(){
-    }
-
-    private String resolveContentType(HttpRequestHeader header) {
-        String accept = header.header().get("Accept");
-
-        if (accept == null || accept.isEmpty()) {
-            return MIME_TYPE_DEFAULT;
-        }
-
-        String preferred = accept.split(",")[0].split(";")[0].trim();
-
-        if (MIME_TYPES_WILDCARD.equals(preferred)) {
-            return MIME_TYPE_DEFAULT;
-        }
-
-        return preferred;
     }
 
     public static URL findStaticResource(String path, String contentType) {

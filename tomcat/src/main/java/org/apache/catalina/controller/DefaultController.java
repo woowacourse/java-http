@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.StaticResourceResolver;
+import org.apache.catalina.util.StaticResourceResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;

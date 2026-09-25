@@ -66,7 +66,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             String requestHead = getRequestMessage(bufferedReader);
             String[] requestHeadLines = requestHead.split(CRLF);
@@ -90,8 +91,12 @@ public class Http11Processor implements Runnable, Processor {
                 Integer contentLength = getContentLength(requestHeadLines);
 
                 char[] buffer = new char[Objects.requireNonNull(contentLength)];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
+                int readCount = bufferedReader.read(buffer, 0, contentLength);
+
+                if (readCount == -1) {
+                    throw new IOException("요청 본문을 읽지 못했습니다.");
+                }
+                String requestBody = new String(buffer, 0, readCount);
 
                 Map<String, String> parameters = parseFormParameters(requestBody);
 
@@ -155,7 +160,6 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    @Nonnull
     private Session createSession(Map<String, String> headers) {
         Session session;
         String sessionId = UUID.randomUUID().toString();

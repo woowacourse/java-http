@@ -9,14 +9,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
-    private final RequestMapping mapping;
+    private final ControllerResolver mapping;
 
-    public Http11Processor(Socket connection, RequestMapping mapping) {
+    public Http11Processor(Socket connection, ControllerResolver mapping) {
         this.connection = connection;
         this.mapping = mapping;
     }
@@ -80,9 +81,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void dispatch(HttpRequest request, HttpResponse response) throws Exception {
-        Controller controller = mapping.getController(request);
-        if (controller != null) {
-            controller.service(request, response);
+        Optional<Controller> controller = mapping.getController(request);
+        if (controller.isPresent()) {
+            controller.get().service(request, response);
             return;
         }
         serveStaticResource(request, response);
@@ -93,10 +94,6 @@ public class Http11Processor implements Runnable, Processor {
             response.sendError(HttpStatus.NOT_FOUND);
             return;
         }
-        String path = request.getPath();
-        if (path.equals("/")) {
-            path = "/index.html";
-        }
-        response.sendStaticFile(path);
+        response.sendStaticFile(request.getPath());
     }
 }

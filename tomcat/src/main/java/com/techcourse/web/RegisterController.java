@@ -12,7 +12,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.sendStaticFile("/register.html");
+        response.sendStaticFile(Page.REGISTER.getPath());
     }
 
     @Override
@@ -23,6 +23,6 @@ public class RegisterController extends AbstractController {
                 request.getParameter("email")
         );
         InMemoryUserRepository.save(user);
-        response.sendRedirect("/index.html");
+        response.sendRedirect(Page.INDEX.getPath());
     }
 }

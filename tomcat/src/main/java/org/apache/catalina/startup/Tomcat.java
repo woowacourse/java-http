@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.http11.ControllerResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,9 +10,9 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
-    private final RequestMapping mapping;
+    private final ControllerResolver mapping;
 
-    public Tomcat(RequestMapping mapping) {
+    public Tomcat(ControllerResolver mapping) {
         this.mapping = mapping;
     }
 

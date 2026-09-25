@@ -18,10 +18,10 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         Session session = request.getSession(false);
         if (session != null && session.getAttribute(USER_ATTRIBUTE_KEY) != null) {
-            response.sendRedirect("/index.html");
+            response.sendRedirect(Page.INDEX.getPath());
             return;
         }
-        response.sendStaticFile("/login.html");
+        response.sendStaticFile(Page.LOGIN.getPath());
     }
 
     @Override
@@ -30,13 +30,13 @@ public class LoginController extends AbstractController {
         String password = request.getParameter("password");
         Optional<User> user = findAuthenticatedUser(account, password);
         if (user.isEmpty()) {
-            response.sendRedirect("/401.html");
+            response.sendRedirect(Page.UNAUTHORIZED.getPath());
             return;
         }
 
         Session session = request.getSession(true);
         session.setAttribute(USER_ATTRIBUTE_KEY, user.get());
-        response.sendRedirect("/index.html");
+        response.sendRedirect(Page.INDEX.getPath());
     }
 
     private Optional<User> findAuthenticatedUser(String account, String password) {

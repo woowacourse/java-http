@@ -1,8 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Application;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.Application;
+import com.techcourse.web.Page;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,31 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
-    void 등록한_컨트롤러가_응답을_설정하면_WAS가_해당_응답을_출력한다() {
-        // given
-        RequestMapping mapping = new RequestMapping();
-        mapping.add("/custom", (request, response) -> response.sendRedirect("/index.html"));
-        StubSocket socket = new StubSocket("GET /custom HTTP/1.1\r\n\r\n");
-
-        // when
-        new Http11Processor(socket, mapping).process(socket);
-
-        // then
-        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found")
-                .contains("Location: /index.html");
-    }
-
-    @Test
     void 컨트롤러에서_예외가_발생하면_500_페이지를_응답한다() {
         // given
-        RequestMapping mapping = new RequestMapping();
-        mapping.add("/broken", (request, response) -> {
+        ControllerResolver resolver = request -> Optional.of((ignoredRequest, response) -> {
             throw new IOException("failure");
         });
-        StubSocket socket = new StubSocket("GET /broken HTTP/1.1\r\n\r\n");
+        StubSocket socket = new StubSocket("GET /login HTTP/1.1\r\n\r\n");
 
         // when
-        new Http11Processor(socket, mapping).process(socket);
+        new Http11Processor(socket, resolver).process(socket);
 
         // then
         assertThat(socket.output()).startsWith("HTTP/1.1 500 Internal Server Error")
@@ -199,7 +185,7 @@ class Http11ProcessorTest {
         // then
         assertThat(response)
                 .startsWith("HTTP/1.1 302 Found \r\n")
-                .contains("Location: /401.html \r\n")
+                .contains("Location: " + Page.UNAUTHORIZED.getPath() + " \r\n")
                 .doesNotContain("Set-Cookie");
     }
 
@@ -215,7 +201,7 @@ class Http11ProcessorTest {
         // then
         assertThat(response)
                 .startsWith("HTTP/1.1 302 Found \r\n")
-                .contains("Location: /401.html \r\n")
+                .contains("Location: " + Page.UNAUTHORIZED.getPath() + " \r\n")
                 .doesNotContain("Set-Cookie");
     }
 

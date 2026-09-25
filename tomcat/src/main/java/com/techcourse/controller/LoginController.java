@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Http11Processor;
@@ -32,6 +33,14 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(MyHttpRequest request, MyHttpResponse response) throws Exception {
+        Session session = request.getSession(false);
+        if (session != null && getUser(session) != null) {
+            response.setStatusCode(StatusCode.FOUND);
+            response.setContentType(ContentType.HTML);
+            response.sendRedirect("index.html");
+            return;
+        }
+
         response.setStatusCode(StatusCode.OK);
         response.setContentType(request.getContentType());
         final var responseBody = readStaticResource(request, "Hello world!");
@@ -65,6 +74,10 @@ public class LoginController extends AbstractController {
         httpResponse.setStatusCode(StatusCode.FOUND);
         httpResponse.setContentType(ContentType.HTML);
         httpResponse.sendRedirect("401.html");
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
     private static Optional<User> findUserByAccount(String account) {

@@ -5,6 +5,7 @@ import org.apache.coyote.http11.HttpCookie;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -18,18 +19,15 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final BufferedReader reader) throws IOException {
+    public static Optional<HttpRequest> from(final BufferedReader reader) throws IOException {
         final String line = reader.readLine();
+        if (line == null) {
+            return Optional.empty();
+        }
+        final RequestLine requestLine = RequestLine.from(line);
         final HttpHeaders headers = HttpHeaders.from(reader);
         final RequestBody body = RequestBody.of(reader, headers);
-        if (line == null) {
-            return new HttpRequest(null, headers, body);
-        }
-        return new HttpRequest(RequestLine.from(line), headers, body);
-    }
-
-    public boolean isEmpty() {
-        return requestLine == null;
+        return Optional.of(new HttpRequest(requestLine, headers, body));
     }
 
     public boolean isGet() {

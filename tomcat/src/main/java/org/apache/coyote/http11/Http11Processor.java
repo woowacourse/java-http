@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
@@ -38,7 +39,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest request = HttpRequest.from(bufferedReader);
+            final Optional<HttpRequest> parsed = HttpRequest.from(bufferedReader);
+            if (parsed.isEmpty()) {
+                return;
+            }
+            final HttpRequest request = parsed.get();
             final HttpResponse response = new HttpResponse();
             addSessionCookie(response, request.getCookie());
 

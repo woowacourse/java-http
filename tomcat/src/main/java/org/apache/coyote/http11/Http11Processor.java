@@ -43,10 +43,6 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpResponse httpResponse = new MyHttpResponse();
             log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
-            if (!httpRequest.hasCookie("JSESSIONID")) {
-                Session session = httpRequest.getSession(true);
-            }
-
             RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);

@@ -264,11 +264,15 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 요청에_쿠키가_없으면_JSESSIONID를_발급한다() {
+    void 로그인에_성공하고_세션이_없으면_JSESSIONID를_발급한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=password",
                 "",
                 "");
         var socket = new StubSocket(httpRequest);
@@ -290,18 +294,11 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 요청에_이미_JSession_쿠키_헤더가_있다면_응답에_포함하지_않는다() {
+    void 세션이_필요하지_않은_정적_리소스_요청에는_세션_쿠키를_발급하지_않는다() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + session.getId(),
-                "Connection: keep-alive ",
-                "Content-Length: 30",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
-                "\r\n" +
-                        "account=gugu&password=password",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
                 "",
                 "");
 

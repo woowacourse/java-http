@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -8,6 +10,9 @@ import java.util.TreeMap;
 public class HttpHeaders {
 
     private final Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+    public HttpHeaders() {
+    }
 
     public HttpHeaders(final List<String> headerLines) throws IOException {
         for (String line : headerLines) {
@@ -17,6 +22,17 @@ public class HttpHeaders {
 
     public String getHeader(final String name) {
         return headers.get(name);
+    }
+
+    public void setHeader(final String name, final String value) {
+        headers.put(name, value);
+    }
+
+    public void writeTo(final OutputStream outputStream) throws IOException {
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            final String line = header.getKey() + ": " + header.getValue() + "\r\n";
+            outputStream.write(line.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     private void addHeader(final String line) throws IOException {
@@ -30,6 +46,6 @@ public class HttpHeaders {
             throw new IOException("잘못된 요청 헤더입니다: " + line);
         }
         final String value = line.substring(separator + 1).trim();
-        headers.put(name, value);
+        setHeader(name, value);
     }
 }

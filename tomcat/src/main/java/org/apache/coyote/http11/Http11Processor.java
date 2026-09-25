@@ -1,56 +1,34 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.session.SessionIdGenerator;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String STATIC_ROOT = "static";
-    private static final String ROOT_PATH = "/";
-    private static final String MIME_TYPE_DEFAULT = "text/html";
-    private static final String MIME_TYPES_WILDCARD = "*/*";
-    private static final Map<String, String> MIME_TYPE = Map.ofEntries(
-            Map.entry("text/html", ".html"),
-            Map.entry("text/css", ".css"),
-            Map.entry("text/javascript", ".js")
-    );
-
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionIdGenerator sessionIdGenerator;
-    private final SessionManager sessionManager = SessionManager.getInstance();
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
-        this.connection = connection;
-        this.sessionIdGenerator = new SessionIdGenerator();
+        this(connection, new SessionIdGenerator());
     }
 
     public Http11Processor(final Socket connection, SessionIdGenerator sessionIdGenerator) {
         this.connection = connection;
-        this.sessionIdGenerator = sessionIdGenerator;
+        this.requestMapping = new RequestMapping(SessionManager.getInstance(), sessionIdGenerator);
     }
 
     @Override
@@ -62,215 +40,21 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            HttpRequest request = parseRequest(inputStream);
-            final String response = handle(request);
+             final var br = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream()
+        ) {
+            HttpRequest request = HttpRequest.from(br);
+            HttpResponse response;
+            try {
+                response = requestMapping.getController(request).service(request);
+            } catch (Exception e) {
+                response = HttpResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest parseRequest(InputStream inputStream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
-        HttpRequestHeader header = parseRequestHeader(br);
-
-        if (!header.hasContain("Content-Length")) {
-            return new HttpRequest(header, HttpRequestBody.empty());
-        }
-
-        int contentLength = Integer.parseInt(header.header().get("Content-Length"));
-        HttpRequestBody body = parseRequestBody(br, contentLength);
-        return new HttpRequest(header, body);
-    }
-
-    private HttpRequestHeader parseRequestHeader(BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        HttpCookie cookie = HttpCookie.empty();
-        String line = br.readLine();
-        RequestLine firstLine = RequestLine.from(line);
-
-        while ((line = br.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            String[] parts = line.split(": ", 2);
-            if (parts[0].equals("Cookie")) {
-                cookie = HttpCookie.from(parts[1]);
-                continue;
-            }
-            if (parts.length == 2) {
-                headers.put(parts[0], parts[1]);
-            }
-        }
-        return new HttpRequestHeader(firstLine, headers, cookie);
-    }
-
-    private HttpRequestBody parseRequestBody(BufferedReader br, int contentLength) throws IOException {
-        String requestBody;
-
-        char[] buffer = new char[contentLength];
-        int offset = 0;
-        while (offset < contentLength) {
-            int result = br.read(buffer, offset, contentLength - offset);
-            if (result == -1) {
-                break;
-            }
-            offset += result;
-        }
-        requestBody = new String(buffer);
-
-        return new HttpRequestBody(requestBody);
-    }
-
-    private String handle(HttpRequest request) throws IOException {
-        HttpRequestHeader header = request.requestHeader();
-        HttpCookie cookie = header.cookie();
-        HttpRequestBody body = request.requestBody();
-
-        String responseBody;
-
-        String contentType = resolveContentType(header);
-        URL url = findStaticResource(header.path(), contentType);
-
-        if (url == null || url.getPath().endsWith(ROOT_PATH)) {
-            responseBody = "Hello world!";
-            return buildResponse(HttpStatus.OK, contentType, responseBody);
-        }
-
-        if (header.path().contains("login")) {
-            return handleLogin(cookie, header, body);
-        }
-
-        if (header.path().contains("register") && header.hasContain("Content-Length")) {
-            String location = registerUser(body);
-            return redirectResponse(HttpStatus.FOUND, location);
-        }
-
-        Path path = new File(url.getFile()).toPath();
-        responseBody = Files.readString(path);
-
-        return buildResponse(HttpStatus.OK, contentType, responseBody);
-    }
-
-    private String resolveContentType(HttpRequestHeader header) {
-        String accept = header.header().get("Accept");
-
-        if (accept == null || accept.isEmpty()) {
-            return MIME_TYPE_DEFAULT;
-        }
-
-        String preferred = accept.split(",")[0].split(";")[0].trim();
-
-        if (MIME_TYPES_WILDCARD.equals(preferred)) {
-            return MIME_TYPE_DEFAULT;
-        }
-
-        return preferred;
-    }
-
-    private URL findStaticResource(String path, String contentType) {
-        if (path.contains(".")) {
-            return getClass().getClassLoader().getResource(STATIC_ROOT + path);
-        }
-
-        return getClass().getClassLoader().getResource(STATIC_ROOT + path + MIME_TYPE.get(contentType));
-    }
-
-    private User loginUser(HttpRequestBody body) {
-        String[] formData = body.requestBody().split("&");
-
-        List<String> data = Arrays.asList(formData);
-
-        String account = data.get(0).split("=")[1];
-        String password = data.get(1).split("=")[1];
-
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElse(null);
-
-        if (user == null || !user.checkPassword(password)) {
-            return null;
-        }
-
-        log.info("user : {}", user);
-
-        return user;
-    }
-
-    private String registerUser(HttpRequestBody body) {
-        String[] formData = body.requestBody().split("&");
-
-        List<String> data = Arrays.asList(formData);
-
-        String account = data.get(0).split("=")[1];
-        String email = data.get(1).split("=")[1];
-        String password = data.get(2).split("=")[1];
-
-        User newUser = new User(account, password, email);
-        InMemoryUserRepository.save(newUser);
-
-        log.info("new user : {}", newUser);
-
-        return "/index.html";
-    }
-
-    private static String buildResponse(HttpStatus status, String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.status() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
-    }
-
-    private String handleLogin(HttpCookie cookie, HttpRequestHeader header, HttpRequestBody body) {
-        if (hasValidSession(cookie)) {
-            return redirectResponse(HttpStatus.FOUND, "/index.html");
-        }
-
-        if (!header.hasContain("Content-Length")) {
-            return redirectResponse(HttpStatus.LENGTH_REQUIRED, "");
-        }
-
-        User user = loginUser(body);
-        if (user == null) {
-            return redirectResponse(HttpStatus.FOUND, UNAUTHORIZED_PAGE);
-        }
-
-        String sessionId = sessionIdGenerator.generate();
-        sessionManager.add(new Session(sessionId, "user", user));
-        return redirectResponseWithCookie(HttpStatus.FOUND, INDEX_PAGE, sessionId);
-    }
-
-    private String redirectResponse(HttpStatus status, String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.status() + " ",
-                "Location: " + location + " ",
-                "",
-                ""
-        );
-    }
-
-    private String redirectResponseWithCookie(HttpStatus status, String location, String sessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.status() + " ",
-                "Location: " + location + " ",
-                "Set-Cookie: " + "JSESSIONID=" + sessionId + " ",
-                "",
-                ""
-        );
-    }
-
-    private boolean hasValidSession(HttpCookie cookie) {
-        if (!cookie.hasJSessionId()) {
-            return false;
-        }
-
-        return sessionManager.hasUser(cookie.getJSessionId());
     }
 }

@@ -21,11 +21,7 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = Map.copyOf(headers);
         this.body = body;
-        if ("POST".equals(requestLine.getMethod())) {
-            this.parameters = parseParameters(body);
-        } else {
-            this.parameters = parseParameters(requestLine.getQueryString());
-        }
+        this.parameters = readParameters(requestLine, body);
         this.cookie = new HttpCookie(headers.get("Cookie"));
     }
 
@@ -90,11 +86,18 @@ public class HttpRequest {
         while (totalRead < contentLength) {
             int readLength = reader.read(buffer, totalRead, contentLength - totalRead);
             if (readLength == -1) {
-                throw new EOFException("요청 본문을 모두 읽기 전에 연결이 종료되었습니다.");
+                throw new EOFException("본문 읽기 실패");
             }
             totalRead += readLength;
         }
         return new String(buffer);
+    }
+
+    private static Map<String, String> readParameters(RequestLine requestLine, String body) {
+        if ("POST".equals(requestLine.getMethod())) {
+            return parseParameters(body);
+        }
+        return parseParameters(requestLine.getQueryString());
     }
 
     private static Map<String, String> parseParameters(String parameters) {

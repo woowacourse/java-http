@@ -42,12 +42,12 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) {
                 return;
             }
+            HttpResponse response = new HttpResponse();
             String sessionId = request.getCookie("JSESSIONID");
 
-            String setCookieHeader = "";
             if (sessionId == null) {
                 sessionId = UUID.randomUUID().toString();
-                setCookieHeader = "Set-Cookie: JSESSIONID=" + sessionId + "\r\n";
+                response.setHeader("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
             SessionManager sessionManager = SessionManager.getInstance();
@@ -65,31 +65,15 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (redirectLocation != null) {
-                final var response =
-                        "HTTP/1.1 302 Found\r\n"
-                                + "Location: " + redirectLocation + "\r\n"
-                                + setCookieHeader
-                                + "Content-Length: 0\r\n"
-                                + "\r\n";
-
-                outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                response.sendRedirect(redirectLocation);
+                response.writeTo(outputStream);
                 return;
             }
 
             byte[] responseBody = readResponseBody(path);
-            String contentType = resolveContentType(path);
-
-            final var response =
-                    "HTTP/1.1 200 OK\r\n"
-                            + setCookieHeader
-                            + "Content-Type: " + contentType + "charset=utf-8\r\n"
-                            + "Content-Length: " + responseBody.length + "\r\n"
-                            + "\r\n";
-
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
-            outputStream.flush();
+            String contentType = resolveContentType(path) + "charset=utf-8";
+            response.setBody(responseBody, contentType);
+            response.writeTo(outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

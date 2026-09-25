@@ -1,41 +1,25 @@
 package org.apache.catalina.controller;
 
+import org.apache.catalina.resource.Resource;
+import org.apache.catalina.resource.ResourceReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ContentType;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.util.Optional;
 
 public class StaticResourceController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final var resource = findResource(request.getPath());
-        if (resource == null) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        final Optional<Resource> readResource = ResourceReader.read(request.getPath());
+        if (readResource.isEmpty()) {
+            final Resource notFound = ResourceReader.read("/404.html").orElseThrow();
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setBody(ContentType.HTML, page("/404.html"));
+            response.setBody(notFound.contentType(), notFound.content());
             return;
         }
-
-        response.setBody(ContentType.from(request.getPath()), readResource(resource));
-    }
-
-    private String readResource(final URL resource) throws IOException, URISyntaxException {
-        return Files.readString(Path.of(resource.toURI()), UTF_8);
-    }
-
-    private URL findResource(final String path) {
-        return getClass().getClassLoader().getResource("static" + path);
-    }
-
-    private String page(final String path) throws URISyntaxException, IOException {
-        return readResource(findResource(path));
+        final Resource resource = readResource.get();
+        response.setBody(resource.contentType(), resource.content());
     }
 }

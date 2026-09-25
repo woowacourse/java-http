@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.ContentType;
 public class HomeController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         response.setBody(ContentType.HTML, "Hello world!");
     }
 }

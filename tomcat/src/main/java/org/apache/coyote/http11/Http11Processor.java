@@ -8,6 +8,7 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,29 +71,43 @@ public class Http11Processor implements Runnable, Processor {
     private void login(OutputStream outputStream, Request request) throws IOException {
         String account = request.getRequestParam("account");
         String password = request.getRequestParam("password");
+        if (account.isEmpty() && password.isEmpty()) {
+            if (SessionManager.getInstance().hasUser(request.getJSessionId())) {
+                Response.redirect(outputStream, "/index.html");
+                return;
+            }
+            Response response = handling(request, StatusCode.OK);
+            response.response(outputStream);
+            return;
+        }
+        loginWithParams(outputStream, request);
+    }
+
+    private void loginWithParams(OutputStream outputStream, Request request) throws IOException {
+        String account = request.getRequestParam("account");
+        String password = request.getRequestParam("password");
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
-            log.info(user.toString());
-            loginSuccess(outputStream);
+            loginSuccess(outputStream, request, user);
         }
         if (user != null && !user.checkPassword(password)) {
-            log.info("login fail");
             loginFail(outputStream);
         }
         if (!account.isEmpty() && user == null) {
-            log.info("login fail");
             loginFail(outputStream);
         }
-        Response response = handling(request, StatusCode.OK);
-        response.response(outputStream);
     }
 
     private void loginFail(OutputStream outputStream) throws IOException {
+        log.info("login fail");
         Response.redirect(outputStream, "/401");
     }
 
-    private void loginSuccess(OutputStream outputStream) throws IOException {
-        Response.redirect(outputStream, "/index");
+    private void loginSuccess(OutputStream outputStream, Request request, User user) throws IOException {
+        log.info(user.toString());
+        final var session = request.getSession(true);
+        session.setAttribute("user", user);
+        Response.redirect(outputStream, "/index.html", session.getId());
     }
 
     private void register(OutputStream outputStream, Request request) throws IOException {

@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 public class Request {
 
     private final RequestHeader requestHeader;
@@ -35,6 +39,10 @@ public class Request {
         return requestHeader.hasJSessionId();
     }
 
+    public HttpCookie getCookie() {
+        return requestHeader.cookie();
+    }
+
     public String getJSessionId() {
         return requestHeader.getJSessionId();
     }
@@ -52,5 +60,15 @@ public class Request {
                 ", contentType=" + contentType +
                 ", jSessionId='" + jSessionId + '\'' +
                 '}';
+    }
+
+    public Session getSession(boolean create) {
+        SessionManager manager = SessionManager.getInstance();
+        Session session = manager.findSession(getJSessionId());
+        if (session == null && create) {
+            session = new Session(UUID.randomUUID().toString());
+            manager.add(session);
+        }
+        return session;
     }
 }

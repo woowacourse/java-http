@@ -22,6 +22,10 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
+    public String getRequestPath() {
+        return requestLine.uriInfo().path();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

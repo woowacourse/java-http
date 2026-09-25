@@ -56,7 +56,6 @@ public class MyHttpRequest {
 
         this.session = manager.createSession();
         this.isNewSession = true;
-        manager.add(this.session);
         return this.session;
     }
 

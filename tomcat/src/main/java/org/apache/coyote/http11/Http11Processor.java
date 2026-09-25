@@ -50,46 +50,42 @@ public class Http11Processor implements Runnable, Processor {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
+            final String readLine = bufferedReader.readLine();
+            if (readLine == null) {
                 return;
             }
-            final String[] lines = requestLine.split(" ");
-            final String method = lines[0];
-            final String uri = lines[1];
 
-            int queryIndex = uri.indexOf("?");
+            RequestLine requestLine = new RequestLine(readLine);
 
-            String path = uri;
-            String queryString = "";
+            Map<String, String> readHttpRequestHeaders = readHeaders(bufferedReader);
+            String readRequestBody = readRequestBody(bufferedReader, readHttpRequestHeaders);
 
-            if (queryIndex != -1) {
-                path = uri.substring(0, queryIndex);
-                queryString = uri.substring(queryIndex + 1);
-            }
+            HttpRequest httpRequest = new HttpRequest(requestLine, readHttpRequestHeaders, readRequestBody);
 
-            Map<String, String> httpRequestHeaders = readHeaders(bufferedReader);
-            String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
-
-            HttpCookie requestCookie = new HttpCookie(httpRequestHeaders.get("cookie"));
+            HttpCookie requestCookie = new HttpCookie(httpRequest.getHeader("cookie"));
             String sessionId = requestCookie.get(HttpCookie.JSESSIONID);
             Session session = SessionManager.getInstance().findSession(sessionId);
             HttpCookie responseCookie = null;
 
-            if (path.equals("/login") && method.equals("GET") && queryString.isEmpty()) {
+            if (httpRequest.getPath().equals("/login")
+                    && httpRequest.getMethod().equals("GET")
+                    && httpRequest.getQueryString().isEmpty()) {
                 if (session != null && getUser(session) != null) {
                     sendRedirect(outputStream, "/index.html", null);
                     return;
                 }
             }
 
-            if (path.equals("/login") && (method.equals("POST") || !queryString.isEmpty())) {
+            if (httpRequest.getPath().equals("/login")
+                    && (httpRequest.getMethod().equals("POST")
+                    || !httpRequest.getQueryString().isEmpty())) {
                 if (session == null) {
                     session = new Session(UUID.randomUUID().toString());
                     SessionManager.getInstance().add(session);
                 }
 
-                String loginData = method.equals("POST") ? requestBody : queryString;
+                String loginData = httpRequest.getMethod().equals("POST")
+                        ? httpRequest.getBody() : httpRequest.getQueryString();
                 boolean loginSuccess = login(loginData, session);
 
                 if (loginSuccess) {
@@ -101,8 +97,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (path.equals("/register") && method.equals("POST")) {
-                Map<String, String> registerInfo = parseQueryString(requestBody);
+            if (httpRequest.getPath().equals("/register")
+                    && httpRequest.getMethod().equals("POST")) {
+                Map<String, String> registerInfo = parseQueryString(httpRequest.getBody());
 
                 String account = registerInfo.get("account");
                 String password = registerInfo.get("password");
@@ -117,11 +114,11 @@ public class Http11Processor implements Runnable, Processor {
 
             var responseBody = "Hello world!";
             int contentLength = responseBody.getBytes().length;
-            String contentType = getContentType(path);
+            String contentType = getContentType(httpRequest.getPath());
             String statusLine = "HTTP/1.1 200 OK ";
 
-            if (!path.equals("/")) {
-                String resourcePath = getResourcePath(path);
+            if (!httpRequest.getPath().equals("/")) {
+                String resourcePath = getResourcePath(httpRequest.getPath());
 
                 byte[] fileBytes = readResource(resourcePath);
 

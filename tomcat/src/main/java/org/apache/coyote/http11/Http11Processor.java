@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.RequestMapping;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.controller.Controller;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
@@ -16,10 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapping requestMapping = new RequestMapping();
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override

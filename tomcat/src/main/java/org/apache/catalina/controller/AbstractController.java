@@ -1,19 +1,22 @@
 package org.apache.catalina.controller;
 
+import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public abstract class AbstractController implements Controller {
+    private final Map<String, Controller> handlers = Map.of(
+            "GET", this::doGet,
+            "POST", this::doPost
+    );
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if ("POST".equals(request.getMethod())) {
-            doPost(request, response);
+        Controller handler = handlers.get(request.getMethod());
+        if (handler == null) {
             return;
         }
-        if ("GET".equals(request.getMethod())) {
-            doGet(request, response);
-        }
+        handler.service(request, response);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

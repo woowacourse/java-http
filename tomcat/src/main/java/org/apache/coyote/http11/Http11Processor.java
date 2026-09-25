@@ -11,13 +11,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -45,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final HttpRequest request = parsed.get();
             final HttpResponse response = new HttpResponse();
-            addSessionCookie(response, request.getCookie());
+            request.bind(response);
 
             requestMapping.getController(request).service(request, response);
 
@@ -53,12 +50,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private void addSessionCookie(final HttpResponse response, final HttpCookie cookie) {
-        if (!cookie.hasJSessionId()) {
-            response.setCookie(JSESSIONID + "=" + UUID.randomUUID());
         }
     }
 }

@@ -28,7 +28,7 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK ")
-                .contains("Set-Cookie: JSESSIONID=")
+                .doesNotContain("Set-Cookie")
                 .contains("Content-Type: text/html;charset=utf-8 ")
                 .contains("Content-Length: 12 ")
                 .endsWith("\r\n\r\nHello world!");
@@ -56,7 +56,7 @@ class Http11ProcessorTest {
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK ")
-                .contains("Set-Cookie: JSESSIONID=")
+                .doesNotContain("Set-Cookie")
                 .contains("Content-Type: text/html;charset=utf-8 ")
                 .contains("Content-Length: 5564 ")
                 .endsWith("\r\n\r\n" + body);

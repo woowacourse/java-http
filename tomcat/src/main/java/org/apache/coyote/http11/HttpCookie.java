@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    private static final String JSESSIONID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_SEPARATOR = ";";
     private static final String KEY_VALUE_SEPARATOR = "=";
 

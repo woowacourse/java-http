@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 
 public abstract class AbstractController implements Controller {
 
@@ -32,21 +29,12 @@ public abstract class AbstractController implements Controller {
         // NOOP
     }
 
-    protected Session getSession(final HttpRequest request, final HttpResponse response) {
-        final String cookieHeader = request.getHeader("cookie");
-        final String sessionId = Cookie.getValue(cookieHeader, "JSESSIONID");
-        final Session existingSession = SessionManager.findSession(sessionId);
-        if (existingSession != null) {
-            return existingSession;
-        }
-
-        final Session session = SessionManager.createSession();
-        response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-        return session;
+    protected void redirect(final HttpResponse response, final String location) {
+        redirect(response, 302, location);
     }
 
-    protected void redirect(final HttpResponse response, final String location) {
-        response.setStatusCode(302);
+    protected void redirect(final HttpResponse response, final int statusCode, final String location) {
+        response.setStatusCode(statusCode);
         response.setHeader("Location", location);
         response.setBody("");
     }

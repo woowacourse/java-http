@@ -4,9 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +44,23 @@ public class LoginController extends AbstractController {
             final User user = optionalUser.orElseThrow();
             session.setAttribute("user", user);
             log.info("회원 조회 결과: {}", user);
+            redirect(response, "/index.html");
+            return;
         }
 
-        redirect(response, loginSuccess ? "/index.html" : "/401.html");
+        redirect(response, 401, "/401.html");
+    }
+
+    private Session getSession(final HttpRequest request, final HttpResponse response) {
+        final String cookieHeader = request.getHeader("cookie");
+        final String sessionId = Cookie.getValue(cookieHeader, "JSESSIONID");
+        final Session existingSession = SessionManager.findSession(sessionId);
+        if (existingSession != null) {
+            return existingSession;
+        }
+
+        final Session session = SessionManager.createSession();
+        response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        return session;
     }
 }

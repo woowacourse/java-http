@@ -7,7 +7,6 @@ public class StaticController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        getSession(request, response);
         renderResource(response, request.getPath());
     }
 }

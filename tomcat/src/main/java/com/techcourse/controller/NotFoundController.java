@@ -7,7 +7,6 @@ public class NotFoundController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        getSession(request, response);
         renderResource(response, "/404.html");
         response.setStatusCode(404);
     }

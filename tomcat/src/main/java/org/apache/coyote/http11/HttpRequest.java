@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -20,12 +20,10 @@ public class HttpRequest {
 
     public HttpRequest(final InputStream inputStream) {
         try {
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8)
-            );
-            this.requestLine = new RequestLine(readRequestLine(reader));
-            this.headers = readHeaders(reader);
-            this.body = readBody(reader);
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            this.requestLine = new RequestLine(readRequestLine(bufferedInputStream));
+            this.headers = readHeaders(bufferedInputStream);
+            this.body = readBody(bufferedInputStream);
             this.parameters = Collections.unmodifiableMap(createParameters());
         } catch (IOException e) {
             throw new UncheckedIOException("HTTP 요청을 읽을 수 없습니다.", e);
@@ -68,18 +66,18 @@ public class HttpRequest {
         return parameters.get(name);
     }
 
-    private String readRequestLine(final BufferedReader reader) throws IOException {
-        final String line = reader.readLine();
+    private String readRequestLine(final InputStream inputStream) throws IOException {
+        final String line = readLine(inputStream);
         if (line == null) {
             throw new IllegalArgumentException("HTTP 요청이 비어 있습니다.");
         }
         return line;
     }
 
-    private Headers readHeaders(final BufferedReader reader) throws IOException {
+    private Headers readHeaders(final InputStream inputStream) throws IOException {
         final Headers result = new Headers();
         String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+        while ((line = readLine(inputStream)) != null && !line.isEmpty()) {
             final int separator = line.indexOf(':');
             if (separator <= 0) {
                 throw new IllegalArgumentException("잘못된 헤더입니다: " + line);
@@ -89,7 +87,7 @@ public class HttpRequest {
         return result;
     }
 
-    private String readBody(final BufferedReader reader) throws IOException {
+    private String readBody(final InputStream inputStream) throws IOException {
         final String contentLength = headers.get("Content-Length");
         if (contentLength == null || contentLength.isBlank()) {
             return "";
@@ -105,16 +103,30 @@ public class HttpRequest {
             throw new IllegalArgumentException("Content-Length는 음수일 수 없습니다.");
         }
 
-        final char[] content = new char[length];
-        int offset = 0;
-        while (offset < length) {
-            final int read = reader.read(content, offset, length - offset);
-            if (read == -1) {
-                throw new IOException("Content-Length만큼 요청 바디를 읽지 못했습니다.");
-            }
-            offset += read;
+        final byte[] content = inputStream.readNBytes(length);
+        if (content.length != length) {
+            throw new IOException("Content-Length만큼 요청 바디를 읽지 못했습니다.");
         }
-        return new String(content);
+        return new String(content, StandardCharsets.UTF_8);
+    }
+
+    private String readLine(final InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream line = new ByteArrayOutputStream();
+        int value;
+        while ((value = inputStream.read()) != -1 && value != '\n') {
+            line.write(value);
+        }
+
+        if (value == -1 && line.size() == 0) {
+            return null;
+        }
+
+        final byte[] bytes = line.toByteArray();
+        int length = bytes.length;
+        if (length > 0 && bytes[length - 1] == '\r') {
+            length--;
+        }
+        return new String(bytes, 0, length, StandardCharsets.UTF_8);
     }
 
     private Map<String, String> createParameters() {

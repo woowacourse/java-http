@@ -7,7 +7,6 @@ public class RootController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        getSession(request, response);
         renderHtml(response, "Hello world!");
     }
 

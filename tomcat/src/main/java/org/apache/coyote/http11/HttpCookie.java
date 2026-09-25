@@ -6,6 +6,8 @@ import java.util.Optional;
 
 public class HttpCookie {
 
+    public static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     private HttpCookie(final Map<String, String> cookies) {

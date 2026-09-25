@@ -30,11 +30,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void redirect(final HttpResponse response, final String location) {
-        redirect(response, 302, location);
-    }
-
-    protected void redirect(final HttpResponse response, final int statusCode, final String location) {
-        response.setStatusCode(statusCode);
+        response.setStatusCode(302);
         response.setHeader("Location", location);
         response.setBody("");
     }

@@ -182,14 +182,10 @@ class Http11ProcessorTest {
         new Http11Processor(socket).process(socket);
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized",
-                "Location: /401.html",
-                "Content-Length: 0",
-                "",
-                "");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 401 Unauthorized\r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("<h1 class=\"display-1\">401</h1>");
     }
 
     @Test

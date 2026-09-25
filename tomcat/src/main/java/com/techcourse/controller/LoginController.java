@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final Session session = getSession(request, response);
         final Map<String, String> parameters = request.getParameters();
         final String account = parameters.get("account");
@@ -48,7 +48,8 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        redirect(response, 401, "/401.html");
+        renderResource(response, "/401.html");
+        response.setStatusCode(401);
     }
 
     private Session getSession(final HttpRequest request, final HttpResponse response) {

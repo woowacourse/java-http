@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +52,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final int METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;
     private static final String STATIC_PREFIX = "static";
-    private static final int REQUEST_LINE_SIZE = 3;
 
-    private static final String POST = "POST";
     private static final String OK = "200 OK";
     private static final String BAD_REQUEST = "400 Bad Request";
     private static final String NOT_FOUND = "404 Not Found";
@@ -78,14 +77,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
+            String response;
+            try {
+                final HttpRequest request = HttpRequest.from(reader);
+                if (request == null) {
+                    return;
+                }
+                response = createResponse(request);
+            } catch (IllegalArgumentException e) {
+                log.warn("잘못된 요청입니다. {}", e.getMessage());
+                response = buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
             }
-            final Map<String, String> headers = readHeaders(reader);
-            final String requestBody = readBody(reader, headers);
-
-            final var response = createResponse(requestLine, headers, requestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -94,41 +96,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
-        final String contentLength = headers.get(CONTENT_LENGTH);
-        if (contentLength == null) {
-            return "";
-        }
-        final int length = Integer.parseInt(contentLength);
-        final char[] buffer = new char[length];
-        int totalRead = 0;
-        while (totalRead < length) {
-            final int read = reader.read(buffer, totalRead, length - totalRead);
-            if (read == -1) {
-                break;
-            }
-            totalRead += read;
-        }
-        return new String(buffer, 0, totalRead);
-    }
+    private String createResponse(final HttpRequest request) throws IOException {
+        final String requestPath = request.getPath();
+        log.info("{} {} / Cookie: {}", request.getMethod(), requestPath, request.getCookie().get(COOKIE));
 
-    private String createResponse(final String requestLine, final Map<String, String> headers, final String requestBody) throws IOException {
-        if (requestLine.isBlank() || requestLine.trim().split(" ").length != REQUEST_LINE_SIZE) {
-            return buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
-        }
-
-        final String requestUri = parseUri(requestLine);
-        final String requestPath = parsePath(requestUri);
-        final String method = parseMethod(requestLine);
-        final Map<String, String> cookies = parseCookies(headers.get(COOKIE));
-        log.info("requestPath = " + requestPath);
-        log.info("{} {} / Cookie: {}", method, requestPath, headers.get(COOKIE));
-
-        if (POST.equals(method)) {
-            final Map<String, String> data = parseFormData(requestBody);
-
+        if (request.isPost()) {
             if (LOGIN_PATH.equals(requestPath)) {
-                final Optional<User> user = login(data);
+                final Optional<User> user = login(request);
                 if (user.isPresent()) {
                     log.info("로그인 성공: {}", user.get());
                     final String sessionId = UUID.randomUUID().toString();
@@ -141,14 +115,14 @@ public class Http11Processor implements Runnable, Processor {
                     responseHeaders.put(SET_COOKIE, JSESSIONID + "=" + sessionId);
                     return buildResponse(FOUND, responseHeaders, "");
                 }
-                log.info("로그인 실패: {}", data.get("account"));
+                log.info("로그인 실패: {}", request.getParameter("account"));
                 return buildRedirect(UNAUTHORIZED_PATH);
             }
 
             if (REGISTER_PATH.equals(requestPath)) {
-                final String account = data.get("account");
-                final String password = data.get("password");
-                final String email = data.get("email");
+                final String account = request.getParameter("account");
+                final String password = request.getParameter(("password"));
+                final String email = request.getParameter(("email"));
                 if (account == null || password == null || email == null) {
                     return buildResponse(BAD_REQUEST, contentTypeHeader(DEFAULT_CONTENT_TYPE), BAD_REQUEST_MESSAGE);
                 }
@@ -159,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (LOGIN_PATH.equals(requestPath)) {
-            final String sessionId = cookies.get(JSESSIONID);
+            final String sessionId = request.getCookie().getJsessionid();
             if (sessionId != null) {
                 final Session session = SESSION_MANAGER.findSession(sessionId);
                 if (session != null) {
@@ -176,34 +150,6 @@ public class Http11Processor implements Runnable, Processor {
             log.info(e.getMessage());
             return buildResponse(NOT_FOUND, contentTypeHeader(DEFAULT_CONTENT_TYPE), resolveResponseBody(NOT_FOUND_PATH));
         }
-    }
-
-    private Map<String, String> parseCookies(String cookie) {
-        if (cookie == null || cookie.isBlank()) {
-            return Map.of();
-        }
-        final Map<String, String> cookies = new HashMap<>();
-        for (final String c : cookie.split(";")) {
-            final String[] keyAndValue = c.trim().split("=", 2);
-            if (keyAndValue.length == 2) {
-                cookies.put(keyAndValue[0], keyAndValue[1]);
-            }
-        }
-        return cookies;
-    }
-
-    private Map<String, String> parseFormData(String requestBody) {
-        if (requestBody.isBlank()) {
-            return Map.of();
-        }
-        final Map<String, String> params = new HashMap<>();
-        for (final String param : requestBody.split("&")) {
-            final String[] keyAndValue = param.split("=", 2);
-            if (keyAndValue.length == 2) {
-                params.put(keyAndValue[0], keyAndValue[1]);
-            }
-        }
-        return params;
     }
 
     private String buildRedirect(final String location) {
@@ -224,25 +170,9 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String parseUri(String requestLine) {
-        return requestLine.trim().split(" ")[PATH_INDEX];
-    }
-
-    private String parsePath(String requestUri) {
-        final int index = requestUri.indexOf("?");
-        if (index == -1) {
-            return requestUri;
-        }
-        return requestUri.substring(0, index);
-    }
-
-    private String parseMethod(final String requestLine) {
-        return requestLine.trim().split(" ")[METHOD_INDEX];
-    }
-
-    private Optional<User> login(final Map<String, String> queryParams) {
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
+    private Optional<User> login(final HttpRequest request) {
+        final String account = request.getParameter("account");
+        final String password = request.getParameter("password");
         if (account == null || password == null) {
             return Optional.empty();
         }
@@ -258,18 +188,6 @@ public class Http11Processor implements Runnable, Processor {
             return JS_CONTENT_TYPE;
         }
         return DEFAULT_CONTENT_TYPE;
-    }
-
-    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isBlank()) {
-            final String[] nameAndValue = line.split(":", 2);
-            if (nameAndValue.length == 2) {
-                headers.put(nameAndValue[0].trim(), nameAndValue[1].trim());
-            }
-        }
-        return headers;
     }
 
     private String resolveResponseBody(String requestPath) throws IOException {

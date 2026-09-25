@@ -234,7 +234,7 @@ class Step2Test {
     }
 
     @Test
-    void 로그인한_사용자가_로그인_페이지에_접근하면_홈으로_리다이렉트한다() {
+    void 로그인_후_새_ID로_로그인_페이지에_접근하면_홈으로_리다이렉트한다() {
         String pageRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "",
@@ -254,7 +254,8 @@ class Step2Test {
         var loginSocket = new StubSocket(loginRequest);
         new Http11Processor(loginSocket).process(loginSocket);
         String sessionId = sessionIdFrom(loginSocket);
-        assertThat(sessionId).isEqualTo(pageSessionId);
+        assertThat(sessionId).isNotEqualTo(pageSessionId);
+        assertThat(new SessionManager().findSession(pageSessionId)).isEmpty();
 
         String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",

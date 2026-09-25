@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
                 sessionManager.add(newSession);
                 return newSession;
             });
-            HttpResponse response = route(request, session);
+            HttpResponse response = route(request, session, sessionManager);
             if (existingSession.isEmpty() && !response.hasHeader("Set-Cookie")) {
                 response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
@@ -64,9 +64,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse route(HttpRequest request, Session session) throws IOException, URISyntaxException {
+    private HttpResponse route(HttpRequest request, Session session, SessionManager sessionManager)
+            throws IOException, URISyntaxException {
         if (request.matches("POST", LOGIN_PATH)) {
-            return login(request, session);
+            return login(request, session, sessionManager);
         }
         if (request.matches("POST", "/register")) {
             return register(request);
@@ -88,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirectTo("/index.html");
     }
 
-    private HttpResponse login(HttpRequest request, Session session) {
+    private HttpResponse login(HttpRequest request, Session session, SessionManager sessionManager) {
         String account = request.findFormParameter("account")
                 .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
         String password = request.findFormParameter("password")
@@ -101,10 +102,13 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.redirectTo("/401.html");
         }
 
-        session.setAttribute("user", authenticatedUser.get());
+        Session renewedSession = new Session(UUID.randomUUID().toString());
+        renewedSession.setAttribute("user", authenticatedUser.get());
+        sessionManager.remove(session.getId());
+        sessionManager.add(renewedSession);
 
         HttpResponse response = HttpResponse.redirectTo("/index.html");
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.addHeader("Set-Cookie", "JSESSIONID=" + renewedSession.getId());
         return response;
     }
 

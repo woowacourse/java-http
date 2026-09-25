@@ -7,15 +7,15 @@ import org.apache.coyote.http11.HttpResponse;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class StaticResourceController extends AbstractController {
 
     private static final Map<String, String> MIME_TYPES = Map.of(
-            "html", "text/html",
-            "css", "text/css",
-            "js", "application/javascript"
+            "html", "text/html;charset=utf-8",
+            "css", "text/css;charset=utf-8",
+            "js", "application/javascript;charset=utf-8",
+            "svg", "image/svg+xml"
     );
 
     @Override
@@ -30,7 +30,7 @@ public class StaticResourceController extends AbstractController {
         }
 
         try (BufferedInputStream inputStream = new BufferedInputStream(resourceStream)) {
-            String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            byte[] body = inputStream.readAllBytes();
             response.ok(contentType(request.getPath()), body);
         }
     }
@@ -38,11 +38,10 @@ public class StaticResourceController extends AbstractController {
     private String contentType(String path) {
         int extensionDelimiter = path.lastIndexOf('.');
         if (extensionDelimiter == -1) {
-            return "text/plain;charset=utf-8";
+            return "application/octet-stream";
         }
 
         String extension = path.substring(extensionDelimiter + 1);
-        String mimeType = MIME_TYPES.getOrDefault(extension, "text/plain");
-        return mimeType + ";charset=utf-8";
+        return MIME_TYPES.getOrDefault(extension, "application/octet-stream");
     }
 }

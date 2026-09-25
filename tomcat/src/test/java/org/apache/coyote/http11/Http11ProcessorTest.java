@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static support.RequestMappingFixtures.requestMapping;
 
 class Http11ProcessorTest {
 
@@ -17,7 +18,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestMapping());
 
         // when
         processor.process(socket);
@@ -45,7 +46,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping());
 
         // when
         processor.process(socket);

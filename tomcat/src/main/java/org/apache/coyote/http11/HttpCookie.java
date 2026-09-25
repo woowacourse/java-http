@@ -36,9 +36,4 @@ public class HttpCookie {
         return cookies.get("JSESSIONID");
     }
 
-    public int getContentLength() {
-        String contentLength = cookies.get("Content-Length");
-
-        return contentLength == null ? 0 : Integer.parseInt(contentLength);
-    }
 }

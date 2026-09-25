@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static support.HttpResponseFixtures.responseText;
 
 class HttpResponseTest {
 
@@ -18,7 +19,7 @@ class HttpResponseTest {
                 "text/plain;charset=utf-8",
                 "Hello world!"
         );
-        String message = response.toResponse();
+        String message = responseText(response);
 
         // then
         assertThat(message).startsWith("HTTP/1.1 200 OK\r\n");
@@ -35,7 +36,7 @@ class HttpResponseTest {
 
         // when
         response.sendRedirect("/index.html");
-        String message = response.toResponse();
+        String message = responseText(response);
 
         // then
         assertThat(message).startsWith("HTTP/1.1 302 Found\r\n");
@@ -51,7 +52,7 @@ class HttpResponseTest {
 
         // when
         response.notFound();
-        String message = response.toResponse();
+        String message = responseText(response);
 
         // then
         assertThat(message).startsWith("HTTP/1.1 404 Not Found\r\n");
@@ -66,9 +67,22 @@ class HttpResponseTest {
         HttpResponse response = new HttpResponse();
 
         // when & then
-        assertThatThrownBy(response::toResponse)
+        assertThatThrownBy(response::toBytes)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("HTTP 응답 상태가 설정되지 않았습니다.");
+    }
+
+    @Test
+    void 바이너리_본문의_원본_바이트를_유지한다() {
+        // given
+        HttpResponse response = new HttpResponse();
+        byte[] body = {(byte) 0xff, 0x00, (byte) 0x80};
+
+        // when
+        response.ok("application/octet-stream", body);
+
+        // then
+        assertThat(response.toBytes()).endsWith(body);
     }
 
     private static String responseBody(String response) {

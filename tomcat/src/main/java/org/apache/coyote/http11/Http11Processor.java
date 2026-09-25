@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,9 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -112,47 +109,41 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            var responseBody = "Hello world!";
-            int contentLength = responseBody.getBytes().length;
+            int statusCode = 200;
+            String statusMessage = "OK";
+            String responseBody = "Hello world!";
             String contentType = getContentType(httpRequest.getPath());
-            String statusLine = "HTTP/1.1 200 OK ";
 
             if (!httpRequest.getPath().equals("/")) {
                 String resourcePath = getResourcePath(httpRequest.getPath());
-
                 byte[] fileBytes = readResource(resourcePath);
 
                 if (fileBytes == null) {
                     fileBytes = readResource("static/404.html");
+
                     if (fileBytes == null) {
                         throw new IllegalArgumentException("404.html 리소스를 찾을 수 없습니다.");
                     }
-                    statusLine = "HTTP/1.1 404 Not Found ";
+
+                    statusCode = 404;
+                    statusMessage = "Not Found";
+                    contentType = "text/html;charset=utf-8";
                 }
 
                 responseBody = new String(fileBytes, StandardCharsets.UTF_8);
-                contentLength = fileBytes.length;
             }
 
-            String cookieHeader = "";
+            int contentLength = responseBody.getBytes(StandardCharsets.UTF_8).length;
+            HttpResponse httpResponse = new HttpResponse("HTTP/1.1", statusCode, statusMessage, responseBody);
+
+            httpResponse.addHeader("Content-Type", contentType);
+            httpResponse.addHeader("Content-Length", String.valueOf(contentLength));
 
             if (responseCookie != null) {
-                cookieHeader = "Set-Cookie: " + responseCookie.toHeaderValue();
+                httpResponse.addHeader("Set-Cookie", responseCookie.toHeaderValue());
             }
 
-            List<String> headers = new ArrayList<>();
-            headers.add(statusLine);
-            headers.add("Content-Type: " + contentType + " ");
-            if (!cookieHeader.isBlank()) {
-                headers.add(cookieHeader);
-            }
-            headers.add("Content-Length: " + contentLength + " ");
-            headers.add("");
-            headers.add(responseBody);
-
-            final var response = String.join("\r\n", headers);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toHttpMessage().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
 
         } catch (IOException | URISyntaxException e) {
@@ -270,21 +261,20 @@ public class Http11Processor implements Runnable, Processor {
 
     private void sendRedirect(OutputStream outputStream, String redirectPath, HttpCookie responseCookie)
             throws IOException {
-        String cookieHeader = "";
+        int statusCode = 302;
+        String statusMessage = "Found";
+        String responseBody = "";
+
+        HttpResponse httpResponse = new HttpResponse("HTTP/1.1", statusCode, statusMessage, responseBody);
+
+        httpResponse.addHeader("Location", redirectPath);
+        httpResponse.addHeader("Content-Length", "0");
 
         if (responseCookie != null) {
-            cookieHeader = "Set-Cookie: " + responseCookie.toHeaderValue();
+            httpResponse.addHeader("Set-Cookie", responseCookie.toHeaderValue());
         }
 
-        String response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + redirectPath,
-                cookieHeader,
-                "Content-Length: 0",
-                "",
-                "");
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(httpResponse.toHttpMessage().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 

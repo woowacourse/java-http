@@ -88,11 +88,14 @@ class Http11ProcessorTest {
     @Test
     void loginSuccessRedirectsToIndex() {
         // given
+        String body = "account=gugu&password=password";
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
                 "",
-                "");
+                body);
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
@@ -146,12 +149,15 @@ class Http11ProcessorTest {
     @Test
     void loginFailureRedirectsTo401() {
         // given
+        String body = "account=gugu&password=wrong";
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong HTTP/1.1",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.length(),
                 "Cookie: JSESSIONID=existing-session-id",
                 "",
-                "");
+                body);
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 

@@ -315,14 +315,12 @@ public class Http11Processor implements Runnable, Processor {
                 new byte[0]);
     }
 
-    private HttpResponse createUnauthorizedResponse() throws URISyntaxException, IOException {
-        Path filePath = Path.of(getClass().getClassLoader().getResource("static/401.html").toURI());
-        byte[] body = Files.readAllBytes(filePath);
+    private HttpResponse createUnauthorizedResponse() {
 
         return new HttpResponse(
                 "302 FOUND ",
-                Map.of("Content-Type", List.of("text/html; charset=UTF-8")),
-                body);
+                Map.of("Location", List.of("/401.html")),
+                new byte[0]);
     }
 
     private HttpResponse createResourceResponse(String requestPath) throws URISyntaxException, IOException {

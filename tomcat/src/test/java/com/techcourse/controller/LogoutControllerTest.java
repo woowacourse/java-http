@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.request.ContentType;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.RequestBody;
-import org.apache.coyote.http.RequestLine;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestLine;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 

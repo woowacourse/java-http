@@ -4,14 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.coyote.http.ContentType;
-import org.apache.coyote.http.EmptyBody;
+import org.apache.coyote.http.request.ContentType;
+import org.apache.coyote.http.response.EmptyBody;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpStatus;
-import org.apache.coyote.http.RequestBody;
-import org.apache.coyote.http.RequestLine;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.HttpStatus;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 class AbstractControllerTest {

@@ -1,8 +1,8 @@
 package org.apache.catalina.controller;
 
 import java.io.IOException;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
 public interface Controller {
 

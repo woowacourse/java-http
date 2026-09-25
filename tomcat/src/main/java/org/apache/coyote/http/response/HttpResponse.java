@@ -1,7 +1,9 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http.HttpHeaders;
+import org.apache.coyote.http.HttpVersion;
 
 public class HttpResponse {
 

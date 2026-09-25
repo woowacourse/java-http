@@ -1,7 +1,8 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import org.apache.coyote.http.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 class StatusLineTest {

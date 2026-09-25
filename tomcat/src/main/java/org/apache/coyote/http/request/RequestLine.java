@@ -1,7 +1,8 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.apache.coyote.http.HttpVersion;
 
 public class RequestLine {
 

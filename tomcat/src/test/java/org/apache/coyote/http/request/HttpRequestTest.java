@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http.HttpHeaders;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

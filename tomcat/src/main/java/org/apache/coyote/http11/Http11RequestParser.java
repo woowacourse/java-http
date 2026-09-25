@@ -8,11 +8,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http.ContentType;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.ContentType;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.RequestBody;
-import org.apache.coyote.http.RequestLine;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestLine;
 
 public class Http11RequestParser {
 

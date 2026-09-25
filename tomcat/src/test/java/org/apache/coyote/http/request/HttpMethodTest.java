@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;

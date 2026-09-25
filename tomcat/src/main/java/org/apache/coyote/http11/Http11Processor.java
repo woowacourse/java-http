@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,10 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -2,7 +2,7 @@ package org.apache.catalina.controller;
 
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 

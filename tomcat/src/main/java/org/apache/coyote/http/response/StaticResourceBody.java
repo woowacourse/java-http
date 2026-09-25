@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
 
 import java.io.IOException;
 import org.apache.catalina.resource.ResourcePathResolver;

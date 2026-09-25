@@ -1,8 +1,8 @@
 package org.apache.coyote;
 
 import java.io.IOException;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
 /**
  * 프로토콜 계층(coyote)과 컨테이너 계층(catalina)의 경계.

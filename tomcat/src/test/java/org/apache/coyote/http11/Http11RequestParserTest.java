@@ -6,10 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http.HttpMethod;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.HttpVersion;
-import org.apache.coyote.http.TextBody;
+import org.apache.coyote.http.request.TextBody;
 import org.junit.jupiter.api.Test;
 
 class Http11RequestParserTest {

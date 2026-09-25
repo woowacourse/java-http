@@ -1,4 +1,6 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
+
+import org.apache.coyote.http.HttpVersion;
 
 public class StatusLine {
 

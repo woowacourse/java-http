@@ -3,10 +3,10 @@ package com.techcourse.controller;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.MimeType;
-import org.apache.coyote.http.StaticResourceBody;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.MimeType;
+import org.apache.coyote.http.response.StaticResourceBody;
 
 public class IndexController extends AbstractController {
 

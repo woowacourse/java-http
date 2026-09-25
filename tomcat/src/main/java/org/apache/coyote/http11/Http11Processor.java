@@ -45,12 +45,18 @@ public class Http11Processor implements Runnable, Processor {
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
                 Session session = httpRequest.getSession(true);
-                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
 
             RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);
+
+            if (httpRequest.isNewSession()) {
+                httpResponse.addHeader(
+                        "Set-Cookie",
+                        "JSESSIONID=" + httpRequest.getSession(false).getId()
+                );
+            }
 
             outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();

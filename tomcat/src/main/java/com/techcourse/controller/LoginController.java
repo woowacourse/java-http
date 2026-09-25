@@ -56,9 +56,6 @@ public class LoginController extends AbstractController {
         if (foundUser.get().checkPassword(params.get("password"))) {
             log.info("user matched={}", foundUser.get());
             final var session = httpRequest.getSession(true);
-            if (httpRequest.isNewSession()) {
-                httpResponse.addHeader("Set-Cookie", String.join("=", "JSESSIONID", session.getId()));
-            }
             session.setAttribute("user", foundUser.get());
             httpResponse.setStatusCode(StatusCode.FOUND);
             httpResponse.setContentType(ContentType.HTML);

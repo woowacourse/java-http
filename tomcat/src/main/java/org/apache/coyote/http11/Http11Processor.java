@@ -8,6 +8,8 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.request.HttpRequestParser;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
@@ -49,10 +51,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             MyHttpRequest httpRequest =
                     HttpRequestParser.parse(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
             MyHttpResponse httpResponse = new MyHttpResponse();
+            httpResponse.setStatusCode(StatusCode.OK);
             log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
@@ -75,12 +77,12 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
             }
-
-            if (isLoginRequest(httpRequest)) {
-                authenticate(httpRequest, httpResponse);
+            RequestMapping requestMapping = new RequestMapping();
+            Controller controller = requestMapping.getController(httpRequest);
+            if (controller != null) {
+                controller.service(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-                log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
                 return;
             }
 
@@ -103,6 +105,8 @@ public class Http11Processor implements Runnable, Processor {
             log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

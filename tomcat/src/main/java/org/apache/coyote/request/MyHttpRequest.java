@@ -76,8 +76,12 @@ public class MyHttpRequest {
         return requestLine.hasMethod(Method.POST);
     }
 
+    public String getPath() {
+        return requestLine.getRequestTarget().getPath();
+    }
+
     public boolean isPath(String path) {
-        return path.equals(path);
+        return requestLine.getRequestTarget().getPath().equals(path);
     }
 
     public String getUri() {

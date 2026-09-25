@@ -27,13 +27,13 @@ class StandardSession implements Session {
     }
 
     @Override
-    public Object getAttribute(final String name) {
+    public synchronized Object getAttribute(final String name) {
         validate();
         return values.get(name);
     }
 
     @Override
-    public void setAttribute(final String name, final Object value) {
+    public synchronized void setAttribute(final String name, final Object value) {
         validate();
         Objects.requireNonNull(name);
         if (value == null) {
@@ -44,13 +44,13 @@ class StandardSession implements Session {
     }
 
     @Override
-    public void removeAttribute(final String name) {
+    public synchronized void removeAttribute(final String name) {
         validate();
         values.remove(name);
     }
 
     @Override
-    public void invalidate() {
+    public synchronized void invalidate() {
         validate();
         values.clear();
         manager.remove(this);

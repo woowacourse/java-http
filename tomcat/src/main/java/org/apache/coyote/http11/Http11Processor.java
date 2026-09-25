@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
@@ -49,18 +49,9 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            final String startLine = bufferedReader.readLine();
-            final HttpMethod httpMethod = HttpMethod.valueOf(startLine.split(" ")[0]);
-            final String requestTarget = startLine.split(" ")[1];
-            final URI uri = URI.create(requestTarget);
-            log.info("request uri: {}", uri);
+            final HttpRequest httpRequest = new HttpRequest(bufferedReader);
 
-            final Map<String, String> httpRequestHeaders = readHttpRequestHeaders(bufferedReader);
-            final HttpCookie httpCookie = new HttpCookie(httpRequestHeaders.get("Cookie"));
-
-            final String requestBody = readRequestBody(bufferedReader, httpRequestHeaders);
-
-            final HttpResponse response = handleRequest(httpMethod, uri, httpCookie, requestBody);
+            final HttpResponse response = handleRequest(httpRequest);
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
@@ -68,31 +59,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> httpRequestHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        String line;
-
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] headers = line.split(":", 2);
-            httpRequestHeaders.put(headers[0].trim(), headers[1].trim());
-        }
-
-        return httpRequestHeaders;
-    }
-
-    private String readRequestBody(final BufferedReader bufferedReader,
-                                   final Map<String, String> httpRequestHeaders) throws IOException {
-        if (httpRequestHeaders.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return null;
-    }
-
-    private HttpResponse handleRequest(final HttpMethod httpMethod, final URI uri, final HttpCookie httpCookie, final String requestBody) throws IOException {
+    private HttpResponse handleRequest(final HttpRequest httpRequest) throws IOException {
+        final RequestLine requestLine = httpRequest.getRequestLine();
+        final HttpMethod httpMethod = requestLine.getHttpMethod();
+        final String target = requestLine.getTarget();
+        final URI uri = URI.create(target);
         final String uriPath = uri.getPath();
+        final String requestBody = httpRequest.getBody().getContent();
+
+        final HttpHeaders headers = httpRequest.getHeaders();
+        final HttpCookie httpCookie = new HttpCookie(headers.getHeader("Cookie"));
 
         if (uriPath.equals("/login")) {
             return handleLogin(httpMethod, uri, httpCookie, requestBody);

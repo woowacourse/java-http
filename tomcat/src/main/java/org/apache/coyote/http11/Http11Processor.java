@@ -45,34 +45,16 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
+            final HttpRequest httpRequest = HttpRequestParser.parse(reader);
+            if (httpRequest == null) {
                 return;
             }
 
-            final String method = requestLine.split(" ")[0];
-            final String uri = requestLine.split(" ")[1];
-
-            String line;
-            int contentLength = 0;
-            HttpCookie cookie = null;
-            while(true) {
-                line = reader.readLine();
-                if(line == null) {
-                    return;
-                }
-                if(line.isEmpty()) {
-                    break;
-                }
-
-                String[] header = line.split(":", 2);
-                if(header[0].equalsIgnoreCase("Content-Length")) {
-                    contentLength = Integer.parseInt(header[1].trim());
-                }
-                if(header[0].equalsIgnoreCase("Cookie")) {
-                    cookie = new HttpCookie(header[1]);
-                }
-            }
+            final String method = httpRequest.getMethod();
+            final String path = httpRequest.getPath();
+            final String body = httpRequest.getBody();
+            final String cookieHeader = httpRequest.getHeader("Cookie");
+            final HttpCookie cookie = cookieHeader == null ? null : new HttpCookie(cookieHeader);
 
             String jSessionId = null;
             if (cookie != null) {
@@ -81,32 +63,6 @@ public class Http11Processor implements Runnable, Processor {
             boolean shouldSetCookie = jSessionId == null;
             if (shouldSetCookie) {
                 jSessionId = UUID.randomUUID().toString();
-            }
-
-            char[] bodyBuffer = new char[contentLength];
-            int totalRead = 0;
-
-            while (totalRead < contentLength) {
-                int readCount = reader.read(
-                        bodyBuffer,
-                        totalRead,
-                        contentLength - totalRead
-                );
-                if (readCount == -1) {
-                    return;
-                }
-                totalRead += readCount;
-            }
-
-            String body = new String(bodyBuffer);
-
-            final int index = uri.indexOf("?");
-            String path = uri;
-            String queryString = "";
-
-            if (index >= 0) {
-                path = uri.substring(0, index);
-                queryString = uri.substring(index + 1);
             }
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);

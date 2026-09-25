@@ -14,12 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,16 +47,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            String line = reader.readLine();
-            if (line == null) {
+            HttpRequest request = HttpRequest.from(reader);
+            if (request == null) {
                 return;
             }
-            RequestLine requestLine = new RequestLine(line);
-            Map<String, String> headers = readHeaders(reader);
-            String requestBody = readRequestBody(reader, headers);
-            HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-            String sessionId = cookie.get("JSESSIONID");
-            String response = createResponse(requestLine.getMethod(), requestLine.getPath(), requestBody, sessionId);
+            String response = createResponse(request);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -68,42 +60,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] keyValue = line.split(":", 2);
-            if (keyValue.length == 2) {
-                headers.put(keyValue[0].trim(), keyValue[1].trim());
-            }
-        }
-        return headers;
-    }
-
-    private String readRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-        char[] buffer = new char[contentLength];
-        int totalRead = 0;
-        while (totalRead < contentLength) {
-            int readCount = reader.read(buffer, totalRead, contentLength - totalRead);
-            if (readCount == -1) {
-                break;
-            }
-            totalRead += readCount;
-        }
-        return new String(buffer, 0, totalRead);
-    }
-
-    private String createResponse(String method, String path, String requestBody, String sessionId) throws IOException {
+    private String createResponse(HttpRequest request) throws IOException {
+        String method = request.getMethod();
+        String path = request.getPath();
+        String sessionId = request.getCookie("JSESSIONID");
         String setCookie = null;
         if (sessionId == null) {
             setCookie = "JSESSIONID=" + UUID.randomUUID();
         }
         if ("POST".equals(method) && "/login".equals(path)) {
-            return login(requestBody, setCookie);
+            return login(request, setCookie);
         }
         if ("POST".equals(method) && "/register".equals(path)) {
-            return register(requestBody, setCookie);
+            return register(request, setCookie);
         }
         if ("GET".equals(method) && "/login".equals(path) && isLoggedIn(sessionId)) {
             return buildRedirectResponse(INDEX_PAGE, setCookie);
@@ -170,10 +139,9 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private String login(String requestBody, String setCookie) {
-        Map<String, String> parameters = parseFormParameters(requestBody);
-        String account = parameters.get("account");
-        String password = parameters.get("password");
+    private String login(HttpRequest request, String setCookie) {
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
         if (account == null || password == null) {
             return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
         }
@@ -197,11 +165,10 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private String register(String requestBody, String setCookie) {
-        Map<String, String> parameters = parseFormParameters(requestBody);
-        String account = parameters.get("account");
-        String password = parameters.get("password");
-        String email = parameters.get("email");
+    private String register(HttpRequest request, String setCookie) {
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
         if (account == null || account.isBlank()
                 || password == null || password.isBlank()
                 || email == null || email.isBlank()) {
@@ -209,16 +176,5 @@ public class Http11Processor implements Runnable, Processor {
         }
         InMemoryUserRepository.save(new User(account, password, email));
         return buildRedirectResponse(INDEX_PAGE, setCookie);
-    }
-
-    private Map<String, String> parseFormParameters(String requestBody) {
-        Map<String, String> parameters = new HashMap<>();
-        for (String pair : requestBody.split("&")) {
-            String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                parameters.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
-            }
-        }
-        return parameters;
     }
 }

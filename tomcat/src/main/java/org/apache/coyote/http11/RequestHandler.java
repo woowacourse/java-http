@@ -10,8 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.model.FormParameters;
-import org.apache.coyote.http11.model.UriInfo;
+import org.apache.coyote.http11.model.request.FormParameters;
+import org.apache.coyote.http11.model.request.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

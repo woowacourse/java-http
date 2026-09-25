@@ -11,9 +11,9 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.UuidGenerator;
-import org.apache.coyote.http11.model.FormParameters;
-import org.apache.coyote.http11.model.HttpRequest;
-import org.apache.coyote.http11.model.UriInfo;
+import org.apache.coyote.http11.model.request.FormParameters;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.request.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

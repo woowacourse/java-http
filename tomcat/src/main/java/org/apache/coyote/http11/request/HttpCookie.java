@@ -21,7 +21,7 @@ public class HttpCookie {
         return values.get(name);
     }
 
-    public String getJsessionid() {
+    public String getJSessionId() {
         return values.get(JSESSIONID);
     }
 }

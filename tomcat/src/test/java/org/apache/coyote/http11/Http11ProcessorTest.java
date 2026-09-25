@@ -26,14 +26,17 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String expectedBody = "Hello world!";
+        String[] response = socket.output().split("\r\n\r\n", 2);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).hasSize(2);
+        String[] headers = response[0].split("\r\n");
+        assertThat(headers[0]).isEqualTo("HTTP/1.1 200 OK");
+        assertThat(headers).contains(
+                "Content-Type: text/plain;charset=UTF-8",
+                "Content-Length: " + expectedBody.getBytes(StandardCharsets.UTF_8).length
+        );
+        assertThat(response[1]).isEqualTo(expectedBody);
     }
 
     @Test
@@ -55,13 +58,17 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+        String expectedBody = Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
+        String[] response = socket.output().split("\r\n\r\n", 2);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).hasSize(2);
+        String[] headers = response[0].split("\r\n");
+        assertThat(headers[0]).isEqualTo("HTTP/1.1 200 OK");
+        assertThat(headers).contains(
+                "Content-Type: text/html;charset=UTF-8",
+                "Content-Length: " + expectedBody.getBytes(StandardCharsets.UTF_8).length
+        );
+        assertThat(response[1]).isEqualTo(expectedBody);
     }
     @Test
     void issuesCookieOnlyWhenMissingForEachResponseType() {

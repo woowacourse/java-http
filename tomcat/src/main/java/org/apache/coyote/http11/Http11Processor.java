@@ -3,6 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -128,14 +133,14 @@ public class Http11Processor implements Runnable, Processor {
                         .orElse(null);
 
                 if (user != null) {
-                    Session session = SessionManager.findSession(jSessionId);
+                    HttpSession session = SESSION_MANAGER.findSession(jSessionId);
                     if (session == null) {
                         if (!shouldSetCookie) {
                             jSessionId = UUID.randomUUID().toString();
                             shouldSetCookie = true;
                         }
                         session = new Session(jSessionId);
-                        SessionManager.add(session);
+                        SESSION_MANAGER.add(session);
                     }
                     session.setAttribute("user", user);
 
@@ -227,8 +232,8 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8 ";
     }
 
-    private boolean isLoggedIn(final String jSessionId) {
-        final Session session = SessionManager.findSession(jSessionId);
+    private boolean isLoggedIn(final String jSessionId) throws IOException {
+        final HttpSession session = SESSION_MANAGER.findSession(jSessionId);
         return session != null && session.getAttribute("user") != null;
     }
 

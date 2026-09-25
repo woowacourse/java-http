@@ -10,18 +10,18 @@ public enum HttpStatus {
     ;
 
     private final int code;
-    private final String response;
+    private final String responsePhrase;
 
-    HttpStatus(final int code, final String response) {
+    HttpStatus(final int code, final String responsePhrase) {
         this.code = code;
-        this.response = response;
+        this.responsePhrase = responsePhrase;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getResponse() {
-        return response;
+    public String getResponsePhrase() {
+        return responsePhrase;
     }
 }

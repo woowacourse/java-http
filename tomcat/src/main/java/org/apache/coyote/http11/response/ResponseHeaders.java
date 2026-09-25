@@ -17,20 +17,24 @@ public class ResponseHeaders {
 
     private final Map<String, String> values = new LinkedHashMap<>();
 
+    public void setHeader(final String name, final String value) {
+        values.put(name, value);
+    }
+
     public void setContentType(final String contentType) {
-        values.put(CONTENT_TYPE, contentType + CHARSET);
+        setHeader(CONTENT_TYPE, contentType + CHARSET);
     }
 
     public void setContentLength(final int contentLength) {
-        values.put(CONTENT_LENGTH, String.valueOf(contentLength));
+        setHeader(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public void setLocation(final String location) {
-        values.put(LOCATION, location);
+        setHeader(LOCATION, location);
     }
 
     public void setCookie(final String cookie) {
-        values.put(SET_COOKIE, cookie);
+        setHeader(SET_COOKIE, cookie);
     }
 
     public List<String> toLines() {

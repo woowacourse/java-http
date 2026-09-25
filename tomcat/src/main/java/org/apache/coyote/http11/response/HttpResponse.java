@@ -31,6 +31,10 @@ public class HttpResponse {
         headers.setCookie(cookie);
     }
 
+    public void setHeader(final String name, final String value) {
+        headers.setHeader(name, value);
+    }
+
     public String toMessage() {
         final List<String> lines = new ArrayList<>();
         lines.add(statusLine.toString());

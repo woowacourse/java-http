@@ -1,25 +1,19 @@
 package com.techcourse.controller;
 
+import com.techcourse.StaticResourceReader;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
 import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class LoginController extends AbstractController {
@@ -43,7 +37,7 @@ public class LoginController extends AbstractController {
 
         response.setStatusCode(StatusCode.OK);
         response.setContentType(request.getContentType());
-        final var responseBody = readStaticResource(request, "Hello world!");
+        final var responseBody = StaticResourceReader.read(request.getResourcePath());
         response.writeBody(responseBody);
     }
 
@@ -82,17 +76,5 @@ public class LoginController extends AbstractController {
 
     private static Optional<User> findUserByAccount(String account) {
         return InMemoryUserRepository.findByAccount(account);
-    }
-
-    private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)
-            throws IOException, URISyntaxException {
-        URL fileUrl = Http11Processor.class
-                .getClassLoader()
-                .getResource(httpRequest.getResourcePath());
-        File file = new File(Objects.requireNonNull(fileUrl).toURI());
-        if (file.isFile()) {
-            return Files.readString(file.toPath(), StandardCharsets.UTF_8);
-        }
-        return defaultContent;
     }
 }

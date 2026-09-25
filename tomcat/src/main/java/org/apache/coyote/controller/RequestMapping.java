@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import org.apache.coyote.request.MyHttpRequest;
 
 import java.util.Map;

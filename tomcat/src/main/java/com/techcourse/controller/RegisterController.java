@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.StaticResourceReader;
 import com.techcourse.model.Register;
 import com.techcourse.model.User;
 import org.apache.coyote.controller.AbstractController;
@@ -33,7 +34,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(MyHttpRequest request, MyHttpResponse response) throws Exception {
         response.setStatusCode(StatusCode.OK);
         response.setContentType(request.getContentType());
-        final var responseBody = readStaticResource(request, "Hello world!");
+        final var responseBody = StaticResourceReader.read(request.getResourcePath());
         response.writeBody(responseBody);
     }
 

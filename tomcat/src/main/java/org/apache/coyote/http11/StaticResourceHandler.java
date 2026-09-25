@@ -15,14 +15,22 @@ class StaticResourceHandler {
     }
 
     HttpResponse respond(String path) throws IOException {
+        HttpResponse response = new HttpResponse();
+        serve(path, response);
+        return response;
+    }
+
+    void serve(String path, HttpResponse response) throws IOException {
         if (!isResourcePath(path)) {
-            return error(HttpStatus.NOT_FOUND);
+            fillError(HttpStatus.NOT_FOUND, response);
+            return;
         }
         try (InputStream resource = classLoader.getResourceAsStream("static" + path)) {
             if (resource == null) {
-                return error(HttpStatus.NOT_FOUND);
+                fillError(HttpStatus.NOT_FOUND, response);
+                return;
             }
-            return HttpResponse.of(HttpStatus.OK, resource.readAllBytes(), contentType(path));
+            response.setContent(HttpStatus.OK, resource.readAllBytes(), contentType(path));
         }
     }
 

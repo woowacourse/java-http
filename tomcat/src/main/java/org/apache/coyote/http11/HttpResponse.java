@@ -65,6 +65,11 @@ public class HttpResponse {
         resources.fillError(status, this);
     }
 
+    public void sendStaticFile(String path) throws IOException {
+        StaticResourceHandler resources = new StaticResourceHandler(getClass().getClassLoader());
+        resources.serve(path, this);
+    }
+
     public void writeTo(OutputStream outputStream) throws IOException {
         outputStream.write(createHead().getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);

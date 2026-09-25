@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.Application;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,38 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @Test
+    void 등록한_컨트롤러가_응답을_설정하면_WAS가_해당_응답을_출력한다() {
+        // given
+        RequestMapping mapping = new RequestMapping();
+        mapping.add("/custom", (request, response) -> response.sendRedirect("/index.html"));
+        StubSocket socket = new StubSocket("GET /custom HTTP/1.1\r\n\r\n");
+
+        // when
+        new Http11Processor(socket, mapping).process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    void 컨트롤러에서_예외가_발생하면_500_페이지를_응답한다() {
+        // given
+        RequestMapping mapping = new RequestMapping();
+        mapping.add("/broken", (request, response) -> {
+            throw new IOException("failure");
+        });
+        StubSocket socket = new StubSocket("GET /broken HTTP/1.1\r\n\r\n");
+
+        // when
+        new Http11Processor(socket, mapping).process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 500 Internal Server Error")
+                .contains("Content-Type: text/html;charset=utf-8");
+    }
 
     @Test
     void 로그인에_성공하면_인증된_User_객체를_세션의_user_속성에_저장한다() {
@@ -195,7 +228,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -220,7 +253,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -239,7 +272,7 @@ class Http11ProcessorTest {
     void 존재하지_않는_파일을_요청하면_404_상태와_오류_페이지를_응답한다() throws IOException {
         // given
         final var socket = new StubSocket("GET /missing.html HTTP/1.1\r\n\r\n");
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -256,7 +289,7 @@ class Http11ProcessorTest {
     void 요청_첫_줄이_없으면_400을_응답한다() {
         // given
         final var socket = new StubSocket("");
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -276,7 +309,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -301,7 +334,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -346,7 +379,7 @@ class Http11ProcessorTest {
 
     private String process(String httpRequest) {
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
         processor.process(socket);
         return socket.output();
     }

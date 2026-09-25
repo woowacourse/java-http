@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -12,18 +9,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String USER_ATTRIBUTE_KEY = "user";
-
     private final Socket connection;
-    private final StaticResourceHandler resources = new StaticResourceHandler(getClass().getClassLoader());
+    private final RequestMapping mapping;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, RequestMapping mapping) {
         this.connection = connection;
+        this.mapping = mapping;
     }
 
     @Override
@@ -39,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpResponse response = readResponse(inputStream);
             response.writeTo(outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -49,7 +44,10 @@ public class Http11Processor implements Runnable, Processor {
         try {
             request = new HttpRequestParser(inputStream).parse();
         } catch (IllegalArgumentException e) {
-            return resources.error(HttpStatus.BAD_REQUEST);
+            return error(HttpStatus.BAD_REQUEST);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return error(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         HttpResponse response = createResponseSafely(request);
         request.getNewSession().ifPresent(session -> addSessionCookie(response, session));
@@ -57,12 +55,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponseSafely(HttpRequest request) {
+        HttpResponse response = new HttpResponse();
         try {
-            return createResponse(request);
-        } catch (IOException | RuntimeException e) {
+            dispatch(request, response);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return resources.error(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        return response;
+    }
+
+    private HttpResponse error(HttpStatus status) {
+        HttpResponse response = new HttpResponse();
+        response.sendError(status);
+        return response;
     }
 
     private void addSessionCookie(HttpResponse response, Session session) {
@@ -73,65 +79,24 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Set-Cookie", sessionCookie.toHeaderValue());
     }
 
-    private HttpResponse createResponse(HttpRequest request) throws IOException {
-        return switch (Route.find(request.getMethod(), request.getPath())) {
-            case HOME -> staticResourceResponse("/index.html");
-            case REGISTER_PAGE -> staticResourceResponse("/register.html");
-            case REGISTER -> register(request);
-            case LOGIN_PAGE -> loginPage(request);
-            case LOGIN -> login(request);
-            case STATIC_RESOURCE -> staticResourceResponse(request.getPath());
-            case NOT_FOUND -> resources.error(HttpStatus.NOT_FOUND);
-        };
+    private void dispatch(HttpRequest request, HttpResponse response) throws Exception {
+        Controller controller = mapping.getController(request);
+        if (controller != null) {
+            controller.service(request, response);
+            return;
+        }
+        serveStaticResource(request, response);
     }
 
-    private HttpResponse loginPage(HttpRequest request) throws IOException {
-        Session session = request.getSession(false);
-        if (session != null && session.getAttribute(USER_ATTRIBUTE_KEY) != null) {
-            return HttpResponse.redirect("/index.html");
+    private void serveStaticResource(HttpRequest request, HttpResponse response) throws IOException {
+        if (request.getMethod() != HttpMethod.GET) {
+            response.sendError(HttpStatus.NOT_FOUND);
+            return;
         }
-        return staticResourceResponse("/login.html");
-    }
-
-    private HttpResponse register(HttpRequest request) {
-        User user = new User(
-                request.getParameter("account"),
-                request.getParameter("password"),
-                request.getParameter("email")
-        );
-        InMemoryUserRepository.save(user);
-        return HttpResponse.redirect("/index.html");
-    }
-
-    private HttpResponse login(HttpRequest request) {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
-        Optional<User> user = findAuthenticatedUser(account, password);
-        if (user.isEmpty()) {
-            return HttpResponse.redirect("/401.html");
+        String path = request.getPath();
+        if (path.equals("/")) {
+            path = "/index.html";
         }
-
-        Session session = request.getSession(true);
-        session.setAttribute(USER_ATTRIBUTE_KEY, user.get());
-        return HttpResponse.redirect("/index.html");
-    }
-
-    private Optional<User> findAuthenticatedUser(String account, String password) {
-        if (account == null || password == null) {
-            return Optional.empty();
-        }
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return Optional.empty();
-        }
-        if (!user.get().checkPassword(password)) {
-            return Optional.empty();
-        }
-        return user;
-    }
-
-    private HttpResponse staticResourceResponse(String requestPath) throws IOException {
-        return resources.respond(requestPath);
+        response.sendStaticFile(path);
     }
 }

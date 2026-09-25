@@ -54,7 +54,7 @@ public class HttpResponse {
                 .collect(Collectors.joining(CRLF));
 
         return String.join(CRLF,
-                PROTOCOL + " " + status.getCode() + " " + status.getResponse() + " ",
+                PROTOCOL + " " + status.getCode() + " " + status.getResponsePhrase() + " ",
                 headerLines,
                 "",
                 body);

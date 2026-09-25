@@ -118,14 +118,6 @@ public class HttpRequest {
         return httpCookie.getJsessionid();
     }
 
-    public String createJsessionidIfAbsent() {
-        String jsessionid = httpCookie.getJsessionid();
-        if (jsessionid.isEmpty()) {
-            return UUID.randomUUID().toString();
-        }
-        return "";
-    }
-
     private static String readLine(InputStream inputStream) throws IOException {
         ByteArrayOutputStream line = new ByteArrayOutputStream();
 

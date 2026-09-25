@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
 public class RequestLine {
-    private final String method;
+    private final HttpMethod method;
     private final String requestPath;
     private final String protocolVersion;
     private final String pathUri;
     private final String queryString;
 
-    public RequestLine(String method, String requestPath, String protocolVersion) {
+    public RequestLine(HttpMethod method, String requestPath, String protocolVersion) {
         int queryIndex = requestPath.indexOf("?");
 
         this.method = method;
@@ -31,7 +31,7 @@ public class RequestLine {
         return requestPath.substring(queryIndex + 1);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

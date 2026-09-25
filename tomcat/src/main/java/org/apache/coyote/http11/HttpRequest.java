@@ -40,7 +40,7 @@ public class HttpRequest {
         String reqBody = readReqBody(input, contentLength);
 
         return new HttpRequest(
-                new RequestLine(method, requestPath, protocolVersion),
+                new RequestLine(HttpMethod.from(method), requestPath, protocolVersion),
                 headers,
                 reqBody
         );
@@ -122,7 +122,7 @@ public class HttpRequest {
         return parseUrlEncodedParams(requestBody);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 

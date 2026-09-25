@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.HomeController;
+import org.apache.catalina.controller.RequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -7,16 +9,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private final RequestMapping requestMapping = new RequestMapping(Map.of("/", new HomeController()));
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new RequestHandler());
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -43,7 +48,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new RequestHandler());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);

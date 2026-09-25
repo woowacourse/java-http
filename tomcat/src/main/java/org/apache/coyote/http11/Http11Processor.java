@@ -1,13 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -15,11 +13,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestHandler requestHandler;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection, RequestHandler requestHandler) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
-        this.requestHandler = requestHandler;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -37,11 +35,12 @@ public class Http11Processor implements Runnable, Processor {
             if (request.isEmpty()) {
                 return;
             }
-            final HttpResponse response = requestHandler.handle(request.get());
+            final HttpResponse response = new HttpResponse();
+            requestMapping.getController(request.get()).service(request.get(), response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException | HttpRequestParseException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

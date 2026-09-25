@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootController;
 import com.techcourse.controller.StaticResourceController;
 import org.apache.coyote.request.MyHttpRequest;
 
@@ -11,6 +12,7 @@ public class RequestMapping {
 
     // TODO: 외부 주입으로 변경
     private final Map<String, Controller> controllers = Map.of(
+            "/", new RootController(),
             "/login", new LoginController(),
             "/register", new RegisterController()
     );

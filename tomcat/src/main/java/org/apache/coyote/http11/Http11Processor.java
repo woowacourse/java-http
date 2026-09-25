@@ -4,18 +4,16 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.HttpCookie;
+import com.techcourse.model.HttpRequest;
 import com.techcourse.model.HttpResponse;
 import com.techcourse.model.User;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -46,27 +44,23 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            // 첫번째 라인 & 요청 url 구하기
-            String requestLine = readLine(inputStream);
-            if (requestLine == null || requestLine.isEmpty()) {
-                return;
-            }
+            HttpRequest request = HttpRequest.parse(inputStream);
 
-            String requestMethod = requestLine.split(" ")[0];
-            String requestTarget = requestLine.split(" ")[1];
+            String requestMethod = request.getRequestLine().getMethod().toUpperCase();
 
             // 리소스 경로 찾기
-            String requestPath = requestTarget.split("\\?")[0];
+            String requestPath = request.getRequestLine().getPath();
 
             // 헤더 읽기
-            Map<String, List<String>> requestHeaders = readRequestHeaders(inputStream);
+            Map<String, List<String>> requestHeaders = request.getHeaders();
 
             // 바디 읽기
-            String requestBody = readRequestBody(inputStream, requestHeaders);
+            // todo 반환형 뭐로 할지
+            String requestBody = request.getBody().toString();
             Map<String, String> formParameters = parseFormParameters(requestBody);
 
             // 쿼리 파싱
-            Map<String, String> queryParameters = parseQueryParameters(requestTarget);
+            Map<String, List<String>> queryParameters = request.getRequestLine().getQueryParameters();
 
             HttpResponse httpResponse;
             if (requestPath.equals("/")) {
@@ -196,36 +190,7 @@ public class Http11Processor implements Runnable, Processor {
         return partsMap;
     }
 
-    private String readLine(InputStream inputStream) throws IOException {
-        StringBuilder line = new StringBuilder();
 
-        int current;
-        boolean carriageReturn = false;
-
-        while ((current = inputStream.read()) != -1) {
-            if (current == '\r') {
-                carriageReturn = true;
-                continue;
-            }
-
-            if (carriageReturn && current == '\n') {
-                break;
-            }
-
-            if (carriageReturn) {
-                line.append('\r');
-                carriageReturn = false;
-            }
-
-            line.append((char) current);
-        }
-
-        if (current == -1 && line.isEmpty()) {
-            return null;
-        }
-
-        return line.toString();
-    }
     private void writeHttpResponse(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
         byte[] body = httpResponse.body();
         StringBuilder header = new StringBuilder();
@@ -352,84 +317,6 @@ public class Http11Processor implements Runnable, Processor {
         log.info("filePath: {}", filePath);
 
         return filePath;
-    }
-
-    // 헤더 분리
-    private Map<String, List<String>> readRequestHeaders(InputStream inputStream) throws IOException {
-        String headerLine;
-        Map<String, List<String>> requestHeaders = new HashMap<>();
-
-        while ((headerLine = readLine(inputStream)) != null && !headerLine.isEmpty()) {
-            int colonIndex = headerLine.indexOf(':');
-
-            if (colonIndex <= 0) {
-                throw new IOException("Invalid header line: " + headerLine);
-            }
-
-            String headerName = headerLine.substring(0, colonIndex).trim().toLowerCase(Locale.ROOT);
-            String headerValue = headerLine.substring(colonIndex + 1).trim();
-
-            requestHeaders.computeIfAbsent(headerName, key -> new ArrayList<>())
-                    .add(headerValue);
-        }
-
-        return requestHeaders;
-    }
-
-    // requestBody 읽기
-    private String readRequestBody(InputStream inputStream, Map<String, List<String>> requestHeaders) throws IOException {
-
-        List<String> contentLengthValues = requestHeaders.getOrDefault("content-length", List.of("0"));
-
-        if (contentLengthValues.isEmpty()) {
-            return "";
-        }
-
-        String contentLengthValue = contentLengthValues.getFirst().trim();
-
-        if (!contentLengthValue.matches("\\d+")) {
-            throw new IOException(
-                    "Invalid Content-Length: " + contentLengthValue
-            );
-        }
-
-        for (String value : contentLengthValues) {
-            if (!contentLengthValue.equals(value.trim())) {
-                throw new IOException("Conflicting Content-Length headers");
-            }
-        }
-
-        int contentLength = Integer.parseInt(contentLengthValue);
-
-        if (contentLength < 0) {
-            throw new IOException("Invalid Content-Length");
-        }
-
-        byte[] body = new byte[contentLength];
-        inputStream.read(body, 0, contentLength);
-
-        return new String(body);
-    }
-
-    // 쿼리 파라미터 분리
-    private Map<String, String> parseQueryParameters(String requestTarget) {
-        String[] targetParts = requestTarget.split("\\?", 2);
-        Map<String, String> queryParameters = new HashMap<>();
-
-        if (targetParts.length == 2) {
-            String queryString = targetParts[1];
-
-            // 본격 쿼리 파싱
-            String[] parameters = queryString.split("&", -1);
-            for (String parameter : parameters) {
-                String[] parameterParts = parameter.split("=", 2);
-                String parameterName = parameterParts[0];
-                String parameterValue = parameterParts[1];
-                queryParameters.put(parameterName, parameterValue);
-            }
-        }
-
-        return queryParameters;
     }
 
     // content-type 결정

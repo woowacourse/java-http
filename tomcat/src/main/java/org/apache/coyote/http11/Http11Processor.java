@@ -153,8 +153,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if ("POST".equals(method)) {
-                handleRegister(body);
-                writeRedirectResponse(outputStream, "/index.html", cookie, session);
+                boolean registerSuccess = handleRegister(body);
+
+                if (registerSuccess) {
+                    writeRedirectResponse(outputStream, "/index.html", cookie, session);
+                    return;
+                }
+
+                writeRedirectResponse(outputStream, "/register", cookie, session);
                 return;
             }
         }
@@ -168,7 +174,7 @@ public class Http11Processor implements Runnable, Processor {
         String account = params.get("account");
         String password = params.get("password");
 
-        if (account == null || password == null) {
+        if (!validateInput(account) || !validateInput(password)) {
             return false;
         }
 
@@ -187,19 +193,20 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private void handleRegister(String body) {
+    private boolean handleRegister(String body) {
         Map<String, String> params = parseParameters(body);
 
         String account = params.get("account");
         String password = params.get("password");
         String email = params.get("email");
 
-        if (account == null || password == null || email == null) {
-            return;
+        if (!validateInput(account) || !validateInput(password) || !validateInput(email)) {
+            return false;
         }
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+        return true;
     }
 
     private Map<String, String> parseParameters(String parameter) {
@@ -280,5 +287,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String decode(String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    private boolean validateInput(String input) {
+        return input != null && !input.isBlank();
     }
 }

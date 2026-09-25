@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,21 +40,71 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String request = readRequest(inputStream);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+            final String request = readRequest(reader);
+            log.info(request);
+
+            String method = request.split(" ")[0];
             String uri = request.split(" ")[1];
-            log.info("uri: {}", uri);
+            String body = readRequestBody(method, request, reader);
+            log.info("body: {}", body);
             final String type = findType(uri);
+            String status = "200 OK";
+            HttpCookie httpCookie = new HttpCookie(findCookies(request));
+            boolean hasJSessionId = hasJSessionId(httpCookie);
+            String jSessionId = httpCookie.get("JSESSIONID");
+            String setCookie = "";
 
-            final String queryString = findQueryString(uri);
-            if (!queryString.isBlank()) {
-                uri = List.of(uri.split("\\?")).getFirst() + ".html";
-                final Map<String, String> pairs = findQueries(queryString);
-                userMatching(pairs.get("account"), pairs.get("password"));
+            final SessionManager manager = SessionManager.getInstance();
+
+            if (uri.equals("/login") && method.equals("GET")) {
+                if (hasJSessionId) {
+                    log.info("쿠키 존재!");
+                    String id = httpCookie.get("JSESSIONID");
+                    log.info("session: {}", manager.findSession(id));
+                    if (manager.findSession(id) != null) {
+                        log.info("세션 존재!");
+                        uri = "/index.html";
+                    }
+                }
             }
 
+            if (!body.isEmpty()) {
+                Map<String, String> pairs = findQueries(body);
+                if (uri.equals("/login")) {
+                    if (userMatching(pairs.get("account"), pairs.get("password"))) {
+                        log.info("로그인 성공! id: {}", pairs.get("account"));
+                        if (manager.findSession(jSessionId) == null) {
+                            jSessionId = UUID.randomUUID().toString();
+                            String account = pairs.get("account");
+                            Session session = new Session(jSessionId);
+                            boolean isPresent = InMemoryUserRepository.findByAccount(account).isPresent();
+                            if (isPresent) {
+                                User user = InMemoryUserRepository.findByAccount(account).get();
+                                session.setAttribute("user", user);
+                                manager.add(session);
+                                setCookie = "Set-Cookie: JSESSIONID=" + jSessionId + " ";
+                                log.info("set cookie: {}", setCookie);
+                            }
+                        }
+                        status = "302 FOUND";
+                        uri = "/index.html";
+                    } else {
+                        uri = "/401.html";
+                    }
+                } else {
+                    User user = new User(pairs.get("account"), pairs.get("password"), pairs.get("email"));
+                    log.info("user: {}", user);
+                    InMemoryUserRepository.save(user);
+                    uri = "/index.html";
+                }
+            }
+
+            log.info("uri: {}", uri);
+
             final String responseBody = makeResponseBody(uri);
-            final String response = makeResponse(type, responseBody);
+            final String response = makeResponse(status, type, responseBody, setCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -62,8 +113,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequest(InputStream inputStream) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    private String readRequest(BufferedReader reader) throws IOException {
         final StringBuilder builder = new StringBuilder();
 
         String line;
@@ -74,6 +124,18 @@ public class Http11Processor implements Runnable, Processor {
         return builder.toString();
     }
 
+    private String readRequestBody(String method, String request, BufferedReader reader) throws IOException {
+        if (!method.equals("POST")) {
+            return "";
+        }
+        String bodyLength = request.split("Content-Length:", 2)[1].trim();
+        bodyLength = bodyLength.split("\r\n")[0].trim();
+        int length = Integer.parseInt(bodyLength);
+        char[] body = new char[length];
+        reader.read(body, 0, length);
+        return new String(body);
+    }
+
     private String findType(String uri) {
         if (uri.contains(".")) {
             return List.of(uri.split("\\.")).getLast();
@@ -81,11 +143,17 @@ public class Http11Processor implements Runnable, Processor {
         return "html";
     }
 
-    private String findQueryString(String uri) {
-        if (uri.contains("?")) {
-            return List.of(uri.split("\\?")).getLast();
+    private boolean hasJSessionId(HttpCookie httpCookie) {
+        return httpCookie.containsKey("JSESSIONID");
+    }
+
+    private String findCookies(String request) {
+        if (!request.contains("Cookie")) {
+            return "";
         }
-        return "";
+        String allCookies = request.split("Cookie: ", 2)[1];
+        log.info("allCookies: {}", allCookies);
+        return allCookies.trim();
     }
 
     private Map<String, String> findQueries(String queryString) {
@@ -99,15 +167,18 @@ public class Http11Processor implements Runnable, Processor {
         return pairs;
     }
 
-    private void userMatching(String account, String password) {
-        InMemoryUserRepository.findByAccount(account)
+    private boolean userMatching(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("user : {}", user));
+                .isPresent();
     }
 
     private String makeResponseBody(String uri) throws IOException {
         if (uri.equals("/") || uri.isBlank()) {
-            return "Hello world!";
+            uri = "/index.html";
+        }
+        if (uri.equals("/login") || uri.equals("/register")) {
+            uri = uri + ".html";
         }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
 
@@ -117,12 +188,18 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private String makeResponse(String type, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+    private String makeResponse(String status, String type, String responseBody, String setCookie) {
+        String response = String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                "Content-Length: " + responseBody.getBytes().length + " ");
+
+        if (!setCookie.isBlank()) {
+            response = String.join("\r\n", response, setCookie);
+        }
+
+        response = String.join("\r\n", response, "", responseBody);
+
+        return response;
     }
 }

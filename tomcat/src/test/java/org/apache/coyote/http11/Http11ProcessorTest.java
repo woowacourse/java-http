@@ -6,10 +6,27 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    private SessionManager sessionManager;
+    private Session session;
+
+    @BeforeEach
+    void setUp() {
+        sessionManager = new SessionManager();
+        session = new Session("test-session-id");
+        sessionManager.add(session);
+    }
+
+    @AfterEach
+    void tearDown() {
+        sessionManager.remove(session);
+    }
 
     @Test
     void process() {

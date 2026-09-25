@@ -67,17 +67,17 @@ public class Http11Processor implements Runnable, Processor {
             parseRequestLine(reader);
             parseHeaders(reader);
 
-            setCookieHeader = createSessionCookieHeader();
+            Session session = findOrCreateSession();
 
             if (method.equals("GET")) {
-                httpResponse = handleGetRequest();
+                httpResponse = handleGetRequest(session);
                 writeResponse(outputStream);
                 return;
             }
             if (method.equals("POST")) {
                 readRequestBody(reader);
                 formParameters.putAll(parseParameters(requestBody));
-                httpResponse = handlePostRequest();
+                httpResponse = handlePostRequest(session);
                 writeResponse(outputStream);
             }
 
@@ -157,8 +157,17 @@ public class Http11Processor implements Runnable, Processor {
         requestBody = new String(body);
     }
 
-    private byte[] handleGetRequest() throws IOException {
-        if (path.equals("/login") || path.equals("/register")) {
+    private byte[] handleGetRequest(Session session) throws IOException {
+        if (path.equals("/login")) {
+            User user = (User) session.getAttribute("user");
+
+            if (user != null) {
+                return createRedirectResponse(INDEX_PATH).getBytes(UTF_8);
+            }
+
+            return serveStaticFile(path + ".html");
+        }
+        if (path.equals("/register")) {
             return serveStaticFile(path + ".html");
         }
         if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
@@ -174,9 +183,9 @@ public class Http11Processor implements Runnable, Processor {
         return createNotFoundResponse("/404.html").getBytes(UTF_8);
     }
 
-    private byte[] handlePostRequest() {
+    private byte[] handlePostRequest(Session session) {
         if (path.equals("/login")) {
-            return loginResult();
+            return loginResult(session);
         }
         if (path.equals("/register")) {
             return registerResult();
@@ -184,32 +193,44 @@ public class Http11Processor implements Runnable, Processor {
         return notFound();
     }
 
-    private byte[] loginResult() {
+    private byte[] loginResult(Session session) {
         String account = formParameters.get("account");
         String password = formParameters.get("password");
 
-        boolean loginSucceeded = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
+        Optional<User> authenticatedUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
 
-        String location = "/401.html";
-        if (loginSucceeded) {
-            location = INDEX_PATH;
+        if (authenticatedUser.isPresent()) {
+            session.setAttribute("user", authenticatedUser.get());
+            return createRedirectResponse(INDEX_PATH).getBytes(UTF_8);
         }
 
-        return createRedirectResponse(location).getBytes(UTF_8);
+        return createNotFoundResponse("/401.html").getBytes(UTF_8);
     }
 
-    private Optional<String> createSessionCookieHeader() {
-        HttpCookie cookies = HttpCookie.parse(headers.get("cookie"));
+    private Session findOrCreateSession() throws IOException {
+        HttpCookie cookie = HttpCookie.parse(headers.get("cookie"));
+        SessionManager sessionManager = new SessionManager();
 
-        if (cookies.contains("JSESSIONID")) {
-            return Optional.empty();
+        Optional<String> sessionId = cookie.get("JSESSIONID");
+
+        if (sessionId.isPresent()) {
+            Session session = sessionManager.findSession(sessionId.get());
+
+            if (session != null) {
+                setCookieHeader = Optional.empty();
+                return session;
+            }
         }
 
-        String sessionId = UUID.randomUUID().toString();
+        String newSessionId = UUID.randomUUID().toString();
+        Session newSession = new Session(newSessionId);
 
-        return Optional.of("Set-Cookie: JSESSIONID=" + sessionId);
+        sessionManager.add(newSession);
+
+        setCookieHeader = Optional.of("Set-Cookie: JSESSIONID=" + newSessionId);
+
+        return newSession;
     }
 
     private byte[] registerResult() {

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class HttpCookieTest {
@@ -32,9 +32,9 @@ class HttpCookieTest {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
+    @EmptySource
     @ValueSource(strings = {"   "})
-    void 쿠키_헤더가_없으면_빈_쿠키를_생성한다(String rawCookie) {
+    void 쿠키_헤더_값이_비어있으면_빈_쿠키를_생성한다(String rawCookie) {
         HttpCookie cookie = HttpCookie.from(rawCookie);
 
         assertThat(cookie.get("JSESSIONID")).isEmpty();

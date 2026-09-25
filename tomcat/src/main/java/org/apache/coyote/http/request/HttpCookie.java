@@ -17,9 +17,6 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(String rawCookie) {
-        if (rawCookie == null || rawCookie.isBlank()) {
-            return new HttpCookie(Map.of());
-        }
         final Map<String, String> values = Arrays.stream(rawCookie.split(PAIR_DELIMITER))
                 .map(String::trim)
                 .map(pair -> pair.split(VALUE_DELIMITER, 2))

@@ -21,11 +21,9 @@ public record HttpRequest(
     }
 
     public Optional<String> cookie(String key) {
-        return cookies().get(key);
-    }
-
-    private HttpCookie cookies() {
-        return HttpCookie.from(headers.get(COOKIE).orElse(null));
+        return headers.get(COOKIE)
+                .map(HttpCookie::from)
+                .flatMap(cookies -> cookies.get(key));
     }
 
     public HttpMethod method() {

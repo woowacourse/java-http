@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -243,8 +243,14 @@ public class Http11Processor implements Runnable, Processor {
 
         String[] queryPairs = queryString.split("&");
         for (String queryPair : queryPairs) {
-            String[] keyAndValue = queryPair.split("=");
-            encodedParameters.put(keyAndValue[0], keyAndValue[1]);
+            String[] keyAndValue = queryPair.split("=", 2);
+
+            if (keyAndValue.length == 2) {
+                String key = URLDecoder.decode(keyAndValue[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyAndValue[1], StandardCharsets.UTF_8);
+
+                encodedParameters.put(key, value);
+            }
         }
         return encodedParameters;
     }
@@ -266,7 +272,7 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        if (requestUri.contains(LOGIN_PATH)) {
+        if (requestUri.equals(LOGIN_PATH)) {
             requestUri = LOGIN_PATH + HTML_EXTENSION;
         }
 

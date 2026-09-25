@@ -40,7 +40,11 @@ public class RequestTarget {
         return path;
     }
 
-    public Optional<String> queryParameter(String name) {
+    public boolean hasQueryParameters() {
+        return !queryParameters.isEmpty();
+    }
+
+    public Optional<String> findQueryParameter(String name) {
         return Optional.ofNullable(queryParameters.get(name));
     }
 

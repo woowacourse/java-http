@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import org.apache.coyote.http11.session.SessionManager;
 import support.StubSocket;
@@ -126,7 +127,7 @@ class Http11ProcessorTest {
     void replacesUnknownSessionIdWithServerGeneratedSessionId() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET / HTTP/1.1",
+                "GET /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Cookie: JSESSIONID=client-controlled-session-id",
                 "",
@@ -146,7 +147,12 @@ class Http11ProcessorTest {
     @Test
     void setsSessionCookieWhenRequestDoesNotHaveCookie() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when
@@ -155,6 +161,53 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36} ");
+    }
+
+    @Test
+    void loginFailureReturnsUnauthorized() {
+        // given
+        final String requestBody = "account=gugu&password=wrong";
+        final String sessionCookie = "JSESSIONID=" + SessionManager.createSession().getId();
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "Cookie: " + sessionCookie,
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+
+        // when
+        new Http11Processor(socket).process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 401 Unauthorized\r\n")
+                .contains("Content-Type: text/html;charset=utf-8\r\n")
+                .contains("<h1 class=\"display-1\">401</h1>");
+    }
+
+    @Test
+    void blankRegistrationDataIsNotSaved() {
+        // given
+        final String requestBody = "account=+&password=+&email=+";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                requestBody);
+        final var socket = new StubSocket(httpRequest);
+
+        // when
+        new Http11Processor(socket).process(socket);
+
+        // then
+        assertThat(InMemoryUserRepository.findByAccount(" ")).isEmpty();
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request\r\n")
+                .contains("<form method=\"post\" action=\"/register\">");
     }
 
     @Test

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -305,6 +306,38 @@ class Http11ProcessorTest {
 
         assertThat(loggedInUser.getAccount()).isEqualTo(account);
         assertThat(loggedInUser.checkPassword(password)).isTrue();
+    }
+
+    @DisplayName("로그인된 사용자가 로그인 페이지에 접근하면 인덱스로 리다이렉트한다.")
+    @Test
+    void redirectToIndexWhenLoggedInUserRequestsLoginPage() {
+        // given
+        final String sessionId = "logged-in-session";
+        final User user = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
+
+        final Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        SESSION_MANAGER.add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + sessionId + " ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: /index.html \r\n"
+        );
     }
 
     private byte[] readResource(String resourceName) throws IOException {

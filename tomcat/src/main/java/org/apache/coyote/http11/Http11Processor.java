@@ -113,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
         final String requestTarget = parsedRequestLine[1];
 
         if (httpMethod.equals("GET")) {
-            return handleGetRequest(requestTarget, responseHeaders);
+            return handleGetRequest(requestTarget, responseHeaders, session);
         }
 
         if (httpMethod.equals("POST")) {
@@ -141,12 +141,15 @@ public class Http11Processor implements Runnable, Processor {
         return new String(messageBody);
     }
 
-    private String handleGetRequest(final String requestTarget, final Map<String, String> responseHeaders) throws IOException {
+    private String handleGetRequest(final String requestTarget, final Map<String, String> responseHeaders, final Session session) throws IOException {
         if (requestTarget.equals("/")) {
             return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html", responseHeaders);
         }
 
         if (requestTarget.equals("/login")) {
+            if (session.getAttribute("user") != null) {
+                return createRedirectResponse("/index.html", responseHeaders);
+            }
             return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html", responseHeaders);
         }
 

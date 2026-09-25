@@ -14,9 +14,13 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -26,7 +30,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String INDEX_PATH = "index.html";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String LOCATION = "Location: ";
+    private static final String CRLF = "\r\n";
 
     private final Socket connection;
 
@@ -34,6 +40,7 @@ public class Http11Processor implements Runnable, Processor {
     private String method;
     private String path;
     private String requestBody;
+    private Optional<String> setCookieHeader;
     private final Map<String, String> queryParameters = new HashMap<>();
     private final Map<String, String> formParameters = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
@@ -60,15 +67,17 @@ public class Http11Processor implements Runnable, Processor {
             parseRequestLine(reader);
             parseHeaders(reader);
 
+            setCookieHeader = createSessionCookieHeader();
+
             if (method.equals("GET")) {
-                handleGetRequest();
+                httpResponse = handleGetRequest();
                 writeResponse(outputStream);
                 return;
             }
             if (method.equals("POST")) {
                 readRequestBody(reader);
                 formParameters.putAll(parseParameters(requestBody));
-                handlePostRequest();
+                httpResponse = handlePostRequest();
                 writeResponse(outputStream);
             }
 
@@ -100,8 +109,14 @@ public class Http11Processor implements Runnable, Processor {
     private void parseHeaders(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] headerParts = line.split(" ");
-            headers.put(headerParts[0].trim(), headerParts[1].trim());
+            String[] headerParts = line.split(":", 2);
+
+            if (headerParts.length == 2) {
+                String name = headerParts[0].trim().toLowerCase();
+                String value = headerParts[1].trim();
+
+                headers.put(name, value);
+            }
         }
     }
 
@@ -122,7 +137,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void readRequestBody(BufferedReader reader) throws IOException {
-        String value = headers.get("Content-Length:");
+        String value = headers.get("content-length");
         if (value == null) {
             throw new IOException("Content-Length header is missing");
         }
@@ -142,36 +157,34 @@ public class Http11Processor implements Runnable, Processor {
         requestBody = new String(body);
     }
 
-    private void handleGetRequest() throws IOException {
+    private byte[] handleGetRequest() throws IOException {
         if (path.equals("/login") || path.equals("/register")) {
-            serveStaticFile(path + ".html");
-            return;
+            return serveStaticFile(path + ".html");
         }
         if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js")) {
-            serveStaticFile(path);
-            return;
+            return serveStaticFile(path);
         }
         if (path.equals("/")) {
-            serverHomePage();
-            return;
+            return serverHomePage();
         }
-        notFound();
+        return notFound();
     }
 
-    private void notFound() {
-        httpResponse = createNotFoundResponse("404.html").getBytes(UTF_8);
+    private byte[] notFound() {
+        return createNotFoundResponse("/404.html").getBytes(UTF_8);
     }
 
-    private void handlePostRequest() {
+    private byte[] handlePostRequest() {
         if (path.equals("/login")) {
-            loginResult();
+            return loginResult();
         }
         if (path.equals("/register")) {
-            registerResult();
+            return registerResult();
         }
+        return notFound();
     }
 
-    private void loginResult() {
+    private byte[] loginResult() {
         String account = formParameters.get("account");
         String password = formParameters.get("password");
 
@@ -184,32 +197,44 @@ public class Http11Processor implements Runnable, Processor {
             location = INDEX_PATH;
         }
 
-        httpResponse = createRedirectResponse(location).getBytes(UTF_8);
+        return createRedirectResponse(location).getBytes(UTF_8);
     }
 
-    private void registerResult() {
+    private Optional<String> createSessionCookieHeader() {
+        HttpCookie cookies = HttpCookie.parse(headers.get("cookie"));
+
+        if (cookies.contains("JSESSIONID")) {
+            return Optional.empty();
+        }
+
+        String sessionId = UUID.randomUUID().toString();
+
+        return Optional.of("Set-Cookie: JSESSIONID=" + sessionId);
+    }
+
+    private byte[] registerResult() {
         String account = formParameters.get("account");
         String password = formParameters.get("password");
         String email = formParameters.get("email");
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        httpResponse = createRedirectResponse(INDEX_PATH).getBytes(UTF_8);
+        return createRedirectResponse(INDEX_PATH).getBytes(UTF_8);
     }
 
-    private void serveStaticFile(String requestUri) throws IOException {
+    private byte[] serveStaticFile(String requestUri) throws IOException {
         String contentType = findContentType(requestUri);
 
         URL resource = Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri));
         String body = Files.readString(Path.of(resource.getPath()), UTF_8);
         writeBody(body);
 
-        httpResponse = createOkHttpResponse(contentType).getBytes(UTF_8);
+        return createOkHttpResponse(contentType).getBytes(UTF_8);
     }
 
-    private void serverHomePage() {
+    private byte[] serverHomePage() {
         writeBody("Hello world!");
-        httpResponse = createOkHttpResponse(findContentType("/")).getBytes(UTF_8);
+        return createOkHttpResponse(findContentType("/")).getBytes(UTF_8);
     }
 
     private String findContentType(String requestUri) {
@@ -228,34 +253,49 @@ public class Http11Processor implements Runnable, Processor {
 
     @Nonnull
     private String createOkHttpResponse(String contentType) {
-        int contentLength = bodyBuilder.toString().getBytes(UTF_8).length;
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + contentLength + " ",
-                "",
-                bodyBuilder.toString()
+        String body = bodyBuilder.toString();
+
+        return createHttpResponse(
+                "200 OK",
+                List.of(
+                        "Content-Type: " + contentType,
+                        "Content-Length: " + body.getBytes(UTF_8).length
+                ),
+                body
         );
     }
 
     private String createRedirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
+        return createHttpResponse(
+                "302 FOUND",
+                List.of(
+                        LOCATION + location + " ",
+                        "Content-Length: 0 "
+                ),
                 ""
         );
     }
 
     private String createNotFoundResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 404 NOT FOUND ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
-                "",
+        return createHttpResponse(
+                "404 NOT FOUND",
+                List.of(
+                        LOCATION + location + " ",
+                        "Content-Length: 0 "
+                ),
                 ""
         );
+    }
+
+    private String createHttpResponse(String status, List<String> headers, String body) {
+        List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 " + status);
+        setCookieHeader.ifPresent(lines::add);
+        lines.addAll(headers);
+        lines.add("");
+        lines.add(body);
+
+        return String.join(CRLF, lines);
     }
 
     private void writeResponse(OutputStream outputStream) throws IOException {

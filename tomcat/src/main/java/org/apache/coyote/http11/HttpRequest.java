@@ -9,6 +9,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.session.Session;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -16,6 +17,7 @@ public class HttpRequest {
     private final String body;
     private final Map<String, String> parameters;
     private final HttpCookie cookie;
+    private Session session;
 
     public HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
         this.requestLine = requestLine;
@@ -39,6 +41,14 @@ public class HttpRequest {
 
     public String getMethod() {
         return requestLine.getMethod();
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public String getPath() {

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.exception;
 
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class NotImplementedException extends HttpException {
     public NotImplementedException(final String message) {

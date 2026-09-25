@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.exception;
 
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class HttpVersionNotSupportedException extends HttpException{
     public HttpVersionNotSupportedException(final String message) {

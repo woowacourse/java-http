@@ -40,11 +40,11 @@ public class RegisterController extends AbstractController {
     }
 
     private void handleRegister(HttpRequest request, HttpResponse response) {
-        Map<String, String> requestBodyParams = request.parseQueryParams(request.getRequestBody());
+        Map<String, String> formParams = request.getFormParams();
 
-        String account = requestBodyParams.get("account");
-        String password = requestBodyParams.get("password");
-        String email = requestBodyParams.get("email");
+        String account = formParams.get("account");
+        String password = formParams.get("password");
+        String email = formParams.get("email");
 
         if (isBlank(account) || isBlank(password) || isBlank(email)) {
             response.status(HttpStatus.BAD_REQUEST)

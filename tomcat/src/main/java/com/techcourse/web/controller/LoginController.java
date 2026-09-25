@@ -48,14 +48,14 @@ public class LoginController extends AbstractController {
     }
 
     private User login(HttpRequest request) {
-        Map<String, String> queryParams = request.parseQueryParams(request.getRequestBody());
+        Map<String, String> formParams = request.getFormParams();
 
-        if (queryParams.get("account") == null || queryParams.get("password") == null) {
+        if (formParams.get("account") == null || formParams.get("password") == null) {
             return null;
         }
 
-        return InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .filter(user -> user.checkPassword(queryParams.get("password")))
+        return InMemoryUserRepository.findByAccount(formParams.get("account"))
+                .filter(user -> user.checkPassword(formParams.get("password")))
                 .orElse(null);
     }
 

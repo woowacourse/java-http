@@ -69,7 +69,8 @@ public class HttpResponse {
         return this;
     }
 
-    public void addHeader(String key, String value) {
+    public HttpResponse addHeader(String key, String value) {
         headers.add(new Header(key, value));
+        return this;
     }
 }

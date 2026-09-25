@@ -9,20 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
-    private final String method;
-    private final String pathUri;
-    private final String protocolVersion;
+    private final RequestLine requestLine;
     private final Map<String, String> requestHeaders;
     private final String requestBody;
-    private final String queryParams;
 
-    private HttpRequest(String method, String pathUri, String protocolVersion, Map<String, String> requestHeaders, String requestBody, String queryParams) {
-        this.method = method;
-        this.pathUri = pathUri;
-        this.protocolVersion = protocolVersion;
+    private HttpRequest(RequestLine requestLine, Map<String, String> requestHeaders, String requestBody) {
+        this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
-        this.queryParams = queryParams;
     }
 
     public static HttpRequest from(BufferedInputStream input) throws IOException {
@@ -33,25 +27,6 @@ public class HttpRequest {
         return requestHeaders.get(header);
     }
 
-    public Map<String, String> parseQueryParams(String queryParams) {
-        Map<String, String> queries = new HashMap<>();
-
-        if (queryParams == null || queryParams.isBlank()) {
-            return queries;
-        }
-
-        for (String parameter : queryParams.split("&")) {
-            String[] keyValue = parameter.split("=", 2);
-
-            if (keyValue.length != 2) {
-                continue;
-            }
-            queries.put(keyValue[0], keyValue[1]);
-        }
-
-        return queries;
-    }
-
     private static HttpRequest parse(BufferedInputStream input) throws IOException {
         String headerFirstLine = readLine(input);
 
@@ -59,22 +34,15 @@ public class HttpRequest {
         String requestPath = headerFirstLine.split(" ")[1];
         String protocolVersion = headerFirstLine.split(" ")[2];
 
-        int queryIndex = requestPath.indexOf("?");
-        String pathUri = readPathUri(requestPath, queryIndex);
-        String queryParams = readQuery(requestPath, queryIndex);
-
         Map<String, String> headers = readHeaders(input);
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
         String reqBody = readReqBody(input, contentLength);
 
         return new HttpRequest(
-                method,
-                pathUri,
-                protocolVersion,
+                new RequestLine(method, requestPath, protocolVersion),
                 headers,
-                reqBody,
-                queryParams
+                reqBody
         );
     }
 
@@ -121,43 +89,52 @@ public class HttpRequest {
         String line;
 
         while (!(line = readLine(bufferedInputStream)).isEmpty()) {
-            headerMaps.put(line.split(":", 2)[0].trim(), line.split(":")[1].trim());
+            headerMaps.put(line.split(":", 2)[0].trim(), line.split(":", 2)[1].trim());
         }
 
         return headerMaps;
     }
 
-    private static String readQuery(String reqUri, int queryIndex) {
-        if (queryIndex == -1) {
-            return "";
+    private Map<String, String> parseUrlEncodedParams(String value) {
+        Map<String, String> queries = new HashMap<>();
+
+        if (value == null || value.isBlank()) {
+            return queries;
         }
-        return reqUri.substring(queryIndex + 1);
+
+        for (String parameter : value.split("&")) {
+            String[] keyValue = parameter.split("=", 2);
+
+            if (keyValue.length != 2) {
+                continue;
+            }
+            queries.put(keyValue[0], keyValue[1]);
+        }
+
+        return queries;
     }
 
-    private static String readPathUri(String reqUri, int queryIndex) {
-        if (queryIndex == -1) {
-            return reqUri;
-        }
-        return reqUri.substring(0, queryIndex);
+    public Map<String, String> getQueryParams() {
+        return parseUrlEncodedParams(requestLine.getQueryString());
+    }
+
+    public Map<String, String> getFormParams() {
+        return parseUrlEncodedParams(requestBody);
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPathUri() {
-        return pathUri;
+        return requestLine.getPathUri();
     }
 
     public String getProtocolVersion() {
-        return protocolVersion;
+        return requestLine.getProtocolVersion();
     }
 
     public String getRequestBody() {
         return requestBody;
-    }
-
-    public String getQueryParams() {
-        return queryParams;
     }
 }

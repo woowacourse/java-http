@@ -8,14 +8,14 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private final static String HTTP_VERSION = "HTTP/1.1";
+    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String CHARSET_UTF_8 = "charset=utf-8";
-    private HttpStatus httpStatus;
     private final Map<String, String> headers;
+    private HttpStatus httpStatus;
     private String responseBody;
 
     public HttpResponse() {

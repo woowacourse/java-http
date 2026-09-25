@@ -2,7 +2,6 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {

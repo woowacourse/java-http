@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public abstract class AbstractController implements Controller{
+public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -13,6 +13,9 @@ public abstract class AbstractController implements Controller{
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {}
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {}
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    }
+
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    }
 }

@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +13,7 @@ import org.apache.coyote.UuidGenerator;
 import org.apache.coyote.http11.model.request.FormParameters;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.UriInfo;
+import org.apache.coyote.http11.model.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,86 +60,46 @@ public class Http11Processor implements Runnable, Processor {
             String method = httpRequest.getRequestLine().httpMethod();
             UriInfo uriInfo = UriInfo.makeUriInfo(url);
 
+            Http11Response response;
             if ("GET".equals(method)) {
-                getProcess(outputStream, uriInfo, isGenerated, session);
+                response = getProcess(uriInfo, session);
             } else if ("POST".equals(method)) {
                 String requestBodyForm = httpRequest.getRequestBody().value();
                 FormParameters requestBody = FormParameters.from(requestBodyForm);
-                postProcess(outputStream, uriInfo, requestBody, isGenerated, session);
+                response = postProcess(uriInfo, requestBody, session);
+            } else {
+                return;
             }
+
+            if (isGenerated) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            }
+            response.writeTo(outputStream);
 
         } catch (IOException | URISyntaxException | RuntimeException e) {
             log.error("HTTP 요청 처리 실패. path={}", requestPath, e);
         }
     }
 
-    private void getProcess(
-            OutputStream outputStream,
+    private Http11Response getProcess(
             UriInfo uriInfo,
-            boolean isSessionGenerated,
             Session session
     ) throws IOException, URISyntaxException {
         String redirectPath;
         if ((redirectPath = RequestHandler.findGetRedirectPath(uriInfo.path(), session)) != null) {
-            String responseHeader = buildResponseHeader(redirectPath);
-            responseHeader = finishResponseHeader(responseHeader);
-            outputStream.write(responseHeader.getBytes());
-            outputStream.flush();
-            return;
+            return Http11Response.redirect(redirectPath);
         }
         byte[] responseBody = RequestHandler.get(uriInfo.path());
-        String responseHeader = buildResponseHeader(responseBody, findContentType(uriInfo.path()));
-        if (isSessionGenerated) {
-            responseHeader = addCookieToResponseHeader(responseHeader, session);
-        }
-        responseHeader = finishResponseHeader(responseHeader);
-        outputStream.write(responseHeader.getBytes());
-        outputStream.write(responseBody);
-        outputStream.flush();
+        return Http11Response.ok(responseBody, findContentType(uriInfo.path()));
     }
 
-    private void postProcess(
-            OutputStream outputStream,
+    private Http11Response postProcess(
             UriInfo uriInfo,
             FormParameters formParameters,
-            boolean isSessionGenerated,
             Session session
-    ) throws IOException, URISyntaxException {
-        String redirectPath = RequestHandler.post(uriInfo, formParameters, session);
-        String responseHeader = buildResponseHeader(redirectPath);
-        if (isSessionGenerated) {
-            responseHeader = addCookieToResponseHeader(responseHeader, session);
-        }
-        responseHeader = finishResponseHeader(responseHeader);
-        outputStream.write(responseHeader.getBytes());
-        outputStream.flush();
-    }
-
-    private String buildResponseHeader(String redirectPath) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + redirectPath,
-                "Content-Length: 0");
-    }
-
-    private String addCookieToResponseHeader(String responseHeader, Session session) {
-        return responseHeader +
-                "\r\n" +
-                "Set-Cookie: JSESSIONID=" + session.getId();
-    }
-
-    private String finishResponseHeader(String responseHeader) {
-        return responseHeader + "\r\n\r\n";
-    }
-
-    private String buildResponseHeader(
-            byte[] responseBody,
-            String contentType
     ) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.length + " ");
+        String redirectPath = RequestHandler.post(uriInfo, formParameters, session);
+        return Http11Response.redirect(redirectPath);
     }
 
     private String findContentType(String url) {

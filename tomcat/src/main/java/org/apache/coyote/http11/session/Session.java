@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.session;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class Session {
 
     private final String id;
-    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;
@@ -17,19 +17,19 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-        return attributes.get(name);
+        return SESSIONS.get(name);
     }
 
-    public void setAttribute(final String name, final Object value) {
-        attributes.put(name, value);
+    public void setAttribute(final String name, final Session value) {
+        SESSIONS.put(name, value);
     }
 
     public void removeAttribute(final String name) {
-        attributes.remove(name);
+        SESSIONS.remove(name);
     }
 
     public void invalidate() {
-        attributes.clear();
+        SESSIONS.clear();
         SessionManager.remove(this);
     }
 }

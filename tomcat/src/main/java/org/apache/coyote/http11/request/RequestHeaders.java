@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.HttpHeaderName;
+import org.apache.coyote.http11.HttpToken;
 import org.apache.coyote.http11.exception.BadRequestException;
 
 import java.util.HashMap;
@@ -30,6 +31,11 @@ public class RequestHeaders {
             if (delimiterIndex == NOT_FOUND) {
                 throw new BadRequestException("잘못된 형식의 헤더: " + line);
             }
+            final String rawName = line.substring(0, delimiterIndex);
+            if (!HttpToken.isValid(rawName)) {
+                throw new BadRequestException("잘못된 헤더 이름입니다");
+            }
+
             final String name = HttpHeaderName.normalize(line.substring(0, delimiterIndex));
             final String value = line.substring(delimiterIndex + 1).strip();
 

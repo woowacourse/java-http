@@ -83,14 +83,6 @@ public class Http11Processor implements Runnable, Processor {
                 controller.service(httpRequest, httpResponse);
                 outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
-                return;
-            }
-
-            // register
-            if (isRegisterRequest(httpRequest)) {
-                register(httpRequest, httpResponse);
-                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
                 log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
                 return;
             }
@@ -137,69 +129,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private User getUser(Session session) {
         return (User) session.getAttribute("user");
-    }
-
-    private static boolean isLoginRequest(MyHttpRequest httpRequest) {
-        return httpRequest.getResourcePath().contains("static/login.html")
-                && httpRequest.isPost()
-                && httpRequest.hasBody();
-    }
-
-    private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
-        return httpRequest.isStaticResourcePath("static/register.html")
-                && httpRequest.isPost()
-                && httpRequest.hasBody();
-    }
-
-    // TODO json도 처리 가능하도록
-    private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) throws IOException {
-        Map<String, String> params = httpRequest.getFormParameters();
-        Optional<User> foundUser = findUserByAccount(params.get("account"));
-        if (foundUser.isEmpty()) {
-            log.info("authenticate failed: user not found");
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("401.html");
-            return;
-        }
-
-        if (foundUser.get().checkPassword(params.get("password"))) {
-            log.info("user matched={}", foundUser.get());
-            final var session = httpRequest.getSession(true);
-            if (httpRequest.isNewSession()) {
-                httpResponse.addHeader("Set-Cookie", String.join("=", "JSESSIONID", session.getId()));
-            }
-            session.setAttribute("user", foundUser.get());
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("index.html");
-            return;
-        }
-        log.info("authenticate failed: incorrectly password");
-        httpResponse.setStatusCode(StatusCode.FOUND);
-        httpResponse.setContentType(ContentType.HTML);
-        httpResponse.sendRedirect("401.html");
-    }
-
-    private static void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
-        Map<String, String> params = httpRequest.getFormParameters();
-
-        try {
-            User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
-            log.info("registration succeed: {}", registeredUser);
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("index.html");
-        } catch (IllegalArgumentException e) {
-            log.error("registration failed: ", e);
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("login.html");
-        }
-    }
-
-    private static Optional<User> findUserByAccount(String account) {
-        return InMemoryUserRepository.findByAccount(account);
     }
 
     private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)

@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.ContentType;
 
 import java.io.IOException;
 import java.io.OutputStream;

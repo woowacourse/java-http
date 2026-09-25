@@ -1,15 +1,15 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.exception.BadRequestException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class RequestHeaders {
     private static final String HEADER_DELIMITER = ":";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COOKIE = "Cookie";
     private static final int NOT_FOUND = -1;
 
     private final Map<String, String> headers;
@@ -30,30 +30,34 @@ public class RequestHeaders {
             if (delimiterIndex == NOT_FOUND) {
                 throw new BadRequestException("잘못된 형식의 헤더: " + line);
             }
-            final String name = line.substring(0, delimiterIndex);
+            final String name = HttpHeaderName.normalize(line.substring(0, delimiterIndex));
             final String value = line.substring(delimiterIndex + 1).strip();
 
-            if (CONTENT_LENGTH.equals(name) && parsed.containsKey(name)) {
-                throw new BadRequestException("Content-Length 헤더가 중복되었습니다.");
+            if (HttpHeaderName.CONTENT_LENGTH.getNormalized().equals(name) && parsed.containsKey(name)) {
+                throw new BadRequestException("Content-Length 헤더가 중복되었습니다");
             }
             parsed.putIfAbsent(name, value);
         }
         return new RequestHeaders(Map.copyOf(parsed));
     }
 
+    public Optional<String> get(final HttpHeaderName name) {
+        return Optional.ofNullable(headers.get(name.getNormalized()));
+    }
+
     public int getContentLength() {
-        final String value = headers.get(CONTENT_LENGTH);
-        if (value == null) {
+        final Optional<String> value = get(HttpHeaderName.CONTENT_LENGTH);
+        if (value.isEmpty()) {
             return 0;
         }
         try {
-            return Integer.parseInt(value);
+            return Integer.parseInt(value.get());
         } catch (NumberFormatException e) {
             throw new BadRequestException("Content-Length가 숫자가 아닙니다.");
         }
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(headers.getOrDefault(COOKIE, ""));
+        return HttpCookie.from(get(HttpHeaderName.COOKIE).orElse(""));
     }
 }

@@ -11,6 +11,7 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.requestline.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

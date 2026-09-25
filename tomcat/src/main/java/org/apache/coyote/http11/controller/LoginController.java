@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpException;
@@ -53,16 +54,7 @@ public class LoginController extends AbstractController {
             return HttpResponse.status(HttpStatus.LENGTH_REQUIRED);
         }
 
-        User user = loginUser(request.requestBody());
-        if (user == null) {
-            return HttpResponse.found().location(UNAUTHORIZED_PAGE);
-        }
-
-        String sessionId = sessionIdGenerator.generate();
-        sessionManager.add(new Session(sessionId, "user", user));
-        return HttpResponse.found()
-                .location(INDEX_PAGE)
-                .setCookie(JSESSIONID, sessionId);
+        return loginUser(request.requestBody());
     }
 
     private HttpResponse firstVisit(HttpRequest request) throws IOException, HttpException {
@@ -87,23 +79,29 @@ public class LoginController extends AbstractController {
         return sessionManager.hasUser(cookie.getJSessionId());
     }
 
-    private User loginUser(HttpRequestBody body) {
-        String[] formData = body.requestBody().split("&");
+    private HttpResponse loginUser(HttpRequestBody body) {
+        Map<String, String> formData = body.formData();
 
-        List<String> data = Arrays.asList(formData);
+        String account = formData.get("account");
+        String password = formData.get("password");
 
-        String account = data.get(0).split("=")[1];
-        String password = data.get(1).split("=")[1];
+        if (account.isEmpty() || password.isEmpty()) {
+            return HttpResponse.status(HttpStatus.BAD_REQUEST);
+        }
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
 
         if (user == null || !user.checkPassword(password)) {
-            return null;
+            return HttpResponse.found().location(UNAUTHORIZED_PAGE);
         }
 
         log.info("user : {}", user);
 
-        return user;
+        String sessionId = sessionIdGenerator.generate();
+        sessionManager.add(new Session(sessionId, "user", user));
+        return HttpResponse.found()
+                .location(INDEX_PAGE)
+                .setCookie(JSESSIONID, sessionId);
     }
 }

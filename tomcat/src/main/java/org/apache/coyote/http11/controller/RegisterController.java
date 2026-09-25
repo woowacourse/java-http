@@ -2,9 +2,8 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.HttpException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -26,24 +25,26 @@ public class RegisterController extends AbstractController {
             return HttpResponse.status(HttpStatus.LENGTH_REQUIRED);
         }
 
-        registerUser(request.requestBody());
-
-        return HttpResponse.found()
-                .location(INDEX_PAGE);
+        return registerUser(request.requestBody());
     }
 
-    private void registerUser(HttpRequestBody body) {
-        String[] formData = body.requestBody().split("&");
+    private HttpResponse registerUser(HttpRequestBody body) {
+        Map<String, String> formData = body.formData();
 
-        List<String> data = Arrays.asList(formData);
+        String account = formData.get("account");
+        String email = formData.get("email");
+        String password = formData.get("password");
 
-        String account = data.get(0).split("=")[1];
-        String email = data.get(1).split("=")[1];
-        String password = data.get(2).split("=")[1];
+        if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            return HttpResponse.status(HttpStatus.BAD_REQUEST);
+        }
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         log.info("new user : {}", user);
+
+        return HttpResponse.found()
+                .location(INDEX_PAGE);
     }
 }

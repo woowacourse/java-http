@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.Cookie;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +29,8 @@ public class HttpResponse {
         headers.setLocation(location);
     }
 
-    public void setCookie(final String cookie) {
-        headers.setCookie(cookie);
+    public void addCookie(final Cookie cookie) {
+        headers.addCookie(cookie);
     }
 
     public void setHeader(final String name, final String value) {

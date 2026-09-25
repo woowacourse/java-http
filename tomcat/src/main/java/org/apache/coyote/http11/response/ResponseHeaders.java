@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.Cookie;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +18,7 @@ public class ResponseHeaders {
     private static final String LINE_SUFFIX = " ";
 
     private final Map<String, String> values = new LinkedHashMap<>();
+    private final List<Cookie> cookies = new ArrayList<>();
 
     public void setHeader(final String name, final String value) {
         values.put(name, value);
@@ -33,14 +36,17 @@ public class ResponseHeaders {
         setHeader(LOCATION, location);
     }
 
-    public void setCookie(final String cookie) {
-        setHeader(SET_COOKIE, cookie);
+    public void addCookie(final Cookie cookie) {
+        cookies.add(cookie);
     }
 
     public List<String> toLines() {
         final List<String> lines = new ArrayList<>();
         for (final Map.Entry<String, String> value : values.entrySet()) {
             lines.add(value.getKey() + KEY_VALUE_SEPARATOR + value.getValue() + LINE_SUFFIX);
+        }
+        for (final Cookie cookie : cookies) {
+            lines.add(SET_COOKIE + KEY_VALUE_SEPARATOR + cookie.toMessage() + LINE_SUFFIX);
         }
         return lines;
     }

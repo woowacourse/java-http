@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -12,8 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class HttpRequest {
-
-    private static final String KEY_VALUE_SEPARATOR = "=";
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
@@ -59,7 +58,7 @@ public class HttpRequest {
     private Session createSession() {
         final Session session = new Session(UUID.randomUUID().toString());
         SessionManager.getInstance().add(session);
-        response.setCookie(HttpCookie.JSESSIONID + KEY_VALUE_SEPARATOR + session.getId());
+        response.addCookie(Cookie.ofJSessionId(session.getId()));
         return session;
     }
 

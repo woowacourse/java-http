@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.model.User;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -13,6 +17,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
 
     @Test
     void process() {
@@ -265,6 +271,40 @@ class Http11ProcessorTest {
         );
 
         assertThat(socket.output()).contains(expected);
+    }
+
+    @DisplayName("로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.")
+    @Test
+    void saveUserAsSessionAttributeWhenLoginSucceeds() {
+        // given
+        final String account = "gugu";
+        final String password = "password";
+        final String loginInfo = "account=" + account + "&password=" + password;
+        final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + loginInfo.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                loginInfo);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String socketOutput = socket.output();
+        final int sessionIdBeginIndex = socketOutput.indexOf("JSESSIONID=") + "JSESSIONID=".length();
+        final int sessionIdEndIndex = socketOutput.indexOf("\r\n", sessionIdBeginIndex);
+        final String sessionId = socketOutput.substring(sessionIdBeginIndex, sessionIdEndIndex).trim();
+        final Session session = SESSION_MANAGER.findSession(sessionId);
+        final User loggedInUser = (User) session.getAttribute("user");
+
+        assertThat(loggedInUser.getAccount()).isEqualTo(account);
+        assertThat(loggedInUser.checkPassword(password)).isTrue();
     }
 
     private byte[] readResource(String resourceName) throws IOException {

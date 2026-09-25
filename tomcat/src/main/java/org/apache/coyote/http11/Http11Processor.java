@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_RESOURCE_FOLDER = "static";
 
     private final Socket connection;
+    private final Manager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -52,14 +56,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> responseHeader  = new HashMap<>();
 
+            Session session;
             final HttpCookie httpCookie = HttpCookie.from(messageHeaders.get("Cookie"));
-            if (!httpCookie.contains("JSESSIONID")) {
-                responseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            if (httpCookie.contains("JSESSIONID")) {
+                final String sessionId = httpCookie.get("JSESSIONID");
+                session = sessionManager.findSession(sessionId);
+            } else {
+                final String sessionId = String.valueOf(UUID.randomUUID());
+                session = new Session(sessionId);
+                sessionManager.add(session);
+                responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
             final int contentLength = Integer.parseInt(messageHeaders.getOrDefault("Content-Length", "0"));
             final String messageBody = readMessageBody(contentLength, inputStream);
-            final String response = handleRequest(requestLine, messageBody, responseHeader);
+            final String response = handleRequest(requestLine, messageBody, responseHeader, session);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -95,7 +106,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(final String requestLine, final String messageBody, final Map<String, String> responseHeaders) throws IOException {
+    private String handleRequest(final String requestLine, final String messageBody, final Map<String, String> responseHeaders, final Session session) throws IOException {
         final String[] parsedRequestLine = requestLine.split("\\s+");
 
         final String httpMethod = parsedRequestLine[0];
@@ -106,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpMethod.equals("POST")) {
-            return handlePostRequest(requestTarget, messageBody, responseHeaders);
+            return handlePostRequest(requestTarget, messageBody, responseHeaders, session);
         }
 
         return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
@@ -170,9 +181,9 @@ public class Http11Processor implements Runnable, Processor {
         return response.toString();
     }
 
-    private String handlePostRequest(final String requestTarget, final String messageBody, final Map<String, String> responseHeaders) throws IOException {
+    private String handlePostRequest(final String requestTarget, final String messageBody, final Map<String, String> responseHeaders, final Session session) throws IOException {
         if (requestTarget.equals("/login")) {
-            final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(messageBody);
+            final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(messageBody, session);
             if (hasLoginSucceeded) {
                 return createRedirectResponse("/index.html", responseHeaders);
             }
@@ -190,9 +201,8 @@ public class Http11Processor implements Runnable, Processor {
         return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
     }
 
-    private boolean loginAndRetrieveUserInfo(final String requestURI) {
-        final int index = requestURI.indexOf("?");
-        final Map<String, String> loginInfoPairs = parseQuery(requestURI.substring(index + 1));
+    private boolean loginAndRetrieveUserInfo(final String messageBody, final Session session) {
+        final Map<String, String> loginInfoPairs = parseQuery(messageBody);
         String account = loginInfoPairs.getOrDefault("account", "");
         String password = loginInfoPairs.getOrDefault("password", "");
 
@@ -203,6 +213,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final User retrievedUser = retrieveResult.get();
             if (retrievedUser.checkPassword(password)) {
+                session.setAttribute("user", retrievedUser);
                 log.info("로그인 성공! 아이디 : {}", retrievedUser.getAccount());
                 return true;
             }

@@ -26,4 +26,8 @@ public record HttpCookie(Map<String, String> pairs) {
     public boolean contains(final String name) {
         return pairs.containsKey(name);
     }
+
+    public String get(final String name) {
+        return pairs.get(name);
+    }
 }

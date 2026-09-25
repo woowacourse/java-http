@@ -9,9 +9,17 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private final Connector connector;
+
+    public Tomcat() {
+        this(new HttpServerConfiguration().createConnector());
+    }
+
+    public Tomcat(final Connector connector) {
+        this.connector = connector;
+    }
 
     public void start() {
-        var connector = new Connector();
         connector.start();
 
         try {

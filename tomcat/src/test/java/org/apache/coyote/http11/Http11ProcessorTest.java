@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,12 +20,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     private static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+    private final SessionManager sessionManager = new SessionManager();
+    private final StaticResourceController staticResourceController = new StaticResourceController();
+    private final RequestMapping requestMapping = new RequestMapping(Map.of(
+            "/register", new RegisterController(staticResourceController),
+            "/login", new LoginController(new SessionResolver(sessionManager), sessionManager,
+                    staticResourceController)
+    ));
+    private final HttpRequestDispatcher requestDispatcher = new HttpRequestDispatcher(
+            requestMapping,
+            staticResourceController
+    );
 
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestDispatcher);
 
         // when
         processor.process(socket);
@@ -32,7 +44,7 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK\r\n")
-                .containsPattern("Set-Cookie: JSESSIONID=" + UUID_PATTERN)
+                .doesNotContain("Set-Cookie:")
                 .contains("Content-Type: text/html;charset=utf-8\r\n")
                 .contains("Content-Length: 12\r\n")
                 .endsWith("Hello world!");
@@ -49,7 +61,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestDispatcher);
 
         // when
         processor.process(socket);
@@ -60,7 +72,7 @@ class Http11ProcessorTest {
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK\r\n")
-                .containsPattern("Set-Cookie: JSESSIONID=" + UUID_PATTERN)
+                .doesNotContain("Set-Cookie:")
                 .contains("Content-Type: text/html;charset=utf-8\r\n")
                 .contains("Content-Length: 5564\r\n")
                 .endsWith("\r\n" + responseBody);
@@ -70,7 +82,7 @@ class Http11ProcessorTest {
     void 세션_쿠키가_있는_요청에는_세션_쿠키를_추가하지_않는다() {
         // given
         final String sessionId = UUID.randomUUID().toString();
-        SessionManager.getInstance().add(new Session(sessionId));
+        sessionManager.add(new Session(sessionId));
         final String httpRequest = String.join("\r\n",
                 "GET / HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -78,7 +90,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestDispatcher);
 
         // when
         processor.process(socket);
@@ -100,7 +112,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestDispatcher);
 
         // when
         processor.process(socket);
@@ -123,14 +135,14 @@ class Http11ProcessorTest {
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestDispatcher);
 
         // when
         processor.process(socket);
 
         // then
         final String sessionId = extractSessionId(socket.output());
-        final Session session = SessionManager.getInstance().findSession(sessionId);
+        final Session session = sessionManager.findSession(sessionId);
 
         assertThat(session).isNotNull();
         assertThat(session.getAttribute("user")).isInstanceOf(User.class);

@@ -1,12 +1,13 @@
-package org.apache.session;
+package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
+
     private final String jsessionId;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     public Session() {
         this.jsessionId = UUID.randomUUID().toString();

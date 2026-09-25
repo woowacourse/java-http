@@ -1,0 +1,35 @@
+package com.techcourse.web.controller;
+
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+
+import java.io.IOException;
+
+public class LogoutController extends AbstractController {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        handleLogout(request.getHeader("Cookie"));
+        response.redirectTo("/login")
+                .expiresCookie("JSESSIONID", "/");
+    }
+
+    private void handleLogout(String cookie) {
+        String jsessionId = HttpCookie.getJsessionId(cookie);
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(jsessionId);
+
+        if (session != null) {
+            session.invalidate();
+            sessionManager.remove(jsessionId);
+        }
+    }
+}

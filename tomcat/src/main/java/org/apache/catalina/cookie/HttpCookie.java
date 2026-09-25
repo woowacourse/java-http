@@ -1,4 +1,4 @@
-package org.apache.cookie;
+package org.apache.catalina.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +9,12 @@ public class HttpCookie {
 
     public HttpCookie() {
         this.cookieMap = new HashMap<>();
+    }
+
+    public static String getJsessionId(String cookie) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookie(cookie);
+        return httpCookie.getCookieValue("JSESSIONID");
     }
 
     public void parseCookie(String cookie) {

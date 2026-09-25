@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 public class Response {
 
@@ -45,10 +46,14 @@ public class Response {
         outputStream.flush();
     }
 
-    public void response(OutputStream outputStream)
-            throws IOException {
+    public void response(OutputStream outputStream) throws IOException {
+        String jSessionId = request.getJSessionId();
+        if (!request.hasJSessionId()) {
+            jSessionId = UUID.randomUUID().toString();
+        }
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + statusCode.getStatusCode(),
+                "Set-Cookie: JSESSIONID=" + jSessionId,
                 "Content-Type: text/" + request.getContentTypeName() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

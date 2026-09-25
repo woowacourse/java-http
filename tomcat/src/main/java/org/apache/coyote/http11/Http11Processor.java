@@ -22,48 +22,6 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
     }
 
-    private void empty(OutputStream outputStream, Request request) throws IOException {
-        Response response = Response.empty(request);
-        response.response(outputStream);
-    }
-
-    private void login(OutputStream outputStream, Request request) throws IOException {
-        String account = request.getRequestParam("account");
-        String password = request.getRequestParam("password");
-        User user = findByAccount(account).orElse(null);
-        if (user != null && user.checkPassword(password)) {
-            log.info(user.toString());
-            loginSuccess(outputStream);
-        }
-        if ((user != null && !user.checkPassword(password))) {
-            loginFail(outputStream);
-        }
-        Response response = handling(request, StatusCode.OK);
-        response.response(outputStream);
-    }
-
-    private void loginFail(OutputStream outputStream) throws IOException {
-        Response.redirect(outputStream, "/401");
-    }
-
-    private void loginSuccess(OutputStream outputStream) throws IOException {
-        Response.redirect(outputStream, "/index");
-    }
-
-    private void register(OutputStream outputStream, Request request) throws IOException {
-        if (request.getMethod() == HttpMethod.GET) {
-            Response response = handling(request, StatusCode.OK);
-            response.response(outputStream);
-            return;
-        }
-        String account = request.getRequestParam("account");
-        String password = request.getRequestParam("password");
-        String email = request.getRequestParam("email");
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        Response.redirect(outputStream, "/index");
-    }
-
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
@@ -102,5 +60,52 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response handling(Request request, StatusCode statusCode) throws IOException {
         return Response.from(request, statusCode, getClass().getClassLoader());
+    }
+
+    private void empty(OutputStream outputStream, Request request) throws IOException {
+        Response response = Response.empty(request);
+        response.response(outputStream);
+    }
+
+    private void login(OutputStream outputStream, Request request) throws IOException {
+        String account = request.getRequestParam("account");
+        String password = request.getRequestParam("password");
+        User user = findByAccount(account).orElse(null);
+        if (user != null && user.checkPassword(password)) {
+            log.info(user.toString());
+            loginSuccess(outputStream);
+        }
+        if (user != null && !user.checkPassword(password)) {
+            log.info("login fail");
+            loginFail(outputStream);
+        }
+        if (!account.isEmpty() && user == null) {
+            log.info("login fail");
+            loginFail(outputStream);
+        }
+        Response response = handling(request, StatusCode.OK);
+        response.response(outputStream);
+    }
+
+    private void loginFail(OutputStream outputStream) throws IOException {
+        Response.redirect(outputStream, "/401");
+    }
+
+    private void loginSuccess(OutputStream outputStream) throws IOException {
+        Response.redirect(outputStream, "/index");
+    }
+
+    private void register(OutputStream outputStream, Request request) throws IOException {
+        if (request.getMethod() == HttpMethod.GET) {
+            Response response = handling(request, StatusCode.OK);
+            response.response(outputStream);
+            return;
+        }
+        String account = request.getRequestParam("account");
+        String password = request.getRequestParam("password");
+        String email = request.getRequestParam("email");
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        Response.redirect(outputStream, "/index");
     }
 }

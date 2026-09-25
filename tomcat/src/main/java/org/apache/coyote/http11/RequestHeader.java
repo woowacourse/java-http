@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import javax.annotation.Nonnull;
 
 public record RequestHeader(
         HttpMethod method,
         String uri,
         String version,
+        HttpCookie cookie,
         int contentLength,
         ContentType contentType
 ) {
@@ -21,16 +23,27 @@ public record RequestHeader(
 
     private static RequestHeader from(HttpMethod method, String path, String version, Headers headers) {
         String acceptLine = headers.getValue("accept");
-        ContentType contentType = Arrays.stream(ContentType.values())
-                .filter(type -> acceptLine.contains(type.getName()))
-                .findFirst()
-                .orElse(ContentType.HTML);
+        String cookieLine = headers.getValue("cookie");
         String contentLengthValue = headers.getValue("content-length");
+        HttpCookie httpCookie = HttpCookie.from(cookieLine);
+        ContentType contentType = findContentType(acceptLine);
+        int contentLength = checkContentLength(contentLengthValue);
+        return new RequestHeader(method, path, version, httpCookie, contentLength, contentType);
+    }
+
+    private static int checkContentLength(String contentLengthValue) {
         if (contentLengthValue.isEmpty()) {
             contentLengthValue = "0";
         }
-        int contentLength = Integer.parseInt(contentLengthValue);
-        return new RequestHeader(method, path, version, contentLength, contentType);
+        return Integer.parseInt(contentLengthValue);
+    }
+
+    @Nonnull
+    private static ContentType findContentType(String acceptLine) {
+        return Arrays.stream(ContentType.values())
+                .filter(type -> acceptLine.contains(type.getName()))
+                .findFirst()
+                .orElse(ContentType.HTML);
     }
 
     public String getPath() {
@@ -55,5 +68,13 @@ public record RequestHeader(
 
     public String getMethodName() {
         return method.getName();
+    }
+
+    public String getJSessionId() {
+        return cookie.getJSessionId();
+    }
+
+    public boolean hasJSessionId() {
+        return cookie.hasJSessionId();
     }
 }

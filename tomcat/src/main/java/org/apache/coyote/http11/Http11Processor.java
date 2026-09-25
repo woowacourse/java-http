@@ -111,7 +111,8 @@ public class Http11Processor implements Runnable, Processor {
             return response;
         }
 
-        boolean hasSetCookie = requestHeaders.containsKey("set-cookie");
+        // 이미 위에서 세션을 응답에 넣어줄 경우 발급 X
+        boolean hasSetCookie = response.headers().containsKey("set-cookie");
         if (hasSetCookie) {
             return response;
         }

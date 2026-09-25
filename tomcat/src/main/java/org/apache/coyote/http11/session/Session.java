@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 public class Session {
 
     private final String id;
-    private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;
@@ -17,19 +17,19 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-        return SESSIONS.get(name);
+        return attributes.get(name);
     }
 
-    public void setAttribute(final String name, final Session value) {
-        SESSIONS.put(name, value);
+    public void setAttribute(final String name, final Object value) {
+        attributes.put(name, value);
     }
 
     public void removeAttribute(final String name) {
-        SESSIONS.remove(name);
+        attributes.remove(name);
     }
 
     public void invalidate() {
-        SESSIONS.clear();
+        attributes.clear();
         SessionManager.remove(this);
     }
 }

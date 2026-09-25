@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.routing.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

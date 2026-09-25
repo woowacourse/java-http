@@ -2,7 +2,7 @@ package com.techcourse;
 
 import com.techcourse.web.resource.StaticResourceHandler;
 import com.techcourse.web.routing.TechCourseRequestMapping;
-import org.apache.catalina.connector.RequestMapping;
+import org.apache.catalina.routing.RequestMapping;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {

@@ -6,7 +6,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.cookie.HttpCookie;
 import com.techcourse.web.resource.StaticResourceHandler;
-import org.apache.catalina.connector.AbstractController;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;

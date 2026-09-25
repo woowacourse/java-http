@@ -65,6 +65,23 @@ class LoginControllerTest {
     }
 
     @Test
+    void 로그인에_성공하면_이전_세션을_무효화하고_새_세션을_발급한다() throws Exception {
+        final Session oldSession = SessionManager.INSTANCE.createSession();
+        oldSession.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+        final HttpRequest request = HttpRequest.of(
+                RequestLine.from("POST /login HTTP/1.1"),
+                RequestHeaders.from(List.of(FORM_URLENCODED, "Cookie: JSESSIONID=" + oldSession.getId())),
+                "account=gugu&password=password");
+
+        final String message = service(request);
+
+        assertThat(SessionManager.INSTANCE.findSession(oldSession.getId())).isNull();
+        final Matcher matcher = SESSION_ID.matcher(message);
+        assertThat(matcher.find()).isTrue();
+        assertThat(matcher.group(1)).isNotEqualTo(oldSession.getId());
+    }
+
+    @Test
     void 비밀번호가_틀리면_401_페이지로_리다이렉트한다() throws Exception {
         final String message = service(post("account=gugu&password=wrong"));
 

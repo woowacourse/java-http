@@ -3,6 +3,7 @@ package org.apache.catalina.session;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class SessionManagerTest {
 
@@ -59,5 +60,10 @@ class SessionManagerTest {
         sessionManager.invalidate(session.getId());
 
         assertThat(session.getAttribute("user")).isNull();
+    }
+
+    @Test
+    void id가_null이면_무효화할_세션이_없어_아무것도_하지_않는다() {
+        assertThatCode(() -> sessionManager.invalidate(null)).doesNotThrowAnyException();
     }
 }

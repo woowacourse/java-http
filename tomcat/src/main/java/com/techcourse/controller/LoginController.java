@@ -41,7 +41,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        loginSuccess(user.get(), response);
+        loginSuccess(user.get(), request, response);
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
@@ -59,7 +59,10 @@ public class LoginController extends AbstractController {
                 .filter(user -> user.checkPassword(password));
     }
 
-    private void loginSuccess(final User user, final HttpResponse response) {
+    private void loginSuccess(final User user, final HttpRequest request, final HttpResponse response) {
+        final String oldSessionId = request.getCookie().get(JSESSIONID);
+        SessionManager.INSTANCE.invalidate(oldSessionId);
+
         final Session session = SessionManager.INSTANCE.createSession();
         session.setAttribute(SESSION_USER_KEY, user);
 

@@ -30,8 +30,9 @@ public class Uri {
         if (queryString != null && !queryString.isBlank()) {
             String[] query = queryString.split("&");
             for (int i = 0; i < query.length; i++) {
-                String[] value = query[i].split("=");
-                queryMap.put(value[0], value[1]);
+                String[] keyValue = query[i].split("=", 2);
+                String value = keyValue.length > 1 ? keyValue[1] : "";
+                queryMap.put(keyValue[0], value);
             }
         }
     }

@@ -14,7 +14,7 @@ public class SessionManager implements Manager {
     private static final Logger log = LoggerFactory.getLogger(SessionManager.class);
 
     private static final SessionManager INSTANCE = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private final Map<String, Session> sessions = new HashMap<>();
 
     public static SessionManager getInstance() {
         return INSTANCE;
@@ -23,17 +23,17 @@ public class SessionManager implements Manager {
     @Override
     public void add(final Session session) {
         log.info("session added: {}", session.getId());
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(final String id) throws IOException {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(final String id) {
-        SESSIONS.remove(id);
+        sessions.remove(id);
     }
 
     public Session createSession() {

@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.header.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -67,5 +68,21 @@ class HttpResponseTest {
         assertThat(actual)
                 .contains("Set-Cookie: JSESSIONID=abc-123")
                 .contains("Set-Cookie: theme=dark");
+    }
+
+    @Test
+    @DisplayName("본문을 변경하면 직렬화 시점의 바이트 길이로 Content-Length를 계산한다")
+    void calculatesContentLengthFromLatestBodyWhenSerializing() {
+        // given
+        final HttpResponse response = new HttpResponse();
+        response.setBody("안녕");
+
+        // when
+        final String actual = new String(response.toBytes(), java.nio.charset.StandardCharsets.UTF_8);
+
+        // then
+        assertThat(actual)
+                .contains("Content-Length: 6")
+                .endsWith("안녕");
     }
 }

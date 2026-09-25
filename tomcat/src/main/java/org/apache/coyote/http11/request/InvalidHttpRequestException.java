@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-final class InvalidHttpRequestException extends RuntimeException {
+public final class InvalidHttpRequestException extends RuntimeException {
 
     InvalidHttpRequestException(final String message) {
         super(message);

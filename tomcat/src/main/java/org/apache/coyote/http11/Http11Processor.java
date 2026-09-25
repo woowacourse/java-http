@@ -50,23 +50,16 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            String requestLine = reader.readLine();
-            if (requestLine == null) {
+            String line = reader.readLine();
+            if (line == null) {
                 return;
             }
-            String[] parts = requestLine.split(" ");
-            String method = parts[0];
-            String uri = parts[1];
-            String path = uri;
-            int index = uri.indexOf("?");
-            if (index != -1) {
-                path = uri.substring(0, index);
-            }
+            RequestLine requestLine = new RequestLine(line);
             Map<String, String> headers = readHeaders(reader);
             String requestBody = readRequestBody(reader, headers);
             HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
             String sessionId = cookie.get("JSESSIONID");
-            String response = createResponse(method, path, requestBody, sessionId);
+            String response = createResponse(requestLine.getMethod(), requestLine.getPath(), requestBody, sessionId);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();

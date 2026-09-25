@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,19 @@ import java.util.UUID;
 
 
 class Http11ProcessorTest {
+
+    SessionManager manager = SessionManager.getInstance();
+    Session session;
+
+    @BeforeEach
+    void setUp() {
+        session = manager.createSession();
+    }
+
+    @AfterEach
+    void tearDown() {
+        manager.remove(session.getId());
+    }
 
     @Test
     void 존재하지_않는_정적_리소스는_404로_응답한다() throws IOException {
@@ -277,8 +292,6 @@ class Http11ProcessorTest {
     @Test
     void 요청에_이미_JSession_쿠키_헤더가_있다면_응답에_포함하지_않는다() {
         // given
-        SessionManager manager = SessionManager.getInstance();
-        Session session = manager.createSession();
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -300,7 +313,6 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
-        manager.remove(session.getId());
     }
 
     @Test

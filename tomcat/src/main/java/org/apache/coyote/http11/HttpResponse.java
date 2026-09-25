@@ -60,6 +60,11 @@ public class HttpResponse {
         headers.put("Location", location);
     }
 
+    public void sendError(HttpStatus status) {
+        StaticResourceHandler resources = new StaticResourceHandler(getClass().getClassLoader());
+        resources.fillError(status, this);
+    }
+
     public void writeTo(OutputStream outputStream) throws IOException {
         outputStream.write(createHead().getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);

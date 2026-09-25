@@ -5,11 +5,12 @@ import java.io.IOException;
 
 public record RequestLine(
         String httpMethod,
-        String requestUrl
+        String requestUrl,
+        String protocolVersion
 ) {
 
     public static RequestLine from(BufferedReader reader) throws IOException {
         String[] request = reader.readLine().trim().split("\\s+");
-        return new RequestLine(request[0], request[1]);
+        return new RequestLine(request[0], request[1], request[2]);
     }
 }

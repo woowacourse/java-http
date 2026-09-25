@@ -32,13 +32,13 @@ public class HttpRequestReader {
 
     private String readLine() throws IOException {
         final ByteArrayOutputStream line = new ByteArrayOutputStream();
-        int b = inputStream.read();
-        if (b == -1) {
+        int readByte = inputStream.read();
+        if (readByte == -1) {
             return null;
         }
-        while (b != -1 && b != '\n') {
-            line.write(b);
-            b = inputStream.read();
+        while (readByte != -1 && readByte != '\n') {
+            line.write(readByte);
+            readByte = inputStream.read();
         }
         return stripCarriageReturn(line.toString(UTF_8));
     }

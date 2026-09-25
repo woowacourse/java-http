@@ -68,7 +68,7 @@ public class LoginController extends AbstractController {
         session.setAttribute(SESSION_USER_KEY, user);
 
         response.sendRedirect("/index.html");
-        response.addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
+        response.setHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
     }
 
     private String page(final String path) throws URISyntaxException, IOException {

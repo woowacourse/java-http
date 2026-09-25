@@ -19,12 +19,12 @@ public class HttpResponse {
         this.body = "";
     }
 
-    public void addHeader(final String name, final String value) {
+    public void setHeader(final String name, final String value) {
         headers.put(name, value);
     }
 
     public void setBody(final String contentType, final String body) {
-        addHeader("Content-Type", contentType + ";charset=utf-8");
+        setHeader("Content-Type", contentType + ";charset=utf-8");
         this.body = body;
     }
 
@@ -34,7 +34,7 @@ public class HttpResponse {
 
     public void sendRedirect(final String location) {
         setStatus(HttpStatus.FOUND);
-        addHeader("Location", location);
+        setHeader("Location", location);
         headers.remove("Content-Type");
         this.body = "";
     }

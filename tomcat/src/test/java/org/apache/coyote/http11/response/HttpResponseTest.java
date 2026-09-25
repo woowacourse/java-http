@@ -85,7 +85,7 @@ class HttpResponseTest {
         final HttpResponse response = new HttpResponse();
         response.sendRedirect("/index.html");
 
-        response.addHeader("Set-Cookie", "JSESSIONID=656cef62");
+        response.setHeader("Set-Cookie", "JSESSIONID=656cef62");
 
         assertThat(toString(response)).contains("Set-Cookie: JSESSIONID=656cef62 \r\n");
     }

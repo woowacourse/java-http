@@ -24,6 +24,8 @@ public class LoginParser {
 
         final String[] queries = queryString.split("&");
         for (String query : queries) {
+            log.debug("[parseQueryString] query = {}", query);
+
             final String[] keyValue = query.split("=", 2);
             if (keyValue.length != 2) {
                 log.error("[authenticateUser] query의 형식이 올바르지 않습니다. query = {}", query);

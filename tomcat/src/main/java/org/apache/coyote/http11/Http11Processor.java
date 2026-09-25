@@ -11,17 +11,12 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.login.LoginParser;
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,65 +46,19 @@ public class Http11Processor implements Runnable, Processor {
             parseHttpRequest(inputStream);
 
             // 반환 타입 확정
-            final var responseType = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
+            final var type = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
-            // 로그인 페이지 요청 처리
-            if (httpInfo.get("Path").equals("/login") && httpInfo.get("Method").equals("GET")) {
-                if (findLoginUser().isPresent()) {
-                    final var responseBody = readStaticResource("/index", responseType);
-                    final var response = buildRedirectResponse("/index.html", responseBody, responseType);
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
+            // 반환할 정적 파일 찾기
+            final var responseBody = readStaticResource(type);
+
+            // Path에 따른 비지니스 로직
+            if (httpInfo.get("Path").contains("/login?")) {
+                authenticateUser();
             }
 
-            // POST 방식 로그인 요청 처리
-            if (httpInfo.get("Path").equals("/login") && httpInfo.get("Method").equals("POST")) {
-                Map<String, String> body = parseRequestBody();
-                Optional<User> loginUser = authenticateUser(body.get("account"), body.get("password"));
+            // HTTP 요청 응답 완성
+            final var response = buildHttpResponse(responseBody, type);
 
-                if (loginUser.isEmpty()) {
-                    final var responseBody = readStaticResource("/401", responseType);
-                    final var response = buildRedirectResponse("/401", responseBody, responseType);
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                final var responseBody = readStaticResource("/index", responseType);
-                final var session = createSession(loginUser.get());
-                final var response = buildRedirectResponseWithCookie("/index.html", responseBody, responseType,
-                    session.getId());
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            // 회원가입 요청 처리
-            if (httpInfo.get("Method").equals("POST") && httpInfo.get("Path").contains("/register")) {
-                Map<String, String> body = parseRequestBody();
-                boolean isRegisterSuccess = registerUser(body.get("account"), body.get("password"), body.get("email"));
-
-                if (!isRegisterSuccess) {
-                    final var responseBody = readStaticResource("/401", responseType);
-                    final var response = buildRedirectResponse("/401", responseBody, responseType);
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                // 리다이렉트 응답 반환
-                final var responseBody = readStaticResource("/index", responseType);
-                final var response = buildRedirectResponse("/index.html", responseBody, responseType);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            // 200 OK 응답 반환
-            final var responseBody = readStaticResource(null, responseType);
-            final var response = buildOKHttpResponse(responseBody, responseType);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -118,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void parseHttpRequest(InputStream httpRequest) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(httpRequest, StandardCharsets.UTF_8));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(httpRequest));
 
         final String[] top = reader.readLine().split(" ");
         httpInfo.put("Method", top[0]);
@@ -131,41 +80,8 @@ public class Http11Processor implements Runnable, Processor {
             if (header.length != 2) {
                 break;
             }
-            httpInfo.put(header[0], header[1].trim());
+            httpInfo.put(header[0], header[1]);
         }
-
-        final int contentLength = Integer.parseInt(httpInfo.getOrDefault("Content-Length", "0").trim());
-        if (contentLength == 0) {
-            return;
-        }
-
-        final char[] body = new char[contentLength];
-        final int readCount = reader.read(body);
-        if (readCount > 0) {
-            httpInfo.put("Body", new String(body, 0, readCount));
-        }
-    }
-
-    private Map<String, String> parseCookies() {
-        final Map<String, String> cookies = new HashMap<>();
-        final String cookieHeader = httpInfo.get("Cookie");
-
-        if (cookieHeader == null || cookieHeader.isBlank()) {
-            return cookies;
-        }
-
-        final String[] cookiePairs = cookieHeader.split(";");
-        for (String cookiePair : cookiePairs) {
-            final String[] keyValue = cookiePair.trim().split("=", 2);
-            if (keyValue.length != 2) {
-                log.debug("[parseCookies] cookie의 형식이 올바르지 않습니다. cookie = {}", cookiePair);
-                continue;
-            }
-
-            cookies.put(keyValue[0], keyValue[1]);
-        }
-
-        return cookies;
     }
 
     private String resolveContentType(String acceptValue) {
@@ -178,11 +94,11 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String readStaticResource(String fileCode, String type) {
+    private String readStaticResource(String type) {
         final String path = "/static";
         final String NO_CONTENT = "Hello world!";
 
-        final String fileName = resolveResourcePath(fileCode, type);
+        final String fileName = resolveResourcePath(type);
         final URL resource = getClass().getResource(path + fileName);
         if (resource == null) {
             log.error("[getStaticResource] 파일을 찾을 수 없습니다. path = {}", path + fileName);
@@ -197,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String resolveResourcePath(String fileName, String type) {
+    private String resolveResourcePath(String type) {
         final String NO_CONTENT = "Hello world!";
 
         String uri = httpInfo.get("Path");
@@ -206,131 +122,36 @@ public class Http11Processor implements Runnable, Processor {
             return NO_CONTENT;
         }
 
-        uri = uri.split("\\?")[0]; // 순수 URL
+        uri = uri.split("\\?")[0];
 
         final String extension = "." + type;
         if (!uri.endsWith(extension)) {
             uri += extension;
         }
 
-        if (fileName != null) {
-            uri = fileName + extension;
-        }
-
         return uri;
     }
 
-    private Map<String, String> parseQueryString() {
+    private void authenticateUser() {
         final String path = httpInfo.getOrDefault("Path", "/");
         URI uri = URI.create(path);
 
-        return LoginParser.parseQueryString(uri.getQuery());
-    }
+        Map<String, String> queryString = LoginParser.parseQueryString(uri.getQuery());
 
-    private Map<String, String> parseFormUrlEncodedBody() {
-        final String body = httpInfo.get("Body");
-        if (body == null || body.isBlank()) {
-            return new HashMap<>();
-        }
+        User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow();
 
-        return LoginParser.parseQueryString(body);
-    }
-
-    private Map<String, String> parseRequestBody() {
-        final String contentType = httpInfo.getOrDefault("Content-Type", "");
-
-        if (contentType.contains("application/x-www-form-urlencoded")) {
-            return parseFormUrlEncodedBody();
-        }
-
-        log.debug("[parseRequestBody] 지원하지 않는 Content-Type 입니다. Content-Type = {}", contentType);
-        return new HashMap<>();
-    }
-
-    private Optional<User> authenticateUser(String account, String password) {
-        try {
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-
-            if (!user.checkPassword(password)) {
-                log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
-                return Optional.empty();
-            }
-
+        if (user.checkPassword(queryString.get("password"))) {
             log.info("user : {}", user);
-            return Optional.of(user);
-        } catch (Exception e) {
-            log.error("[authenticateUser] 회원 정보를 찾을 수 없습니다.");
-            return Optional.empty();
+        } else {
+            log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
         }
     }
 
-    private Session createSession(User user) {
-        final var session = new Session(UUID.randomUUID().toString());
-        session.setAttribute("user", user);
-        SessionManager.add(session);
-        return session;
-    }
 
-    private Optional<User> findLoginUser() {
-        final var cookies = parseCookies();
-        final var sessionId = cookies.get("JSESSIONID");
-        if (sessionId == null) {
-            return Optional.empty();
-        }
-
-        final var session = SessionManager.findSession(sessionId);
-        if (session == null) {
-            return Optional.empty();
-        }
-
-        final var user = session.getAttribute("user");
-        if (user instanceof User loginUser) {
-            return Optional.of(loginUser);
-        }
-
-        return Optional.empty();
-    }
-
-    private boolean registerUser(String account, String password, String email) {
-        try {
-            if (account == null || password == null || email == null) {
-                return false;
-            }
-
-            InMemoryUserRepository.save(new User(account, password, email));
-            return true;
-        } catch (Exception e) {
-            log.error("[registerUser] 알 수 없는 에러가 발생했습니다.");
-            return false;
-        }
-    }
-
-    private String buildOKHttpResponse(final String responseBody, final String type) {
+    private String buildHttpResponse(final String responseBody, final String type) {
         return String.join("\r\n",
-            String.format("HTTP/1.1 %d %s ", 200, "OK"),
+            "HTTP/1.1 200 OK ",
             String.format("Content-Type: text/%s;charset=utf-8 ", type),
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-    }
-
-    private String buildRedirectResponse(final String url, final String responseBody, final String type) {
-        return String.join("\r\n",
-            "HTTP/1.1 302 Redirect ",
-            String.format("Content-Type: text/%s;charset=utf-8 ", type),
-            String.format("Location: %s ", url),
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-    }
-
-    private String buildRedirectResponseWithCookie(final String url, final String responseBody, final String type,
-        final String sessionId) {
-        return String.join("\r\n",
-            "HTTP/1.1 302 Redirect ",
-            String.format("Content-Type: text/%s;charset=utf-8 ", type),
-            String.format("Location: %s ", url),
-            String.format("Set-Cookie: JSESSIONID=%s; ", sessionId),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

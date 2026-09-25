@@ -10,12 +10,14 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.http.HttpHeaders;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,9 +123,7 @@ public class Http11Processor implements Runnable, Processor {
                 User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalStateException("등록되지 않은 계정입니다."));
 
-                if (user.isMatchPassword(password)) {
-                    log.info("user : {}", user);
-                    sendRedirect(outputStream, INDEX_PAGE);
+                if (loginSuccess(user, password, outputStream)) {
                     return;
                 }
                 if (!user.isMatchPassword(password)) {
@@ -150,6 +150,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private static boolean loginSuccess(User user, String password, OutputStream outputStream)
+        throws IOException {
+        if (user.isMatchPassword(password)) {
+            log.info("user : {}", user);
+            sendRedirect(outputStream, INDEX_PAGE);
+            return true;
+        }
+        return false;
+    }
+
     private static boolean isPostRequest(Map<String, String> requestHeaders,
         BufferedReader bufferedReader, OutputStream outputStream) throws IOException {
         if (requestHeaders.get("Content-Length") != null) {
@@ -167,6 +177,7 @@ public class Http11Processor implements Runnable, Processor {
             InMemoryUserRepository.save(user);
             log.info("register user: {}", user);
 
+
             sendRedirect(outputStream, INDEX_PAGE);
             return true;
         }
@@ -177,6 +188,7 @@ public class Http11Processor implements Runnable, Processor {
         throws IOException {
         String response = String.join("\r\n",
             "HTTP/1.1 " + REDIRECTION_FOUND_CODE + " " + FOUND_STATUS_RESPONSE + " ",
+            "Set-Cookie: JSESSIONID=" + UUID.randomUUID(),
             "Location: " + location + " ",
             "Content-Length: 0 ",
             "",

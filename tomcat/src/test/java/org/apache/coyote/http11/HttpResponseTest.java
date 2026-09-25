@@ -2,22 +2,19 @@ package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpResponseTest {
 
     @Test
     void 성공_응답을_생성한다() {
         // given
-        Map<String, String> headers = Map.of(
-                "Set-Cookie", "JSESSIONID=session-id; Path=/"
-        );
+        HttpResponse response = new HttpResponse();
+        response.addHeader("Set-Cookie", "JSESSIONID=session-id; Path=/");
 
         // when
-        HttpResponse response = HttpResponse.createSuccessResponse(
-                headers,
+        response.ok(
                 "text/plain;charset=utf-8",
                 "Hello world!"
         );
@@ -33,11 +30,11 @@ class HttpResponseTest {
 
     @Test
     void 리다이렉트_응답을_생성한다() {
+        // given
+        HttpResponse response = new HttpResponse();
+
         // when
-        HttpResponse response = HttpResponse.createRedirectResponse(
-                Map.of(),
-                "/index.html"
-        );
+        response.sendRedirect("/index.html");
         String message = response.toResponse();
 
         // then
@@ -49,8 +46,11 @@ class HttpResponseTest {
 
     @Test
     void 찾을_수_없음_응답을_생성한다() {
+        // given
+        HttpResponse response = new HttpResponse();
+
         // when
-        HttpResponse response = HttpResponse.createNotFoundResponse(Map.of());
+        response.notFound();
         String message = response.toResponse();
 
         // then
@@ -58,6 +58,17 @@ class HttpResponseTest {
         assertThat(message).contains("Content-Type: text/plain;charset=utf-8\r\n");
         assertThat(message).contains("Content-Length: 9\r\n");
         assertThat(responseBody(message)).isEqualTo("Not Found");
+    }
+
+    @Test
+    void 응답_상태가_설정되지_않으면_예외가_발생한다() {
+        // given
+        HttpResponse response = new HttpResponse();
+
+        // when & then
+        assertThatThrownBy(response::toResponse)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("HTTP 응답 상태가 설정되지 않았습니다.");
     }
 
     private static String responseBody(String response) {

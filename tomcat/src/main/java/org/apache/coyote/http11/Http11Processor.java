@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.RequestMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -17,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapping requestMapping;
+    private final RequestHandler requestHandler;
 
-    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
+    public Http11Processor(final Socket connection, final RequestHandler requestHandler) {
         this.connection = connection;
-        this.requestMapping = requestMapping;
+        this.requestHandler = requestHandler;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = new HttpResponse();
             request.bind(response);
 
-            requestMapping.getController(request).service(request, response);
+            requestHandler.service(request, response);
 
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();

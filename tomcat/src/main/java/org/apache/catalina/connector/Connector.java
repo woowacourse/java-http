@@ -1,7 +1,10 @@
 package org.apache.catalina.connector;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.core.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int KEEP_ALIVE_SECONDS = 60;
 
     private final Container container;
     private final ExecutorService executorService;
@@ -33,7 +37,13 @@ public class Connector implements Runnable {
         this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                acceptCount,
+                maxThreads,
+                KEEP_ALIVE_SECONDS,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(100)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -70,15 +80,20 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
-        executorService.submit(() -> container.execute(connection));
+        try {
+            executorService.submit(() -> container.execute(connection));
+        } catch (RejectedExecutionException e) {
+            connection.close();
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.close();
         try {
             serverSocket.close();
         } catch (IOException e) {

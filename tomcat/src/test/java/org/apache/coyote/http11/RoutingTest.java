@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Application;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -103,7 +104,7 @@ class RoutingTest {
         StubSocket socket = new StubSocket("POST /login HTTP/1.1\r\nContent-Length: -1\r\n\r\n");
 
         // when
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, Application.createRequestMapping()).process(socket);
 
         // then
         assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request");
@@ -111,7 +112,7 @@ class RoutingTest {
 
     private String request(String method, String path) {
         StubSocket socket = new StubSocket(method + " " + path + " HTTP/1.1\r\n\r\n");
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, Application.createRequestMapping()).process(socket);
         return socket.output();
     }
 

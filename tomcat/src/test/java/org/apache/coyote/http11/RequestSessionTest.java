@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Application;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
@@ -91,7 +92,7 @@ class RequestSessionTest {
         StubSocket socket = new StubSocket("GET /css/styles.css HTTP/1.1\r\nCookie: JSESSIONID=existing\r\n\r\n");
         try (MockedStatic<SessionManager> sessions = mockStatic(SessionManager.class)) {
             // when
-            new Http11Processor(socket).process(socket);
+            new Http11Processor(socket, Application.createRequestMapping()).process(socket);
 
             // then
             assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
@@ -108,7 +109,7 @@ class RequestSessionTest {
                 + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n\r\n" + body);
         try (MockedStatic<SessionManager> sessions = mockStatic(SessionManager.class)) {
             // when
-            new Http11Processor(socket).process(socket);
+            new Http11Processor(socket, Application.createRequestMapping()).process(socket);
 
             // then
             assertThat(socket.output()).startsWith("HTTP/1.1 302 Found");

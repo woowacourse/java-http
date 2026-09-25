@@ -41,6 +41,9 @@ public class RequestPath {
         if (!path.startsWith(ROOT)) {
             throw new BadRequestException("경로는 /로 시작해야 합니다");
         }
+        if (containsControlChar(path)) {
+            throw new BadRequestException("경로에 제어 문자가 포함되어 있습니다");
+        }
         if (path.indexOf(NULL_CHAR) != NOT_FOUND) {
             throw new BadRequestException("경로에 null 문자가 포함되어 있습니다");
         }
@@ -50,6 +53,15 @@ public class RequestPath {
         if (containsParentSegment(path)) {
             throw new BadRequestException("상위 경로 참조는 허용되지 않습니다");
         }
+    }
+
+    private static boolean containsControlChar(final String path) {
+        for (final char c : path.toCharArray()) {
+            if (Character.isISOControl(c)) {   // 0x00~0x1F, 0x7F~0x9F
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean containsParentSegment(final String path) {

@@ -3,16 +3,24 @@ package org.apache.coyote.http11.request.requestline;
 import org.apache.coyote.http11.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class PathTest {
+class RequestPathTest {
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void null이나_빈_경로는_거부한다(final String raw) {
+        assertThatThrownBy(() -> RequestPath.from(raw))
+                .isInstanceOf(BadRequestException.class);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
             "/../etc/passwd",
@@ -21,6 +29,7 @@ class PathTest {
             "/..%2Fetc/passwd",
             "/static/../../etc/passwd",
             "/..%5C..%5Cwindows",   // %5C = 역슬래시
+            "/a\\b",                // 인코딩 안 된 역슬래시
             "/index.html%00.png",
             "index.html",
             "",
@@ -40,6 +49,11 @@ class PathTest {
     })
     void 정상_경로는_허용한다(final String raw) {
         assertThatCode(() -> RequestPath.from(raw)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void 인코딩된_한글_경로를_디코딩한다() {
+        assertThat(RequestPath.from("/%ED%95%9C%EA%B8%80").getValue()).isEqualTo("/한글");
     }
 
     @Test
@@ -63,6 +77,13 @@ class PathTest {
         assertThat(RequestPath.from("/a%252Fb").getValue()).isEqualTo("/a%2Fb");
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"/a%0Ab", "/a%0D%0Ab", "/a%09b", "/a%7Fb"})
+    void 제어_문자는_거부한다(final String raw) {
+        assertThatThrownBy(() -> RequestPath.from(raw))
+                .isInstanceOf(BadRequestException.class);
+    }
+
     @Test
     void 쿼리_값의_인코딩된_슬래시는_허용한다() {
         final RequestUri uri = RequestUri.from("/login?redirect=%2Fmypage");
@@ -79,12 +100,5 @@ class PathTest {
     @Test
     void 인코딩이_달라도_디코딩_결과가_같으면_같은_경로다() {
         assertThat(RequestPath.from("/%69ndex.html")).isEqualTo(RequestPath.from("/index.html"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"/a%0Ab", "/a%0D%0Ab", "/a%09b", "/a%7Fb"})
-    void 제어_문자는_거부한다(final String raw) {
-        assertThatThrownBy(() -> RequestPath.from(raw))
-                .isInstanceOf(BadRequestException.class);
     }
 }

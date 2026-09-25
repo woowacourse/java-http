@@ -1,6 +1,7 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.exception.BadRequestException;
+import org.apache.coyote.http11.request.QueryParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -10,7 +11,6 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class QueryParametersTest {
 

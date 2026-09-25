@@ -1,6 +1,7 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -46,6 +47,17 @@ class RegisterControllerTest {
         assertThat(message).startsWith("HTTP/1.1 200 OK ");
         assertThat(message).contains("<title>회원가입</title>");
         assertThat(InMemoryUserRepository.findByAccount("register-blank")).isEmpty();
+    }
+
+    @Test
+    void 이미_있는_계정이면_덮어쓰지_않고_회원가입_페이지를_응답한다() throws Exception {
+        final String message = service(post("account=gugu&password=hacked&email=hacker%40x.com"));
+
+        assertThat(message).startsWith("HTTP/1.1 200 OK ");
+        assertThat(message).contains("<title>회원가입</title>");
+        final User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
+        assertThat(gugu.checkPassword("password")).isTrue();
+        assertThat(gugu.checkPassword("hacked")).isFalse();
     }
 
     private HttpRequest post(final String body) {

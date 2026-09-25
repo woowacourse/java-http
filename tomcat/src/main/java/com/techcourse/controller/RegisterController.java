@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
         final String email = request.getParameter("email");
-        if (isBlank(account) || isBlank(password) || isBlank(email)) {
+        if (isBlank(account) || isBlank(password) || isBlank(email) || isRegistered(account)) {
             final Resource resource = ResourceReader.read("/register.html").orElseThrow();
             response.setBody(resource.contentType(), resource.content());
             return;
@@ -32,5 +32,9 @@ public class RegisterController extends AbstractController {
 
     private boolean isBlank(final String value) {
         return value == null || value.isBlank();
+    }
+
+    private boolean isRegistered(final String account) {
+        return InMemoryUserRepository.findByAccount(account).isPresent();
     }
 }

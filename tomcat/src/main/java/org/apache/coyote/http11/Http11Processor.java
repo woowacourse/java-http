@@ -146,7 +146,7 @@ public class Http11Processor implements Runnable, Processor {
             return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html", responseHeaders);
         }
 
-        if (requestTarget.equals("/login")) {
+        if (requestTarget.equals("/login") || requestTarget.equals("/login.html")) {
             if (session.getAttribute("user") != null) {
                 return createRedirectResponse("/index.html", responseHeaders);
             }
@@ -218,6 +218,7 @@ public class Http11Processor implements Runnable, Processor {
             if (retrievedUser.checkPassword(password)) {
                 session.setAttribute("user", retrievedUser);
                 log.info("로그인 성공! 아이디 : {}", retrievedUser.getAccount());
+                log.info("User : {}", retrievedUser);
                 return true;
             }
         }

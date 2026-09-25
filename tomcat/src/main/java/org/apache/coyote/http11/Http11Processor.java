@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.login.LoginParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             parseHttpRequest(inputStream);
 
             // 반환 타입 확정
-            final var type = resolveContentType();
+            final var type = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
             // 반환할 정적 파일 찾기
             final var responseBody = readStaticResource(type);
@@ -82,12 +84,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String resolveContentType() {
-        final String accept = httpInfo.getOrDefault("Accept", "html");
-        if (accept.contains("css")) {
+    private String resolveContentType(String acceptValue) {
+        if (acceptValue.contains("css")) {
             return "css";
         }
-        if (accept.contains("html")) {
+        if (acceptValue.contains("html") || acceptValue.contains("*/*")) {
             return "html";
         }
         return "";
@@ -132,24 +133,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void authenticateUser() {
-        final String[] uri = httpInfo.getOrDefault("Path", "/").split("\\?");
+        final String path = httpInfo.getOrDefault("Path", "/");
+        URI uri = URI.create(path);
 
-        if (uri.length == 2) {
-            Map<String, String> queryString = new HashMap<>();
-            final String[] queryStrings = uri[1].split("&");
-            for (String query : queryStrings) {
-                final String[] keyValue = query.split("=");
-                queryString.put(keyValue[0], keyValue[1]);
-            }
+        Map<String, String> queryString = LoginParser.parseQueryString(uri.getQuery());
 
-            User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow();
-            if (user.checkPassword(queryString.get("password"))) {
-                log.info("user : {}", user);
-            } else {
-                log.info("[printLoginResult] 회원 정보가 일치하지 않습니다.");
-            }
+        User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow();
+
+        if (user.checkPassword(queryString.get("password"))) {
+            log.info("user : {}", user);
+        } else {
+            log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
         }
     }
+
 
     private String buildHttpResponse(final String responseBody, final String type) {
         return String.join("\r\n",

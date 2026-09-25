@@ -2,8 +2,9 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,13 +24,17 @@ class FileTest {
      * 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = new File("resources/" + fileName).getName();
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        assertThat(resource).isNotNull();
 
-        assertThat(actual).endsWith(fileName);
+        final Path actual = Path.of(resource.toURI());
+
+        assertThat(actual).exists();
+        assertThat(actual.getFileName().toString()).isEqualTo(fileName);
     }
 
     /**

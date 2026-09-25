@@ -6,11 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Session {
 
     private final String id;
-    private final Map<String, Object> values;
+    private final Map<String, Object> attributes;
 
-    private Session(String id,  Map<String, Object> values) {
+    private Session(String id,  Map<String, Object> attributes) {
         this.id = id;
-        this.values = values;
+        this.attributes = attributes;
     }
 
     public static Session from(String id) {
@@ -22,15 +22,15 @@ public class Session {
     }
 
     public Object getAttribute(String name) {
-        return values.get(name);
+        return attributes.get(name);
     }
 
     public void setAttribute(final String name, final Object value) {
         if (value == null) {
-            values.remove(name);
+            attributes.remove(name);
             return;
         }
 
-        values.put(name, value);
+        attributes.put(name, value);
     }
 }

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public record HttpRequest(
         HttpRequestLine requestLine,
         Map<String, String> headers,
@@ -94,6 +95,7 @@ public record HttpRequest(
 
         return HttpRequestLine.parseParameters(new String(body, StandardCharsets.UTF_8));
     }
+
 
     public boolean isGet() {
         return "GET".equals(requestLine.method());

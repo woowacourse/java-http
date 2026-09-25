@@ -5,9 +5,7 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.MethodDispatchingController;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.http11.HttpRequest;
@@ -17,20 +15,14 @@ import org.slf4j.LoggerFactory;
 
 public final class LoginController extends MethodDispatchingController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String JSESSION_ID = "JSESSIONID";
     private static final String SESSION_USER_ATTRIBUTE = "user";
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
     private static final String INDEX_PATH = "/index.html";
 
-    private final SessionManager sessionManager;
     private final StaticResourceController staticResourceController;
 
-    public LoginController(
-            final SessionManager sessionManager,
-            final StaticResourceController staticResourceController
-    ) {
-        this.sessionManager = sessionManager;
+    public LoginController(final StaticResourceController staticResourceController) {
         this.staticResourceController = staticResourceController;
     }
 
@@ -44,7 +36,7 @@ public final class LoginController extends MethodDispatchingController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final Optional<User> authenticatedUser = findAuthenticatedUser(request.formParameters());
         if (authenticatedUser.isEmpty()) {
             response.sendRedirect("/401.html");
@@ -54,31 +46,14 @@ public final class LoginController extends MethodDispatchingController {
         final User user = authenticatedUser.get();
         log.info("로그인 성공! 아이디 : {}", user.getAccount());
 
-        final Optional<Session> existingSession = findSession(request);
-        final Session session = existingSession.orElseGet(this::createSession);
+        final Session session = request.getSession(true);
         session.setAttribute(SESSION_USER_ATTRIBUTE, user);
-
         response.sendRedirect(INDEX_PATH);
-        if (existingSession.isEmpty()) {
-            response.addHeader("Set-Cookie", JSESSION_ID + "=" + session.getId());
-        }
     }
 
-    private boolean isLoggedIn(final HttpRequest request) {
-        return findSession(request)
-                .map(session -> session.getAttribute(SESSION_USER_ATTRIBUTE))
-                .isPresent();
-    }
-
-    private Optional<Session> findSession(final HttpRequest request) {
-        return request.cookie(JSESSION_ID)
-                .map(sessionManager::findSession);
-    }
-
-    private Session createSession() {
-        final Session session = new Session(UUID.randomUUID().toString());
-        sessionManager.add(session);
-        return session;
+    private boolean isLoggedIn(final HttpRequest request) throws IOException {
+        final Session session = request.getSession(false);
+        return session != null && session.getAttribute(SESSION_USER_ATTRIBUTE) != null;
     }
 
     private Optional<User> findAuthenticatedUser(final Map<String, String> formParameters) {

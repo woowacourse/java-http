@@ -30,6 +30,10 @@ public final class HttpResponse {
         body = new byte[0];
     }
 
+    public void addCookie(final String name, final String value) {
+        addHeader("Set-Cookie", name + "=" + value);
+    }
+
     public void addHeader(final String name, final String value) {
         headers.put(name, value);
     }

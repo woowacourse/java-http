@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-enum HttpMethod {
+public enum HttpMethod {
     DELETE,
     GET,
     HEAD,

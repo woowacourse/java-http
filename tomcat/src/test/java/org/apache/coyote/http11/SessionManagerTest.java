@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

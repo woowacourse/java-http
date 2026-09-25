@@ -1,7 +1,5 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina.session;
 
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 

@@ -1,11 +1,12 @@
-package org.apache.coyote.http11.routing;
+package org.apache.catalina.routing;
 
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.StaticResourceController;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class HttpRequestDispatcher {
+public class HttpRequestDispatcher implements Adapter {
 
     private final RequestMapping requestMapping;
     private final StaticResourceController staticResourceController;
@@ -16,7 +17,8 @@ public class HttpRequestDispatcher {
         this.staticResourceController = staticResourceController;
     }
 
-    public HttpResponse dispatch(final HttpRequest request) throws Exception {
+    @Override
+    public HttpResponse service(final HttpRequest request) throws Exception {
         Controller controller = requestMapping.getController(request);
         if (controller == null) {
             controller = staticResourceController;

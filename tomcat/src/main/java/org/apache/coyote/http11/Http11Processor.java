@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.routing.HttpRequestDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +16,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
-    private final HttpRequestDispatcher requestDispatcher;
+    private final Adapter adapter;
 
-    public Http11Processor(final Socket connection, final HttpRequestDispatcher requestDispatcher) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
-        this.requestDispatcher = requestDispatcher;
+        this.adapter = adapter;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) { // 처리할 요청이 없으면 컨트롤러 선택 및 응답 생성을 건너뜀
                 return;
             }
-            HttpResponse response = requestDispatcher.dispatch(request);
+            HttpResponse response = adapter.service(request);
             writeResponse(outputStream, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

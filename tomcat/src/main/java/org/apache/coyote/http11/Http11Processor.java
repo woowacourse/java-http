@@ -54,7 +54,6 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpRequest httpRequest =
                     HttpRequestParser.parse(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
             MyHttpResponse httpResponse = new MyHttpResponse();
-            httpResponse.setStatusCode(StatusCode.OK);
             log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
             if (!httpRequest.hasCookie("JSESSIONID")) {
@@ -77,20 +76,10 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
             }
+
             RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(httpRequest);
-            if (controller != null) {
-                controller.service(httpRequest, httpResponse);
-                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
-                return;
-            }
-
-            httpResponse.setStatusCode(StatusCode.OK);
-            httpResponse.setContentType(httpRequest.getContentType());
-            final var responseBody = readStaticResource(httpRequest, "Hello world!");
-            httpResponse.writeBody(responseBody);
+            controller.service(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -129,17 +118,5 @@ public class Http11Processor implements Runnable, Processor {
 
     private User getUser(Session session) {
         return (User) session.getAttribute("user");
-    }
-
-    private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)
-            throws IOException, URISyntaxException {
-        URL fileUrl = Http11Processor.class
-                .getClassLoader()
-                .getResource(httpRequest.getResourcePath());
-        File file = new File(Objects.requireNonNull(fileUrl).toURI());
-        if (file.isFile()) {
-            return Files.readString(file.toPath(), StandardCharsets.UTF_8);
-        }
-        return defaultContent;
     }
 }

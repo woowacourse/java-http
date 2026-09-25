@@ -9,12 +9,14 @@ import java.util.Map;
 public class RequestMapping {
 
     // TODO: 외부 주입으로 변경
-    Map<String, Controller> controllers = Map.of(
+    private final Map<String, Controller> controllers = Map.of(
             "/login", new LoginController(),
             "/register", new RegisterController()
     );
 
+    private final Controller staticResourceController = new StaticResourceController();
+
     public Controller getController(MyHttpRequest request) {
-        return controllers.get(request.getPath());
+        return controllers.getOrDefault(request.getPath(), staticResourceController);
     }
 }

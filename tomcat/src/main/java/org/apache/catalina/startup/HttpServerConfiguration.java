@@ -3,12 +3,12 @@ package org.apache.catalina.startup;
 import java.util.Map;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.HttpRequestDispatcher;
-import org.apache.coyote.http11.LoginController;
-import org.apache.coyote.http11.RegisterController;
-import org.apache.coyote.http11.RequestMapping;
-import org.apache.coyote.http11.SessionResolver;
-import org.apache.coyote.http11.StaticResourceController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.coyote.http11.routing.HttpRequestDispatcher;
+import org.apache.coyote.http11.routing.RequestMapping;
+import org.apache.coyote.http11.session.SessionResolver;
 
 public class HttpServerConfiguration {
 

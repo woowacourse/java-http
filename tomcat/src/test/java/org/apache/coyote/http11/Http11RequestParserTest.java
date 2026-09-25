@@ -6,10 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.http.HttpMethod;
-import org.apache.coyote.http.HttpServletRequest;
+import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.HttpVersion;
-import org.apache.coyote.http.TextBody;
+import org.apache.coyote.http.request.TextBody;
 import org.junit.jupiter.api.Test;
 
 class Http11RequestParserTest {
@@ -17,7 +17,7 @@ class Http11RequestParserTest {
     @Test
     void 바디가_있는_요청을_파싱한다() throws IOException {
         final String body = "{\"name\":\"김\"}";
-        final HttpServletRequest request = parse(String.join("\r\n",
+        final HttpRequest request = parse(String.join("\r\n",
                 "POST /users?id=1 HTTP/1.1",
                 "Host: localhost:8080",
                 "Content-Type: application/json",
@@ -35,7 +35,7 @@ class Http11RequestParserTest {
 
     @Test
     void 바디가_없는_요청을_파싱한다() throws IOException {
-        final HttpServletRequest request = parse(String.join("\r\n",
+        final HttpRequest request = parse(String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "",
@@ -45,7 +45,7 @@ class Http11RequestParserTest {
         assertThat(request.body()).isEqualTo(new TextBody(""));
     }
 
-    private HttpServletRequest parse(final String rawRequest) throws IOException {
+    private HttpRequest parse(final String rawRequest) throws IOException {
         final InputStream inputStream =
                 new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         return new Http11RequestParser(inputStream).parse();

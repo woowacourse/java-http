@@ -8,11 +8,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http.ContentType;
-import org.apache.coyote.http.HttpServletRequest;
+import org.apache.coyote.http.request.ContentType;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.RequestBody;
-import org.apache.coyote.http.RequestLine;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestLine;
 
 public class Http11RequestParser {
 
@@ -22,12 +22,12 @@ public class Http11RequestParser {
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.ISO_8859_1));
     }
 
-    public HttpServletRequest parse() throws IOException {
+    public HttpRequest parse() throws IOException {
         final RequestLine requestLine = RequestLine.from(readFirstLine());
         final HttpHeaders headers = HttpHeaders.from(readHeaderLines());
         final RequestBody body = RequestBody.of(ContentType.from(headers.contentType()), readBody(headers.contentLength()));
 
-        return new HttpServletRequest(requestLine, headers, body);
+        return new HttpRequest(requestLine, headers, body);
     }
 
     private String readFirstLine() throws IOException {

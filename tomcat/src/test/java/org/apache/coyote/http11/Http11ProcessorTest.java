@@ -2,21 +2,21 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.handler.StaticResourceHandler;
+import com.techcourse.controller.StaticResourceController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import org.apache.catalina.handler.ResourceResolver;
+import java.util.Map;
+import org.apache.catalina.controller.Dispatcher;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Adapter;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private static final Adapter ADAPTER = new ResourceResolver(List.of(
-            new StaticResourceHandler()
-    ));
+    private static final Adapter ADAPTER = new Dispatcher(
+            new RequestMapping(Map.of()), new StaticResourceController());
 
     @Test
     void process() throws IOException {

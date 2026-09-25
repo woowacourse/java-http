@@ -64,6 +64,10 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
+    public String getVersion() {
+        return requestLine.getVersion();
+    }
+
     public HttpSession getSession(boolean isCreate) throws IOException {
         HttpSession session = SESSION_MANAGER.findSession(cookie.getJsessionid());
         if (isCreate && session == null) {

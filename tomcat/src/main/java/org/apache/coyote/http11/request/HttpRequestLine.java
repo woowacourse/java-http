@@ -48,6 +48,10 @@ public class HttpRequestLine {
         return path;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
     private void validate(String method, String version) {
         validateMethod(method);
         validateVersion(version);

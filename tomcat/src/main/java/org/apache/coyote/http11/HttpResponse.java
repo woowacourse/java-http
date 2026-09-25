@@ -10,13 +10,19 @@ public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private final HttpStatus status;
+    private HttpStatus status;
     private final Map<String, String> headers;
-    private final byte[] body;
+    private byte[] body;
+
+    public HttpResponse() {
+        this.status = HttpStatus.OK;
+        this.headers = new LinkedHashMap<>();
+        this.body = new byte[0];
+    }
 
     private HttpResponse(HttpStatus status, byte[] body) {
+        this();
         this.status = status;
-        this.headers = new LinkedHashMap<>();
         this.body = body.clone();
     }
 
@@ -38,6 +44,20 @@ public class HttpResponse {
 
     public void addHeader(String name, String value) {
         headers.put(name, value);
+    }
+
+    public void setContent(HttpStatus status, byte[] body, String contentType) {
+        this.status = status;
+        this.body = body.clone();
+        headers.remove("Location");
+        headers.put("Content-Type", contentType);
+    }
+
+    public void sendRedirect(String location) {
+        this.status = HttpStatus.FOUND;
+        this.body = new byte[0];
+        headers.remove("Content-Type");
+        headers.put("Location", location);
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {

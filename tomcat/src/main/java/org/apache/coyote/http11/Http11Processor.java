@@ -15,8 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,34 +49,38 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) {
                 return;
             }
-            String response = createResponse(request);
+            HttpResponse response = createResponse(request);
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponse(HttpRequest request) throws IOException {
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
+        HttpResponse response = new HttpResponse();
         String method = request.getMethod();
         String path = request.getPath();
         String sessionId = request.getCookie("JSESSIONID");
-        String setCookie = null;
         if (sessionId == null) {
-            setCookie = "JSESSIONID=" + UUID.randomUUID();
+            response.setHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
         }
         if ("POST".equals(method) && "/login".equals(path)) {
-            return login(request, setCookie);
+            login(request, response);
+            return response;
         }
         if ("POST".equals(method) && "/register".equals(path)) {
-            return register(request, setCookie);
+            register(request, response);
+            return response;
         }
         if ("GET".equals(method) && "/login".equals(path) && isLoggedIn(sessionId)) {
-            return buildRedirectResponse(INDEX_PAGE, setCookie);
+            response.sendRedirect(INDEX_PAGE);
+            return response;
         }
         if ("/".equals(path)) {
-            return buildResponse("HTTP/1.1 200 OK ", getContentType(path), "Hello world!", setCookie);
+            response.setBody(ContentType.HTML, "Hello world!");
+            return response;
         }
         String resourcePath = path;
         if ("/login".equals(path)) {
@@ -89,35 +91,12 @@ public class Http11Processor implements Runnable, Processor {
         }
         String responseBody = readStaticResource(resourcePath);
         if (responseBody == null) {
-            String notFoundBody = readStaticResource(NOT_FOUND_PAGE);
-            return buildResponse("HTTP/1.1 404 Not Found ", getContentType(NOT_FOUND_PAGE), notFoundBody, setCookie);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setBody(ContentType.HTML, readStaticResource(NOT_FOUND_PAGE));
+            return response;
         }
-        return buildResponse("HTTP/1.1 200 OK ", getContentType(resourcePath), responseBody, setCookie);
-    }
-
-    private String buildRedirectResponse(String location, String setCookie) {
-        List<String> lines = new ArrayList<>();
-        lines.add("HTTP/1.1 302 Found ");
-        lines.add("Location: " + location + " ");
-        if (setCookie != null) {
-            lines.add("Set-Cookie: " + setCookie + " ");
-        }
-        lines.add("");
-        lines.add("");
-        return String.join("\r\n", lines);
-    }
-
-    private String buildResponse(String statusLine, String contentType, String responseBody, String setCookie) {
-        List<String> lines = new ArrayList<>();
-        lines.add(statusLine);
-        lines.add("Content-Type: " + contentType + " ");
-        lines.add("Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
-        if (setCookie != null) {
-            lines.add("Set-Cookie: " + setCookie + " ");
-        }
-        lines.add("");
-        lines.add(responseBody);
-        return String.join("\r\n", lines);
+        response.setBody(ContentType.from(resourcePath), responseBody);
+        return response;
     }
 
     private String readStaticResource(String path) throws IOException {
@@ -129,32 +108,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getContentType(String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
-    }
-
-    private String login(HttpRequest request, String setCookie) {
+    private void login(HttpRequest request, HttpResponse response) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         if (account == null || password == null) {
-            return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
+            response.sendRedirect(UNAUTHORIZED_PAGE);
+            return;
         }
         Optional<User> loginUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
         if (loginUser.isEmpty()) {
-            return buildRedirectResponse(UNAUTHORIZED_PAGE, setCookie);
+            response.sendRedirect(UNAUTHORIZED_PAGE);
+            return;
         }
         Session session = new Session(UUID.randomUUID().toString());
         session.setAttribute("user", loginUser.get());
         SessionManager.add(session);
         log.info("user : {}", loginUser.get().getAccount());
-        return buildRedirectResponse(INDEX_PAGE, "JSESSIONID=" + session.getId());
+        response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.sendRedirect(INDEX_PAGE);
     }
 
     private boolean isLoggedIn(String sessionId) {
@@ -165,16 +137,17 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private String register(HttpRequest request, String setCookie) {
+    private void register(HttpRequest request, HttpResponse response) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         String email = request.getParameter("email");
         if (account == null || account.isBlank()
                 || password == null || password.isBlank()
                 || email == null || email.isBlank()) {
-            return buildRedirectResponse(REGISTER_PAGE, setCookie);
+            response.sendRedirect(REGISTER_PAGE);
+            return;
         }
         InMemoryUserRepository.save(new User(account, password, email));
-        return buildRedirectResponse(INDEX_PAGE, setCookie);
+        response.sendRedirect(INDEX_PAGE);
     }
 }

@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.ControllerMapping;
 import org.apache.catalina.session.Session;
@@ -41,14 +42,13 @@ public class Dispatcher implements RequestHandler {
 
     private HttpResponse route(final HttpRequest httpRequest) throws Exception {
         final String path = httpRequest.requestLine().path();
-        final Controller controller = controllerMapping.find(path).orElse(null);
-
-        if (controller == null) {
+        final Optional<Controller> controller = controllerMapping.find(path);
+        if (controller.isEmpty()) {
             return HttpResponses.render(path);
         }
 
         final Request request = new Request(httpRequest, sessionManager);
-        final HttpResponse response = controller.handle(request);
+        final HttpResponse response = controller.get().handle(request);
 
         return request.createdSession()
                 .map(session -> withSessionCookie(response, session))

@@ -23,7 +23,7 @@ class HttpResponseTest {
     void 본문을_담은_응답_메시지를_생성한다() {
         final HttpResponse response = new HttpResponse();
 
-        response.setBody("text/html", "Hello world!");
+        response.setBody(ContentType.HTML, "Hello world!");
 
         final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -47,7 +47,7 @@ class HttpResponseTest {
     void Content_Length는_바이트_길이로_계산한다() {
         final HttpResponse response = new HttpResponse();
 
-        response.setBody("text/html", "한글");
+        response.setBody(ContentType.HTML, "한글");
 
         assertThat(toString(response)).contains("Content-Length: 6 \r\n");
     }
@@ -70,7 +70,7 @@ class HttpResponseTest {
     @Test
     void 리다이렉트하면_앞서_담은_본문을_비운다() {
         final HttpResponse response = new HttpResponse();
-        response.setBody("text/html", "Hello world!");
+        response.setBody(ContentType.HTML, "Hello world!");
 
         response.sendRedirect("/index.html");
 

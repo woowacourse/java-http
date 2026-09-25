@@ -8,6 +8,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class HttpResponse {
     private static final String VERSION = "HTTP/1.1";
     private static final String CRLF = "\r\n";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private HttpStatus status;
     private final Map<String, String> headers;
@@ -23,8 +26,8 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
-    public void setBody(final String contentType, final String body) {
-        setHeader("Content-Type", contentType + ";charset=utf-8");
+    public void setBody(final ContentType contentType, final String body) {
+        setHeader(CONTENT_TYPE, contentType.getValue());
         this.body = body;
     }
 
@@ -34,15 +37,15 @@ public class HttpResponse {
 
     public void sendRedirect(final String location) {
         setStatus(HttpStatus.FOUND);
-        setHeader("Location", location);
-        headers.remove("Content-Type");
+        setHeader(LOCATION, location);
+        headers.remove(CONTENT_TYPE);
         this.body = "";
     }
 
     public byte[] getBytes() {
         final StringBuilder message = new StringBuilder(statusLine());
         headers.forEach((name, value) -> appendHeader(message, name, value));
-        appendHeader(message, "Content-Length", String.valueOf(body.getBytes(UTF_8).length));
+        appendHeader(message, CONTENT_LENGTH, String.valueOf(body.getBytes(UTF_8).length));
         message.append(CRLF).append(body);
         return message.toString().getBytes(UTF_8);
     }

@@ -4,6 +4,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.ContentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,14 +17,14 @@ class AbstractControllerTest {
     private final Controller getOnlyController = new AbstractController() {
         @Override
         protected void doGet(final HttpRequest request, final HttpResponse response) {
-            response.setBody("text/plain", "get");
+            response.setBody(ContentType.HTML, "get");
         }
     };
 
     private final Controller postOnlyController = new AbstractController() {
         @Override
         protected void doPost(final HttpRequest request, final HttpResponse response) {
-            response.setBody("text/plain", "post");
+            response.setBody(ContentType.HTML, "post");
         }
     };
 

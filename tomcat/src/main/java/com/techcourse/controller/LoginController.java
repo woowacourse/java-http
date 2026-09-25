@@ -7,6 +7,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ContentType;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,7 +28,7 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/index.html");
             return;
         }
-        response.setBody("text/html", page("/login.html"));
+        response.setBody(ContentType.HTML, page("/login.html"));
     }
 
     @Override

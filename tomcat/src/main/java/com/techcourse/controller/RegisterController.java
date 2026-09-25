@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ContentType;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,7 +19,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.setBody("text/html", page("/register.html"));
+        response.setBody(ContentType.HTML, page("/register.html"));
     }
 
     @Override
@@ -27,7 +28,7 @@ public class RegisterController extends AbstractController {
         final String password = request.getParameter("password");
         final String email = request.getParameter("email");
         if (isBlank(account) || isBlank(password) || isBlank(email)) {
-            response.setBody("text/html", page("/register.html"));
+            response.setBody(ContentType.HTML, page("/register.html"));
             return;
         }
         InMemoryUserRepository.save(new User(account, password, email));

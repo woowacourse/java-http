@@ -3,6 +3,7 @@ package org.apache.catalina.controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ContentType;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,11 +20,11 @@ public class StaticResourceController extends AbstractController {
         final var resource = findResource(request.getPath());
         if (resource == null) {
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setBody("text/html", page("/404.html"));
+            response.setBody(ContentType.HTML, page("/404.html"));
             return;
         }
 
-        response.setBody(contentType(request.getPath()), readResource(resource));
+        response.setBody(ContentType.from(request.getPath()), readResource(resource));
     }
 
     private String readResource(final URL resource) throws IOException, URISyntaxException {
@@ -36,18 +37,5 @@ public class StaticResourceController extends AbstractController {
 
     private String page(final String path) throws URISyntaxException, IOException {
         return readResource(findResource(path));
-    }
-
-    private String contentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "application/javascript";
-        }
-        if (path.endsWith(".svg")) {
-            return "image/svg+xml";
-        }
-        return "text/html";
     }
 }

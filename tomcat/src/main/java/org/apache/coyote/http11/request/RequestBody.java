@@ -7,9 +7,9 @@ public class RequestBody {
 
     private final String content;
 
-    public RequestBody(final BufferedReader bufferedReader, final HttpHeaders httpRequestHeaders) throws IOException {
-        if (httpRequestHeaders.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequestHeaders.getHeader("Content-Length"));
+    public RequestBody(final BufferedReader bufferedReader, final RequestHeaders httpRequestHeaders) throws IOException {
+        if (httpRequestHeaders.contains("Content-Length")) {
+            int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             content = new String(buffer);

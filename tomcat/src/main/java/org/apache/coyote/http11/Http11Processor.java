@@ -5,6 +5,9 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.*;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +70,8 @@ public class Http11Processor implements Runnable, Processor {
         final String uriPath = uri.getPath();
         final String requestBody = httpRequest.getBody().getContent();
 
-        final HttpHeaders headers = httpRequest.getHeaders();
-        final HttpCookie httpCookie = new HttpCookie(headers.getHeader("Cookie"));
+        final RequestHeaders headers = httpRequest.getHeaders();
+        final HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
 
         if (uriPath.equals("/login")) {
             return handleLogin(httpMethod, uri, httpCookie, requestBody);
@@ -78,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
             return handleRegister(requestBody);
         }
 
-        return createFileResponse(uriPath, "200 OK");
+        return createFileResponse(uriPath, HttpStatus.OK);
     }
 
     private HttpResponse handleLogin(final HttpMethod httpMethod, final URI uri, final HttpCookie httpCookie, final String requestBody) throws IOException {
@@ -86,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
         Path filePath = getFilePath(uriPath);
 
         if (httpMethod == HttpMethod.GET && isLoggedIn(httpCookie)) {
-            return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/index.html", httpCookie);
+            return createRedirectResponse(HttpStatus.FOUND, "/index.html", httpCookie);
         }
 
         final String query = uri.getQuery();
@@ -94,16 +97,16 @@ public class Http11Processor implements Runnable, Processor {
 
         if (loginParameters == null) {
             filePath = getFilePath("/login");
-            return new HttpResponse("200 OK", getContentType(filePath), getResponseBody(filePath), null, httpCookie);
+            return createResponse(HttpStatus.OK, getContentType(filePath), getResponseBody(filePath), null, httpCookie);
         }
 
         final Optional<User> user = authenticate(extractQueryParams(loginParameters));
         if (user.isPresent()) {
             saveUserInSession(httpCookie, user.get());
-            return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/index.html", httpCookie);
+            return createRedirectResponse(HttpStatus.FOUND, "/index.html", httpCookie);
         }
 
-        return new HttpResponse("302 Found", "text/html;charset=utf-8", "", "/401.html", httpCookie);
+        return createRedirectResponse(HttpStatus.FOUND, "/401.html", httpCookie);
     }
 
     private boolean isLoggedIn(final HttpCookie httpCookie) throws IOException {
@@ -140,14 +143,34 @@ public class Http11Processor implements Runnable, Processor {
             createUser(extractQueryParams(requestBody));
         }
 
-        return createFileResponse("/register", "200 OK");
+        return createFileResponse("/register", HttpStatus.OK);
     }
 
-    private HttpResponse createFileResponse(final String uriPath, final String httpStatus) throws IOException {
+    private HttpResponse createFileResponse(final String uriPath, final HttpStatus httpStatus) throws IOException {
         final Path filePath = getFilePath(uriPath);
         final String contentType = getContentType(filePath);
         final String responseBody = getResponseBody(filePath);
-        return new HttpResponse(httpStatus, contentType, responseBody, null, null);
+        return createResponse(httpStatus, contentType, responseBody, null, null);
+    }
+
+    private HttpResponse createRedirectResponse(final HttpStatus httpStatus, final String location,
+                                                final HttpCookie httpCookie) {
+        return createResponse(httpStatus, "text/html;charset=utf-8", "", location, httpCookie);
+    }
+
+    private HttpResponse createResponse(final HttpStatus httpStatus, final String contentType,
+                                        final String body, final String location, final HttpCookie httpCookie) {
+        final ResponseHeaders responseHeaders = new ResponseHeaders();
+        responseHeaders.add("Content-Type", contentType);
+
+        if (location != null) {
+            responseHeaders.add("Location", location);
+        }
+        if (httpCookie != null && httpCookie.contains(JSESSION_ID_KEY)) {
+            responseHeaders.add("Set-Cookie", JSESSION_ID_KEY + "=" + httpCookie.get(JSESSION_ID_KEY));
+        }
+
+        return new HttpResponse(httpStatus, responseHeaders, body);
     }
 
     private Path getFilePath(final String uriPath) {
@@ -243,17 +266,15 @@ public class Http11Processor implements Runnable, Processor {
         log.info("response status: {}", response.status());
         StringBuilder httpResponse = new StringBuilder()
                 .append("HTTP/1.1 ").append(response.status()).append(" ").append("\r\n")
-                .append("Content-Type: ").append(response.contentType()).append(" ").append("\r\n")
+                .append("Content-Type: ").append(response.headers().get("Content-Type")).append(" ").append("\r\n")
                 .append("Content-Length: ").append(response.body().getBytes().length).append(" ").append("\r\n");
 
-        if (response.location() != null) {
-            httpResponse.append("Location: ").append(response.location()).append(" ").append("\r\n");
+        if (response.headers().contains("Location")) {
+            httpResponse.append("Location: ").append(response.headers().get("Location")).append(" ").append("\r\n");
         }
-        if (response.cookie() != null && response.cookie().contains(JSESSION_ID_KEY)) {
+        if (response.headers().contains("Set-Cookie")) {
             httpResponse.append("Set-Cookie: ")
-                    .append(JSESSION_ID_KEY)
-                    .append("=")
-                    .append(response.cookie().get(JSESSION_ID_KEY))
+                    .append(response.headers().get("Set-Cookie"))
                     .append(" ").append("\r\n");
         }
 
@@ -261,6 +282,4 @@ public class Http11Processor implements Runnable, Processor {
                 .append(response.body())
                 .toString();
     }
-
-    private record HttpResponse(String status, String contentType, String body, String location, HttpCookie cookie) { }
 }

@@ -33,32 +33,34 @@ public class Response {
         return new Response(request, statusCode, responseBody);
     }
 
-    public static void redirect(OutputStream outputStream, String redirectUrl) throws IOException {
-        redirect(outputStream, redirectUrl, "");
+    private String build() {
+        String responseLine = request.getProtocolVersion() + " " + statusCode.getStatus();
+        ContentType contentType = request.getContentType();
+        String contentTypeHeader = "Content-Type: text/" + contentType.getName() + ";charset=utf-8";
+        String contentLengthHeader = "Content-Length: " + responseBody.getBytes().length;
+        String setCookieHeader = "Set-Cookie: JSESSIONID=" + request.getJSessionId();
+        return String.join("\r\n",
+                responseLine,
+                contentTypeHeader,
+                contentLengthHeader,
+                setCookieHeader
+        );
     }
 
-    public static void redirect(OutputStream outputStream, String redirectUrl, String jSessionId) throws IOException {
-        String setCookieHeader = "";
-        if (!jSessionId.isEmpty()) {
-            setCookieHeader = "Set-Cookie: JSESSIONID=" + jSessionId + "\r\n";
-        }
-        final var response = "HTTP/1.1 " + StatusCode.FOUND.getStatusCode() + "\r\n"
-                + "Location: " + redirectUrl + "\r\n"
-                + setCookieHeader
-                + "Content-Length: 0\r\n"
-                + "\r\n";
+    public void redirect(OutputStream outputStream, String redirectUrl) throws IOException {
+        final var response = String.join(
+                "\r\n",
+                build(),
+                "Location: " + redirectUrl,
+                "\r\n"
+        );
+        System.out.println(response);
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
 
     public void respond(OutputStream outputStream) throws IOException {
-        ContentType contentType = request.getContentType();
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + statusCode.getStatusCode(),
-                "Content-Type: text/" + contentType.getName() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        final var response = build() + "\r\n\r\n" + responseBody;
 
         outputStream.write(response.getBytes());
         outputStream.flush();

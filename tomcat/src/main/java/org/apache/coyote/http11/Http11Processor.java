@@ -79,7 +79,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private void loginGet(OutputStream outputStream, Request request) throws IOException {
         if (SessionManager.getInstance().hasUser(request.getJSessionId())) {
-            Response.redirect(outputStream, "/index.html");
+            Response response = handling(request, StatusCode.FOUND);
+            response.redirect(outputStream, "/index.html");
             return;
         }
         Response response = handling(request, StatusCode.OK);
@@ -90,31 +91,33 @@ public class Http11Processor implements Runnable, Processor {
         String account = request.getRequestParam("account");
         String password = request.getRequestParam("password");
         if (account.isEmpty() || password.isEmpty()) {
-            loginFail(outputStream);
+            loginFail(outputStream, request);
         }
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
             loginSuccess(outputStream, request, user);
         }
         if (user != null && !user.checkPassword(password)) {
-            loginFail(outputStream);
+            loginFail(outputStream, request);
         }
         if (!account.isEmpty() && user == null) {
-            loginFail(outputStream);
+            loginFail(outputStream, request);
         }
 
     }
 
-    private void loginFail(OutputStream outputStream) throws IOException {
+    private void loginFail(OutputStream outputStream, Request request) throws IOException {
         log.info("login fail");
-        Response.redirect(outputStream, "/401");
+        Response response = handling(request, StatusCode.FOUND);
+        response.redirect(outputStream, "/401.html");
     }
 
     private void loginSuccess(OutputStream outputStream, Request request, User user) throws IOException {
         log.info(user.toString());
         final var session = request.getSession(true);
         session.setAttribute("user", user);
-        Response.redirect(outputStream, "/index.html", session.getId());
+        Response response = handling(request, StatusCode.FOUND);
+        response.redirect(outputStream, "/index.html");
     }
 
     private void register(OutputStream outputStream, Request request) throws IOException {
@@ -128,6 +131,7 @@ public class Http11Processor implements Runnable, Processor {
         String email = request.getRequestParam("email");
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        Response.redirect(outputStream, "/index");
+        Response response = handling(request, StatusCode.FOUND);
+        response.redirect(outputStream, "/index.html");
     }
 }

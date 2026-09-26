@@ -35,15 +35,15 @@ public record RequestHeader(
         return headers.getJSessionId();
     }
 
-    public boolean hasJSessionId() {
-        return headers.hasJSessionId();
-    }
-
     public HttpMethod getMethod() {
         return requestLine.method();
     }
 
     public HttpCookie getHttpCookie() {
         return headers.getHttpCookie();
+    }
+
+    public String getProtocolVersion() {
+        return requestLine.protocolVersion();
     }
 }

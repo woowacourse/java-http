@@ -14,7 +14,7 @@ public enum StatusCode {
         this.description = description;
     }
 
-    public String getStatusCode() {
+    public String getStatus() {
         return code + " " + description;
     }
 }

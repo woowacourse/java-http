@@ -67,4 +67,8 @@ public class Request {
     public ContentType getContentType() {
         return requestHeader.getContentType();
     }
+
+    public String getProtocolVersion() {
+        return requestHeader.getProtocolVersion();
+    }
 }

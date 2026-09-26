@@ -1,37 +1,34 @@
-package org.apache.coyote.http11.handler;
-
-import static org.apache.coyote.http11.data.SessionManager.JSESSIONID_COOKIE_NAME;
+package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.data.Request;
-import org.apache.coyote.http11.data.Response;
-import org.apache.coyote.http11.data.Session;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterRequestHandler implements RequestHandler {
-    private static final Logger log = LoggerFactory.getLogger(RegisterRequestHandler.class);
+public class RegisterAbstractController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(RegisterAbstractController.class);
 
     private final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
 
     @Override
-    public Response doGet(Request request) {
-        return Response.view("/register.html");
+    public void doGet(HttpRequest request, HttpResponse response) {
+        response.setViewName("/register.html");
     }
 
     @Override
-    public Response doPost(Request request) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         final String account = request.getBody().get("account");
         final String email = request.getBody().get("email");
         final String password = request.getBody().get("password");
 
         if (!isValidateData(account, email, password)) {
-            return Response.badRequest();
+            response.badRequest();
+            return;
         }
 
         try {
@@ -40,10 +37,10 @@ public class RegisterRequestHandler implements RequestHandler {
             InMemoryUserRepository.save(user);
             request.getSession().setAttribute("user", user);
 
-            return Response.view("redirect:/index.html");
+            response.setViewName("redirect:/index.html");
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.view("redirect:/500.html");
+            response.setViewName("redirect:/500.html");
         }
     }
 
@@ -67,7 +64,7 @@ public class RegisterRequestHandler implements RequestHandler {
     }
 
     @Override
-    public boolean canHandle(Request request) {
-        return request.getRequestPoint().getPath().equals("/register");
+    public boolean canHandle(HttpRequest request) {
+        return request.getRequestLine().getPath().equals("/register");
     }
 }

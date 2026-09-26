@@ -8,10 +8,10 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.config.TomcatServerConfiguration;
 import org.apache.coyote.http11.data.Cookie;
-import org.apache.coyote.http11.data.Request;
-import org.apache.coyote.http11.data.Response;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.Session;
-import org.apache.coyote.http11.resolver.RequestResolver;
+import org.apache.coyote.http11.handle.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,15 +20,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final List<RequestResolver> requestResolvers;
+    private final List<RequestHandler> requestHandlers;
 
     public Http11Processor(final Socket connection) {
-        this(connection, TomcatServerConfiguration.requestResolvers);
+        this(connection, TomcatServerConfiguration.REQUEST_HANDLERS);
     }
 
-    public Http11Processor(final Socket connection, final List<RequestResolver> requestResolvers) {
+    public Http11Processor(final Socket connection, final List<RequestHandler> requestHandlers) {
         this.connection = connection;
-        this.requestResolvers = requestResolvers;
+        this.requestHandlers = requestHandlers;
     }
 
     @Override
@@ -43,13 +43,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Request request = Request.from(inputStream);
-            final Response response = handleRequest(request);
+            final HttpRequest request = HttpRequest.from(inputStream);
+            final HttpResponse response = HttpResponse.create();
+            handleRequest(request, response);
 
             final Session session = request.getSession(false);
             if (session != null) {
                 Cookie cookie = Cookie.create(JSESSIONID_COOKIE_NAME, session.getId(), "/");
-                response.addCookie(cookie);
+                response.getCookies().addCookie(cookie);
             }
 
             outputStream.write(response.toString().getBytes());
@@ -59,13 +60,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Response handleRequest(Request request) {
-        for (RequestResolver requestResolver : requestResolvers) {
-            if (requestResolver.canHandle(request)) {
-                return requestResolver.handleRequest(request);
+    private void handleRequest(HttpRequest request, HttpResponse response) {
+        for (RequestHandler requestHandler : requestHandlers) {
+            if (requestHandler.canHandle(request)) {
+                requestHandler.handle(request, response);
+                return;
             }
         }
 
-        return Response.badRequest();
+        response.badRequest();
     }
 }

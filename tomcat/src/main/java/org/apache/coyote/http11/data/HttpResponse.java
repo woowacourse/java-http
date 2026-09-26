@@ -2,32 +2,30 @@ package org.apache.coyote.http11.data;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-public class Response {
+public class HttpResponse {
     private int statusCode;
     private final Map<String, String> headers;
     private String body;
     private Cookies cookies;
     private String viewName;
 
-    private Response(
+    private HttpResponse(
             int statusCode,
-            Map<String, String> responseHeaderMap,
-            String body, Cookies cookies
+            Map<String, String> headers,
+            String body,
+            Cookies cookies,
+            String viewName
     ) {
         this.statusCode = statusCode;
-        this.headers = new HashMap<>(responseHeaderMap);
+        this.headers = headers;
         this.body = body;
         this.cookies = cookies;
+        this.viewName = viewName;
     }
 
-    private Response(
-            int statusCode,
-            Map<String, String> responseHeaderMap,
-            String body
-    ) {
-        this(statusCode, responseHeaderMap, body, Cookies.empty());
+    public static HttpResponse create() {
+        return new HttpResponse(200, new HashMap<>(), "", Cookies.empty(), "");
     }
 
     private static final Map<Integer, String> httpStatusMessage = new HashMap<>() {
@@ -43,42 +41,22 @@ public class Response {
     };
     private static final String CRLF = " \r\n";
 
-
-    public static Response noContent() {
-        return new Response(204, new HashMap<>(), "");
+    public void notFound() {
+        this.statusCode = 404;
+        this.body = "Not Found";
     }
 
-    public static Response ok() {
-        return new Response(200, new HashMap<>(), "");
-    }
-
-    public static Response ok(
-            final Map<String, String> responseHeaderMap,
-            final String responseBody) {
-
-        return new Response(200, responseHeaderMap, responseBody);
-    }
-
-    public static Response notFound() {
-        return new Response(404, new HashMap<>(), "Not Found");
-    }
-
-    public static Response badRequest() {
-        return new Response(400, new HashMap<>(), "Bad Request");
-    }
-
-    public static Response view(final String viewName) {
-        final Response response = Response.ok();
-        response.setViewName(viewName);
-        return response;
+    public void badRequest() {
+        this.statusCode = 400;
+        this.body = "Bad Request";
     }
 
     public void setViewName(final String viewName) {
         this.viewName = viewName;
     }
 
-    public Optional<String> getViewName() {
-        return Optional.ofNullable(viewName);
+    public String getViewName() {
+        return viewName;
     }
 
     public void setBody(final String body) {
@@ -109,16 +87,20 @@ public class Response {
         this.cookies = cookies;
     }
 
+    /*
+     * response.addCookie(cookie)
+     * → Response의 구성 요소로 Cookie를 본다.
+     * → "Response에 쿠키를 추가한다."
+     *
+     * response.getCookies().addCookie(cookie)
+     * → Cookies를 독립적인 일급 컬렉션으로 본다.
+     * → "Response의 Cookies에 쿠키를 추가한다."
+     *
+     * 둘중 고민을 많이 했으나.
+     * Cookies 자체가 일급 컬렉션이고, 쿠키 변경 규칙을 Cookies가 책임지는 설계가 좋다고 생각했다.
+     */
     public Cookies getCookies() {
         return cookies;
-    }
-
-    public void addCookie(Cookie cookie) {
-        if (cookies == null) {
-            cookies = Cookies.of(cookie);
-        } else {
-            cookies = cookies.with(cookie);
-        }
     }
 
     @Override

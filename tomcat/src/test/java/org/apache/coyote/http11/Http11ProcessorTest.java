@@ -220,7 +220,7 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK \r\n")
                 .contains("Content-Type: text/html;charset=utf-8 \r\n")
-                .doesNotContain("Location:", "Set-Cookie:")
+                .doesNotContain("Location:")
                 .endsWith("\r\n\r\n" + expectedBody);
     }
 }

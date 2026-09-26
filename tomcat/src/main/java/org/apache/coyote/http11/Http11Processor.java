@@ -33,15 +33,13 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             HttpRequest request = HttpRequest.from(reader);
+            if (request == null) {
+                return;
+            }
             HttpResponse response = new HttpResponse();
 
             Controller controller = requestMapping.getController(request);
-
-            if (controller != null) {
-                controller.service(request, response);
-            } else {
-                response.forward(request.getPath());
-            }
+            controller.service(request, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -39,6 +39,9 @@ public class HttpRequest {
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
+        if (requestLine == null) {
+            return null;
+        }
         String[] tokens = requestLine.split(REQUEST_LINE_SEPARATOR);
         String method = tokens[0];
         String path = parsePath(tokens[1]);

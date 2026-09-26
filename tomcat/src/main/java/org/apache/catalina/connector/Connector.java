@@ -2,6 +2,7 @@ package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.SimpleSessionManager;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final SimpleSessionManager sessionManager;
+    private final RequestMapping requestMapping;
     private boolean stopped;
 
     public Connector() {
@@ -28,6 +30,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.sessionManager = new SimpleSessionManager();
+        this.requestMapping = new RequestMapping(sessionManager);
         this.stopped = false;
     }
 
@@ -69,7 +72,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, sessionManager);
+        var processor = new Http11Processor(connection, sessionManager, requestMapping);
         new Thread(processor).start();
     }
 

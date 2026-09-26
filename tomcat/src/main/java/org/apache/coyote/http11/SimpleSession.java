@@ -47,35 +47,6 @@ public class SimpleSession implements HttpSession {
         );
     }
 
-    public void access() {
-        validate();
-        lastAccessedTime = System.currentTimeMillis();
-    }
-
-    public void markEstablished() {
-        newSession = false;
-    }
-
-    public boolean isExpired() {
-        if (maxInactiveInterval < 0) {
-            return false;
-        }
-
-        long inactiveMillis = System.currentTimeMillis() - lastAccessedTime;
-
-        return inactiveMillis >= maxInactiveInterval * 1000L;
-    }
-
-    public boolean isInvalidated() {
-        return invalidated;
-    }
-
-    private void validate() {
-        if (invalidated) {
-            throw new IllegalStateException("이미 무효화된 세션입니다.");
-        }
-    }
-
     @Override
     public long getCreationTime() {
         validate();
@@ -99,15 +70,15 @@ public class SimpleSession implements HttpSession {
     }
 
     @Override
-    public void setMaxInactiveInterval(int interval) {
-        validate();
-        maxInactiveInterval = interval;
-    }
-
-    @Override
     public int getMaxInactiveInterval() {
         validate();
         return maxInactiveInterval;
+    }
+
+    @Override
+    public void setMaxInactiveInterval(int interval) {
+        validate();
+        maxInactiveInterval = interval;
     }
 
     @Deprecated
@@ -185,5 +156,15 @@ public class SimpleSession implements HttpSession {
     public boolean isNew() {
         validate();
         return newSession;
+    }
+
+    public void markEstablished() {
+        newSession = false;
+    }
+
+    private void validate() {
+        if (invalidated) {
+            throw new IllegalStateException("이미 무효화된 세션입니다.");
+        }
     }
 }

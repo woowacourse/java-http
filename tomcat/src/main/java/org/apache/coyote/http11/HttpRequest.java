@@ -46,10 +46,6 @@ public class HttpRequest {
         return body;
     }
 
-    public HttpCookie getCookies() {
-        return cookies;
-    }
-
     public Session findSession() {
         if (session != null) {
             return session;

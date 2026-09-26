@@ -45,10 +45,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(
                      new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            final String requestLine = bufferedReader.readLine();
-            final String[] requestLineParts = requestLine.split(" "); // 요청 첫 줄(Request Line) 분리
-            final String requestUri = requestLineParts[1];
-            final String requestMethod = requestLineParts[0];
+
+            final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
+            final String requestMethod = requestLine.getMethod();
+            final String path = requestLine.getPath();
+            final String queryString = requestLine.getQueryString();
 
             String line;
             final Map<String, String> httpRequestHeaders = new HashMap<>();
@@ -64,9 +65,6 @@ public class Http11Processor implements Runnable, Processor {
                     httpRequestHeaders.put(keyValue[0], keyValue[1].trim());
                 }
             }
-
-            final String path = extractPath(requestUri);
-            final String queryString = extractQueryString(requestUri);
 
             final String rawParams;
             if ("POST".equals(requestMethod)) {
@@ -111,27 +109,11 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String extractPath(final String requestUri) {
-        final int queryStartIndex = requestUri.indexOf('?');
-        if (queryStartIndex == -1) { // 쿼리가 없는 경우
-            return requestUri;
-        }
-        return requestUri.substring(0, queryStartIndex);
-    }
-
-    private String extractQueryString(String requestUri) {
-        final int queryStartIndex = requestUri.indexOf('?');
-        if (queryStartIndex == -1) { // 쿼리가 없는 경우
-            return "";
-        }
-        return requestUri.substring(queryStartIndex + 1);
     }
 
     private Map<String, String> parseFormData(final String queryString) {

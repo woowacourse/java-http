@@ -27,8 +27,8 @@ public class HttpResponse {
         setHeader("Set-Cookie", name + "=" + value);
     }
 
-    public void setBody(String body, String contentType) {
-        this.body = body.getBytes(StandardCharsets.UTF_8);
+    public void setBody(byte[] body, String contentType) {
+        this.body = body;
         setHeader("Content-Type", contentType);
     }
 

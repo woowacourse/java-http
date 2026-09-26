@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.HttpResponse;
 
 public class StaticResourceResponder {
@@ -15,7 +14,7 @@ public class StaticResourceResponder {
                 return response;
             }
 
-            String resource = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            byte[] resource = inputStream.readAllBytes();
             HttpResponse response = new HttpResponse();
             response.setBody(resource, getContentType(path));
             return response;

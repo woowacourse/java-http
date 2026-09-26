@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
@@ -15,7 +16,9 @@ public class RequestMapping {
         controllers.put(path, controller);
     }
 
-    public Controller getController(final HttpRequest request) {
-        return controllers.get(request.getPath());
+    public Optional<Controller> getController(final HttpRequest request) {
+        return Optional.ofNullable(
+                controllers.get(request.getPath())
+        );
     }
 }

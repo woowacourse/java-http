@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestMapping;
@@ -79,10 +80,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request,
             final HttpResponse response
     ) throws Exception {
-        final Controller controller =
+        final Optional<Controller> controller =
                 requestMapping.getController(request);
 
-        if (controller == null) {
+        if (controller.isEmpty()) {
             serveStaticResource(
                     request.getPath(),
                     response
@@ -90,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        controller.service(request, response);
+        controller.get().service(request, response);
 
         if (response.hasResourcePath()) {
             serveStaticResource(

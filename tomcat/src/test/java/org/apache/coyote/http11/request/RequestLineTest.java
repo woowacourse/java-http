@@ -21,7 +21,7 @@ class RequestLineTest {
         RequestLine requestLine = RequestLine.from("GET /login?account=gugu HTTP/1.1");
 
         assertThat(requestLine.getPath()).isEqualTo("/login");
-        assertThat(requestLine.getQueryParameter("account")).isEqualTo("gugu");
+        assertThat(requestLine.getQueryParameters().get("account")).isEqualTo("gugu");
     }
 
     @Test

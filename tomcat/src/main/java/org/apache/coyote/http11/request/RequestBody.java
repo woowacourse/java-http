@@ -24,7 +24,7 @@ class RequestBody {
         return new RequestBody(Parameters.from(new String(buffer, 0, read)));
     }
 
-    String getParameter(String name) {
-        return parameters.get(name);
+    Parameters getParameters() {
+        return parameters;
     }
 }

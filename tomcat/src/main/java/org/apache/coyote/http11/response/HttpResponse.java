@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.request.HttpCookie;
 
 public class HttpResponse {
 
@@ -31,6 +33,12 @@ public class HttpResponse {
 
     public void addCookie(String name, String value) {
         cookies.add(name + "=" + value);
+    }
+
+    public void addSessionCookie(Session session) {
+        if (session.isNew()) {
+            addCookie(HttpCookie.JSESSIONID, session.getId());
+        }
     }
 
     public HttpStatus getStatus() {

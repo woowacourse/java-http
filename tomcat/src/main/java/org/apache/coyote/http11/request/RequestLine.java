@@ -47,8 +47,8 @@ class RequestLine {
         return path;
     }
 
-    String getQueryParameter(String name) {
-        return queryParameters.get(name);
+    Parameters getQueryParameters() {
+        return queryParameters;
     }
 
     String getVersion() {

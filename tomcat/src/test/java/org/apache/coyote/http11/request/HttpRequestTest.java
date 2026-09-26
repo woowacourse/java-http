@@ -27,15 +27,27 @@ class HttpRequestTest {
     }
 
     @Test
-    void Cookie_헤더를_파싱한다() throws IOException {
+    void Cookie_헤더에서_세션_ID를_찾는다() throws IOException {
         HttpRequest request = parse(
                 "GET /index.html HTTP/1.1",
                 "Cookie: yummy_cookie=choco; JSESSIONID=abc",
                 "",
                 "");
 
-        assertThat(request.getCookie().get("yummy_cookie")).isEqualTo("choco");
-        assertThat(request.getCookie().getJSessionId()).isEqualTo("abc");
+        assertThat(request.getSessionId()).isEqualTo("abc");
+    }
+
+    @Test
+    void 쿼리스트링과_본문의_파라미터를_함께_조회한다() throws IOException {
+        String body = "password=password";
+        HttpRequest request = parse(
+                "POST /login?account=gugu HTTP/1.1",
+                "Content-Length: " + body.length(),
+                "",
+                body);
+
+        assertThat(request.getParameter("account")).isEqualTo("gugu");
+        assertThat(request.getParameter("password")).isEqualTo("password");
     }
 
     private HttpRequest parse(String... lines) throws IOException {

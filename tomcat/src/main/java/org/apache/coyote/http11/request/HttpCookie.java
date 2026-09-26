@@ -27,15 +27,7 @@ public class  HttpCookie {
         return cookies;
     }
 
-    public boolean hasJSessionId() {
-        return cookies.containsKey(JSESSIONID);
-    }
-
-    public String getJSessionId() {
+    String getJSessionId() {
         return cookies.get(JSESSIONID);
-    }
-
-    public String get(String name) {
-        return cookies.get(name);
     }
 }

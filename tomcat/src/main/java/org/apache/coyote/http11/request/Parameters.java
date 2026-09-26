@@ -33,6 +33,12 @@ class Parameters {
         return new Parameters(values);
     }
 
+    Parameters merge(Parameters other) {
+        Map<String, String> merged = new HashMap<>(values);
+        merged.putAll(other.values);
+        return new Parameters(merged);
+    }
+
     String get(String name) {
         return values.get(name);
     }

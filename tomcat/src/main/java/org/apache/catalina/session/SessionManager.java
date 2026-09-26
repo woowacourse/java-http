@@ -2,6 +2,7 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -14,6 +15,21 @@ public class SessionManager implements Manager {
 
     public static SessionManager getInstance() {
         return INSTANCE;
+    }
+
+    public Session findOrCreate(String id) {
+        Session session = SESSIONS.get(id);
+        if (session == null) {
+            return create();
+        }
+        session.access();
+        return session;
+    }
+
+    private Session create() {
+        Session session = new Session(UUID.randomUUID().toString());
+        add(session);
+        return session;
     }
 
     @Override

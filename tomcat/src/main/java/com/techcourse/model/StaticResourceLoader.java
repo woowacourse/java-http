@@ -1,0 +1,56 @@
+package com.techcourse.model;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class StaticResourceLoader {
+
+    public StaticResource load(String requestPath)
+            throws IOException, URISyntaxException {
+
+        Path path = resolveResourcePath(requestPath);
+        byte[] body = Files.readAllBytes(path);
+        String contentType = resolveContentType(path.getFileName().toString());
+
+        return new StaticResource(contentType, body);
+    }
+
+    private Path resolveResourcePath(String requestPath) throws URISyntaxException {
+        String resourcePath = "static" + requestPath;
+        if (requestPath.equals("/login")) {
+            resourcePath += ".html";
+        }
+        if (requestPath.equals("/register")) {
+            resourcePath += ".html";
+        }
+        Path filePath = Path.of(
+                getClass()
+                        .getClassLoader()
+                        .getResource(resourcePath)
+                        .toURI()
+        );
+
+        return filePath;
+    }
+
+    private String resolveContentType(final String fileName) {
+        if (fileName.endsWith(".html")) {
+            return "text/html;charset=utf-8 ";
+        }
+        if (fileName.endsWith(".css")) {
+            return "text/css; charset=UTF-8";
+        }
+        if (fileName.endsWith(".js")) {
+            return "application/javascript; charset=UTF-8";
+        }
+        if (fileName.endsWith(".png")) {
+            return "image/png";
+        }
+        if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+            return "image/jpeg";
+        }
+        return "text/plain";
+    }
+}

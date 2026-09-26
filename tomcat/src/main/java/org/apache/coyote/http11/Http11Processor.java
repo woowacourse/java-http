@@ -6,12 +6,13 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.HttpCookie;
 import com.techcourse.model.HttpRequest;
 import com.techcourse.model.HttpResponse;
+import com.techcourse.model.StaticResource;
+import com.techcourse.model.StaticResourceLoader;
 import com.techcourse.model.User;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
     private final SessionManager sessionManager = new SessionManager();
+    private final StaticResourceLoader resourceLoader = new StaticResourceLoader();
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -55,8 +58,8 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, List<String>> requestHeaders = request.getHeaders();
 
             // 바디 읽기
-            // todo 반환형 뭐로 할지
-            String requestBody = request.getBody().toString();
+            String requestBody = new String(request.getBody(), StandardCharsets.UTF_8);
+            // todo 바디 파싱
             Map<String, String> formParameters = parseFormParameters(requestBody);
 
             // 쿼리 파싱
@@ -64,22 +67,24 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpResponse httpResponse;
             if (requestPath.equals("/")) {
-                httpResponse = new HttpResponse(
-                        "200 OK ",
+                httpResponse = HttpResponse.of(
+                        "200",
+                        "OK",
                         Map.of("Content-Type", List.of("text/html;charset=utf-8 ")),
                         "Hello world!".getBytes()
                 );
             } else if (requestPath.startsWith("/login")) {
                 httpResponse = handleLoginRequest(formParameters, requestHeaders, requestMethod);
             } else if (requestPath.startsWith("/register") && requestMethod.equals("POST")) {
-                User user = new User(formParameters.get("account"), formParameters.get("password"), formParameters.get("email"));
+                User user = new User(formParameters.get("account"), formParameters.get("password"),
+                        formParameters.get("email"));
                 InMemoryUserRepository.save(user);
 
                 Session session = getSession(requestHeaders, true);
                 session.setAttribute("user", user);
                 HttpCookie cookie = new HttpCookie(session.getId());
 
-                httpResponse = createRegisterSuccessResponse(List.of(cookie.toString()));
+                httpResponse = HttpResponse.of("302", "FOUND", Map.of("Location", List.of("/index.html"), "Set-Cookie", List.of(cookie.toString())), new byte[0]);
                 log.info("회원가입 성공 : {}", user.toString());
             } else {
                 httpResponse = createResourceResponse(requestPath);
@@ -90,13 +95,13 @@ public class Http11Processor implements Runnable, Processor {
                     httpResponse
             );
 
-        writeHttpResponse(outputStream, httpResponse);
-    } catch (IOException | UncheckedServletException e) {
-        log.error(e.getMessage(), e);
-    } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
+            writeHttpResponse(outputStream, httpResponse);
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
-}
 
     private HttpResponse addSessionCookieIfNeeded(Map<String, List<String>> requestHeaders, HttpResponse response) {
 
@@ -106,7 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         // 이미 위에서 세션을 응답에 넣어줄 경우 발급 X
-        boolean hasSetCookie = response.headers().containsKey("set-cookie");
+        boolean hasSetCookie = response.getHeaders().containsKey("set-cookie");
         if (hasSetCookie) {
             return response;
         }
@@ -114,24 +119,27 @@ public class Http11Processor implements Runnable, Processor {
         Session session = Session.create();
         sessionManager.add(session);
 
-        Map<String, List<String>> headers = new HashMap<>(response.headers());
+        Map<String, List<String>> headers = new HashMap<>(response.getHeaders());
 
         headers.put(
                 "Set-Cookie",
                 List.of(new HttpCookie(session.getId()).toString())
         );
 
-        return new HttpResponse(
-                response.statusCode(),
+        return  HttpResponse.of(
+                response.getStatusCode(),
+                response.getStatusMessage(),
                 headers,
-                response.body()
+                response.getBody()
         );
     }
 
     private String getSessionId(Map<String, List<String>> requestHeaders) {
         List<String> cookieHeaders = requestHeaders.get("cookie");
 
-        if (cookieHeaders == null) { return null;}
+        if (cookieHeaders == null) {
+            return null;
+        }
 
         for (String cookieHeader : cookieHeaders) {
             for (String cookie : cookieHeader.split(";")) {
@@ -165,6 +173,7 @@ public class Http11Processor implements Runnable, Processor {
         sessionManager.add(session);
         return session;
     }
+
     private Map<String, String> parseFormParameters(String requestBody) throws URISyntaxException, IOException {
         Map<String, String> partsMap = new HashMap<>();
 
@@ -192,14 +201,16 @@ public class Http11Processor implements Runnable, Processor {
 
 
     private void writeHttpResponse(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
-        byte[] body = httpResponse.body();
+        byte[] body = httpResponse.getBody();
         StringBuilder header = new StringBuilder();
 
         header.append("HTTP/1.1 ")
-                .append(httpResponse.statusCode())
+                .append(httpResponse.getStatusCode())
+                .append(" ")
+                .append(httpResponse.getStatusMessage())
                 .append("\r\n");
 
-        for (Map.Entry<String, List<String>> entry : httpResponse.headers().entrySet()) {
+        for (Map.Entry<String, List<String>> entry : httpResponse.getHeaders().entrySet()) {
 
             String headerName = entry.getKey();
 
@@ -221,7 +232,9 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private HttpResponse handleLoginRequest(Map<String, String> formParameters, Map<String, List<String>> requestHeaders, String requestMethod) throws URISyntaxException, IOException {
+    private HttpResponse handleLoginRequest(Map<String, String> formParameters,
+                                            Map<String, List<String>> requestHeaders, String requestMethod)
+            throws URISyntaxException, IOException {
 
         // 로그인 페이지 접근
         if (requestMethod.equals("GET")) {
@@ -239,7 +252,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = formParameters.get("password");
 
         if (account == null || password == null) {
-            return createUnauthorizedResponse();
+            return createRedirectResponse("/login.html");
         }
 
         final var user = InMemoryUserRepository
@@ -247,8 +260,8 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(foundUser -> foundUser.checkPassword(password))
                 .orElse(null);
 
-        if  (user == null) {
-            return createUnauthorizedResponse();
+        if (user == null) {
+            return createRedirectResponse("/401.html");
         }
 
         // 성공한 경우에만 세션 생성
@@ -259,83 +272,35 @@ public class Http11Processor implements Runnable, Processor {
 
         return createLoginSuccessResponse(List.of(cookie.toString()));
     }
-    private HttpResponse createRedirectResponse(String url) {
-        return new HttpResponse(
-                "302 FOUND ",
-                Map.of("Location", List.of(url)),
-                new byte[0]);
-    }
-    private HttpResponse createLoginSuccessResponse(List<String> httpCookie) {
-        return new HttpResponse(
-                "302 FOUND ",
-                Map.of("Location", List.of("/index.html"),
-                        "Set-Cookie", httpCookie),
-                new byte[0]);
-    }
 
-    private HttpResponse createRegisterSuccessResponse(List<String> httpCookie) {
-        return new HttpResponse(
-                "302 FOUND ",
-                Map.of("Location", List.of("/index.html"),
-                        "Set-Cookie", httpCookie),
-                new byte[0]);
-    }
+    private HttpResponse createResourceResponse(String path) throws IOException, URISyntaxException {
+        StaticResource resource = resourceLoader.load(path);
 
-    private HttpResponse createUnauthorizedResponse() {
-
-        return new HttpResponse(
-                "302 FOUND ",
-                Map.of("Location", List.of("/401.html")),
-                new byte[0]);
-    }
-
-    private HttpResponse createResourceResponse(String requestPath) throws URISyntaxException, IOException {
-        Path filePath = resolveResourcePath(requestPath);
-        byte[] body = Files.readAllBytes(filePath);
-
-        return new HttpResponse(
-                "200 OK ",
-                Map.of(
-                        "Content-Type",
-                        List.of(resolveContentType(filePath.getFileName().toString()))
-                ), body);
-    }
-
-    // 리소스 경로 찾기
-    private Path resolveResourcePath(String requestPath) throws URISyntaxException {
-        String resourcePath = "static" + requestPath;
-        if (requestPath.equals("/login")) resourcePath += ".html";
-        if (requestPath.equals("/register")) resourcePath += ".html";
-        Path filePath = Path.of(
-                getClass()
-                        .getClassLoader()
-                        .getResource(resourcePath)
-                        .toURI()
+        return HttpResponse.of(
+                "200",
+                "OK",
+                Map.of("Content-Type", List.of(resource.contentType())),
+                resource.body()
         );
-
-        log.info("requestPath: {}", requestPath);
-        log.info("filePath: {}", filePath);
-
-        return filePath;
     }
 
-    // content-type 결정
-    private String resolveContentType(final String resourcePath) {
-        if (resourcePath.endsWith(".html")) {
-            return "text/html;charset=utf-8 ";
-        }
-        if (resourcePath.endsWith(".css")) {
-            return "text/css; charset=UTF-8";
-        }
-        if (resourcePath.endsWith(".js")) {
-            return "application/javascript; charset=UTF-8";
-        }
-        if (resourcePath.endsWith(".png")) {
-            return "image/png";
-        }
-        if (resourcePath.endsWith(".jpg") || resourcePath.endsWith(".jpeg")) {
-            return "image/jpeg";
-        }
-        return "text/plain";
+    private HttpResponse createRedirectResponse(String path) {
+        return HttpResponse.redirect(
+                "302",
+                "FOUND",
+                path
+        );
+    }
+
+    private HttpResponse createLoginSuccessResponse(List<String> cookies) {
+        return HttpResponse.of(
+                "302",
+                "FOUND",
+                Map.of(
+                        "Location", List.of("/index.html"),
+                        "Set-Cookie", cookies
+                ),
+                new byte[0]
+        );
     }
 }

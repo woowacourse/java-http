@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.ApplicationConfig;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -24,13 +26,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("HTTP/1.1 요청 처리")
 class Http11ProcessorTest {
+    private final RequestMapping requestMapping = new ApplicationConfig().requestMapping();
 
     @Test
     @DisplayName("요청 경로가 /이면 기본 응답을 내려준다")
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -58,20 +61,13 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).isEqualTo(staticResponse("index.html", "text/html;charset=utf-8"));
     }
 
     @Test
@@ -79,7 +75,7 @@ class Http11ProcessorTest {
     void css() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/css/styles.css"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -88,12 +84,32 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(staticResponse("css/styles.css", "text/css;charset=utf-8"));
     }
 
+    private String getRequest(String path) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+    }
+
+    private String staticResponse(String resourceName, String contentType) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
+        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        return "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: " + contentType + " \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n" +
+                new String(body, StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("존재하지 않는 리소스는 404로 응답한다")
     void notFound() {
         // given
         final var socket = new StubSocket(getRequest("/nothing.html"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -102,12 +118,19 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(errorResponse(HttpStatus.NOT_FOUND));
     }
 
+    private String errorResponse(HttpStatus status) {
+        return "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
+    }
+
     @Test
     @DisplayName("로그인 페이지에 GET으로 접근하면 로그인 폼을 보여준다")
     void showLoginPageOnGet() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/login"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -121,7 +144,7 @@ class Http11ProcessorTest {
     void loginWithMissingParameterRespondsBadRequest() {
         // given
         final var socket = new StubSocket(postRequest("/login", "account=gugu"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -130,12 +153,22 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(errorResponse(HttpStatus.BAD_REQUEST));
     }
 
+    private String postRequest(String path, String body) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                body);
+    }
+
     @Test
     @DisplayName("로그인에 성공하면 세션 쿠키를 내려주고 index.html로 리다이렉트한다")
     void loginSuccessRedirectsToIndex() {
         // given
         final var socket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -154,7 +187,7 @@ class Http11ProcessorTest {
     void loginFailureRedirectsToUnauthorized() {
         // given
         final var socket = new StubSocket(postRequest("/login", "account=gugu&password=wrong"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -163,12 +196,19 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(redirectResponse("/401.html"));
     }
 
+    private String redirectResponse(String location) {
+        return "HTTP/1.1 302 Found \r\n" +
+                "Location: " + location + " \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
+    }
+
     @Test
     @DisplayName("GET 요청이면 회원가입 페이지를 보여준다")
     void registerPage() throws IOException {
         // given
         final var socket = new StubSocket(getRequest("/register"));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -183,7 +223,7 @@ class Http11ProcessorTest {
         // given
         final String body = "account=tester&password=secret&email=tester%40woowahan.com";
         final var socket = new StubSocket(postRequest("/register", body));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -203,7 +243,7 @@ class Http11ProcessorTest {
         // given
         final String body = "account=noemail&password=secret";
         final var socket = new StubSocket(postRequest("/register", body));
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -227,7 +267,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket, requestMapping, new SessionManager());
 
         // when
         processor.process(socket);
@@ -245,7 +285,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
 
         // when
-        new Http11Processor(socket, manager).process(socket);
+        new Http11Processor(socket, requestMapping, manager).process(socket);
 
         // then
         final HttpSession session = manager.findSession(extractSessionId(socket.output()));
@@ -255,21 +295,69 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("세션이 있는 상태로 로그인하면 기존 세션을 제거하고 새 세션 아이디를 발급한다")
+    void renewSessionOnLogin() {
+        // given
+        final var manager = new SessionManager();
+        final var firstLoginSocket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
+        new Http11Processor(firstLoginSocket, requestMapping, manager).process(firstLoginSocket);
+        final String oldSessionId = extractSessionId(firstLoginSocket.output());
+
+        final var socket = new StubSocket(postRequestWithCookie(
+                "/login", "account=gugu&password=password", "JSESSIONID=" + oldSessionId));
+
+        // when
+        new Http11Processor(socket, requestMapping, manager).process(socket);
+
+        // then
+        final String newSessionId = extractSessionId(socket.output());
+        assertThat(newSessionId).isNotEqualTo(oldSessionId);
+        assertThat(manager.findSession(oldSessionId)).isNull();
+        assertThat(manager.findSession(newSessionId)).isNotNull();
+    }
+
+    private String postRequestWithCookie(String path, String body, String cookie) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: " + cookie + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
+                "",
+                body);
+    }
+
+    private String extractSessionId(String response) {
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
+        assertThat(matcher.find()).isTrue();
+        return matcher.group(1);
+    }
+
+    @Test
     @DisplayName("로그인된 상태로 로그인 페이지에 접근하면 index.html로 리다이렉트한다")
     void redirectWhenAlreadyLoggedIn() {
         // given
         final var manager = new SessionManager();
         final var loginSocket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
-        new Http11Processor(loginSocket, manager).process(loginSocket);
+        new Http11Processor(loginSocket, requestMapping, manager).process(loginSocket);
         final String sessionId = extractSessionId(loginSocket.output());
 
         final var socket = new StubSocket(getRequestWithCookie("/login", "JSESSIONID=" + sessionId));
 
         // when
-        new Http11Processor(socket, manager).process(socket);
+        new Http11Processor(socket, requestMapping, manager).process(socket);
 
         // then
         assertThat(socket.output()).isEqualTo(redirectResponse("/index.html"));
+    }
+
+    private String getRequestWithCookie(String path, String cookie) {
+        return String.join("\r\n",
+                "GET " + path + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: " + cookie + " ",
+                "",
+                "");
     }
 
     @Test
@@ -279,7 +367,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(getRequestWithCookie("/login", "JSESSIONID=unknown"));
 
         // when
-        new Http11Processor(socket, new SessionManager()).process(socket);
+        new Http11Processor(socket, requestMapping, new SessionManager()).process(socket);
 
         // then
         assertThat(socket.output()).isEqualTo(staticResponse("login.html", "text/html;charset=utf-8"));
@@ -292,75 +380,16 @@ class Http11ProcessorTest {
         final AtomicLong now = new AtomicLong(0);
         final var manager = new SessionManager(now::get);
         final var loginSocket = new StubSocket(postRequest("/login", "account=gugu&password=password"));
-        new Http11Processor(loginSocket, manager).process(loginSocket);
+        new Http11Processor(loginSocket, requestMapping, manager).process(loginSocket);
         final String sessionId = extractSessionId(loginSocket.output());
         now.addAndGet(Duration.ofMinutes(30).toMillis());
 
         final var socket = new StubSocket(getRequestWithCookie("/login", "JSESSIONID=" + sessionId));
 
         // when
-        new Http11Processor(socket, manager).process(socket);
+        new Http11Processor(socket, requestMapping, manager).process(socket);
 
         // then
         assertThat(socket.output()).isEqualTo(staticResponse("login.html", "text/html;charset=utf-8"));
-    }
-
-    private String extractSessionId(String response) {
-        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
-        assertThat(matcher.find()).isTrue();
-        return matcher.group(1);
-    }
-
-    private String getRequestWithCookie(String path, String cookie) {
-        return String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Cookie: " + cookie + " ",
-                "",
-                "");
-    }
-
-    private String getRequest(String path) {
-        return String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-    }
-
-    private String postRequest(String path, String body) {
-        return String.join("\r\n",
-                "POST " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                body);
-    }
-
-    private String staticResponse(String resourceName, String contentType) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
-        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        return "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + contentType + " \r\n" +
-                "Content-Length: " + body.length + " \r\n" +
-                "\r\n" +
-                new String(body, StandardCharsets.UTF_8);
-    }
-
-    private String redirectResponse(String location) {
-        return "HTTP/1.1 302 Found \r\n" +
-                "Location: " + location + " \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-    }
-
-    private String errorResponse(HttpStatus status) {
-        return "HTTP/1.1 " + status.getCode() + " " + status.getMessage() + " \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
     }
 }

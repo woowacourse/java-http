@@ -16,8 +16,8 @@ class CookiesTest {
 
         // then
         assertThat(cookies.find("JSESSIONID")).isPresent();
-        assertThat(cookies.find("JSESSIONID").get().getValue()).isEqualTo("abc123");
-        assertThat(cookies.find("theme").get().getValue()).isEqualTo("dark");
+        assertThat(cookies.find("JSESSIONID").get().value()).isEqualTo("abc123");
+        assertThat(cookies.find("theme").get().value()).isEqualTo("dark");
     }
 
     @Test
@@ -37,7 +37,7 @@ class CookiesTest {
         final Cookies cookies = Cookies.from("JSESSIONID=YWJjMTIz==");
 
         // then
-        assertThat(cookies.find("JSESSIONID").get().getValue()).isEqualTo("YWJjMTIz==");
+        assertThat(cookies.find("JSESSIONID").get().value()).isEqualTo("YWJjMTIz==");
     }
 
     @Test
@@ -47,7 +47,7 @@ class CookiesTest {
         final Cookies cookies = Cookies.from("email=a%40b.com");
 
         // then
-        assertThat(cookies.find("email").get().getValue()).isEqualTo("a%40b.com");
+        assertThat(cookies.find("email").get().value()).isEqualTo("a%40b.com");
     }
 
     @Test

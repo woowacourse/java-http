@@ -1,4 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
+
+import org.apache.catalina.Manager;
+import org.apache.coyote.http11.HttpHeaders;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -12,23 +15,21 @@ public class Http11RequestProcessor {
     private static final char CR = '\r';
     private static final char LF = '\n';
     private final InputStream inputStream;
+    private final Manager manager;
 
-    public Http11RequestProcessor(InputStream inputStream) {
+    public Http11RequestProcessor(InputStream inputStream, Manager manager) {
         this.inputStream = inputStream;
+        this.manager = manager;
     }
 
     public HttpRequest process() throws IOException {
         RequestLine requestLine = RequestLine.from(readLine());
-        Map<String, String> headers = readHeaders();
-        String contentLength = headers.get("Content-Length");
+        HttpHeaders headers = readHeaders();
 
-        if (contentLength == null) {
-            return new HttpRequest(requestLine, headers);
-        }
-        return new HttpRequest(requestLine, headers, readBody(Integer.parseInt(contentLength)));
+        return new HttpRequest(requestLine, headers, readBody(headers.getContentLength()), manager);
     }
 
-    private Map<String, String> readHeaders() throws IOException {
+    private HttpHeaders readHeaders() throws IOException {
         Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         String line;
 
@@ -36,7 +37,7 @@ public class Http11RequestProcessor {
             int separatorIndex = line.indexOf(':');
             headers.put(line.substring(0, separatorIndex).strip(), line.substring(separatorIndex + 1).strip());
         }
-        return headers;
+        return new HttpHeaders(headers);
     }
 
     private String readLine() throws IOException {

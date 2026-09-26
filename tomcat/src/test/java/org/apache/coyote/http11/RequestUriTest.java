@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.exception.HttpParseException;
+import org.apache.coyote.http11.request.RequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

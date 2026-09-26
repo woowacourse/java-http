@@ -8,8 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongSupplier;
 
 public class SessionManager implements Manager {
-    public static final String SESSION_ID = "JSESSIONID";
-
     private final Map<String, Session> sessionMap;
     private final LongSupplier currentTimeMillis;
 

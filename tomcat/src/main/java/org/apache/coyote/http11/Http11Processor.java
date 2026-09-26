@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -58,9 +59,9 @@ public class Http11Processor implements Runnable, Processor {
             final var responseType = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
             // Path에 따른 비지니스 로직
-            if (httpInfo.get("Path").contains("/login") && httpInfo.get("Method").equals("GET")) {
-                Map<String, String> queryString = parseQueryString();
-                LoginResult loginResult = authenticateUser(queryString.get("account"), queryString.get("password"));
+            if (httpInfo.get("Path").contains("/login?") && httpInfo.get("Method").equals("GET")) {
+                Map<String, String> jsonString = parseQueryString();
+                LoginResult loginResult = authenticateUser(jsonString.get("account"), jsonString.get("password"));
 
                 // 실패 응답 반환
                 if (loginResult == LoginResult.FAIL) {
@@ -73,23 +74,36 @@ public class Http11Processor implements Runnable, Processor {
 
                 // 리다이렉트 응답 반환
                 final var responseBody = readStaticResource("/index", responseType);
-                final var response = buildRedirectResponse("/index.html", responseBody, responseType);
+                final var response = buildRedirectResponseWithCookie("/index.html", responseBody, responseType);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
             if (httpInfo.get("Method").equals("POST") && httpInfo.get("Path").contains("/register")) {
-                // TODO
+                Map<String, String> body = parseRequestBody();
+                boolean isRegisterSuccess = registerUser(body.get("account"), body.get("password"), body.get("email"));
+
+                if (!isRegisterSuccess) {
+                    final var responseBody = readStaticResource("/401", responseType);
+                    final var response = buildRedirectResponse("/401", responseBody, responseType);
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+
+                // 리다이렉트 응답 반환
+                final var responseBody = readStaticResource("/index", responseType);
+                final var response = buildRedirectResponseWithCookie("/index.html", responseBody, responseType);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
             }
 
             // 200 OK 응답 반환
             final var responseBody = readStaticResource(null, responseType);
 
-            var response = buildOKHttpResponse(responseBody, responseType);
-            if (parseCookies().get("JSESSIONID") == null) {
-                response = buildOKHttpResponseWithCookie(responseBody, responseType);
-            }
+            final var response = buildOKHttpResponse(responseBody, responseType);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -98,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void parseHttpRequest(InputStream httpRequest) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(httpRequest));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(httpRequest, StandardCharsets.UTF_8));
 
         final String[] top = reader.readLine().split(" ");
         httpInfo.put("Method", top[0]);
@@ -111,7 +125,18 @@ public class Http11Processor implements Runnable, Processor {
             if (header.length != 2) {
                 break;
             }
-            httpInfo.put(header[0], header[1]);
+            httpInfo.put(header[0], header[1].trim());
+        }
+
+        final int contentLength = Integer.parseInt(httpInfo.getOrDefault("Content-Length", "0").trim());
+        if (contentLength == 0) {
+            return;
+        }
+
+        final char[] body = new char[contentLength];
+        final int readCount = reader.read(body);
+        if (readCount > 0) {
+            httpInfo.put("Body", new String(body, 0, readCount));
         }
     }
 
@@ -196,6 +221,26 @@ public class Http11Processor implements Runnable, Processor {
         return LoginParser.parseQueryString(uri.getQuery());
     }
 
+    private Map<String, String> parseFormUrlEncodedBody() {
+        final String body = httpInfo.get("Body");
+        if (body == null || body.isBlank()) {
+            return new HashMap<>();
+        }
+
+        return LoginParser.parseQueryString(body);
+    }
+
+    private Map<String, String> parseRequestBody() {
+        final String contentType = httpInfo.getOrDefault("Content-Type", "");
+        
+        if (contentType.contains("application/x-www-form-urlencoded")) {
+            return parseFormUrlEncodedBody();
+        }
+
+        log.debug("[parseRequestBody] 지원하지 않는 Content-Type 입니다. Content-Type = {}", contentType);
+        return new HashMap<>();
+    }
+
     private LoginResult authenticateUser(String account, String password) {
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
@@ -213,6 +258,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean registerUser(String account, String password, String email) {
+        try {
+            if (account == null || password == null || email == null) {
+                return false;
+            }
+
+            InMemoryUserRepository.save(new User(account, password, email));
+            return true;
+        } catch (Exception e) {
+            log.error("[registerUser] 알 수 없는 에러가 발생했습니다.");
+            return false;
+        }
+    }
 
     private String buildOKHttpResponse(final String responseBody, final String type) {
         return String.join("\r\n",
@@ -223,21 +281,22 @@ public class Http11Processor implements Runnable, Processor {
             responseBody);
     }
 
-    private String buildOKHttpResponseWithCookie(final String responseBody, final String type) {
-        return String.join("\r\n",
-            String.format("HTTP/1.1 %d %s ", 200, "OK"),
-            String.format("Content-Type: text/%s;charset=utf-8 ", type),
-            String.format("Set-Cookie: JSESSIONID=%s; ", UUID.randomUUID()),
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-    }
-
     private String buildRedirectResponse(final String url, final String responseBody, final String type) {
         return String.join("\r\n",
             "HTTP/1.1 302 Redirect ",
             String.format("Content-Type: text/%s;charset=utf-8 ", type),
             String.format("Location: %s ", url),
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+    }
+
+    private String buildRedirectResponseWithCookie(final String url, final String responseBody, final String type) {
+        return String.join("\r\n",
+            "HTTP/1.1 302 Redirect ",
+            String.format("Content-Type: text/%s;charset=utf-8 ", type),
+            String.format("Location: %s ", url),
+            String.format("Set-Cookie: JSESSIONID=%s; ", UUID.randomUUID()),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

@@ -7,7 +7,6 @@ import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.HttpHeaders;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 
@@ -33,10 +32,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void setCookies(Cookies cookies) {
-        this.cookies = cookies;
-    }
-
     public byte[] toHttpBytes() {
         String responseLine = String.join(" ",
                 VERSION, String.valueOf(status.getCode()), status.getMessage());
@@ -53,10 +48,6 @@ public class HttpResponse {
         outputStream.writeBytes(headBytes);
         outputStream.writeBytes(body);
         return outputStream.toByteArray();
-    }
-
-    public void setStatus(HttpStatus httpStatus) {
-        this.status = httpStatus;
     }
 
     public void addCookie(Cookie cookie) {
@@ -77,14 +68,14 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void setRedirect(String path) {
+        setRedirect(path, Cookies.empty());
+    }
+
     public void setRedirect(String path, Cookies cookies) {
         this.status = HttpStatus.FOUND;
         this.headers.add("Location", path);
         this.headers.addContentLength(0);
         this.cookies = cookies;
-    }
-
-    public void setRedirect(String path) {
-        setRedirect(path, Cookies.empty());
     }
 }

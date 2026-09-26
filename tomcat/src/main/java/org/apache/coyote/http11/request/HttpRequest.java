@@ -76,16 +76,6 @@ public class HttpRequest {
         return Optional.ofNullable(foundSession);
     }
 
-    public HttpSession getSession() throws IOException {
-        Optional<HttpSession> foundSession = findSession();
-        if (foundSession.isPresent()) {
-            return foundSession.get();
-        }
-        session = manager.createSession();
-        isNewSession = true;
-        return session;
-    }
-
     public Optional<HttpSession> createdSession() {
         if (isNewSession) {
             return Optional.of(session);

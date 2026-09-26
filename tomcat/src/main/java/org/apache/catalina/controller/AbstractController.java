@@ -11,7 +11,7 @@ public abstract class AbstractController implements Controller {
         switch (request.getMethod()) {
             case GET -> doGet(request, response);
             case POST -> doPost(request, response);
-            default -> response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+            default -> response.setError(HttpStatus.METHOD_NOT_ALLOWED);
         }
     }
 

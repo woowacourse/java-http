@@ -1,37 +1,46 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
+    // Accept-Count는 TCP 연결이 가득 차면, server socket에서 대기할 최대 요청 개수를 지정한다.
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private static final int DEFAULT_MAX_THREADS = 250;
+
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor executor;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        // 반환된 serverSocket은 최대 acceptCount개 만큼 연결을 대기할 수 있다.
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        executor.setMaximumPoolSize(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            // 소켓을 열 때, AcceptCount를 넘겨서 대기할 연결 개수를 설정한다.
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -66,8 +75,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executor.submit(new Http11Processor(connection));
     }
 
     public void stop() {

@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -47,7 +48,7 @@ class AbstractControllerTest {
     }
 
     @Test
-    void 지원하지_않는_HTTP_Method는_doGet과_doPost를_호출하지_않는다() throws Exception {
+    void 지원하지_않는_HTTP_Method는_405_응답을_반환한다() throws Exception {
 
         // given
         final HttpRequest request = createRequest("PUT");
@@ -63,6 +64,14 @@ class AbstractControllerTest {
         assertThat(controller.getCalled).isFalse();
 
         assertThat(controller.postCalled).isFalse();
+
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        response.writeTo(outputStream);
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8))
+                .contains("HTTP/1.1 405 Method Not Allowed")
+                .contains("Allow: GET, POST")
+                .contains("Content-Length: 0");
     }
 
     private HttpRequest createRequest(final String method) throws Exception {

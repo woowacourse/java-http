@@ -16,6 +16,8 @@ public class HttpResponse {
 
     private static final String LOCATION = "Location";
 
+    private static final String ALLOW = "Allow";
+
     private static final byte[] EMPTY_BODY = new byte[0];
 
     private HttpStatus status;
@@ -35,6 +37,14 @@ public class HttpResponse {
         this.status = HttpStatus.NOT_FOUND;
         this.contentType = contentType;
         this.body = body;
+    }
+
+    public void methodNotAllowed(final String allowedMethods) {
+        this.status = HttpStatus.METHOD_NOT_ALLOWED;
+        this.contentType = null;
+        this.body = EMPTY_BODY;
+
+        addHeader(ALLOW, allowedMethods);
     }
 
     public void sendRedirect(final String location) {

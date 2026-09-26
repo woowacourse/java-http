@@ -7,6 +7,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String ALLOWED_METHODS = "GET, POST";
+
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
 
@@ -17,7 +19,10 @@ public abstract class AbstractController implements Controller {
 
         if (HttpMethod.POST == request.getMethod()) {
             doPost(request, response);
+            return;
         }
+
+        response.methodNotAllowed(ALLOWED_METHODS);
     }
 
     //하위 클래스가 필요한 메서드만 재정의한다.

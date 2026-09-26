@@ -37,13 +37,14 @@ class SessionManagerTest {
 
         // then
         assertThat(sessionManager.findSession("manager-remove")).isNull();
-        assertThat(session.getAttribute("user")).isNull();
+        assertThat(session.getAttribute("user")).isEqualTo("gugu");
     }
 
     @Test
     void removingOldSessionDoesNotRemoveReplacement() {
         // given
         final Session oldSession = new Session("same-id");
+        oldSession.setAttribute("user", "old");
         final Session replacement = new Session("same-id");
         replacement.setAttribute("user", "replacement");
         sessionManager.add(oldSession);
@@ -55,6 +56,7 @@ class SessionManagerTest {
         // then
         assertThat(sessionManager.findSession("same-id")).isSameAs(replacement);
         assertThat(replacement.getAttribute("user")).isEqualTo("replacement");
+        assertThat(oldSession.getAttribute("user")).isEqualTo("old");
     }
 
     @Test

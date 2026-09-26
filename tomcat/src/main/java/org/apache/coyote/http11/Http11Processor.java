@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import org.apache.catalina.Session;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,7 @@ import java.util.Map;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final RequestMapping requestMapping = new RequestMapping();
 
     private final Socket connection;
 
@@ -43,26 +44,21 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.toHttpMessage().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private HttpResponse handleRequest(HttpRequest httpRequest) throws URISyntaxException, IOException {
+    private HttpResponse handleRequest(HttpRequest httpRequest) throws Exception {
         String requestTarget = httpRequest.getRequestTarget();
 
         if (requestTarget.equals("/")) {
             return HttpResponse.create("200 OK", "text/html", "Hello world!");
         }
 
-        if (httpRequest.isGetMethod() && httpRequest.isPath("/login") && isLoggedIn(httpRequest)) {
-            return HttpResponse.redirect("/index.html");
-        }
-
-        if (httpRequest.isPostMethod() && httpRequest.isPath("/login")) {
-            return handleLoginRequest(httpRequest);
+        if (httpRequest.isPath("/login")) {
+            Controller controller = requestMapping.getController(requestTarget);
+            return controller.service(httpRequest);
         }
 
         if (httpRequest.isPostMethod() && httpRequest.isPath("/register")) {
@@ -81,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResourcePath(String requestTarget) {
         String resourcePath = "static" + requestTarget;
-        if (requestTarget.equals("/login") || requestTarget.equals("/register")) {
+        if (requestTarget.equals("/register")) {
             resourcePath += ".html";
         }
         return resourcePath;
@@ -95,57 +91,6 @@ public class Http11Processor implements Runnable, Processor {
             return "text/javascript";
         }
         return "text/html";
-    }
-
-    private HttpResponse handleLoginRequest(HttpRequest httpRequest) {
-        User user = authenticateUser(httpRequest);
-        if (user == null) {
-            return HttpResponse.redirect("/401.html");
-        }
-
-        Session session = saveLoginSession(httpRequest, user);
-        return createLoginSuccessResponse(httpRequest, session);
-    }
-
-    private User authenticateUser(HttpRequest httpRequest) {
-        Map<String, String> body = parseBody(httpRequest.getBody());
-        String account = body.get("account");
-        String password = body.get("password");
-
-        if (account == null || password == null) {
-            return null;
-        }
-
-        User user = InMemoryUserRepository.findByAccount(account).orElse(null);
-        if (user == null || !user.checkPassword(password)) {
-            return null;
-        }
-
-        log.info(user.toString());
-        return user;
-    }
-
-    private Session saveLoginSession(HttpRequest httpRequest, User user) {
-        Session session = httpRequest.getSession(true);
-        session.setAttribute("user", user);
-        return session;
-    }
-
-    private HttpResponse createLoginSuccessResponse(HttpRequest httpRequest, Session session) {
-        String requestedSessionId = httpRequest.getCookie().getValue("JSESSIONID");
-        if (session.getId().equals(requestedSessionId)) {
-            return HttpResponse.redirect("/index.html");
-        }
-
-        return HttpResponse.redirectWithCookie(
-                "/index.html",
-                "JSESSIONID=" + session.getId()
-        );
-    }
-
-    private boolean isLoggedIn(HttpRequest httpRequest) {
-        Session session = httpRequest.getSession(false);
-        return session != null && session.getAttribute("user") != null;
     }
 
     private HttpResponse createRegisterResponse(HttpRequest httpRequest) {

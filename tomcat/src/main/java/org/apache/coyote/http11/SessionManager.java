@@ -3,11 +3,12 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     @Override
     public Session createSession() {

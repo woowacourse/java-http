@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,16 +6,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpCookie;
 
-public class Headers {
+public class HttpHeaders {
 
     private final Map<String, String> headers;
 
-    public Headers(Map<String, String> headers) {
+    public HttpHeaders(Map<String, String> headers) {
         this.headers = Collections.unmodifiableMap(headers);
     }
 
-    public static Headers of(BufferedReader reader) throws IOException {
+    public static HttpHeaders of(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -24,7 +26,7 @@ public class Headers {
             String value = parts[1].trim();
             headers.put(key, value);
         }
-        return new Headers(headers);
+        return new HttpHeaders(headers);
     }
 
     public HttpCookie getHttpCookie() {

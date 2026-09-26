@@ -1,44 +1,47 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.request.HttpRequest;
 
-public class Response {
+public class HttpResponse {
 
-    private final Request request;
-    private final StatusCode statusCode;
+    private final HttpRequest httpRequest;
+    private final HttpStatusCode httpStatusCode;
     private final String responseBody;
 
-    public Response(Request request, StatusCode statusCode, String responseBody) {
-        this.request = request;
-        this.statusCode = statusCode;
+    public HttpResponse(HttpRequest httpRequest, HttpStatusCode httpStatusCode, String responseBody) {
+        this.httpRequest = httpRequest;
+        this.httpStatusCode = httpStatusCode;
         this.responseBody = responseBody;
     }
 
-    public static Response empty(Request request) {
-        return new Response(request, StatusCode.OK, "Hello world!");
+    public static HttpResponse empty(HttpRequest httpRequest) {
+        return new HttpResponse(httpRequest, HttpStatusCode.OK, "Hello world!");
     }
 
-    public static Response from(Request request, StatusCode statusCode, ClassLoader classLoader) throws IOException {
-        String path = request.getPath();
-        ContentType contentType = request.getContentType();
+    public static HttpResponse from(HttpRequest httpRequest, HttpStatusCode httpStatusCode, ClassLoader classLoader)
+            throws IOException {
+        String path = httpRequest.getPath();
+        ContentType contentType = httpRequest.getContentType();
         if (!path.contains(".")) {
             path += "." + contentType;
         }
         final URL resource = classLoader.getResource("static" + path);
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return new Response(request, statusCode, responseBody);
+        return new HttpResponse(httpRequest, httpStatusCode, responseBody);
     }
 
     private String build() {
-        String responseLine = request.getProtocolVersion() + " " + statusCode.getStatus();
-        ContentType contentType = request.getContentType();
+        String responseLine = httpRequest.getProtocolVersion() + " " + httpStatusCode.getStatus();
+        ContentType contentType = httpRequest.getContentType();
         String contentTypeHeader = "Content-Type: text/" + contentType.getName() + ";charset=utf-8";
         String contentLengthHeader = "Content-Length: " + responseBody.getBytes().length;
-        String setCookieHeader = "Set-Cookie: JSESSIONID=" + request.getJSessionId();
+        String setCookieHeader = "Set-Cookie: JSESSIONID=" + httpRequest.getJSessionId();
         return String.join("\r\n",
                 responseLine,
                 contentTypeHeader,

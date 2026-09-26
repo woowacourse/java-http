@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public record RequestLine(
+public record HttpRequestLine(
         HttpMethod method,
         String uri,
         String protocolVersion

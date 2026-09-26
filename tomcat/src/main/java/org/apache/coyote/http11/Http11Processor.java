@@ -10,6 +10,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpParser;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,105 +38,105 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            Request request = HttpParser.getRequest(inputStream);
-            log.info("request: {}", request);
+            HttpRequest httpRequest = HttpParser.getRequest(inputStream);
+            log.info("request: {}", httpRequest);
 
-            dispatch(request, outputStream);
+            dispatch(httpRequest, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void dispatch(Request request, OutputStream outputStream) throws IOException {
-        if (request.getPath().equals("/")) {
-            empty(outputStream, request);
+    private void dispatch(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
+        if (httpRequest.getPath().equals("/")) {
+            empty(outputStream, httpRequest);
             return;
         }
-        if (request.getPath().startsWith("/login")) {
-            login(outputStream, request);
+        if (httpRequest.getPath().startsWith("/login")) {
+            login(outputStream, httpRequest);
             return;
         }
-        if (request.getPath().startsWith("/register")) {
-            register(outputStream, request);
+        if (httpRequest.getPath().startsWith("/register")) {
+            register(outputStream, httpRequest);
             return;
         }
-        Response response = handling(request, StatusCode.OK);
-        response.respond(outputStream);
+        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.OK);
+        httpResponse.respond(outputStream);
     }
 
-    private Response handling(Request request, StatusCode statusCode) throws IOException {
-        return Response.from(request, statusCode, getClass().getClassLoader());
+    private HttpResponse handling(HttpRequest httpRequest, HttpStatusCode httpStatusCode) throws IOException {
+        return HttpResponse.from(httpRequest, httpStatusCode, getClass().getClassLoader());
     }
 
-    private void empty(OutputStream outputStream, Request request) throws IOException {
-        Response response = Response.empty(request);
-        response.respond(outputStream);
+    private void empty(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        HttpResponse httpResponse = HttpResponse.empty(httpRequest);
+        httpResponse.respond(outputStream);
     }
 
-    private void login(OutputStream outputStream, Request request) throws IOException {
-        if (request.getMethod().equals(HttpMethod.GET)) {
-            loginGet(outputStream, request);
+    private void login(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getMethod().equals(HttpMethod.GET)) {
+            loginGet(outputStream, httpRequest);
         }
-        if (request.getMethod().equals(HttpMethod.POST)) {
-            loginPost(outputStream, request);
+        if (httpRequest.getMethod().equals(HttpMethod.POST)) {
+            loginPost(outputStream, httpRequest);
         }
     }
 
-    private void loginGet(OutputStream outputStream, Request request) throws IOException {
-        if (SessionManager.getInstance().hasUser(request.getJSessionId())) {
-            Response response = handling(request, StatusCode.FOUND);
-            response.redirect(outputStream, "/index.html");
+    private void loginGet(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        if (SessionManager.getInstance().hasUser(httpRequest.getJSessionId())) {
+            HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
+            httpResponse.redirect(outputStream, "/index.html");
             return;
         }
-        Response response = handling(request, StatusCode.OK);
-        response.respond(outputStream);
+        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.OK);
+        httpResponse.respond(outputStream);
     }
 
-    private void loginPost(OutputStream outputStream, Request request) throws IOException {
-        String account = request.getRequestParam("account");
-        String password = request.getRequestParam("password");
+    private void loginPost(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        String account = httpRequest.getRequestParam("account");
+        String password = httpRequest.getRequestParam("password");
         if (account.isEmpty() || password.isEmpty()) {
-            loginFail(outputStream, request);
+            loginFail(outputStream, httpRequest);
         }
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
-            loginSuccess(outputStream, request, user);
+            loginSuccess(outputStream, httpRequest, user);
         }
         if (user != null && !user.checkPassword(password)) {
-            loginFail(outputStream, request);
+            loginFail(outputStream, httpRequest);
         }
         if (!account.isEmpty() && user == null) {
-            loginFail(outputStream, request);
+            loginFail(outputStream, httpRequest);
         }
 
     }
 
-    private void loginFail(OutputStream outputStream, Request request) throws IOException {
+    private void loginFail(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
         log.info("login fail");
-        Response response = handling(request, StatusCode.FOUND);
-        response.redirect(outputStream, "/401.html");
+        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
+        httpResponse.redirect(outputStream, "/401.html");
     }
 
-    private void loginSuccess(OutputStream outputStream, Request request, User user) throws IOException {
+    private void loginSuccess(OutputStream outputStream, HttpRequest httpRequest, User user) throws IOException {
         log.info(user.toString());
-        final var session = request.getSession(true);
+        final var session = httpRequest.getSession(true);
         session.setAttribute("user", user);
-        Response response = handling(request, StatusCode.FOUND);
-        response.redirect(outputStream, "/index.html");
+        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
+        httpResponse.redirect(outputStream, "/index.html");
     }
 
-    private void register(OutputStream outputStream, Request request) throws IOException {
-        if (request.getMethod() == HttpMethod.GET) {
-            Response response = handling(request, StatusCode.OK);
-            response.respond(outputStream);
+    private void register(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getMethod() == HttpMethod.GET) {
+            HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.OK);
+            httpResponse.respond(outputStream);
             return;
         }
-        String account = request.getRequestParam("account");
-        String password = request.getRequestParam("password");
-        String email = request.getRequestParam("email");
+        String account = httpRequest.getRequestParam("account");
+        String password = httpRequest.getRequestParam("password");
+        String email = httpRequest.getRequestParam("email");
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        Response response = handling(request, StatusCode.FOUND);
-        response.redirect(outputStream, "/index.html");
+        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
+        httpResponse.redirect(outputStream, "/index.html");
     }
 }

@@ -1,14 +1,12 @@
 package org.apache.coyote.http11;
 
-import static com.techcourse.db.InMemoryUserRepository.findByAccount;
-
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpParser;
@@ -48,6 +46,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void dispatch(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
+        String path = httpRequest.getPath();
+        Controller controller = RequestMapping.getController(path);
+        try {
+            String response = controller.service(httpRequest);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
         if (httpRequest.getPath().equals("/")) {
             empty(outputStream, httpRequest);
             return;
@@ -68,64 +73,13 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.from(httpRequest, httpStatusCode, getClass().getClassLoader());
     }
 
-    private void empty(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        HttpResponse httpResponse = HttpResponse.empty(httpRequest);
-        httpResponse.respond(outputStream);
+    private void empty(HttpRequest httpRequest) throws IOException {
     }
 
-    private void login(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getMethod().equals(HttpMethod.GET)) {
-            loginGet(outputStream, httpRequest);
-        }
-        if (httpRequest.getMethod().equals(HttpMethod.POST)) {
-            loginPost(outputStream, httpRequest);
-        }
+    private void login(HttpRequest httpRequest) throws IOException {
     }
 
-    private void loginGet(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        if (SessionManager.getInstance().hasUser(httpRequest.getJSessionId())) {
-            HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
-            httpResponse.redirect(outputStream, "/index.html");
-            return;
-        }
-        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.OK);
-        httpResponse.respond(outputStream);
-    }
-
-    private void loginPost(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        String account = httpRequest.getRequestParam("account");
-        String password = httpRequest.getRequestParam("password");
-        if (account.isEmpty() || password.isEmpty()) {
-            loginFail(outputStream, httpRequest);
-        }
-        User user = findByAccount(account).orElse(null);
-        if (user != null && user.checkPassword(password)) {
-            loginSuccess(outputStream, httpRequest, user);
-        }
-        if (user != null && !user.checkPassword(password)) {
-            loginFail(outputStream, httpRequest);
-        }
-        if (!account.isEmpty() && user == null) {
-            loginFail(outputStream, httpRequest);
-        }
-
-    }
-
-    private void loginFail(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
-        log.info("login fail");
-        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
-        httpResponse.redirect(outputStream, "/401.html");
-    }
-
-    private void loginSuccess(OutputStream outputStream, HttpRequest httpRequest, User user) throws IOException {
-        log.info(user.toString());
-        final var session = httpRequest.getSession(true);
-        session.setAttribute("user", user);
-        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
-        httpResponse.redirect(outputStream, "/index.html");
-    }
-
-    private void register(OutputStream outputStream, HttpRequest httpRequest) throws IOException {
+    private void register(HttpRequest httpRequest) throws IOException {
         if (httpRequest.getMethod() == HttpMethod.GET) {
             HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.OK);
             httpResponse.respond(outputStream);

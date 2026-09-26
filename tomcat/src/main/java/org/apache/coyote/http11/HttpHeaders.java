@@ -49,6 +49,6 @@ public record HttpHeaders(Map<String, String> values) {
     }
 
     public Map<String, String> values() {
-        return Map.copyOf(values);
+        return values;
     }
 }

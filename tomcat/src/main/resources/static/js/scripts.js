@@ -9,6 +9,10 @@
 
 window.addEventListener('DOMContentLoaded', event => {
 
+    if (new URLSearchParams(window.location.search).get('error') === 'registration-failed') {
+        window.alert('회원가입을 완료할 수 없습니다. 입력 정보를 확인해주세요.');
+    }
+
     // Toggle the side navigation
     const sidebarToggle = document.body.querySelector('#sidebarToggle');
     if (sidebarToggle) {

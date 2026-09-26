@@ -46,35 +46,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<Cookie> findSessionCookie(HttpHeaders headers) {
-        String cookieHeader = headers.get("cookie");
-
-        if (cookieHeader == null || cookieHeader.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String[] cookiePairs = cookieHeader.split(";");
-
-        for (String pair : cookiePairs) {
-            Optional<Cookie> parsed = Cookie.parse(pair);
-            if (parsed.isEmpty()) {
-                continue;
-            }
-
-            String cookieName = parsed.get().name();
-            if ("JSESSIONID".equals(cookieName)) {
-                return parsed;
-            }
-        }
-
-        return Optional.empty();
-    }
-
     private String handleRequest(HttpRequest request) throws IOException {
         String method = request.requestLine().method();
         String path = request.requestLine().path();
 
-        Optional<Cookie> sessionCookie = findSessionCookie(request.headers());
+        Optional<Cookie> sessionCookie = request.headers().getCookie("JSESSIONID");
 
         if ("GET".equals(method)) {
             return handleGetRequest(path, sessionCookie);

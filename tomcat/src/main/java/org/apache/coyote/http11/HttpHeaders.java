@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpHeaders {
 
@@ -28,5 +29,28 @@ public class HttpHeaders {
 
     public int contentLength() {
         return Integer.parseInt(headers.getOrDefault("content-length", "0"));
+    }
+
+    public Optional<Cookie> getCookie(String name) {
+        String cookieHeader = get("cookie");
+
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String[] cookiePairs = cookieHeader.split(";");
+
+        for (String pair : cookiePairs) {
+            Optional<Cookie> parsed = Cookie.parse(pair);
+            if (parsed.isEmpty()) {
+                continue;
+            }
+
+            if (name.equals(parsed.get().name())) {
+                return parsed;
+            }
+        }
+
+        return Optional.empty();
     }
 }

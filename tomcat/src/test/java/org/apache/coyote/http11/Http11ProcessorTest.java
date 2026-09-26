@@ -58,4 +58,71 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void 로그인에_성공하면_JSESSIONID_쿠키와_함께_index로_리다이렉트한다() {
+        // given
+        final String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded ",
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n")
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}; Path=/; HttpOnly \r\n");
+    }
+
+    @Test
+    void 비밀번호가_틀리면_401_페이지를_응답한다() {
+        // given
+        final String body = "account=gugu&password=wrong";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + body.length(),
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 401 Unauthorized \r\n")
+                .contains("Content-Type: text/html;charset=utf-8 \r\n");
+    }
+
+    @Test
+    void 없는_리소스를_요청하면_404를_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /not-exists.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo("HTTP/1.1 404 Not Found \r\nContent-Length: 0 \r\n\r\n");
+    }
 }

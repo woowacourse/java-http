@@ -15,11 +15,10 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    // Accept-Count는 TCP 연결이 가득 차면, server socket에서 대기할 최대 요청 개수를 지정한다.
+    // Accept-Count는 server socket에서 대기할 최대 요청 개수를 지정한다.
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private static final int DEFAULT_MAX_THREADS = 250;
-
     private final ServerSocket serverSocket;
     private final ThreadPoolExecutor executor;
     private boolean stopped;
@@ -32,8 +31,7 @@ public class Connector implements Runnable {
         // 반환된 serverSocket은 최대 acceptCount개 만큼 연결을 대기할 수 있다.
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        executor.setMaximumPoolSize(maxThreads);
+        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -99,5 +97,14 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(int maxThreads) {
+        final var MIN = 1;
+
+        if (maxThreads < MIN || DEFAULT_MAX_THREADS < maxThreads) {
+            return DEFAULT_MAX_THREADS;
+        }
+        return maxThreads;
     }
 }

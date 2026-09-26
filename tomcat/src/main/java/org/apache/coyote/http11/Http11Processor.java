@@ -5,7 +5,6 @@ import java.net.Socket;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.exception.UncheckedServletException;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +16,9 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
-        this.requestMapping = new RequestMapping(sessionManager);
+        this.requestMapping = requestMapping;
     }
 
     @Override

@@ -83,6 +83,66 @@ class Http11ProcessorTest {
         );
     }
 
+    @Test
+    void LoginController가_지원하지_않는_메서드는_405로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "PUT /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 405 Method Not Allowed \r\n",
+                "Allow: GET, POST \r\n"
+        );
+    }
+
+    @Test
+    void RootController가_지원하지_않는_POST는_405로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST / HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 405 Method Not Allowed \r\n",
+                "Allow: GET \r\n"
+        );
+    }
+
+    @Test
+    void 존재하지_않는_정적_리소스에_POST_요청하면_404로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /not-found.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found ");
+    }
+
     @Nested
     @DisplayName("header section의 끝에는 CRLF가 존재한다")
     class end_of_the_header_section {

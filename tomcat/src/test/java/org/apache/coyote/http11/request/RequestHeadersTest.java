@@ -22,7 +22,6 @@ class RequestHeadersTest {
             "Host(x): localhost",      // 구분자 문자
             "헤더: value",              // 비ASCII
             "Coo\u212Aie: a=1",        // 켈빈 기호 K
-            " Host: localhost",        // 줄 시작 공백 (2번 obs-fold)
     })
     void 잘못된_헤더_이름은_거부한다(final String line) {
         assertThatThrownBy(() -> RequestHeaders.from(List.of(line)))
@@ -76,5 +75,47 @@ class RequestHeadersTest {
         assertThatThrownBy(() -> RequestHeaders.from(lines))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("obs-fold");
+    }
+    @Test
+    void 값의_앞뒤_SP와_HTAB만_제거한다() {
+        final RequestHeaders headers = RequestHeaders.from(List.of("Content-Type: \t text/html \t "));
+
+        assertThat(headers.get(HttpHeaderName.CONTENT_TYPE)).hasValue("text/html");
+    }
+
+    @Test
+    void 값_중간의_공백은_유지한다() {
+        final RequestHeaders headers = RequestHeaders.from(List.of("Content-Type: text/html;  charset=utf-8"));
+
+        assertThat(headers.get(HttpHeaderName.CONTENT_TYPE)).hasValue("text/html;  charset=utf-8");
+    }
+
+    @Test
+    void 유니코드_공백은_지우지_않고_값으로_유지한다() {
+        final RequestHeaders headers = RequestHeaders.from(List.of("Content-Type: \u3000text/html"));
+
+        assertThat(headers.get(HttpHeaderName.CONTENT_TYPE)).hasValue("\u3000text/html");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Content-Type: a\rContent-Length: 100",   // 값 중간의 CR
+            "Content-Type: a\0b",                       // NUL
+            "Content-Type: a\u000Bb",                   // 수직 탭
+            "Content-Type: a\u001Fb",                   // 유닛 구분자
+            "Content-Type: a\u007Fb",                   // DEL
+            "Content-Length: 5\u000B",                  // strip()이면 5로 통과하던 케이스
+    })
+    void 값에_제어_문자가_있으면_거부한다(final String line) {
+        assertThatThrownBy(() -> RequestHeaders.from(List.of(line)))
+                .isInstanceOf(BadRequestException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Content-Type:", "Content-Type:   ", "Content-Type:\t"})
+    void 빈_값은_허용한다(final String line) {
+        final RequestHeaders headers = RequestHeaders.from(List.of(line));
+
+        assertThat(headers.get(HttpHeaderName.CONTENT_TYPE)).hasValue("");
     }
 }

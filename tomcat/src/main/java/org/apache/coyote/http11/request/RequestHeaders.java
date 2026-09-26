@@ -14,6 +14,9 @@ public class RequestHeaders {
     private static final int NOT_FOUND = -1;
     private static final char SP = ' ';
     private static final char HTAB = '\t';
+    private static final char FIRST_VISIBLE = 0x21;
+    private static final char LAST_VISIBLE = 0x7E;
+    private static final char FIRST_OBS_TEXT = 0x80;
 
     private final Map<String, String> headers;
 
@@ -39,7 +42,7 @@ public class RequestHeaders {
             }
 
             final String name = HttpHeaderName.normalize(line.substring(0, delimiterIndex));
-            final String value = line.substring(delimiterIndex + 1).strip();
+            final String value = parseValue(line.substring(delimiterIndex + 1));
 
             if (HttpHeaderName.CONTENT_LENGTH.getNormalized().equals(name) && parsed.containsKey(name)) {
                 throw new BadRequestException("Content-Length 헤더가 중복되었습니다");
@@ -47,6 +50,38 @@ public class RequestHeaders {
             parsed.putIfAbsent(name, value);
         }
         return new RequestHeaders(Map.copyOf(parsed));
+    }
+
+    private static String parseValue(final String raw) {
+        final String value = trimOws(raw);
+        for (final char c : value.toCharArray()) {
+            if (!isFieldValueChar(c)) {
+                throw new BadRequestException("헤더 값에 허용되지 않는 문자가 포함되어 있습니다");
+            }
+        }
+        return value;
+    }
+
+    private static String trimOws(final String value) {
+        int start = 0;
+        int end = value.length();
+        while (start < end && isOws(value.charAt(start))) {
+            start++;
+        }
+        while (end > start && isOws(value.charAt(end - 1))) {
+            end--;
+        }
+        return value.substring(start, end);
+    }
+
+    private static boolean isOws(final char c) {
+        return c == SP || c == HTAB;
+    }
+
+    private static boolean isFieldValueChar(final char c) {
+        return isOws(c)
+                || (FIRST_VISIBLE <= c && c <= LAST_VISIBLE)
+                || c >= FIRST_OBS_TEXT;
     }
 
     private static boolean isObsFold(final String line) {

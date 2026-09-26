@@ -21,12 +21,14 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int SOCKET_READ_TIMEOUT_MILLIS = 5_000;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 10;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
     private final ExecutorService executorService;
 
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector(RequestMapping requestMapping, int maxThreads) {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, maxThreads);
@@ -46,10 +48,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -63,11 +65,22 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
-        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+
+        executorService.shutdown();
+        try {
+            if (executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.info("모든 요청 처리가 완료되었습니다.");
+            } else {
+                log.warn("제한 시간 안에 모든 요청 처리가 끝나지 않았습니다.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("요청 처리 종료 대기가 중단되었습니다.");
         }
     }
 
@@ -85,18 +98,22 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
+        connection.setSoTimeout(SOCKET_READ_TIMEOUT_MILLIS);
         var processor = new Http11Processor(requestMapping, connection);
         try {
             executorService.submit(processor);
         } catch (RejectedExecutionException re) {
+            connection.close();
             log.warn("요청 처리 작업이 거부되었습니다.");
         }
     }

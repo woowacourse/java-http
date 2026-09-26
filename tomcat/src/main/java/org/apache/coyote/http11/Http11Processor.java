@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
@@ -22,6 +21,8 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,40 +51,45 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = new BufferedInputStream(connection.getInputStream());
             final var outputStream = connection.getOutputStream()) {
-            final var request = HttpRequestParser.parse(inputStream);
-            handleRequest(request, outputStream);
+            final var readLine = HttpRequestParser.readLine(inputStream);
+            if (readLine == null) {
+                return;
+            }
+
+            final var request = HttpRequestParser.parse(readLine, inputStream);
+            final var response = handleRequest(request);
+            HttpResponseWriter.write(response, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handleRequest(final HttpRequest request, final OutputStream outputStream) throws IOException {
+    private HttpResponse handleRequest(final HttpRequest request) throws IOException {
         if (request.isPost() && "/register".equals(request.path())) {
             try {
                 register(readForm(request));
-                writeResponse(outputStream, "302 Found", Map.of("Location", "/index.html"), new byte[0]);
+                return new HttpResponse(HttpStatus.FOUND, new HttpHeaders(Map.of("Location", "/index.html")), new byte[0]);
             } catch (final IllegalArgumentException e) {
                 final String failedLocation = "/register.html?error=" + URLEncoder.encode(e.getMessage(), UTF_8);
-                writeResponse(outputStream, "302 Found", Map.of("Location", failedLocation), new byte[0]);
+                return new HttpResponse(HttpStatus.FOUND, new HttpHeaders(Map.of("Location", failedLocation)), new byte[0]);
             }
         } else if (request.isPost() && "/login".equals(request.path())) {
             try {
                 final User user = authenticate(readForm(request));
-                final String sessionId = addAuthSession(request.headers().cookie(), user);
-                writeResponse(outputStream, "302 Found", loginSuccessHeaders(sessionId), new byte[0]);
+                final String sessionId = addAuthSession(request.cookie(), user);
+                return new HttpResponse(HttpStatus.FOUND, loginSuccessHeaders(sessionId), new byte[0]);
             } catch (final IllegalArgumentException e) {
                 final String invalidRedirectUri = "/login.html?error=" + URLEncoder.encode(e.getMessage(), UTF_8);
-                writeResponse(outputStream, "302 Found", Map.of("Location", invalidRedirectUri), new byte[0]);
+                return new HttpResponse(HttpStatus.FOUND, new HttpHeaders(Map.of("Location", invalidRedirectUri)), new byte[0]);
             }
         } else if ("/".equals(request.path())) {
             final var body = "Hello world!".getBytes(UTF_8);
-            writeResponse(outputStream, "200 OK", contentTypeHeader("text/html"), body);
+            return new HttpResponse(HttpStatus.OK, contentTypeHeader("text/html"), body);
         } else {
-            if ("/login".equals(request.path()) && isLoggedIn(request.headers().cookie())) {
-                writeResponse(outputStream, "302 Found", Map.of("Location", "/index.html"), new byte[0]);
-                return;
+            if ("/login".equals(request.path()) && isLoggedIn(request.cookie())) {
+                return new HttpResponse(HttpStatus.FOUND, new HttpHeaders(Map.of("Location", "/index.html")), new byte[0]);
             }
-            writeResource(outputStream, "200 OK", STATIC_RESOURCE_PATH + appendHtmlExtension(request.path()));
+            return resourceResponse(HttpStatus.OK, STATIC_RESOURCE_PATH + appendHtmlExtension(request.path()));
         }
     }
 
@@ -105,21 +111,6 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("계정이 존재한다.");
         }
         InMemoryUserRepository.save(new User(account, password, email));
-    }
-
-    private void writeResponse(
-            final OutputStream outputStream,
-            final String status,
-            final Map<String, String> headers,
-            final byte[] responseBody
-    ) throws IOException {
-        final var responseHeader = new StringBuilder().append("HTTP/1.1 %s \r\n".formatted(status));
-        headers.forEach((name, value) -> responseHeader.append("%s: %s \r\n".formatted(name, value)));
-        responseHeader.append("Content-Length: %d \r\n".formatted(responseBody.length)).append("\r\n");
-
-        outputStream.write(responseHeader.toString().getBytes(UTF_8));
-        outputStream.write(responseBody);
-        outputStream.flush();
     }
 
     private User authenticate(final Map<String, String> params) {
@@ -148,18 +139,18 @@ public class Http11Processor implements Runnable, Processor {
         return newSession.getId();
     }
 
-    private Map<String, String> loginSuccessHeaders(final String sessionId) {
+    private HttpHeaders loginSuccessHeaders(final String sessionId) {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Location", "/index.html");
         headers.put("Set-Cookie", SESSION_COOKIE_NAME + "=" + sessionId);
-        return headers;
+        return new HttpHeaders(headers);
     }
 
-    private Map<String, String> contentTypeHeader(final String contentType) {
+    private HttpHeaders contentTypeHeader(final String contentType) {
         if (contentType.startsWith("text/")) {
-            return Map.of("Content-Type", contentType + ";charset=utf-8");
+            return new HttpHeaders(Map.of("Content-Type", contentType + ";charset=utf-8"));
         }
-        return Map.of("Content-Type", contentType);
+        return new HttpHeaders(Map.of("Content-Type", contentType));
     }
 
     private boolean isLoggedIn(final HttpCookie cookie) throws IOException {
@@ -168,19 +159,17 @@ public class Http11Processor implements Runnable, Processor {
         return nonNull(session) && nonNull(session.getAttribute(USER_SESSION_ATTRIBUTE));
     }
 
-    private void writeResource(
-            final OutputStream outputStream,
-            final String status,
+    private HttpResponse resourceResponse(
+            final HttpStatus status,
             final String resourcePath
     ) throws IOException {
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resource == null) {
-                writeResource(outputStream, "404 Not Found", NOT_FOUND_RESOURCE_PATH);
-                return;
+                return resourceResponse(HttpStatus.NOT_FOUND, NOT_FOUND_RESOURCE_PATH);
             }
 
             final var contentType = MimeTypeResolver.resolve(resourcePath);
-            writeResponse(outputStream, status, contentTypeHeader(contentType), resource.readAllBytes());
+            return new HttpResponse(status, contentTypeHeader(contentType), resource.readAllBytes());
         }
     }
 

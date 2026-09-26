@@ -1,18 +1,34 @@
 package org.apache.coyote.http11.request;
 
-public record HttpRequest(
-        RequestLine requestLine,
-        RequestParams params,
-        HttpHeaders headers,
-        byte[] body
-) {
+import org.apache.coyote.http11.HttpHeaders;
 
-    public HttpRequest {
-        body = body.clone();
+public final class HttpRequest {
+
+    private final RequestLine requestLine;
+    private final RequestParams params;
+    private final HttpHeaders headers;
+    private final byte[] body;
+    private final HttpCookie cookie;
+
+    public HttpRequest(final RequestLine requestLine, final RequestParams params,
+                       final HttpHeaders headers, final byte[] body) {
+        this.requestLine = requestLine;
+        this.params = params;
+        this.headers = headers;
+        this.body = body.clone();
+        this.cookie = new HttpCookie(headers.get("cookie"));
+    }
+
+    public HttpHeaders headers() {
+        return headers;
     }
 
     public byte[] body() {
         return body.clone();
+    }
+
+    public HttpCookie cookie() {
+        return cookie;
     }
 
     public String path() {

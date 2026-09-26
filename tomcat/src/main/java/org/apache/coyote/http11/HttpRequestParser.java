@@ -5,10 +5,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.request.RequestParams;
@@ -17,15 +15,16 @@ public final class HttpRequestParser {
 
     private HttpRequestParser() {}
 
-    public static HttpRequest parse(final InputStream inputStream) throws IOException {
-        final RequestLine requestLine = new RequestLine(readLine(inputStream));
-        final RequestParams params = new RequestParams(requestLine.queryString());
-        final HttpHeaders headers = readHeaders(inputStream);
-        final byte[] body = inputStream.readNBytes(headers.contentLength());
+    public static HttpRequest parse(final String readLine, final InputStream inputStream)
+            throws IOException {
+        final var requestLine = new RequestLine(readLine);
+        final var params = new RequestParams(requestLine.queryString());
+        final var headers = readHeaders(inputStream);
+        final var body = inputStream.readNBytes(headers.contentLength());
         return new HttpRequest(requestLine, params, headers, body);
     }
 
-    private static String readLine(final InputStream inputStream) throws IOException {
+    public static String readLine(final InputStream inputStream) throws IOException {
         final ByteArrayOutputStream line = new ByteArrayOutputStream();
         int value;
         while ((value = inputStream.read()) != -1 && value != '\n') {
@@ -42,12 +41,12 @@ public final class HttpRequestParser {
     }
 
     private static HttpHeaders readHeaders(final InputStream inputStream) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         String headerLine;
         while ((headerLine = readLine(inputStream)) != null && !headerLine.isEmpty()) {
             final int index = headerLine.indexOf(":");
             if (index > 0) {
-                final String name = headerLine.substring(0, index).strip().toLowerCase(Locale.ROOT);
+                final String name = headerLine.substring(0, index).strip();
                 final String value = headerLine.substring(index + 1).strip();
                 headers.put(name, value);
             }

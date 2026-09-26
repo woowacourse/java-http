@@ -7,9 +7,6 @@ public class RequestLine {
     private final String queryString;
 
     public RequestLine(final String requestLine) {
-        if (requestLine == null || requestLine.isEmpty()) {
-            throw new IllegalArgumentException("요청을 읽을 수 없음");
-        }
         final String[] parts = requestLine.strip().split(" ", -1);
         final int queryIndex = parts[1].indexOf("?");
         this.method = parts[0];

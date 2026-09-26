@@ -14,7 +14,7 @@ class HttpResponseTest {
     void writesHttpResponse() throws Exception {
         final HttpResponse response = new HttpResponse("HTTP/1.1");
         response.setStatus(200, "OK");
-        response.setHeader("Content-Type", "text/plain");
+        response.putHeader("Content-Type", "text/plain");
         response.setBody("Hello".getBytes(StandardCharsets.UTF_8));
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
 

@@ -28,20 +28,20 @@ public abstract class AbstractController implements Controller {
                                  final String setCookie) {
         response.setStatus(200, "OK ");
         if (!setCookie.isEmpty()) {
-            response.setHeader(SET_COOKIE_HEADER, setCookie + " ");
+            response.putHeader(SET_COOKIE_HEADER, setCookie + " ");
         }
-        response.setHeader("Content-Type", contentType + " ");
-        response.setHeader("Content-Length", body.length + " ");
+        response.putHeader("Content-Type", contentType + " ");
+        response.putHeader("Content-Length", body.length + " ");
         response.setBody(body);
     }
 
     protected void setRedirectResponse(final HttpResponse response, final String location, final String setCookie) {
         response.setStatus(302, "Found ");
         if (!setCookie.isEmpty()) {
-            response.setHeader(SET_COOKIE_HEADER, setCookie + " ");
+            response.putHeader(SET_COOKIE_HEADER, setCookie + " ");
         }
-        response.setHeader("Location", location + " ");
-        response.setHeader("Content-Length", "0 ");
+        response.putHeader("Location", location + " ");
+        response.putHeader("Content-Length", "0 ");
     }
 
     protected String createSetCookieHeader(final String sessionId) {

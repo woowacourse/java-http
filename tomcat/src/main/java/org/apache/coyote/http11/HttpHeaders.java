@@ -26,7 +26,7 @@ public class HttpHeaders {
         return headers.get(name);
     }
 
-    public void setHeader(final String name, final String value) {
+    public void putHeader(final String name, final String value) {
         if (!headers.containsKey(name)) {
             headerNames.add(name);
         }
@@ -51,6 +51,6 @@ public class HttpHeaders {
             throw new IOException("잘못된 요청 헤더입니다: " + line);
         }
         final String value = line.substring(separator + 1).trim();
-        setHeader(name, value);
+        putHeader(name, value);
     }
 }

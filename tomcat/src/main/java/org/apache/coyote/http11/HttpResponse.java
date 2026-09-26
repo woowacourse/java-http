@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
 
+    private static final String CRLF = "\r\n";
+
     private final String httpVersion;
     private final HttpHeaders headers = new HttpHeaders();
     private int statusCode;
@@ -21,8 +23,8 @@ public class HttpResponse {
         this.reasonPhrase = reasonPhrase;
     }
 
-    public void setHeader(final String name, final String value) {
-        headers.setHeader(name, value);
+    public void putHeader(final String name, final String value) {
+        headers.putHeader(name, value);
     }
 
     public void setBody(final byte[] body) {
@@ -33,13 +35,13 @@ public class HttpResponse {
         writeStatusLine(outputStream);
         writeContentLength(outputStream);
         headers.writeTo(outputStream);
-        outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(CRLF.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
         outputStream.flush();
     }
 
     private void writeStatusLine(final OutputStream outputStream) throws IOException {
-        final String statusLine = httpVersion + " " + statusCode + " " + reasonPhrase + "\r\n";
+        final String statusLine = httpVersion + " " + statusCode + " " + reasonPhrase + CRLF;
         outputStream.write(statusLine.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -47,12 +49,12 @@ public class HttpResponse {
         final String contentLength = headers.getHeader("Content-Length");
         final String bodyLength = String.valueOf(body.length);
         if (contentLength == null) {
-            final String header = "Content-Length: " + bodyLength + "\r\n";
+            final String header = "Content-Length: " + bodyLength + CRLF;
             outputStream.write(header.getBytes(StandardCharsets.UTF_8));
             return;
         }
         if (!contentLength.trim().equals(bodyLength)) {
-            headers.setHeader("Content-Length", bodyLength);
+            headers.putHeader("Content-Length", bodyLength);
         }
     }
 }

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -16,7 +17,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var sessionManager = new SimpleSessionManager();
-        final var processor = new Http11Processor(socket, sessionManager);
+        final var processor = new Http11Processor(socket, sessionManager, new RequestMapping(sessionManager));
 
         // when
         processor.process(socket);
@@ -44,7 +45,9 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final var sessionManager = new SimpleSessionManager();
-        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+        final Http11Processor processor = new Http11Processor(
+                socket, sessionManager, new RequestMapping(sessionManager)
+        );
 
         // when
         processor.process(socket);

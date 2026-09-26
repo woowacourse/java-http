@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import jakarta.servlet.http.HttpSession;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpBody;
@@ -40,10 +39,6 @@ public final class HttpRequest {
         return method;
     }
 
-    public RequestTarget getTarget() {
-        return target;
-    }
-
     public String getPath() {
         return target.path();
     }
@@ -52,44 +47,12 @@ public final class HttpRequest {
         return version;
     }
 
-    public boolean isMatched(HttpMethod method, String path) {
-        return this.method == method && target.path().equals(path);
-    }
-
-    public boolean isGet() {
-        return method == HttpMethod.GET;
-    }
-
-    public RequestHeaders getHeaders() {
-        return headers;
-    }
-
-    public HttpCookie getCookie() {
-        return cookie;
-    }
-
     public HttpBody getBody() {
         return body;
     }
 
-    public String getBodyAsString() {
-        return body.asString(StandardCharsets.UTF_8);
-    }
-
-    public String getQueryParamValue(String name) {
-        return getFirstValue(target.queryParameters().all(name));
-    }
-
-    public List<String> getQueryParamValues(String name) {
-        return target.queryParameters().all(name);
-    }
-
     public String getBodyParamValue(String name) {
         return getFirstValue(bodyParameters.all(name));
-    }
-
-    public List<String> getBodyParamValues(String name) {
-        return bodyParameters.all(name);
     }
 
     public Optional<String> getSessionId() {

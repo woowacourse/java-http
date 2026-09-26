@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.response;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpVersion;
+import org.apache.coyote.http11.request.HttpMethod;
 
 public final class HttpResponse {
 
@@ -25,8 +27,8 @@ public final class HttpResponse {
     }
 
     public static HttpResponse ok(HttpVersion version, String contentType, byte[] body) {
-        HttpBody responseBody = new HttpBody(body);
         ResponseHeaders headers = new ResponseHeaders();
+        HttpBody responseBody = new HttpBody(body);
         headers.add(CONTENT_TYPE, contentType);
         headers.add(CONTENT_LENGTH, String.valueOf(responseBody.length()));
 
@@ -38,30 +40,74 @@ public final class HttpResponse {
         headers.add(LOCATION, location);
         headers.add(CONTENT_LENGTH, "0");
 
-        return new HttpResponse(HttpStatus.FOUND, version, headers, new HttpBody(new byte[0]));
+        return new HttpResponse(HttpStatus.FOUND, version, headers, HttpBody.empty());
+    }
+
+    public static HttpResponse badRequest(HttpVersion version) {
+        ResponseHeaders headers = new ResponseHeaders();
+        headers.add(CONTENT_LENGTH, "0");
+
+        return new HttpResponse(HttpStatus.BAD_REQUEST, version, headers, HttpBody.empty());
+    }
+
+    public static HttpResponse unauthorized(HttpVersion version, byte[] body) {
+        ResponseHeaders headers = new ResponseHeaders();
+        HttpBody responseBody = new HttpBody(body);
+        headers.add(CONTENT_TYPE, "text/html;charset=utf-8");
+        headers.add(CONTENT_LENGTH, String.valueOf(responseBody.length()));
+
+        return new HttpResponse(HttpStatus.UNAUTHORIZED, version, headers, responseBody);
+    }
+
+    public static HttpResponse conflict(HttpVersion version, byte[] body) {
+        ResponseHeaders headers = new ResponseHeaders();
+        HttpBody responseBody = new HttpBody(body);
+        headers.add(CONTENT_TYPE, "text/html;charset=utf-8");
+        headers.add(CONTENT_LENGTH, String.valueOf(responseBody.length()));
+
+        return new HttpResponse(HttpStatus.CONFLICT, version, headers, responseBody);
     }
 
     public static HttpResponse notFound(HttpVersion version, byte[] body) {
-        HttpBody responseBody = new HttpBody(body);
         ResponseHeaders headers = new ResponseHeaders();
+        HttpBody responseBody = new HttpBody(body);
         headers.add(CONTENT_TYPE, "text/html;charset=utf-8");
         headers.add(CONTENT_LENGTH, String.valueOf(responseBody.length()));
 
         return new HttpResponse(HttpStatus.NOT_FOUND, version, headers, responseBody);
     }
 
-    public void addHeader(String name, String value) {
-        headers.add(name, value);
+    public static HttpResponse internalServerError(HttpVersion version, byte[] body) {
+        ResponseHeaders headers = new ResponseHeaders();
+        HttpBody responseBody = new HttpBody(body);
+        headers.add(CONTENT_TYPE, "text/html;charset=utf-8");
+        headers.add(CONTENT_LENGTH, String.valueOf(responseBody.length()));
+
+        return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, version, headers, responseBody);
     }
 
-    public void writeTo(OutputStream outputStream) throws IOException {
-        outputStream.write(serializeHeaders().getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body.bytes());
+    public static HttpResponse methodNotAllowed(HttpVersion version, Set<HttpMethod> allowedMethods) {
+        ResponseHeaders headers = new ResponseHeaders();
+        String allowedMethodNames = allowedMethods.stream()
+                .map(HttpMethod::name)
+                .sorted()
+                .collect(Collectors.joining(", "));
+        headers.add("Allow", allowedMethodNames);
+        headers.add(CONTENT_LENGTH, "0");
+
+        return new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, version, headers, HttpBody.empty());
     }
 
-    @Override
-    public String toString() {
-        return serializeHeaders() + body.asString(StandardCharsets.UTF_8);
+    public void addCookie(String cookie) {
+        headers.add("Set-Cookie", cookie);
+    }
+
+    public byte[] serialize() {
+        byte[] headerBytes = serializeHeaders().getBytes(StandardCharsets.UTF_8);
+        byte[] bodyBytes = body.bytes();
+        byte[] responseBytes = Arrays.copyOf(headerBytes, headerBytes.length + bodyBytes.length);
+        System.arraycopy(bodyBytes, 0, responseBytes, headerBytes.length, bodyBytes.length);
+        return responseBytes;
     }
 
     private String serializeHeaders() {

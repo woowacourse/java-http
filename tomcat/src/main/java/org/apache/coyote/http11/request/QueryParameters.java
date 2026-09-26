@@ -22,12 +22,4 @@ public final class QueryParameters {
     public List<String> all(String name) {
         return values.getOrDefault(name, List.of());
     }
-
-    public boolean contains(String name) {
-        return values.containsKey(name);
-    }
-
-    public Map<String, List<String>> asMap() {
-        return values;
-    }
 }

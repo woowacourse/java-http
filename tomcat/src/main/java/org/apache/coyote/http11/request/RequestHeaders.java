@@ -39,10 +39,4 @@ public final class RequestHeaders {
                 List.of()
         );
     }
-
-    public boolean contains(String name) {
-        return values.containsKey(
-                name.toLowerCase(Locale.ROOT)
-        );
-    }
 }

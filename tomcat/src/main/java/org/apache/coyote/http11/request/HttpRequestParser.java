@@ -24,16 +24,19 @@ public final class HttpRequestParser {
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
-        RequestLine requestLine = parseRequestLine(inputStream);
+        String[] requestLine = splitRequestLine(readLine(inputStream));
+        HttpVersion version = HttpVersion.parse(requestLine[2]);
+        HttpMethod method = parseMethod(requestLine[0]);
+        RequestTarget target = parseRequestTarget(requestLine[1]);
         RequestHeaders headers = parseHeaders(inputStream);
         HttpBody body = readBody(inputStream, parseContentLength(headers));
         QueryParameters bodyParameters = parseBodyParameters(headers, body);
         HttpCookie cookie = parseCookie(headers);
 
         return new HttpRequest(
-                requestLine.method(),
-                requestLine.target(),
-                requestLine.version(),
+                method,
+                target,
+                version,
                 headers,
                 body,
                 bodyParameters,
@@ -41,8 +44,7 @@ public final class HttpRequestParser {
         );
     }
 
-    private static RequestLine parseRequestLine(InputStream inputStream) throws IOException {
-        String requestLine = readLine(inputStream);
+    private static String[] splitRequestLine(String requestLine) {
         if (requestLine == null || requestLine.isBlank()) {
             throw new IllegalArgumentException("요청 라인이 존재하지 않습니다.");
         }
@@ -52,10 +54,7 @@ public final class HttpRequestParser {
             throw new IllegalArgumentException("잘못된 HTTP 요청 라인입니다: " + requestLine);
         }
 
-        HttpMethod method = parseMethod(tokens[0]);
-        RequestTarget target = parseRequestTarget(tokens[1]);
-        HttpVersion version = HttpVersion.parse(tokens[2]);
-        return new RequestLine(method, target, version);
+        return tokens;
     }
 
     private static HttpMethod parseMethod(String methodName) {
@@ -85,7 +84,7 @@ public final class HttpRequestParser {
         while ((line = readLine(inputStream)) != null && !line.isEmpty()) {
             int separator = line.indexOf(':');
             if (separator <= 0) {
-                continue;
+                throw new IllegalArgumentException("잘못된 HTTP 헤더입니다: " + line);
             }
 
             String name = line.substring(0, separator).trim();
@@ -119,18 +118,6 @@ public final class HttpRequestParser {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
-    private static HttpBody readBody(InputStream inputStream, int contentLength) throws IOException {
-        byte[] bytes = inputStream.readNBytes(contentLength);
-        if (bytes.length != contentLength) {
-            throw new IOException(
-                    "요청 Body가 Content-Length보다 짧습니다. "
-                            + "expected=" + contentLength
-                            + ", actual=" + bytes.length
-            );
-        }
-        return new HttpBody(bytes);
-    }
-
     private static int parseContentLength(RequestHeaders headers) {
         String value = headers.first(CONTENT_LENGTH).orElse("0");
         try {
@@ -142,6 +129,18 @@ public final class HttpRequestParser {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("잘못된 Content-Length입니다: " + value, e);
         }
+    }
+
+    private static HttpBody readBody(InputStream inputStream, int contentLength) throws IOException {
+        byte[] bytes = inputStream.readNBytes(contentLength);
+        if (bytes.length != contentLength) {
+            throw new IOException(
+                    "요청 Body가 Content-Length보다 짧습니다. "
+                            + "expected=" + contentLength
+                            + ", actual=" + bytes.length
+            );
+        }
+        return new HttpBody(bytes);
     }
 
     private static QueryParameters parseBodyParameters(RequestHeaders headers, HttpBody body) {
@@ -188,8 +187,5 @@ public final class HttpRequestParser {
         }
 
         return new HttpCookie(cookies);
-    }
-
-    private record RequestLine(HttpMethod method, RequestTarget target, HttpVersion version) {
     }
 }

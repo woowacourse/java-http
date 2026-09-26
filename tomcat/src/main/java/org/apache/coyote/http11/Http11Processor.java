@@ -16,10 +16,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.login.LoginParser;
-import org.apache.coyote.login.LoginResult;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,23 +50,26 @@ public class Http11Processor implements Runnable, Processor {
             // HTTP 요청 파싱
             parseHttpRequest(inputStream);
 
-            // Request Line
-            // Request Header
-            // Content-Type을 보고 Body가 어떤 타입인지 확인
-            // Content-Type이 없다면 body도 업는걸까?
-            // Accept를 보고 어떤 타입을 반환할지 결정
-            // Request Body
-
             // 반환 타입 확정
             final var responseType = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
-            // Path에 따른 비지니스 로직
-            if (httpInfo.get("Path").contains("/login?") && httpInfo.get("Method").equals("GET")) {
-                Map<String, String> jsonString = parseQueryString();
-                LoginResult loginResult = authenticateUser(jsonString.get("account"), jsonString.get("password"));
+            // 로그인 페이지 요청 처리
+            if (httpInfo.get("Path").equals("/login") && httpInfo.get("Method").equals("GET")) {
+                if (findLoginUser().isPresent()) {
+                    final var responseBody = readStaticResource("/index", responseType);
+                    final var response = buildRedirectResponse("/index.html", responseBody, responseType);
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+            }
 
-                // 실패 응답 반환
-                if (loginResult == LoginResult.FAIL) {
+            // POST 방식 로그인 요청 처리
+            if (httpInfo.get("Path").equals("/login") && httpInfo.get("Method").equals("POST")) {
+                Map<String, String> body = parseRequestBody();
+                Optional<User> loginUser = authenticateUser(body.get("account"), body.get("password"));
+
+                if (loginUser.isEmpty()) {
                     final var responseBody = readStaticResource("/401", responseType);
                     final var response = buildRedirectResponse("/401", responseBody, responseType);
                     outputStream.write(response.getBytes());
@@ -72,14 +77,16 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                // 리다이렉트 응답 반환
                 final var responseBody = readStaticResource("/index", responseType);
-                final var response = buildRedirectResponseWithCookie("/index.html", responseBody, responseType);
+                final var session = createSession(loginUser.get());
+                final var response = buildRedirectResponseWithCookie("/index.html", responseBody, responseType,
+                    session.getId());
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
+            // 회원가입 요청 처리
             if (httpInfo.get("Method").equals("POST") && httpInfo.get("Path").contains("/register")) {
                 Map<String, String> body = parseRequestBody();
                 boolean isRegisterSuccess = registerUser(body.get("account"), body.get("password"), body.get("email"));
@@ -94,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 // 리다이렉트 응답 반환
                 final var responseBody = readStaticResource("/index", responseType);
-                final var response = buildRedirectResponseWithCookie("/index.html", responseBody, responseType);
+                final var response = buildRedirectResponse("/index.html", responseBody, responseType);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
@@ -102,7 +109,6 @@ public class Http11Processor implements Runnable, Processor {
 
             // 200 OK 응답 반환
             final var responseBody = readStaticResource(null, responseType);
-
             final var response = buildOKHttpResponse(responseBody, responseType);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -232,7 +238,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> parseRequestBody() {
         final String contentType = httpInfo.getOrDefault("Content-Type", "");
-        
+
         if (contentType.contains("application/x-www-form-urlencoded")) {
             return parseFormUrlEncodedBody();
         }
@@ -241,21 +247,48 @@ public class Http11Processor implements Runnable, Processor {
         return new HashMap<>();
     }
 
-    private LoginResult authenticateUser(String account, String password) {
+    private Optional<User> authenticateUser(String account, String password) {
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
 
             if (!user.checkPassword(password)) {
                 log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
-                return LoginResult.FAIL;
+                return Optional.empty();
             }
 
             log.info("user : {}", user);
-            return LoginResult.SUCCESS;
+            return Optional.of(user);
         } catch (Exception e) {
             log.error("[authenticateUser] 회원 정보를 찾을 수 없습니다.");
-            return LoginResult.FAIL;
+            return Optional.empty();
         }
+    }
+
+    private Session createSession(User user) {
+        final var session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        return session;
+    }
+
+    private Optional<User> findLoginUser() {
+        final var cookies = parseCookies();
+        final var sessionId = cookies.get("JSESSIONID");
+        if (sessionId == null) {
+            return Optional.empty();
+        }
+
+        final var session = SessionManager.findSession(sessionId);
+        if (session == null) {
+            return Optional.empty();
+        }
+
+        final var user = session.getAttribute("user");
+        if (user instanceof User loginUser) {
+            return Optional.of(loginUser);
+        }
+
+        return Optional.empty();
     }
 
     private boolean registerUser(String account, String password, String email) {
@@ -291,12 +324,13 @@ public class Http11Processor implements Runnable, Processor {
             responseBody);
     }
 
-    private String buildRedirectResponseWithCookie(final String url, final String responseBody, final String type) {
+    private String buildRedirectResponseWithCookie(final String url, final String responseBody, final String type,
+        final String sessionId) {
         return String.join("\r\n",
             "HTTP/1.1 302 Redirect ",
             String.format("Content-Type: text/%s;charset=utf-8 ", type),
             String.format("Location: %s ", url),
-            String.format("Set-Cookie: JSESSIONID=%s; ", UUID.randomUUID()),
+            String.format("Set-Cookie: JSESSIONID=%s; ", sessionId),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

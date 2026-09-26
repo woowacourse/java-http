@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class ResourceResolver {
 
@@ -13,9 +14,9 @@ public class ResourceResolver {
     private ResourceResolver() {
     }
 
-    public static String resolve(String path) throws IOException {
+    public static Optional<String> resolve(String path) throws IOException {
         if (path.equals("/")) {
-            return "Hello world!";
+            return Optional.of("Hello world!");
         }
         String resourcePath = STATIC + path;
         if (!resourcePath.contains(".")) {
@@ -23,9 +24,9 @@ public class ResourceResolver {
         }
         URL resource = ResourceResolver.class.getClassLoader().getResource(resourcePath);
         if (resource == null) {
-            return null;
+            return Optional.empty();
         }
-        return new String(Files.readAllBytes(Path.of(resource.getPath())));
+        return Optional.of(new String(Files.readAllBytes(Path.of(resource.getPath()))));
     }
 
     public static String resolveContentType(String path) {

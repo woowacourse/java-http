@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpResponse {
 
@@ -34,11 +35,23 @@ public class HttpResponse {
     }
 
     public void forward(String path) throws IOException {
-        String body = ResourceResolver.resolve(path);
-        httpStatus = HttpStatus.OK;
-        headers.put(CONTENT_TYPE, ResourceResolver.resolveContentType(path) + ";" + CHARSET_UTF_8);
+        ResourceResolver.resolve(path)
+                .ifPresent(body -> ok(ResourceResolver.resolveContentType(path), body));
+    }
+
+    public void ok(String contentType, String body) {
+        writeBody(HttpStatus.OK, contentType, body);
+    }
+
+    public void notFound(String contentType, String body) {
+        writeBody(HttpStatus.NOT_FOUND, contentType, body);
+    }
+
+    private void writeBody(HttpStatus status, String contentType, String body) {
+        this.httpStatus = status;
+        this.responseBody = body;
+        headers.put(CONTENT_TYPE, contentType + ";" + CHARSET_UTF_8);
         headers.put(CONTENT_LENGTH, body.getBytes().length + "");
-        responseBody = body;
     }
 
     public byte[] getBytes() {

@@ -48,7 +48,6 @@ public class LoginController extends AbstractController {
                 .filter(user -> user.checkPassword(password));
     }
 
-
     private boolean isLoggedIn(HttpRequest request) {
         Session session = request.getSession(false);
         return session != null && session.getAttribute(SESSION_USER_KEY) != null;

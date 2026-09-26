@@ -32,7 +32,7 @@ public class Connector implements Runnable {
     private final SessionManager sessionManager;
     private final ExecutorService executorService;
     private final RequestDispatcher requestDispatcher;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS, MAX_PENDING_QUEUE_SIZE);

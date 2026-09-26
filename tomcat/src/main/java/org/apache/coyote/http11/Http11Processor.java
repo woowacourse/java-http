@@ -38,21 +38,14 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
 
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+            final var outputStream = connection.getOutputStream()) {
             final var reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String readLine = reader.readLine();
-            if (readLine == null) {
-                return;
-            }
+            HttpRequest request = HttpRequest.parse(reader);
 
-            RequestLine requestLine = RequestLine.parse(readLine);
-
-            HttpHeaders headers = readHeaders(reader);
-            RequestBody body = readBody(reader, headers);
-
-            Optional<Cookie> sessionCookie = findSessionCookie(headers);
-            String response = handleRequest(requestLine.method(), requestLine.target(), body.content(), sessionCookie);
+            Optional<Cookie> sessionCookie = findSessionCookie(request.headers());
+            String response = handleRequest(request.requestLine().method(), request.requestLine().path(),
+                    request.body().content(), sessionCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -85,39 +78,9 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private RequestBody readBody(BufferedReader reader, HttpHeaders headers) throws IOException {
-        int contentLength = headers.contentLength();
-
-        char[] body = new char[contentLength];
-        int current = 0;
-
-        while (current < contentLength) {
-            int read = reader.read(body, current, contentLength - current);
-
-            if (read == -1) {
-                throw new IOException("요청 body가 예상된 값보다 짧습니다.");
-            }
-
-            current += read;
-        }
-
-        return new RequestBody(new String(body));
-    }
-
-    private HttpHeaders readHeaders(BufferedReader reader) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        String line;
-
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headers.add(line);
-        }
-
-        return headers;
-    }
-
-    private String handleRequest(String method, String target, String body, Optional<Cookie> sessionCookie)
+    private String handleRequest(String method, String path, String body, Optional<Cookie> sessionCookie)
             throws IOException {
-        String resourcePath = extractResourcePath(target);
+        String resourcePath = path;
 
         if ("GET".equals(method)) {
             return handleGetRequest(resourcePath, sessionCookie);
@@ -298,15 +261,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return readResource("static" + resourcePath);
-    }
-
-    private String extractResourcePath(String path) {
-        int index = path.indexOf("?");
-        if (index == -1) {
-            return path;
-        }
-
-        return path.substring(0, index);
     }
 
     private byte[] readResource(String resourcePath) throws IOException {

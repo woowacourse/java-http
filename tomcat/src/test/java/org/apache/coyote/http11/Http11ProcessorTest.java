@@ -1,17 +1,16 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.SessionManager;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.catalina.SessionManager;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -35,7 +34,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -107,7 +106,7 @@ class Http11ProcessorTest {
         // given
         final String body = "account=gugu&password=password";
         final String httpRequest = "POST /login HTTP/1.1\r\n"
-                + "Content-Length: " + body.length() + "\r\n\r\n" + body;
+                                   + "Content-Length: " + body.length() + "\r\n\r\n" + body;
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
@@ -126,7 +125,7 @@ class Http11ProcessorTest {
         // given
         final String body = "account=gugu&password=wrong";
         final String httpRequest = "POST /login HTTP/1.1\r\n"
-                + "Content-Length: " + body.length() + "\r\n\r\n" + body;
+                                   + "Content-Length: " + body.length() + "\r\n\r\n" + body;
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
@@ -153,8 +152,8 @@ class Http11ProcessorTest {
     void registerWithPostBody() {
         final String body = "account=new-user&password=secret&email=new%40example.com";
         final String request = "POST /register HTTP/1.1\r\n"
-                + "Content-Length: " + body.length() + "\r\n"
-                + "Content-Type: application/x-www-form-urlencoded\r\n\r\n" + body;
+                               + "Content-Length: " + body.length() + "\r\n"
+                               + "Content-Type: application/x-www-form-urlencoded\r\n\r\n" + body;
         final var socket = new StubSocket(request);
 
         new Http11Processor(socket).process(socket);
@@ -171,7 +170,7 @@ class Http11ProcessorTest {
         final String sessionId = firstSocket.output().split("JSESSIONID=")[1].split(";")[0];
 
         final String request = "GET /index.html HTTP/1.1\r\n"
-                + "Cookie: other=value; JSESSIONID=" + sessionId + "\r\n\r\n";
+                               + "Cookie: other=value; JSESSIONID=" + sessionId + "\r\n\r\n";
         final var secondSocket = new StubSocket(request);
         new Http11Processor(secondSocket).process(secondSocket);
 
@@ -183,7 +182,7 @@ class Http11ProcessorTest {
     void loggedInUserIsRedirectedFromLoginPage() {
         final String body = "account=gugu&password=password";
         final String loginRequest = "POST /login HTTP/1.1\r\n"
-                + "Content-Length: " + body.length() + "\r\n\r\n" + body;
+                                    + "Content-Length: " + body.length() + "\r\n\r\n" + body;
         final var loginSocket = new StubSocket(loginRequest);
         new Http11Processor(loginSocket).process(loginSocket);
 
@@ -192,7 +191,7 @@ class Http11ProcessorTest {
         assertThat(user.getAccount()).isEqualTo("gugu");
 
         final String pageRequest = "GET /login HTTP/1.1\r\n"
-                + "Cookie: other=value; JSESSIONID=" + sessionId + "\r\n\r\n";
+                                   + "Cookie: other=value; JSESSIONID=" + sessionId + "\r\n\r\n";
         final var pageSocket = new StubSocket(pageRequest);
         new Http11Processor(pageSocket).process(pageSocket);
 

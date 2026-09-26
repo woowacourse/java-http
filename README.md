@@ -18,3 +18,37 @@
 1. [File, I/O Stream](study/src/test/java/study)
 2. [HTTP Cache](study/src/test/java/cache)
 3. [Thread](study/src/test/java/thread)
+
+
+## 3단계 구현 요구사항
+
+기존 로그인, 회원가입, 세션, 정적 파일 응답은 유지하면서 `Http11Processor`의 역할을 나눈다.
+
+### HTTP 요청
+
+- [ ] `RequestLine`이 HTTP 메서드, 요청 경로, 버전을 구분한다.
+- [ ] `HttpRequest`가 요청의 첫 줄, 헤더, 본문을 읽고 필요한 값을 제공한다.
+- [ ] GET 쿼리 문자열과 POST 폼 본문에서 파라미터를 읽는다. 폼 인코딩된 값은 디코딩한다.
+- [ ] 요청 쿠키에서 `JSESSIONID`를 읽어 기존 세션을 찾을 수 있다.
+
+### HTTP 응답
+
+- [ ] `HttpResponse`가 상태 줄, 헤더, 빈 줄, 본문 순서로 응답을 출력한다.
+- [ ] 정적 파일 응답의 `Content-Type`과 UTF-8 바이트 기준 `Content-Length`를 설정한다.
+- [ ] 리다이렉트할 때 `302`와 `Location`을, 새 세션이 필요할 때 `Set-Cookie`를 설정한다.
+
+### 컨트롤러와 요청 매핑
+
+- [ ] `Controller`의 `service(HttpRequest, HttpResponse)`로 요청을 처리한다.
+- [ ] `AbstractController`가 HTTP 메서드에 따라 `doGet` 또는 `doPost`를 호출한다.
+- [ ] 로그인, 회원가입, 정적 파일 응답 로직을 각각 컨트롤러로 옮긴다.
+- [ ] `RequestMapping`이 요청 경로에 맞는 컨트롤러를 찾는다.
+- [ ] `Http11Processor`는 요청 생성, 컨트롤러 호출, 응답 출력 흐름을 연결한다.
+
+### 테스트 작성 순서
+
+- [ ] `RequestLine`이 `GET /login HTTP/1.1`을 메서드, 경로, 버전으로 나누는 테스트
+- [ ] `HttpRequest`가 GET 쿼리 문자열, 헤더, POST 폼 본문을 읽는 테스트
+- [ ] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
+- [ ] `RequestMapping`과 `AbstractController`가 경로와 메서드에 맞게 호출하는 테스트
+- [ ] 기존 `Http11ProcessorTest`가 계속 통과하는지 확인

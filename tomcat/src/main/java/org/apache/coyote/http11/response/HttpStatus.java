@@ -1,0 +1,21 @@
+package org.apache.coyote.http11.response;
+
+public enum HttpStatus {
+    OK(200, "OK"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "Not Found");
+
+    private final int code;
+    private final String reasonPhrase;
+
+    HttpStatus(final int code, final String reasonPhrase) {
+        this.code = code;
+        this.reasonPhrase = reasonPhrase;
+    }
+
+    @Override
+    public String toString() {
+        return code + " " + reasonPhrase;
+    }
+}

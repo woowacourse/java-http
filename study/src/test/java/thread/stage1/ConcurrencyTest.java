@@ -28,6 +28,12 @@ class ConcurrencyTest {
 
         // 스레드는 실행 순서가 정해져 있지 않다.
         // firstThread보다 늦게 시작한 secondThread가 먼저 실행될 수도 있다.
+        /**
+         * UserServlet의 join()에 있는 users.add(user);
+         * 1. 해당 부분에 디버깅 포인트 추가
+         * 2. 디버깅 포인트에 우클릭 후 All -> Thread로 변경
+         * 디버깅 실행.
+         */
         firstThread.start();
         secondThread.start();
         secondThread.join(); // secondThread가 먼저 gugu로 가입했다.

@@ -10,7 +10,7 @@ import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.HttpSessionService;
+import org.apache.coyote.http11.session.HttpSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,18 +22,18 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestMapping requestMapping;
     private final Controller staticResourceController;
-    private final HttpSessionService sessionService;
+    private final HttpSessionHandler sessionHandler;
 
     public Http11Processor(
             final Socket connection,
             final RequestMapping requestMapping,
             final Controller staticResourceController,
-            final HttpSessionService sessionService
+            final HttpSessionHandler sessionHandler
     ) {
         this.connection = connection;
         this.requestMapping = requestMapping;
         this.staticResourceController = staticResourceController;
-        this.sessionService = sessionService;
+        this.sessionHandler = sessionHandler;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = optionalRequest.get();
             final HttpResponse response = new HttpResponse();
 
-            sessionService.ensureSessionIdCookie(request, response);
+            sessionHandler.ensureSessionIdCookie(request, response);
             serviceController(request, response);
             if (!response.hasStatus()) {// fallback구조
                 staticResourceController.service(request, response);

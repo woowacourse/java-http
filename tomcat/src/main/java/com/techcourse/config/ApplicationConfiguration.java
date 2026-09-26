@@ -9,7 +9,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.controller.StaticResourceController;
-import org.apache.coyote.http11.session.HttpSessionService;
+import org.apache.coyote.http11.session.HttpSessionHandler;
 
 import org.apache.coyote.resource.ResourceReader;
 
@@ -19,10 +19,10 @@ public class ApplicationConfiguration {
     private static final String REGISTER_PATH = "/register";
 
     private final SessionManager sessionManager = SessionManager.getInstance();
-    private final HttpSessionService sessionService =
-            new HttpSessionService(sessionManager);
+    private final HttpSessionHandler sessionHandler =
+            new HttpSessionHandler(sessionManager);
 
-    private final Controller loginController = new LoginController(sessionService);
+    private final Controller loginController = new LoginController(sessionHandler);
 
 
     private final Controller registerController = new RegisterController();
@@ -40,7 +40,7 @@ public class ApplicationConfiguration {
 
     private final Controller staticResourceController =
             new StaticResourceController(resourceReader);
-    private final Connector connector = new Connector(requestMapping, staticResourceController, sessionService);
+    private final Connector connector = new Connector(requestMapping, staticResourceController, sessionHandler);
 
     private final Tomcat tomcat = new Tomcat(connector);
 

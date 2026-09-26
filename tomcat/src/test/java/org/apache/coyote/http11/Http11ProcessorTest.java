@@ -13,7 +13,7 @@ import java.util.Map;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.controller.StaticResourceController;
-import org.apache.coyote.http11.session.HttpSessionService;
+import org.apache.coyote.http11.session.HttpSessionHandler;
 
 import org.apache.coyote.resource.ResourceReader;
 import org.junit.jupiter.api.Test;
@@ -26,16 +26,16 @@ class Http11ProcessorTest {
     private Http11Processor createProcessor(final StubSocket socket) {
         final SessionManager sessionManager = SessionManager.getInstance();
 
-        final HttpSessionService sessionService = new HttpSessionService(sessionManager);
+        final HttpSessionHandler sessionHandler = new HttpSessionHandler(sessionManager);
 
         final RequestMapping requestMapping = new RequestMapping(
-                Map.of("/login", new LoginController(sessionService),
+                Map.of("/login", new LoginController(sessionHandler),
                         "/register", new RegisterController()
                 )
         );
 
         return new Http11Processor(socket, requestMapping,
-                new StaticResourceController(new ResourceReader()), sessionService);
+                new StaticResourceController(new ResourceReader()), sessionHandler);
     }
 
     @Test

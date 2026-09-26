@@ -12,13 +12,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HttpSessionServiceTest {
+class HttpSessionHandlerTest {
 
     private final SessionManager sessionManager =
             SessionManager.getInstance();
 
-    private final HttpSessionService sessionService =
-            new HttpSessionService(sessionManager);
+    private final HttpSessionHandler sessionHandler =
+            new HttpSessionHandler(sessionManager);
 
     @Test
     void JSESSIONID가_없으면_쿠키를_발급하지만_세션은_생성하지_않는다()
@@ -38,7 +38,7 @@ class HttpSessionServiceTest {
         final HttpResponse response = new HttpResponse();
 
         // when
-        sessionService.ensureSessionIdCookie(request, response);
+        sessionHandler.ensureSessionIdCookie(request, response);
 
         response.ok("text/html;charset=utf-8", new byte[0]);
 
@@ -72,7 +72,7 @@ class HttpSessionServiceTest {
         );
 
         // when
-        final HttpSession foundSession = sessionService.findSession(request);
+        final HttpSession foundSession = sessionHandler.findSession(request);
 
         // then
         assertThat(foundSession).isSameAs(session);
@@ -86,7 +86,7 @@ class HttpSessionServiceTest {
         final HttpResponse response = new HttpResponse();
 
         // when
-        final HttpSession session = sessionService.createSession(response);
+        final HttpSession session = sessionHandler.createSession(response);
 
         response.ok("text/html;charset=utf-8", new byte[0]);
 
@@ -125,7 +125,7 @@ class HttpSessionServiceTest {
 
         try {
             // when
-            newSession = sessionService.replaceSession(request, response);
+            newSession = sessionHandler.replaceSession(request, response);
 
             // then
             assertThat(sessionManager.findSession(existingSessionId)).isNull();

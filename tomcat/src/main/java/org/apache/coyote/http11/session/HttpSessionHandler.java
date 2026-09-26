@@ -8,7 +8,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class HttpSessionService {
+public class HttpSessionHandler {
 
     private static final String COOKIE_NAME = "JSESSIONID";
 
@@ -16,7 +16,7 @@ public class HttpSessionService {
 
     private final SessionManager sessionManager;
 
-    public HttpSessionService(final SessionManager sessionManager) {
+    public HttpSessionHandler(final SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 

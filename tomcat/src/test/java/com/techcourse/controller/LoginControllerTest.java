@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.HttpSessionService;
+import org.apache.coyote.http11.session.HttpSessionHandler;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,11 +22,11 @@ class LoginControllerTest {
     private final SessionManager sessionManager =
             SessionManager.getInstance();
 
-    private final HttpSessionService sessionService =
-            new HttpSessionService(sessionManager);
+    private final HttpSessionHandler sessionHandler =
+            new HttpSessionHandler(sessionManager);
 
     private final LoginController controller =
-            new LoginController(sessionService);
+            new LoginController(sessionHandler);
 
     @Test
     void 로그인하지_않은_사용자가_GET_login을_요청하면_응답을_결정하지_않는다()

@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.HttpSessionService;
+import org.apache.coyote.http11.session.HttpSessionHandler;
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
@@ -22,17 +22,17 @@ public class LoginController extends AbstractController {
     private static final String USER_SESSION_KEY = "user";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private final HttpSessionService sessionService;
+    private final HttpSessionHandler sessionHandler;
 
-    public LoginController(final HttpSessionService sessionService) {
-        this.sessionService = sessionService;
+    public LoginController(final HttpSessionHandler sessionHandler) {
+        this.sessionHandler = sessionHandler;
     }
 
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
 
-        final HttpSession session = sessionService.findSession(request);
+        final HttpSession session = sessionHandler.findSession(request);
         if (session == null) {
             return;
         }
@@ -67,7 +67,7 @@ public class LoginController extends AbstractController {
 
         final User loginUser = user.get();
 
-        final HttpSession session = sessionService.replaceSession(request, response);
+        final HttpSession session = sessionHandler.replaceSession(request, response);
 
         session.setAttribute(USER_SESSION_KEY, loginUser);
         log.info("login success account: {}", loginUser.getAccount());

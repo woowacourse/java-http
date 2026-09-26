@@ -25,13 +25,20 @@ public class HttpCookie {
             String cookie = keyValue.strip();
             int separatorIndex = cookie.indexOf('=');
             if (separatorIndex <= 0) {
-                throw new IllegalArgumentException("잘못된 Cookie 형식입니다: " + cookieString);
+                continue;
             }
             String name = cookie.substring(0, separatorIndex).strip();
+            if (name.isEmpty()) {
+                continue;
+            }
             String value = cookie.substring(separatorIndex + 1).strip();
             cookies.put(name, value);
         }
         return new HttpCookie(cookies);
+    }
+
+    public void add(String name, String value) {
+        cookies.put(name, value);
     }
 
     public boolean has(String name) {

@@ -1,43 +1,36 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.Register;
-import com.techcourse.model.User;
-import org.apache.catalina.Manager;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.Method;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestMapping;
+import org.apache.coyote.request.HttpRequestParser;
+import org.apache.coyote.request.MalformedRequestException;
 import org.apache.coyote.request.MyHttpRequest;
+import org.apache.coyote.request.UnknownMethodException;
 import org.apache.coyote.response.MyHttpResponse;
 import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Manager manager = SessionManager.getInstance();
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -50,70 +43,65 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            MyHttpRequest httpRequest =
-                    MyHttpRequest.of(readHttpRequest(new BufferedReader(new InputStreamReader(inputStream))));
+            MyHttpRequest httpRequest;
+            try {
+                httpRequest = HttpRequestParser.parse(readHttpRequest(
+                        new BufferedReader(new InputStreamReader(inputStream))));
+            } catch (UnknownMethodException e) {
+                writeErrorResponse(outputStream, StatusCode.NOT_IMPLEMENTED);
+                return;
+            } catch (MalformedRequestException e) {
+                writeErrorResponse(outputStream, StatusCode.BAD_REQUEST);
+                return;
+            }
             MyHttpResponse httpResponse = new MyHttpResponse();
-            log.info("start request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+            log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
-            if (!httpRequest.hasCookie("JSESSIONID")) {
-                Session session = httpRequest.getSession(true);
-                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            Controller controller = requestMapping.getController(httpRequest);
+            controller.service(httpRequest, httpResponse);
+
+            if (httpRequest.isNewSession()) {
+                httpResponse.addHeader(
+                        "Set-Cookie",
+                        "JSESSIONID=" + httpRequest.getSession(false).getId()
+                );
             }
 
-            if (manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").orElse(null)) != null
-                    && httpRequest.getMethod() == Method.GET
-                    && httpRequest.getUri().endsWith("/login")) {
-
-                Session session = manager.findSession(httpRequest.getCookie().getValue("JSESSIONID").get());
-                if (getUser(session) != null) {
-                    httpResponse.setStatusCode(StatusCode.FOUND);
-                    httpResponse.setContentType(ContentType.HTML);
-                    httpResponse.sendRedirect("index.html");
-                    outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
-                    log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
-                    return;
-                }
-            }
-
-            if (isLoginRequest(httpRequest)) {
-                authenticate(httpRequest, httpResponse);
-                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
-                return;
-            }
-
-            // register
-            if (isRegisterRequest(httpRequest)) {
-                register(httpRequest, httpResponse);
-                outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
-                log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
-                return;
-            }
-
-            httpResponse.setStatusCode(StatusCode.OK);
-            httpResponse.setContentType(httpRequest.getContentType());
-            final var responseBody = readStaticResource(httpRequest, "Hello world!");
-            httpResponse.writeBody(responseBody);
-
-            outputStream.write(httpResponse.build().getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-            log.info("end request: {} {}", httpRequest.getMethod(), httpRequest.getUri());
+            writeResponse(outputStream, httpResponse);
+            log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private static void writeResponse(final OutputStream outputStream,
+                                      final MyHttpResponse response) throws IOException {
+        outputStream.write(response.build().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private static void writeErrorResponse(final OutputStream outputStream,
+                                           final StatusCode statusCode) throws IOException {
+        MyHttpResponse response = new MyHttpResponse();
+        response.setStatusCode(statusCode);
+        writeResponse(outputStream, response);
     }
 
     private static String readHttpRequest(BufferedReader br) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        String line;
         int contentLength = 0;
-        while (!(line = br.readLine()).isEmpty()) {
+        while (true) {
+            String line = br.readLine();
+            if (line == null) {
+                throw new MalformedRequestException("HTTP 요청이 완성되지 않았습니다.");
+            }
+            if (line.isEmpty()) {
+                break;
+            }
             sb.append(line).append("\r\n");
-            if (line.startsWith("Content-Length:")) {
+            if (line.regionMatches(true, 0, "Content-Length:", 0, "Content-Length:".length())) {
                 contentLength = Integer.parseInt(line.substring("Content-Length:".length()).strip());
             }
         }
@@ -130,92 +118,5 @@ public class Http11Processor implements Runnable, Processor {
         }
         sb.append(cbuf, 0, read);
         return sb.toString();
-    }
-
-    private User getUser(Session session) {
-        return (User) session.getAttribute("user");
-    }
-
-    private static boolean isLoginRequest(MyHttpRequest httpRequest) {
-        return httpRequest.getResourcePath().contains("static/login.html")
-                && httpRequest.getMethod() == Method.POST
-                && httpRequest.hasRequestBody();
-    }
-
-    private static boolean isRegisterRequest(MyHttpRequest httpRequest) {
-        return httpRequest.getResourcePath().contains("static/register.html")
-                && httpRequest.getMethod() == Method.POST
-                && httpRequest.hasRequestBody();
-    }
-
-    // TODO json도 처리 가능하도록
-    private static void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) throws IOException {
-        Map<String, String> params = new HashMap<>();
-        for (String parameter : httpRequest.getBody().split("&")) {
-            String[] keyValue = parameter.split("=", 2);
-            params.put(keyValue[0], keyValue[1]);
-        }
-        Optional<User> foundUser = findUserByAccount(params.get("account"));
-        if (foundUser.isEmpty()) {
-            log.info("authenticate failed: user not found");
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("401.html");
-            return;
-        }
-
-        if (foundUser.get().checkPassword(params.get("password"))) {
-            log.info("user matched={}", foundUser.get());
-            final var session = httpRequest.getSession(true);
-            if (httpRequest.isNewSession()) {
-                httpResponse.addHeader("Set-Cookie", String.join("=", "JSESSIONID", session.getId()));
-            }
-            session.setAttribute("user", foundUser.get());
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("index.html");
-            return;
-        }
-        log.info("authenticate failed: incorrectly password");
-        httpResponse.setStatusCode(StatusCode.FOUND);
-        httpResponse.setContentType(ContentType.HTML);
-        httpResponse.sendRedirect("401.html");
-    }
-
-    private static void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
-        Map<String, String> params = new HashMap<>();
-        for (String parameter : httpRequest.getBody().split("&")) {
-            String[] keyValue = parameter.split("=", 3);
-            params.put(keyValue[0], keyValue[1]);
-        }
-
-        try {
-            User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
-            log.info("registration succeed: {}", registeredUser);
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("index.html");
-        } catch (IllegalArgumentException e) {
-            log.error("registration failed: ", e);
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
-            httpResponse.sendRedirect("login.html");
-        }
-    }
-
-    private static Optional<User> findUserByAccount(String account) {
-        return InMemoryUserRepository.findByAccount(account);
-    }
-
-    private static String readStaticResource(MyHttpRequest httpRequest, String defaultContent)
-            throws IOException, URISyntaxException {
-        URL fileUrl = Http11Processor.class
-                .getClassLoader()
-                .getResource(httpRequest.getResourcePath());
-        File file = new File(Objects.requireNonNull(fileUrl).toURI());
-        if (file.isFile()) {
-            return Files.readString(file.toPath(), StandardCharsets.UTF_8);
-        }
-        return defaultContent;
     }
 }

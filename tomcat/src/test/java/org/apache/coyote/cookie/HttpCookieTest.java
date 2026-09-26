@@ -13,19 +13,28 @@ class HttpCookieTest {
     class parse_cookie {
 
         @Test
-        void 쿠키에_등호가_없는_경우_예외가_발생한다() {
+        void 쿠키에_등호가_없는_경우_해당_쿠키만_무시한다() {
             String invalidCookie = "JSESSIONID";
 
-            assertThatThrownBy(() -> HttpCookie.from(invalidCookie))
-                    .isInstanceOf(IllegalArgumentException.class);
+            HttpCookie httpCookie = HttpCookie.from(invalidCookie);
+
+            assertThat(httpCookie.cookies()).isEmpty();
         }
 
         @Test
-        void 쿠키_이름이_없는_경우_예외가_발생한다() {
+        void 쿠키_이름이_없는_경우_해당_쿠키만_무시한다() {
             String invalidCookie = "=session-id";
 
-            assertThatThrownBy(() -> HttpCookie.from(invalidCookie))
-                    .isInstanceOf(IllegalArgumentException.class);
+            HttpCookie httpCookie = HttpCookie.from(invalidCookie);
+
+            assertThat(httpCookie.cookies()).isEmpty();
+        }
+
+        @Test
+        void 잘못된_쿠키가_포함되어도_정상적인_쿠키는_파싱한다() {
+            HttpCookie httpCookie = HttpCookie.from("JSESSIONID; token=abc; =invalid");
+
+            assertThat(httpCookie.getValue("token")).hasValue("abc");
         }
 
         @Test

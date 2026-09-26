@@ -1,23 +1,79 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.techcourse.model.User;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RootController;
+import com.techcourse.controller.StaticResourceController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.controller.RequestMapping;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.UUID;
 
 
 class Http11ProcessorTest {
+
+    SessionManager manager = SessionManager.getInstance();
+    Session session;
+    RequestMapping requestMapping = new RequestMapping(
+            Map.of(
+                    "/", new RootController(),
+                    "/login", new LoginController(),
+                    "/register", new RegisterController()
+            ),
+            new StaticResourceController()
+    );
+
+    @BeforeEach
+    void setUp() {
+        session = manager.createSession();
+    }
+
+    @AfterEach
+    void tearDown() {
+        manager.remove(session.getId());
+    }
+
+    @Test
+    void 존재하지_않는_정적_리소스는_404로_응답한다() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /not-found.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        assertThatCode(() -> processor.process(socket))
+                .doesNotThrowAnyException();
+
+        // then
+        String notFoundPage = Files.readString(new File(
+                getClass().getClassLoader().getResource("static/404.html").getFile()
+        ).toPath());
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 404 Not Found ")
+                .contains(notFoundPage);
+    }
 
     @Test
     void process() {
@@ -29,7 +85,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -41,6 +97,134 @@ class Http11ProcessorTest {
                 "Content-Length: 12 \r\n",
                 "\r\n" + "Hello world!"
         );
+    }
+
+    @Test
+    void LoginController가_지원하지_않는_메서드는_405로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "PUT /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 405 Method Not Allowed \r\n",
+                "Allow: GET, POST \r\n"
+        );
+    }
+
+    @Test
+    void RootController가_지원하지_않는_POST는_405로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST / HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 405 Method Not Allowed \r\n",
+                "Allow: GET \r\n"
+        );
+    }
+
+    @Test
+    void 존재하지_않는_정적_리소스에_POST_요청하면_404로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /not-found.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found ");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"CUSTOM", "get", "PATCH"})
+    void 서버가_구현하지_않은_메서드는_501로_응답한다(String method) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                method + " /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 501 Not Implemented \r\n"
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "GET /login",
+            "GET /login HTTP/1.1 extra",
+            "GET@ /login HTTP/1.1"
+    })
+    void 형식이_잘못된_요청_라인은_400으로_응답한다(String requestLine) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 400 Bad Request \r\n"
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "GET  /login HTTP/1.1",
+            " GET /login HTTP/1.1 "
+    })
+    void 요청_라인의_앞뒤와_연속된_공백은_허용한다(String requestLine) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK \r\n");
     }
 
     @Nested
@@ -57,7 +241,7 @@ class Http11ProcessorTest {
                     "",
                     "");
             final var socket = new StubSocket(httpRequest);
-            final var processor = new Http11Processor(socket);
+            final var processor = new Http11Processor(socket, requestMapping);
 
             // when
             processor.process(socket);
@@ -88,7 +272,7 @@ class Http11ProcessorTest {
                     "",
                     "");
             final var socket = new StubSocket(httpRequest);
-            final var processor = new Http11Processor(socket);
+            final var processor = new Http11Processor(socket, requestMapping);
 
             // when
             processor.process(socket);
@@ -117,7 +301,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -144,7 +328,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -177,7 +361,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -209,7 +393,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -224,15 +408,45 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 요청에_쿠키가_없으면_JSESSIONID를_발급한다() {
+    void 로그인_요청의_퍼센트_인코딩된_폼_파라미터를_디코딩한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: 34",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=g%75gu&password=pass%77ord",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: http://localhost:8080/index.html \r\n"
+        );
+    }
+
+    @Test
+    void 로그인에_성공하고_세션이_없으면_JSESSIONID를_발급한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=password",
                 "",
                 "");
         var socket = new StubSocket(httpRequest);
-        var processor = new Http11Processor(socket);
+        var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -250,39 +464,54 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 요청에_이미_JSession_쿠키_헤더가_있다면_응답에_포함하지_않는다() {
+    void Content_Length_헤더_이름의_대소문자를_구분하지_않고_본문을_읽는다() {
         // given
-        SessionManager manager = SessionManager.getInstance();
-        Session session = manager.createSession();
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + session.getId(),
-                "Connection: keep-alive ",
-                "Content-Length: 30",
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "content-length: 30",
                 "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
-                "\r\n" +
-                        "account=gugu&password=password",
+                "",
+                "account=gugu&password=password",
+                "",
+                "");
+        var socket = new StubSocket(httpRequest);
+        var processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found ",
+                "Location: http://localhost:8080/index.html "
+        );
+    }
+
+    @Test
+    void 세션이_필요하지_않은_정적_리소스_요청에는_세션_쿠키를_발급하지_않는다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
                 "",
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
-        manager.remove(session.getId());
     }
 
     @Test
     void login_post_fail() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
                 "Connection: keep-alive ",
@@ -295,7 +524,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -321,7 +550,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -353,7 +582,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -384,7 +613,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);

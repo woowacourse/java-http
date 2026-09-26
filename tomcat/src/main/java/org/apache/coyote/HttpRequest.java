@@ -6,6 +6,7 @@ public final class HttpRequest {
 
     private static final String COOKIE = "Cookie";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final String method;
     private final String target;
@@ -49,5 +50,11 @@ public final class HttpRequest {
 
     public String getContentType() {
         return headers.get(CONTENT_TYPE);
+    }
+
+    public boolean isFormUrlEncoded() {
+        final String contentType = getContentType();
+        return contentType != null
+                && contentType.startsWith(CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
     }
 }

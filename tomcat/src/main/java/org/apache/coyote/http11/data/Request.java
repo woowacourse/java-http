@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.http11.config.TomcatServerConfiguration;
 
 public class Request {
@@ -133,7 +132,7 @@ public class Request {
 
         final Map<String, String> bodyMap = new HashMap<>();
         for (String data : bodySplit) {
-            final String[] keyValue = data.split("=");
+            final String[] keyValue = data.split("=", 2);
 
             if (keyValue.length != 2) {
                 throw new IOException("잘못된 HTTP 요청 바디 형식입니다: " + body);
@@ -153,7 +152,7 @@ public class Request {
         final String[] parameters = query.split("&");
 
         return Arrays.stream(parameters)
-                .map(parameter -> parameter.split("="))
+                .map(parameter -> parameter.split("=", 2))
                 .filter(keyValue -> keyValue.length == 2)
                 .collect(
                         HashMap::new,

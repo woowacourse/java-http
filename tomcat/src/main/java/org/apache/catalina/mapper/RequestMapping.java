@@ -3,7 +3,6 @@ package org.apache.catalina.mapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.Controller;
 
 public final class RequestMapping {
@@ -18,7 +17,7 @@ public final class RequestMapping {
         controllers.put(Objects.requireNonNull(path), Objects.requireNonNull(controller));
     }
 
-    public Controller getController(final Request request) {
-        return controllers.getOrDefault(request.path(), defaultController);
+    public Controller getController(final String path) {
+        return controllers.getOrDefault(path, defaultController);
     }
 }

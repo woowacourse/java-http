@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.readFrom(inputStream);
             final Request request = new Request(httpRequest, sessionManager);
             final HttpResponse response = new HttpResponse();
-            final Controller controller = requestMapping.getController(request);
+            final Controller controller = requestMapping.getController(request.path());
             controller.handle(request, response);
             addSessionCookieIfIssued(request, response);
             response.writeTo(outputStream);

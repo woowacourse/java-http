@@ -1,6 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +25,28 @@ public class HttpResponse {
         this.body = body;
         headers.put("Content-Type", contentType + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+    }
+
+    public void setStaticResource(String path) throws IOException {
+        setBody(contentTypeOf(path), resolveContentOf(path));
+    }
+
+    private String resolveContentOf(String path) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static" + path);
+        if (!path.equals("/") && resource != null) {
+            return Files.readString(new File(resource.getFile()).toPath());
+        }
+        return "Hello world!";
+    }
+
+    private String contentTypeOf(String path) {
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html";
     }
 
     public void sendRedirect(String location) {

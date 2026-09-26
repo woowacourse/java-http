@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.Application;
+import com.techcourse.ApplicationConfig;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("HTTP/1.1 요청 처리")
 class Http11ProcessorTest {
-    private final RequestMapping requestMapping = Application.initRequestMapping();
+    private final RequestMapping requestMapping = new ApplicationConfig().requestMapping();
 
     @Test
     @DisplayName("요청 경로가 /이면 기본 응답을 내려준다")

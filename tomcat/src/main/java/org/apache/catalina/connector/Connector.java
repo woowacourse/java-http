@@ -25,6 +25,8 @@ public class Connector implements Runnable {
 
     private static final int MAX_THREADS = 250;
     private static final int MAX_PENDING_QUEUE_SIZE = 100;
+    private static final int CONNECTION_TIMEOUT_MILLIS = 20_000;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 10;
 
     private final ServerSocket serverSocket;
     private final SessionManager sessionManager;
@@ -84,8 +86,9 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection, sessionManager, requestDispatcher);
         try {
+            connection.setSoTimeout(CONNECTION_TIMEOUT_MILLIS);
             executorService.execute(processor);
-        } catch (RejectedExecutionException e) {
+        } catch (IOException | RejectedExecutionException e) {
             try {
                 connection.close();
             } catch (IOException closeException) {
@@ -102,7 +105,23 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {
-            executorService.shutdown();
+            shutdownExecutor();
+        }
+    }
+
+    private void shutdownExecutor() {
+        executorService.shutdown();
+        try {
+            if (executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                return;
+            }
+            executorService.shutdownNow();
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.warn("요청 처리 스레드가 제한 시간 내에 종료되지 않았습니다.");
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

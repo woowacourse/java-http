@@ -83,7 +83,39 @@ class ConnectorTest {
         connector.stop();
 
         // then
-        assertThat(executorOf(connector).isShutdown()).isTrue();
+        assertThat(executorOf(connector).isTerminated()).isTrue();
+    }
+
+    @Test
+    void stopWaitsForRunningRequest() throws Exception {
+        // given
+        final int port = availablePort();
+        final Connector connector = new Connector(port, 100, 1, 1);
+        connector.start();
+
+        try (final Socket connection = new Socket("localhost", port)) {
+            connection.setSoTimeout(3_000);
+            connection.getOutputStream().write("GET / HTTP/1.1\r\n".getBytes(StandardCharsets.UTF_8));
+            connection.getOutputStream().flush();
+            awaitActiveWorker(connector);
+
+            // when
+            final Thread stopper = new Thread(connector::stop);
+            stopper.start();
+            stopper.join(300);
+
+            // then
+            assertThat(stopper.isAlive()).isTrue();
+            assertThat(executorOf(connector).isTerminated()).isFalse();
+
+            connection.getOutputStream().write("\r\n".getBytes(StandardCharsets.UTF_8));
+            connection.getOutputStream().flush();
+            assertThat(readResponse(connection)).startsWith("HTTP/1.1 200 OK");
+
+            stopper.join(3_000);
+            assertThat(stopper.isAlive()).isFalse();
+            assertThat(executorOf(connector).isTerminated()).isTrue();
+        }
     }
 
     private int availablePort() throws IOException {

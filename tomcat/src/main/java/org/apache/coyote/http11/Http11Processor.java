@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COLON = ":";
     private static final String CONTENT_TYPE_TEXT_HTML = "text/html";
     private static final String CONTENT_TYPE_TEXT_CSS = "text/css";
     private static final String CONTENT_TYPE_TEXT_JAVASCRIPT = "text/javascript";
     private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String PATH_INDEX_HTML = "/index.html";
     private static final String PATH_LOGIN_HTML = "/login.html";
     private static final String PATH_REGISTER_HTML = "/register.html";
@@ -52,7 +52,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC = "static";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String COOKIE = "Cookie";
     private static final String USER = "user";
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
@@ -75,45 +74,24 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
 
-            String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-            Map<String, String> headers = readHeaders(bufferedReader);
-            String requestBody = readBody(bufferedReader, headers);
-            String[] requestLines = requestLine.split(" ");
-            MyHttpCookie httpCookie = new MyHttpCookie(headers.get(COOKIE));
+            MyHttpCookie httpCookie = new MyHttpCookie(httpRequest.getCookie());
             Session session = SESSION_MANAGER.findSession(httpCookie.getJSessionId());
-            handle(outputStream, requestLines[0], requestLines[1], requestBody, headers.get(CONTENT_TYPE), session);
+
+            handle(outputStream, httpRequest, session);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> readHeaders(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        while (true) {
-            String line = bufferedReader.readLine();
-            if (line == null || line.isEmpty()) {
-                return headers;
-            }
-            String[] headerLine = line.split(COLON);
-            headers.put(headerLine[0], headerLine[1].trim());
-        }
-    }
 
-    private String readBody(final BufferedReader bufferedReader, final Map<String, String> headers) throws IOException {
-        String contentLength = headers.get(CONTENT_LENGTH);
-        if (contentLength == null) {
-            return "";
-        }
-        char[] buffer = new char[Integer.parseInt(contentLength)];
-        int count = bufferedReader.read(buffer, 0, buffer.length);
-        return new String(buffer, 0, count);
-    }
+    private void handle(final OutputStream outputStream, HttpRequest httpRequest, Session session) throws IOException, URISyntaxException {
+        final String method = httpRequest.getMethod();
+        final String path = httpRequest.getTarget();
+        final String body = httpRequest.getBody();
+        final String contentType = httpRequest.getContentType();
 
-    private void handle(final OutputStream outputStream, final String method, String path, String body, String contentType, Session session) throws IOException, URISyntaxException {
         if ("/".equals(path)) {
             writeResponse(outputStream, HTTP_STATUS_OK, CONTENT_TYPE_TEXT_HTML, "Hello world!");
         } else if ("/login".equals(path)) {

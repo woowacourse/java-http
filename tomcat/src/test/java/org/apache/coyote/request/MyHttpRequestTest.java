@@ -39,6 +39,20 @@ class MyHttpRequestTest {
         assertThat(request.getFormParameters()).containsEntry("password", "a=b");
     }
 
+    @Test
+    void Accept_헤더가_중복되면_대소문자와_순서를_유지해_결합한다() {
+        String rawRequest = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "accept: text/html",
+                "Accept: text/plain",
+                "",
+                "");
+
+        MyHttpRequest request = HttpRequestParser.parse(rawRequest);
+
+        assertThat(request.getHeader("Accept")).hasValue("text/html, text/plain");
+    }
+
     private MyHttpRequest requestWithBody(String body) {
         String rawRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",

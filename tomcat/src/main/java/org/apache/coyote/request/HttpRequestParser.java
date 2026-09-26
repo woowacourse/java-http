@@ -45,6 +45,17 @@ public class HttpRequestParser {
         }
         String name = line.substring(0, separatorIndex).strip();
         String value = line.substring(separatorIndex + 1).strip();
+
+        String actualName = headers.keySet().stream()
+                .filter(headerName -> headerName.equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+        if (name.equalsIgnoreCase("Accept") && actualName != null) {
+            String previousValue = headers.get(actualName).toString();
+            headers.put(actualName, previousValue + ", " + value);
+            return;
+        }
+
         headers.put(name, value);
     }
 

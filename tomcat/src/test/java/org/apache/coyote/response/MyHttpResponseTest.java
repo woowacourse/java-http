@@ -1,8 +1,11 @@
 package org.apache.coyote.response;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class MyHttpResponseTest {
 
@@ -39,5 +42,16 @@ class MyHttpResponseTest {
         assertThat(result)
                 .contains("X-Test: new \r\n")
                 .doesNotContain("X-Test: old \r\n");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Content-Length", "Content-Type", "Location"})
+    void 단일_값_헤더는_addHeader로_추가할_수_없다(String headerName) {
+        // given
+        MyHttpResponse response = new MyHttpResponse();
+
+        // when & then
+        assertThatThrownBy(() -> response.addHeader(headerName, "value"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

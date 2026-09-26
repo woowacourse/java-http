@@ -18,4 +18,8 @@ public enum ResponseHeader {
     ResponseHeader(String fieldName) {
         this.fieldName = fieldName;
     }
+
+    public String fieldName() {
+        return fieldName;
+    }
 }

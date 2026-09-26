@@ -30,12 +30,13 @@ public class Connector implements Runnable {
     private static final int DEFAULT_MAX_THREADS = 250;
     private static final int DEFAULT_QUEUED_REQUESTS = 100;
     private static final int DEFAULT_READ_TIMEOUT_MILLIS = 10_000;
-    private static final long SHUTDOWN_WAIT_SECONDS = 1;
+    private static final long DEFAULT_SHUTDOWN_WAIT_MILLIS = 5_000;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executor;
     private final Set<Socket> connections = ConcurrentHashMap.newKeySet();
     private final int readTimeoutMillis;
+    private final long shutdownWaitMillis;
     private final Manager sessionManager = new SessionManager();
     private final RequestMapping requestMapping;
     private volatile boolean stopped;
@@ -60,12 +61,20 @@ public class Connector implements Runnable {
 
     Connector(final int port, final int acceptCount, final int maxThreads,
               final int queuedRequests, final int readTimeoutMillis, final RequestMapping requestMapping) {
-        if (maxThreads <= 0 || queuedRequests <= 0 || readTimeoutMillis <= 0) {
-            throw new IllegalArgumentException("스레드 수, 대기 작업 수, 읽기 제한 시간은 양수여야 합니다.");
+        this(port, acceptCount, maxThreads, queuedRequests, readTimeoutMillis,
+                DEFAULT_SHUTDOWN_WAIT_MILLIS, requestMapping);
+    }
+
+    Connector(final int port, final int acceptCount, final int maxThreads,
+              final int queuedRequests, final int readTimeoutMillis, final long shutdownWaitMillis,
+              final RequestMapping requestMapping) {
+        if (maxThreads <= 0 || queuedRequests <= 0 || readTimeoutMillis <= 0 || shutdownWaitMillis <= 0) {
+            throw new IllegalArgumentException("스레드 수, 대기 작업 수, 읽기 제한 시간, 종료 대기 시간은 양수여야 합니다.");
         }
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.readTimeoutMillis = readTimeoutMillis;
+        this.shutdownWaitMillis = shutdownWaitMillis;
         this.executor = new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(queuedRequests), Executors.defaultThreadFactory());
         this.stopped = false;
@@ -145,9 +154,9 @@ public class Connector implements Runnable {
         }
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(SHUTDOWN_WAIT_SECONDS, TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(shutdownWaitMillis, TimeUnit.MILLISECONDS)) {
                 forceStop();
-                if (!executor.awaitTermination(SHUTDOWN_WAIT_SECONDS, TimeUnit.SECONDS)) {
+                if (!executor.awaitTermination(shutdownWaitMillis, TimeUnit.MILLISECONDS)) {
                     log.warn("요청 처리 스레드가 종료 제한 시간 내에 끝나지 않았습니다.");
                 }
             }

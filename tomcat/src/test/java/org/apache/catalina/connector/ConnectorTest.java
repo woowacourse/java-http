@@ -95,9 +95,45 @@ class ConnectorTest {
     }
 
     @Test
+    void letsRunningAndQueuedTasksFinishDuringGracefulShutdown() throws Exception {
+        final var firstStarted = new CountDownLatch(1);
+        final var secondStarted = new CountDownLatch(1);
+        final var mapping = new RequestMapping(Map.of(
+                "/first", (request, response) -> {
+                    firstStarted.countDown();
+                    Thread.sleep(2_000);
+                    response.body("first".getBytes(StandardCharsets.UTF_8));
+                },
+                "/second", (request, response) -> {
+                    secondStarted.countDown();
+                    response.body("second".getBytes(StandardCharsets.UTF_8));
+                }
+        ), (request, response) -> {});
+        final var connector = new Connector(0, 100, 1, 1, mapping);
+        final var first = request("/first");
+        final var second = request("/second");
+
+        try {
+            connector.process(first);
+            assertThat(firstStarted.await(5, TimeUnit.SECONDS)).isTrue();
+            connector.process(second);
+
+            connector.stop();
+
+            assertThat(first.output()).endsWith("first");
+            assertThat(secondStarted.getCount()).isZero();
+            assertThat(second.output()).endsWith("second");
+            assertThat(first.isClosed()).isTrue();
+            assertThat(second.isClosed()).isTrue();
+        } finally {
+            connector.stop();
+        }
+    }
+
+    @Test
     void closesRunningAndQueuedConnectionsWhenStopping() throws Exception {
         final var mapping = new RequestMapping(Map.of(), (request, response) -> {});
-        final var connector = new Connector(0, 100, 1, 1, mapping);
+        final var connector = new Connector(0, 100, 1, 1, 10_000, 100, mapping);
         final var running = new BlockingSocket();
         final var queued = request("/queued");
 
@@ -120,7 +156,7 @@ class ConnectorTest {
     @Test
     void stopReleasesARealSocketWaitingForMoreRequestBytes() throws Exception {
         final var mapping = new RequestMapping(Map.of(), (request, response) -> {});
-        final var connector = new Connector(0, 100, 1, 1, mapping);
+        final var connector = new Connector(0, 100, 1, 1, 10_000, 100, mapping);
 
         try (var listener = new ServerSocket(0);
              var client = new Socket("127.0.0.1", listener.getLocalPort());

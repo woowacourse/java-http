@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
         if (isLoggedIn(request.cookie())) {
             return "redirect:/index.html";
         }
-        return "/login.html";
+        return "login";
     }
 
     @Override

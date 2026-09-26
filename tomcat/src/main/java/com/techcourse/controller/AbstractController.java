@@ -1,13 +1,12 @@
 package com.techcourse.controller;
 
-import com.techcourse.view.ResourceRenderer;
+import com.techcourse.view.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
-    private static final String REDIRECT_PREFIX = "redirect:";
-    private final ResourceRenderer resourceRenderer = new ResourceRenderer();
+    private final ViewResolver viewResolver = new ViewResolver();
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -17,14 +16,7 @@ public abstract class AbstractController implements Controller {
             default -> throw new IllegalStateException("지원하지 않는 메소드");
         };
 
-        if (view == null) {
-            return;
-        }
-        if (view.startsWith(REDIRECT_PREFIX)) {
-            response.sendRedirect(view.substring(REDIRECT_PREFIX.length()));
-            return;
-        }
-        resourceRenderer.render(view, response);
+        viewResolver.resolve(view, response);
     }
 
     protected String doPost(final HttpRequest request, final HttpResponse response) throws Exception {

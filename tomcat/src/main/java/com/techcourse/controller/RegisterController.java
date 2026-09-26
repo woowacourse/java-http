@@ -13,7 +13,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected String doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        return "/register.html";
+        return "register";
     }
 
     @Override

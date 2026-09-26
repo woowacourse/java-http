@@ -9,12 +9,14 @@ public class RequestBody {
     private static final char SP = ' ';
     private static final char HTAB = '\t';
 
-    private static final RequestBody EMPTY = new RequestBody(QueryParameters.empty());
+    private static final RequestBody EMPTY = new RequestBody(new byte[0], QueryParameters.empty());
 
-    private final QueryParameters parameters;
+    private final byte[] content;
+    private final QueryParameters formParameters;
 
-    public RequestBody(QueryParameters parameters) {
-        this.parameters = parameters;
+    private RequestBody(final byte[] content, final QueryParameters formParameters) {
+        this.content = content;
+        this.formParameters = formParameters;
     }
 
     public static RequestBody empty() {
@@ -22,13 +24,18 @@ public class RequestBody {
     }
 
     public static RequestBody of(final byte[] content, final Optional<String> contentType) {
-        if (content.length == 0 || !contentType.map(RequestBody::isFormUrlEncoded).orElse(false)) {
+        if (content.length == 0) {
             return EMPTY;
         }
+        final byte[] copy = content.clone();
+        if (!contentType.map(RequestBody::isFormUrlEncoded).orElse(false)) {
+            return new RequestBody(copy, QueryParameters.empty());
+        }
         // form 데이터는 percent-encoding된 ASCII. 바이트를 변형 없이 옮기고 UTF-8 해석은 PercentDecoder에 맡긴다
-        final String raw = new String(content, StandardCharsets.ISO_8859_1);
-        return new RequestBody(QueryParameters.from(raw));
+        final String raw = new String(copy, StandardCharsets.ISO_8859_1);
+        return new RequestBody(copy, QueryParameters.from(raw));
     }
+
 
     // 미디어 타입은 대소문자를 구분하지 않고, ';' 뒤의 파라미터(charset 등)는 무시한다 (RFC 9110 8.3.1)
     private static boolean isFormUrlEncoded(final String contentType) {
@@ -48,10 +55,10 @@ public class RequestBody {
     }
 
     public boolean hasParameters() {
-        return !parameters.isEmpty();
+        return !formParameters.isEmpty();
     }
 
     public Optional<String> getParameter(final String name) {
-        return parameters.get(name);
+        return formParameters.get(name);
     }
 }

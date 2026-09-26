@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             if (sessionContext.isChanged()) {
                 response.setCookie("JSESSIONID", sessionContext.getSession().getId(), "/");
             }
-            response.writeTo(outputStream);
+            response.writeTo(outputStream, !request.getMethod().equals("HEAD"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

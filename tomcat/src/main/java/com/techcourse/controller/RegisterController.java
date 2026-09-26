@@ -13,6 +13,11 @@ import java.io.IOException;
 public class RegisterController extends AbstractController {
 
     @Override
+    protected String getAllowedMethods() {
+        return "GET, POST";
+    }
+
+    @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         StaticResourceController.serve("/register.html", response);
     }

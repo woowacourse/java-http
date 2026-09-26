@@ -46,8 +46,7 @@ class RequestMappingTest {
         return HttpRequest.of(
                 RequestLine.from("GET " + target + " HTTP/1.1"),
                 RequestHeaders.from(List.of("Host: localhost")),
-                RequestBody.empty(),
-                sessionManager
+                RequestBody.empty()
         );
     }
 }

@@ -71,8 +71,7 @@ class AbstractControllerTest {
         return HttpRequest.of(
                 RequestLine.from(method + " / HTTP/1.1"),
                 RequestHeaders.from(List.of("Host: localhost")),
-                RequestBody.empty(),
-                sessionManager
+                RequestBody.empty()
         );
     }
 }

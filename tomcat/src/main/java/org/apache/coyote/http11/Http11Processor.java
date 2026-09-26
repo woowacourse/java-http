@@ -52,21 +52,23 @@ public class Http11Processor implements Runnable, Processor {
     private static final int LINE_FEED = '\n';
     private static final String CARRIAGE_RETURN = "\r";
 
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping(
-            Map.of(
-                    "/", new HomeController(),
-                    "/login", new LoginController(),
-                    "/register", new RegisterController()
-            ),
-            new StaticResourceController()
-    );
-
     private final Socket connection;
-    private final SessionManager sessionManager;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
-        this.sessionManager = sessionManager;
+        this.requestMapping = createRequestMapping(sessionManager);
+    }
+
+    private static RequestMapping createRequestMapping(final SessionManager sessionManager) {
+        return new RequestMapping(
+                Map.of(
+                        "/", new HomeController(),
+                        "/login", new LoginController(sessionManager),
+                        "/register", new RegisterController()
+                ),
+                new StaticResourceController()
+        );
     }
 
     @Override
@@ -119,14 +121,13 @@ public class Http11Processor implements Runnable, Processor {
                 headers.get(HttpHeaderName.CONTENT_TYPE)
         );
         log.info("request: {}", requestLine);
-        return Optional.of(HttpRequest.of(requestLine, headers, body, sessionManager));
+        return Optional.of(HttpRequest.of(requestLine, headers, body));
     }
 
     private HttpResponse service(final HttpRequest request) {
         try {
             final HttpResponse response = new HttpResponse();
-            REQUEST_MAPPING.getController(request).service(request, response);
-            addSessionCookie(request, response);
+            requestMapping.getController(request).service(request, response);
             return response;
         } catch (HttpException e) {
             log.info("request rejected [{}]: {}", e.getStatus().getCode(), e.getMessage());
@@ -135,19 +136,6 @@ public class Http11Processor implements Runnable, Processor {
             log.error("unexpected error in controller", e);
             return HttpResponse.error(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    private void addSessionCookie(final HttpRequest request, final HttpResponse response) {
-        request.getNewSession().ifPresent(session -> {
-            log.debug("issue JSESSIONID: {}", session.getId());
-            response.addCookie(JSESSIONID + "=" + session.getId() + COOKIE_PATH);
-        });
-    }
-
-    private boolean isLoggedIn(final HttpRequest request) {
-        return request.findSession()
-                .map(session -> session.getAttribute(USER))
-                .isPresent();
     }
 
     private List<String> readHeaders(final InputStream inputStream) throws IOException {

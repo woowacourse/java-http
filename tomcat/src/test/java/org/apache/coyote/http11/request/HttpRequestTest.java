@@ -23,7 +23,7 @@ class HttpRequestTest {
         final RequestLine line = RequestLine.from("GET / HTTP/1.1");
         final RequestHeaders headers = RequestHeaders.from(List.of());
 
-        assertThatThrownBy(() -> HttpRequest.of(line, headers, emptyBody, sessionManager))
+        assertThatThrownBy(() -> HttpRequest.of(line, headers, emptyBody))
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -32,7 +32,7 @@ class HttpRequestTest {
         final RequestLine line = RequestLine.from("GET / HTTP/1.0");
         final RequestHeaders headers = RequestHeaders.from(List.of());
 
-        assertThatCode(() -> HttpRequest.of(line, headers, emptyBody, sessionManager))
+        assertThatCode(() -> HttpRequest.of(line, headers, emptyBody))
                 .doesNotThrowAnyException();
     }
 
@@ -41,18 +41,17 @@ class HttpRequestTest {
         final RequestLine line = RequestLine.from("GET / HTTP/1.1");
         final RequestHeaders headers = RequestHeaders.from(List.of("Host: localhost"));
 
-        assertThatCode(() -> HttpRequest.of(line, headers, emptyBody, sessionManager))
+        assertThatCode(() -> HttpRequest.of(line, headers, emptyBody))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void 쿼리와_본문의_파라미터를_출처별로_조회한다() {
+    void 쿼리와_본문의_파라미터를_출처별로_조회한다(   ) {
         final HttpRequest request = HttpRequest.of(
                 RequestLine.from("POST /login?source=query HTTP/1.1"),
                 RequestHeaders.from(List.of("Host: localhost", "Content-Type: application/x-www-form-urlencoded")),
                 RequestBody.of("account=gugu".getBytes(StandardCharsets.US_ASCII),
-                        Optional.of("application/x-www-form-urlencoded")),
-                sessionManager
+                        Optional.of("application/x-www-form-urlencoded"))
         );
 
         assertThat(request.getQueryParameter("source")).hasValue("query");

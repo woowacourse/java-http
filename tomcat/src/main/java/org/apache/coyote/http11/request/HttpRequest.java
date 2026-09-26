@@ -13,30 +13,24 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeaders headers;
     private final RequestBody body;
-    private final SessionManager sessionManager;
-
-    private Session newSession;
 
     public HttpRequest(
             final RequestLine requestLine,
             final RequestHeaders headers,
-            final RequestBody body,
-            final SessionManager sessionManager
+            final RequestBody body
     ) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.sessionManager = sessionManager;
     }
 
     public static HttpRequest of(
             final RequestLine requestLine,
             final RequestHeaders headers,
-            final RequestBody body,
-            final SessionManager sessionManager
+            final RequestBody body
     ) {
         validateHostRequirement(requestLine, headers);
-        return new HttpRequest(requestLine, headers, body, sessionManager);
+        return new HttpRequest(requestLine, headers, body);
     }
 
     private static void validateHostRequirement(final RequestLine requestLine, final RequestHeaders headers) {
@@ -47,19 +41,6 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath().getValue();
-
-    }
-
-    public HttpCookie getCookie() {
-        return headers.getCookie();
-    }
-
-    public Optional<Session> findSession() {
-        if (newSession != null) {
-            return Optional.of(newSession);
-        }
-        return getCookie().get(HttpCookie.JSESSIONID)
-                .flatMap(sessionManager::findSession);
     }
 
     public Optional<String> getQueryParameter(final String name) {
@@ -78,16 +59,7 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public Session getSession() {
-        return findSession().orElseGet(this::createSession);
-    }
-
-    public Optional<Session> getNewSession() {
-        return Optional.ofNullable(newSession);
-    }
-
-    private Session createSession() {
-        newSession = sessionManager.create();
-        return newSession;
+    public HttpCookie getCookie() {
+        return headers.getCookie();
     }
 }

@@ -1,11 +1,15 @@
 package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class LoginController extends AbstractController {
@@ -18,6 +22,12 @@ public class LoginController extends AbstractController {
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
 
+    private final SessionManager sessionManager;
+
+    public LoginController(final SessionManager sessionManager) {
+        this.sessionManager = Objects.requireNonNull(sessionManager);
+    }
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (isLoggedIn(request)) {
@@ -29,32 +39,43 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        response.sendRedirect(login(request));
+        final Optional<User> user = authenticate(request);
+        if (user.isEmpty()) {
+            response.sendRedirect(UNAUTHORIZED_PAGE);
+            return;
+        }
+        response.sendRedirect(INDEX_PAGE);
+        startNewSession(request, response, user.get());
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
-        return request.findSession()
+        return sessionManager.findSession(request)
                 .map(session -> session.getAttribute(USER))
                 .isPresent();
     }
 
-    private String login(final HttpRequest request) {
+    private Optional<User> authenticate(final HttpRequest request) {
         final Optional<String> account = request.getBodyParameter(ACCOUNT);
         final Optional<String> password = request.getBodyParameter(PASSWORD);
         if (account.isEmpty() || password.isEmpty()) {
             log.info("login parameters are missing");
-            return UNAUTHORIZED_PAGE;
+            return Optional.empty();
         }
-        return InMemoryUserRepository.findByAccount(account.get())
-                .filter(user -> user.checkPassword(password.get()))
-                .map(user -> {
-                    log.info("login success. account: {}", user.getAccount());
-                    request.getSession().setAttribute(USER, user);
-                    return INDEX_PAGE;
-                })
-                .orElseGet(() -> {
-                    log.info("login failed. account: {}", account.get());
-                    return UNAUTHORIZED_PAGE;
-                });
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account.get())
+                .filter(found -> found.checkPassword(password.get()));
+        if (user.isEmpty()) {
+            log.info("login failed");
+        }
+        return user;
+    }
+
+    // 로그인하면 기존 세션을 폐기하고 새 세션을 발급한다 (session fixation 방지)
+    private void startNewSession(final HttpRequest request, final HttpResponse response, final User user) {
+        sessionManager.findSession(request)
+                .ifPresent(old -> sessionManager.remove(old.getId()));
+        final Session session = sessionManager.create();
+        session.setAttribute(USER, user);
+        response.addCookie(sessionManager.toCookie(session));
+        log.info("login success. account: {}", user.getAccount());
     }
 }

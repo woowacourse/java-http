@@ -4,6 +4,7 @@ import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpToken;
 import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.exception.ContentTooLargeException;
+import org.apache.coyote.http11.exception.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,7 @@ public class RequestHeaders {
         }
 
         final Map<String, String> headers = Map.copyOf(parsed);
+        validateMessageFraming(headers);
         return new RequestHeaders(headers, parseContentLength(headers));
     }
 
@@ -97,6 +99,18 @@ public class RequestHeaders {
         }
         final char first = line.charAt(0);
         return first == SP || first == HTAB;
+    }
+
+    private static void validateMessageFraming(final Map<String, String> headers) {
+        final boolean hasTransferEncoding = headers.containsKey(HttpHeaderName.TRANSFER_ENCODING.getNormalized());
+        if (!hasTransferEncoding) {
+            return;
+        }
+        final boolean hasContentLength = headers.containsKey(HttpHeaderName.CONTENT_LENGTH.getNormalized());
+        if (hasContentLength) {
+            throw new BadRequestException("Transfer-Encoding과 Content-Length를 함께 사용할 수 없습니다");
+        }
+        throw new NotImplementedException("Transfer-Encoding은 지원하지 않습니다");
     }
 
     private static int parseContentLength(final Map<String, String> headers) {

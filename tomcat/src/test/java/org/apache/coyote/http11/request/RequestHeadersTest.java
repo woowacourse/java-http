@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.exception.ContentTooLargeException;
+import org.apache.coyote.http11.exception.NotImplementedException;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -162,5 +164,54 @@ class RequestHeadersTest {
     void 대소문자가_달라도_중복을_거부한다() {
         assertThatThrownBy(() -> RequestHeaders.from(List.of("Content-Length: 5", "content-length: 5")))
                 .isInstanceOf(BadRequestException.class);
+    }
+    @Nested
+    class Transfer_Encoding {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"chunked", "Chunked", "gzip, chunked", "identity", "xchunked", ""})
+        void 값과_관계없이_있으면_501(final String value) {
+            assertThatThrownBy(() -> RequestHeaders.from(List.of("Transfer-Encoding: " + value)))
+                    .isInstanceOf(NotImplementedException.class);
+        }
+
+        @Test
+        void 이름의_대소문자가_달라도_인식한다() {
+            assertThatThrownBy(() -> RequestHeaders.from(List.of("transfer-ENCODING: chunked")))
+                    .isInstanceOf(NotImplementedException.class);
+        }
+
+        @Test
+        void Content_Length와_함께_오면_400() {
+            final List<String> lines = List.of("Content-Length: 4", "Transfer-Encoding: chunked");
+
+            assertThatThrownBy(() -> RequestHeaders.from(lines))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Transfer-Encoding");
+        }
+
+        @Test
+        void 순서가_바뀌어도_400() {
+            final List<String> lines = List.of("Transfer-Encoding: chunked", "Content-Length: 4");
+
+            assertThatThrownBy(() -> RequestHeaders.from(lines))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Transfer-Encoding");
+        }
+
+        @Test
+        void Content_Length가_잘못돼도_smuggling으로_먼저_판단한다() {
+            final List<String> lines = List.of("Content-Length: abc", "Transfer-Encoding: chunked");
+
+            assertThatThrownBy(() -> RequestHeaders.from(lines))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Transfer-Encoding");
+        }
+
+        @Test
+        void 없으면_통과한다() {
+            assertThatCode(() -> RequestHeaders.from(List.of("Content-Length: 5")))
+                    .doesNotThrowAnyException();
+        }
     }
 }

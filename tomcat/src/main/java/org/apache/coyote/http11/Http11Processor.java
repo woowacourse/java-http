@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -74,7 +73,6 @@ public class Http11Processor implements Runnable, Processor {
     private String handleRequest(HttpRequest request) throws IOException {
         String method = request.requestLine().method();
         String path = request.requestLine().path();
-        String body = request.body().content();
 
         Optional<Cookie> sessionCookie = findSessionCookie(request.headers());
 
@@ -83,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("POST".equals(method)) {
-            return handlePostRequest(path, body);
+            return handlePostRequest(path, request.body());
         }
 
         return emptyResponse("HTTP/1.1 405 Method Not Allowed");
@@ -99,8 +97,8 @@ public class Http11Processor implements Runnable, Processor {
         return serveStaticResource(resourcePath);
     }
 
-    private String handlePostRequest(String resourcePath, String body) {
-        Map<String, String> formData = parseFormData(body);
+    private String handlePostRequest(String resourcePath, RequestBody body) {
+        Map<String, String> formData = body.parseFormData();
 
         if (resourcePath.equals("/register")) {
             return handleRegister(formData);
@@ -123,31 +121,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isLoggedIn(Session session) {
         return session != null && session.getAttribute("user") != null;
-    }
-
-    private Map<String, String> parseFormData(String body) {
-        Map<String, String> formData = new HashMap<>();
-
-        if (body == null || body.isBlank()) {
-            return formData;
-        }
-
-        String[] parameters = body.split("&");
-
-        for (String parameter : parameters) {
-            String[] values = parameter.split("=", 2);
-
-            if (values.length != 2) {
-                continue;
-            }
-
-            String key = java.net.URLDecoder.decode(values[0], StandardCharsets.UTF_8);
-            String value = java.net.URLDecoder.decode(values[1], StandardCharsets.UTF_8);
-
-            formData.put(key, value);
-        }
-
-        return formData;
     }
 
     private String handleRegister(Map<String, String> formData) {

@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,9 +12,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
@@ -47,59 +44,24 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = HttpRequest.from(bufferedReader);
             final String requestMethod = request.getMethod();
             final String path = request.getPath();
-            final HttpResponse response;
+            final HttpResponse response = new HttpResponse();
 
             if ("POST".equals(requestMethod) && "/register".equals(path)) {
-                register(request.getParameters());
-                response = HttpResponse.redirect("/index.html");
+                new RegisterController().service(request, response);
             } else if ("POST".equals(requestMethod) && "/login".equals(path)) {
-                final Optional<User> user = findLoginUser(request.getParameters());
-                if (user.isPresent()) {
-                    final Session session = new Session(UUID.randomUUID().toString());
-                    session.setAttribute("user", user.get());
-                    SessionManager.INSTANCE.add(session);
-                    response = HttpResponse.redirectWithCookie("/index.html", session.getId());
-                } else {
-                    response = HttpResponse.redirect("/401.html");
-                }
+                new LoginController().service(request, response);
             } else if ("GET".equals(requestMethod) && "/login".equals(path) && isLoggedIn(request)) {
-                response = HttpResponse.redirect("/index.html");
+                new LoginController().service(request, response);
             } else if ("/".equals(path)) {
-                response = HttpResponse.ok("text/html", "Hello world!");
+                new HomeController().service(request, response);
             } else {
-                response = HttpResponse.ok(resolveContentType(path), readStaticFile(path));
+                response.ok(resolveContentType(path), readStaticFile(path));
             }
-
             outputStream.write(response.format().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
-    }
-
-    private void register(final Map<String, String> requestParams) {
-        final String account = requestParams.get("account");
-        final String password = requestParams.get("password");
-        final String email = requestParams.get("email");
-        final User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-    }
-
-    private Optional<User> findLoginUser(final Map<String, String> queryParams) {
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
-
-        if (account == null) {
-            return Optional.empty();
-        }
-
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
-                .filter(u -> u.checkPassword(password));
-        user.ifPresent(u -> log.info("로그인 성공! user: {}", u));
-
-        return user;
     }
 
     private boolean isLoggedIn(final HttpRequest request) {

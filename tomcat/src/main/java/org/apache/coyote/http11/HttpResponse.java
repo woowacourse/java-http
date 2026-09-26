@@ -5,14 +5,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final Map<String, String> headers;
-    private final String body;
+    private String body;
 
-    private HttpResponse(final StatusLine statusLine, final String body) {
-        this.statusLine = statusLine;
+    public HttpResponse() {
+        this.statusLine = new StatusLine(HttpStatus.OK);
         this.headers = new LinkedHashMap<>();
-        this.body = body;
+        this.body = "";
     }
 
     public void addHeader(final String name, final String value) {
@@ -31,21 +31,19 @@ public class HttpResponse {
         return sb.toString();
     }
 
-    public static HttpResponse ok(final String contentType, final String responseBody) {
-        final HttpResponse response = new HttpResponse(new StatusLine(HttpStatus.OK), responseBody);
-        response.addHeader("Content-Type", contentType + ";charset=utf-8");
-        return response;
+    public void ok(final String contentType, final String responseBody) {
+        this.statusLine = new StatusLine(HttpStatus.OK);
+        addHeader("Content-Type", contentType + ";charset=utf-8");
+        this.body = responseBody;
     }
 
-    public static HttpResponse redirect(final String location) {
-        final HttpResponse response = new HttpResponse(new StatusLine(HttpStatus.FOUND), "");
-        response.addHeader("Location", location);
-        return response;
+    public void redirect(final String location) {
+        this.statusLine = new StatusLine(HttpStatus.FOUND);
+        addHeader("Location", location);
     }
 
-    public static HttpResponse redirectWithCookie(final String location, final String sessionId) {
-        final HttpResponse response = redirect(location);
-        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-        return response;
+    public void redirectWithCookie(final String location, final String sessionId) {
+        redirect(location);
+        addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 }

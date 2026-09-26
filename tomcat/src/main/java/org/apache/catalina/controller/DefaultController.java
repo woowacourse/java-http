@@ -1,17 +1,18 @@
 package org.apache.catalina.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class DefaultController extends AbstractController {
 
     @Override
     protected String doPost(HttpRequest httpRequest) throws Exception {
-        return null;
+        return doGet(httpRequest);
     }
 
     @Override
     protected String doGet(HttpRequest httpRequest) throws Exception {
-        return null;
-
+        HttpResponse httpResponse = HttpResponse.of(httpRequest);
+        return httpResponse.ok();
     }
 }

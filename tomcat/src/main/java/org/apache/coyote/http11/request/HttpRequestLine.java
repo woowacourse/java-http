@@ -5,6 +5,15 @@ public record HttpRequestLine(
         String uri,
         String protocolVersion
 ) {
+    public String getPathWithoutExtension() {
+        String fullPath = getPath();
+        int separatorIndex = fullPath.indexOf(".");
+        if (separatorIndex != -1) {
+            return fullPath.substring(0, separatorIndex);
+        }
+        return fullPath;
+    }
+
     public String getPath() {
         int separatorIndex = uri.indexOf('?');
         if (separatorIndex != -1) {

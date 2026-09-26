@@ -23,8 +23,8 @@ public class HttpRequest {
         return httpRequestHeader.getMethod();
     }
 
-    public String getPath() {
-        return httpRequestHeader.getPath();
+    public String getPathWithoutExtension() {
+        return httpRequestHeader.getPathWithoutExtension();
     }
 
     public String getRequestParam(String key) {
@@ -73,5 +73,13 @@ public class HttpRequest {
 
     public String getProtocolVersion() {
         return httpRequestHeader.getProtocolVersion();
+    }
+
+    public String getPath() {
+        String path = httpRequestHeader.getPath();
+        if (!path.contains(".")) {
+            return path + "." + getContentType();
+        }
+        return path;
     }
 }

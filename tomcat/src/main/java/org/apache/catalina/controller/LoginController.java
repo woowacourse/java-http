@@ -7,61 +7,48 @@ import java.io.IOException;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class LoginController extends AbstractController {
 
     @Override
     protected String doPost(HttpRequest httpRequest) throws Exception {
-        loginPost(outputStream, httpRequest);
+        String account = httpRequest.getRequestParam("account");
+        String password = httpRequest.getRequestParam("password");
+        if (account.isEmpty() || password.isEmpty()) {
+            return loginFail(httpRequest);
+        }
+        User user = findByAccount(account).orElse(null);
+        return checkUser(httpRequest, user, password);
+    }
+
+    private String checkUser(HttpRequest httpRequest, User user, String password) throws IOException {
+        if (user == null) {
+            return loginFail(httpRequest);
+        }
+        if (!user.checkPassword(password)) {
+            return loginFail(httpRequest);
+        }
+        return loginSuccess(httpRequest, user);
     }
 
     @Override
     protected String doGet(HttpRequest httpRequest) throws Exception {
-        loginGet(outputStream, httpRequest);
-    }
-
-    private void loginGet(HttpRequest httpRequest) throws IOException {
+        HttpResponse httpResponse = HttpResponse.of(httpRequest);
         if (SessionManager.getInstance().hasUser(httpRequest.getJSessionId())) {
-            HttpResponse httpResponse = HttpResponse.from(httpRequest, HttpStatusCode.FOUND)
-            HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
-            httpResponse.redirect(outputStream, "/index.html");
-            return;
+            return httpResponse.found("/index.html");
         }
-        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.OK);
-        httpResponse.respond(outputStream);
+        return httpResponse.ok();
     }
 
-    private void loginPost(HttpRequest httpRequest) throws IOException {
-        String account = httpRequest.getRequestParam("account");
-        String password = httpRequest.getRequestParam("password");
-        if (account.isEmpty() || password.isEmpty()) {
-            loginFail(outputStream, httpRequest);
-        }
-        User user = findByAccount(account).orElse(null);
-        if (user != null && user.checkPassword(password)) {
-            loginSuccess(outputStream, httpRequest, user);
-        }
-        if (user != null && !user.checkPassword(password)) {
-            loginFail(outputStream, httpRequest);
-        }
-        if (!account.isEmpty() && user == null) {
-            loginFail(outputStream, httpRequest);
-        }
-
+    private String loginFail(HttpRequest httpRequest) throws IOException {
+        HttpResponse httpResponse = HttpResponse.of(httpRequest);
+        return httpResponse.found("/401.html");
     }
 
-    private void loginFail(HttpRequest httpRequest) throws IOException {
-        log.info("login fail");
-        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
-        httpResponse.redirect(outputStream, "/401.html");
-    }
-
-    private void loginSuccess(HttpRequest httpRequest, User user) throws IOException {
-        log.info(user.toString());
+    private String loginSuccess(HttpRequest httpRequest, User user) throws IOException {
         final var session = httpRequest.getSession(true);
         session.setAttribute("user", user);
-        HttpResponse httpResponse = handling(httpRequest, HttpStatusCode.FOUND);
-        httpResponse.redirect(outputStream, "/index.html");
+        HttpResponse httpResponse = HttpResponse.of(httpRequest);
+        return httpResponse.found("/index.html");
     }
 }

@@ -49,4 +49,8 @@ public record HttpRequestHeader(
     public String getProtocolVersion() {
         return httpRequestLine.protocolVersion();
     }
+
+    public String getPathWithoutExtension() {
+        return httpRequestLine.getPathWithoutExtension();
+    }
 }

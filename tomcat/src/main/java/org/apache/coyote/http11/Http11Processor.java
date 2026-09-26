@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         // root 처리
         if (requestTarget.equals("/")) {
             writeResponse(outputStream,
+                    HttpStatus.OK,
                     "text/html;charset=utf-8 ",
                     "Hello world!".getBytes(StandardCharsets.UTF_8));
 
@@ -79,14 +78,27 @@ public class Http11Processor implements Runnable, Processor {
 
         ParsedTarget parsedTarget = parseRequestTarget(requestTarget);
         String resourceName = parsedTarget.path();
+        HttpStatus status = HttpStatus.OK;
         Map<String, String> queryParameters = parsedTarget.queryParameters();
 
-        resourceName = handleLogin(resourceName, queryParameters);
+        if (resourceName.equals("/login")) {
+            if (queryParameters.get("account") == null || queryParameters.get("password") == null) {
+                status = HttpStatus.OK;
+                resourceName = "login.html";
+            }
+            else if (isLoginSuccessful(queryParameters)) {
+                status = HttpStatus.OK;
+                resourceName = "index.html";
+            } else {
+                status = HttpStatus.UNAUTHORIZED;
+                resourceName = "401.html";
+            }
+        }
 
         contentType = resolveContentType(resourceName);
         responseBody = readResponseBody(resourceName);
 
-        writeResponse(outputStream, contentType, responseBody);
+        writeResponse(outputStream, status, contentType, responseBody);
     }
 
     private ParsedTarget parseRequestTarget(String requestTarget) {
@@ -125,22 +137,13 @@ public class Http11Processor implements Runnable, Processor {
         return queryParameters;
     }
 
-    private static String handleLogin(String resourceName, Map<String, String> queryParameters) {
-        if (resourceName.equals("/login")) {
-            String account = queryParameters.get("account");
-            String password = queryParameters.get("password");
+    private static boolean isLoginSuccessful(Map<String, String> queryParameters) {
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
 
-            if (account != null && password != null) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-                if (user.isPresent() && user.get().checkPassword(password)) {
-                    log.info("user = {}", user);
-                }
-            }
-
-            resourceName = "login.html";
-        }
-        return resourceName;
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
     }
 
     private static String resolveContentType(String resourceName) {
@@ -170,10 +173,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeResponse(OutputStream outputStream,
+                                      HttpStatus status,
                                       String contentType,
                                       byte[] responseBody) throws  IOException{
         final var header = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status.getCode() + " " + status.getReasonPhrase() + " ",
                 "Content-Type: " + contentType,
                 "Content-Length: " + responseBody.length + " ",
                 "",

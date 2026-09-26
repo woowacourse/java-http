@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -50,9 +52,9 @@ class Http11ProcessorTest {
         final Session session = SessionManager.createSession();
 
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "Cookie: JSESSIONID=" + session.getId(),
                 "",
                 "");
@@ -71,8 +73,8 @@ class Http11ProcessorTest {
         );
 
         var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + expectedBody.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: " + expectedBody.length + "\r\n" +
                 "\r\n" +
                 new String(
                         expectedBody, StandardCharsets.UTF_8

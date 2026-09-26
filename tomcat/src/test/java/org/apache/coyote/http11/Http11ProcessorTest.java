@@ -32,9 +32,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -166,6 +166,7 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found\r\n" +
                 "Location: /401.html\r\n" +
+                "Content-Length: 0\r\n" +
                 "\r\n";
 
         assertThat(socket.output())
@@ -208,6 +209,7 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found\r\n" +
                 "Location: /index.html\r\n" +
+                "Content-Length: 0\r\n" +
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -289,6 +291,7 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found\r\n" +
                 "Location: /index.html\r\n" +
+                "Content-Length: 0\r\n" +
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -420,9 +423,9 @@ class Http11ProcessorTest {
     private String staticFileResponse(final String resourceName, final String contentType) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(resourceName);
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + contentType + ";charset=utf-8 \r\n" +
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " \r\n" +
+        return "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: " + contentType + ";charset=utf-8\r\n" +
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n" +
                 "\r\n" +
                 body;
     }

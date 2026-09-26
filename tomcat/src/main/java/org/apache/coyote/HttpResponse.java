@@ -67,9 +67,18 @@ public class HttpResponse {
         send(HTTP_STATUS_METHOD_NOT_ALLOWED, CONTENT_TYPE_TEXT_HTML, "");
     }
 
-    public void sendInternalServerError() throws URISyntaxException, IOException {
+    public void sendInternalServerError() {
         URL resource = getClass().getClassLoader().getResource(PATH_500_HTML);
-        send(HTTP_STATUS_INTERNAL_SERVER_ERROR, CONTENT_TYPE_TEXT_HTML, Files.readString(Path.of(resource.toURI())));
+        if (resource == null) {
+            send(HTTP_STATUS_INTERNAL_SERVER_ERROR, CONTENT_TYPE_TEXT_HTML, "");
+            return;
+        }
+
+        try {
+            send(HTTP_STATUS_INTERNAL_SERVER_ERROR, CONTENT_TYPE_TEXT_HTML, Files.readString(Path.of(resource.toURI())));
+        } catch (IOException | URISyntaxException exception) {
+            send(HTTP_STATUS_INTERNAL_SERVER_ERROR, CONTENT_TYPE_TEXT_HTML, "");
+        }
     }
 
     private String contentTypeOf(final String target) {

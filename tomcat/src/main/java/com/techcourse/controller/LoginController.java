@@ -10,6 +10,8 @@ import org.apache.coyote.http11.MyHttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +33,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Session session = findSession(request);
         try {
             Map<String, String> parameters;
@@ -65,7 +67,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         Session session = findSession(request);
         if (session != null && session.getAttribute(USER) != null) {
             response.sendRedirect(PATH_INDEX_HTML);

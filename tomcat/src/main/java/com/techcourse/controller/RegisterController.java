@@ -7,6 +7,8 @@ import org.apache.coyote.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 public class RegisterController extends AbstractController {
@@ -17,7 +19,7 @@ public class RegisterController extends AbstractController {
     private static final String PATH_REGISTER_HTML = "/register.html";
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> parameters = request.getFormData();
         User user = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
         InMemoryUserRepository.save(user);
@@ -26,7 +28,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         response.sendStaticHtml(PATH_REGISTER_HTML);
     }
 }

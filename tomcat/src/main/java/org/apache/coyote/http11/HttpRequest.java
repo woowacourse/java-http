@@ -81,12 +81,16 @@ public final class HttpRequest {
                 && requestLine.target().hasPath(expectedPath);
     }
 
-    public String getPath() {
-        return requestLine.target().getPath();
+    public String path() {
+        return requestLine.target().path();
     }
 
-    public String getExtension() {
-        return requestLine.target().getExtension();
+    public String extension() {
+        return requestLine.target().extension();
+    }
+
+    public HttpMethod method() {
+        return requestLine.method();
     }
 
     public Optional<String> findHeader(String name) {

@@ -36,7 +36,7 @@ public class RequestTarget {
         return path.equals(expectedPath);
     }
 
-    public String getPath() {
+    public String path() {
         return path;
     }
 
@@ -44,11 +44,13 @@ public class RequestTarget {
         return Optional.ofNullable(queryParameters.get(name));
     }
 
-    public String getExtension() {
+    public String extension() {
         int extensionStart = path.lastIndexOf(".");
+
         if (extensionStart < path.lastIndexOf("/")) {
             return "";
         }
+
         return path.substring(extensionStart + 1);
     }
 }

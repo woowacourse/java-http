@@ -178,3 +178,24 @@ HTTP 응답 상태를 표현한다.
 ### 계약
 
 - [x] 상태 코드와 Reason Phrase를 제공한다.
+
+## Controller
+
+### 책임
+
+HTTP 요청을 처리해 HTTP 응답을 작성한다.
+
+### 계약
+
+- [x] 요청을 처리한 결과를 전달받은 `HttpResponse`에 작성한다.
+
+## AbstractController
+
+### 책임
+
+HTTP Method에 따라 Controller의 처리 흐름을 분기한다.
+
+### 계약
+
+- [x] GET 요청은 GET 처리에 위임한다.
+- [x] POST 요청은 POST 처리에 위임한다.

@@ -121,7 +121,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleResourceRequest(HttpRequest request) throws IOException, URISyntaxException {
-        String resourcePath = resolveResourcePath(request.getPath());
+        String resourcePath = resolveResourcePath(request.path());
         byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
         if (!resourcePath.equals("/")) {
             String fileName = STATIC_RESOURCE_PREFIX + resourcePath;
@@ -131,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readAllBytes(path);
             }
         }
-        String contentType = contentTypeOf(request.getExtension());
+        String contentType = contentTypeOf(request.extension());
         HttpResponse response = new HttpResponse();
         response.setStatus(HttpStatus.OK);
         response.addHeader("Content-Type", contentType);

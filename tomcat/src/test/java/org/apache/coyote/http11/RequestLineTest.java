@@ -12,7 +12,7 @@ class RequestLineTest {
         RequestLine requestLine = RequestLine.from("GET /login?account=gugu HTTP/1.1");
 
         assertThat(requestLine.method()).isEqualTo(HttpMethod.GET);
-        assertThat(requestLine.target().getPath()).isEqualTo("/login");
+        assertThat(requestLine.target().path()).isEqualTo("/login");
         assertThat(requestLine.target().findQueryParameter("account"))
                 .contains("gugu");
         assertThat(requestLine.version()).isEqualTo(HttpVersion.HTTP_1_1);

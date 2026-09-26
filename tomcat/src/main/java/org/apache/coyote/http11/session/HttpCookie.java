@@ -27,8 +27,4 @@ public class HttpCookie {
 
         return null;
     }
-
-    public String createSetCookieHeaderForResponse(String sessionId) {
-        return "Set-Cookie: " + JSESSION_ID + "=" + sessionId;
-    }
 }

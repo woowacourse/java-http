@@ -1,9 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,13 +17,9 @@ public class HttpRequest {
     private final Map<String, String> parameters;
 
     public HttpRequest(InputStream inputStream) throws IOException {
-        this(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
-    }
-
-    public HttpRequest(BufferedReader reader) throws IOException {
-        this.requestLine = new RequestLine(readRequestLine(reader));
-        this.headers = readHeaders(reader);
-        this.body = readBody(reader, headers.getContentLength());
+        this.requestLine = new RequestLine(readLine(inputStream));
+        this.headers = readHeaders(inputStream);
+        this.body = readBody(inputStream, headers.getContentLength());
         this.parameters = mergeParameters(requestLine.getQueryParameters(), body);
     }
 
@@ -34,10 +29,6 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public String getProtocol() {
-        return requestLine.getProtocol();
     }
 
     public String getHeader(String name) {
@@ -52,46 +43,48 @@ public class HttpRequest {
         return parameters;
     }
 
-    public String getBody() {
-        return body;
-    }
-
     public HttpCookie getCookie() {
         return new HttpCookie(getHeader("Cookie"));
     }
 
-    private String readRequestLine(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        if (line == null || line.isBlank()) {
+    private String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream line = new ByteArrayOutputStream();
+        int current;
+        while ((current = inputStream.read()) != -1 && current != '\n') {
+            if (current != '\r') {
+                line.write(current);
+            }
+        }
+
+        if (current == -1 && line.size() == 0) {
             throw new IllegalArgumentException("Request line is empty");
         }
-        return line;
+        return line.toString(StandardCharsets.ISO_8859_1);
     }
 
-    private HttpHeaders readHeaders(BufferedReader reader) throws IOException {
+    private HttpHeaders readHeaders(InputStream inputStream) throws IOException {
         Map<String, String> values = new LinkedHashMap<>();
         String line;
-        while ((line = reader.readLine()) != null && !line.isBlank()) {
-            String[] nameAndValue = line.split(":", 2);
-            if (nameAndValue.length != 2) {
-                throw new IllegalArgumentException("Invalid header: " + line);
-            }
-            values.put(nameAndValue[0].trim(), nameAndValue[1].trim());
+        while (!(line = readLine(inputStream)).isBlank()) {
+            addHeader(values, line);
         }
         return new HttpHeaders(values);
     }
 
-    private String readBody(BufferedReader reader, int contentLength) throws IOException {
-        char[] value = new char[contentLength];
-        int totalRead = 0;
-        while (totalRead < contentLength) {
-            int read = reader.read(value, totalRead, contentLength - totalRead);
-            if (read < 0) {
-                break;
-            }
-            totalRead += read;
+    private void addHeader(Map<String, String> values, String line) {
+        String[] nameAndValue = line.split(":", 2);
+        if (nameAndValue.length != 2) {
+            throw new IllegalArgumentException("Invalid header: " + line);
         }
-        return new String(value, 0, totalRead);
+        values.put(nameAndValue[0].trim(), nameAndValue[1].trim());
+    }
+
+    private String readBody(InputStream inputStream, int contentLength) throws IOException {
+        byte[] value = inputStream.readNBytes(contentLength);
+        if (value.length != contentLength) {
+            throw new IllegalArgumentException("Request body is shorter than Content-Length");
+        }
+        return new String(value, StandardCharsets.UTF_8);
     }
 
     private Map<String, String> mergeParameters(Map<String, String> queryParameters, String body) {

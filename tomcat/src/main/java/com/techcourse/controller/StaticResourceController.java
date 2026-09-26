@@ -16,20 +16,16 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        byte[] body = staticResource.read(request.getPath())
-                .orElseGet(() -> readNotFoundPage(response));
-
-        response.setContentType(resolveContentType(request.getPath()));
-        response.setBody(body);
-    }
-
-    private byte[] readNotFoundPage(HttpResponse response) {
-        response.setStatus(HttpStatus.NOT_FOUND);
-        try {
-            return staticResource.read("/404.html").orElse(new byte[0]);
-        } catch (Exception ignored) {
-            return new byte[0];
+        var resource = staticResource.read(request.getPath());
+        if (resource.isPresent()) {
+            response.setContentType(resolveContentType(request.getPath()));
+            response.setBody(resource.get());
+            return;
         }
+
+        response.setStatus(HttpStatus.NOT_FOUND);
+        response.setContentType("text/html;charset=utf-8");
+        response.setBody(staticResource.read("/404.html").orElse(new byte[0]));
     }
 
     private String resolveContentType(String path) {

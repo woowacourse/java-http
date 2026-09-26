@@ -35,10 +35,12 @@ public class Http11Processor implements Runnable, Processor {
                 HttpRequest request = new HttpRequest(inputStream);
                 Controller controller = requestMapping.getController(request);
                 controller.service(request, response);
+            } catch (IllegalArgumentException e) {
+                log.warn(e.getMessage());
+                response.reset(HttpStatus.BAD_REQUEST);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                response.setBody(new byte[0]);
+                response.reset(HttpStatus.INTERNAL_SERVER_ERROR);
             }
             response.send();
         } catch (IOException e) {

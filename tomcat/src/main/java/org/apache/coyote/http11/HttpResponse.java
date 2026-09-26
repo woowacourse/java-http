@@ -53,6 +53,12 @@ public class HttpResponse {
         setHeader("Set-Cookie", name + "=" + value);
     }
 
+    public void reset(HttpStatus status) {
+        setStatus(status);
+        headers.clear();
+        setBody(EMPTY_BODY);
+    }
+
     public void send() throws IOException {
         if (sent) {
             return;

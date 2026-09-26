@@ -23,10 +23,10 @@ public class HttpHeaders {
         if (contentLength == null || contentLength.isBlank()) {
             return 0;
         }
-        return Integer.parseInt(contentLength);
-    }
-
-    public Map<String, String> values() {
-        return values;
+        int parsedContentLength = Integer.parseInt(contentLength);
+        if (parsedContentLength < 0) {
+            throw new IllegalArgumentException("Content-Length must not be negative");
+        }
+        return parsedContentLength;
     }
 }

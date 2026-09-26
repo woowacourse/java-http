@@ -12,17 +12,19 @@ public class RequestLine {
 
     private final HttpMethod method;
     private final String path;
-    private final String protocol;
     private final Map<String, String> queryParameters;
 
     public RequestLine(String requestLine) {
-        String[] tokens = requestLine.split(" ", REQUEST_LINE_TOKEN_COUNT);
+        String[] tokens = requestLine.trim().split("\\s+", REQUEST_LINE_TOKEN_COUNT);
         if (tokens.length != REQUEST_LINE_TOKEN_COUNT) {
             throw new IllegalArgumentException("Invalid request line: " + requestLine);
         }
 
         this.method = HttpMethod.from(tokens[0]);
-        this.protocol = tokens[2];
+
+        if (!tokens[1].startsWith("/") || !tokens[2].startsWith("HTTP/")) {
+            throw new IllegalArgumentException("Invalid request line: " + requestLine);
+        }
 
         int queryStartIndex = tokens[1].indexOf('?');
         if (queryStartIndex < 0) {
@@ -41,14 +43,6 @@ public class RequestLine {
 
     public String getPath() {
         return path;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public String getParameter(String name) {
-        return queryParameters.get(name);
     }
 
     public Map<String, String> getQueryParameters() {

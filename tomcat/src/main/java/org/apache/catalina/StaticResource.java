@@ -1,31 +1,42 @@
 package org.apache.catalina;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.Optional;
 
 public class StaticResource {
 
     private static final String STATIC_ROOT = "static/";
 
-    public Optional<byte[]> read(String requestPath) throws IOException, URISyntaxException {
-        URL resource = find(requestPath);
-        if (resource == null) {
+    public Optional<byte[]> read(String requestPath) throws IOException {
+        String resourcePath = find(requestPath);
+        if (resourcePath == null) {
             return Optional.empty();
         }
-        return Optional.of(Files.readAllBytes(Path.of(resource.toURI())));
+
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                return Optional.empty();
+            }
+            return Optional.of(inputStream.readAllBytes());
+        }
     }
 
-    private URL find(String requestPath) {
+    private String find(String requestPath) {
         String resourcePath = normalize(requestPath);
-        URL resource = getClass().getClassLoader().getResource(STATIC_ROOT + resourcePath);
-        if (resource != null || resourcePath.endsWith(".html")) {
-            return resource;
+        String fullPath = STATIC_ROOT + resourcePath;
+        if (getClass().getClassLoader().getResource(fullPath) != null) {
+            return fullPath;
         }
-        return getClass().getClassLoader().getResource(STATIC_ROOT + resourcePath + ".html");
+        if (resourcePath.endsWith(".html")) {
+            return null;
+        }
+
+        String htmlPath = fullPath + ".html";
+        if (getClass().getClassLoader().getResource(htmlPath) != null) {
+            return htmlPath;
+        }
+        return null;
     }
 
     private String normalize(String requestPath) {

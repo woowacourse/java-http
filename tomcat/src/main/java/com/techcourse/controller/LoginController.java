@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.StaticResourceController;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -45,7 +47,30 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) {
-        response.redirect("/index.html");
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        if (isLoggedIn(request)) {
+            response.redirect("/index.html");
+            return;
+        }
+        new StaticResourceController().service(request, response);
+    }
+
+    private boolean isLoggedIn(final HttpRequest request) {
+        final HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
+        final String sessionId = cookie.get("JSESSIONID");
+
+        if (sessionId == null) {
+            return false;
+        }
+
+        final Session session = SessionManager.INSTANCE.findSession(sessionId);
+
+        if (session == null) {
+            return false;
+        } else if (session.getAttribute("user") == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

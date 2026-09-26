@@ -9,6 +9,7 @@ import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -63,11 +64,15 @@ class Http11ProcessorTest {
                 )
         );
 
+        final int contentLength = responseBody
+                .getBytes(StandardCharsets.UTF_8)
+                .length;
+
         assertThat(socket.output())
                 .contains("HTTP/1.1 200 OK")
                 .contains("set-cookie: JSESSIONID=")
                 .contains("content-type: text/html;charset=utf-8")
-                .contains("content-length: 5564")
+                .contains("content-length: " + contentLength)
                 .contains(responseBody);
     }
 

@@ -7,25 +7,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.SessionResolver;
 
 public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, List<String>> headers;
     private final byte[] body;
 
-    private final SessionManager sessionManager;
-    private Session session;
+    private final SessionResolver sessionResolver;
+    private HttpSession session;
     private boolean newSession;
 
-    public static HttpRequest parse(InputStream inputStream, SessionManager sessionManager) throws IOException {
+    public static HttpRequest parse(InputStream inputStream, SessionResolver sessionResolver) throws IOException {
 
         RequestLine requestLine = readFirstLine(inputStream);
         Map<String, List<String>> headers = readHeaders(inputStream);
         byte[] body = readBody(inputStream, headers);
 
-        return new HttpRequest(requestLine, headers, body, sessionManager);
+        return new HttpRequest(requestLine, headers, body, sessionResolver);
     }
 
     public HttpSession getSession(boolean create) {
@@ -33,20 +32,11 @@ public class HttpRequest {
             return session;
         }
 
-        boolean validSessionExists = sessionManager.hasValidSession(headers);
-
-        session = sessionManager.getSession(headers, create);
-
-        if (session != null && create && !validSessionExists) {
-            newSession = true;
-        }
+        session = sessionResolver.getSession(headers, create);
 
         return session;
     }
 
-    public boolean hasNewSession() {
-        return newSession;
-    }
 
     public RequestLine getRequestLine() {
         return requestLine;
@@ -167,10 +157,10 @@ public class HttpRequest {
         return line.toString();
     }
 
-    private HttpRequest(RequestLine requestLine, Map<String, List<String>> headers, byte[] body, SessionManager sessionManager) {
+    private HttpRequest(RequestLine requestLine, Map<String, List<String>> headers, byte[] body, SessionResolver sessionResolver) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.sessionManager = sessionManager;
+        this.sessionResolver = sessionResolver;
     }
 }

@@ -1,12 +1,13 @@
 package org.apache.catalina;
 
+import com.techcourse.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 // 모든 클라이언트의 세션 값을 관리하는 클래스
 // 각 세션의 id 는 uuid 사용
-public class SessionManager implements Manager{
+public class SessionManager implements Manager, SessionResolver {
 
     // key = JSESSION 아이디값,value = Session
     private static final Map<String, Session> SESSIONS = new HashMap<>();
@@ -31,6 +32,14 @@ public class SessionManager implements Manager{
         String sessionId = getSessionId(headers);
 
         return sessionId != null && findSession(sessionId) != null;
+    }
+
+    @Override
+    public String getSessionId(HttpSession session) {
+        if (session instanceof Session actualSession) {
+            return actualSession.getId();
+        }
+        return null;
     }
     public boolean hasSessionId(Map<String, List<String>> headers) {
         return getSessionId(headers) != null;

@@ -1,20 +1,18 @@
 package org.apache.coyote.http11;
 
 
-import com.techcourse.RequestMapping;
-import com.techcourse.controller.Controller;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.HttpCookie;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpResponse;
 import com.techcourse.http.HttpSession;
-import com.techcourse.resource.StaticResourceLoader;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.List;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.Controller;
+import org.apache.catalina.ControllerResolver;
+import org.apache.catalina.SessionResolver;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +21,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
+    private final SessionResolver sessionResolver;
+    private final ControllerResolver controllerResolver;
 
-    private final SessionManager sessionManager = new SessionManager();
-    private final StaticResourceLoader staticResourceLoader = new StaticResourceLoader();
-    private final RequestMapping requestMapping = new RequestMapping(sessionManager, staticResourceLoader);
-
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionResolver sessionResolver, final ControllerResolver controllerResolver) {
         this.connection = connection;
+        this.sessionResolver = sessionResolver;
+        this.controllerResolver = controllerResolver;
     }
 
     @Override
@@ -43,10 +41,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequest.parse(inputStream, sessionManager);
+            HttpRequest request = HttpRequest.parse(inputStream, sessionResolver);
             HttpResponse response = new HttpResponse();
 
-            Controller controller = requestMapping.getController(request);
+            Controller controller = controllerResolver.getController(request);
 
             controller.service(request, response);
 
@@ -65,18 +63,22 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addSessionCookieIfNeeded(HttpRequest request, HttpResponse response) {
 
-        if (!request.hasNewSession()) {
+        if (response.hasHeader("Set-Cookie")) {
             return;
         }
 
-        HttpSession session = request.getSession(false);
+        if (sessionResolver.hasValidSession(request.getHeaders())) {
+            return;
+        }
+
+        HttpSession session = request.getSession(true);
 
         if (session == null) {
             return;
         }
 
-        Session actualSession = (Session) session;
-        HttpCookie cookie = new HttpCookie(actualSession.getId());
+        String sessionId = sessionResolver.getSessionId(session);
+        HttpCookie cookie = new HttpCookie(sessionId);
 
         response.addHeader(
                 "Set-Cookie",

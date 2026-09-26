@@ -13,6 +13,7 @@ import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.requestline.HttpMethod;
 import org.apache.coyote.http11.request.requestline.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,18 +95,19 @@ public class Http11Processor implements Runnable, Processor {
                     headers.get(HttpHeaderName.CONTENT_TYPE)
             );
             final HttpRequest request = HttpRequest.of(requestLine, headers, body, sessionManager);
-
-            log.info("request: {}", rawRequestLine);
-
-            final HttpResponse response = route(request);
+            log.info("request: {}", requestLine);
+            final HttpResponse response = new HttpResponse();
+            route(request, response);
             addSessionCookie(request, response);
             response.writeTo(outputStream);
         } catch (HttpException e) {
-            log.warn("invalid request [{}]: {}", e.getStatus().getCode(), e.getMessage());
-//            HttpResponse.error().writeTo(outputStream);
+            log.info("invalid request [{}]: {}", e.getStatus().getCode(), e.getMessage());
+            HttpResponse.error(e.getStatus()).writeTo(outputStream);
+        } catch (URISyntaxException | RuntimeException e) {
+            log.error("unexpected error while handling request", e);
+            HttpResponse.error(HttpStatus.INTERNAL_SERVER_ERROR).writeTo(outputStream);
         }
     }
-
 
     private void addSessionCookie(final HttpRequest request, final HttpResponse response) {
         request.getNewSession().ifPresent(session -> {
@@ -114,32 +116,37 @@ public class Http11Processor implements Runnable, Processor {
         });
     }
 
-    private HttpResponse route(final HttpRequest request)
+    private void route(final HttpRequest request, final HttpResponse response)
             throws IOException, URISyntaxException {
         final String path = request.getPath();
 
         if (ROOT_PATH.equals(path)) {
-            return HttpResponse.ok(ContentType.HTML, "Hello world!".getBytes(UTF_8));
+            response.setContentType(ContentType.HTML);
+            response.setBody("Hello world!".getBytes(UTF_8));
+            return;
         }
 
         if (LOGIN_PATH.equals(path)) {
             if (request.isMethod(HttpMethod.POST)) {
-                return HttpResponse.redirect(login(request));
+                response.sendRedirect(login(request));
+                return;
             }
             if (isLoggedIn(request)) {
-                return HttpResponse.redirect(INDEX_PAGE);
+                response.sendRedirect(INDEX_PAGE);
+                return;
             }
-            return staticFile(LOGIN_PAGE);
+            staticFile(LOGIN_PAGE, response);
+            return;
         }
-
         if (REGISTER_PATH.equals(path)) {
             if (request.isMethod(HttpMethod.POST)) {
-                return HttpResponse.redirect(register(request));
+                response.sendRedirect(register(request));
+                return;
             }
-            return staticFile(REGISTER_PAGE);
+            staticFile(REGISTER_PAGE, response);
+            return;
         }
-
-        return staticFile(path);
+        staticFile(path, response);
     }
 
     private boolean isLoggedIn(final HttpRequest request) {
@@ -147,14 +154,17 @@ public class Http11Processor implements Runnable, Processor {
                 .map(session -> session.getAttribute(USER))
                 .isPresent();
     }
-
-    private HttpResponse staticFile(final String filePath)
+    private void staticFile(final String filePath, final HttpResponse response)
             throws IOException, URISyntaxException {
         final Optional<Path> found = findStaticFile(filePath);
         if (found.isEmpty()) {
-            return HttpResponse.notFound(ContentType.HTML, readNotFoundBody());
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setContentType(ContentType.HTML);
+            response.setBody(readNotFoundBody());
+            return;
         }
-        return HttpResponse.ok(ContentType.from(filePath), Files.readAllBytes(found.get()));
+        response.setContentType(ContentType.from(filePath));
+        response.setBody(Files.readAllBytes(found.get()));
     }
 
     private byte[] readNotFoundBody() throws IOException, URISyntaxException {

@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
-
     private SessionManager sessionManager;
 
     @BeforeEach
@@ -36,7 +35,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
@@ -49,13 +48,12 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException, URISyntaxException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
-
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
@@ -63,12 +61,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final byte[] body = readStaticFile("static/index.html");
+        final var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(Path.of(resource.toURI())), StandardCharsets.UTF_8);
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n" +
+                new String(body, StandardCharsets.UTF_8);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -83,7 +81,6 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "",
                 "");
-
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
@@ -91,9 +88,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final byte[] body = readStaticFile("static/css/styles.css");
+        final var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: " + body.length + " \r\n" +
                 "\r\n" +
@@ -118,8 +114,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
+        final byte[] body = readStaticFile("static/login.html");
         final String expectedHeader = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.length + " \r\n" +
@@ -129,17 +124,9 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_성공() throws URISyntaxException, IOException {
+    void login_성공() {
         // given
-        final String requestBody = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "",
-                requestBody);
-        final var socket = new StubSocket(httpRequest);
+        final var socket = new StubSocket(formPost("/login", "account=gugu&password=password"));
         final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
@@ -158,15 +145,7 @@ class Http11ProcessorTest {
     @Test
     void 로그인한_사용자는_발급받은_세션으로_인증_상태를_유지한다() {
         // given
-        final String requestBody = "account=gugu&password=password";
-        final String loginRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "",
-                requestBody);
-        final var loginSocket = new StubSocket(loginRequest);
+        final var loginSocket = new StubSocket(formPost("/login", "account=gugu&password=password"));
         new Http11Processor(loginSocket, sessionManager).process(loginSocket);
 
         final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(.+?); Path=/")
@@ -229,8 +208,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
+        final byte[] body = readStaticFile("static/login.html");
         final String expectedHeader = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.length + " \r\n" +
@@ -240,17 +218,54 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 본문에_멀티바이트_문자가_있어도_Content_Length만큼_읽는다() {
+    void login_실패() {
         // given
-        final String requestBody = "account=달수&password=password&email=dalsu%40woowahan.com";
-        final String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "Content-Type: application/x-www-form-urlencoded ",
+        final var socket = new StubSocket(formPost("/login", "account=gugu&password=wrong"));
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /401.html ",
+                "Content-Length: 0 ",
                 "",
-                requestBody);
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void register_페이지() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
         final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final byte[] body = readStaticFile("static/register.html");
+        final String expectedHeader = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).startsWith(expectedHeader);
+    }
+
+    @Test
+    void register_성공() {
+        // given
+        final var socket = new StubSocket(
+                formPost("/register", "account=zeze&password=password&email=zeze%40woowahan.com"));
         final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
         // when
@@ -265,79 +280,51 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+        assertThat(InMemoryUserRepository.findByAccount("zeze")).isPresent();
+    }
+
+    @Test
+    void 인코딩된_한글_계정으로_회원가입한다() {
+        // given
+        final String encodedAccount = "%EB%8B%AC%EC%88%98";   // "달수"
+        final var socket = new StubSocket(formPost("/register",
+                "account=" + encodedAccount + "&password=password&email=dalsu%40woowahan.com"));
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\nLocation: /index.html ");
         assertThat(InMemoryUserRepository.findByAccount("달수")).isPresent();
     }
 
     @Test
-    void login_실패() {
-        final String requestBody = "account=gugu&password=wrong";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "",
-                requestBody);
-        final var socket = new StubSocket(httpRequest);
+    void 인코딩되지_않은_한글_본문은_거부한다() {
+        // given
+        final var socket = new StubSocket(formPost("/register",
+                "account=달수&password=password&email=dalsu%40woowahan.com"));
         final Http11Processor processor = new Http11Processor(socket, sessionManager);
 
+        // when
         processor.process(socket);
 
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /401.html ",
-                "Content-Length: 0 ",
-                "",
-                "");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request ");
     }
 
-    @Test
-    void register_페이지() throws IOException, URISyntaxException {
-        final String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
+    private static String formPost(final String path, final String body) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "",
-                "");
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager);
-
-        processor.process(socket);
-
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final byte[] body = Files.readAllBytes(Path.of(resource.toURI()));
-        final String expectedHeader = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + body.length + " \r\n" +
-                "\r\n";
-
-        assertThat(socket.output()).startsWith(expectedHeader);
-    }
-
-    @Test
-    void register_성공() {
-        final String requestBody = "account=zeze&password=password&email=zeze%40woowahan.com";
-        final String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                requestBody);
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+                body);
+    }
 
-        processor.process(socket);
-
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Length: 0 ",
-                "",
-                "");
-
-        assertThat(socket.output()).isEqualTo(expected);
-        assertThat(InMemoryUserRepository.findByAccount("zeze")).isPresent();
+    private byte[] readStaticFile(final String path) throws IOException, URISyntaxException {
+        final URL resource = getClass().getClassLoader().getResource(path);
+        return Files.readAllBytes(Path.of(resource.toURI()));
     }
 }

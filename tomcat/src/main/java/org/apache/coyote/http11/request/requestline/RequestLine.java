@@ -8,6 +8,7 @@ import java.util.Optional;
 public class RequestLine {
 
     private static final String DELIMITER = " ";
+    private static final char SP = ' ';
     private static final int KEEP_TRAILING_EMPTY = -1;
     private static final int PARTS_COUNT = 3;
     private static final int METHOD_INDEX = 0;
@@ -29,7 +30,8 @@ public class RequestLine {
             throw new BadRequestException("Request Line이 비어 있습니다.");
         }
 
-        final String[] parts = line.split(DELIMITER, KEEP_TRAILING_EMPTY);
+        // RFC 9112 3: 받는 쪽은 요청 라인 끝의 공백을 무시할 수 있다. 해석이 갈리지 않도록 SP만 허용한다
+        final String[] parts = stripTrailingSp(line).split(DELIMITER, KEEP_TRAILING_EMPTY);
         if (parts.length != PARTS_COUNT) {
             throw new BadRequestException("요청 라인 형식이 잘못되었습니다");
         }
@@ -38,6 +40,14 @@ public class RequestLine {
                 RequestUri.from(parts[URI_INDEX]),
                 HttpVersion.from(parts[VERSION_INDEX])
         );
+    }
+
+    private static String stripTrailingSp(final String line) {
+        int end = line.length();
+        while (end > 0 && line.charAt(end - 1) == SP) {
+            end--;
+        }
+        return line.substring(0, end);
     }
 
     public HttpMethod getMethod() {

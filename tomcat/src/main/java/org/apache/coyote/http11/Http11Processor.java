@@ -54,30 +54,33 @@ public class Http11Processor implements Runnable, Processor {
             // Request Body
 
             // 반환 타입 확정
-            final var type = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
+            final var responseType = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
             // Path에 따른 비지니스 로직
             if (httpInfo.get("Path").contains("/login?")) {
                 Map<String, String> queryString = parseQueryString();
                 LoginResult loginResult = authenticateUser(queryString.get("account"), queryString.get("password"));
 
+                // 실패 응답 반환
                 if (loginResult == LoginResult.FAIL) {
-                    final var responseBody = readStaticResource("/401", type);
-                    final var response = buildHttpResponse(responseBody, type);
+                    final var responseBody = readStaticResource("/401", responseType);
+                    final var response = buildRedirectResponse("/401", responseBody, responseType);
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;
                 }
+
+                // 리다이렉트 응답 반환
+                final var responseBody = readStaticResource("/index", responseType);
+                final var response = buildRedirectResponse("/index.html", responseBody, responseType);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
             }
-            // 지금 문제점.
-            // 비지니스 로직과 결과의 반영 여부가 다르다.
 
-            // 반환할 정적 파일 찾기
-            final var responseBody = readStaticResource(null, type);
-
-            // HTTP 요청 응답 완성
-            final var response = buildHttpResponse(responseBody, type);
-
+            // 200 OK 응답 반환
+            final var responseBody = readStaticResource(null, responseType);
+            final var response = buildOKHttpResponse(responseBody, responseType);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -166,7 +169,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
 
-            if (user.checkPassword(password)) {
+            if (!user.checkPassword(password)) {
                 log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
                 return LoginResult.FAIL;
             }
@@ -180,10 +183,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 
-    private String buildHttpResponse(final String responseBody, final String type) {
+    private String buildOKHttpResponse(final String responseBody,
+        final String type) {
         return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
+            String.format("HTTP/1.1 %d %s ", 200, "OK"),
             String.format("Content-Type: text/%s;charset=utf-8 ", type),
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+    }
+
+    private String buildRedirectResponse(final String url, final String responseBody, final String type) {
+        return String.join("\r\n",
+            "HTTP/1.1 302 Redirect ",
+            String.format("Content-Type: text/%s;charset=utf-8 ", type),
+            String.format("Location: %s ", url),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

@@ -63,7 +63,9 @@ class Session implements HttpSession {
     @Override
     public ServletContext getServletContext() {
         throw new UnsupportedOperationException(UNSUPPORTED_MESSAGE);
-    }    @Override
+    }
+
+    @Override
     public Object getAttribute(String name) {
         return attributes.get(name);
     }
@@ -96,7 +98,6 @@ class Session implements HttpSession {
     public int getMaxInactiveInterval() {
         return maxInactiveInterval;
     }
-
 
 
     @Override

@@ -1,7 +1,9 @@
 package com.techcourse.resource;
 
+import com.techcourse.exception.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,14 +27,15 @@ public class StaticResourceLoader {
         if (requestPath.equals("/register")) {
             resourcePath += ".html";
         }
-        Path filePath = Path.of(
-                getClass()
+        URL resource = getClass()
                         .getClassLoader()
-                        .getResource(resourcePath)
-                        .toURI()
-        );
+                        .getResource(resourcePath);
 
-        return filePath;
+        if (resource == null) {
+            throw new ResourceNotFoundException(resourcePath);
+        }
+
+        return Path.of(resource.toURI());
     }
 
     private String resolveContentType(final String fileName) {
@@ -50,6 +53,9 @@ public class StaticResourceLoader {
         }
         if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
             return "image/jpeg";
+        }
+        if (fileName.endsWith(".svg")) {
+            return "image/svg+xml";
         }
         return "text/plain";
     }

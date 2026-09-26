@@ -58,6 +58,8 @@ public class HttpResponse {
             }
         }
 
+        header.append("\r\n");
+
         byte[] headerBytes = header.toString().getBytes(StandardCharsets.UTF_8);
         byte[] result = new byte[headerBytes.length + responseBody.length];
 

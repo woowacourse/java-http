@@ -5,8 +5,6 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserSessionService;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.resource.StaticResourceService;
-import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -28,7 +26,7 @@ public final class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.getCookie(HttpCookie.JSESSION_ID).flatMap(userSessions::findUser).isPresent()) {
+        if (userSessions.findUser(request).isPresent()) {
             response.sendRedirect("/index.html");
             return;
         }
@@ -46,9 +44,7 @@ public final class LoginController extends AbstractController {
         User user = loginUser.get();
         log.info("회원 조회 성공: account={}", user.getAccount());
 
-        String sessionId = request.getCookie(HttpCookie.JSESSION_ID).orElse(null);
-        Session session = userSessions.startAuthenticatedSession(sessionId, user);
-        response.setCookie(HttpCookie.JSESSION_ID, session.getId());
+        userSessions.startAuthenticatedSession(request, response, user);
         response.sendRedirect("/index.html");
     }
 

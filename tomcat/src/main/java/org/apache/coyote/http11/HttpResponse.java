@@ -42,6 +42,13 @@ public class HttpResponse {
         send();
     }
 
+    public void sendMethodNotAllowed(final List<String> allowedMethods) throws IOException {
+        setStatus("405 Method Not Allowed");
+        addHeader("Allow", String.join(", ", allowedMethods));
+        setBody(new byte[0]);
+        send();
+    }
+
     public void forward(final String path) throws IOException {
         final URL resource = findResource(path);
         if (resource == null) {

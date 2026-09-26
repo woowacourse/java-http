@@ -8,6 +8,10 @@ import java.nio.charset.StandardCharsets;
 
 public class RootController extends AbstractController {
 
+    public RootController() {
+        super("GET");
+    }
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.setStatus("200 OK");

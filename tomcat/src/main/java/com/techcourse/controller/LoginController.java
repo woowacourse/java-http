@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public class LoginController extends AbstractController {
 
+    public LoginController() {
+        super("GET", "POST");
+    }
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final Session session = request.getSession(false);

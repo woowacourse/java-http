@@ -50,4 +50,17 @@ class StaticResourceControllerTest {
         assertThat(outputStream.toString(StandardCharsets.UTF_8))
                 .startsWith("HTTP/1.1 404 Not Found\r\n");
     }
+
+    @Test
+    void 정적_파일_POST_요청은_405를_응답한다() throws Exception {
+        final HttpRequest request = HttpRequest.from("POST /index.html HTTP/1.1");
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse response = new HttpResponse(outputStream);
+
+        controller.service(request, response);
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8))
+                .startsWith("HTTP/1.1 405 Method Not Allowed\r\n")
+                .contains("Allow: GET\r\n");
+    }
 }

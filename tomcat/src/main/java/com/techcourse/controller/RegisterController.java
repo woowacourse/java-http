@@ -10,6 +10,10 @@ import java.util.Map;
 
 public class RegisterController extends AbstractController {
 
+    public RegisterController() {
+        super("GET", "POST");
+    }
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.forward("/register.html");

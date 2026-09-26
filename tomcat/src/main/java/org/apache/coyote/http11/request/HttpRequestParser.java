@@ -6,8 +6,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public final class HttpRequestParser {
 
@@ -39,12 +39,15 @@ public final class HttpRequestParser {
     }
 
     private static Map<String, String> readHeaders(final InputStream inputStream) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         String line = readLine(inputStream);
         while (line != null && !line.isEmpty()) {
-            String[] header = line.split(": ", 2);
-            headers.put(header[0], header[1]);
+            int separator = line.indexOf(':');
+            if (separator <= 0) {
+                throw new IOException("올바르지 않은 HTTP 헤더입니다: " + line);
+            }
+            headers.put(line.substring(0, separator), line.substring(separator + 1).stripLeading());
             line = readLine(inputStream);
         }
         return headers;

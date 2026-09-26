@@ -10,9 +10,6 @@ import org.apache.coyote.http11.MyHttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,12 +32,11 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        MyHttpCookie httpCookie = new MyHttpCookie(request.getCookie());
-        Session session = sessionManager.findSession(httpCookie.getJSessionId());
+        Session session = findSession(request);
         try {
             Map<String, String> parameters;
             if (request.isFormUrlEncoded()) {
-                parameters = parseFormData(request.getBody());
+                parameters = request.getFormData();
             } else {
                 throw new IllegalArgumentException("지원하지 않는 Content-Type입니다: " + request.getContentType());
             }
@@ -70,8 +66,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        MyHttpCookie httpCookie = new MyHttpCookie(request.getCookie());
-        Session session = sessionManager.findSession(httpCookie.getJSessionId());
+        Session session = findSession(request);
         if (session != null && session.getAttribute(USER) != null) {
             response.sendRedirect(PATH_INDEX_HTML);
             return;
@@ -79,15 +74,8 @@ public class LoginController extends AbstractController {
         response.sendStaticHtml(PATH_LOGIN_HTML);
     }
 
-    private Map<String, String> parseFormData(final String body) {
-        Map<String, String> formData = new HashMap<>();
-        String[] pairs = body.split("&");
-        for (String pair : pairs) {
-            String[] keyAndMap = pair.split("=", 2);
-            String key = keyAndMap[0];
-            String value = keyAndMap[1];
-            formData.put(URLDecoder.decode(key, StandardCharsets.UTF_8), URLDecoder.decode(value, StandardCharsets.UTF_8));
-        }
-        return formData;
+    private Session findSession(final HttpRequest request) {
+        MyHttpCookie cookie = new MyHttpCookie(request.getCookie());
+        return sessionManager.findSession(cookie.getJSessionId());
     }
 }

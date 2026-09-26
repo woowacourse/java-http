@@ -1,5 +1,8 @@
 package org.apache.coyote;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 public final class HttpRequest {
@@ -56,5 +59,17 @@ public final class HttpRequest {
         final String contentType = getContentType();
         return contentType != null
                 && contentType.startsWith(CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
+    }
+
+    public Map<String, String> getFormData() {
+        Map<String, String> formData = new HashMap<>();
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] keyAndValue = pair.split("=", 2);
+            String key = keyAndValue[0];
+            String value = keyAndValue[1];
+            formData.put(URLDecoder.decode(key, StandardCharsets.UTF_8), URLDecoder.decode(value, StandardCharsets.UTF_8));
+        }
+        return formData;
     }
 }

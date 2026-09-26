@@ -3,18 +3,11 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.session.Session;
@@ -49,32 +42,22 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var rawInputStream = connection.getInputStream();
+        try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var inputStream = new BufferedInputStream(rawInputStream);
-            final String requestLine = readLine(inputStream);
+            final HttpRequest request = HttpRequest.from(inputStream);
+            final HttpMethod method = request.getMethod();
+            final String path = request.getPath();
+            final Cookie cookie = request.getCookie();
 
-            if (requestLine == null || requestLine.isBlank()) {
+            log.debug("{} {} 요청을 받았습니다.", method, path);
+
+            if (method == HttpMethod.POST && path.equals("/login")) {
+                login(request, outputStream);
                 return;
             }
 
-            final String[] requestLineTokens = requestLine.split(" ");
-            final String method = requestLineTokens[0];
-            final String requestTarget = requestLineTokens[1];
-            final String path = extractPath(requestTarget);
-            final Map<String, String> headers = readHeaders(inputStream);
-            final String requestBody = readBody(inputStream, headers);
-            final Cookie cookie = Cookie.from(headers.get("cookie"));
-
-            log.debug("{} {} 요청을 받았습니다. 본문 길이: {}", method, requestTarget, requestBody.length());
-
-            if (method.equals("POST") && path.equals("/login")) {
-                login(parseQueryString(requestBody), cookie, outputStream);
-                return;
-            }
-
-            if (method.equals("POST") && path.equals("/register")) {
-                register(parseQueryString(requestBody), outputStream);
+            if (method == HttpMethod.POST && path.equals("/register")) {
+                register(request, outputStream);
                 return;
             }
 
@@ -149,10 +132,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void register(final Map<String, String> params, final OutputStream outputStream) throws IOException {
-        final String account = params.get("account");
-        final String email = params.get("email");
-        final String password = params.get("password");
+    private void register(final HttpRequest request, final OutputStream outputStream) throws IOException {
+        final String account = request.getBodyParam("account");
+        final String email = request.getBodyParam("email");
+        final String password = request.getBodyParam("password");
 
         if (isBlank(account) || isBlank(email) || isBlank(password)) {
             log.info("회원가입에 필요한 정보가 입력되지 않았습니다.");
@@ -201,54 +184,9 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-
-    private String readLine(final InputStream inputStream) throws IOException {
-        final ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream();
-        int current = inputStream.read();
-        if (current == -1) {
-            return null;
-        }
-
-        while (current != -1 && current != '\n') {
-            if (current != '\r') {
-                lineBuffer.write(current);
-            }
-            current = inputStream.read();
-        }
-        return lineBuffer.toString(StandardCharsets.UTF_8);
-    }
-
-    private Map<String, String> readHeaders(final InputStream inputStream) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-
-        String line = readLine(inputStream);
-        while (line != null && !line.isEmpty()) {
-            final int separatorIndex = line.indexOf(":");
-            if (separatorIndex != -1) {
-                final String name = line.substring(0, separatorIndex).trim().toLowerCase();
-                final String value = line.substring(separatorIndex + 1).trim();
-                headers.put(name, value);
-            }
-            line = readLine(inputStream);
-        }
-        return headers;
-    }
-
-    private String readBody(final InputStream inputStream, final Map<String, String> headers) throws IOException {
-        final String contentLength = headers.get("content-length");
-        if (contentLength == null) {
-            return "";
-        }
-
-        final int length = Integer.parseInt(contentLength);
-        final byte[] buffer = inputStream.readNBytes(length);
-        return new String(buffer, StandardCharsets.UTF_8);
-    }
-
-    private void login(final Map<String, String> params, final Cookie cookie, final OutputStream outputStream)
-            throws IOException {
-        final String account = params.get("account");
-        final String password = params.get("password");
+    private void login(final HttpRequest request, final OutputStream outputStream) throws IOException {
+        final String account = request.getBodyParam("account");
+        final String password = request.getBodyParam("password");
 
         if (account == null || password == null) {
             log.info("아이디 또는 비밀번호가 입력되지 않았습니다.");
@@ -267,7 +205,7 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("로그인 성공! 아이디 : {}", account);
 
-        final Optional<Session> existingSession = findSession(cookie);
+        final Optional<Session> existingSession = findSession(request.getCookie());
         final Session session = existingSession.orElseGet(this::createSession);
         session.setAttribute(USER_ATTRIBUTE, user.get());
 
@@ -280,38 +218,5 @@ public class Http11Processor implements Runnable, Processor {
             return Optional.empty();
         }
         return Optional.ofNullable(SessionManager.getInstance().findSession(cookie.getJSessionId()));
-    }
-
-    private String extractPath(final String requestTarget) {
-        final int queryIndex = requestTarget.indexOf("?");
-        if (queryIndex == -1) {
-            return requestTarget;
-        }
-        return requestTarget.substring(0, queryIndex);
-    }
-
-    private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> params = new HashMap<>();
-        if (queryString == null || queryString.isBlank()) {
-            return params;
-        }
-
-        final String[] pairs = queryString.split("&");
-        for (final String pair : pairs) {
-            final String[] keyValue = pair.split("=", 2);
-            if (keyValue[0].isBlank()) {
-                continue;
-            }
-            if (keyValue.length == 2) {
-                params.put(decode(keyValue[0]), decode(keyValue[1]));
-            } else {
-                params.put(decode(keyValue[0]), "");
-            }
-        }
-        return params;
-    }
-
-    private String decode(final String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

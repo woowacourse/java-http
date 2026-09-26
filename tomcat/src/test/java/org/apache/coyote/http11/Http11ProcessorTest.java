@@ -394,6 +394,32 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 로그인_요청의_퍼센트_인코딩된_폼_파라미터를_디코딩한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: 34",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=g%75gu&password=pass%77ord",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found \r\n",
+                "Location: http://localhost:8080/index.html \r\n"
+        );
+    }
+
+    @Test
     void 로그인에_성공하고_세션이_없으면_JSESSIONID를_발급한다() {
         // given
         String httpRequest = String.join("\r\n",

@@ -8,6 +8,8 @@ import org.apache.coyote.cookie.HttpCookie;
 import org.apache.coyote.http11.ContentType;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -143,10 +145,16 @@ public class MyHttpRequest {
     public Map<String, String> getFormParameters() {
         Map<String, String> params = new HashMap<>();
         for (String parameter : body.split("&")) {
-            String[] keyValue = parameter.split("=", 3);
-            params.put(keyValue[0], keyValue[1]);
+            int separatorIndex = parameter.indexOf('=');
+            String key = parameter.substring(0, separatorIndex);
+            String value = parameter.substring(separatorIndex + 1);
+            params.put(decode(key), decode(value));
         }
         return Map.copyOf(params);
+    }
+
+    private String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
     /**

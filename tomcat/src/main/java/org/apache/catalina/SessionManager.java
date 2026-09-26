@@ -17,7 +17,7 @@ public class SessionManager implements Manager {
     }
 
     public Session createSession() {
-        final var session = new Session(UUID.randomUUID().toString());
+        final Session session = new Session(UUID.randomUUID().toString());
         add(session);
         return session;
     }

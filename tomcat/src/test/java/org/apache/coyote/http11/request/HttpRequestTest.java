@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HttpRequestTest {
     private final SessionManager sessionManager = SessionManager.getInstance();
-    private final RequestBody emptyBody = RequestBody.from("");
+    private final RequestBody emptyBody = RequestBody.empty();
 
     @Test
     void HTTP_1_1_요청에_Host가_없으면_거부한다() {

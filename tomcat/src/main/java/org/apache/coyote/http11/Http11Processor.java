@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.exception.HttpException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -88,7 +89,10 @@ public class Http11Processor implements Runnable, Processor {
             final String rawRequestLine = readLine(inputStream);
             final RequestLine requestLine = RequestLine.from(rawRequestLine);
             final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
-            final RequestBody body = RequestBody.from(readBody(inputStream, headers.getContentLength()));
+            final RequestBody body = RequestBody.of(
+                    readBody(inputStream, headers.getContentLength()),
+                    headers.get(HttpHeaderName.CONTENT_TYPE)
+            );
             final HttpRequest request = HttpRequest.of(requestLine, headers, body, sessionManager);
 
             log.info("request: {}", rawRequestLine);
@@ -198,14 +202,18 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String readBody(
+    private byte[] readBody(
             final InputStream inputStream,
             final int contentLength
             ) throws IOException {
         if (contentLength == 0) {
-            return "";
+            return new byte[0];
         }
-        return new String(inputStream.readNBytes(contentLength), UTF_8);
+        final byte[] body = inputStream.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new BadRequestException("요청 본문이 Content-Length보다 짧습니다");
+        }
+        return body;
     }
 
     private String readLine(final InputStream inputStream) throws IOException {

@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,8 +15,14 @@ import org.apache.coyote.http11.SessionManager;
 
 public class LoginController implements Controller {
 
+    private final Controller staticResourceController = new StaticResourceController();
+
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request) throws IOException {
+        if ("GET".equals(request.requestLine().method())) {
+            return showLoginPage(request);
+        }
+
         Map<String, String> formData = request.body().parseFormData();
         String account = formData.get("account");
         String password = formData.get("password");
@@ -29,6 +36,29 @@ public class LoginController implements Controller {
         Session session = createSession(authenticatedUser);
 
         return HttpResponse.redirect("/index.html", new Cookie("JSESSIONID", session.getId()));
+    }
+
+    private HttpResponse showLoginPage(HttpRequest request) throws IOException {
+        Optional<Cookie> sessionCookie = request.headers().getCookie("JSESSIONID");
+        Session session = findSession(sessionCookie);
+
+        if (isLoggedIn(session)) {
+            return HttpResponse.redirect("/index.html");
+        }
+
+        return staticResourceController.handle(request);
+    }
+
+    private Session findSession(Optional<Cookie> sessionCookie) {
+        if (sessionCookie.isEmpty()) {
+            return null;
+        }
+
+        return SessionManager.findSession(sessionCookie.get().value());
+    }
+
+    private boolean isLoggedIn(Session session) {
+        return session != null && session.getAttribute("user") != null;
     }
 
     @Nonnull

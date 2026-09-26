@@ -7,7 +7,6 @@ import com.techcourse.controller.StaticResourceController;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +49,8 @@ public class Http11Processor implements Runnable, Processor {
         String method = request.requestLine().method();
         String path = request.requestLine().path();
 
-        Optional<Cookie> sessionCookie = request.headers().getCookie("JSESSIONID");
-
         if ("GET".equals(method)) {
-            return handleGetRequest(path, sessionCookie, request);
+            return handleGetRequest(path, request);
         }
 
         if ("POST".equals(method)) {
@@ -63,12 +60,9 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.empty(405, "Method Not Allowed");
     }
 
-    private HttpResponse handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie, HttpRequest request)
-            throws IOException {
-        Session session = findSession(sessionCookie);
-
-        if ("/login".equals(resourcePath) && isLoggedIn(session)) {
-            return HttpResponse.redirect("/index.html");
+    private HttpResponse handleGetRequest(String resourcePath, HttpRequest request) throws IOException {
+        if ("/login".equals(resourcePath)) {
+            return loginController.handle(request);
         }
 
         return staticResourceController.handle(request);
@@ -84,17 +78,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return HttpResponse.empty(405, "Method Not Allowed");
-    }
-
-    private Session findSession(Optional<Cookie> sessionCookie) {
-        if (sessionCookie.isEmpty()) {
-            return null;
-        }
-
-        return SessionManager.findSession(sessionCookie.get().value());
-    }
-
-    private boolean isLoggedIn(Session session) {
-        return session != null && session.getAttribute("user") != null;
     }
 }

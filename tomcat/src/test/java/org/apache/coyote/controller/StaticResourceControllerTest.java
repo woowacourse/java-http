@@ -37,12 +37,13 @@ class StaticResourceControllerTest {
     }
 
     @Test
-    void 로그인_페이지를_반환한다() throws Exception {
+    void forward_경로가_있으면_해당_리소스를_응답한다() throws Exception {
 
         // given
         final HttpRequest request = createRequest("GET /login HTTP/1.1");
 
         final HttpResponse response = new HttpResponse();
+        response.forward("/login.html");
 
         // when
         controller.service(request, response);
@@ -53,6 +54,21 @@ class StaticResourceControllerTest {
         assertThat(result)
                 .contains("HTTP/1.1 200 OK")
                 .contains("<title>로그인</title>");
+    }
+
+    @Test
+    void 애플리케이션_경로는_알지_못해_404를_응답한다() throws Exception {
+
+        // given
+        final HttpRequest request = createRequest("GET /login HTTP/1.1");
+
+        final HttpResponse response = new HttpResponse();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        assertThat(writeResponse(response)).contains("HTTP/1.1 404 Not Found");
     }
 
     @Test

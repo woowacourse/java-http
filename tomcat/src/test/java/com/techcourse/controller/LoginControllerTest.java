@@ -25,7 +25,7 @@ class LoginControllerTest {
             new LoginController();
 
     @Test
-    void 로그인하지_않은_사용자가_GET_login을_요청하면_응답을_결정하지_않는다()
+    void 로그인하지_않은_사용자가_GET_login을_요청하면_로그인_페이지로_forward한다()
             throws Exception {
 
         // given
@@ -50,9 +50,7 @@ class LoginControllerTest {
         );
 
         // then
-        assertThat(
-                response.hasStatus()
-        ).isFalse();
+        assertThat(response.getForwardPath()).contains("/login.html");
     }
 
     @Test

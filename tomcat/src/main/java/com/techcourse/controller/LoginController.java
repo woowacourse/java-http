@@ -21,16 +21,14 @@ public class LoginController extends AbstractController {
     private static final String USER_SESSION_KEY = "user";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String LOGIN_PAGE = "/login.html";
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
 
         final HttpSession session = request.getSession(false);
-        if (session == null) {
-            return;
-        }
-
-        if (getUser(session) == null) {
+        if (session == null || getUser(session) == null) {
+            response.forward(LOGIN_PAGE);
             return;
         }
 

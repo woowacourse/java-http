@@ -106,6 +106,28 @@ class Http11ProcessorTest {
 
 
     @Test
+    void GET_register는_회원가입_페이지를_보여준다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+
+        final Http11Processor processor = createProcessor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("<title>회원가입</title>");
+    }
+
+    @Test
     void POST_방식으로_로그인에_실패하면_401페이지로_리다이렉트한다() {
         // given
         final String body = "account=gugu&password=wrong";

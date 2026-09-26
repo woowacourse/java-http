@@ -15,10 +15,6 @@ public class StaticResourceController extends AbstractController {
 
     private static final String ROOT_PATH = "/";
 
-    private static final String LOGIN_PATH = "/login";
-
-    private static final String REGISTER_PATH = "/register";
-
     private static final byte[] HELLO_WORLD =
             "Hello world!".getBytes(StandardCharsets.UTF_8);
 
@@ -44,18 +40,17 @@ public class StaticResourceController extends AbstractController {
     private void serveResource(final HttpRequest request, final HttpResponse response)
             throws IOException {
 
-        final String path = request.getPath();
+        final String path = response.getForwardPath()
+                .orElse(request.getPath());
 
         if (ROOT_PATH.equals(path)) {
             response.ok("text/html;charset=utf-8", HELLO_WORLD);
             return;
         }
 
-        final String resourcePath = resolveResourcePath(path);
-
         final Optional<byte[]> resource =
                 resourceReader.read(
-                        resourcePath
+                        STATIC_DIRECTORY + path
                 );
 
         if (resource.isEmpty()) {
@@ -71,17 +66,6 @@ public class StaticResourceController extends AbstractController {
         final byte[] responseBody = "Not Found".getBytes(StandardCharsets.UTF_8);
 
         response.notFound("text/plain;charset=utf-8", responseBody);
-    }
-
-    private String resolveResourcePath(final String path) {
-        if (LOGIN_PATH.equals(path)) {
-            return STATIC_DIRECTORY + "/login.html";
-        }
-
-        if (REGISTER_PATH.equals(path)) {
-            return STATIC_DIRECTORY + "/register.html";
-        }
-        return STATIC_DIRECTORY + path;
     }
 
     private String resolveContentType(final String path) {

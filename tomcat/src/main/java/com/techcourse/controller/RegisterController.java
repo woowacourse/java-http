@@ -21,6 +21,13 @@ public class RegisterController extends AbstractController {
 
     private static final String INDEX_PAGE = "/index.html";
 
+    private static final String REGISTER_PAGE = "/register.html";
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.forward(REGISTER_PAGE);
+    }
+
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
 
@@ -29,6 +36,7 @@ public class RegisterController extends AbstractController {
         final Optional<String> email = getRequiredParameter(request, EMAIL);
 
         if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            response.forward(REGISTER_PAGE);
             return;
         }
 

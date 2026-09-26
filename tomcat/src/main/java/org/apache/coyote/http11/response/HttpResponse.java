@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpResponse {
 
@@ -26,6 +27,8 @@ public class HttpResponse {
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     private byte[] body = EMPTY_BODY;
+
+    private String forwardPath;
 
     public void ok(final String contentType, final byte[] body) {
         this.status = HttpStatus.OK;
@@ -53,6 +56,14 @@ public class HttpResponse {
         this.body = EMPTY_BODY;
 
         addHeader(LOCATION, location);
+    }
+
+    public void forward(final String path) {
+        this.forwardPath = path;
+    }
+
+    public Optional<String> getForwardPath() {
+        return Optional.ofNullable(forwardPath);
     }
 
     public void addHeader(final String name, final String value) {

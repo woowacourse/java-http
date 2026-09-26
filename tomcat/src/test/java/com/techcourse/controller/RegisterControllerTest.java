@@ -19,6 +19,21 @@ class RegisterControllerTest {
             new RegisterController();
 
     @Test
+    void GET_요청이면_회원가입_페이지로_forward한다() throws Exception {
+        // given
+        final HttpRequest request = HttpRequest.from(new ByteArrayInputStream(
+                "GET /register HTTP/1.1\r\nHost: localhost:8080\r\n\r\n".getBytes(StandardCharsets.UTF_8)
+        )).orElseThrow();
+        final HttpResponse response = new HttpResponse();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        assertThat(response.getForwardPath()).contains("/register.html");
+    }
+
+    @Test
     void POST_요청으로_회원을_등록하고_index로_리다이렉트한다()
             throws Exception {
 
@@ -78,7 +93,7 @@ class RegisterControllerTest {
     }
 
     @Test
-    void 회원가입_파라미터가_누락되면_회원을_저장하지_않고_응답을_결정하지_않는다()
+    void 회원가입_파라미터가_누락되면_회원을_저장하지_않고_회원가입_페이지로_forward한다()
             throws Exception {
 
         // given
@@ -113,18 +128,16 @@ class RegisterControllerTest {
                         )
         ).isEmpty();
 
-        assertThat(
-                response.hasStatus()
-        ).isFalse();
+        assertThat(response.getForwardPath()).contains("/register.html");
     }
 
     @Test
-    void 계정이_공백이면_회원을_저장하지_않고_응답을_결정하지_않는다() throws Exception {
+    void 계정이_공백이면_회원을_저장하지_않고_회원가입_페이지로_forward한다() throws Exception {
         assertRegisterRejected("account=+++&password=1234&email=moca%40email.com", "   ");
     }
 
     @Test
-    void 비밀번호가_공백이면_회원을_저장하지_않고_응답을_결정하지_않는다() throws Exception {
+    void 비밀번호가_공백이면_회원을_저장하지_않고_회원가입_페이지로_forward한다() throws Exception {
         assertRegisterRejected(
                 "account=blank-password-test&password=+++&email=moca%40email.com",
                 "blank-password-test"
@@ -132,7 +145,7 @@ class RegisterControllerTest {
     }
 
     @Test
-    void 이메일이_공백이면_회원을_저장하지_않고_응답을_결정하지_않는다() throws Exception {
+    void 이메일이_공백이면_회원을_저장하지_않고_회원가입_페이지로_forward한다() throws Exception {
         assertRegisterRejected(
                 "account=blank-email-test&password=1234&email=+++",
                 "blank-email-test"
@@ -149,7 +162,7 @@ class RegisterControllerTest {
 
         // then
         assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
-        assertThat(response.hasStatus()).isFalse();
+        assertThat(response.getForwardPath()).contains("/register.html");
     }
 
     private HttpRequest createPostRequest(

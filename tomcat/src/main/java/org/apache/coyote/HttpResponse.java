@@ -23,8 +23,11 @@ public class HttpResponse {
     private static final String HTTP_STATUS_OK = "200 OK";
     private static final String HTTP_STATUS_NOT_FOUND = "404 Not Found";
     private static final String HTTP_STATUS_FOUND = "302 Found";
+    private static final String HTTP_STATUS_METHOD_NOT_ALLOWED = "405 Method Not Allowed";
+    private static final String HTTP_STATUS_INTERNAL_SERVER_ERROR = "500 Internal Server Error";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID=";
+    private static final String PATH_500_HTML = "static/500.html";
 
     private String status;
     private String version;
@@ -58,6 +61,15 @@ public class HttpResponse {
         headers.put(CONTENT_LENGTH, String.valueOf(0));
         headers.put(LOCATION, locationUrl);
         this.body = "";
+    }
+
+    public void sendMethodNotAllowed() {
+        send(HTTP_STATUS_METHOD_NOT_ALLOWED, CONTENT_TYPE_TEXT_HTML, "");
+    }
+
+    public void sendInternalServerError() throws URISyntaxException, IOException {
+        URL resource = getClass().getClassLoader().getResource(PATH_500_HTML);
+        send(HTTP_STATUS_INTERNAL_SERVER_ERROR, CONTENT_TYPE_TEXT_HTML, Files.readString(Path.of(resource.toURI())));
     }
 
     private String contentTypeOf(final String target) {

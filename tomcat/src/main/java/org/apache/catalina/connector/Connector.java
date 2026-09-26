@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +29,13 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
     private static final int DEFAULT_QUEUED_REQUESTS = 100;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 10_000;
     private static final long SHUTDOWN_WAIT_SECONDS = 1;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executor;
     private final Set<Socket> connections = ConcurrentHashMap.newKeySet();
+    private final int readTimeoutMillis;
     private final Manager sessionManager = new SessionManager();
     private final RequestMapping requestMapping;
     private volatile boolean stopped;
@@ -52,11 +55,17 @@ public class Connector implements Runnable {
 
     Connector(final int port, final int acceptCount, final int maxThreads,
               final int queuedRequests, final RequestMapping requestMapping) {
-        if (maxThreads <= 0 || queuedRequests <= 0) {
-            throw new IllegalArgumentException("스레드 수와 대기 작업 수는 양수여야 합니다.");
+        this(port, acceptCount, maxThreads, queuedRequests, DEFAULT_READ_TIMEOUT_MILLIS, requestMapping);
+    }
+
+    Connector(final int port, final int acceptCount, final int maxThreads,
+              final int queuedRequests, final int readTimeoutMillis, final RequestMapping requestMapping) {
+        if (maxThreads <= 0 || queuedRequests <= 0 || readTimeoutMillis <= 0) {
+            throw new IllegalArgumentException("스레드 수, 대기 작업 수, 읽기 제한 시간은 양수여야 합니다.");
         }
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.readTimeoutMillis = readTimeoutMillis;
         this.executor = new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(queuedRequests), Executors.defaultThreadFactory());
         this.stopped = false;
@@ -104,8 +113,15 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, sessionManager, requestMapping);
         connections.add(connection);
+        try {
+            connection.setSoTimeout(readTimeoutMillis);
+        } catch (SocketException e) {
+            closeConnection(connection);
+            log.warn("연결의 읽기 제한 시간을 설정하지 못했습니다.", e);
+            return;
+        }
+        var processor = new Http11Processor(connection, sessionManager, requestMapping);
         try {
             executor.execute(() -> {
                 try {

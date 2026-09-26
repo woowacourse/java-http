@@ -139,6 +139,24 @@ class ConnectorTest {
         }
     }
 
+    @Test
+    void closesAnIdleConnectionAfterTheReadTimeout() throws Exception {
+        final var mapping = new RequestMapping(Map.of(), (request, response) -> {});
+        final var connector = new Connector(0, 100, 1, 1, 200, mapping);
+
+        try (var listener = new ServerSocket(0);
+             var client = new Socket("127.0.0.1", listener.getLocalPort());
+             var accepted = listener.accept()) {
+            client.setSoTimeout(3_000);
+            connector.process(accepted);
+
+            assertThat(client.getInputStream().read()).isEqualTo(-1);
+            assertThat(accepted.isClosed()).isTrue();
+        } finally {
+            connector.stop();
+        }
+    }
+
     private StubSocket request(String path) {
         return new StubSocket("GET " + path + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
     }

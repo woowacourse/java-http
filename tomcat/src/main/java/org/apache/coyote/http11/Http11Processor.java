@@ -4,11 +4,21 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.HomeController;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.BadRequestException;
+import org.apache.coyote.http11.exception.HttpException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.requestline.HttpMethod;
+import org.apache.coyote.http11.request.requestline.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -34,7 +45,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_DIRECTORY = "static";
     private static final String USER = "user";
 
-    private static final String POST = "POST";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_PATH = "; Path=/";
 
@@ -42,25 +52,23 @@ public class Http11Processor implements Runnable, Processor {
     private static final int LINE_FEED = '\n';
     private static final String CARRIAGE_RETURN = "\r";
 
-    private static final String ROOT_PATH = "/";
-    private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String NOT_FOUND_PAGE = "/404.html";
-    private static final String REGISTER_PATH = "/register";
-    private static final String REGISTER_PAGE = "/register.html";
-
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-    private static final String EMAIL = "email";
-
     private final Socket connection;
-    private final SessionManager sessionManager;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
-        this.sessionManager = sessionManager;
+        this.requestMapping = createRequestMapping(sessionManager);
+    }
+
+    private static RequestMapping createRequestMapping(final SessionManager sessionManager) {
+        return new RequestMapping(
+                Map.of(
+                        "/", new HomeController(),
+                        "/login", new LoginController(sessionManager),
+                        "/register", new RegisterController()
+                ),
+                new StaticResourceController()
+        );
     }
 
     @Override
@@ -82,112 +90,52 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handle(final InputStream inputStream, final OutputStream outputStream)
             throws IOException, URISyntaxException {
-        final String rawRequestLine = readLine(inputStream);
-        if (rawRequestLine == null) {
+        final HttpResponse response;
+        try {
+            final Optional<HttpRequest> request = readRequest(inputStream);
+            if (request.isEmpty()) {
+                return;   // 요청 없이 연결이 닫힘
+            }
+            response = service(request.get());
+        } catch (HttpException e) {
+            log.info("invalid request [{}]: {}", e.getStatus().getCode(), e.getMessage());
+            HttpResponse.error(e.getStatus()).writeTo(outputStream);
+            return;
+        } catch (RuntimeException e) {
+            log.error("unexpected error while reading request", e);
+            HttpResponse.error(HttpStatus.INTERNAL_SERVER_ERROR).writeTo(outputStream);
             return;
         }
+        response.writeTo(outputStream);
+    }
 
+    private Optional<HttpRequest> readRequest(final InputStream inputStream) throws IOException {
+        final String rawRequestLine = readLine(inputStream);
+        if (rawRequestLine == null) {
+            return Optional.empty();
+        }
+        final RequestLine requestLine = RequestLine.from(rawRequestLine);
+        final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
+        final RequestBody body = RequestBody.of(
+                readBody(inputStream, headers.getContentLength()),
+                headers.get(HttpHeaderName.CONTENT_TYPE)
+        );
+        log.info("request: {}", requestLine);
+        return Optional.of(HttpRequest.of(requestLine, headers, body));
+    }
+
+    private HttpResponse service(final HttpRequest request) {
         try {
-            final RequestLine requestLine = RequestLine.from(rawRequestLine);
-            final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
-            final RequestBody body = RequestBody.from(readBody(inputStream, headers.getContentLength()));
-            final HttpRequest request = HttpRequest.of(requestLine, headers, body, sessionManager);
-
-            log.info("request: {}", rawRequestLine);
-
-            final HttpResponse response = route(request);
-            addSessionCookie(request, response);
-            response.writeTo(outputStream);
-        } catch (InvalidRequestException e) {
-            log.warn("bad request: {}", e.getMessage());
-            HttpResponse.badRequest(ContentType.HTML, "400 Bad Request".getBytes(UTF_8))
-                    .writeTo(outputStream);
+            final HttpResponse response = new HttpResponse();
+            requestMapping.getController(request).service(request, response);
+            return response;
+        } catch (HttpException e) {
+            log.info("request rejected [{}]: {}", e.getStatus().getCode(), e.getMessage());
+            return HttpResponse.error(e.getStatus());
+        } catch (Exception e) {
+            log.error("unexpected error in controller", e);
+            return HttpResponse.error(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-
-    private void addSessionCookie(final HttpRequest request, final HttpResponse response) {
-        request.getNewSession().ifPresent(session -> {
-            log.debug("issue JSESSIONID: {}", session.getId());
-            response.addCookie(JSESSIONID + "=" + session.getId() + COOKIE_PATH);
-        });
-    }
-
-    private HttpResponse route(final HttpRequest request)
-            throws IOException, URISyntaxException {
-        final String path = request.getPath();
-
-        if (ROOT_PATH.equals(path)) {
-            return HttpResponse.ok(ContentType.HTML, "Hello world!".getBytes(UTF_8));
-        }
-
-        if (LOGIN_PATH.equals(path)) {
-            if (POST.equals(request.getMethod())) {
-                return HttpResponse.redirect(login(request));
-            }
-            if (isLoggedIn(request)) {
-                return HttpResponse.redirect(INDEX_PAGE);
-            }
-            return staticFile(LOGIN_PAGE);
-        }
-
-        if (REGISTER_PATH.equals(path)) {
-            if (POST.equals(request.getMethod())) {
-                return HttpResponse.redirect(register(request));
-            }
-            return staticFile(REGISTER_PAGE);
-        }
-
-        return staticFile(path);
-    }
-
-    private boolean isLoggedIn(final HttpRequest request) {
-        return request.findSession()
-                .map(session -> session.getAttribute(USER))
-                .isPresent();
-    }
-
-    private HttpResponse staticFile(final String filePath)
-            throws IOException, URISyntaxException {
-        final Optional<Path> found = findStaticFile(filePath);
-        if (found.isEmpty()) {
-            return HttpResponse.notFound(ContentType.HTML, readNotFoundBody());
-        }
-        return HttpResponse.ok(ContentType.from(filePath), Files.readAllBytes(found.get()));
-    }
-
-    private byte[] readNotFoundBody() throws IOException, URISyntaxException {
-        final Optional<Path> notFoundPage = findStaticFile(NOT_FOUND_PAGE);
-        if (notFoundPage.isPresent()) {
-            return Files.readAllBytes(notFoundPage.get());
-        }
-        return "Not Found".getBytes(UTF_8);
-    }
-
-    private Optional<Path> findStaticFile(final String url) throws URISyntaxException {
-        final URL resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + url);
-        if (resource == null) {
-            return Optional.empty();
-        }
-
-        final Path path = Path.of(resource.toURI());
-        if (!Files.isRegularFile(path)) {
-            return Optional.empty();
-        }
-        return Optional.of(path);
-    }
-
-    private String register(HttpRequest request) {
-        final Optional<String> account = request.getParameter(ACCOUNT);
-        final Optional<String> password = request.getParameter(PASSWORD);
-        final Optional<String> email = request.getParameter(EMAIL);
-        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            log.info("회원 가입을 하기위해서는 셋 다 입력이 되어야 합니다.");
-            return REGISTER_PAGE;
-        }
-        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
-
-        return INDEX_PAGE;
     }
 
     private List<String> readHeaders(final InputStream inputStream) throws IOException {
@@ -201,14 +149,18 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String readBody(
+    private byte[] readBody(
             final InputStream inputStream,
             final int contentLength
             ) throws IOException {
         if (contentLength == 0) {
-            return "";
+            return new byte[0];
         }
-        return new String(inputStream.readNBytes(contentLength), UTF_8);
+        final byte[] body = inputStream.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new BadRequestException("요청 본문이 Content-Length보다 짧습니다");
+        }
+        return body;
     }
 
     private String readLine(final InputStream inputStream) throws IOException {
@@ -226,25 +178,5 @@ public class Http11Processor implements Runnable, Processor {
             return value.substring(0, value.length() - CARRIAGE_RETURN.length());
         }
         return value;
-    }
-
-    private String login(final HttpRequest request) {
-        final Optional<String> account = request.getParameter(ACCOUNT);
-        final Optional<String> password = request.getParameter(PASSWORD);
-        if (account.isEmpty() || password.isEmpty()) {
-            log.info("login parameters are missing");
-            return UNAUTHORIZED_PAGE;
-        }
-        return InMemoryUserRepository.findByAccount(account.get())
-                .filter(user -> user.checkPassword(password.get()))
-                .map(user -> {
-                    log.info("login success. account: {}", user.getAccount());
-                    request.getSession().setAttribute(USER, user);
-                    return INDEX_PAGE;
-                })
-                .orElseGet(() -> {
-                    log.info("login failed. account: {}", account.get());
-                    return UNAUTHORIZED_PAGE;
-                });
     }
 }

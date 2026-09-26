@@ -20,7 +20,7 @@ public class HttpCookie {
         final Map<String, String> parsed = new HashMap<>();
         for (final String pair : rawCookie.split(COOKIE_DELIMITER)) {
             final String trimmed = pair.strip();
-            if (trimmed.isBlank()) {
+            if (trimmed.isEmpty()) {
                 continue;
             }
             final int delimiterIndex = trimmed.indexOf(NAME_VALUE_DELIMITER);
@@ -28,7 +28,11 @@ public class HttpCookie {
                 continue;
             }
             final String name = trimmed.substring(0, delimiterIndex);
+            if (name.isEmpty()) {
+                continue;
+            }
             final String value = trimmed.substring(delimiterIndex + 1);
+            // 같은 이름이면 첫 번째를 쓴다. 브라우저는 Path가 더 구체적인 쿠키를 먼저 보낸다 (RFC 6265 5.4)
             parsed.putIfAbsent(name, value);
         }
         return new HttpCookie(Map.copyOf(parsed));

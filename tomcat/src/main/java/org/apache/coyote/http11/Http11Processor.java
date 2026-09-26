@@ -37,6 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse httpResponse = new HttpResponse(outputStream);
 
             new RequestMapping().getController(httpRequest).service(httpRequest, httpResponse);
+            connection.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {

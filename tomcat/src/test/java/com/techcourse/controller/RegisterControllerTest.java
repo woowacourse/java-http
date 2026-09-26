@@ -118,6 +118,40 @@ class RegisterControllerTest {
         ).isFalse();
     }
 
+    @Test
+    void 계정이_공백이면_회원을_저장하지_않고_응답을_결정하지_않는다() throws Exception {
+        assertRegisterRejected("account=+++&password=1234&email=moca%40email.com", "   ");
+    }
+
+    @Test
+    void 비밀번호가_공백이면_회원을_저장하지_않고_응답을_결정하지_않는다() throws Exception {
+        assertRegisterRejected(
+                "account=blank-password-test&password=+++&email=moca%40email.com",
+                "blank-password-test"
+        );
+    }
+
+    @Test
+    void 이메일이_공백이면_회원을_저장하지_않고_응답을_결정하지_않는다() throws Exception {
+        assertRegisterRejected(
+                "account=blank-email-test&password=1234&email=+++",
+                "blank-email-test"
+        );
+    }
+
+    private void assertRegisterRejected(final String body, final String account) throws Exception {
+        // given
+        final HttpRequest request = createPostRequest("/register", body);
+        final HttpResponse response = new HttpResponse();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
+        assertThat(response.hasStatus()).isFalse();
+    }
+
     private HttpRequest createPostRequest(
             final String path,
             final String body

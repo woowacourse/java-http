@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.Optional;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,19 +24,24 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
 
-        final String account = request.getParameter(ACCOUNT).orElse(null);
-        final String password = request.getParameter(PASSWORD).orElse(null);
-        final String email = request.getParameter(EMAIL).orElse(null);
+        final Optional<String> account = getRequiredParameter(request, ACCOUNT);
+        final Optional<String> password = getRequiredParameter(request, PASSWORD);
+        final Optional<String> email = getRequiredParameter(request, EMAIL);
 
-        if (account == null || password == null || email == null) {
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
             return;
         }
 
-        final User user = new User(account, password, email);
+        final User user = new User(account.get(), password.get(), email.get());
         InMemoryUserRepository.save(user);
 
-        log.info("register success account: {}", account);
+        log.info("register success account: {}", user.getAccount());
 
         response.sendRedirect(INDEX_PAGE);
+    }
+
+    private Optional<String> getRequiredParameter(final HttpRequest request, final String name) {
+        return request.getParameter(name)
+                .filter(value -> !value.isBlank());
     }
 }

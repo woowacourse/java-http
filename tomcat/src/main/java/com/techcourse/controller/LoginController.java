@@ -47,20 +47,15 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
 
-        final String account = request.getParameter(ACCOUNT).orElse(null);
+        final Optional<String> account = request.getParameter(ACCOUNT);
+        final Optional<String> password = request.getParameter(PASSWORD);
 
-        final String password = request.getParameter(PASSWORD).orElse(null);
-
-        if (account == null || password == null) {
-            response.sendRedirect(UNAUTHORIZED_PAGE);
-            return;
-        }
-
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
-                .filter(foundUser -> foundUser.checkPassword(password));
+        final Optional<User> user = account
+                .flatMap(InMemoryUserRepository::findByAccount)
+                .filter(foundUser -> password.map(foundUser::checkPassword).orElse(false));
 
         if (user.isEmpty()) {
-            log.info("login failed account: {}", account);
+            log.info("login failed account: {}", account.orElse(""));
             response.sendRedirect(UNAUTHORIZED_PAGE);
             return;
         }

@@ -18,10 +18,10 @@ public class SessionManager implements Manager {
     }
 
     public Session findOrCreate(String id) {
-        Session session = SESSIONS.get(id);
-        if (session == null) {
+        if (id == null || !SESSIONS.containsKey(id)) {
             return create();
         }
+        Session session = SESSIONS.get(id);
         session.access();
         return session;
     }
@@ -39,6 +39,9 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 

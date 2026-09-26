@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class Parameters {
 
@@ -14,29 +15,19 @@ class Parameters {
         this.values = Map.copyOf(values);
     }
 
-    static Parameters empty() {
-        return new Parameters(Map.of());
-    }
-
     static Parameters from(String raw) {
-        if (raw == null || raw.isEmpty()) {
-            return empty();
+        if (raw == null) {
+            return new Parameters(Map.of());
         }
 
-        Map<String, String> values = new HashMap<>();
-        for (String pair : raw.split(PAIR_DELIMITER)) {
-            String[] keyValue = pair.split(KEY_VALUE_DELIMITER, 2);
-            if (keyValue.length == 2) {
-                values.put(keyValue[0], keyValue[1]);
-            }
-        }
+        Map<String, String> values = Arrays.stream(raw.split(PAIR_DELIMITER))
+                .map(pair -> pair.split(KEY_VALUE_DELIMITER, 2))
+                .filter(keyValue -> keyValue.length == 2)
+                .collect(Collectors.toMap(
+                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[1],
+                        (previous, current) -> current));
         return new Parameters(values);
-    }
-
-    Parameters merge(Parameters other) {
-        Map<String, String> merged = new HashMap<>(values);
-        merged.putAll(other.values);
-        return new Parameters(merged);
     }
 
     String get(String name) {

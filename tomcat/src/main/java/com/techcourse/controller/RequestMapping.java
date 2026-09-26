@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class RequestMapping {
 
@@ -13,13 +14,21 @@ public class RequestMapping {
 
     public RequestMapping() {
         UserService userService = new UserService();
+        Controller loginController = new LoginController(userService);
+        Controller registerController = new RegisterController(userService);
         this.controllers = Map.of(
-                "/login", new LoginController(userService),
-                "/register", new RegisterController(userService)
+                "/login", loginController,
+                "/login.html", loginController,
+                "/register", registerController,
+                "/register.html", registerController
         );
     }
 
-    public Controller getController(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        getController(request).service(request, response);
+    }
+
+    private Controller getController(HttpRequest request) {
         return controllers.getOrDefault(request.getPath(), defaultController);
     }
 }

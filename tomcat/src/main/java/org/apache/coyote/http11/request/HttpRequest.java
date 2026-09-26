@@ -1,53 +1,43 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import org.apache.catalina.session.Session;
+import java.util.List;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final Parameters parameters;
-    private final Session session;
+    private final String sessionId;
 
-    private HttpRequest(RequestLine requestLine, HttpHeaders headers, Parameters parameters, Session session) {
+    private HttpRequest(RequestLine requestLine, HttpHeaders headers, Parameters parameters, String sessionId) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.parameters = parameters;
-        this.session = session;
+        this.sessionId = sessionId;
     }
 
-    public static HttpRequest from(BufferedReader reader) throws IOException {
-        RequestLine requestLine = RequestLine.from(reader.readLine());
-        HttpHeaders headers = HttpHeaders.from(reader);
-        RequestBody body = RequestBody.from(reader, headers.getContentLength());
-        Parameters parameters = requestLine.getQueryParameters().merge(body.getParameters());
-        return new HttpRequest(requestLine, headers, parameters, null);
+    public static HttpRequest from(List<String> headLines, String body) {
+        RequestLine requestLine = RequestLine.from(headLines.getFirst());
+        HttpHeaders headers = HttpHeaders.from(headLines.subList(1, headLines.size()));
+        Parameters parameters = Parameters.from(body);
+
+        return new HttpRequest(requestLine, headers, parameters, headers.getSessionId());
     }
 
-    public HttpRequest withSession(Session session) {
-        return new HttpRequest(requestLine, headers, parameters, session);
+    public HttpRequest withSessionId(String sessionId) {
+        return new HttpRequest(requestLine, headers, parameters, sessionId);
     }
 
     public boolean isGet() {
-        return requestLine.getMethod() == HttpMethod.GET;
+        return requestLine.hasMethod(HttpMethod.GET);
     }
 
     public boolean isPost() {
-        return requestLine.getMethod() == HttpMethod.POST;
-    }
-
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
+        return requestLine.hasMethod(HttpMethod.POST);
     }
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public String getHeader(String name) {
-        return headers.get(name);
     }
 
     public String getParameter(String name) {
@@ -55,10 +45,6 @@ public class HttpRequest {
     }
 
     public String getSessionId() {
-        return headers.getCookie().getJSessionId();
-    }
-
-    public Session getSession() {
-        return session;
+        return sessionId;
     }
 }

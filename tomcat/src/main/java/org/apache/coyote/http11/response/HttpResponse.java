@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -19,11 +21,23 @@ public class HttpResponse {
     private HttpStatus status = HttpStatus.OK;
     private String body = "";
 
-    public void ok(ContentType contentType, String body) {
-        this.status = HttpStatus.OK;
-        this.body = body;
-        headers.put("Content-Type", contentType.getValue() + CHARSET);
-        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+    private HttpResponse() {
+    }
+
+    public static HttpResponse empty() {
+        return new HttpResponse();
+    }
+
+    public static HttpResponse from(Session session) {
+        HttpResponse response = new HttpResponse();
+        if (session.isNew()) {
+            response.cookies.add(HttpCookie.JSESSIONID + "=" + session.getId());
+        }
+        return response;
+    }
+
+    public void page(String path) throws IOException {
+        StaticResource.from(path).writeTo(this);
     }
 
     public void redirect(String location) {
@@ -31,33 +45,29 @@ public class HttpResponse {
         headers.put("Location", location);
     }
 
-    public void addCookie(String name, String value) {
-        cookies.add(name + "=" + value);
+    public void writeTo(OutputStream outputStream) throws IOException {
+        outputStream.write(toMessage().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
-    public void addSessionCookie(Session session) {
-        if (session.isNew()) {
-            addCookie(HttpCookie.JSESSIONID, session.getId());
-        }
+    void ok(ContentType contentType, String body) {
+        this.status = HttpStatus.OK;
+        this.body = body;
+        headers.put("Content-Type", contentType.getValue() + CHARSET);
+        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getHeader(String name) {
-        return headers.get(name);
-    }
-
-    public byte[] getBytes() {
+    private String toMessage() {
         StringBuilder message = new StringBuilder();
         message.append(VERSION).append(" ")
                 .append(status.getCode()).append(" ")
                 .append(status.getReasonPhrase()).append(" ").append(CRLF);
+
         cookies.forEach(cookie -> appendHeader(message, "Set-Cookie", cookie));
         headers.forEach((name, value) -> appendHeader(message, name, value));
+
         message.append(CRLF).append(body);
-        return message.toString().getBytes(StandardCharsets.UTF_8);
+        return message.toString();
     }
 
     private void appendHeader(StringBuilder message, String name, String value) {

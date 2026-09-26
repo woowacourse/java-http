@@ -1,13 +1,11 @@
-package org.apache.catalina.resource;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.response.ContentType;
-import org.apache.coyote.http11.response.HttpResponse;
 
-public class StaticResource {
+class StaticResource {
 
     private static final String ROOT_DIRECTORY = "static";
     private static final String ROOT_PATH = "/";
@@ -22,7 +20,7 @@ public class StaticResource {
         this.content = content;
     }
 
-    public static StaticResource from(String path) throws IOException {
+    static StaticResource from(String path) throws IOException {
         if (path.equals(ROOT_PATH)) {
             return new StaticResource(ContentType.HTML, DEFAULT_CONTENT);
         }
@@ -44,15 +42,7 @@ public class StaticResource {
         return path + DEFAULT_EXTENSION;
     }
 
-    public void writeTo(HttpResponse response) {
+    void writeTo(HttpResponse response) {
         response.ok(contentType, content);
-    }
-
-    public ContentType getContentType() {
-        return contentType;
-    }
-
-    public String getContent() {
-        return content;
     }
 }

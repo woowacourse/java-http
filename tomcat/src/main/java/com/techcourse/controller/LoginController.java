@@ -4,7 +4,6 @@ import com.techcourse.exception.AuthenticationException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.resource.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -20,18 +19,18 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (LoginSession.of(request.getSession()).isLoggedIn()) {
+        if (LoginSession.of(request).isLoggedIn()) {
             response.redirect("/index.html");
             return;
         }
-        StaticResource.from(LOGIN_PAGE).writeTo(response);
+        response.page(LOGIN_PAGE);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         try {
             User user = userService.login(request.getParameter("account"), request.getParameter("password"));
-            LoginSession.of(request.getSession()).login(user);
+            LoginSession.of(request).login(user);
             response.redirect("/index.html");
         } catch (AuthenticationException e) {
             response.redirect("/401.html");

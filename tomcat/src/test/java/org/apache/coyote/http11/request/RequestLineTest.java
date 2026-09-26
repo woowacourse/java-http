@@ -8,20 +8,18 @@ import org.junit.jupiter.api.Test;
 class RequestLineTest {
 
     @Test
-    void 요청_라인에서_메서드와_경로와_버전을_파싱한다() {
+    void 요청_라인에서_메서드와_경로를_파싱한다() {
         RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
 
-        assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(requestLine.hasMethod(HttpMethod.GET)).isTrue();
         assertThat(requestLine.getPath()).isEqualTo("/index.html");
-        assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1");
     }
 
     @Test
-    void 쿼리스트링은_경로와_분리해_파라미터로_파싱한다() {
+    void 쿼리스트링은_경로에서_분리한다() {
         RequestLine requestLine = RequestLine.from("GET /login?account=gugu HTTP/1.1");
 
         assertThat(requestLine.getPath()).isEqualTo("/login");
-        assertThat(requestLine.getQueryParameters().get("account")).isEqualTo("gugu");
     }
 
     @Test

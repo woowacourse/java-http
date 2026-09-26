@@ -56,4 +56,27 @@ class Http11ProcessorTest {
                 .contains("Content-Length: 5564 \r\n")
                 .endsWith("\r\n\r\n" + body);
     }
+
+    @Test
+    void Content_Length만큼_본문을_읽어_로그인한다() {
+        // given
+        final String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + body.length(),
+                "",
+                body);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n");
+    }
 }

@@ -25,4 +25,17 @@ class SessionManagerTest {
         assertThat(found).isSameAs(created);
         assertThat(found.isNew()).isFalse();
     }
+
+    @Test
+    void 서버에_없는_세션_ID면_새_세션을_만든다() {
+        Session session = sessionManager.findOrCreate("expired-session-id");
+
+        assertThat(session.isNew()).isTrue();
+        assertThat(session.getId()).isNotEqualTo("expired-session-id");
+    }
+
+    @Test
+    void 세션_ID가_null이면_찾지_못한다() {
+        assertThat(sessionManager.findSession(null)).isNull();
+    }
 }

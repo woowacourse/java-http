@@ -15,8 +15,6 @@ public final class RequestMapping {
     }
 
     public Controller getController(final HttpRequest request) {
-        final var path = RequestUri.from(request.path()).path();
-
-        return controllers.getOrDefault(path, staticResourceController);
+        return controllers.getOrDefault(request.path(), staticResourceController);
     }
 }

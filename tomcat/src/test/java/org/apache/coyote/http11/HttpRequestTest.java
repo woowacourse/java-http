@@ -22,7 +22,8 @@ class HttpRequestTest {
         final var request = HttpRequest.from(reader);
 
         assertThat(request.method()).isEqualTo("GET");
-        assertThat(request.path()).isEqualTo("/hello?name=codex");
+        assertThat(request.path()).isEqualTo("/hello");
+        assertThat(request.queryParameter("name")).isEqualTo("codex");
         assertThat(request.version()).isEqualTo("HTTP/1.1");
         assertThat(request.header("Host")).isEqualTo("localhost:8080");
         assertThat(request.header("accept-language")).isEqualTo("ko");

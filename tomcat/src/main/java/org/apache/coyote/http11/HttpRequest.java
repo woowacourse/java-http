@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public record HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
+public record HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
     public HttpRequest(final String method, final String path, final String version, final Map<String, String> headers) {
-        this(method, path, version, headers, "");
+        this(new RequestLine(method, RequestUri.from(path), version), headers, "");
     }
 
     public HttpRequest {
@@ -16,17 +16,7 @@ public record HttpRequest(String method, String path, String version, Map<String
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
-        final var requestLine = reader.readLine();
-
-        if (requestLine == null || requestLine.isBlank()) {
-            throw new IOException("Request line is required");
-        }
-
-        final var requestParts = requestLine.trim().split("\\s+", 3);
-
-        if (requestParts.length != 3) {
-            throw new IOException("Invalid request line");
-        }
+        final var requestLine = RequestLine.from(reader.readLine());
 
         final var parsedHeaders = new HashMap<String, String>();
         String headerLine;
@@ -45,9 +35,7 @@ public record HttpRequest(String method, String path, String version, Map<String
         }
 
         final var request = new HttpRequest(
-                requestParts[0],
-                requestParts[1],
-                requestParts[2],
+                requestLine,
                 parsedHeaders,
                 ""
         );
@@ -78,7 +66,23 @@ public record HttpRequest(String method, String path, String version, Map<String
         return headers.get(name.toLowerCase(Locale.ROOT));
     }
 
+    public String method() {
+        return requestLine.method();
+    }
+
+    public String path() {
+        return requestLine.uri().path();
+    }
+
+    public String version() {
+        return requestLine.version();
+    }
+
+    public String queryParameter(final String name) {
+        return requestLine.uri().queryParameter(name);
+    }
+
     public HttpRequest withBody(final String requestBody) {
-        return new HttpRequest(method, path, version, headers, requestBody);
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 }

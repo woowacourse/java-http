@@ -9,7 +9,7 @@ final class StaticResourceController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        return resourceResponseFor(RequestUri.from(request.path()).path(), request);
+        return resourceResponseFor(request.path(), request);
     }
 
     @Override

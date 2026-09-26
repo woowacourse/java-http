@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestMapping;
@@ -105,14 +106,15 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request,
             final HttpResponse response
     ) {
+        final Session session = request.getSession();
+
         if (!request.isNewSession()) {
             return;
         }
 
         response.addHeader(
                 "Set-Cookie",
-                "JSESSIONID="
-                        + request.getSession().getId()
+                "JSESSIONID=" + session.getId()
         );
     }
 

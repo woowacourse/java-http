@@ -9,23 +9,19 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
+
     private static final String COOKIE = "cookie";
     private static final String JSESSION_ID = "JSESSIONID";
 
     private final RequestLine requestLine;
     private final RequestHeaders headers;
     private final RequestBody body;
-    private final Session session;
-    private final boolean newSession;
+    private Session session;
+    private boolean newSession;
 
     public HttpRequest(final BufferedReader reader) {
         requestLine = resolveRequestLine(reader);
         headers = new RequestHeaders(reader);
-
-        final SessionResult sessionResult = resolveSession();
-        session = sessionResult.session();
-        newSession = sessionResult.newSession();
-
         body = resolveBody(reader);
     }
 
@@ -54,10 +50,50 @@ public class HttpRequest {
     }
 
     public Session getSession() {
+        if (session != null) {
+            return session;
+        }
+
+        final Session existingSession = findSession();
+
+        if (existingSession != null) {
+            session = existingSession;
+            return session;
+        }
+
+        session = createSession();
+        newSession = true;
+
         return session;
     }
 
     public boolean isNewSession() {
+        return newSession;
+    }
+
+    private Session findSession() {
+        final HttpCookie cookie = new HttpCookie(
+                headers.getHeaders(COOKIE)
+        );
+
+        if (!cookie.contains(JSESSION_ID)) {
+            return null;
+        }
+
+        final String sessionId = cookie.get(JSESSION_ID);
+
+        return SessionManager.getInstance()
+                .findSession(sessionId);
+    }
+
+    private Session createSession() {
+        final Session newSession = new Session(
+                UUID.randomUUID().toString()
+        );
+
+        SessionManager.getInstance()
+                .add(newSession);
+
         return newSession;
     }
 
@@ -106,31 +142,4 @@ public class HttpRequest {
             throw new UncheckedIOException(e);
         }
     }
-
-    private SessionResult resolveSession() {
-        final HttpCookie cookie = new HttpCookie(
-                headers.getHeaders(COOKIE)
-        );
-
-        final SessionManager sessionManager =
-                SessionManager.getInstance();
-
-        if (cookie.contains(JSESSION_ID)) {
-            final String sessionId = cookie.get(JSESSION_ID);
-            final Session session = sessionManager.findSession(sessionId);
-
-            if (session != null) {
-                return new SessionResult(session, false);
-            }
-        }
-
-        final Session newSession = new Session(
-                UUID.randomUUID().toString()
-        );
-
-        sessionManager.add(newSession);
-
-        return new SessionResult(newSession, true);
-    }
 }
-

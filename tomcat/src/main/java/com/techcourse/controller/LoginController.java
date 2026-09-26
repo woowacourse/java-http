@@ -36,8 +36,6 @@ public class LoginController extends AbstractController {
     protected void doGet(MyHttpRequest request, MyHttpResponse response) throws Exception {
         Session session = request.getSession(false);
         if (session != null && getUser(session) != null) {
-            response.setStatusCode(StatusCode.FOUND);
-            response.setContentType(ContentType.HTML);
             response.sendRedirect("index.html");
             return;
         }
@@ -54,8 +52,6 @@ public class LoginController extends AbstractController {
         Optional<User> foundUser = findUserByAccount(params.get("account"));
         if (foundUser.isEmpty()) {
             log.info("authenticate failed: user not found");
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
             httpResponse.sendRedirect("401.html");
             return;
         }
@@ -64,14 +60,10 @@ public class LoginController extends AbstractController {
             log.info("user matched={}", foundUser.get());
             final var session = httpRequest.getSession(true);
             session.setAttribute("user", foundUser.get());
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
             httpResponse.sendRedirect("index.html");
             return;
         }
         log.info("authenticate failed: incorrectly password");
-        httpResponse.setStatusCode(StatusCode.FOUND);
-        httpResponse.setContentType(ContentType.HTML);
         httpResponse.sendRedirect("401.html");
     }
 

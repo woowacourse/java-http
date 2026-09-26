@@ -44,13 +44,9 @@ public class RegisterController extends AbstractController {
         try {
             User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
             log.info("registration succeed: {}", registeredUser);
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
             httpResponse.sendRedirect("index.html");
         } catch (IllegalArgumentException e) {
             log.error("registration failed: ", e);
-            httpResponse.setStatusCode(StatusCode.FOUND);
-            httpResponse.setContentType(ContentType.HTML);
             httpResponse.sendRedirect("login.html");
         }
     }

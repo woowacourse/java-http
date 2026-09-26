@@ -33,6 +33,8 @@ public class MyHttpResponse {
 
     public void sendRedirect(String redirectLocation) {
         Objects.requireNonNull(redirectLocation);
+        setStatusCode(StatusCode.FOUND);
+        setContentType(ContentType.HTML);
         headers.put(
                 "Location",
                 "http://localhost:8080/" + redirectLocation

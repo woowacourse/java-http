@@ -69,23 +69,29 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void login(OutputStream outputStream, Request request) throws IOException {
-        String account = request.getRequestParam("account");
-        String password = request.getRequestParam("password");
-        if (account.isEmpty() && password.isEmpty()) {
-            if (SessionManager.getInstance().hasUser(request.getJSessionId())) {
-                Response.redirect(outputStream, "/index.html");
-                return;
-            }
-            Response response = handling(request, StatusCode.OK);
-            response.response(outputStream);
-            return;
+        if (request.getMethod().equals(HttpMethod.GET)) {
+            loginGet(outputStream, request);
         }
-        loginWithParams(outputStream, request);
+        if (request.getMethod().equals(HttpMethod.POST)) {
+            loginPost(outputStream, request);
+        }
     }
 
-    private void loginWithParams(OutputStream outputStream, Request request) throws IOException {
+    private void loginGet(OutputStream outputStream, Request request) throws IOException {
+        if (SessionManager.getInstance().hasUser(request.getJSessionId())) {
+            Response.redirect(outputStream, "/index.html");
+            return;
+        }
+        Response response = handling(request, StatusCode.OK);
+        response.response(outputStream);
+    }
+
+    private void loginPost(OutputStream outputStream, Request request) throws IOException {
         String account = request.getRequestParam("account");
         String password = request.getRequestParam("password");
+        if (account.isEmpty() || password.isEmpty()) {
+            loginFail(outputStream);
+        }
         User user = findByAccount(account).orElse(null);
         if (user != null && user.checkPassword(password)) {
             loginSuccess(outputStream, request, user);
@@ -96,6 +102,7 @@ public class Http11Processor implements Runnable, Processor {
         if (!account.isEmpty() && user == null) {
             loginFail(outputStream);
         }
+
     }
 
     private void loginFail(OutputStream outputStream) throws IOException {

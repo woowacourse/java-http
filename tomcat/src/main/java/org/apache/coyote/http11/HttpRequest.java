@@ -11,6 +11,10 @@ import java.util.List;
 
 public class HttpRequest {
 
+    private static final int END_OF_STREAM = -1;
+    private static final int LINE_FEED = '\n';
+    private static final int CARRIAGE_RETURN = '\r';
+
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpCookie cookies;
@@ -21,7 +25,7 @@ public class HttpRequest {
 
         this.requestLine = readRequestLine(input);
         this.headers = readHeaders(input);
-        this.body = readBody(input, contentLength());
+        this.body = readBody(input, parseContentLength());
         this.cookies = new HttpCookie(headers.getHeader("Cookie"));
     }
 
@@ -76,7 +80,7 @@ public class HttpRequest {
         return new HttpHeaders(headerLines);
     }
 
-    private int contentLength() throws IOException {
+    private int parseContentLength() throws IOException {
         final String contentLength = getHeader("Content-Length");
         if (contentLength == null) {
             return 0;
@@ -106,19 +110,19 @@ public class HttpRequest {
     private String readLine(final InputStream input) throws IOException {
         final ByteArrayOutputStream lineBytes = new ByteArrayOutputStream();
         int currentByte;
-        while ((currentByte = input.read()) != -1 && currentByte != '\n') {
+        while ((currentByte = input.read()) != END_OF_STREAM && currentByte != LINE_FEED) {
             lineBytes.write(currentByte);
         }
 
-        if (currentByte == -1 && lineBytes.size() == 0) {
+        if (currentByte == END_OF_STREAM && lineBytes.size() == 0) {
             return null;
         }
-        return lineBytesToString(lineBytes.toByteArray());
+        return lineBytesToStringWithoutCarriageReturn(lineBytes.toByteArray());
     }
 
-    private String lineBytesToString(final byte[] lineBytes) {
+    private String lineBytesToStringWithoutCarriageReturn(final byte[] lineBytes) {
         int lineLength = lineBytes.length;
-        if (lineLength > 0 && lineBytes[lineLength - 1] == '\r') {
+        if (lineLength > 0 && lineBytes[lineLength - 1] == CARRIAGE_RETURN) {
             lineLength--;
         }
         return new String(lineBytes, 0, lineLength, StandardCharsets.ISO_8859_1);

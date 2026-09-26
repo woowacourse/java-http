@@ -1,9 +1,5 @@
 package org.apache.coyote.http11.resolver;
 
-import static org.apache.coyote.http11.config.TomcatServerConfiguration.DEFAULT_CHARSET;
-import static org.apache.coyote.http11.config.TomcatServerConfiguration.DEFAULT_CHARSET_NAME;
-import static org.apache.coyote.http11.config.TomcatServerConfiguration.STATIC_RESOURCE_PATH;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;

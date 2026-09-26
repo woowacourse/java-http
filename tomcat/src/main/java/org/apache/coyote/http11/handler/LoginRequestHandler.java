@@ -15,12 +15,16 @@ public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
 
     @Override
-    public Response handle(Request request) {
-        final Session session = request.getSession();
-
-        if (isLogin(session)) {
-            return Response.redirect("/index.html");
+    public Response doGet(Request request) {
+        if (isLogin(request.getSession())) {
+            return Response.view("redirect:/index.html");
         }
+        return Response.view("/login.html");
+    }
+
+    @Override
+    public Response doPost(Request request) {
+        final Session session = request.getSession();
 
         final Map<String, String> body = request.getBody();
         final String account = body.get("account");
@@ -35,10 +39,10 @@ public class LoginRequestHandler implements RequestHandler {
 
         if (optionalUser.isPresent()) {
             session.setAttribute("user", optionalUser.get());
-            return Response.redirect("/index.html");
+            return Response.view("redirect:/index.html");
         }
 
-        return Response.redirect("/401.html");
+        return Response.view("redirect:/401.html");
     }
 
     private boolean isLogin(Session session) {

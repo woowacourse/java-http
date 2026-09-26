@@ -20,7 +20,12 @@ public class RegisterRequestHandler implements RequestHandler {
 
 
     @Override
-    public Response handle(Request request) {
+    public Response doGet(Request request) {
+        return Response.view("/register.html");
+    }
+
+    @Override
+    public Response doPost(Request request) {
         final String account = request.getBody().get("account");
         final String email = request.getBody().get("email");
         final String password = request.getBody().get("password");
@@ -35,10 +40,10 @@ public class RegisterRequestHandler implements RequestHandler {
             InMemoryUserRepository.save(user);
             request.getSession().setAttribute("user", user);
 
-            return Response.redirect("/index.html");
+            return Response.view("redirect:/index.html");
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.redirect("/500.html");
+            return Response.view("redirect:/500.html");
         }
     }
 

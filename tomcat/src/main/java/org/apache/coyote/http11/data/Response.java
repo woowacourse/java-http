@@ -2,12 +2,14 @@ package org.apache.coyote.http11.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Response {
-    private final int statusCode;
+    private int statusCode;
     private final Map<String, String> headers;
-    private final String body;
+    private String body;
     private Cookies cookies;
+    private String viewName;
 
     private Response(
             int statusCode,
@@ -65,8 +67,42 @@ public class Response {
         return new Response(400, new HashMap<>(), "Bad Request");
     }
 
-    public static Response redirect(final String location) {
-        return new Response(302, Map.of("Location", location), "");
+    public static Response view(final String viewName) {
+        final Response response = Response.ok();
+        response.setViewName(viewName);
+        return response;
+    }
+
+    public void setViewName(final String viewName) {
+        this.viewName = viewName;
+    }
+
+    public Optional<String> getViewName() {
+        return Optional.ofNullable(viewName);
+    }
+
+    public void setBody(final String body) {
+        this.body = body;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setStatusCode(final int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setHeader(final String name, final String value) {
+        headers.put(name, value);
+    }
+
+    public Map<String, String> getHeaders() {
+        return Map.copyOf(headers);
     }
 
     public void setCookies(final Cookies cookies) {

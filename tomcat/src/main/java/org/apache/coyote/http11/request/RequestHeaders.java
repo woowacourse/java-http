@@ -12,6 +12,8 @@ import java.util.Optional;
 public class RequestHeaders {
     private static final String HEADER_DELIMITER = ":";
     private static final int NOT_FOUND = -1;
+    private static final char SP = ' ';
+    private static final char HTAB = '\t';
 
     private final Map<String, String> headers;
 
@@ -24,8 +26,8 @@ public class RequestHeaders {
         final Map<String, String> parsed = new HashMap<>();
 
         for (final String line : headers) {
-            if (line.isBlank()) {
-                continue;
+            if (isObsFold(line)) {
+                throw new BadRequestException("obs-fold(헤더 줄 접기)는 지원하지 않습니다");
             }
             final int delimiterIndex = line.indexOf(HEADER_DELIMITER);
             if (delimiterIndex == NOT_FOUND) {
@@ -45,6 +47,14 @@ public class RequestHeaders {
             parsed.putIfAbsent(name, value);
         }
         return new RequestHeaders(Map.copyOf(parsed));
+    }
+
+    private static boolean isObsFold(final String line) {
+        if (line.isEmpty()) {
+            return false;
+        }
+        final char first = line.charAt(0);
+        return first == SP || first == HTAB;
     }
 
     public Optional<String> get(final HttpHeaderName name) {

@@ -16,13 +16,10 @@ public class HttpResponse {
     private final Map<String, String> headers = new LinkedHashMap<>();
     private String path;
 
-    public HttpResponse(String protocolVersion) {
+    public HttpResponse(String protocolVersion, String path) {
         this.protocolVersion = protocolVersion;
-        this.status = "200 OK";
-    }
-
-    public void setPath(String path) {
         this.path = path;
+        this.status = "200 OK";
     }
 
     public void setStatus(String status) {

@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             return handlePostRequest(path, request.body());
         }
 
-        return emptyResponse(405, "Method Not Allowed");
+        return HttpResponse.empty(405, "Method Not Allowed");
     }
 
     private HttpResponse handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie) throws IOException {
@@ -84,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
             return handleLogin(formData);
         }
 
-        return emptyResponse(405, "Method Not Allowed");
+        return HttpResponse.empty(405, "Method Not Allowed");
     }
 
     private Session findSession(Optional<Cookie> sessionCookie) {
@@ -151,11 +151,7 @@ public class Http11Processor implements Runnable, Processor {
         byte[] bytes = resolveResponseBody(resourcePath);
         String contentType = resolveContentType(resourcePath);
 
-        return new HttpResponse(
-                new StatusLine("HTTP/1.1", 200, "OK"),
-                Map.of("Content-Type", contentType),
-                bytes
-        );
+        return HttpResponse.ok(contentType, bytes);
     }
 
     private String resolveContentType(String resourcePath) {
@@ -190,13 +186,5 @@ public class Http11Processor implements Runnable, Processor {
 
             return resourceStream.readAllBytes();
         }
-    }
-
-    private HttpResponse emptyResponse(int statusCode, String reasonPhrase) {
-        return new HttpResponse(
-                new StatusLine("HTTP/1.1", statusCode, reasonPhrase),
-                Map.of(),
-                new byte[0]
-        );
     }
 }

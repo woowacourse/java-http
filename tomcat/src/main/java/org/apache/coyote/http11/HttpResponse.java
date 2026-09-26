@@ -12,6 +12,22 @@ public record HttpResponse(
         byte[] body
 ) {
 
+    public static HttpResponse ok(String contentType, byte[] body) {
+        return new HttpResponse(
+                new StatusLine("HTTP/1.1", 200, "OK"),
+                Map.of("Content-Type", contentType),
+                body
+        );
+    }
+
+    public static HttpResponse empty(int statusCode, String reasonPhrase) {
+        return new HttpResponse(
+                new StatusLine("HTTP/1.1", statusCode, reasonPhrase),
+                Map.of(),
+                new byte[0]
+        );
+    }
+
     public static HttpResponse redirect(String location) {
         return new HttpResponse(
                 new StatusLine("HTTP/1.1", 302, "Found"),

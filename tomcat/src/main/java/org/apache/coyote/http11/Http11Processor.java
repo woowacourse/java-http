@@ -1,18 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
+import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Controller registerController = new RegisterController();
+    private final Controller loginController = new LoginController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -81,10 +78,8 @@ public class Http11Processor implements Runnable, Processor {
             return registerController.handle(request);
         }
 
-        Map<String, String> formData = request.body().parseFormData();
-
         if (resourcePath.equals("/login")) {
-            return handleLogin(formData);
+            return loginController.handle(request);
         }
 
         return HttpResponse.empty(405, "Method Not Allowed");
@@ -100,44 +95,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isLoggedIn(Session session) {
         return session != null && session.getAttribute("user") != null;
-    }
-
-    private HttpResponse handleLogin(Map<String, String> formData) {
-        String account = formData.get("account");
-        String password = formData.get("password");
-
-        Optional<User> authenticatedUser = authenticate(account, password);
-
-        if (authenticatedUser.isEmpty()) {
-            return HttpResponse.redirect("/401.html");
-        }
-
-        Session session = createSession(authenticatedUser);
-
-        return HttpResponse.redirect("/index.html", new Cookie("JSESSIONID", session.getId()));
-    }
-
-    @Nonnull
-    private static Session createSession(Optional<User> authenticatedUser) {
-        String sessionId = UUID.randomUUID().toString();
-        Session session = new Session(sessionId);
-        session.setAttribute("user", authenticatedUser.get());
-        SessionManager.add(session);
-
-        return session;
-    }
-
-    private Optional<User> authenticate(String account, String password) {
-        if (account == null || account.isBlank()) {
-            return Optional.empty();
-        }
-
-        if (password == null || password.isBlank()) {
-            return Optional.empty();
-        }
-
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
     }
 
     private HttpResponse serveStaticResource(String resourcePath) throws IOException {

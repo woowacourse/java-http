@@ -3,12 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -16,11 +14,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -33,14 +28,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ROOT_RESOURCE_PATH = "/";
     private static final String DEFAULT_MESSAGE = "Hello world!";
     private static final String STATIC_RESOURCE_PATH = "static";
-    private static final String REQUEST_LINE_ELEMENT_SEPARATOR = " ";
-    private static final int REQUEST_TARGET_INDEX = 1;
     private static final String PATH_QUERY_SEPARATOR = "?";
     private static final String QUERY_PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_NAME_VALUE_SEPARATOR = "=";
     private static final String FORM_DATA_KEY_VALUE_SEPARATOR = "=";
     private static final String FILE_EXTENSION_SEPARATOR = ".";
-
+    private static final int READ_TIMEOUT_MILLISECONDS = 5000;
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -57,11 +50,11 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            final List<String> requestHead = readRequestHead(reader);
-            String cookieHeader = extractCookieHeader(requestHead);
-            HttpCookie httpCookie = new HttpCookie(cookieHeader);
-            String sessionId = httpCookie.getValue("JSESSIONID");
+        ) {
+            connection.setSoTimeout(READ_TIMEOUT_MILLISECONDS);
+
+            HttpRequest request = new HttpRequest(inputStream);
+            String sessionId = request.getCookie("JSESSIONID");
 
             boolean shouldSetCookie = false;
             SessionManager sessionManager = new SessionManager();
@@ -74,86 +67,25 @@ public class Http11Processor implements Runnable, Processor {
                 sessionManager.add(session);
             }
 
-
-            int contentLength = extractContentLength(requestHead);
-            String requestBody = readRequestBody(reader, contentLength);
-
-            String response = resolveResponse(requestHead, requestBody, session);
+            String response = resolveResponse(request, session);
             if (shouldSetCookie) {
                 response = addSetCookieHeader(response, session);
             }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+        } catch (SocketTimeoutException exception) {
+            log.warn("소켓에서 데이터 읽기를 기다리는 시간이 초과되었습니다.");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private int extractContentLength(List<String> requestHead) {
-        for (String headerLine : requestHead) {
-            String[] headerParts = headerLine.split(":", 2);
-
-            if (headerParts.length == 2
-                    && headerParts[0].trim().equalsIgnoreCase("Content-Length")) {
-                return Integer.parseInt(headerParts[1].trim());
-            }
-        }
-
-        return 0;
-    }
-
-    private String extractCookieHeader(List<String> requestHead) {
-        for (String headerLine : requestHead) {
-            String[] headerParts = headerLine.split(":", 2);
-
-            if (headerParts.length == 2
-                    && headerParts[0].trim().equalsIgnoreCase("Cookie")) {
-                return headerParts[1].trim();
-            }
-        }
-
-        return "";
-    }
-
-    private List<String> readRequestHead(BufferedReader reader) throws IOException {
-        final List<String> requestHeader = new ArrayList<>();
-
-        while (true) {
-            String currentLine = reader.readLine();
-            if (currentLine == null || currentLine.isEmpty()) {
-                break;
-            }
-            requestHeader.add(currentLine);
-        }
-        return requestHeader;
-    }
-
-    private String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
-        if (contentLength < 0) {
-            throw new IOException();
-        }
-
-        char[] body = new char[contentLength];
-        int totalCharactersRead = 0;
-
-        while (totalCharactersRead < contentLength) {
-            int remainingCharacters = contentLength - totalCharactersRead;
-            int charactersRead = reader.read(body, totalCharactersRead, remainingCharacters);
-
-            if (charactersRead == -1) {
-                throw new EOFException("");
-            }
-            totalCharactersRead += charactersRead;
-        }
-
-        return new String(body);
-    }
-
-    private String resolveResponse(List<String> requestHead, String requestBody, Session session) {
-        final String requestLine = extractRequestLine(requestHead);
-        final String requestMethod = requestLine.split(REQUEST_LINE_ELEMENT_SEPARATOR)[0];
-        final String requestTarget = extractRequestTarget(requestLine);
+    private String resolveResponse(HttpRequest request, Session session) {
+        final RequestLine requestLine = request.getRequestLine();
+        final String requestBody = request.getRequestBody();
+        final String requestMethod = requestLine.getMethod();
+        final String requestTarget = requestLine.getRequestTarget();
         final String requestPath = extractTargetPath(requestTarget);
 
         if (requestTarget.equals(ROOT_RESOURCE_PATH)) {
@@ -173,18 +105,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (UncheckedServletException e) {
             return createErrorResponse();
         }
-    }
-
-    private String extractRequestLine(List<String> requestHead) {
-        if (requestHead.isEmpty()) {
-            return "";
-        }
-
-        return requestHead.getFirst();
-    }
-
-    private String extractRequestTarget(String requestLine) {
-        return requestLine.split(REQUEST_LINE_ELEMENT_SEPARATOR)[REQUEST_TARGET_INDEX];
     }
 
     private String extractTargetPath(String requestTarget) {

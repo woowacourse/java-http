@@ -15,5 +15,5 @@
 # 3단계
 - [x] HttpRequest 클래스 구현하기
 - [x] HttpResponse 클래스 구현하기
-- [ ] Controller 인터페이스 추가하기
-- [ ] 2단계 코멘트 반영
+- [x] Controller 인터페이스 추가하기
+- [x] 2단계 코멘트 반영

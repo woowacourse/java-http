@@ -1,8 +1,12 @@
 package org.apache.coyote.request;
 
+import java.util.regex.Pattern;
+
 public class RequestLine {
 
     private static final int PART_COUNT = 3;
+    private static final Pattern METHOD_TOKEN_PATTERN =
+            Pattern.compile("[!#$%&'*+.^_`|~0-9A-Za-z-]+");
 
     private final Method method;
     private final RequestTarget requestTarget;
@@ -15,12 +19,9 @@ public class RequestLine {
     }
 
     public static RequestLine from(String rawRequestLine) {
-        String[] parts = rawRequestLine.strip().split("\\s+", PART_COUNT);
-        if (parts.length < PART_COUNT) {
-            throw new IllegalArgumentException(
-                    String.format("요청 라인은 %d개의 파트로 이루어져야 합니다. '%s'의 파트 수는 %d개입니다.",
-                            PART_COUNT, rawRequestLine, parts.length)
-            );
+        String[] parts = rawRequestLine.strip().split("\\s+");
+        if (parts.length != PART_COUNT || !parts[2].equals("HTTP/1.1")) {
+            throw new MalformedRequestException("잘못된 요청 라인입니다: " + rawRequestLine);
         }
 
         return new RequestLine(
@@ -31,6 +32,10 @@ public class RequestLine {
     }
 
     private static Method parseMethod(String method) {
+        if (!METHOD_TOKEN_PATTERN.matcher(method).matches()) {
+            throw new MalformedRequestException("잘못된 메서드 토큰입니다: " + method);
+        }
+
         try {
             return Method.valueOf(method);
         } catch (IllegalArgumentException e) {

@@ -166,6 +166,53 @@ class Http11ProcessorTest {
         );
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "GET /login",
+            "GET /login HTTP/1.1 extra",
+            "GET@ /login HTTP/1.1"
+    })
+    void 형식이_잘못된_요청_라인은_400으로_응답한다(String requestLine) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 400 Bad Request \r\n"
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "GET  /login HTTP/1.1",
+            " GET /login HTTP/1.1 "
+    })
+    void 요청_라인의_앞뒤와_연속된_공백은_허용한다(String requestLine) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK \r\n");
+    }
+
     @Nested
     @DisplayName("header section의 끝에는 CRLF가 존재한다")
     class end_of_the_header_section {
@@ -350,7 +397,7 @@ class Http11ProcessorTest {
     void 로그인에_성공하고_세션이_없으면_JSESSIONID를_발급한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080",
                 "Content-Length: 30",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -424,7 +471,7 @@ class Http11ProcessorTest {
     void login_post_fail() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
+                "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
                 "Connection: keep-alive ",

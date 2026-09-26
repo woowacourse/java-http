@@ -20,7 +20,7 @@ public class HttpRequestParser {
     private static String extractRequestLine(String rawRequest) {
         return rawRequest.lines()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("http 요청을 읽을 수 없습니다."));
+                .orElseThrow(() -> new MalformedRequestException("http 요청 라인을 읽을 수 없습니다."));
     }
 
     private static Map<String, Object> extractHeaders(String rawRequest) {

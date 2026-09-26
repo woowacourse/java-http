@@ -5,6 +5,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.request.HttpRequestParser;
+import org.apache.coyote.request.MalformedRequestException;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.request.UnknownMethodException;
 import org.apache.coyote.response.MyHttpResponse;
@@ -45,9 +46,10 @@ public class Http11Processor implements Runnable, Processor {
                 httpRequest = HttpRequestParser.parse(readHttpRequest(
                         new BufferedReader(new InputStreamReader(inputStream))));
             } catch (UnknownMethodException e) {
-                MyHttpResponse response = new MyHttpResponse();
-                response.setStatusCode(StatusCode.NOT_IMPLEMENTED);
-                writeResponse(outputStream, response);
+                writeErrorResponse(outputStream, StatusCode.NOT_IMPLEMENTED);
+                return;
+            } catch (MalformedRequestException e) {
+                writeErrorResponse(outputStream, StatusCode.BAD_REQUEST);
                 return;
             }
             MyHttpResponse httpResponse = new MyHttpResponse();
@@ -79,11 +81,24 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private static void writeErrorResponse(final OutputStream outputStream,
+                                           final StatusCode statusCode) throws IOException {
+        MyHttpResponse response = new MyHttpResponse();
+        response.setStatusCode(statusCode);
+        writeResponse(outputStream, response);
+    }
+
     private static String readHttpRequest(BufferedReader br) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        String line;
         int contentLength = 0;
-        while (!(line = br.readLine()).isEmpty()) {
+        while (true) {
+            String line = br.readLine();
+            if (line == null) {
+                throw new MalformedRequestException("HTTP 요청이 완성되지 않았습니다.");
+            }
+            if (line.isEmpty()) {
+                break;
+            }
             sb.append(line).append("\r\n");
             if (line.regionMatches(true, 0, "Content-Length:", 0, "Content-Length:".length())) {
                 contentLength = Integer.parseInt(line.substring("Content-Length:".length()).strip());

@@ -6,10 +6,10 @@ import java.util.Map;
 public class HttpResponse {
 
     private final String httpVersion;
-    private final int statusCode;
-    private final String statusMessage;
+    private int statusCode;
+    private String statusMessage;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private final String body;
+    private String body;
 
     public HttpResponse(String httpVersion, int statusCode, String statusMessage, String body) {
         validateHttpVersion(httpVersion);
@@ -84,5 +84,17 @@ public class HttpResponse {
         response.append(body);
 
         return response.toString();
+    }
+
+    public void setStatus(int statusCode, String statusMessage) {
+        validateStatusCode(statusCode);
+        validateStatusMessage(statusMessage);
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+    }
+
+    public void setBody(String body) {
+        validateBody(body);
+        this.body = body;
     }
 }

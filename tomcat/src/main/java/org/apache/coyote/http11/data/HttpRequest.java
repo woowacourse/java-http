@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.InvalidHttpRequestException;
 import org.apache.coyote.http11.config.TomcatServerConfiguration;
 
 public class HttpRequest {
@@ -38,10 +39,22 @@ public class HttpRequest {
         final RequestLine requestEndPoint = requestEndPoint(inputStream);
         final Map<String, String> queryParameters = parseQueryParameter(requestEndPoint.getQuery());
         final Map<String, String> headers = readHeader(inputStream);
-        final Map<String, String> body = readBody(inputStream, Integer.parseInt(headers.getOrDefault("Content-Length", "0")));
+        final Map<String, String> body = readBody(inputStream, parseContentLength(headers.getOrDefault("Content-Length", "0")));
         final Cookies cookies = Cookies.fromHeaderValue(headers.getOrDefault("Cookie", ""));
 
         return new HttpRequest(requestEndPoint, headers, queryParameters, body, cookies);
+    }
+
+    private static int parseContentLength(final String value) {
+        if (!value.matches("[0-9]+")) {
+            throw new InvalidHttpRequestException("잘못된 Content-Length 형식입니다.");
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidHttpRequestException("Content-Length가 처리 가능한 범위를 벗어났습니다.", e);
+        }
     }
 
     private static RequestLine requestEndPoint(final InputStream inputStream) throws IOException {

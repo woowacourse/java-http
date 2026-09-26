@@ -43,8 +43,18 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest request = HttpRequest.from(inputStream);
             final HttpResponse response = HttpResponse.create();
+            final HttpRequest request;
+            try {
+                request = HttpRequest.from(inputStream);
+            } catch (InvalidHttpRequestException e) {
+                response.badRequest();
+                response.setHeader("Connection", "close");
+                outputStream.write(response.toString().getBytes());
+                outputStream.flush();
+                return;
+            }
+
             handleRequest(request, response);
 
             final Session session = request.getSession(false);

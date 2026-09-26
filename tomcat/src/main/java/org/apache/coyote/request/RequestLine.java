@@ -24,10 +24,18 @@ public class RequestLine {
         }
 
         return new RequestLine(
-                Method.valueOf(parts[0]),
+                parseMethod(parts[0]),
                 RequestTarget.from(parts[1]),
                 parts[2]
         );
+    }
+
+    private static Method parseMethod(String method) {
+        try {
+            return Method.valueOf(method);
+        } catch (IllegalArgumentException e) {
+            throw new UnknownMethodException(method, e);
+        }
     }
 
     public Method getMethod() {

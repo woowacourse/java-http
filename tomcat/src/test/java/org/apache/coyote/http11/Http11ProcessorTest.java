@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 import java.io.File;
@@ -141,6 +143,27 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found ");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"CUSTOM", "get", "PATCH"})
+    void 서버가_구현하지_않은_메서드는_501로_응답한다(String method) {
+        // given
+        final String httpRequest = String.join("\r\n",
+                method + " /login HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 501 Not Implemented \r\n"
+        );
     }
 
     @Nested

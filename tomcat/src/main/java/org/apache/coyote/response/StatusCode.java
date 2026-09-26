@@ -6,6 +6,7 @@ public enum StatusCode {
     FOUND(302, "Found"),
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    NOT_IMPLEMENTED(501, "Not Implemented"),
     ;
 
     private final int statusCode;

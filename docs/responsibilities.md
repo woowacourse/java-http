@@ -144,3 +144,17 @@ HTTP 응답 메시지를 구성하고 직렬화한다.
 - [x] 서버에서 공유할 SessionManager를 생성한다.
 - [x] Connector를 시작한다.
 - [x] 서버 종료 시 Connector를 종료한다.
+
+## RequestLine
+
+### 책임
+
+HTTP 요청의 첫 줄을 해석해 요청 정보를 제공한다.
+
+### 계약
+
+- [x] `METHOD request-target HTTP-version` 형식을 해석한다.
+- [x] 요청 메서드를 제공한다.
+- [x] 요청 대상을 제공한다.
+- [x] HTTP 버전을 제공한다.
+- [x] 올바르지 않은 Request Line은 허용하지 않는다.

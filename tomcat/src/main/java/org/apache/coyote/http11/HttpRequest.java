@@ -13,15 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class HttpRequest {
-    private final String method;
-    private final RequestTarget target;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final HttpCookie cookies;
     private final String body;
 
-    private HttpRequest(String method, RequestTarget target, Map<String, String> headers, String body) {
-        this.method = method;
-        this.target = target;
+    private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
+        this.requestLine = requestLine;
         this.headers = Map.copyOf(headers);
         this.cookies = new HttpCookie(this.headers.getOrDefault("cookie", ""));
         this.body = body;
@@ -29,11 +27,13 @@ public final class HttpRequest {
 
     public static HttpRequest readFrom(InputStream inputStream) throws IOException {
         BufferedInputStream input = new BufferedInputStream(inputStream);
-        String requestLine = readLine(input);
-        if (requestLine == null) {
+        String requestLineValue = readLine(input);
+
+        if (requestLineValue == null) {
             return null;
         }
-        String[] parts = requestLine.split(" ");
+
+        RequestLine requestLine = RequestLine.from(requestLineValue);
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while ((headerLine = readLine(input)) != null && !headerLine.isEmpty()) {
@@ -49,8 +49,11 @@ public final class HttpRequest {
         if (bodyBytes.length < contentLength) {
             throw new EOFException("요청 본문이 Content-Length보다 짧습니다");
         }
-        return new HttpRequest(parts[0], new RequestTarget(parts[1]), headers,
-                new String(bodyBytes, StandardCharsets.UTF_8));
+        return new HttpRequest(
+                requestLine,
+                headers,
+                new String(bodyBytes, StandardCharsets.UTF_8)
+        );
     }
 
     private static String readLine(InputStream input) throws IOException {
@@ -70,16 +73,20 @@ public final class HttpRequest {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
-    public boolean matches(String expectedMethod, String expectedPath) {
-        return method.equals(expectedMethod) && target.hasPath(expectedPath);
+    public boolean matches(
+            final String expectedMethod,
+            final String expectedPath
+    ) {
+        return requestLine.method() == HttpMethod.from(expectedMethod)
+                && requestLine.target().hasPath(expectedPath);
     }
 
     public String getPath() {
-        return target.getPath();
+        return requestLine.target().getPath();
     }
 
     public String getExtension() {
-        return target.getExtension();
+        return requestLine.target().getExtension();
     }
 
     public Optional<String> findHeader(String name) {

@@ -4,7 +4,7 @@ import com.techcourse.service.UserService;
 import java.util.Map;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.StaticResourceController;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 
@@ -14,8 +14,8 @@ public class RequestMapping {
     public RequestMapping() {
         UserService userService = new UserService();
         this.controllers = Map.of(
-                "/login.html", new LoginController(userService),
-                "/register.html", new RegisterController(userService)
+                "/login", new LoginController(userService),
+                "/register", new RegisterController(userService)
         );
     }
 

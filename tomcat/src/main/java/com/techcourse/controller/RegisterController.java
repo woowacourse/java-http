@@ -2,10 +2,13 @@ package com.techcourse.controller;
 
 import com.techcourse.service.UserService;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.catalina.resource.StaticResource;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
+
+    private static final String REGISTER_PAGE = "/register.html";
 
     private final UserService userService;
 
@@ -15,7 +18,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.setStaticResource(request.getPath());
+        StaticResource.from(REGISTER_PAGE).writeTo(response);
     }
 
     @Override
@@ -25,6 +28,6 @@ public class RegisterController extends AbstractController {
                 request.getParameter("password"),
                 request.getParameter("email")
         );
-        response.sendRedirect("/index.html");
+        response.redirect("/index.html");
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,35 +12,33 @@ class HttpRequestTest {
     @Test
     void POST_요청의_헤더와_폼_파라미터를_파싱한다() throws IOException {
         String body = "account=gugu&password=password";
-        String rawRequest = String.join("\r\n",
+        HttpRequest request = parse(
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
-                "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + body.length(),
                 "",
                 body);
 
-        HttpRequest request = HttpRequest.from(new BufferedReader(new StringReader(rawRequest)));
-
         assertThat(request.isPost()).isTrue();
-        assertThat(request.getPath()).isEqualTo("/login.html");
+        assertThat(request.getPath()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getParameter("account")).isEqualTo("gugu");
         assertThat(request.getParameter("password")).isEqualTo("password");
     }
 
     @Test
-    void 쿠키에_JSESSIONID가_없으면_새_세션을_만든다() throws IOException {
-        String rawRequest = String.join("\r\n",
+    void Cookie_헤더를_파싱한다() throws IOException {
+        HttpRequest request = parse(
                 "GET /index.html HTTP/1.1",
-                "Cookie: yummy_cookie=choco",
+                "Cookie: yummy_cookie=choco; JSESSIONID=abc",
                 "",
                 "");
 
-        HttpRequest request = HttpRequest.from(new BufferedReader(new StringReader(rawRequest)));
-
-        assertThat(request.getSession()).isNotNull();
-        assertThat(request.isNewSession()).isTrue();
         assertThat(request.getCookie().get("yummy_cookie")).isEqualTo("choco");
+        assertThat(request.getCookie().getJSessionId()).isEqualTo("abc");
+    }
+
+    private HttpRequest parse(String... lines) throws IOException {
+        return HttpRequest.from(new BufferedReader(new StringReader(String.join("\r\n", lines))));
     }
 }

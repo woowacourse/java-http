@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
 
     @Test
-    void 본문을_설정하면_200_응답과_컨텐츠_헤더를_만든다() {
+    void ok_응답은_200과_컨텐츠_헤더를_만든다() {
         HttpResponse response = new HttpResponse();
 
-        response.setBody("text/html", "Hello world!");
+        response.ok(ContentType.HTML, "Hello world!");
 
         assertThat(toString(response)).isEqualTo(String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -22,10 +22,10 @@ class HttpResponseTest {
     }
 
     @Test
-    void 리다이렉트하면_302_응답과_Location_헤더를_만든다() {
+    void redirect_응답은_302와_Location_헤더를_만든다() {
         HttpResponse response = new HttpResponse();
 
-        response.sendRedirect("/index.html");
+        response.redirect("/index.html");
         response.addCookie("JSESSIONID", "abc");
 
         assertThat(toString(response)).isEqualTo(String.join("\r\n",

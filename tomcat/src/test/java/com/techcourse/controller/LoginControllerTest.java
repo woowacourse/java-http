@@ -6,9 +6,10 @@ import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
@@ -44,6 +45,7 @@ class LoginControllerTest {
                 "Content-Length: " + body.length(),
                 "",
                 body);
-        return HttpRequest.from(new BufferedReader(new StringReader(rawRequest)));
+        return HttpRequest.from(new BufferedReader(new StringReader(rawRequest)))
+                .withSession(new Session("test-session"));
     }
 }

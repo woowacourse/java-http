@@ -4,11 +4,14 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 import java.util.Optional;
 import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.resource.StaticResource;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
+
+    private static final String LOGIN_PAGE = "/login.html";
 
     private final UserService userService;
 
@@ -19,22 +22,22 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoggedIn(request.getSession())) {
-            response.sendRedirect("/index.html");
+            response.redirect("/index.html");
             return;
         }
-        response.setStaticResource(request.getPath());
+        StaticResource.from(LOGIN_PAGE).writeTo(response);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         Optional<User> user = userService.login(request.getParameter("account"), request.getParameter("password"));
         if (user.isEmpty()) {
-            response.sendRedirect("/401.html");
+            response.redirect("/401.html");
             return;
         }
 
         request.getSession().setAttribute("user", user.get());
-        response.sendRedirect("/index.html");
+        response.redirect("/index.html");
     }
 
     private boolean isLoggedIn(Session session) {

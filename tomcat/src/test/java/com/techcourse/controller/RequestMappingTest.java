@@ -6,7 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import org.apache.catalina.controller.StaticResourceController;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class RequestMappingTest {

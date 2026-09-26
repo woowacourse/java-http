@@ -22,6 +22,9 @@ import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.HttpMethod;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +41,6 @@ public class Http11Processor implements Runnable, Processor {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String SET_COOKIE = "Set-Cookie";
     private static final String LOCATION = "Location";
-    public static final String COOKIE = "Cookie";
 
     public static final String HOME_PATH = "/";
     public static final String LOGIN_PATH = "/login";
@@ -69,35 +71,24 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String requestHead = getRequestMessage(bufferedReader);
+            String requestHead = getRequestHead(bufferedReader);
             String[] requestHeadLines = requestHead.split(CRLF);
 
-            String[] requestLineParts = requestHeadLines[0].split(" ");
-            String httpMethod = requestLineParts[0];
-            String requestUri = requestLineParts[1];
-            String cookieLine = getCookieLine(requestHeadLines);
+            Integer contentLength = getContentLength(requestHeadLines);
+            String requestBody = getRequestBody(bufferedReader, contentLength);
+
+            HttpRequest request = HttpRequest.parse(requestHead, requestBody);
+
+            HttpMethod httpMethod = request.getHttpMethod();
+            String requestUri = request.getRequestTarget();
+
+            String cookieLine = request.getCookieLine();
+            HttpCookie cookie = HttpCookie.parse(cookieLine);
 
             Map<String, String> responseHeaders = new LinkedHashMap<>();
-
-            HttpCookie cookie = HttpCookie.parse(cookieLine);
             Session session = getOrCreateJSessionId(cookie, responseHeaders);
 
-            if (requestUri.contains("?")) {
-                String[] uriParts = requestUri.split("\\?", 2);
-                requestUri = uriParts[0];
-            }
-
-            if ("POST".equals(httpMethod)) {
-                Integer contentLength = getContentLength(requestHeadLines);
-
-                char[] buffer = new char[Objects.requireNonNull(contentLength)];
-                int readCount = bufferedReader.read(buffer, 0, contentLength);
-
-                if (readCount == -1) {
-                    throw new IOException("요청 본문을 읽지 못했습니다.");
-                }
-                String requestBody = new String(buffer, 0, readCount);
-
+            if (HttpMethod.POST.equals(httpMethod)) {
                 Map<String, String> parameters = parseFormParameters(requestBody);
 
                 if (requestUri.equals(REGISTER_PATH)) {
@@ -126,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if ("GET".equals(httpMethod) && LOGIN_PATH.equals(requestUri)) {
+            if (HttpMethod.GET.equals(httpMethod) && LOGIN_PATH.equals(requestUri)) {
                 User user = (User) session.getAttribute("user");
                 if (user != null) {
                     responseHeaders.put(LOCATION, INDEX_HTML);
@@ -143,6 +134,20 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getRequestBody(BufferedReader bufferedReader, Integer contentLength) throws IOException {
+        if (contentLength == null || contentLength == 0) {
+            return "";
+        }
+
+        char[] buffer = new char[Objects.requireNonNull(contentLength)];
+        int readCount = bufferedReader.read(buffer, 0, contentLength);
+
+        if (readCount == -1) {
+            throw new IOException("요청 본문을 읽지 못했습니다.");
+        }
+        return new String(buffer, 0, readCount);
     }
 
     private Session getOrCreateJSessionId(HttpCookie cookie, Map<String, String> headers) throws IOException {
@@ -170,15 +175,6 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    private String getCookieLine(String[] requestHeadLines) {
-        for (String requestHeadLine : requestHeadLines) {
-            if (requestHeadLine.startsWith(COOKIE + ":")) {
-                return requestHeadLine;
-            }
-        }
-        return null;
-    }
-
     private Integer getContentLength(String[] requestHeadLines) {
         for (String requestHeadLine : requestHeadLines) {
             if (requestHeadLine.contains(CONTENT_LENGTH + ":")) {
@@ -188,7 +184,7 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String getRequestMessage(BufferedReader bufferedReader) throws IOException {
+    private String getRequestHead(BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
 
         String line = bufferedReader.readLine();

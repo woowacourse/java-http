@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.catalina.connector.Request;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
@@ -15,7 +15,7 @@ public final class StaticResourceController extends MethodDispatchingController 
     private static final String CSS_CONTENT_TYPE = "text/css;charset=utf-8";
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doGet(final Request request, final HttpResponse response) throws IOException {
         serve(request.path(), response);
     }
 

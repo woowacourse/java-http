@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
+import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.MethodDispatchingController;
 import org.apache.catalina.controller.StaticResourceController;
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public final class LoginController extends MethodDispatchingController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doGet(final Request request, final HttpResponse response) throws IOException {
         if (isLoggedIn(request)) {
             response.sendRedirect(INDEX_PATH);
             return;
@@ -36,7 +36,7 @@ public final class LoginController extends MethodDispatchingController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doPost(final Request request, final HttpResponse response) throws IOException {
         final Optional<User> authenticatedUser = findAuthenticatedUser(request.formParameters());
         if (authenticatedUser.isEmpty()) {
             response.sendRedirect("/401.html");
@@ -51,7 +51,7 @@ public final class LoginController extends MethodDispatchingController {
         response.sendRedirect(INDEX_PATH);
     }
 
-    private boolean isLoggedIn(final HttpRequest request) throws IOException {
+    private boolean isLoggedIn(final Request request) throws IOException {
         final Session session = request.getSession(false);
         return session != null && session.getAttribute(SESSION_USER_ATTRIBUTE) != null;
     }

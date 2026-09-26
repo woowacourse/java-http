@@ -4,9 +4,9 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
+import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.MethodDispatchingController;
 import org.apache.catalina.controller.StaticResourceController;
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public final class RegisterController extends MethodDispatchingController {
@@ -21,12 +21,12 @@ public final class RegisterController extends MethodDispatchingController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doGet(final Request request, final HttpResponse response) throws IOException {
         staticResourceController.serve("/register.html", response);
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final Request request, final HttpResponse response) {
         final Map<String, String> formParameters = request.formParameters();
         final String account = getRequiredParameter(formParameters, ACCOUNT_PARAMETER);
         final String password = getRequiredParameter(formParameters, PASSWORD_PARAMETER);

@@ -3,8 +3,8 @@ package org.apache.catalina.mapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.Controller;
-import org.apache.coyote.http11.HttpRequest;
 
 public final class RequestMapping {
     private final Map<String, Controller> controllers = new HashMap<>();
@@ -18,7 +18,7 @@ public final class RequestMapping {
         controllers.put(Objects.requireNonNull(path), Objects.requireNonNull(controller));
     }
 
-    public Controller getController(final HttpRequest request) {
+    public Controller getController(final Request request) {
         return controllers.getOrDefault(request.path(), defaultController);
     }
 }

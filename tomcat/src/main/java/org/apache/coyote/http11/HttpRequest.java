@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Session;
 
 public final class HttpRequest {
     private static final String EMPTY_LINE = "";
@@ -22,22 +19,18 @@ public final class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final byte[] body;
-    private final Manager sessionManager;
-    private Session session;
 
     private HttpRequest(
             final RequestLine requestLine,
             final Map<String, String> headers,
-            final byte[] body,
-            final Manager sessionManager
+            final byte[] body
     ) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.sessionManager = sessionManager;
     }
 
-    public static HttpRequest readFrom(final InputStream inputStream, final Manager sessionManager) throws IOException {
+    public static HttpRequest readFrom(final InputStream inputStream) throws IOException {
         final BufferedReader reader = getReader(inputStream);
         final List<String> requestHeadLines = readRequestHead(reader);
         validateRequest(requestHeadLines);
@@ -46,47 +39,15 @@ public final class HttpRequest {
         final Map<String, String> headers = parseHeaders(requestHeadLines.subList(1, separatorIndex));
         final byte[] body = readRequestBody(reader, headers);
 
-        return new HttpRequest(requestLine, headers, body, sessionManager);
+        return new HttpRequest(requestLine, headers, body);
     }
 
     public RequestLine requestLine() {
         return requestLine;
     }
 
-    public Map<String, String> headers() {
-        return headers;
-    }
-
     public byte[] body() {
         return body.clone();
-    }
-
-    public Optional<String> requestedSessionId() {
-        return cookie(HttpCookie.JSESSIONID);
-    }
-
-    public Session getSession(final boolean create) throws IOException {
-        if (session == null) {
-            session = findRequestedSession();
-        }
-        if (session == null && create) {
-            session = createSession();
-        }
-        return session;
-    }
-
-    private Session findRequestedSession() throws IOException {
-        final Optional<String> sessionId = requestedSessionId();
-        if (sessionId.isEmpty()) {
-            return null;
-        }
-        return sessionManager.findSession(sessionId.get());
-    }
-
-    private Session createSession() {
-        final Session newSession = new Session(UUID.randomUUID().toString());
-        sessionManager.add(newSession);
-        return newSession;
     }
 
     public String path() {

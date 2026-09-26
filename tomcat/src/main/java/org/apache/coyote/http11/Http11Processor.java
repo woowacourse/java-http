@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
+import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.mapper.RequestMapping;
 import org.apache.coyote.Processor;
@@ -34,7 +35,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final HttpRequest request = HttpRequest.readFrom(inputStream, sessionManager);
+            final HttpRequest httpRequest = HttpRequest.readFrom(inputStream);
+            final Request request = new Request(httpRequest, sessionManager);
             final HttpResponse response = new HttpResponse();
             final Controller controller = requestMapping.getController(request);
             controller.handle(request, response);
@@ -45,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void addSessionCookieIfIssued(final HttpRequest request, final HttpResponse response)
+    private void addSessionCookieIfIssued(final Request request, final HttpResponse response)
             throws IOException {
         final Session session = request.getSession(false);
         if (session == null) {

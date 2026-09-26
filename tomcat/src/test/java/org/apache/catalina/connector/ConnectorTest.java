@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -130,6 +131,73 @@ class ConnectorTest {
                 assertThat(server.connector().workersTerminated()).isTrue();
                 assertThat(calls.get()).isZero();
             }
+        }
+    }
+
+    @Test
+    void timesOutHeadersEvenWhenDataKeepsArriving() throws Exception {
+        assertSlowRequestTimesOut("GET / HTTP/1.1\r\nX-Slow: ", "abcdefghij\r\n\r\n");
+    }
+
+    @Test
+    void timesOutBodyEvenWhenDataKeepsArriving() throws Exception {
+        assertSlowRequestTimesOut("POST / HTTP/1.1\r\nContent-Length: 10\r\n\r\n", "abcdefghij");
+    }
+
+    private void assertSlowRequestTimesOut(String prefix, String remaining) throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        try (TestServer server = startServer((request, response) -> {
+            calls.incrementAndGet();
+            response.setBody("ok");
+        }, limits(300, 5_000, 500));
+             Socket client = new Socket("127.0.0.1", server.port());
+             var sender = Executors.newSingleThreadExecutor()) {
+            client.setSoTimeout(2_000);
+            client.getOutputStream().write(prefix.getBytes(StandardCharsets.US_ASCII));
+            var sending = sender.submit(() -> {
+                for (byte value : remaining.getBytes(StandardCharsets.US_ASCII)) {
+                    Thread.sleep(50);
+                    try {
+                        client.getOutputStream().write(value);
+                    } catch (SocketException closed) {
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            assertThat(response(client)).startsWith("HTTP/1.1 408 Request Timeout\r\n");
+            assertThat(calls.get()).isZero();
+            sending.get(2, TimeUnit.SECONDS);
+            try (Socket next = request(server.port())) {
+                assertThat(response(next)).startsWith("HTTP/1.1 200 OK\r\n");
+            }
+            assertThat(calls.get()).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void receptionTimeoutExcludesQueueWaitAndAdapterExecutionDuringShutdown() throws Exception {
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        try (TestServer server = startServer((request, response) -> {
+            started.countDown();
+            release.await();
+            response.setBody("ok");
+        }, limits(150, 5_000, 2_000));
+             Socket first = request(server.port());
+             Socket queued = request(server.port())) {
+            assertThat(started.await(2, TimeUnit.SECONDS)).isTrue();
+            awaitQueuedRequests(server.connector(), 1);
+            try (var releaser = Executors.newSingleThreadScheduledExecutor()) {
+                releaser.schedule(release::countDown, 300, TimeUnit.MILLISECONDS);
+                server.connector().stop();
+            }
+
+            assertThat(response(first)).startsWith("HTTP/1.1 200 OK\r\n");
+            assertThat(response(queued)).startsWith("HTTP/1.1 200 OK\r\n");
+        } finally {
+            release.countDown();
         }
     }
 

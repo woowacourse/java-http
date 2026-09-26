@@ -13,9 +13,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +33,7 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private final Adapter adapter;
     private final ThreadPoolExecutor executorService;
-    private final ScheduledExecutorService queueTimeoutExecutor;
+    private final ScheduledThreadPoolExecutor timeoutExecutor;
     private final Set<Socket> openConnections = ConcurrentHashMap.newKeySet();
     private final Limits limits;
     private volatile boolean stopped;
@@ -70,11 +69,12 @@ public class Connector implements Runnable {
         // acceptCount limits connections before accept; this queue holds accepted connections.
         this.executorService = new ThreadPoolExecutor(limits.maxThreads(), limits.maxThreads(),
                 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(limits.maxQueuedRequests()));
-        this.queueTimeoutExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
-            Thread thread = new Thread(runnable, "connector-queue-timeout");
+        this.timeoutExecutor = new ScheduledThreadPoolExecutor(1, runnable -> {
+            Thread thread = new Thread(runnable, "connector-timeout");
             thread.setDaemon(true);
             return thread;
         });
+        this.timeoutExecutor.setRemoveOnCancelPolicy(true);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -92,7 +92,7 @@ public class Connector implements Runnable {
     public void start() {
         stopped = false;
         long checkInterval = Math.min(1_000, Math.max(1, limits.queueWaitTimeoutMillis() / 2));
-        queueTimeoutExecutor.scheduleWithFixedDelay(this::expireQueuedRequests,
+        timeoutExecutor.scheduleWithFixedDelay(this::expireQueuedRequests,
                 checkInterval, checkInterval, TimeUnit.MILLISECONDS);
         var thread = new Thread(this);
         thread.setDaemon(true);
@@ -148,7 +148,6 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        queueTimeoutExecutor.shutdownNow();
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(limits.shutdownTimeoutMillis(), TimeUnit.MILLISECONDS)) {
@@ -160,6 +159,8 @@ public class Connector implements Runnable {
         } catch (InterruptedException e) {
             forceStop();
             Thread.currentThread().interrupt();
+        } finally {
+            timeoutExecutor.shutdownNow();
         }
     }
 
@@ -230,7 +231,7 @@ public class Connector implements Runnable {
                     closeConnection(connection);
                     return;
                 }
-                new Http11Processor(connection, adapter).run();
+                new Http11Processor(connection, adapter, timeoutExecutor).run();
             } finally {
                 closeConnection(connection);
             }

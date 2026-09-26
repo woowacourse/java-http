@@ -2,9 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.RequestMapping;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -37,8 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest request = HttpRequest.from(bufferedReader);
+            HttpRequest request = HttpRequest.from(inputStream);
             HttpResponse response = HttpResponse.create();
 
             if (request.shouldIssueSessionCookie()) {

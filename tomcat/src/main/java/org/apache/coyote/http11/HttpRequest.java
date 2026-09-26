@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,51 +31,54 @@ public class HttpRequest {
         }
     }
 
-    public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
-        RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
+    public static HttpRequest from(InputStream inputStream) throws IOException {
+        RequestLine requestLine = RequestLine.from(readLine(inputStream));
         Map<String, String> headers = new LinkedHashMap<>();
-        readHeaders(bufferedReader, headers);
+        readHeaders(inputStream, headers);
 
-        final int contentLength = Integer.parseInt(
+        int contentLength = Integer.parseInt(
                 headers.getOrDefault(CONTENT_LENGTH_HEADER, DEFAULT_CONTENT_LENGTH)
         );
-        String requestBody = "";
-        requestBody = readBody(bufferedReader, contentLength, requestBody);
-
+        String requestBody = readBody(inputStream, contentLength);
         return new HttpRequest(requestLine, headers, requestBody);
     }
 
-    private static String readBody(BufferedReader bufferedReader, int contentLength, String requestBody)
-            throws IOException {
-        if (contentLength > 0) {
-            char[] buffer = new char[contentLength];
-            int totalRead = 0;
-            readBodyLines(bufferedReader, contentLength, totalRead, buffer);
-            requestBody = new String(buffer);
+    private static String readBody(InputStream inputStream, int contentLength) throws IOException {
+        if (contentLength < 0) {
+            throw new IOException("Content-Length는 음수일 수 없습니다.");
         }
-        return requestBody;
+        byte[] body = inputStream.readNBytes(contentLength);
+        if (body.length != contentLength) {
+            throw new IOException(UNEXPECTED_END_OF_BODY_MESSAGE);
+        }
+        return new String(body, StandardCharsets.UTF_8);
     }
 
-    private static void readBodyLines(BufferedReader bufferedReader, int contentLength, int totalRead, char[] buffer)
-            throws IOException {
-        while (totalRead < contentLength) {
-            int count = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
-            if (count == -1) {
-                throw new IOException(UNEXPECTED_END_OF_BODY_MESSAGE);
-            }
-            totalRead += count;
-        }
-    }
-
-    private static void readHeaders(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+    private static void readHeaders(InputStream inputStream, Map<String, String> headers) throws IOException {
         while (true) {
-            String line = bufferedReader.readLine();
+            String line = readLine(inputStream);
             if (line == null || line.isEmpty()) {
                 break;
             }
             String[] parts = line.split(HEADER_DELIMITER, 2);
             headers.put(parts[0], parts[1].trim());
         }
+    }
+
+    private static String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int value;
+        while ((value = inputStream.read()) != -1) {
+            if (value == '\n') {
+                break;
+            }
+            buffer.write(value);
+        }
+        if (value == -1 && buffer.size() == 0) {
+            return null;
+        }
+        String line = buffer.toString(StandardCharsets.ISO_8859_1);
+        return line.endsWith("\r") ? line.substring(0, line.length() - 1) : line;
     }
 
     public HttpMethod getMethod() {

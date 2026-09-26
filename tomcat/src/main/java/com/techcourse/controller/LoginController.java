@@ -3,6 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.AbstractController;
@@ -14,6 +15,11 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
     private static final String LOGIN_USER = "user";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
+    @Override
+    protected List<String> getAllowedMethods() {
+        return List.of("GET", "POST");
+    }
 
     @Override
     protected HttpResponse doGet(HttpRequest request, Session session) throws IOException {

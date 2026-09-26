@@ -1,9 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.util.List;
 import org.apache.catalina.session.Session;
 
 public class StaticResourceController extends AbstractController {
+
+    @Override
+    protected List<String> getAllowedMethods() {
+        return List.of("GET");
+    }
 
     @Override
     protected HttpResponse doGet(HttpRequest request, Session session) throws IOException {
@@ -12,10 +18,5 @@ public class StaticResourceController extends AbstractController {
         }
 
         return resourceResponse(request, session, "static" + request.getPath());
-    }
-
-    @Override
-    protected HttpResponse doPost(HttpRequest request, Session session) throws IOException {
-        return doGet(request, session);
     }
 }

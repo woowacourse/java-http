@@ -118,6 +118,21 @@ class ConnectorTest {
         }
     }
 
+    @Test
+    void invalidWorkerConfigDoesNotBindPort() throws IOException {
+        // given
+        final int port = availablePort();
+
+        // when & then
+        assertThatThrownBy(() -> new Connector(port, 100, 0, 1))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Connector(port, 100, 1, 0))
+                .isInstanceOf(IllegalArgumentException.class);
+        try (final ServerSocket socket = new ServerSocket(port)) {
+            assertThat(socket.getLocalPort()).isEqualTo(port);
+        }
+    }
+
     private int availablePort() throws IOException {
         try (final ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();

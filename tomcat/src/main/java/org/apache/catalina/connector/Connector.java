@@ -39,9 +39,9 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads, final int maxPendingQueueSize) {
+        this.executorService = new ThreadPoolExecutor(maxThreads, maxThreads, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(maxPendingQueueSize));
         this.serverSocket = createServerSocket(port, acceptCount);
         this.sessionManager = new SessionManager();
-        this.executorService = new ThreadPoolExecutor(maxThreads, maxThreads, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(maxPendingQueueSize));
         this.requestDispatcher = new RequestDispatcher();
         this.stopped = false;
     }

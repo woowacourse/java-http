@@ -7,8 +7,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,9 +27,6 @@ public class Http11Processor implements Runnable, Processor {
 
     public static final String FAVICON_PATH = "/favicon.ico";
     public static final String STATIC_PATH = "static";
-    public static final String QUERY_DELIMITER = "?";
-    public static final String PARAM_DELIMITER = "&";
-    public static final String PARAM_EQUAL = "=";
 
     public static final String SLASH = "/";
     public static final String EXTENSION_DELIMITER = ".";
@@ -67,29 +62,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String[] requestLine = bufferedReader.readLine().split(" ");
-            String method = requestLine[0];
-            String uri = requestLine[1];
-            if (uri.equals(FAVICON_PATH)) {
+            HttpRequest request = new HttpRequest(bufferedReader);
+            String method = request.getMethod();
+            if (request.getUri().equals(FAVICON_PATH)) {
                 return;
             }
 
-            int index = uri.indexOf(QUERY_DELIMITER);
-            String path = findPath(uri, index);
+            String path = findPath(request.getPath());
 
-            String line;
-            int contentLength = 0;
-            String cookieHeader = "";
-            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                if (line.startsWith("Content-Length:")) {
-                    contentLength = Integer.parseInt(line.split(":", 2)[1].trim());
-                }
-                if (line.startsWith("Cookie:")) {
-                    cookieHeader = line.split(":", 2)[1].trim();
-                }
-            }
-
-            HttpCookie cookie = new HttpCookie(cookieHeader);
+            HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
             String setCookieHeader = "";
             if (cookie.get("JSESSIONID") == null) {
                 setCookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "\r\n";
@@ -105,15 +86,12 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (method.equals("POST")) {
-                String requestBody = readRequestBody(bufferedReader, contentLength);
-                Map<String, String> params = parseParams(requestBody);
-
                 if (path.equals("static/register.html")) {
-                    String account = params.get("account");
+                    String account = request.getParameter("account");
                     if (InMemoryUserRepository.findByAccount(account).isPresent()) {
                         httpStatus = HttpStatus.CONFLICT;
                     } else {
-                        User user = new User(account, params.get("password"), params.get("email"));
+                        User user = new User(account, request.getParameter("password"), request.getParameter("email"));
                         InMemoryUserRepository.save(user);
                         httpStatus = HttpStatus.FOUND;
                     }
@@ -121,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (path.equals("static/login.html")) {
                     Session loginSession = new Session(UUID.randomUUID().toString());
-                    httpStatus = findUser(params, loginSession);
+                    httpStatus = findUser(request.getParameters(), loginSession);
                     if (httpStatus == HttpStatus.FOUND) {
                         sessionManager.add(loginSession);
                         setCookieHeader = "Set-Cookie: JSESSIONID=" + loginSession.getId() + "\r\n";
@@ -162,27 +140,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
-        StringBuilder requestBody = new StringBuilder();
-        for (int i = 0; i < contentLength; i++) {
-            int character = bufferedReader.read();
-
-            if (character == -1) {
-                break;
-            }
-
-            requestBody.append((char) character);
-        }
-
-        return requestBody.toString();
-    }
-
-    private String findPath(String uri, int index) {
-        String path = uri;
-        if (index != -1) {
-            path = uri.substring(0, index);
-        }
-
+    private String findPath(String path) {
         if (!path.isBlank()) {
             if (!path.equals(SLASH) && !path.contains(EXTENSION_DELIMITER)) {
                 path += HTML_EXTENSION;
@@ -190,28 +148,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return STATIC_PATH + path;
-    }
-
-    private Map<String, String> parseParams(String params) {
-        Map<String, String> queryParams = new HashMap<>();
-
-        if (params.isBlank()) {
-            return queryParams;
-        }
-
-        for (String query : params.split(PARAM_DELIMITER)) {
-            String[] q = query.split(PARAM_EQUAL, 2);
-            if (q.length != 2) {
-                continue;
-            }
-
-            String key = URLDecoder.decode(q[0], StandardCharsets.UTF_8);
-            String value = URLDecoder.decode(q[1], StandardCharsets.UTF_8);
-
-            queryParams.put(key, value);
-        }
-
-        return queryParams;
     }
 
     private Path getPath(String path) throws URISyntaxException {

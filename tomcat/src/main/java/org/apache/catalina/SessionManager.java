@@ -27,6 +27,11 @@ public class SessionManager implements Manager{
         SESSIONS.remove(session.getId());
     }
 
+    public boolean hasValidSession(Map<String, List<String>> headers) {
+        String sessionId = getSessionId(headers);
+
+        return sessionId != null && findSession(sessionId) != null;
+    }
     public boolean hasSessionId(Map<String, List<String>> headers) {
         return getSessionId(headers) != null;
     }

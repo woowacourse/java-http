@@ -4,24 +4,20 @@ import static org.reflections.Reflections.log;
 
 import com.techcourse.FormBodyParser;
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.HttpCookie;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpResponse;
+import com.techcourse.http.HttpSession;
 import com.techcourse.model.User;
 import com.techcourse.resource.StaticResource;
 import com.techcourse.resource.StaticResourceLoader;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 
 public class RegisterController extends AbstractController {
 
-    private final SessionManager sessionManager;
     private final StaticResourceLoader staticResourceLoader;
 
-    public RegisterController(SessionManager sessionManager, StaticResourceLoader staticResourceLoader) {
-        this.sessionManager = sessionManager;
+    public RegisterController(StaticResourceLoader staticResourceLoader) {
         this.staticResourceLoader = staticResourceLoader;
     }
 
@@ -39,11 +35,9 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(user);
 
-        Session session = sessionManager.getSession(request.getHeaders(), true);
+        HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
-        HttpCookie cookie = new HttpCookie(session.getId());
 
-        response.addHeader("Set-Cookie", List.of(cookie.toString()));
         response.redirect("/index.html");
         log.info("회원가입 성공 : {}", user.toString());
     }

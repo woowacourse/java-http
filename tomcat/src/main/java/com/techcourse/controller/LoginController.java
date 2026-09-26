@@ -2,23 +2,18 @@ package com.techcourse.controller;
 
 import com.techcourse.FormBodyParser;
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.http.HttpCookie;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpResponse;
+import com.techcourse.http.HttpSession;
 import com.techcourse.resource.StaticResource;
 import com.techcourse.resource.StaticResourceLoader;
 import java.util.List;
 import java.util.Map;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 
 public class LoginController extends AbstractController {
-
-    private final SessionManager sessionManager;
     private final StaticResourceLoader resourceLoader;
 
-    public LoginController(SessionManager sessionManager, StaticResourceLoader staticResourceLoader) {
-        this.sessionManager = sessionManager;
+    public LoginController(StaticResourceLoader staticResourceLoader) {
         this.resourceLoader = staticResourceLoader;
     }
 
@@ -45,18 +40,15 @@ public class LoginController extends AbstractController {
         }
 
         // 성공한 경우에만 세션 생성
-        Session session = sessionManager.getSession(request.getHeaders(), true);
+        HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
 
-        HttpCookie cookie = new HttpCookie(session.getId());
-
-        response.addHeader("Set-Cookie", List.of(cookie.toString()));
         response.redirect("/index.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        Session session = sessionManager.getSession(request.getHeaders(), false);
+        HttpSession session = request.getSession(false);
 
         if (session != null && session.getAttribute("user") != null) {
             response.redirect("/index.html");

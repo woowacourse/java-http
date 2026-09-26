@@ -18,8 +18,8 @@ public class RequestMapping {
     public RequestMapping(SessionManager sessionManager, StaticResourceLoader staticResourceLoader) {
         this.controllers = Map.of(
                 "/", new HomeController(),
-                "/login", new LoginController(sessionManager, staticResourceLoader),
-                "/register", new RegisterController(sessionManager, staticResourceLoader)
+                "/login", new LoginController(staticResourceLoader),
+                "/register", new RegisterController(staticResourceLoader)
         );
         this.staticResourceController = new StaticResourceController(staticResourceLoader);
     }

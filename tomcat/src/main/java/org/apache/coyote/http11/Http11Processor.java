@@ -7,6 +7,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.HttpCookie;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpResponse;
+import com.techcourse.http.HttpSession;
 import com.techcourse.resource.StaticResourceLoader;
 import java.io.IOException;
 import java.net.Socket;
@@ -42,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequest.parse(inputStream);
+            HttpRequest request = HttpRequest.parse(inputStream, sessionManager);
             HttpResponse response = new HttpResponse();
 
             Controller controller = requestMapping.getController(request);
@@ -64,18 +65,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addSessionCookieIfNeeded(HttpRequest request, HttpResponse response) {
 
-        // 이미 JSESSIONID 있으면 추가 발급 x
-        if (sessionManager.hasSessionId(request.getHeaders())) {
+        if (!request.hasNewSession()) {
             return;
         }
 
-        // 이미 위에서 세션을 응답에 넣어줄 경우 발급 X
-        if (response.hasHeader("Set-Cookie")) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
             return;
         }
 
-        Session session = sessionManager.getSession(request.getHeaders(), true);
-        HttpCookie cookie = new HttpCookie(session.getId());
+        Session actualSession = (Session) session;
+        HttpCookie cookie = new HttpCookie(actualSession.getId());
 
         response.addHeader(
                 "Set-Cookie",

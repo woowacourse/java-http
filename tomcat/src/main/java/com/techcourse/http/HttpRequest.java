@@ -7,19 +7,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, List<String>> headers;
     private final byte[] body;
 
-    public static HttpRequest parse(InputStream inputStream) throws IOException {
+    private final SessionManager sessionManager;
+    private Session session;
+    private boolean newSession;
+
+    public static HttpRequest parse(InputStream inputStream, SessionManager sessionManager) throws IOException {
 
         RequestLine requestLine = readFirstLine(inputStream);
         Map<String, List<String>> headers = readHeaders(inputStream);
         byte[] body = readBody(inputStream, headers);
 
-        return new HttpRequest(requestLine, headers, body);
+        return new HttpRequest(requestLine, headers, body, sessionManager);
+    }
+
+    public HttpSession getSession(boolean create) {
+        if (session != null) {
+            return session;
+        }
+
+        boolean validSessionExists = sessionManager.hasValidSession(headers);
+
+        session = sessionManager.getSession(headers, create);
+
+        if (session != null && create && !validSessionExists) {
+            newSession = true;
+        }
+
+        return session;
+    }
+
+    public boolean hasNewSession() {
+        return newSession;
     }
 
     public RequestLine getRequestLine() {
@@ -33,7 +59,6 @@ public class HttpRequest {
     public byte[] getBody() {
         return body;
     }
-
     private static byte[] readBody(InputStream inputStream, Map<String, List<String>> headers) throws IOException {
 
         List<String> contentLengthValues = headers.getOrDefault("content-length", List.of("0"));
@@ -142,9 +167,10 @@ public class HttpRequest {
         return line.toString();
     }
 
-    private HttpRequest(RequestLine requestLine, Map<String, List<String>> headers, byte[] body) {
+    private HttpRequest(RequestLine requestLine, Map<String, List<String>> headers, byte[] body, SessionManager sessionManager) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.sessionManager = sessionManager;
     }
 }

@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.Controller;
-import com.techcourse.controller.RequestMapping;
-import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

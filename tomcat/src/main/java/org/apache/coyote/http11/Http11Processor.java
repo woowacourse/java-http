@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
@@ -61,15 +63,16 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> responseHeaders = new HashMap<>();
             if (sessionId == null) {
-                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+                sessionId = UUID.randomUUID().toString();
+                responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
             String requestBody = readRequestBody(headers, input);
 
             if (method.equals("GET")) {
-                handleGetRequest(outputStream, requestTarget, responseHeaders);
+                handleGetRequest(outputStream, requestTarget, sessionId, responseHeaders);
             } else if (method.equals("POST")) {
-                handlePostRequest(outputStream, requestTarget, headers, requestBody, responseHeaders);
+                handlePostRequest(outputStream, requestTarget, headers, sessionId, requestBody, responseHeaders);
             }
 
         } catch (IOException | UncheckedServletException e) {
@@ -117,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private void handleGetRequest(OutputStream outputStream, String requestTarget, Map<String, String> responseHeaders) throws IOException {
+    private void handleGetRequest(OutputStream outputStream, String requestTarget, String sessionId, Map<String, String> responseHeaders) throws IOException {
         // root 처리
         if (requestTarget.equals("/")) {
             responseHeaders.put("Content-Type", "text/html;charset=utf-8 ");
@@ -134,6 +137,14 @@ public class Http11Processor implements Runnable, Processor {
         String resourceName = parsedTarget.path();
 
         if (resourceName.equals("/login")) {
+            Session session = SessionManager.getInstance().findSession(sessionId);
+
+            if (session != null && session.getAttribute("user") != null) {
+                responseHeaders.put("Location", "/index.html");
+                writeResponse(outputStream, HttpStatus.FOUND, responseHeaders, new byte[0]);
+                return;
+            }
+
             resourceName = "login.html";
         } else if (resourceName.equals("/register")) {
             resourceName = "register.html";
@@ -153,6 +164,7 @@ public class Http11Processor implements Runnable, Processor {
     private void handlePostRequest(OutputStream outputStream,
                                    String requestTarget,
                                    Map<String, String> headers,
+                                   String sessionId,
                                    String requestBody,
                                    Map<String, String> responseHeaders) throws IOException {
         Map<String, String> bodyFields = null;
@@ -161,34 +173,30 @@ public class Http11Processor implements Runnable, Processor {
             bodyFields = parseUrlEncodedParameters(requestBody);
         }
 
-        HttpStatus status = HttpStatus.OK;
-        final byte[] responseBody;
-
         ParsedTarget parsedTarget = parseRequestTarget(requestTarget);
-        String resourceName = parsedTarget.path();
+        String path = parsedTarget.path();
 
-        log.info("POST path={}, bodyFields={}", resourceName, bodyFields);
-
-        if (resourceName.equals("/register")) {
+        if (path.equals("/register")) {
             handleRegister(bodyFields);
-            status = HttpStatus.FOUND;
-            resourceName = "index.html";
+            responseHeaders.put("Location", "/index.html");
+            writeResponse(outputStream, HttpStatus.FOUND, responseHeaders, new byte[0]);
+            return;
         }
 
-        if (resourceName.equals("/login")) {
-            if (isLoginSuccessful(bodyFields)) {
-                status = HttpStatus.FOUND;
-                resourceName = "index.html";
-            } else {
-                status = HttpStatus.UNAUTHORIZED;
-                resourceName = "401.html";
+        if (path.equals("/login")) {
+            Optional<User> authenticatedUser = authenticate(bodyFields);
+
+            if (authenticatedUser.isPresent()) {
+                saveUserInSession(sessionId, authenticatedUser.get());
+                responseHeaders.put("Location", "/index.html");
+                writeResponse(outputStream, HttpStatus.FOUND, responseHeaders, new byte[0]);
+                return;
             }
+
+            byte[] responseBody = readResponseBody("401.html");
+            responseHeaders.put("Content-Type", resolveContentType("401.html"));
+            writeResponse(outputStream, HttpStatus.UNAUTHORIZED, responseHeaders, responseBody);
         }
-
-        responseHeaders.put("Content-Type", resolveContentType(resourceName));
-        responseBody = readResponseBody(resourceName);
-
-        writeResponse(outputStream, status, responseHeaders, responseBody);
     }
 
     private void handleRegister(Map<String, String> bodyFields) {
@@ -240,13 +248,28 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private static boolean isLoginSuccessful(Map<String, String> queryParameters) {
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
+    private static Optional<User> authenticate(Map<String, String> bodyFields) {
+        String account = bodyFields.get("account");
+        String password = bodyFields.get("password");
+
+        if (account == null || password == null) {
+            return Optional.empty();
+        }
 
         return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
+                .filter(user -> user.checkPassword(password));
+    }
+
+    private void saveUserInSession(String sessionId, User user) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(sessionId);
+
+        if (session == null) {
+            session = new Session(sessionId);
+            sessionManager.add(session);
+        }
+
+        session.setAttribute("user", user);
     }
 
     private static String resolveContentType(String resourceName) {

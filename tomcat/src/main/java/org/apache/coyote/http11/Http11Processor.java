@@ -1,26 +1,22 @@
 package org.apache.coyote.http11;
 
 
-import com.techcourse.controller.Controller;
 import com.techcourse.RequestMapping;
+import com.techcourse.controller.Controller;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.HttpCookie;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpResponse;
 import com.techcourse.resource.StaticResourceLoader;
-import java.io.OutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,7 +51,8 @@ public class Http11Processor implements Runnable, Processor {
 
             addSessionCookieIfNeeded(request, response);
 
-            writeHttpResponse(outputStream, response);
+            outputStream.write(response.toBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -84,37 +81,5 @@ public class Http11Processor implements Runnable, Processor {
                 "Set-Cookie",
                 List.of(cookie.toString())
         );
-    }
-
-
-
-    private void writeHttpResponse(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
-        byte[] body = httpResponse.getBody();
-        StringBuilder header = new StringBuilder();
-
-        header.append(httpResponse.getProtocolVersion())
-                .append(" ")
-                .append(httpResponse.getStatusCode())
-                .append(" ")
-                .append(httpResponse.getStatusMessage())
-                .append("\r\n");
-
-        for (Map.Entry<String, List<String>> entry : httpResponse.getHeaders().entrySet()) {
-
-            for (String value : entry.getValue()) {
-                header.append(entry.getKey())
-                        .append(": ")
-                        .append(value)
-                        .append("\r\n");
-            }
-        }
-
-        header.append("Content-Length: ")
-                .append(body.length)
-                .append(" ")
-                .append("\r\n\r\n");
-
-        outputStream.write(header.toString().getBytes(StandardCharsets.UTF_8));
-        outputStream.write(body);
     }
 }

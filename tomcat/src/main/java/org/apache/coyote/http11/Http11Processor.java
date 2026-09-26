@@ -49,10 +49,10 @@ public class Http11Processor implements Runnable, Processor {
             RequestLine requestLine = RequestLine.parse(readLine);
 
             HttpHeaders headers = readHeaders(reader);
-            String body = readBody(reader, headers);
+            RequestBody body = readBody(reader, headers);
 
             Optional<Cookie> sessionCookie = findSessionCookie(headers);
-            String response = handleRequest(requestLine.method(), requestLine.target(), body, sessionCookie);
+            String response = handleRequest(requestLine.method(), requestLine.target(), body.content(), sessionCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -85,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String readBody(BufferedReader reader, HttpHeaders headers) throws IOException {
+    private RequestBody readBody(BufferedReader reader, HttpHeaders headers) throws IOException {
         int contentLength = headers.contentLength();
 
         char[] body = new char[contentLength];
@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
             current += read;
         }
 
-        return new String(body);
+        return new RequestBody(new String(body));
     }
 
     private HttpHeaders readHeaders(BufferedReader reader) throws IOException {

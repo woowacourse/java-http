@@ -33,6 +33,11 @@ public class HttpResponse {
         addHeader("Location", location);
     }
 
+    // 405 메서드 미허용 세팅
+    public void sendMethodNotAllowed() {
+        this.statusLine = "HTTP/1.1 405 Method Not Allowed";
+    }
+
     // 응답 바디 설정
     public void writeBody(byte[] bodyContent, String contentType) {
         this.body = bodyContent;

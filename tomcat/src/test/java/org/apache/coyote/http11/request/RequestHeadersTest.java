@@ -2,8 +2,10 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.exception.BadRequestException;
+import org.apache.coyote.http11.exception.ContentTooLargeException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
@@ -117,5 +119,48 @@ class RequestHeadersTest {
         final RequestHeaders headers = RequestHeaders.from(List.of(line));
 
         assertThat(headers.get(HttpHeaderName.CONTENT_TYPE)).hasValue("");
+    }
+
+    @Test
+    void 없으면_0이다() {
+        assertThat(RequestHeaders.from(List.of()).getContentLength()).isZero();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0, 0", "5, 5", "005, 5", "2097152, 2097152"})   // 마지막은 2MB 정확히
+    void 유효한_값을_파싱한다(final String raw, final int expected) {
+        final RequestHeaders headers = RequestHeaders.from(List.of("Content-Length: " + raw));
+
+        assertThat(headers.getContentLength()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "",          // 빈 값
+            "+5",        // 부호
+            "-1",        // 음수
+            "5.0",       // 소수점
+            "5, 5",      // 여러 값
+            "0x10",      // 16진수
+            "1e3",       // 지수 표기
+            "٥",         // 아랍 숫자 5
+            "５",        // 전각 5
+    })
+    void 형식이_잘못되면_400(final String raw) {
+        assertThatThrownBy(() -> RequestHeaders.from(List.of("Content-Length: " + raw)))
+                .isInstanceOf(BadRequestException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2097153", "2147483648", "99999999999999999999"})
+    void 한도를_넘으면_413(final String raw) {
+        assertThatThrownBy(() -> RequestHeaders.from(List.of("Content-Length: " + raw)))
+                .isInstanceOf(ContentTooLargeException.class);
+    }
+
+    @Test
+    void 대소문자가_달라도_중복을_거부한다() {
+        assertThatThrownBy(() -> RequestHeaders.from(List.of("Content-Length: 5", "content-length: 5")))
+                .isInstanceOf(BadRequestException.class);
     }
 }

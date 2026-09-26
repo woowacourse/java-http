@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpToken;
 import org.apache.coyote.http11.exception.BadRequestException;
+import org.apache.coyote.http11.exception.ContentTooLargeException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,18 +18,22 @@ public class RequestHeaders {
     private static final char FIRST_VISIBLE = 0x21;
     private static final char LAST_VISIBLE = 0x7E;
     private static final char FIRST_OBS_TEXT = 0x80;
+    private static final int NO_CONTENT = 0;
+    private static final int MAX_CONTENT_LENGTH = 2 * 1024 * 1024;
 
     private final Map<String, String> headers;
+    private final int contentLength;
 
-    private RequestHeaders(Map<String, String> headers) {
+    private RequestHeaders(final Map<String, String> headers, final int contentLength) {
         this.headers = headers;
+        this.contentLength = contentLength;
     }
 
-    public static RequestHeaders from(List<String> headers) {
+    public static RequestHeaders from(final List<String> lines) {
 
         final Map<String, String> parsed = new HashMap<>();
 
-        for (final String line : headers) {
+        for (final String line : lines) {
             if (isObsFold(line)) {
                 throw new BadRequestException("obs-fold(헤더 줄 접기)는 지원하지 않습니다");
             }
@@ -49,7 +54,9 @@ public class RequestHeaders {
             }
             parsed.putIfAbsent(name, value);
         }
-        return new RequestHeaders(Map.copyOf(parsed));
+
+        final Map<String, String> headers = Map.copyOf(parsed);
+        return new RequestHeaders(headers, parseContentLength(headers));
     }
 
     private static String parseValue(final String raw) {
@@ -92,20 +99,33 @@ public class RequestHeaders {
         return first == SP || first == HTAB;
     }
 
+    private static int parseContentLength(final Map<String, String> headers) {
+        final String value = headers.get(HttpHeaderName.CONTENT_LENGTH.getNormalized());
+        if (value == null) {
+            return NO_CONTENT;
+        }
+        if (value.isEmpty()) {
+            throw new BadRequestException("Content-Length가 비어 있습니다");
+        }
+        long length = 0;
+        for (final char c : value.toCharArray()) {
+            if (c < '0' || c > '9') {
+                throw new BadRequestException("Content-Length 형식이 잘못되었습니다");
+            }
+            length = length * 10 + (c - '0');
+            if (length > MAX_CONTENT_LENGTH) {
+                throw new ContentTooLargeException("요청 본문이 너무 큽니다");
+            }
+        }
+        return (int) length;
+    }
+
     public Optional<String> get(final HttpHeaderName name) {
         return Optional.ofNullable(headers.get(name.getNormalized()));
     }
 
     public int getContentLength() {
-        final Optional<String> value = get(HttpHeaderName.CONTENT_LENGTH);
-        if (value.isEmpty()) {
-            return 0;
-        }
-        try {
-            return Integer.parseInt(value.get());
-        } catch (NumberFormatException e) {
-            throw new BadRequestException("Content-Length가 숫자가 아닙니다.");
-        }
+        return contentLength;
     }
 
     public HttpCookie getCookie() {

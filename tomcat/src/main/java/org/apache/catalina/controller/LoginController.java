@@ -39,8 +39,8 @@ public class LoginController extends AbstractController {
     }
 
     private String login(final HttpRequest request) {
-        final Optional<String> account = request.getParameter(ACCOUNT);
-        final Optional<String> password = request.getParameter(PASSWORD);
+        final Optional<String> account = request.getBodyParameter(ACCOUNT);
+        final Optional<String> password = request.getBodyParameter(PASSWORD);
         if (account.isEmpty() || password.isEmpty()) {
             log.info("login parameters are missing");
             return UNAUTHORIZED_PAGE;

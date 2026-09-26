@@ -29,9 +29,9 @@ public class RegisterController extends AbstractController{
     }
 
     private String register(final HttpRequest request) {
-        final Optional<String> account = request.getParameter(ACCOUNT);
-        final Optional<String> password = request.getParameter(PASSWORD);
-        final Optional<String> email = request.getParameter(EMAIL);
+        final Optional<String> account = request.getBodyParameter(ACCOUNT);
+        final Optional<String> password = request.getBodyParameter(PASSWORD);
+        final Optional<String> email = request.getBodyParameter(EMAIL);
         if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
             log.info("회원 가입을 하기위해서는 셋 다 입력이 되어야 합니다.");
             return REGISTER_PAGE;

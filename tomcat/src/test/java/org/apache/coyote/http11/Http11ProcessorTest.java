@@ -332,6 +332,22 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains("Allow: GET, HEAD, POST ");
     }
 
+    @Test
+    void 쿼리_스트링으로_보낸_계정_정보로는_로그인할_수_없다() {
+        final String httpRequest = String.join("\r\n",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: 0 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+
+        new Http11Processor(socket, sessionManager).process(socket);
+
+        assertThat(socket.output()).contains("Location: /401.html ");
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
     private static String formPost(final String path, final String body) {
         return String.join("\r\n",
                 "POST " + path + " HTTP/1.1 ",

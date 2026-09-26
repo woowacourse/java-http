@@ -49,9 +49,6 @@ public class HttpRequest {
         return requestLine.getPath().getValue();
 
     }
-    public Optional<String> getParameter(String name) {
-        return body.getParameter(name);
-    }
 
     public HttpCookie getCookie() {
         return headers.getCookie();
@@ -63,6 +60,14 @@ public class HttpRequest {
         }
         return getCookie().get(HttpCookie.JSESSIONID)
                 .flatMap(sessionManager::findSession);
+    }
+
+    public Optional<String> getQueryParameter(final String name) {
+        return requestLine.getQueryParameter(name);
+    }
+
+    public Optional<String> getBodyParameter(final String name) {
+        return body.getParameter(name);
     }
 
     public boolean isMethod(final HttpMethod method) {

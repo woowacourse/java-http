@@ -5,8 +5,11 @@ import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.request.requestline.RequestLine;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,5 +43,21 @@ class HttpRequestTest {
 
         assertThatCode(() -> HttpRequest.of(line, headers, emptyBody, sessionManager))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 쿼리와_본문의_파라미터를_출처별로_조회한다() {
+        final HttpRequest request = HttpRequest.of(
+                RequestLine.from("POST /login?source=query HTTP/1.1"),
+                RequestHeaders.from(List.of("Host: localhost", "Content-Type: application/x-www-form-urlencoded")),
+                RequestBody.of("account=gugu".getBytes(StandardCharsets.US_ASCII),
+                        Optional.of("application/x-www-form-urlencoded")),
+                sessionManager
+        );
+
+        assertThat(request.getQueryParameter("source")).hasValue("query");
+        assertThat(request.getBodyParameter("account")).hasValue("gugu");
+        assertThat(request.getBodyParameter("source")).isEmpty();
+        assertThat(request.getQueryParameter("account")).isEmpty();
     }
 }

@@ -13,6 +13,9 @@ public class SessionManager {
     }
 
     public Session findSession(String id) throws IOException {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 

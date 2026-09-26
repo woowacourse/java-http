@@ -35,4 +35,5 @@ public class HttpCookie {
     public String getJsessionId() {
         return cookies.get("JSESSIONID");
     }
+
 }

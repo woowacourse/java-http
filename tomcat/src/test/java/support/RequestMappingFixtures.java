@@ -1,18 +1,20 @@
-package com.techcourse;
+package support;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
 import com.techcourse.controller.StaticResourceController;
 import org.apache.catalina.RequestMapping;
-import org.apache.catalina.startup.Tomcat;
 
 import java.util.Map;
 
-public class Application {
+public final class RequestMappingFixtures {
 
-    public static void main(String[] args) {
-        RequestMapping requestMapping = new RequestMapping(
+    private RequestMappingFixtures() {
+    }
+
+    public static RequestMapping requestMapping() {
+        return new RequestMapping(
                 Map.of(
                         "/", new RootController(),
                         "/login", new LoginController(),
@@ -20,8 +22,5 @@ public class Application {
                 ),
                 new StaticResourceController()
         );
-
-        final var tomcat = new Tomcat(requestMapping);
-        tomcat.start();
     }
 }

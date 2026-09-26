@@ -2,6 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.enums.HttpMethod;
+import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.handler.LoginPageHandler;
+import org.apache.coyote.http11.handler.LoginRequestHandler;
+import org.apache.coyote.http11.handler.RegisterRequestHandler;
+import org.apache.coyote.http11.handler.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +26,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_VALUE = "Hello world!";
 
     private final Socket connection;
-    private final Map<String, RequestHandler> handlers;
+    private final Map<Route, RequestHandler> handlers;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.handlers = Map.of("/login", new LoginRequestHandler());
+        this.handlers = Map.of(
+                new Route(HttpMethod.GET, "/login"), new LoginPageHandler(),
+                new Route(HttpMethod.POST, "/login"), new LoginRequestHandler(),
+                new Route(HttpMethod.POST, "/register"), new RegisterRequestHandler()
+        );
     }
 
     @Override
@@ -39,77 +49,56 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final String line = getHttpRequestLine(bufferedReader);
-            final String[] tokens = line.split(" ", 3);
-            final String uri = tokens[1];
+            final HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
+            HttpResponse httpResponse = handleRequest(httpRequest);
 
-            final String path = getPath(uri);
-            final Optional<String> queryString = getQueryString(uri);
-            handleRequest(queryString, path);
+            var header = new StringBuilder();
+            addResponseHeaderInfo(httpResponse, header);
 
-            final var responseBody = createResponseBody(path);
-            final String contentType = getContentType(path);
+            final var responseBody = createResponseBody(httpResponse.path());
+            final String contentType = getContentType(httpResponse.path());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+            var response = new StringBuilder();
+            String responseLine = httpRequest.version() + " " + httpResponse.httpStatus().getMessage() + " ";
+            header.append(String.join("\r\n",
                     "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.length + " ",
-                    "",
-                    new String(responseBody));
+                    "Content-Length: " + responseBody.length + " "));
+            String body = new String(responseBody);
 
-            outputStream.write(response.getBytes());
+            response.append(String.join("\r\n", responseLine, header.toString() + "\r\n", body));
+
+            log.info("mehtod: {} , path: {}, http status: {}",
+                    httpRequest.httpMethod(), httpResponse.path(), httpResponse.httpStatus().getMessage());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getHttpRequestLine(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
-        }
-        return line;
-    }
-
-    private String getPath(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return uri.substring(0, index);
-        }
-        return uri;
-    }
-
-    private Optional<String> getQueryString(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return Optional.of(uri.substring(index + 1));
-        }
-        return Optional.empty();
-    }
-
-    private void handleRequest(Optional<String> queryString, String path) {
-        final RequestHandler requestHandler = handlers.get(path);
+    private HttpResponse handleRequest(HttpRequest request) {
+        final RequestHandler requestHandler = handlers.get(new Route(request.httpMethod(), request.path()));
 
         if (requestHandler == null) {
-            return;
+            return new HttpResponse(request.path(), HttpStatus.OK, new HashMap<>());
         }
 
-        final Map<String, String> paramsMap = queryString
-                .map(this::getParamsMap)
-                .orElseGet(Collections::emptyMap);
-
-        requestHandler.handle(paramsMap);
+        return requestHandler.handle(request);
     }
 
-    private Map<String, String> getParamsMap(String queryString) {
-        Map<String, String> paramsMap = new HashMap<>();
-        String[] data = queryString.split("\\&");
-        for (String d : data) {
-            String[] param = d.split("\\=");
-            paramsMap.put(param[0], param[1]);
+    private void addResponseHeaderInfo(HttpResponse httpResponse, StringBuilder header) {
+        if (httpResponse.headers().containsKey("cookie")) {
+            header.append("Set-Cookie: JSESSIONID=")
+                    .append(httpResponse.headers().get("cookie"))
+                    .append("\r\n");
         }
-        return paramsMap;
+
+        if (httpResponse.headers().containsKey("Location")) {
+            header.append("Location: ")
+                    .append(httpResponse.headers().get("Location"))
+                    .append("\r\n");
+        }
     }
 
     private byte[] createResponseBody(String requestTarget) throws IOException, URISyntaxException {

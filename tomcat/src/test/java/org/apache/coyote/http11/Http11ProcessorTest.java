@@ -53,11 +53,13 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                responseBody;
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -65,15 +67,47 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException, URISyntaxException {
         // given
+        final String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/index.html");
+
+        final byte[] expectedBody = Files.readAllBytes(
+                Path.of(resource.toURI())
+        );
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found")
+                .endsWith(new String(expectedBody, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void 로그인_페이지를_응답한다() throws Exception {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
                 "",
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -90,5 +124,53 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK")
                 .endsWith(new String(expectedBody, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void 올바른_계정과_비밀번호로_로그인한다() {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found");
+    }
+
+    @Test
+    void 비밀번호가_틀리면_401을_응답한다() {
+        // given
+        final String requestBody = "account=gugu&password=wrong";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 401 Unauthorized");
     }
 }

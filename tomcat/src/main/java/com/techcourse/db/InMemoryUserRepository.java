@@ -16,7 +16,10 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        User existUser = database.putIfAbsent(user.getAccount(), user);
+        if (existUser != null) {
+            throw new IllegalArgumentException("이미 존재하는 계정입니다: " + user.getAccount());
+        }
     }
 
     public static Optional<User> findByAccount(String account) {

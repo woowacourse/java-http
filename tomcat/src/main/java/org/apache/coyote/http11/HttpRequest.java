@@ -44,13 +44,34 @@ public record HttpRequest(String method, String path, String version, Map<String
             parsedHeaders.put(name, value);
         }
 
-        return new HttpRequest(
+        final var request = new HttpRequest(
                 requestParts[0],
                 requestParts[1],
                 requestParts[2],
                 parsedHeaders,
                 ""
         );
+        return request.withBody(readBody(reader, request));
+    }
+
+    private static String readBody(final BufferedReader reader, final HttpRequest request) throws IOException {
+        if (!request.method().equals("POST")) {
+            return "";
+        }
+
+        final var contentLength = Integer.parseInt(request.header("Content-Length"));
+        final var buffer = new char[contentLength];
+        var totalRead = 0;
+
+        while (totalRead < contentLength) {
+            final var read = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (read == -1) {
+                throw new IOException("Request body ended before Content-Length");
+            }
+            totalRead += read;
+        }
+
+        return new String(buffer);
     }
 
     public String header(final String name) {

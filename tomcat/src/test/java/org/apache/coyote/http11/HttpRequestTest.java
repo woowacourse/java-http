@@ -50,6 +50,24 @@ class HttpRequestTest {
     }
 
     @Test
+    void parsesBodyWithHeaders() throws IOException {
+        final var reader = new BufferedReader(new StringReader(
+                "POST /login HTTP/1.1\r\nContent-Length: 12\r\n\r\naccount=gugu"));
+
+        assertThat(HttpRequest.from(reader).body()).isEqualTo("account=gugu");
+    }
+
+    @Test
+    void rejectsTruncatedBody() {
+        final var reader = new BufferedReader(new StringReader(
+                "POST /login HTTP/1.1\r\nContent-Length: 12\r\n\r\naccount="));
+
+        assertThatThrownBy(() -> HttpRequest.from(reader))
+                .isInstanceOf(IOException.class)
+                .hasMessage("Request body ended before Content-Length");
+    }
+
+    @Test
     void addingBodyCreatesNewRequest() {
         final var request = new HttpRequest("POST", "/login", "HTTP/1.1", Map.of());
 

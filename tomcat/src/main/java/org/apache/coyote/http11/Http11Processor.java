@@ -32,35 +32,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final var request = requestWithBody(reader, HttpRequest.from(reader));
+            final var request = HttpRequest.from(reader);
             final var response = requestMapping.getController(request).service(request);
 
             writeResponse(outputStream, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest requestWithBody(final BufferedReader reader, final HttpRequest request) throws IOException {
-        if (!request.method().equals("POST")) {
-            return request;
-        }
-
-        final var contentLength = Integer.parseInt(request.header("Content-Length"));
-        final var buffer = new char[contentLength];
-        var totalRead = 0;
-
-        while (totalRead < contentLength) {
-            final var read = reader.read(buffer, totalRead, contentLength - totalRead);
-
-            if (read == -1) {
-                throw new IOException("Request body ended before Content-Length");
-            }
-
-            totalRead += read;
-        }
-
-        return request.withBody(new String(buffer));
     }
 
     private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {

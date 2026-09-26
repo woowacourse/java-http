@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
@@ -29,7 +28,7 @@ public class HttpRequest {
     private final HttpCookie cookie;
 
     private HttpRequest(String method, String path, Map<String, String> headers, String body,
-                        Map<String, String> parameters, HttpCookie cookie) {
+            Map<String, String> parameters, HttpCookie cookie) {
         this.method = method;
         this.path = path;
         this.headers = headers;
@@ -40,6 +39,9 @@ public class HttpRequest {
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
+        if (requestLine == null) {
+            return null;
+        }
         String[] tokens = requestLine.split(REQUEST_LINE_SEPARATOR);
         String method = tokens[0];
         String path = parsePath(tokens[1]);
@@ -73,7 +75,8 @@ public class HttpRequest {
         return headers;
     }
 
-    private static String parseBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+    private static String parseBody(BufferedReader reader, Map<String, String> headers)
+            throws IOException {
         String contentLength = headers.get(CONTENT_LENGTH);
         if (contentLength == null) {
             return "";

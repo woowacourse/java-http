@@ -1,42 +1,62 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpResponse {
 
-    private final HttpStatus httpStatus;
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String CHARSET_UTF_8 = "charset=utf-8";
     private final Map<String, String> headers;
-    private final String responseBody;
+    private HttpStatus httpStatus;
+    private String responseBody;
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String responseBody) {
-        this.httpStatus = httpStatus;
-        this.headers = headers;
-        this.responseBody = responseBody;
+    public HttpResponse() {
+        this.httpStatus = HttpStatus.OK;
+        this.headers = new LinkedHashMap<>();
+        this.responseBody = "";
     }
 
-    public static HttpResponse ok(String contentType, String responseBody) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType + ";charset=utf-8");
-        headers.put("Content-Length", responseBody.getBytes().length + "");
-        return new HttpResponse(HttpStatus.OK, headers, responseBody);
+    public void setJSessionId(String jSessionId) {
+        headers.put(SET_COOKIE, "JSESSIONID=" + jSessionId);
     }
 
-    public static HttpResponse found(String location) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", location);
-        return new HttpResponse(HttpStatus.FOUND, headers, "");
+    public void sendRedirect(String location) {
+        httpStatus = HttpStatus.FOUND;
+        headers.put(LOCATION, location);
     }
 
-    public void addCookie(String jSessionId) {
-        headers.put("Set-Cookie", "JSESSIONID=" + jSessionId);
+    public void forward(String path) throws IOException {
+        ResourceResolver.resolve(path)
+                .ifPresent(body -> ok(ResourceResolver.resolveContentType(path), body));
+    }
+
+    public void ok(String contentType, String body) {
+        writeBody(HttpStatus.OK, contentType, body);
+    }
+
+    public void notFound(String contentType, String body) {
+        writeBody(HttpStatus.NOT_FOUND, contentType, body);
+    }
+
+    private void writeBody(HttpStatus status, String contentType, String body) {
+        this.httpStatus = status;
+        this.responseBody = body;
+        headers.put(CONTENT_TYPE, contentType + ";" + CHARSET_UTF_8);
+        headers.put(CONTENT_LENGTH, body.getBytes().length + "");
     }
 
     public byte[] getBytes() {
         List<String> lines = new ArrayList<>();
-        lines.add("HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getStatusMessage());
+        lines.add(HTTP_VERSION + " " + httpStatus.getCode() + " " + httpStatus.getStatusMessage());
         headers.forEach((name, value) -> lines.add(name + ": " + value));
         lines.add("");
         lines.add(responseBody);

@@ -2,15 +2,19 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.Adapter;
+import org.apache.coyote.http11.request.BadRequestException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,14 +38,25 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final HttpRequest request = HttpRequestParser.parse(inputStream);
-            if (request == null) { // 처리할 요청이 없으면 컨트롤러 선택 및 응답 생성을 건너뜀
+            final Optional<HttpRequest> request = parseRequest(inputStream, outputStream);
+            if (request.isEmpty()) { // 처리할 요청이 없으면 컨트롤러 선택 및 응답 생성을 건너뜀
                 return;
             }
-            final HttpResponse response = adapter.service(request);
+            final HttpResponse response = adapter.service(request.get());
             writeResponse(outputStream, response);
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private Optional<HttpRequest> parseRequest(final InputStream inputStream,
+                                              final OutputStream outputStream) throws IOException {
+        try {
+            return Optional.ofNullable(HttpRequestParser.parse(inputStream));
+        } catch (final BadRequestException e) {
+            log.warn("잘못된 HTTP 요청입니다: {}", e.getMessage());
+            writeResponse(outputStream, HttpResponse.empty(HttpStatus.BAD_REQUEST));
+            return Optional.empty();
         }
     }
 

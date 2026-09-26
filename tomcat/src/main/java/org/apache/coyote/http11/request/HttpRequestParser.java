@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +43,7 @@ public final class HttpRequestParser {
         while (line != null && !line.isEmpty()) {
             final int separator = line.indexOf(':');
             if (separator <= 0) {
-                throw new IOException("올바르지 않은 HTTP 헤더입니다: " + line);
+                throw new BadRequestException("올바르지 않은 HTTP 헤더입니다: " + line);
             }
             headers.put(line.substring(0, separator), line.substring(separator + 1).stripLeading());
             line = readLine(inputStream);
@@ -82,14 +81,19 @@ public final class HttpRequestParser {
             return "";
         }
 
-        final int contentLength = Integer.parseInt(contentLengthHeader);
+        final int contentLength;
+        try {
+            contentLength = Integer.parseInt(contentLengthHeader);
+        } catch (final NumberFormatException e) {
+            throw new BadRequestException("올바르지 않은 Content-Length입니다.", e);
+        }
         if (contentLength < 0) {
-            throw new IOException("Content-Length는 음수일 수 없습니다.");
+            throw new BadRequestException("Content-Length는 음수일 수 없습니다.");
         }
 
         final byte[] body = inputStream.readNBytes(contentLength);
         if (body.length != contentLength) {
-            throw new EOFException("요청 본문이 Content-Length보다 짧습니다.");
+            throw new BadRequestException("요청 본문이 Content-Length보다 짧습니다.");
         }
         return new String(body, StandardCharsets.UTF_8);
     }

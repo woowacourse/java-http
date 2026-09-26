@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import com.techcourse.exception.AuthenticationException;
+
 public class User {
 
     private final Long id;
@@ -20,6 +22,12 @@ public class User {
 
     public boolean checkPassword(String password) {
         return this.password.equals(password);
+    }
+
+    public void authenticate(String password) {
+        if (!checkPassword(password)) {
+            throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     public String getAccount() {

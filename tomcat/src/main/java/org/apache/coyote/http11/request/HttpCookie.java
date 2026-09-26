@@ -1,11 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpCookie {
+public class  HttpCookie {
 
-    private static final String JSESSIONID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
@@ -27,15 +27,7 @@ public class HttpCookie {
         return cookies;
     }
 
-    public boolean hasJSessionId() {
-        return cookies.containsKey(JSESSIONID);
-    }
-
-    public String getJSessionId() {
+    String getJSessionId() {
         return cookies.get(JSESSIONID);
-    }
-
-    public String get(String name) {
-        return cookies.get(name);
     }
 }

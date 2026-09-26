@@ -8,12 +8,14 @@ import java.util.Map;
 
 public class RequestMapping {
 
+    private final StaticResourceController staticResources = new StaticResourceController();
     private final Map<String, Controller> controllers = Map.of(
-            "/login", new LoginController(new LoginService()),
-            "/register", new RegisterController(new RegisterService())
+            "/", new HomeController(),
+            "/login", new LoginController(new LoginService(), staticResources),
+            "/register", new RegisterController(new RegisterService(), staticResources)
     );
 
     public Controller getController(String path) {
-        return controllers.get(path);
+        return controllers.getOrDefault(path, staticResources);
     }
 }

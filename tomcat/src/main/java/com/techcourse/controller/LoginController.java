@@ -13,9 +13,11 @@ import java.net.URISyntaxException;
 public class LoginController extends AbstractController {
 
     private final LoginService loginService;
+    private final StaticResourceController staticResources;
 
-    public LoginController(LoginService loginService) {
+    public LoginController(LoginService loginService, StaticResourceController staticResources) {
         this.loginService = loginService;
+        this.staticResources = staticResources;
     }
 
     @Override
@@ -23,12 +25,7 @@ public class LoginController extends AbstractController {
         if (isLoggedIn(request)) {
             return HttpResponse.redirect("/index.html");
         }
-
-        String body = loginService.readLoginPage();
-        if (body == null) {
-            return HttpResponse.create("404 Not Found", "text/plain", "Not Found");
-        }
-        return HttpResponse.create("200 OK", "text/html", body);
+        return staticResources.serve("/login.html");
     }
 
     @Override

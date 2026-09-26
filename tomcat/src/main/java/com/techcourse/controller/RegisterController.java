@@ -11,18 +11,16 @@ import java.net.URISyntaxException;
 public class RegisterController extends AbstractController {
 
     private final RegisterService registerService;
+    private final StaticResourceController staticResources;
 
-    public RegisterController(RegisterService registerService) {
+    public RegisterController(RegisterService registerService, StaticResourceController staticResources) {
         this.registerService = registerService;
+        this.staticResources = staticResources;
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException, URISyntaxException {
-        String body = registerService.readRegisterPage();
-        if (body == null) {
-            return HttpResponse.create("404 Not Found", "text/plain", "Not Found");
-        }
-        return HttpResponse.create("200 OK", "text/html", body);
+        return staticResources.serve("/register.html");
     }
 
     @Override

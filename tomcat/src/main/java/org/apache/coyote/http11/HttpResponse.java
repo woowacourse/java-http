@@ -9,33 +9,25 @@ public class HttpResponse {
     private static final String BLANK = " ";
     private static final String CRLF = "\r\n";
 
-    private final HttpStatus status;
+    private HttpStatus status;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private final String body;
+    private String body = "";
 
-    private HttpResponse(HttpStatus status, String body) {
-        this.status = status;
-        this.body = body;
+    public HttpResponse() {
     }
 
-    public static HttpResponse ok(String contentType, String body) {
-        HttpResponse response = new HttpResponse(HttpStatus.OK, body);
-        response.addHeader("Content-Type", contentType);
-        response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-        return response;
+    public void ok(String contentType, String body) {
+        setResponse(HttpStatus.OK, contentType, body);
     }
 
-    public static HttpResponse notFound(String contentType, String body) {
-        HttpResponse response = new HttpResponse(HttpStatus.NOT_FOUND, body);
-        response.addHeader("Content-Type", contentType);
-        response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-        return response;
+    public void notFound(String contentType, String body) {
+        setResponse(HttpStatus.NOT_FOUND, contentType, body);
     }
 
-    public static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, "");
-        response.addHeader("Location", location);
-        return response;
+    public void sendRedirect(String location) {
+        this.status = HttpStatus.FOUND;
+        this.body = "";
+        addHeader("Location", location);
     }
 
     public void addHeader(String name, String value) {
@@ -57,5 +49,12 @@ public class HttpResponse {
 
         message.append(CRLF).append(body);
         return message.toString();
+    }
+
+    private void setResponse(HttpStatus status, String contentType, String body) {
+        this.status = status;
+        this.body = body;
+        addHeader("Content-Type", contentType);
+        addHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 }

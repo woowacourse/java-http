@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_SEPARATOR = ";";
     private static final String KEY_VALUE_SEPARATOR = "=";
 
@@ -30,10 +29,10 @@ public class HttpCookie {
     }
 
     public boolean hasJSessionId() {
-        return values.containsKey(JSESSIONID);
+        return values.containsKey(Cookie.JSESSIONID);
     }
 
     public String getJSessionId() {
-        return values.get(JSESSIONID);
+        return values.get(Cookie.JSESSIONID);
     }
 }

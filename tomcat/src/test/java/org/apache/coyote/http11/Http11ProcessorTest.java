@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -19,7 +20,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new RequestMapping());
 
         // when
         processor.process(socket);
@@ -27,7 +28,7 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK ")
-                .contains("Set-Cookie: JSESSIONID=")
+                .doesNotContain("Set-Cookie")
                 .contains("Content-Type: text/html;charset=utf-8 ")
                 .contains("Content-Length: 12 ")
                 .endsWith("\r\n\r\nHello world!");
@@ -44,7 +45,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new RequestMapping());
 
         // when
         processor.process(socket);
@@ -55,7 +56,7 @@ class Http11ProcessorTest {
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK ")
-                .contains("Set-Cookie: JSESSIONID=")
+                .doesNotContain("Set-Cookie")
                 .contains("Content-Type: text/html;charset=utf-8 ")
                 .contains("Content-Length: 5564 ")
                 .endsWith("\r\n\r\n" + body);
@@ -72,7 +73,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new RequestMapping());
 
         // when
         processor.process(socket);
@@ -95,7 +96,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new RequestMapping());
 
         // when
         processor.process(socket);
@@ -123,7 +124,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new RequestMapping());
 
         // when
         processor.process(socket);
@@ -144,7 +145,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new RequestMapping());
 
         // when
         processor.process(socket);

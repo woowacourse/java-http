@@ -192,6 +192,9 @@ class Step2Test {
 
         String loggedInSessionId = sessionIdFrom(loginSocket);
 
+        assertThat(loggedInSessionId).isNotEqualTo(initialSessionId);
+        assertThat(manager.findSession(initialSessionId)).isEmpty();
+
         Session session = manager
                 .findSession(loggedInSessionId)
                 .orElseThrow();
@@ -217,6 +220,59 @@ class Step2Test {
 
         assertThat(authenticatedSocket.output())
                 .contains("Location: /index.html");
+    }
+
+    @Test
+    void 쿠키_없이_바로_로그인하면_최종_세션의_ID를_응답한다() {
+        Manager manager = new SessionManager();
+        StubSocket loginSocket = loginRequest("gugu", "password");
+
+        process(loginSocket, manager);
+
+        String sessionId = sessionIdFrom(loginSocket);
+        Session session = manager.findSession(sessionId).orElseThrow();
+
+        assertThat(((User) session.getAttribute("user")).getAccount())
+                .isEqualTo("gugu");
+        assertThat(loginSocket.output())
+                .contains("Set-Cookie: JSESSIONID=" + sessionId + "; Path=/; HttpOnly");
+    }
+
+    @Test
+    void 로그인에_실패하면_기존_세션을_유지한다() {
+        Manager manager = new SessionManager();
+        Session session = manager.createSession();
+        String body = "account=gugu&password=wrong";
+        String request = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Cookie: JSESSIONID=" + session.getId(),
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body
+        );
+        StubSocket socket = new StubSocket(request);
+
+        process(socket, manager);
+
+        assertThat(socket.output()).contains("Location: /401.html");
+        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
+        assertThat(manager.findSession(session.getId())).contains(session);
+    }
+
+    @Test
+    void 세션_쿠키를_발급할_때_다른_쿠키를_보존한다() {
+        Manager manager = new SessionManager();
+        RequestMapping mapping = new RequestMapping((request, response) ->
+                response.addHeader("Set-Cookie", "theme=dark"));
+        StubSocket socket = new StubSocket("GET / HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket, manager, mapping).process(socket);
+
+        assertThat(socket.output())
+                .contains("Set-Cookie: theme=dark\r\n")
+                .contains("Set-Cookie: JSESSIONID=");
+        assertThat(manager.findSession(sessionIdFrom(socket))).isPresent();
     }
 
     private StubSocket loginRequest(
@@ -250,7 +306,7 @@ class Step2Test {
 
         requestMapping.register(
                 "/login",
-                new LoginController(manager, staticResourceController)
+                new LoginController(staticResourceController)
         );
         new Http11Processor(socket, manager, requestMapping)
                 .process(socket);
@@ -266,8 +322,7 @@ class Step2Test {
                 .findFirst()
                 .orElseThrow();
 
-        return cookieHeader.substring(
-                "Set-Cookie: JSESSIONID=".length()
-        );
+        return cookieHeader.substring("Set-Cookie: JSESSIONID=".length())
+                .split(";", 2)[0];
     }
 }

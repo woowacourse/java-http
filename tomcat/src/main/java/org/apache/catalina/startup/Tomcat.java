@@ -27,7 +27,7 @@ public class Tomcat {
         );
         requestMapping.register(
                 "/login",
-                new LoginController(sessionManager, staticResourceController)
+                new LoginController(staticResourceController)
         );
 
         var connector = new Connector(sessionManager, requestMapping);

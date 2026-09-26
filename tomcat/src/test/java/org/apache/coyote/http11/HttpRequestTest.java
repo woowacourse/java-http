@@ -7,7 +7,9 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -76,8 +78,9 @@ class HttpRequestTest {
         );
         var request = request(rawRequest);
 
-        Session session = new Session("session-id");
-        request.attachSession(session);
+        Manager manager = new SessionManager();
+        Session session = manager.createSession();
+        request.attachSession(session, manager);
 
         assertThat(request.session()).isSameAs(session);
     }
@@ -92,6 +95,21 @@ class HttpRequestTest {
 
         assertThatThrownBy(request::session)
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void 세션을_갱신하면_새_세션이_요청에_연결된다() throws Exception {
+        Manager manager = new SessionManager();
+        Session oldSession = manager.createSession();
+        var request = request("GET /login HTTP/1.1\r\n\r\n");
+        request.attachSession(oldSession, manager);
+
+        Session renewedSession = request.renewSession();
+
+        assertThat(request.session()).isSameAs(renewedSession);
+        assertThat(renewedSession.getId()).isNotEqualTo(oldSession.getId());
+        assertThat(manager.findSession(oldSession.getId())).isEmpty();
+        assertThat(manager.findSession(renewedSession.getId())).contains(renewedSession);
     }
 
     private HttpRequest request(final String value) throws Exception {

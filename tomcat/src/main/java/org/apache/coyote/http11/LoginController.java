@@ -3,19 +3,13 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 
 public class LoginController extends AbstractController {
 
-    private final Manager sessionManager;
     private final Controller staticResourceController;
 
-    public LoginController(
-            final Manager sessionManager,
-            final Controller staticResourceController
-    ) {
-        this.sessionManager = sessionManager;
+    public LoginController(final Controller staticResourceController) {
         this.staticResourceController = staticResourceController;
     }
 
@@ -50,13 +44,9 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        Session renewedSession = sessionManager.renewSession(request.session());
+        Session renewedSession = request.renewSession();
         renewedSession.setAttribute("user", authenticatedUser.get());
 
         response.sendRedirect("/index.html");
-        response.addHeader(
-                "Set-Cookie",
-                "JSESSIONID=" + renewedSession.getId()
-        );
     }
 }

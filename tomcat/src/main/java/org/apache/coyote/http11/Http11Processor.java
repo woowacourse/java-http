@@ -1,10 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import java.net.Socket;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
@@ -44,16 +41,21 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            Optional<Session> existingSession = request.findCookie("JSESSIONID")
+            Optional<String> requestedSessionId = request.findCookie("JSESSIONID");
+            Optional<Session> existingSession = requestedSessionId
                     .flatMap(sessionManager::findSession);
 
             Session session = existingSession.orElseGet(sessionManager::createSession);
-            request.attachSession(session);
+            request.attachSession(session, sessionManager);
 
             HttpResponse response = route(request);
 
-            if (existingSession.isEmpty() && !response.hasHeader("Set-Cookie")) {
-                response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            Session currentSession = request.session();
+            if (requestedSessionId.filter(currentSession.getId()::equals).isEmpty()) {
+                response.addHeader(
+                        "Set-Cookie",
+                        "JSESSIONID=" + currentSession.getId() + "; Path=/; HttpOnly"
+                );
             }
 
             outputStream.write(response.toByteArray());

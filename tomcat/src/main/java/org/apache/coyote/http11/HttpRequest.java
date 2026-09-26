@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 
 public final class HttpRequest {
@@ -19,6 +20,7 @@ public final class HttpRequest {
     private final HttpCookie cookies;
     private final String body;
     private Session session;
+    private Manager sessionManager;
 
     private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
         this.requestLine = requestLine;
@@ -75,8 +77,12 @@ public final class HttpRequest {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
-    void attachSession(final Session session) {
+    void attachSession(
+            final Session session,
+            final Manager sessionManager
+    ) {
         this.session = session;
+        this.sessionManager = sessionManager;
     }
 
     public Session session() {
@@ -84,6 +90,16 @@ public final class HttpRequest {
             throw new IllegalStateException("요청에 세션이 연결되지 않았습니다.");
         }
 
+        return session;
+    }
+
+    public Session renewSession() {
+        Session currentSession = session();
+        if (sessionManager == null) {
+            throw new IllegalStateException("요청에 세션 관리자가 연결되지 않았습니다.");
+        }
+
+        session = sessionManager.renewSession(currentSession);
         return session;
     }
 

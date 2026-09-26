@@ -12,8 +12,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +24,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String CRLF = "\r\n";
     private static final String STATIC_RESOURCE_ROOT = "static";
     private static final String NOT_FOUND_PAGE = "/404.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
@@ -39,13 +36,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String ACCEPT_HEADER = "Accept";
     private static final String COOKIE_HEADER = "Cookie";
-    private static final String ACCEPT_ANY = "*/*";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String TEXT_HTML = "text/html;charset=utf-8";
     private static final String TEXT_CSS = "text/css";
-
-    private static final String STATUS_OK = "HTTP/1.1 200 OK ";
-    private static final String STATUS_FOUND = "HTTP/1.1 302 Found ";
-    private static final String STATUS_NOT_FOUND = "HTTP/1.1 404 Not Found ";
 
     private static final String POST = "POST";
     private static final String GET = "GET";
@@ -74,10 +68,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = HttpRequest.from(bufferedReader);
-            log.info("HttpRequest: {}", request);
             if (request == null) {
                 return;
             }
+            log.info("{}", request.toString());
 
             final var cookie = new HttpCookie(request.getHeader(COOKIE_HEADER));
             var setCookie = "";
@@ -88,53 +82,43 @@ public class Http11Processor implements Runnable, Processor {
             final var method = request.getMethod();
             final var path = request.getPath();
 
-            var statusLine = STATUS_OK;
-            var location = "";
-            final byte[] responseBody;
+            final var response = new HttpResponse();
+            response.setHeader(CONTENT_TYPE_HEADER, contentType);
+
             if (path.equals("/")) { // Hello World
-                responseBody = "Hello world!".getBytes();
+                response.setBody("Hello world!".getBytes());
             } else if (method.equals(POST) && path.equals(REGISTER_PATH)) { // 회원가입
-                final var formParameters = request.getParameters();
-
-                statusLine = STATUS_FOUND;
-
-                if (register(formParameters)) {
-                    location = INDEX_PAGE;
+                if (register(request.getParameters())) {
+                    response.sendRedirect(INDEX_PAGE);
                 } else {
-                    location = REGISTER_PATH;
+                    response.sendRedirect(REGISTER_PATH);
                 }
-                responseBody = new byte[0];
             } else if (method.equals(POST) && path.equals(LOGIN_PATH)) {  // 로그인
-                final var formParameters = request.getParameters();
-
-                statusLine = STATUS_FOUND;
-                final var loginUser = login(formParameters);
+                final var loginUser = login(request.getParameters());
                 if (loginUser.isPresent()) {
                     final var session = sessionManager.createSession();
                     session.setAttribute(USER_ATTRIBUTE, loginUser.get());
                     setCookie = HttpCookie.JSESSIONID + "=" + session.getId();
-                    location = INDEX_PAGE;
+                    response.sendRedirect(INDEX_PAGE);
                     log.info("Session id: {} -> {}", session.getId(), session.getAttribute(USER_ATTRIBUTE));
                 } else {
-                    location = UNAUTHORIZED_PAGE;
+                    response.sendRedirect(UNAUTHORIZED_PAGE);
                 }
-                responseBody = new byte[0];
             } else if (method.equals(GET) && path.equals(LOGIN_PATH) && isLoggedIn(cookie)) { // GET 로그인
-                statusLine = STATUS_FOUND;
-                location = INDEX_PAGE;
-                responseBody = new byte[0];
+                response.sendRedirect(INDEX_PAGE);
             } else {
                 var resourceUrl = findResource(path);
                 if (resourceUrl == null) {
-                    statusLine = STATUS_NOT_FOUND;
+                    response.setStatus(HttpStatus.NOT_FOUND);
                     resourceUrl = findResource(NOT_FOUND_PAGE);
                 }
-                log.info("{} -> {}", statusLine, resourceUrl);
-                responseBody = Files.readAllBytes(Path.of(resourceUrl.toURI()));
+                response.setBody(Files.readAllBytes(Path.of(resourceUrl.toURI())));
             }
-
-            final var response = buildResponse(statusLine, location, setCookie, contentType, responseBody);
-            outputStream.write(response.getBytes());
+            if (!setCookie.isEmpty()) {
+                response.setHeader(SET_COOKIE_HEADER, setCookie);
+            }
+            log.info("{}",response);
+            outputStream.write(response.build().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -192,22 +176,5 @@ public class Http11Processor implements Runnable, Processor {
             return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path);
         }
         return getClass().getClassLoader().getResource(STATIC_RESOURCE_ROOT + path + ".html");
-    }
-
-    private String buildResponse(final String statusLine, final String location, final String setCookie,
-                                 final String contentType, final byte[] body) {
-        final List<String> lines = new ArrayList<>();
-        lines.add(statusLine);
-        if (!location.isEmpty()) {
-            lines.add("Location: " + location + " ");
-        }
-        if (!setCookie.isEmpty()) {
-            lines.add("Set-Cookie: " + setCookie + " ");
-        }
-        lines.add("Content-Type: " + contentType + " ");
-        lines.add("Content-Length: " + body.length + " ");
-        lines.add("");
-        lines.add(new String(body, StandardCharsets.UTF_8));
-        return String.join(CRLF, lines);
     }
 }

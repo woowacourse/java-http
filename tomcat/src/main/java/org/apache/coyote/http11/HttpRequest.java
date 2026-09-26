@@ -120,4 +120,15 @@ public class HttpRequest {
     public Map<String, String> getParameters() {
         return parameters;
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequest {" + "\r\n" +
+                "method= " + method + "\r\n" +
+                "path= " + path + "\r\n" +
+                "headers= " + headers + "\r\n" +
+                "body= " + body + "\r\n" +
+                "parameters= " + parameters + "\r\n" +
+                "}";
+    }
 }

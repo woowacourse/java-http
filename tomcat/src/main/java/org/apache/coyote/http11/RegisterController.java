@@ -32,12 +32,16 @@ public class RegisterController extends AbstractController {
         final String[] formFields = requestBody.split("&");
 
         for (String formField : formFields) {
-            final String[] keyValue = formField.split("=", 2);
-            if (keyValue.length < 2) {
-                continue;
-            }
-            formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+            addFormField(formData, formField);
         }
         return formData;
+    }
+
+    private void addFormField(final Map<String, String> formData, final String formField) {
+        final String[] keyValue = formField.split("=", 2);
+        if (keyValue.length < 2) {
+            return;
+        }
+        formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
     }
 }

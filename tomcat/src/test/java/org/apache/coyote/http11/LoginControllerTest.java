@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.LoginController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.ByteArrayInputStream;
@@ -16,7 +17,7 @@ class LoginControllerTest {
     @Test
     void 로그인하지_않은_GET_요청에_로그인_페이지를_응답한다() throws Exception {
         Manager manager = new SessionManager();
-        Controller controller = new LoginController(new StaticResourceController());
+        Controller controller = new LoginController(new StaticResourceRenderer());
         HttpRequest request = request("GET /login HTTP/1.1\r\n\r\n");
         request.attachSession(manager.createSession(), manager);
         HttpResponse response = new HttpResponse();
@@ -26,13 +27,14 @@ class LoginControllerTest {
         String actual = responseText(response);
 
         assertThat(actual).contains("Content-Type: text/html");
+        assertThat(actual).contains("<form method=\"post\" action=\"login\">");
         assertThat(actual).doesNotContain("Location: /index.html");
     }
 
     @Test
     void 로그인한_사용자의_GET_요청은_index로_리다이렉트한다() throws Exception {
         Manager manager = new SessionManager();
-        Controller controller = new LoginController(new StaticResourceController());
+        Controller controller = new LoginController(new StaticResourceRenderer());
 
         Session session = manager.createSession();
         session.setAttribute(
@@ -53,7 +55,7 @@ class LoginControllerTest {
     @Test
     void 올바른_로그인_정보로_요청하면_세션을_갱신하고_사용자를_저장한다() throws Exception {
         Manager manager = new SessionManager();
-        Controller controller = new LoginController(new StaticResourceController());
+        Controller controller = new LoginController(new StaticResourceRenderer());
 
         User user = new User(
                 "login-test",
@@ -97,7 +99,7 @@ class LoginControllerTest {
     @Test
     void 잘못된_로그인_정보로_요청하면_401로_리다이렉트한다() throws Exception {
         Manager manager = new SessionManager();
-        Controller controller = new LoginController(new StaticResourceController());
+        Controller controller = new LoginController(new StaticResourceRenderer());
 
         Session session = manager.createSession();
 

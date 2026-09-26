@@ -1,14 +1,20 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.StaticResourceRenderer;
 
 public class RegisterController extends AbstractController {
 
-    private final Controller staticResourceController;
+    private static final String REGISTER_PAGE = "/register.html";
 
-    public RegisterController(final Controller staticResourceController) {
-        this.staticResourceController = staticResourceController;
+    private final StaticResourceRenderer resourceRenderer;
+
+    public RegisterController(final StaticResourceRenderer resourceRenderer) {
+        this.resourceRenderer = resourceRenderer;
     }
 
     @Override
@@ -16,7 +22,7 @@ public class RegisterController extends AbstractController {
             final HttpRequest request,
             final HttpResponse response
     ) throws Exception {
-        staticResourceController.service(request, response);
+        resourceRenderer.writeResource(REGISTER_PAGE, response);
     }
 
     @Override

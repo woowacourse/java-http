@@ -1,16 +1,22 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.StaticResourceRenderer;
 
 public class LoginController extends AbstractController {
 
-    private final Controller staticResourceController;
+    private static final String LOGIN_PAGE = "/login.html";
 
-    public LoginController(final Controller staticResourceController) {
-        this.staticResourceController = staticResourceController;
+    private final StaticResourceRenderer resourceRenderer;
+
+    public LoginController(final StaticResourceRenderer resourceRenderer) {
+        this.resourceRenderer = resourceRenderer;
     }
 
     @Override
@@ -23,7 +29,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        staticResourceController.service(request, response);
+        resourceRenderer.writeResource(LOGIN_PAGE, response);
     }
 
     @Override

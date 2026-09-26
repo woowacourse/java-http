@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.model.User;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -297,16 +299,18 @@ class Step2Test {
             final StubSocket socket,
             final Manager manager
     ) {
-        StaticResourceController staticResourceController = new StaticResourceController();
+        StaticResourceRenderer resourceRenderer = new StaticResourceRenderer();
+        StaticResourceController staticResourceController =
+                new StaticResourceController(resourceRenderer);
         RequestMapping requestMapping = new RequestMapping(staticResourceController);
         requestMapping.register(
                 "/register",
-                new RegisterController(staticResourceController)
+                new RegisterController(resourceRenderer)
         );
 
         requestMapping.register(
                 "/login",
-                new LoginController(staticResourceController)
+                new LoginController(resourceRenderer)
         );
         new Http11Processor(socket, manager, requestMapping)
                 .process(socket);

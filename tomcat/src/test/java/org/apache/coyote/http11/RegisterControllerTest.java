@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.RegisterController;
 import com.techcourse.db.InMemoryUserRepository;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +12,7 @@ class RegisterControllerTest {
 
     @Test
     void POST_회원가입_요청으로_사용자를_저장하고_리다이렉트한다() throws Exception {
-        Controller controller = new RegisterController(new StaticResourceController());
+        Controller controller = new RegisterController(new StaticResourceRenderer());
 
         String body = "account=test&password=password&email=test@test.com";
 
@@ -43,7 +44,7 @@ class RegisterControllerTest {
 
     @Test
     void GET_회원가입_요청에_회원가입_페이지를_응답한다() throws Exception {
-        Controller controller = new RegisterController(new StaticResourceController());
+        Controller controller = new RegisterController(new StaticResourceRenderer());
 
         HttpRequest request = request(
                 "GET /register HTTP/1.1\r\n\r\n"
@@ -59,6 +60,7 @@ class RegisterControllerTest {
         );
 
         assertThat(actual).contains("Content-Type: text/html");
+        assertThat(actual).contains("<form method=\"post\" action=\"register\">");
         assertThat(actual).doesNotEndWith("Hello world!");
     }
 

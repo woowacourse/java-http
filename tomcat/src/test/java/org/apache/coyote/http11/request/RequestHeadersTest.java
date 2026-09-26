@@ -258,4 +258,45 @@ class RequestHeadersTest {
             assertThat(headers.hasHost()).isFalse();
         }
     }
+
+    @Nested
+    class 중복_헤더 {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"Host", "Content-Length", "Content-Type"})
+        void 단일_값_헤더가_중복되면_거부한다(final String name) {
+            final String value = name.equals("Content-Length") ? "5" : "a";
+            final List<String> lines = List.of(name + ": " + value, name.toLowerCase() + ": " + value);
+
+            assertThatThrownBy(() -> RequestHeaders.from(lines))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("중복");
+        }
+
+        @Test
+        void Cookie는_세미콜론으로_합친다() {
+            final List<String> lines = List.of("Cookie: a=1", "Cookie: b=2");
+
+            final RequestHeaders headers = RequestHeaders.from(lines);
+
+            assertThat(headers.get(HttpHeaderName.COOKIE)).hasValue("a=1; b=2");
+        }
+
+        @Test
+        void 합쳐진_Cookie를_모두_파싱한다() {
+            final List<String> lines = List.of("Cookie: a=1", "Cookie: b=2");
+
+            final HttpCookie cookie = RequestHeaders.from(lines).getCookie();
+
+            assertThat(cookie.get("a")).hasValue("1");
+            assertThat(cookie.get("b")).hasValue("2");
+        }
+
+        @Test
+        void 빈_Cookie_줄은_구분자를_남기지_않는다() {
+            final List<String> lines = List.of("Cookie: a=1", "Cookie:");
+
+            assertThat(RequestHeaders.from(lines).get(HttpHeaderName.COOKIE)).hasValue("a=1");
+        }
+    }
 }

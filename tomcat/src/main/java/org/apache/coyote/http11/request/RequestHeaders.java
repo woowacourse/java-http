@@ -15,21 +15,25 @@ import java.util.Set;
 public class RequestHeaders {
     private static final Set<String> SINGLE_VALUE_HEADERS = Set.of(
             HttpHeaderName.CONTENT_LENGTH.getNormalized(),
-            HttpHeaderName.HOST.getNormalized()
+            HttpHeaderName.HOST.getNormalized(),
+            HttpHeaderName.CONTENT_TYPE.getNormalized()
     );
 
     // Host = uri-host [ ":" port ], 허용 문자만 검사 (RFC 3986 reg-name, IP 리터럴, 포트)
     private static final String HOST_SPECIAL_CHARS = "-._~%!$&'()*+,;=:[]";
-
-    private static final String HEADER_DELIMITER = ":";
-    private static final int NOT_FOUND = -1;
-    private static final char SP = ' ';
-    private static final char HTAB = '\t';
     private static final char FIRST_VISIBLE = 0x21;
     private static final char LAST_VISIBLE = 0x7E;
     private static final char FIRST_OBS_TEXT = 0x80;
-    private static final int NO_CONTENT = 0;
     private static final int MAX_CONTENT_LENGTH = 2 * 1024 * 1024;
+
+    private static final String LIST_SEPARATOR = ", ";
+    private static final String COOKIE_SEPARATOR = "; ";
+    private static final String HEADER_DELIMITER = ":";
+    private static final char SP = ' ';
+    private static final char HTAB = '\t';
+
+    private static final int NOT_FOUND = -1;
+    private static final int NO_CONTENT = 0;
 
     private final Map<String, String> headers;
     private final int contentLength;
@@ -56,19 +60,33 @@ public class RequestHeaders {
                 throw new BadRequestException("잘못된 헤더 이름입니다");
             }
 
-            final String name = HttpHeaderName.normalize(line.substring(0, delimiterIndex));
+            final String name = HttpHeaderName.normalize(rawName);
             final String value = parseValue(line.substring(delimiterIndex + 1));
 
             if (SINGLE_VALUE_HEADERS.contains(name) && parsed.containsKey(name)) {
                 throw new BadRequestException("중복될 수 없는 헤더입니다: " + name);
             }
-            parsed.putIfAbsent(name, value);
+            parsed.merge(name, value, (existing, added) -> combine(name, existing, added));
         }
 
         final Map<String, String> headers = Map.copyOf(parsed);
         validateMessageFraming(headers);
         validateHost(headers);
         return new RequestHeaders(headers, parseContentLength(headers));
+    }
+
+    // RFC 9110 5.3: 같은 이름의 헤더는 순서대로 합친다. Cookie는 RFC 9113 8.2.3에 따라 "; "로 합친다.
+    private static String combine(final String name, final String existing, final String added) {
+        if (existing.isEmpty()) {
+            return added;
+        }
+        if (added.isEmpty()) {
+            return existing;
+        }
+        final String separator = HttpHeaderName.COOKIE.getNormalized().equals(name)
+                ? COOKIE_SEPARATOR
+                : LIST_SEPARATOR;
+        return existing + separator + added;
     }
 
     private static String parseValue(final String raw) {

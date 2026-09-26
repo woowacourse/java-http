@@ -82,12 +82,21 @@ public class Http11Processor implements Runnable, Processor {
         final Controller controller =
                 requestMapping.getController(request);
 
-        if (controller != null) {
-            controller.service(request, response);
+        if (controller == null) {
+            serveStaticResource(
+                    request.getPath(),
+                    response
+            );
+            return;
         }
 
-        if (!response.isCommitted()) {
-            serveStaticResource(request, response);
+        controller.service(request, response);
+
+        if (response.hasResourcePath()) {
+            serveStaticResource(
+                    response.getResourcePath(),
+                    response
+            );
         }
     }
 
@@ -107,11 +116,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void serveStaticResource(
-            final HttpRequest request,
+            final String path,
             final HttpResponse response
     ) throws IOException, URISyntaxException {
-        final String path = request.getPath();
-
         if ("/".equals(path)) {
             response.addHeader(
                     "Content-Type",

@@ -9,7 +9,7 @@ public class HttpResponse {
     private StatusLine statusLine;
     private final ResponseHeaders headers;
     private String body;
-    private boolean committed;
+    private String resourcePath;
 
     public HttpResponse() {
         this.statusLine = new StatusLine(
@@ -19,7 +19,17 @@ public class HttpResponse {
         );
         this.headers = new ResponseHeaders();
         this.body = "";
-        this.committed = false;
+    }
+
+    public void setResourcePath(final String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+    public boolean hasResourcePath() {
+        return resourcePath != null;
     }
 
     public void setStatus(
@@ -31,7 +41,6 @@ public class HttpResponse {
                 statusCode,
                 reasonPhrase
         );
-        this.committed = true;
     }
 
     public void addHeader(final String name, final String value) {
@@ -48,18 +57,12 @@ public class HttpResponse {
         } else {
             this.body = body;
         }
-
-        this.committed = true;
     }
 
     public void sendRedirect(final String location) {
         setStatus(302, "Found");
         addHeader("Location", location);
         setBody("");
-    }
-
-    public boolean isCommitted() {
-        return committed;
     }
 
     public String toResponse() {

@@ -47,6 +47,9 @@ public class LoginController extends AbstractController {
 
         if (user != null) {
             response.sendRedirect("/index.html");
+            return;
         }
+
+        response.setResourcePath("/login.html");
     }
 }

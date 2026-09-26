@@ -32,4 +32,12 @@ public class RegisterController extends AbstractController {
 
         response.sendRedirect("/index.html");
     }
+
+    @Override
+    protected void doGet(
+            final HttpRequest request,
+            final HttpResponse response
+    ) {
+        response.setResourcePath("/register.html");
+    }
 }

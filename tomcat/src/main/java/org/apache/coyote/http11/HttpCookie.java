@@ -14,12 +14,16 @@ public class HttpCookie {
 
         final String[] cookies = cookieHeader.split(";");
         for (String cookie : cookies) {
-            final String[] keyValue = cookie.trim().split("=", 2);
-            if (keyValue.length < 2) {
-                continue;
-            }
-            values.put(keyValue[0].trim(), keyValue[1].trim());
+            addCookie(cookie);
         }
+    }
+
+    private void addCookie(final String cookie) {
+        final String[] keyValue = cookie.trim().split("=", 2);
+        if (keyValue.length < 2) {
+            return;
+        }
+        values.put(keyValue[0].trim(), keyValue[1].trim());
     }
 
     public String getValue(final String name) {

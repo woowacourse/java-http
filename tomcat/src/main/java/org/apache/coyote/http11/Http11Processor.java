@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -99,10 +98,14 @@ public class Http11Processor implements Runnable, Processor {
             } else if (method.equals(POST) && path.equals(REGISTER_PATH)) { // 회원가입
                 final var requestBody = readBody(bufferedReader, requestHeaders);
                 final var formParameters = parseQueryParameters(requestBody);
-                register(formParameters);
 
                 statusLine = STATUS_FOUND;
-                location = INDEX_PAGE;
+
+                if (register(formParameters)) {
+                    location = INDEX_PAGE;
+                } else {
+                    location = REGISTER_PATH;
+                }
                 responseBody = new byte[0];
             } else if (method.equals(POST) && path.equals(LOGIN_PATH)) {  // 로그인
                 final var requestBody = readBody(bufferedReader, requestHeaders);
@@ -115,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
                     session.setAttribute(USER_ATTRIBUTE, loginUser.get());
                     setCookie = HttpCookie.JSESSIONID + "=" + session.getId();
                     location = INDEX_PAGE;
-                    log.info("Session id: {} -> {}",session.getId(),session.getAttribute(USER_ATTRIBUTE));
+                    log.info("Session id: {} -> {}", session.getId(), session.getAttribute(USER_ATTRIBUTE));
                 } else {
                     location = UNAUTHORIZED_PAGE;
                 }
@@ -145,12 +148,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(HttpCookie cookie) {
-        if(!cookie.hasJSessionId()) {
+        if (!cookie.hasJSessionId()) {
             return false;
         }
         final var jSessionId = cookie.getJSessionId();
         final var session = SessionManager.getInstance().findSession(jSessionId);
-        if(session == null) {
+        if (session == null) {
             return false;
         }
         return session.getAttribute(USER_ATTRIBUTE) != null;
@@ -211,23 +214,33 @@ public class Http11Processor implements Runnable, Processor {
         final String[] pairs = queryString.split("&");
         for (int i = 0; i < pairs.length; i++) {
             final String[] nameAndValue = pairs[i].split("=", 2);
-            parameters.put(URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
-                    URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8));
+            if (nameAndValue.length == 2) {
+                parameters.put(URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8));
+            }
         }
         return parameters;
     }
 
-    private void register(final Map<String, String> formParameters) {
-        final var user = new User(formParameters.get(ACCOUNT_PARAMETER),
-                formParameters.get(PASSWORD_PARAMETER),
-                formParameters.get(EMAIL_PARAMETER));
+    private boolean register(final Map<String, String> formParameters) {
+        final var account = formParameters.get(ACCOUNT_PARAMETER);
+        final var password = formParameters.get(PASSWORD_PARAMETER);
+        final var email = formParameters.get(EMAIL_PARAMETER);
+        if (account == null || password == null || email == null) {
+            return false;
+        }
+        final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info("register success: {}", user);
+        return true;
     }
 
     private Optional<User> login(final Map<String, String> formParameters) {
         final var account = formParameters.get(ACCOUNT_PARAMETER);
         final var password = formParameters.get(PASSWORD_PARAMETER);
+        if (account == null || password == null) {
+            return Optional.empty();
+        }
         final var user = InMemoryUserRepository.findByAccount(account)
                 .filter(found -> found.checkPassword(password));
         user.ifPresent(found -> log.info("login success: {}", found));

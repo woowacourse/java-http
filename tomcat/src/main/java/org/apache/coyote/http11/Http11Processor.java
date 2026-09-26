@@ -35,18 +35,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest request = HttpRequest.from(inputStream);
-            HttpResponse response = HttpResponse.create();
-
-            if (request.shouldIssueSessionCookie()) {
-                HttpCookie cookie = request.getCookie();
-                response.addHeader(SET_COOKIE_HEADER,
-                        cookie.getSessionIdCookieName() + COOKIE_KEY_VALUE_SEPARATOR
-                                + cookie.getSessionId() + COOKIE_PATH_ATTRIBUTE);
-            }
-
-            Controller controller = requestMapping.getController(request);
-            controller.service(request, response);
+            HttpResponse response = createResponse(inputStream);
 
             outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -54,4 +43,39 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private HttpResponse createResponse(InputStream inputStream) {
+        HttpRequest request;
+        try {
+            request = HttpRequest.from(inputStream);
+        } catch (Exception e) {
+            log.warn("요청 파싱 실패", e);
+            return errorResponse(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            HttpResponse response = HttpResponse.create();
+            if (request.shouldIssueSessionCookie()) {
+                HttpCookie cookie = request.getCookie();
+                response.addHeader(SET_COOKIE_HEADER,
+                        cookie.getSessionIdCookieName() + COOKIE_KEY_VALUE_SEPARATOR
+                                + cookie.getSessionId() + COOKIE_PATH_ATTRIBUTE);
+            }
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
+            return response;
+        } catch (Exception e) {
+            log.error("요청 처리 실패", e);
+            return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private HttpResponse errorResponse(HttpStatus status) {
+        HttpResponse response = HttpResponse.create();
+        response.setStatus(status);
+        response.setContentType(ContentType.TEXT);
+        response.setBody(status.getMessage());
+        return response;
+    }
+
 }

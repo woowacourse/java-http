@@ -29,4 +29,10 @@ public class StaticResourceController extends AbstractController {
         response.setContentType(ContentType.from(request.getUri().getPath()));
         response.setBody(Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8));
     }
+
+    @Override
+    protected String allowedMethods() {
+        return "GET";
+    }
+
 }

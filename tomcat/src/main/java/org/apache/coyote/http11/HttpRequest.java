@@ -57,7 +57,10 @@ public class HttpRequest {
     private static void readHeaders(InputStream inputStream, Map<String, String> headers) throws IOException {
         while (true) {
             String line = readLine(inputStream);
-            if (line == null || line.isEmpty()) {
+            if (line == null) {
+                throw new IOException("요청 헤더가 끝나기 전에 입력이 종료되었습니다.");
+            }
+            if (line.isEmpty()) {
                 break;
             }
             String[] parts = line.split(HEADER_DELIMITER, 2);

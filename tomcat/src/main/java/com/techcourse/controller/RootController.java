@@ -12,4 +12,10 @@ public class RootController extends AbstractController {
         response.setContentType(ContentType.TEXT);
         response.setBody(HELLO_WORLD_BODY);
     }
+
+    @Override
+    protected String allowedMethods() {
+        return "GET";
+    }
+
 }

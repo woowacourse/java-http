@@ -2,9 +2,10 @@ package org.apache.coyote.http11.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestInput;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
@@ -44,18 +45,14 @@ class AbstractControllerTest {
         assertThat(controller.isGetCalled()).isFalse();
     }
 
-    private HttpRequest createRequest(final String requestLine) {
-        final String httpRequest = String.join(
-                "\r\n",
-                requestLine,
-                "",
-                ""
-        );
+    private HttpRequest createRequest(final String httpRequest) {
+        final ByteArrayInputStream inputStream =
+                new ByteArrayInputStream(
+                        httpRequest.getBytes(StandardCharsets.UTF_8)
+                );
 
-        final BufferedReader reader = new BufferedReader(
-                new StringReader(httpRequest)
+        return new HttpRequest(
+                new HttpRequestInput(inputStream)
         );
-
-        return new HttpRequest(reader);
     }
 }

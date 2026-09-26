@@ -3,9 +3,10 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.model.User;
-import java.io.BufferedReader;
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestInput;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
@@ -110,10 +111,13 @@ class LoginControllerTest {
     }
 
     private HttpRequest createRequest(final String httpRequest) {
+        final ByteArrayInputStream inputStream =
+                new ByteArrayInputStream(
+                        httpRequest.getBytes(StandardCharsets.UTF_8)
+                );
+
         return new HttpRequest(
-                new BufferedReader(
-                        new StringReader(httpRequest)
-                )
+                new HttpRequestInput(inputStream)
         );
     }
 }

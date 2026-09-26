@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -15,17 +14,15 @@ public class RequestHeaders {
 
     private final Map<String, List<String>> headers;
 
-    public RequestHeaders(final BufferedReader reader) {
-        this.headers = resolveHeaders(reader);
+    public RequestHeaders(final HttpRequestInput input) {
+        this.headers = resolveHeaders(input);
     }
 
-    private Map<String, List<String>> resolveHeaders(
-            final BufferedReader reader
-    ) {
+    private Map<String, List<String>> resolveHeaders(final HttpRequestInput input) {
         final Map<String, List<String>> headers = new HashMap<>();
 
         try {
-            String line = reader.readLine();
+            String line = input.readLine();
 
             while (line != null && !line.isBlank()) {
                 final String[] header = line.split(":", 2);
@@ -45,7 +42,7 @@ public class RequestHeaders {
                         key -> new ArrayList<>()
                 ).add(value);
 
-                line = reader.readLine();
+                line = input.readLine();
             }
 
             return headers;

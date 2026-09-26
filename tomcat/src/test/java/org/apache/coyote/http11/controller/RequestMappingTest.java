@@ -2,10 +2,11 @@ package org.apache.coyote.http11.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestInput;
 import org.junit.jupiter.api.Test;
 
 class RequestMappingTest {
@@ -50,18 +51,16 @@ class RequestMappingTest {
         assertThat(result).contains(controller);
     }
 
-    private HttpRequest createRequest(final String requestLine) {
-        final String httpRequest = String.join(
-                "\r\n",
-                requestLine,
-                "",
-                ""
-        );
+    private HttpRequest createRequest(
+            final String httpRequest
+    ) {
+        final ByteArrayInputStream inputStream =
+                new ByteArrayInputStream(
+                        httpRequest.getBytes(StandardCharsets.UTF_8)
+                );
 
         return new HttpRequest(
-                new BufferedReader(
-                        new StringReader(httpRequest)
-                )
+                new HttpRequestInput(inputStream)
         );
     }
 }

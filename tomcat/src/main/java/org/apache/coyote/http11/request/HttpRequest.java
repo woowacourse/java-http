@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -19,10 +19,10 @@ public class HttpRequest {
     private Session session;
     private boolean newSession;
 
-    public HttpRequest(final BufferedReader reader) {
-        requestLine = resolveRequestLine(reader);
-        headers = new RequestHeaders(reader);
-        body = resolveBody(reader);
+    public HttpRequest(final HttpRequestInput input) {
+        requestLine = resolveRequestLine(input);
+        headers = new RequestHeaders(input);
+        body = resolveBody(input);
     }
 
     public String getMethod() {
@@ -97,9 +97,9 @@ public class HttpRequest {
         return newSession;
     }
 
-    private RequestLine resolveRequestLine(final BufferedReader reader) {
+    private RequestLine resolveRequestLine(final HttpRequestInput input) {
         try {
-            final String line = reader.readLine();
+            final String line = input.readLine();
 
             if (line == null || line.isBlank()) {
                 throw new IllegalArgumentException("Request Line이 존재하지 않습니다.");
@@ -111,33 +111,22 @@ public class HttpRequest {
         }
     }
 
-    private RequestBody resolveBody(final BufferedReader reader) {
+    private RequestBody resolveBody(final HttpRequestInput input) {
         final int contentLength = headers.getContentLength();
 
         if (contentLength == 0) {
             return new RequestBody("");
         }
 
-        final char[] buffer = new char[contentLength];
-
         try {
-            int offset = 0;
+            final byte[] bodyBytes = input.readBytes(contentLength);
 
-            while (offset < contentLength) {
-                final int read = reader.read(
-                        buffer,
-                        offset,
-                        contentLength - offset
-                );
-
-                if (read == -1) {
-                    throw new IllegalArgumentException("Content-Length보다 Body가 짧습니다.");
-                }
-
-                offset += read;
-            }
-
-            return new RequestBody(new String(buffer));
+            return new RequestBody(
+                    new String(
+                            bodyBytes,
+                            StandardCharsets.UTF_8
+                    )
+            );
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -100,7 +100,12 @@ public class Connector implements Runnable {
     }
 
     private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+        final var MIN_ACCEPT_COUNT = 1;
+
+        if (acceptCount < MIN_ACCEPT_COUNT) {
+            return DEFAULT_ACCEPT_COUNT;
+        }
+        return acceptCount;
     }
 
 }

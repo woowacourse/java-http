@@ -1,4 +1,4 @@
-package com.techcourse.view;
+package org.mvc.view;
 
 import java.util.Locale;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.techcourse.view;
+package org.mvc.view;
 
 import java.io.IOException;
 import java.io.InputStream;

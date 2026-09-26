@@ -1,8 +1,8 @@
-package com.techcourse.controller;
+package org.mvc.controller;
 
-import com.techcourse.view.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.mvc.view.ViewResolver;
 
 public abstract class AbstractController implements Controller {
 

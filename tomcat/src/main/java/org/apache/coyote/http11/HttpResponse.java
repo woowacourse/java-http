@@ -7,10 +7,14 @@ import java.util.Map;
 public final class HttpResponse {
 
     private final String protocol;
-    private final int statusCode;
-    private final String statusMessage;
+    private int statusCode;
+    private String statusMessage;
     private final Map<String, String> headers = new LinkedHashMap<>();
     private byte[] body = new byte[0];
+
+    public HttpResponse() {
+        this("HTTP/1.1", 200, "OK");
+    }
 
     public HttpResponse(final int statusCode) {
         this("HTTP/1.1", statusCode, defaultStatusMessage(statusCode));
@@ -28,6 +32,16 @@ public final class HttpResponse {
 
     public void setHeader(final String name, final String value) {
         headers.put(name, value);
+    }
+
+    public void setStatus(final int statusCode) {
+        this.statusCode = statusCode;
+        this.statusMessage = defaultStatusMessage(statusCode);
+    }
+
+    public void setStatus(final int statusCode, final String statusMessage) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
     }
 
     public void setBody(final String body) {

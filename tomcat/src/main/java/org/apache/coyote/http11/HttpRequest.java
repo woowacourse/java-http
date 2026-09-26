@@ -9,6 +9,9 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
+/**
+ * 입력 스트림에서 HTTP 요청 전체(요청 라인, 헤더, 본문)를 파싱하고, 요청에 딸린 세션 조회를 제공함.
+ */
 public class HttpRequest {
 
     private static final String CONTENT_LENGTH = "Content-Length";

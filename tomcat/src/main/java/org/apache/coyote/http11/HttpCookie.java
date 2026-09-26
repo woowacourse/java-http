@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Cookie 헤더 문자열을 파싱해 이름으로 쿠키 값을 조회할 수 있게 함.
+ */
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";

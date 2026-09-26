@@ -9,6 +9,9 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.RequestParameters;
 
+/**
+ * /register 요청을 처리함. 회원가입 페이지를 응답하고, 전달받은 폼 데이터로 회원을 저장함.
+ */
 public class RegisterController extends AbstractController {
 
     private static final String REGISTER_PAGE = "/register.html";

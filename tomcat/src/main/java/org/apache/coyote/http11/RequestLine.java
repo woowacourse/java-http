@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+/**
+ * 요청의 첫 줄을 파싱해 메서드, 경로, 쿼리 파라미터, HTTP 버전으로 나눠 보관함.
+ */
 public class RequestLine {
 
     private final HttpMethod method;

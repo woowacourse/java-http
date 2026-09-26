@@ -7,6 +7,9 @@ import java.util.Map;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.HttpRequest;
 
+/**
+ * 요청 경로에 매핑된 Controller를 찾아주고, 없으면 기본 컨트롤러를 반환함.
+ */
 public class RequestMapping {
 
     private static final Map<String, Controller> CONTROLLERS = Map.of(

@@ -6,6 +6,9 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.ResourceLoader;
 
+/**
+ * 별도로 매핑된 컨트롤러가 없는 요청을 받아, 경로에 해당하는 정적 리소스를 응답함.
+ */
 public class StaticResourceController extends AbstractController {
 
     private static final String DEFAULT_REQUEST = "/";

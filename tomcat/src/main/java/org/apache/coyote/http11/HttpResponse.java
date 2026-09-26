@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * 응답의 상태, 헤더, 본문을 담아두고 최종 HTTP 응답 메시지 문자열로 조립함.
+ */
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";

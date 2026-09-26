@@ -3,6 +3,9 @@ package org.apache.catalina;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 생성된 Session들을 식별자로 저장·조회·삭제하는 싱글턴 저장소
+ */
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();

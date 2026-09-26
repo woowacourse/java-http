@@ -5,6 +5,9 @@ import java.util.Optional;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
+/**
+ * 컨트롤러의 공통 동작을 담음. HTTP 메서드에 따라 doGet/doPost로 분기하고, 404 응답 생성을 지원함.
+ */
 public abstract class AbstractController implements Controller {
     private static final String NOT_FOUND_PAGE = "/404.html";
 

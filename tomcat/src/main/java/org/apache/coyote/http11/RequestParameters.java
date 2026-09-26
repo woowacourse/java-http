@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * key=value&... 형식의 문자열을 파싱. 쿼리 스트링과 폼 데이터가 공통으로 사용함.
+ */
 public class RequestParameters {
 
     private final Map<String, String> values;

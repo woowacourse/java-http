@@ -8,6 +8,9 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 클래스패스의 static 디렉터리에서 정적 리소스를 읽어오고, 확장자로 Content-Type을 판별함.
+ */
 public class ResourceLoader {
     private static final String STATIC_ROOT = "static";
     private static final String DEFAULT_CONTENT_TYPE = "text/html";

@@ -12,6 +12,9 @@ import org.apache.coyote.http11.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * /login 요청을 처리함. 로그인 페이지를 응답하고, 인증에 성공하면 세션에 사용자를 저장함.
+ */
 public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 

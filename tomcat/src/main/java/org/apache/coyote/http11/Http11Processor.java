@@ -10,6 +10,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest request = HttpRequest.from(inputStream);
+            final HttpRequest request = HttpRequestParser.parse(inputStream);
             attachExistingSession(request);
 
             final HttpResponse response = handleRequest(request);
@@ -46,36 +50,6 @@ public class Http11Processor implements Runnable, Processor {
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private void attachExistingSession(HttpRequest request) {
-        request.getSessionId()
-                .map(sessionManager::findSession)
-                .ifPresent(request::setSession);
-    }
-
-    private HttpSession getOrCreateSession(HttpRequest request) {
-        HttpSession session = request.getSession();
-        if (session != null) {
-            return session;
-        }
-
-        SimpleSession newSession = SimpleSession.create();
-        sessionManager.add(newSession);
-        request.setSession(newSession);
-        return newSession;
-    }
-
-    private void applySessionCookie(HttpRequest request, HttpResponse response) {
-        HttpSession session = request.getSession();
-        if (session == null || !session.isNew()) {
-            return;
-        }
-
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
-        if (session instanceof SimpleSession simpleSession) {
-            simpleSession.markEstablished();
         }
     }
 
@@ -89,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.isMatched(HttpMethod.GET, "/register")) {
-            return createStaticResourceResponse("/register.html");
+            return createStaticResourceResponse(request, "/register.html");
         }
 
         if (request.isMatched(HttpMethod.POST, "/register")) {
@@ -97,22 +71,22 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.isMatched(HttpMethod.GET, "/")) {
-            return createRootResponse();
+            return createRootResponse(request);
         }
 
         if (request.isGet() && isStaticResource(request.getPath())) {
-            return createStaticResourceResponse(request.getPath());
+            return createStaticResourceResponse(request, request.getPath());
         }
 
-        return createNotFoundResponse();
+        return createNotFoundResponse(request);
     }
 
     private HttpResponse handleLoginPage(HttpRequest request) throws IOException {
         if (isLoggedIn(request)) {
-            return HttpResponse.redirect("/index.html");
+            return HttpResponse.redirect(request.getVersion(), "/index.html");
         }
 
-        return createStaticResourceResponse("/login.html");
+        return createStaticResourceResponse(request, "/login.html");
     }
 
     private boolean isLoggedIn(HttpRequest request) {
@@ -127,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> authenticatedUser = authenticate(account, password);
 
         if (authenticatedUser.isEmpty()) {
-            return HttpResponse.redirect("/401.html");
+            return HttpResponse.redirect(request.getVersion(), "/401.html");
         }
 
         User user = authenticatedUser.get();
@@ -136,12 +110,24 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info(user.toString());
 
-        return HttpResponse.redirect("/index.html");
+        return HttpResponse.redirect(request.getVersion(), "/index.html");
     }
 
     private Optional<User> authenticate(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
+    }
+
+    private HttpSession getOrCreateSession(HttpRequest request) {
+        HttpSession session = request.getSession();
+        if (session != null) {
+            return session;
+        }
+
+        SimpleSession newSession = SimpleSession.create();
+        sessionManager.add(newSession);
+        request.setSession(newSession);
+        return newSession;
     }
 
     private HttpResponse handleRegister(HttpRequest request) {
@@ -151,7 +137,7 @@ public class Http11Processor implements Runnable, Processor {
 
         saveUser(account, email, password);
 
-        return HttpResponse.redirect("/index.html");
+        return HttpResponse.redirect(request.getVersion(), "/index.html");
     }
 
     private void saveUser(String account, String email, String password) {
@@ -164,23 +150,29 @@ public class Http11Processor implements Runnable, Processor {
         log.info("회원가입 완료: {}", account);
     }
 
-    private HttpResponse createStaticResourceResponse(String path) throws IOException {
+    private HttpResponse createRootResponse(HttpRequest request) {
+        byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
+        return HttpResponse.ok(request.getVersion(), "text/html;charset=utf-8", body);
+    }
+
+    private HttpResponse createStaticResourceResponse(HttpRequest request, String path) throws IOException {
         String resourcePath = "static" + path;
 
         byte[] body = readResourceBytes(resourcePath);
         String contentType = resolveContentType(path);
 
-        return HttpResponse.ok(contentType, body);
+        return HttpResponse.ok(request.getVersion(), contentType, body);
     }
 
-    private HttpResponse createRootResponse() {
-        byte[] body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-        return HttpResponse.ok("text/html;charset=utf-8", body);
-    }
-
-    private HttpResponse createNotFoundResponse() throws IOException {
+    private HttpResponse createNotFoundResponse(HttpRequest request) throws IOException {
         byte[] body = readResourceBytes("static/404.html");
-        return HttpResponse.notFound(body);
+        return HttpResponse.notFound(request.getVersion(), body);
+    }
+
+    private boolean isStaticResource(String path) {
+        return path.endsWith(".html")
+                || path.endsWith(".css")
+                || path.endsWith(".js");
     }
 
     private byte[] readResourceBytes(String path) throws IOException {
@@ -208,17 +200,29 @@ public class Http11Processor implements Runnable, Processor {
         return "application/octet-stream";
     }
 
-    private boolean isStaticResource(String path) {
-        return path.endsWith(".html")
-                || path.endsWith(".css")
-                || path.endsWith(".js");
+    private void attachExistingSession(HttpRequest request) {
+        request.getSessionId()
+                .map(sessionManager::findSession)
+                .ifPresent(request::setSession);
+    }
+
+    private void applySessionCookie(HttpRequest request, HttpResponse response) {
+        HttpSession session = request.getSession();
+        if (session == null || !session.isNew()) {
+            return;
+        }
+
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/");
+        if (session instanceof SimpleSession simpleSession) {
+            simpleSession.markEstablished();
+        }
     }
 
     private void writeResponse(
             OutputStream outputStream,
             HttpResponse response
     ) throws IOException {
-        outputStream.write(response.toString().getBytes(StandardCharsets.UTF_8));
+        response.writeTo(outputStream);
         outputStream.flush();
     }
 }

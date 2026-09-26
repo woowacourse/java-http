@@ -70,12 +70,6 @@ public class SimpleSession implements HttpSession {
         return invalidated;
     }
 
-    private void validate() {
-        if (invalidated) {
-            throw new IllegalStateException("이미 무효화된 세션입니다.");
-        }
-    }
-
     @Override
     public long getCreationTime() {
         validate();
@@ -185,5 +179,11 @@ public class SimpleSession implements HttpSession {
     public boolean isNew() {
         validate();
         return newSession;
+    }
+
+    private void validate() {
+        if (invalidated) {
+            throw new IllegalStateException("이미 무효화된 세션입니다.");
+        }
     }
 }

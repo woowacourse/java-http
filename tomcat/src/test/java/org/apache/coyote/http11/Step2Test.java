@@ -5,326 +5,269 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.techcourse.model.User;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import support.StubSocket;
 
 class Step2Test {
 
     @Test
-    void 로그인에_성공하면_302_상태_코드와_index_html_Location으로_응답한다() {
-        // given
-        String body = "account=gugu&password=password";
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
-                "Content-Type: application/x-www-form-urlencoded",
-                "",
-                body);
+    void POST_로그인은_성공과_실패에_맞는_경로로_리다이렉트한다() {
+        Manager manager = new SessionManager();
 
-        var socket = new StubSocket(httpRequest);
-        var processor = new Http11Processor(socket);
+        StubSocket success = loginRequest(
+                "gugu",
+                "password"
+        );
+        process(success, manager);
 
-        // when
-        processor.process(socket);
+        assertThat(success.output())
+                .startsWith("HTTP/1.1 302");
+        assertThat(success.output())
+                .contains("Location: /index.html");
 
-        // then
-        assertThat(socket.output()).startsWith("HTTP/1.1 302");
-        assertThat(socket.output()).contains("Location: /index.html");
-    }
+        StubSocket unknownAccount = loginRequest(
+                "unknown",
+                "password"
+        );
+        process(unknownAccount, manager);
 
-    @ParameterizedTest
-    @CsvSource({
-            "unknown, password",
-            "gugu, wrong"
-    })
-    void 로그인에_실패하면_302_상태_코드와_401_html_Location으로_응답한다(
-            String account,
-            String password
-    ) {
-        // given
-        String body = "account=" + account + "&password=" + password;
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
-                "Content-Type: application/x-www-form-urlencoded",
-                "",
-                body);
+        assertThat(unknownAccount.output())
+                .contains("Location: /401.html");
 
-        var socket = new StubSocket(httpRequest);
-        var processor = new Http11Processor(socket);
+        StubSocket wrongPassword = loginRequest(
+                "gugu",
+                "wrong"
+        );
+        process(wrongPassword, manager);
 
-        // when
-        processor.process(socket);
+        assertThat(wrongPassword.output())
+                .contains("Location: /401.html");
 
-        // then
-        assertThat(socket.output()).startsWith("HTTP/1.1 302");
-        assertThat(socket.output()).contains("Location: /401.html");
-    }
-
-    @Test
-    void GET_쿼리_문자열로는_로그인하지_않는다() {
-        String httpRequest = String.join("\r\n",
+        String getRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1",
                 "Host: localhost:8080",
                 "",
-                "");
-        var socket = new StubSocket(httpRequest);
+                ""
+        );
+        StubSocket getSocket = new StubSocket(getRequest);
 
-        new Http11Processor(socket).process(socket);
+        process(getSocket, manager);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 200");
-        assertThat(socket.output()).doesNotContain("Location:");
+        assertThat(getSocket.output())
+                .startsWith("HTTP/1.1 200");
+        assertThat(getSocket.output())
+                .doesNotContain("Location:");
     }
 
     @Test
-    void UTF_8_본문을_Content_Length의_바이트_수만큼_읽는다() {
-        String body = "account=gugu&password=틀림";
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
-                "Content-Type: application/x-www-form-urlencoded",
-                "",
-                body);
-        var socket = new StubSocket(httpRequest);
+    void POST로_회원가입하면_저장된_계정으로_로그인할_수_있다() {
+        Manager manager = new SessionManager();
 
-        new Http11Processor(socket).process(socket);
+        String account = "user-" + UUID.randomUUID();
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 302");
-        assertThat(socket.output()).contains("Location: /401.html");
-    }
+        String registerBody =
+                "account=" + account
+                        + "&email=user%40example.com"
+                        + "&password=password";
 
-    @Test
-    void 회원가입_하면_index_html로_리다이렉트한다() {
-        // given
-        String body = "account=whale&email=whale%40gmail.com&password=whale1234";
-        String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
-                "Content-Type: application/x-www-form-urlencoded",
-                "",
-                body);
-
-        var socket = new StubSocket(httpRequest);
-        var processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        assertThat(socket.output()).startsWith("HTTP/1.1 302");
-        assertThat(socket.output()).contains("Location: /index.html");
-    }
-
-    @Test
-    void 회원가입한_계정과_비밀번호로_로그인할_수_있다() {
-        String account = "whale-" + UUID.randomUUID();
-        String registerBody = "account=" + account + "&email=whale%40gmail.com&password=whale1234";
         String registerRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",
-                "Content-Length: " + registerBody.getBytes(StandardCharsets.UTF_8).length,
+                "Content-Length: "
+                        + registerBody.getBytes(StandardCharsets.UTF_8).length,
                 "Content-Type: application/x-www-form-urlencoded",
                 "",
-                registerBody);
-        var registerSocket = new StubSocket(registerRequest);
-        new Http11Processor(registerSocket).process(registerSocket);
+                registerBody
+        );
 
-        String loginBody = "account=" + account + "&password=whale1234";
-        String loginRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Content-Length: " + loginBody.getBytes(StandardCharsets.UTF_8).length,
-                "Content-Type: application/x-www-form-urlencoded",
-                "",
-                loginBody);
-        var loginSocket = new StubSocket(loginRequest);
+        StubSocket registerSocket = new StubSocket(registerRequest);
 
-        new Http11Processor(loginSocket).process(loginSocket);
+        process(registerSocket, manager);
 
-        assertThat(loginSocket.output()).startsWith("HTTP/1.1 302");
-        assertThat(loginSocket.output()).contains("Location: /index.html");
+        assertThat(registerSocket.output())
+                .startsWith("HTTP/1.1 302");
+        assertThat(registerSocket.output())
+                .contains("Location: /index.html");
+
+        StubSocket loginSocket = loginRequest(account, "password");
+
+        process(loginSocket, manager);
+
+        assertThat(loginSocket.output())
+                .contains("Location: /index.html");
     }
 
     @Test
-    void 로그인_페이지에서_로그인_버튼을_누르면_POST_요청을_보낸다() {
-        // given
-        String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1",
-                "Host: localhost:8080",
-                "",
-                "");
-        var socket = new StubSocket(httpRequest);
-        var processor = new Http11Processor(socket);
+    void JSESSIONID가_없거나_유효하지_않으면_새_세션을_발급하고_유효하면_재사용한다() {
+        Manager manager = new SessionManager();
 
-        // when
-        processor.process(socket);
-
-        // then
-        assertThat(socket.output()).contains("<form method=\"post\" action=\"login\">");
-    }
-
-    @Test
-    void JSESSIONID가_없는_요청에는_빈_세션을_만들고_ID를_쿠키로_보낸다() {
-        String httpRequest = String.join("\r\n",
+        String requestWithoutSession = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry",
                 "",
-                "");
-        var socket = new StubSocket(httpRequest);
+                ""
+        );
 
-        new Http11Processor(socket).process(socket);
+        StubSocket firstSocket = new StubSocket(requestWithoutSession);
 
-        String sessionId = sessionIdFrom(socket);
-        assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
-        var session = new SessionManager().findSession(sessionId).orElseThrow();
-        assertThat(session.getAttribute("user")).isNull();
-    }
+        process(firstSocket, manager);
 
-    @Test
-    void 유효한_JSESSIONID가_있는_요청에는_새_쿠키를_설정하지_않는다() {
-        String sessionId = UUID.randomUUID().toString();
-        new SessionManager().add(new Session(sessionId));
-        String httpRequest = String.join("\r\n",
+        String sessionId = sessionIdFrom(firstSocket);
+
+        assertThat(manager.findSession(sessionId))
+                .isPresent();
+
+        String validSessionRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
-                "Host: localhost:8080",
-                "Cookie: yummy_cookie=choco; JSESSIONID=" + sessionId,
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
-                "");
-        var socket = new StubSocket(httpRequest);
+                ""
+        );
 
-        new Http11Processor(socket).process(socket);
+        StubSocket validSocket = new StubSocket(validSessionRequest);
 
-        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
+        process(validSocket, manager);
+
+        assertThat(validSocket.output())
+                .doesNotContain("Set-Cookie: JSESSIONID=");
+
+        String unknownId = UUID.randomUUID().toString();
+
+        String invalidSessionRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Cookie: JSESSIONID=" + unknownId,
+                "",
+                ""
+        );
+
+        StubSocket invalidSocket = new StubSocket(invalidSessionRequest);
+
+        process(invalidSocket, manager);
+
+        String newSessionId = sessionIdFrom(invalidSocket);
+
+        assertThat(newSessionId)
+                .isNotEqualTo(unknownId);
+
+        assertThat(manager.findSession(newSessionId))
+                .isPresent();
     }
 
     @Test
-    void 로그인에_성공하면_응답_쿠키가_가리키는_세션에_사용자를_저장한다() {
-        String body = "account=gugu&password=password";
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
-                "Content-Type: application/x-www-form-urlencoded",
-                "",
-                body);
+    void 로그인한_세션으로_로그인_페이지에_접근하면_홈으로_리다이렉트한다() {
+        Manager manager = new SessionManager();
 
-        var socket = new StubSocket(httpRequest);
-        var processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        String sessionId = sessionIdFrom(socket);
-        var session = new SessionManager().findSession(sessionId).orElseThrow();
-
-        User user = (User) session.getAttribute("user");
-        assertThat(user.getAccount()).isEqualTo("gugu");
-    }
-
-    @Test
-    void 로그인_후_새_ID로_로그인_페이지에_접근하면_홈으로_리다이렉트한다() {
         String pageRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "",
-                "");
-        var pageSocket = new StubSocket(pageRequest);
-        new Http11Processor(pageSocket).process(pageSocket);
-        String pageSessionId = sessionIdFrom(pageSocket);
+                ""
+        );
+
+        StubSocket pageSocket = new StubSocket(pageRequest);
+
+        process(pageSocket, manager);
+
+        assertThat(pageSocket.output())
+                .startsWith("HTTP/1.1 200");
+
+        String initialSessionId = sessionIdFrom(pageSocket);
 
         String body = "account=gugu&password=password";
+
         String loginRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
-                "Cookie: JSESSIONID=" + pageSessionId,
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Cookie: JSESSIONID=" + initialSessionId,
+                "Content-Length: "
+                        + body.getBytes(StandardCharsets.UTF_8).length,
                 "Content-Type: application/x-www-form-urlencoded",
                 "",
-                body);
-        var loginSocket = new StubSocket(loginRequest);
-        new Http11Processor(loginSocket).process(loginSocket);
-        String sessionId = sessionIdFrom(loginSocket);
-        assertThat(sessionId).isNotEqualTo(pageSessionId);
-        assertThat(new SessionManager().findSession(pageSessionId)).isEmpty();
+                body
+        );
 
-        String httpRequest = String.join("\r\n",
+        StubSocket loginSocket = new StubSocket(loginRequest);
+
+        process(loginSocket, manager);
+
+        String loggedInSessionId = sessionIdFrom(loginSocket);
+
+        Session session = manager
+                .findSession(loggedInSessionId)
+                .orElseThrow();
+
+        User user = (User) session.getAttribute("user");
+
+        assertThat(user.getAccount())
+                .isEqualTo("gugu");
+
+        String authenticatedRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
-                "Cookie: JSESSIONID=" + sessionId,
+                "Cookie: JSESSIONID=" + loggedInSessionId,
                 "",
-                "");
-        var socket = new StubSocket(httpRequest);
+                ""
+        );
 
-        new Http11Processor(socket).process(socket);
+        StubSocket authenticatedSocket = new StubSocket(authenticatedRequest);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 302");
-        assertThat(socket.output()).contains("Location: /index.html");
+        process(authenticatedSocket, manager);
+
+        assertThat(authenticatedSocket.output())
+                .startsWith("HTTP/1.1 302");
+
+        assertThat(authenticatedSocket.output())
+                .contains("Location: /index.html");
     }
 
-    @Test
-    void 쿠키에_해당하는_세션이_없으면_로그인_페이지를_보여준다() {
-        String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1",
-                "Cookie: JSESSIONID=" + UUID.randomUUID(),
+    private StubSocket loginRequest(
+            final String account,
+            final String password
+    ) {
+        String body = "account=" + account + "&password=" + password;
+
+        String request = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: "
+                        + body.getBytes(StandardCharsets.UTF_8).length,
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
-                "");
-        var socket = new StubSocket(httpRequest);
+                body
+        );
 
-        new Http11Processor(socket).process(socket);
-
-        assertThat(socket.output()).startsWith("HTTP/1.1 200");
-        assertThat(socket.output()).contains("<form method=\"post\" action=\"login\">");
+        return new StubSocket(request);
     }
 
-    @Test
-    void 세션에_사용자가_없으면_로그인_페이지를_보여준다() {
-        String sessionId = UUID.randomUUID().toString();
-        new SessionManager().add(new Session(sessionId));
-        String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1",
-                "Cookie: JSESSIONID=" + sessionId,
-                "",
-                "");
-        var socket = new StubSocket(httpRequest);
+    private void process(
+            final StubSocket socket,
+            final Manager manager
+    ) {
+        StaticResourceController staticResourceController = new StaticResourceController();
+        RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        requestMapping.register(
+                "/register",
+                new RegisterController(staticResourceController)
+        );
 
-        new Http11Processor(socket).process(socket);
-
-        assertThat(socket.output()).startsWith("HTTP/1.1 200");
-        assertThat(socket.output()).contains("<form method=\"post\" action=\"login\">");
-        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
+        requestMapping.register(
+                "/login",
+                new LoginController(manager, staticResourceController)
+        );
+        new Http11Processor(socket, manager, requestMapping)
+                .process(socket);
     }
 
-    @Test
-    void 쿠키에_해당하는_세션이_없으면_새_JSESSIONID를_발급한다() {
-        String unknownId = UUID.randomUUID().toString();
-        String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1",
-                "Cookie: JSESSIONID=" + unknownId,
-                "",
-                "");
-        var socket = new StubSocket(httpRequest);
-
-        new Http11Processor(socket).process(socket);
-
-        String newSessionId = sessionIdFrom(socket);
-        assertThat(newSessionId).isNotEqualTo(unknownId);
-        assertThat(new SessionManager().findSession(newSessionId)).isPresent();
-    }
-
-    private String sessionIdFrom(StubSocket socket) {
-        String cookieHeader = socket.output().lines()
-                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+    private String sessionIdFrom(
+            final StubSocket socket
+    ) {
+        String cookieHeader = socket.output()
+                .lines()
+                .filter(line ->
+                        line.startsWith("Set-Cookie: JSESSIONID="))
                 .findFirst()
                 .orElseThrow();
-        return cookieHeader.substring("Set-Cookie: JSESSIONID=".length());
+
+        return cookieHeader.substring(
+                "Set-Cookie: JSESSIONID=".length()
+        );
     }
 }

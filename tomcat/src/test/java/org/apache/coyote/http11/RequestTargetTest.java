@@ -7,54 +7,30 @@ import org.junit.jupiter.api.Test;
 class RequestTargetTest {
 
     @Test
-    void 유효한_요청_대상을_요청_경로와_Query_Parameter로_해석한다() {
-        // when
-        final var requestTarget = new RequestTarget("/login?account=gugu&password=password");
+    void 요청_대상을_경로와_Query_Parameter로_해석한다() {
+        RequestTarget target = new RequestTarget("/login?account=gugu&password=password");
 
-        // then
-        assertThat(requestTarget.getPath()).isEqualTo("/login");
-        assertThat(requestTarget.findQueryParameter("account")).contains("gugu");
-        assertThat(requestTarget.findQueryParameter("password")).contains("password");
+        assertThat(target.path()).isEqualTo("/login");
+        assertThat(target.hasPath("/login")).isTrue();
+        assertThat(target.findQueryParameter("account")).contains("gugu");
+        assertThat(target.findQueryParameter("password")).contains("password");
+        assertThat(target.findQueryParameter("unknown")).isEmpty();
     }
 
     @Test
-    void 요청_경로가_주어진_경로와_일치하는지_판단한다() {
-        // given
-        final var requestTarget = new RequestTarget("/login");
+    void Query_Parameter가_없는_요청_대상을_해석한다() {
+        RequestTarget target = new RequestTarget("/login");
 
-        // when & then
-        assertThat(requestTarget.hasPath("/login")).isTrue();
-        assertThat(requestTarget.hasPath("/index.html")).isFalse();
-    }
-
-    @Test
-    void Query_Parameter가_존재하는지_판단한다() {
-        // given
-        final var requestTarget = new RequestTarget("/login?account=gugu");
-
-        // when & then
-        assertThat(requestTarget.hasQueryParameters()).isTrue();
-    }
-
-    @Test
-    void 이름으로_Query_Parameter를_찾는다() {
-        // given
-        final var requestTarget = new RequestTarget("/login?account=gugu");
-
-        // when & then
-        assertThat(requestTarget.findQueryParameter("account")).contains("gugu");
-        assertThat(requestTarget.findQueryParameter("password")).isEmpty();
+        assertThat(target.path()).isEqualTo("/login");
+        assertThat(target.findQueryParameter("account")).isEmpty();
     }
 
     @Test
     void 요청_경로의_확장자를_반환한다() {
-        // given
-        final var requestTarget = new RequestTarget("/css/styles.css");
+        assertThat(new RequestTarget("/css/styles.css").extension())
+                .isEqualTo("css");
 
-        // when
-        final String extension = requestTarget.getExtension();
-
-        // then
-        assertThat(extension).isEqualTo("css");
+        assertThat(new RequestTarget("/login").extension())
+                .isEmpty();
     }
 }

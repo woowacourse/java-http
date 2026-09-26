@@ -17,7 +17,7 @@ public class Request {
     }
 
     public HttpMethod getMethod() {
-        return requestHeader.method();
+        return requestHeader.getMethod();
     }
 
     public String getPath() {
@@ -31,16 +31,8 @@ public class Request {
         return requestParams.getParams(key);
     }
 
-    public String getContentTypeName() {
-        return requestHeader.getContentTypeName();
-    }
-
-    public boolean hasJSessionId() {
-        return requestHeader.hasJSessionId();
-    }
-
     public HttpCookie getCookie() {
-        return requestHeader.cookie();
+        return requestHeader.getHttpCookie();
     }
 
     public String getJSessionId() {
@@ -49,15 +41,15 @@ public class Request {
 
     @Override
     public String toString() {
-        String method = requestHeader.getMethodName();
+        HttpMethod method = requestHeader.getMethod();
         String path = requestHeader.getPath();
         String jSessionId = requestHeader.getJSessionId();
-        String contentType = requestHeader.getContentTypeName();
+        ContentType contentType = requestHeader.getContentType();
         return "Request{" +
-                "method='" + method + '\'' +
+                "method='" + method.getName() + '\'' +
                 ", path='" + path + '\'' +
                 ", requestParams=" + requestParams +
-                ", contentType=" + contentType +
+                ", contentType=" + contentType.getName() +
                 ", jSessionId='" + jSessionId + '\'' +
                 '}';
     }
@@ -70,5 +62,9 @@ public class Request {
             manager.add(session);
         }
         return session;
+    }
+
+    public ContentType getContentType() {
+        return requestHeader.getContentType();
     }
 }

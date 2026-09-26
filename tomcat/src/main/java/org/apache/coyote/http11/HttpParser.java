@@ -23,7 +23,7 @@ public class HttpParser {
     }
 
     private static RequestBody parseBody(BufferedReader reader, RequestHeader requestHeader) throws IOException {
-        int contentLength = requestHeader.contentLength();
+        int contentLength = requestHeader.getContentLength();
         if (contentLength <= 0) {
             return new RequestBody("");
         }
@@ -36,7 +36,7 @@ public class HttpParser {
     private static RequestParams parseParams(RequestHeader requestHeader, RequestBody requestBody)
             throws UnsupportedEncodingException {
         String queryString = requestHeader.getQueryString();
-        if (requestHeader.method() == HttpMethod.POST) {
+        if (requestHeader.getMethod() == HttpMethod.POST) {
             queryString = requestBody.rawBody();
         }
         return RequestParams.of(queryString);

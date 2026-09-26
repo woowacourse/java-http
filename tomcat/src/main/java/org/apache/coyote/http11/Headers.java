@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,29 @@ public class Headers {
         return new Headers(headers);
     }
 
-    public String getValue(String key) {
-        return headers.getOrDefault(key, "");
+    public HttpCookie getHttpCookie() {
+        String cookieLine = headers.getOrDefault("cookie", "");
+        return HttpCookie.from(cookieLine);
+    }
+
+    public boolean hasJSessionId() {
+        return !getJSessionId().isEmpty();
+    }
+
+    public String getJSessionId() {
+        return getHttpCookie().getJSessionId();
+    }
+
+    public int getContentLength() {
+        String contentLength = headers.getOrDefault("content-length", "0");
+        return Integer.parseInt(contentLength);
+    }
+
+    public ContentType getContentType() {
+        String acceptLine = headers.getOrDefault("accept", "");
+        return Arrays.stream(ContentType.values())
+                .filter(type -> acceptLine.contains(type.getName()))
+                .findFirst()
+                .orElse(ContentType.HTML);
     }
 }

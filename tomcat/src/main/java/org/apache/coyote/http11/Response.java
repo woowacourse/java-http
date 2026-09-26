@@ -11,29 +11,26 @@ public class Response {
     private final Request request;
     private final StatusCode statusCode;
     private final String responseBody;
-    private final HttpCookie cookie;
 
-    public Response(Request request, StatusCode statusCode, String responseBody, HttpCookie cookie) {
+    public Response(Request request, StatusCode statusCode, String responseBody) {
         this.request = request;
         this.statusCode = statusCode;
         this.responseBody = responseBody;
-        this.cookie = cookie;
     }
 
     public static Response empty(Request request) {
-        return new Response(request, StatusCode.OK, "Hello world!", HttpCookie.empty());
+        return new Response(request, StatusCode.OK, "Hello world!");
     }
 
     public static Response from(Request request, StatusCode statusCode, ClassLoader classLoader) throws IOException {
         String path = request.getPath();
-        String contentType = request.getContentTypeName();
+        ContentType contentType = request.getContentType();
         if (!path.contains(".")) {
             path += "." + contentType;
         }
         final URL resource = classLoader.getResource("static" + path);
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        HttpCookie cookie = request.getCookie();
-        return new Response(request, statusCode, responseBody, cookie);
+        return new Response(request, statusCode, responseBody);
     }
 
     public static void redirect(OutputStream outputStream, String redirectUrl) throws IOException {
@@ -55,9 +52,10 @@ public class Response {
     }
 
     public void respond(OutputStream outputStream) throws IOException {
+        ContentType contentType = request.getContentType();
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + statusCode.getStatusCode(),
-                "Content-Type: text/" + request.getContentTypeName() + ";charset=utf-8 ",
+                "Content-Type: text/" + contentType.getName() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

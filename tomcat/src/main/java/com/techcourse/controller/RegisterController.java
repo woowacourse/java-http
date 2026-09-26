@@ -1,12 +1,17 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class RegisterController extends AbstractController {
+
+    private final UserService userService;
+
+    public RegisterController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
@@ -15,12 +20,11 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        User user = new User(
+        userService.register(
                 request.getParameter("account"),
                 request.getParameter("password"),
                 request.getParameter("email")
         );
-        InMemoryUserRepository.save(user);
         response.sendRedirect("/index.html");
     }
 }

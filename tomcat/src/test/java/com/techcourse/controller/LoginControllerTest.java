@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
 
-    private final LoginController controller = new LoginController();
+    private final LoginController controller = new LoginController(new UserService());
 
     @Test
     void 로그인에_성공하면_세션에_유저를_저장하고_index로_리다이렉트한다() throws Exception {

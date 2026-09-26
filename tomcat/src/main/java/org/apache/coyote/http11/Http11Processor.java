@@ -7,7 +7,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.*;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
         Path filePath = getFilePath(uriPath);
 
         if (httpMethod == HttpMethod.GET && isLoggedIn(httpCookie)) {
-            return createRedirectResponse(HttpStatus.FOUND, "/index.html", httpCookie);
+            return new HttpResponse(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html", httpCookie);
         }
 
         final String query = uri.getQuery();
@@ -97,16 +96,16 @@ public class Http11Processor implements Runnable, Processor {
 
         if (loginParameters == null) {
             filePath = getFilePath("/login");
-            return createResponse(HttpStatus.OK, getContentType(filePath), getResponseBody(filePath), null, httpCookie);
+            return new HttpResponse(HttpStatus.OK, filePath, getResponseBody(filePath), null, httpCookie);
         }
 
         final Optional<User> user = authenticate(extractQueryParams(loginParameters));
         if (user.isPresent()) {
             saveUserInSession(httpCookie, user.get());
-            return createRedirectResponse(HttpStatus.FOUND, "/index.html", httpCookie);
+            return new HttpResponse(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html", httpCookie);
         }
 
-        return createRedirectResponse(HttpStatus.FOUND, "/401.html", httpCookie);
+        return new HttpResponse(HttpStatus.FOUND, getFilePath("/401.html"), "", "/401.html", httpCookie);
     }
 
     private boolean isLoggedIn(final HttpCookie httpCookie) throws IOException {
@@ -148,29 +147,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createFileResponse(final String uriPath, final HttpStatus httpStatus) throws IOException {
         final Path filePath = getFilePath(uriPath);
-        final String contentType = getContentType(filePath);
         final String responseBody = getResponseBody(filePath);
-        return createResponse(httpStatus, contentType, responseBody, null, null);
-    }
-
-    private HttpResponse createRedirectResponse(final HttpStatus httpStatus, final String location,
-                                                final HttpCookie httpCookie) {
-        return createResponse(httpStatus, "text/html;charset=utf-8", "", location, httpCookie);
-    }
-
-    private HttpResponse createResponse(final HttpStatus httpStatus, final String contentType,
-                                        final String body, final String location, final HttpCookie httpCookie) {
-        final ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.add("Content-Type", contentType);
-
-        if (location != null) {
-            responseHeaders.add("Location", location);
-        }
-        if (httpCookie != null && httpCookie.contains(JSESSION_ID_KEY)) {
-            responseHeaders.add("Set-Cookie", JSESSION_ID_KEY + "=" + httpCookie.get(JSESSION_ID_KEY));
-        }
-
-        return new HttpResponse(httpStatus, responseHeaders, body);
+        return new HttpResponse(httpStatus, filePath, responseBody, null, null);
     }
 
     private Path getFilePath(final String uriPath) {
@@ -236,20 +214,6 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(filePath);
     }
 
-    private String getContentType(final Path filePath) {
-        final String path = filePath.toString();
-
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-
-        if (path.endsWith(".js")) {
-            return "text/javascript;charset=utf-8";
-        }
-
-        return "text/html;charset=utf-8";
-    }
-
     private Path resolveResourcePath(final String name) {
         final URL url = getClass().getClassLoader().getResource(name);
         if (url == null)
@@ -258,28 +222,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
-        outputStream.write(createResponse(response).getBytes());
-        outputStream.flush();
-    }
-
-    private String createResponse(final HttpResponse response) {
         log.info("response status: {}", response.status());
-        StringBuilder httpResponse = new StringBuilder()
-                .append("HTTP/1.1 ").append(response.status()).append(" ").append("\r\n")
-                .append("Content-Type: ").append(response.headers().get("Content-Type")).append(" ").append("\r\n")
-                .append("Content-Length: ").append(response.body().getBytes().length).append(" ").append("\r\n");
-
-        if (response.headers().contains("Location")) {
-            httpResponse.append("Location: ").append(response.headers().get("Location")).append(" ").append("\r\n");
-        }
-        if (response.headers().contains("Set-Cookie")) {
-            httpResponse.append("Set-Cookie: ")
-                    .append(response.headers().get("Set-Cookie"))
-                    .append(" ").append("\r\n");
-        }
-
-        return httpResponse.append("\r\n")
-                .append(response.body())
-                .toString();
+        outputStream.write(response.toHttpMessage().getBytes());
+        outputStream.flush();
     }
 }

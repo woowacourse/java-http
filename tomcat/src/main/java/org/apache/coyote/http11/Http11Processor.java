@@ -1,20 +1,13 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.enums.HttpMethod;
 import org.apache.coyote.http11.enums.HttpStatus;
-import org.apache.coyote.http11.handler.LoginPageHandler;
-import org.apache.coyote.http11.handler.LoginRequestHandler;
-import org.apache.coyote.http11.handler.RegisterRequestHandler;
-import org.apache.coyote.http11.handler.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,17 +64,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(HttpRequest request) throws Exception{
+        final HttpResponse response = new HttpResponse();
         final Optional<Controller> controller = requestMapping.getController(request);
-        HttpResponse response = new HttpResponse();
 
-        if (controller.isPresent()) {
-            controller.get().service(request, response);
+        if (controller.isEmpty()) {
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return response;
         }
 
+        controller.get().service(request, response);
         return response;
     }
 
-    private byte[] createResponseBody(String responsePath) throws IOException, URISyntaxException {
+    private byte[] createResponseBody(String responsePath) throws IOException{
         String resourcePath = getResourcePath(responsePath);
 
         if (responsePath.equals(DEFAULT_RESOURCE_PATH)) {

@@ -241,7 +241,7 @@ class Step2Test {
             final StubSocket socket,
             final Manager manager
     ) {
-        new Http11Processor(socket, manager)
+        new Http11Processor(socket, manager, new RequestMapping(new StaticResourceController()))
                 .process(socket);
     }
 

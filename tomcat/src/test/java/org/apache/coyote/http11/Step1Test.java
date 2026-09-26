@@ -104,7 +104,7 @@ class Step1Test {
     private void process(final StubSocket socket) {
         Manager manager = new SessionManager();
 
-        new Http11Processor(socket, manager)
+        new Http11Processor(socket, manager, new RequestMapping(new StaticResourceController()))
                 .process(socket);
     }
 }

@@ -210,3 +210,15 @@ HTTP Method에 따라 Controller의 처리 흐름을 분기한다.
 
 - [x] 등록된 요청 경로에 대응하는 Controller를 반환한다.
 - [x] 등록되지 않은 요청 경로에는 기본 Controller를 반환한다.
+
+## StaticResourceController
+
+### 책임
+
+요청된 정적 리소스를 읽어 HTTP 응답을 작성한다.
+
+### 계약
+
+- [x] 루트 경로 요청에 기본 HTML 응답을 작성한다.
+- [x] 요청 경로에 대응하는 정적 리소스를 응답 본문에 작성한다.
+- [x] 리소스 확장자에 맞는 `Content-Type`을 포함한다.

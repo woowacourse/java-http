@@ -3,6 +3,9 @@ package org.apache.catalina.startup;
 import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.Controller;
+import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.http11.StaticResourceController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +17,9 @@ public class Tomcat {
 
     public void start() {
         Manager sessionManager = new SessionManager();
-        var connector = new Connector(sessionManager);
+        Controller staticResourceController = new StaticResourceController();
+        RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        var connector = new Connector(sessionManager, requestMapping);
 
         connector.start();
 

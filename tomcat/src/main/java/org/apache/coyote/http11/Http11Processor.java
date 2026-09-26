@@ -1,15 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Manager;
@@ -19,18 +12,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-    private static final String STATIC_RESOURCE_PREFIX = "static";
-    private static final String ROOT_RESPONSE_BODY = "Hello world!";
     private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_RESOURCE_PATH = "/login.html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
     private final Manager sessionManager;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(Socket connection, Manager sessionManager) {
+    public Http11Processor(
+            Socket connection,
+            Manager sessionManager,
+            RequestMapping requestMapping
+    ) {
         this.connection = connection;
         this.sessionManager = sessionManager;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -60,13 +56,13 @@ public class Http11Processor implements Runnable, Processor {
             }
             outputStream.write(response.toByteArray());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private HttpResponse route(HttpRequest request, Session session)
-            throws IOException, URISyntaxException {
+            throws Exception {
         if (request.matches("POST", LOGIN_PATH)) {
             return login(request, session);
         }
@@ -78,7 +74,13 @@ public class Http11Processor implements Runnable, Processor {
             response.sendRedirect("/index.html");
             return response;
         }
-        return handleResourceRequest(request);
+
+        HttpResponse response = new HttpResponse();
+
+        Controller controller = requestMapping.getController(request);
+        controller.service(request, response);
+
+        return response;
     }
 
     private HttpResponse register(HttpRequest request) {
@@ -118,40 +120,5 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Set-Cookie", "JSESSIONID=" + renewedSession.getId());
         response.sendRedirect("/index.html");
         return response;
-    }
-
-    private HttpResponse handleResourceRequest(HttpRequest request) throws IOException, URISyntaxException {
-        String resourcePath = resolveResourcePath(request.path());
-        byte[] responseBody = ROOT_RESPONSE_BODY.getBytes();
-        if (!resourcePath.equals("/")) {
-            String fileName = STATIC_RESOURCE_PREFIX + resourcePath;
-            URL resource = getClass().getClassLoader().getResource(fileName);
-            if (resource != null) {
-                Path path = Paths.get(resource.toURI());
-                responseBody = Files.readAllBytes(path);
-            }
-        }
-        String contentType = contentTypeOf(request.extension());
-        HttpResponse response = new HttpResponse();
-        response.setStatus(HttpStatus.OK);
-        response.addHeader("Content-Type", contentType);
-        response.setBody(responseBody);
-        return response;
-    }
-
-    private String resolveResourcePath(String requestPath) {
-        if (requestPath.equals(LOGIN_PATH)) {
-            return LOGIN_RESOURCE_PATH;
-        } else if (requestPath.equals("/register")) {
-            return "/register.html";
-        }
-        return requestPath;
-    }
-
-    private String contentTypeOf(String extension) {
-        if (extension.equals("css")) {
-            return "text/css;charset=utf-8 ";
-        }
-        return "text/html;charset=utf-8 ";
     }
 }

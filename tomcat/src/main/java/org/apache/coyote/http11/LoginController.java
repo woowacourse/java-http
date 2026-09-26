@@ -34,18 +34,17 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final String sessionId = request.getCookie(JSESSIONID);
-        final String setCookie = createSetCookieHeader(sessionId);
-        final String location = getLoginRedirectionLocation(request.getBody());
-        String responseCookie = setCookie;
-
-        if (location.equals(LOGIN_SUCCESS)) {
-            final User user = findUser(request.getBody());
-            final Session loginSession = getOrCreateSession(sessionId);
-            loginSession.setAttribute(USER, user);
-            responseCookie = createSessionCookie(sessionId, loginSession);
+        final Optional<User> authenticatedUser = authenticate(request.getBody());
+        if (authenticatedUser.isEmpty()) {
+            setRedirectResponse(response, LOGIN_FAILURE, createSetCookieHeader(sessionId));
+            return;
         }
 
-        setRedirectResponse(response, location, responseCookie);
+        final User user = authenticatedUser.orElseThrow();
+        final Session loginSession = getOrCreateSession(sessionId);
+        loginSession.setAttribute(USER, user);
+        final String responseCookie = createSessionCookie(sessionId, loginSession);
+        setRedirectResponse(response, LOGIN_SUCCESS, responseCookie);
     }
 
     private Session getOrCreateSession(final String sessionId) {
@@ -74,51 +73,18 @@ public class LoginController extends AbstractController {
         return (User) session.getAttribute(USER);
     }
 
-    private String getLoginRedirectionLocation(final String requestBody) {
-        final String[] formParts = requestBody.split("&");
-        if (checkUser(formParts)) {
-            return LOGIN_SUCCESS;
-        }
-        return LOGIN_FAILURE;
-    }
-
-    private boolean checkUser(final String[] requestParts) {
-        if (requestParts.length < 2) {
-            return false;
-        }
-
-        final String[] accountPart = requestParts[0].split("=", 2);
-        final String[] passwordPart = requestParts[1].split("=", 2);
-        if (accountPart.length < 2 || passwordPart.length < 2) {
-            return false;
-        }
-
-        final String account = accountPart[1];
-        final String password = passwordPart[1];
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return false;
-        }
-        if (user.get().checkPassword(password)) {
-            log.info("로그인 성공: {}", user.get());
-            return true;
-        }
-        return false;
-    }
-
-    private User findUser(final String requestBody) {
+    private Optional<User> authenticate(final String requestBody) {
         final Map<String, String> formData = parseFormData(requestBody);
         final String account = formData.get("account");
         final String password = formData.get("password");
         if (account == null || password == null) {
-            return null;
+            return Optional.empty();
         }
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return null;
-        }
-        return user.get();
+        final Optional<User> authenticatedUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+        authenticatedUser.ifPresent(user -> log.info("로그인 성공: {}", user));
+        return authenticatedUser;
     }
 
     private Map<String, String> parseFormData(final String requestBody) {
@@ -126,12 +92,16 @@ public class LoginController extends AbstractController {
         final String[] formFields = requestBody.split("&");
 
         for (String formField : formFields) {
-            final String[] keyValue = formField.split("=", 2);
-            if (keyValue.length < 2) {
-                continue;
-            }
-            formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+            addFormField(formData, formField);
         }
         return formData;
+    }
+
+    private void addFormField(final Map<String, String> formData, final String formField) {
+        final String[] keyValue = formField.split("=", 2);
+        if (keyValue.length < 2) {
+            return;
+        }
+        formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
     }
 }

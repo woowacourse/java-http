@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -29,7 +30,7 @@ public class HttpRequest {
         String uri = requestLineParts[1];
         this.path = extractPath(uri);
         this.headers = readHeaders(inputStream);
-        this.cookies = new HttpCookie(headers.getOrDefault("Cookie", ""));
+        this.cookies = new HttpCookie(getHeaderOrDefault("Cookie", ""));
         this.body = parseEncodedFormData(readBody(inputStream));
     }
 
@@ -73,18 +74,22 @@ public class HttpRequest {
     }
 
     private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
-        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, String> headers = new HashMap<>();
         String line;
         while (!(line = readLine(inputStream)).isEmpty()) {
             String[] nameAndValue = line.split(":", 2);
-            headers.put(nameAndValue[0], nameAndValue[1].trim());
+            headers.put(nameAndValue[0].toLowerCase(Locale.ROOT), nameAndValue[1].trim());
         }
 
         return headers;
     }
 
+    private String getHeaderOrDefault(String name, String defaultValue) {
+        return headers.getOrDefault(name.toLowerCase(Locale.ROOT), defaultValue);
+    }
+
     private String readBody(InputStream inputStream) throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+        int contentLength = Integer.parseInt(getHeaderOrDefault("Content-Length", "0"));
         byte[] body = inputStream.readNBytes(contentLength);
         if (body.length != contentLength) {
             throw new IOException("본문을 모두 읽기 전에 연결이 종료되었습니다.");

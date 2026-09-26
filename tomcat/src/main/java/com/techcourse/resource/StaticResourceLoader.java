@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.resource;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

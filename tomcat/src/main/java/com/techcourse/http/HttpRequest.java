@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.http;
 
 import java.io.IOException;
 import java.io.InputStream;

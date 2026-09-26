@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.resource;
 
 public record StaticResource(
         String contentType,

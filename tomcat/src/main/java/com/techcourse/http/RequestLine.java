@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.http;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

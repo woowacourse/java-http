@@ -166,6 +166,7 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found\r\n" +
                 "Location: /401.html\r\n" +
+                "Content-Length: 0\r\n" +
                 "\r\n";
 
         assertThat(socket.output())
@@ -208,6 +209,7 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found\r\n" +
                 "Location: /index.html\r\n" +
+                "Content-Length: 0\r\n" +
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -289,6 +291,7 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found\r\n" +
                 "Location: /index.html\r\n" +
+                "Content-Length: 0\r\n" +
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);

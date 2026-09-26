@@ -26,9 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -55,7 +57,6 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpResponse httpResponse = new MyHttpResponse();
             log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
-            RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);
 

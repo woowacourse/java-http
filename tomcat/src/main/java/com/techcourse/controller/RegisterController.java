@@ -5,7 +5,7 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.MappedController;
-import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.StaticResourceResponder;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -13,7 +13,7 @@ public class RegisterController extends AbstractController implements MappedCont
 
     private static final long DEFAULT_USER_ID = 999L;
 
-    private final StaticResourceController resourceController = new StaticResourceController();
+    private final StaticResourceResponder resourceResponder = new StaticResourceResponder();
 
     @Override
     public String getPath() {
@@ -22,7 +22,7 @@ public class RegisterController extends AbstractController implements MappedCont
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
-        return resourceController.serve("/register.html");
+        return resourceResponder.serve("/register.html");
     }
 
     @Override

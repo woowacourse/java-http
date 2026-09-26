@@ -7,13 +7,13 @@ import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.MappedController;
-import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.StaticResourceResponder;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class LoginController extends AbstractController implements MappedController {
 
-    private final StaticResourceController resourceController = new StaticResourceController();
+    private final StaticResourceResponder resourceResponder = new StaticResourceResponder();
 
     @Override
     public String getPath() {
@@ -28,7 +28,7 @@ public class LoginController extends AbstractController implements MappedControl
             response.redirect("/index.html");
             return response;
         }
-        return resourceController.serve("/login.html");
+        return resourceResponder.serve("/login.html");
     }
 
     @Override

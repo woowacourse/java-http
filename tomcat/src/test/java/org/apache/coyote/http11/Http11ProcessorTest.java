@@ -5,11 +5,50 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @Test
+    void redirectsFailedLogin() {
+        StubSocket socket = new StubSocket("POST /login HTTP/1.1\r\nContent-Length: 0\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo(
+                "HTTP/1.1 302 Found\r\nLocation: /401.html\r\nContent-Length: 0\r\n\r\n"
+        );
+    }
+
+    @Test
+    void redirectsSuccessfulLoginWithSessionCookie() {
+        String body = "account=gugu&password=password";
+        StubSocket socket = new StubSocket("POST /login HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n\r\n"
+                + body);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).matches(
+                "HTTP/1\\.1 302 Found\r\nLocation: /index\\.html\r\n"
+                        + "Set-Cookie: JSESSIONID=[0-9a-f-]{36}\r\nContent-Length: 0\r\n\r\n"
+        );
+    }
+
+    @Test
+    void returnsEmptyMethodNotAllowedResponse() {
+        StubSocket socket = new StubSocket("PUT / HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo(
+                "HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\n\r\n"
+        );
+    }
 
     @Test
     void process() {

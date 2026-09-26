@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,16 +38,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequest.parse(inputStream);
-            String response = handleRequest(request);
+            HttpResponse response = handleRequest(request);
 
-            outputStream.write(response.getBytes());
+            response.writeTo(outputStream);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String handleRequest(HttpRequest request) throws IOException {
+    private HttpResponse handleRequest(HttpRequest request) throws IOException {
         String method = request.requestLine().method();
         String path = request.requestLine().path();
 
@@ -60,10 +61,10 @@ public class Http11Processor implements Runnable, Processor {
             return handlePostRequest(path, request.body());
         }
 
-        return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+        return emptyResponse(405, "Method Not Allowed");
     }
 
-    private String handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie) throws IOException {
+    private HttpResponse handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie) throws IOException {
         Session session = findSession(sessionCookie);
 
         if ("/login".equals(resourcePath) && isLoggedIn(session)) {
@@ -73,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
         return serveStaticResource(resourcePath);
     }
 
-    private String handlePostRequest(String resourcePath, RequestBody body) {
+    private HttpResponse handlePostRequest(String resourcePath, RequestBody body) {
         Map<String, String> formData = body.parseFormData();
 
         if (resourcePath.equals("/register")) {
@@ -84,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
             return handleLogin(formData);
         }
 
-        return emptyResponse("HTTP/1.1 405 Method Not Allowed");
+        return emptyResponse(405, "Method Not Allowed");
     }
 
     private Session findSession(Optional<Cookie> sessionCookie) {
@@ -99,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private String handleRegister(Map<String, String> formData) {
+    private HttpResponse handleRegister(Map<String, String> formData) {
         String account = formData.get("account");
         String email = formData.get("email");
         String password = formData.get("password");
@@ -109,7 +110,7 @@ public class Http11Processor implements Runnable, Processor {
         return generateRedirectResponse("/index.html");
     }
 
-    private String handleLogin(Map<String, String> formData) {
+    private HttpResponse handleLogin(Map<String, String> formData) {
         String account = formData.get("account");
         String password = formData.get("password");
 
@@ -134,24 +135,23 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    private String generateRedirectResponse(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                ""
+    private HttpResponse generateRedirectResponse(String location) {
+        return new HttpResponse(
+                new StatusLine("HTTP/1.1", 302, "Found"),
+                Map.of("Location", location),
+                new byte[0]
         );
     }
 
-    private String generateRedirectResponse(String location, String sessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Set-Cookie: JSESSIONID=" + sessionId,
-                "Content-Length: 0",
-                "",
-                ""
+    private HttpResponse generateRedirectResponse(String location, String sessionId) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", location);
+        headers.put("Set-Cookie", "JSESSIONID=" + sessionId);
+
+        return new HttpResponse(
+                new StatusLine("HTTP/1.1", 302, "Found"),
+                headers,
+                new byte[0]
         );
     }
 
@@ -168,20 +168,15 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password));
     }
 
-    private String serveStaticResource(String resourcePath) throws IOException {
+    private HttpResponse serveStaticResource(String resourcePath) throws IOException {
         byte[] bytes = resolveResponseBody(resourcePath);
-        String responseBody = new String(bytes, StandardCharsets.UTF_8);
         String contentType = resolveContentType(resourcePath);
 
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: " + contentType,
-                "Content-Length: " + bytes.length,
-                "",
-                responseBody
+        return new HttpResponse(
+                new StatusLine("HTTP/1.1", 200, "OK"),
+                Map.of("Content-Type", contentType),
+                bytes
         );
-
-        return response;
     }
 
     private String resolveContentType(String resourcePath) {
@@ -218,12 +213,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String emptyResponse(String statusLine) {
-        return String.join("\r\n",
-                statusLine,
-                "Content-Length: 0",
-                "",
-                ""
+    private HttpResponse emptyResponse(int statusCode, String reasonPhrase) {
+        return new HttpResponse(
+                new StatusLine("HTTP/1.1", statusCode, reasonPhrase),
+                Map.of(),
+                new byte[0]
         );
     }
 }

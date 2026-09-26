@@ -25,7 +25,7 @@ public class HttpResponse {
         this.responseBody = "";
     }
 
-    public void addCookie(String jSessionId) {
+    public void setJSessionId(String jSessionId) {
         headers.put(SET_COOKIE, "JSESSIONID=" + jSessionId);
     }
 

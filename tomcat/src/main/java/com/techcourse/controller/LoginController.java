@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
             session.setAttribute(SESSION_USER_KEY, user.get());
 
             response.sendRedirect(INDEX_PAGE);
-            response.addCookie(session.getId());
+            response.setJSessionId(session.getId());
         } else {
             response.sendRedirect(UNAUTHORIZED_PAGE);
         }
@@ -36,9 +36,9 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoggedIn(request)) {
             response.sendRedirect(INDEX_PAGE);
-        } else {
-            response.forward(request.getPath());
+            return;
         }
+        response.forward(request.getPath());
     }
 
     private Optional<User> login(Map<String, String> parameters) {

@@ -33,7 +33,9 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {
-        User user = loginService.authenticate(request.getBody());
+        String account = request.getFormParameter("account");
+        String password = request.getFormParameter("password");
+        User user = loginService.authenticate(account, password);
         if (user == null) {
             return HttpResponse.redirect("/401.html");
         }

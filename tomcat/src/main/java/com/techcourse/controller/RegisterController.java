@@ -27,7 +27,10 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {
-        if (!registerService.register(request.getBody())) {
+        String account = request.getFormParameter("account");
+        String password = request.getFormParameter("password");
+        String email = request.getFormParameter("email");
+        if (!registerService.register(account, password, email)) {
             return HttpResponse.create("400 Bad Request", "text/plain", "Missing required fields");
         }
         return HttpResponse.redirect("/index.html");

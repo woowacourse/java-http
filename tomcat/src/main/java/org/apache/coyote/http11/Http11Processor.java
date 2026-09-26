@@ -66,9 +66,6 @@ public class Http11Processor implements Runnable, Processor {
         if (request.matches("POST", LOGIN_PATH)) {
             return login(request, session);
         }
-        if (request.matches("POST", "/register")) {
-            return register(request);
-        }
         if (request.matches("GET", LOGIN_PATH) && session.getAttribute("user") instanceof User) {
             HttpResponse response = new HttpResponse();
             response.sendRedirect("/index.html");
@@ -80,19 +77,6 @@ public class Http11Processor implements Runnable, Processor {
         Controller controller = requestMapping.getController(request);
         controller.service(request, response);
 
-        return response;
-    }
-
-    private HttpResponse register(HttpRequest request) {
-        String account = request.findFormParameter("account")
-                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
-        String password = request.findFormParameter("password")
-                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: password"));
-        String email = request.findFormParameter("email")
-                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: email"));
-        InMemoryUserRepository.save(new User(account, password, email));
-        HttpResponse response = new HttpResponse();
-        response.sendRedirect("/index.html");
         return response;
     }
 

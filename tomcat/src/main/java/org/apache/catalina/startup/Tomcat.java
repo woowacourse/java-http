@@ -4,6 +4,7 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.Controller;
+import org.apache.coyote.http11.RegisterController;
 import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.StaticResourceController;
 import org.slf4j.Logger;
@@ -19,6 +20,11 @@ public class Tomcat {
         Manager sessionManager = new SessionManager();
         Controller staticResourceController = new StaticResourceController();
         RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        requestMapping.register(
+                "/register",
+                new RegisterController(staticResourceController)
+        );
+
         var connector = new Connector(sessionManager, requestMapping);
 
         connector.start();

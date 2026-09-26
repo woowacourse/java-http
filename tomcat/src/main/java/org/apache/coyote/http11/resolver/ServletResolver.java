@@ -1,23 +1,45 @@
 package org.apache.coyote.http11.resolver;
 
-import java.util.List;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
-import org.apache.coyote.http11.handler.LoginRequestHandler;
+import org.apache.coyote.http11.filter.FilterChainFactory;
 import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.handler.RootRequestHandler;
 
 public class ServletResolver implements RequestResolver {
-    private final List<RequestHandler> servlets = List.of(
-            new RootRequestHandler(),
-            new LoginRequestHandler()
-    );
+    private final RequestHandler[] handlers;
+    private final FilterChainFactory filterChainFactory;
+    private final ViewResolver viewResolver;
+
+    public static ServletResolver create(
+            FilterChainFactory filterChainFactory,
+            ViewResolver viewResolver,
+            RequestHandler... handlers) {
+        return new ServletResolver(filterChainFactory, viewResolver, handlers);
+    }
+
+    private ServletResolver(
+            FilterChainFactory filterChainFactory,
+            ViewResolver viewResolver,
+            RequestHandler... handlers) {
+        this.handlers = handlers;
+        this.filterChainFactory = filterChainFactory;
+        this.viewResolver = viewResolver;
+    }
 
     @Override
     public Response handleRequest(Request request) {
-        for (RequestHandler servlet : servlets) {
+        final Response response = filterChainFactory.create(this::handleServlet).doFilter(request);
+        return viewResolver.resolve(response);
+    }
+
+    private Response handleServlet(Request request) {
+        for (RequestHandler servlet : handlers) {
             if (servlet.canHandle(request)) {
-                return servlet.handle(request);
+                return switch (request.getRequestPoint().getMethod()) {
+                    case "GET" -> servlet.doGet(request);
+                    case "POST" -> servlet.doPost(request);
+                    default -> Response.badRequest();
+                };
             }
         }
 
@@ -26,6 +48,6 @@ public class ServletResolver implements RequestResolver {
 
     @Override
     public boolean canHandle(Request request) {
-      return true;
+        return true;
     }
 }

@@ -1,9 +1,13 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
+import org.apache.coyote.http11.data.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,25 +15,41 @@ public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
 
     @Override
-    public Response handle(Request request) {;
-        final String account = request.getQueryParameters().get("account");
-        final String password = request.getQueryParameters().get("password");
+    public Response doGet(Request request) {
+        if (isLogin(request.getSession())) {
+            return Response.view("redirect:/index.html");
+        }
+        return Response.view("/login.html");
+    }
+
+    @Override
+    public Response doPost(Request request) {
+        final Session session = request.getSession();
+
+        final Map<String, String> body = request.getBody();
+        final String account = body.get("account");
+        final String password = body.get("password");
 
         if (!isValidateData(account, password)) {
             return Response.badRequest();
         }
 
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(
-                        user -> log.info("User {} logged in successfully.", account),
-                        () -> log.info("Login failed for user {}.", account)
-                );
+        final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
 
-        return Response.noContent();
+        if (optionalUser.isPresent()) {
+            session.setAttribute("user", optionalUser.get());
+            return Response.view("redirect:/index.html");
+        }
+
+        return Response.view("redirect:/401.html");
     }
 
-    public boolean isValidateData(String account, String password) {
+    private boolean isLogin(Session session) {
+        return session.getAttribute("user").isPresent();
+    }
+
+    private boolean isValidateData(String account, String password) {
         return !Objects.isNull(account) && !Objects.isNull(password);
     }
 

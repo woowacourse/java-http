@@ -214,4 +214,48 @@ class RequestHeadersTest {
                     .doesNotThrowAnyException();
         }
     }
+
+    @Nested
+    class Host {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"localhost", "localhost:8080", "127.0.0.1:8080", "[::1]:8080", "example.com"})
+        void 유효한_Host는_허용한다(final String value) {
+            final RequestHeaders headers = RequestHeaders.from(List.of("Host: " + value));
+
+            assertThat(headers.get(HttpHeaderName.HOST)).hasValue(value);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "",                  // 빈 값
+                "local host",        // 공백
+                "localhost/evil",    // 경로 구분자
+                "user@localhost",    // 사용자 정보
+                "localhost\\evil",   // 역슬래시
+                "localhost?x",       // 쿼리 구분자
+                "localhost#x",       // 프래그먼트 구분자
+                "호스트",             // 비ASCII
+        })
+        void 형식이_잘못된_Host는_거부한다(final String value) {
+            assertThatThrownBy(() -> RequestHeaders.from(List.of("Host: " + value)))
+                    .isInstanceOf(BadRequestException.class);
+        }
+
+        @Test
+        void Host가_두_개면_거부한다() {
+            final List<String> lines = List.of("Host: localhost", "host: evil.com");
+
+            assertThatThrownBy(() -> RequestHeaders.from(lines))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("host");
+        }
+
+        @Test
+        void Host가_없어도_헤더_파싱은_성공한다() {
+            final RequestHeaders headers = RequestHeaders.from(List.of("Content-Type: text/html"));
+
+            assertThat(headers.hasHost()).isFalse();
+        }
+    }
 }

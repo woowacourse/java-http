@@ -10,8 +10,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class RequestHeaders {
+    private static final Set<String> SINGLE_VALUE_HEADERS = Set.of(
+            HttpHeaderName.CONTENT_LENGTH.getNormalized(),
+            HttpHeaderName.HOST.getNormalized()
+    );
+
+    // Host = uri-host [ ":" port ], 허용 문자만 검사 (RFC 3986 reg-name, IP 리터럴, 포트)
+    private static final String HOST_SPECIAL_CHARS = "-._~%!$&'()*+,;=:[]";
+
     private static final String HEADER_DELIMITER = ":";
     private static final int NOT_FOUND = -1;
     private static final char SP = ' ';
@@ -50,14 +59,15 @@ public class RequestHeaders {
             final String name = HttpHeaderName.normalize(line.substring(0, delimiterIndex));
             final String value = parseValue(line.substring(delimiterIndex + 1));
 
-            if (HttpHeaderName.CONTENT_LENGTH.getNormalized().equals(name) && parsed.containsKey(name)) {
-                throw new BadRequestException("Content-Length 헤더가 중복되었습니다");
+            if (SINGLE_VALUE_HEADERS.contains(name) && parsed.containsKey(name)) {
+                throw new BadRequestException("중복될 수 없는 헤더입니다: " + name);
             }
             parsed.putIfAbsent(name, value);
         }
 
         final Map<String, String> headers = Map.copyOf(parsed);
         validateMessageFraming(headers);
+        validateHost(headers);
         return new RequestHeaders(headers, parseContentLength(headers));
     }
 
@@ -111,6 +121,32 @@ public class RequestHeaders {
             throw new BadRequestException("Transfer-Encoding과 Content-Length를 함께 사용할 수 없습니다");
         }
         throw new NotImplementedException("Transfer-Encoding은 지원하지 않습니다");
+    }
+
+    private static void validateHost(final Map<String, String> headers) {
+        final String host = headers.get(HttpHeaderName.HOST.getNormalized());
+        if (host == null) {
+            return;   // 없는 경우는 버전을 아는 HttpRequest가 판단
+        }
+        if (host.isEmpty()) {
+            throw new BadRequestException("Host가 비어 있습니다");
+        }
+        for (final char c : host.toCharArray()) {
+            if (!isHostChar(c)) {
+                throw new BadRequestException("Host 형식이 잘못되었습니다");
+            }
+        }
+    }
+
+    private static boolean isHostChar(final char c) {
+        return ('A' <= c && c <= 'Z')
+                || ('a' <= c && c <= 'z')
+                || ('0' <= c && c <= '9')
+                || HOST_SPECIAL_CHARS.indexOf(c) != -1;
+    }
+
+    public boolean hasHost() {
+        return headers.containsKey(HttpHeaderName.HOST.getNormalized());
     }
 
     private static int parseContentLength(final Map<String, String> headers) {

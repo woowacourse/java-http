@@ -14,8 +14,8 @@ public class SessionResolver {
     }
 
     public Session resolve(final HttpRequest request) {
-        HttpCookie cookie = new HttpCookie(request.header("Cookie"));
-        String sessionId = cookie.get(SESSION_COOKIE_NAME);
+        final HttpCookie cookie = new HttpCookie(request.header("Cookie"));
+        final String sessionId = cookie.get(SESSION_COOKIE_NAME);
         return sessionManager.findSession(sessionId);
     }
 }

@@ -21,8 +21,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
-        Map<String, String> params = request.params();
-        User user = new User(params.get("account"), params.get("password"), params.get("email"));
+        final Map<String, String> params = request.params();
+        final User user = new User(params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
 
         log.info("register user: {}", user);

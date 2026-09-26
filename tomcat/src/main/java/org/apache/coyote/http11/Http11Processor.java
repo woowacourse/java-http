@@ -34,13 +34,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            HttpRequest request = HttpRequestParser.parse(inputStream);
+            final HttpRequest request = HttpRequestParser.parse(inputStream);
             if (request == null) { // 처리할 요청이 없으면 컨트롤러 선택 및 응답 생성을 건너뜀
                 return;
             }
-            HttpResponse response = adapter.service(request);
+            final HttpResponse response = adapter.service(request);
             writeResponse(outputStream, response);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error(e.getMessage(), e);
         }
     }

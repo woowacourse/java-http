@@ -17,16 +17,16 @@ public class HttpServerConfiguration {
     }
 
     private HttpRequestDispatcher createRequestDispatcher() {
-        SessionManager sessionManager = new SessionManager();
-        StaticResourceController staticController = new StaticResourceController();
-        RequestMapping requestMapping =
+        final SessionManager sessionManager = new SessionManager();
+        final StaticResourceController staticController = new StaticResourceController();
+        final RequestMapping requestMapping =
                 createRequestMapping(sessionManager, staticController);
 
         return new HttpRequestDispatcher(requestMapping, staticController);
     }
 
     private RequestMapping createRequestMapping(SessionManager sessionManager, StaticResourceController staticController) {
-        SessionResolver sessionResolver = new SessionResolver(sessionManager);
+        final SessionResolver sessionResolver = new SessionResolver(sessionManager);
 
         return new RequestMapping(Map.of(
                 "/register", new RegisterController(staticController),

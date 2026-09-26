@@ -74,7 +74,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 200 OK\r\n")

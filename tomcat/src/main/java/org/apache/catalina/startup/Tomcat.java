@@ -25,7 +25,7 @@ public class Tomcat {
         try {
             // make the application wait until we press any key.
             System.in.read();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         } finally {
             log.info("web server stop.");

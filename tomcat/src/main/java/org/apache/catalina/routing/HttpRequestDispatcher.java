@@ -19,9 +19,9 @@ public class HttpRequestDispatcher implements Adapter {
 
     @Override
     public HttpResponse service(final HttpRequest request) throws Exception {
-        Controller controller = requestMapping.getController(request);
+        final Controller controller = requestMapping.getController(request);
         if (controller == null) {
-            controller = staticResourceController;
+            return staticResourceController.service(request);
         }
         return controller.service(request);
     }

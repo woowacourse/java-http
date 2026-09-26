@@ -15,15 +15,15 @@ public final class HttpRequestParser {
     }
 
     public static HttpRequest parse(final InputStream inputStream) throws IOException {
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        String requestLine = readLine(bufferedInputStream);
+        final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        final String requestLine = readLine(bufferedInputStream);
         if (requestLine == null) {
             return null;
         }
 
-        RequestLine parsedRequestLine = parseRequestLine(requestLine);
-        Map<String, String> headers = readHeaders(bufferedInputStream);
-        String body = readBody(bufferedInputStream, parsedRequestLine.method(), headers);
+        final RequestLine parsedRequestLine = parseRequestLine(requestLine);
+        final Map<String, String> headers = readHeaders(bufferedInputStream);
+        final String body = readBody(bufferedInputStream, parsedRequestLine.method(), headers);
 
         return new HttpRequest(
                 parsedRequestLine.method(),
@@ -34,16 +34,16 @@ public final class HttpRequestParser {
     }
 
     private static RequestLine parseRequestLine(final String requestLine) {
-        String[] requestParts = requestLine.split("\\s+", 3);
+        final String[] requestParts = requestLine.split("\\s+", 3);
         return new RequestLine(requestParts[0], requestParts[1]);
     }
 
     private static Map<String, String> readHeaders(final InputStream inputStream) throws IOException {
-        Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        final Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         String line = readLine(inputStream);
         while (line != null && !line.isEmpty()) {
-            int separator = line.indexOf(':');
+            final int separator = line.indexOf(':');
             if (separator <= 0) {
                 throw new IOException("올바르지 않은 HTTP 헤더입니다: " + line);
             }
@@ -54,7 +54,7 @@ public final class HttpRequestParser {
     }
 
     private static String readLine(final InputStream inputStream) throws IOException {
-        ByteArrayOutputStream line = new ByteArrayOutputStream();
+        final ByteArrayOutputStream line = new ByteArrayOutputStream();
         int value;
         while ((value = inputStream.read()) != -1 && value != '\n') {
             line.write(value);
@@ -64,7 +64,7 @@ public final class HttpRequestParser {
             return null;
         }
 
-        byte[] bytes = line.toByteArray();
+        final byte[] bytes = line.toByteArray();
         int length = bytes.length;
         if (length > 0 && bytes[length - 1] == '\r') {
             length--;
@@ -78,17 +78,17 @@ public final class HttpRequestParser {
             return "";
         }
 
-        String contentLengthHeader = headers.get("Content-Length");
+        final String contentLengthHeader = headers.get("Content-Length");
         if (contentLengthHeader == null) {
             return "";
         }
 
-        int contentLength = Integer.parseInt(contentLengthHeader);
+        final int contentLength = Integer.parseInt(contentLengthHeader);
         if (contentLength < 0) {
             throw new IOException("Content-Length는 음수일 수 없습니다.");
         }
 
-        byte[] body = inputStream.readNBytes(contentLength);
+        final byte[] body = inputStream.readNBytes(contentLength);
         if (body.length != contentLength) {
             throw new EOFException("요청 본문이 Content-Length보다 짧습니다.");
         }

@@ -28,7 +28,7 @@ public class StaticResourceController extends AbstractController {
     }
 
     private HttpResponse createResourceResponse(final String resourcePath) throws IOException {
-        InputStream resourceStream = getResourceStream(resourcePath);
+        final InputStream resourceStream = getResourceStream(resourcePath);
         if (resourceStream == null) {
             return createNotFoundResponse();
         }
@@ -36,13 +36,13 @@ public class StaticResourceController extends AbstractController {
     }
 
     private InputStream getResourceStream(final String resourcePath) {
-        String path = "static" + resourcePath;
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final String path = "static" + resourcePath;
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         return classLoader.getResourceAsStream(path);
     }
 
     private String resolveResourcePath(final String path) {
-        String fileName = path.substring(path.lastIndexOf("/") + 1);
+        final String fileName = path.substring(path.lastIndexOf("/") + 1);
         if (!fileName.contains(".")) {
             return path + ".html";
         }

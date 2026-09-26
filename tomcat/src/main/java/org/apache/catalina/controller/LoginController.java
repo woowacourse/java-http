@@ -31,16 +31,16 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
-        Map<String, String> params = request.params();
-        String account = params.get("account");
-        String password = params.get("password");
+        final Map<String, String> params = request.params();
+        final String account = params.get("account");
+        final String password = params.get("password");
 
-        Optional<User> authenticatedUser = authenticate(account, password);
+        final Optional<User> authenticatedUser = authenticate(account, password);
         if (authenticatedUser.isEmpty()) {
             return HttpResponse.redirect("/401.html", null);
         }
-        User user = authenticatedUser.get();
-        String sessionId = addUserToSession(request, user);
+        final User user = authenticatedUser.get();
+        final String sessionId = addUserToSession(request, user);
 
         log.info("login user: {}", user);
         return HttpResponse.redirect("/index.html", sessionId);
@@ -50,7 +50,7 @@ public class LoginController extends AbstractController {
         if (account == null || password == null) {
             return Optional.empty();
         }
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
             log.info("account doesn't exist: {}", account);
             return Optional.empty();
@@ -59,19 +59,19 @@ public class LoginController extends AbstractController {
     }
 
     private String addUserToSession(final HttpRequest request, final User user) {
-        Session session = sessionResolver.resolve(request);
+        final Session session = sessionResolver.resolve(request);
         if (session != null) {
             session.setAttribute(USER_SESSION_ATTRIBUTE, user);
             return null;
         }
-        Session newSession = sessionManager.createSession();
+        final Session newSession = sessionManager.createSession();
         newSession.setAttribute(USER_SESSION_ATTRIBUTE, user);
         return newSession.getId();
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
-        Session session = sessionResolver.resolve(request);
+        final Session session = sessionResolver.resolve(request);
         if (getUser(session) != null) {
             return HttpResponse.redirect("/index.html", null);
         }

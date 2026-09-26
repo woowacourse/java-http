@@ -27,7 +27,7 @@ public record HttpResponse(
     }
 
     public static HttpResponse redirect(final String location, final String newSessionId) {
-        Map<String, String> headers = new LinkedHashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Location", location);
         if (newSessionId != null) {
             headers.put("Set-Cookie", "JSESSIONID=" + newSessionId);
@@ -36,7 +36,7 @@ public record HttpResponse(
     }
 
     public static HttpResponse resource(final HttpStatus status, final String resourcePath, final String body) {
-        Map<String, String> headers = new LinkedHashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", getContentType(resourcePath));
         headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         return new HttpResponse(status, headers, body);
@@ -54,7 +54,7 @@ public record HttpResponse(
     }
 
     public byte[] toBytes() {
-        StringBuilder response = new StringBuilder("HTTP/1.1 ")
+        final StringBuilder response = new StringBuilder("HTTP/1.1 ")
                 .append(status.getStatusLine())
                 .append("\r\n");
 

@@ -14,7 +14,7 @@ public record HttpRequest(
     }
 
     public String path() {
-        int queryStringIndex = requestUri.indexOf("?");
+        final int queryStringIndex = requestUri.indexOf("?");
         if (queryStringIndex == -1) {
             return requestUri;
         }
@@ -32,21 +32,21 @@ public record HttpRequest(
         if (queryString.isEmpty()) {
             return Map.of();
         }
-        Map<String, String> params = new HashMap<>();
-        String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=", 2);
+        final Map<String, String> params = new HashMap<>();
+        final String[] pairs = queryString.split("&");
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.split("=", 2);
             params.put(keyValue[0], keyValue[1]);
         }
         return params;
     }
 
     private Map<String, String> extractQueryParams(final String requestUri) {
-        int queryStringIndex = requestUri.indexOf("?");
+        final int queryStringIndex = requestUri.indexOf("?");
         if (queryStringIndex == -1) {
             return Map.of();
         }
-        String queryString = requestUri.substring(queryStringIndex + 1);
+        final String queryString = requestUri.substring(queryStringIndex + 1);
         return parseQueryString(queryString);
     }
 }

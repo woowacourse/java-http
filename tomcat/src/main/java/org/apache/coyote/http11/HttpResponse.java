@@ -9,17 +9,17 @@ import java.util.Objects;
 public final class HttpResponse {
     private static final String LINE_SEPARATOR = "\r\n";
 
-    private final String status;
+    private final HttpStatus status;
     private final Map<String, String> headers;
     private final byte[] body;
 
-    private HttpResponse(final String status, final Map<String, String> headers, final byte[] body) {
+    private HttpResponse(final HttpStatus status, final Map<String, String> headers, final byte[] body) {
         this.status = Objects.requireNonNull(status);
         this.headers = Collections.unmodifiableMap(new LinkedHashMap<>(headers));
         this.body = body.clone();
     }
 
-    static HttpResponse of(final String status, final byte[] body) {
+    static HttpResponse of(final HttpStatus status, final byte[] body) {
         return new HttpResponse(status, Map.of(), body);
     }
 
@@ -32,7 +32,7 @@ public final class HttpResponse {
 
     byte[] headerBytes() {
         final var responseHeader = new StringBuilder("HTTP/1.1 ")
-                .append(status)
+                .append(status.statusLine())
                 .append(LINE_SEPARATOR);
 
         headers.forEach((name, value) -> responseHeader

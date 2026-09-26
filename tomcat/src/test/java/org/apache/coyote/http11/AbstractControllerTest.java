@@ -35,12 +35,12 @@ class AbstractControllerTest {
     private static final class TestController extends AbstractController {
         @Override
         protected HttpResponse doGet(final HttpRequest request) {
-            return HttpResponse.of("200 OK", new byte[0]);
+            return HttpResponse.of(HttpStatus.OK, new byte[0]);
         }
 
         @Override
         protected HttpResponse doPost(final HttpRequest request) {
-            return HttpResponse.of("302 Found", new byte[0]);
+            return HttpResponse.of(HttpStatus.FOUND, new byte[0]);
         }
     }
 }

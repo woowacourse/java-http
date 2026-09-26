@@ -8,8 +8,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpResponseTest {
 
     @Test
+    void serializesEachStatusCodeAndReasonPhrase() {
+        assertStatusLine(HttpStatus.OK, "200 OK");
+        assertStatusLine(HttpStatus.FOUND, "302 Found");
+        assertStatusLine(HttpStatus.NOT_FOUND, "404 Not Found");
+        assertStatusLine(HttpStatus.METHOD_NOT_ALLOWED, "405 Method Not Allowed");
+    }
+
+    private void assertStatusLine(final HttpStatus status, final String expected) {
+        assertThat(new String(HttpResponse.of(status, new byte[0]).headerBytes(), StandardCharsets.UTF_8))
+                .isEqualTo("HTTP/1.1 " + expected + "\r\n\r\n");
+    }
+
+    @Test
     void headersAreWrittenInTheirAddedOrder() {
-        final var response = HttpResponse.of("200 OK", "Hello".getBytes(StandardCharsets.UTF_8))
+        final var response = HttpResponse.of(HttpStatus.OK, "Hello".getBytes(StandardCharsets.UTF_8))
                 .withHeader("Set-Cookie", "JSESSIONID=session-id")
                 .withHeader("Content-Type", "text/html")
                 .withHeader("Content-Length", "5");
@@ -27,7 +40,7 @@ class HttpResponseTest {
 
     @Test
     void addingHeaderCreatesNewResponse() {
-        final var response = HttpResponse.of("302 Found", new byte[0]);
+        final var response = HttpResponse.of(HttpStatus.FOUND, new byte[0]);
         final var responseWithLocation = response.withHeader("Location", "/index.html");
 
         assertThat(new String(response.headerBytes(), StandardCharsets.UTF_8))

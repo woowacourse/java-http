@@ -14,12 +14,12 @@ final class ResponseFactory {
     }
 
     static HttpResponse resourceResponse(
-            final String status,
+            final HttpStatus status,
             final byte[] body,
             final String contentType,
             final HttpRequest request
     ) {
-        final var response = withNewSessionCookie(HttpResponse.of(status + " ", body), request);
+        final var response = withNewSessionCookie(HttpResponse.of(status, body), request);
 
         return response
                 .withHeader(CONTENT_TYPE_HEADER, contentType + " ")
@@ -32,9 +32,9 @@ final class ResponseFactory {
 
     static HttpResponse redirect(final String location, final Optional<String> sessionId) {
         final var response = sessionId
-                .map(value -> HttpResponse.of("302 Found", new byte[0])
+                .map(value -> HttpResponse.of(HttpStatus.FOUND, new byte[0])
                         .withHeader(SET_COOKIE_HEADER, SESSION_ID_COOKIE_NAME + "=" + value))
-                .orElseGet(() -> HttpResponse.of("302 Found", new byte[0]));
+                .orElseGet(() -> HttpResponse.of(HttpStatus.FOUND, new byte[0]));
 
         return response
                 .withHeader(LOCATION_HEADER, location)

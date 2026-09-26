@@ -20,7 +20,7 @@ final class StaticResourceController extends AbstractController {
     private HttpResponse resourceResponseFor(final String requestPath, final HttpRequest request) throws IOException {
         if (requestPath.equals("/")) {
             return ResponseFactory.resourceResponse(
-                    "200 OK",
+                    HttpStatus.OK,
                     "Hello world!".getBytes(StandardCharsets.UTF_8),
                     HTML_CONTENT_TYPE,
                     request
@@ -34,11 +34,11 @@ final class StaticResourceController extends AbstractController {
             if (resourceStream == null) {
                 final var body = "404 Not Found".getBytes(StandardCharsets.UTF_8);
 
-                return ResponseFactory.resourceResponse("404 Not Found", body, HTML_CONTENT_TYPE, request);
+                return ResponseFactory.resourceResponse(HttpStatus.NOT_FOUND, body, HTML_CONTENT_TYPE, request);
             }
 
             return ResponseFactory.resourceResponse(
-                    "200 OK",
+                    HttpStatus.OK,
                     resourceStream.readAllBytes(),
                     contentTypeFor(staticPath),
                     request

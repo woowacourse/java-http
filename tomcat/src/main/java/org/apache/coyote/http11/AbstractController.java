@@ -11,14 +11,14 @@ public abstract class AbstractController implements Controller {
             return doPost(request);
         }
 
-        return HttpResponse.of("405 Method Not Allowed", new byte[0]);
+        return HttpResponse.of(HttpStatus.METHOD_NOT_ALLOWED, new byte[0]);
     }
 
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
-        return HttpResponse.of("405 Method Not Allowed", new byte[0]);
+        return HttpResponse.of(HttpStatus.METHOD_NOT_ALLOWED, new byte[0]);
     }
 
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
-        return HttpResponse.of("405 Method Not Allowed", new byte[0]);
+        return HttpResponse.of(HttpStatus.METHOD_NOT_ALLOWED, new byte[0]);
     }
 }

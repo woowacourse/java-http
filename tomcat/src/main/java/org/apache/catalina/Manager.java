@@ -27,6 +27,8 @@ public interface Manager {
      */
     void add(Session session);
 
+    Session createSession();
+
     /**
      * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise
      * return

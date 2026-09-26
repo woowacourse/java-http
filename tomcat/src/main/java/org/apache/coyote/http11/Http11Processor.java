@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +56,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String USER_ATTRIBUTE = "user";
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -114,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
                 statusLine = STATUS_FOUND;
                 final var loginUser = login(formParameters);
                 if (loginUser.isPresent()) {
-                    final var session = SessionManager.getInstance().createSession();
+                    final var session = sessionManager.createSession();
                     session.setAttribute(USER_ATTRIBUTE, loginUser.get());
                     setCookie = HttpCookie.JSESSIONID + "=" + session.getId();
                     location = INDEX_PAGE;
@@ -147,12 +149,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean isLoggedIn(HttpCookie cookie) {
+    private boolean isLoggedIn(HttpCookie cookie) throws IOException {
         if (!cookie.hasJSessionId()) {
             return false;
         }
         final var jSessionId = cookie.getJSessionId();
-        final var session = SessionManager.getInstance().findSession(jSessionId);
+        final var session = sessionManager.findSession(jSessionId);
         if (session == null) {
             return false;
         }

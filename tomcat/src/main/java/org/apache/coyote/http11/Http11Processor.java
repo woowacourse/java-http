@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestLine requestLine = RequestLine.parse(readLine);
 
-            Map<String, String> headers = readHeaders(reader);
+            HttpHeaders headers = readHeaders(reader);
             String body = readBody(reader, headers);
 
             Optional<Cookie> sessionCookie = findSessionCookie(headers);
@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Optional<Cookie> findSessionCookie(Map<String, String> headers) {
+    private Optional<Cookie> findSessionCookie(HttpHeaders headers) {
         String cookieHeader = headers.get("cookie");
 
         if (cookieHeader == null || cookieHeader.isEmpty()) {
@@ -85,8 +85,8 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+    private String readBody(BufferedReader reader, HttpHeaders headers) throws IOException {
+        int contentLength = headers.contentLength();
 
         char[] body = new char[contentLength];
         int current = 0;
@@ -104,24 +104,12 @@ public class Http11Processor implements Runnable, Processor {
         return new String(body);
     }
 
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private HttpHeaders readHeaders(BufferedReader reader) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            int colonIndex = line.indexOf(":");
-
-            if (colonIndex == -1) {
-                continue;
-            }
-
-            String name = line.substring(0, colonIndex)
-                    .trim()
-                    .toLowerCase();
-
-            String value = line.substring(colonIndex + 1).trim();
-
-            headers.put(name, value);
+            headers.add(line);
         }
 
         return headers;

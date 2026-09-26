@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
         Session session = findSession(sessionCookie);
 
         if ("/login".equals(resourcePath) && isLoggedIn(session)) {
-            return generateRedirectResponse("/index.html");
+            return HttpResponse.redirect("/index.html");
         }
 
         return serveStaticResource(resourcePath);
@@ -107,7 +106,7 @@ public class Http11Processor implements Runnable, Processor {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return generateRedirectResponse("/index.html");
+        return HttpResponse.redirect("/index.html");
     }
 
     private HttpResponse handleLogin(Map<String, String> formData) {
@@ -117,12 +116,12 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> authenticatedUser = authenticate(account, password);
 
         if (authenticatedUser.isEmpty()) {
-            return generateRedirectResponse("/401.html");
+            return HttpResponse.redirect("/401.html");
         }
 
         Session session = createSession(authenticatedUser);
 
-        return generateRedirectResponse("/index.html", session.getId());
+        return HttpResponse.redirect("/index.html", new Cookie("JSESSIONID", session.getId()));
     }
 
     @Nonnull
@@ -133,26 +132,6 @@ public class Http11Processor implements Runnable, Processor {
         SessionManager.add(session);
 
         return session;
-    }
-
-    private HttpResponse generateRedirectResponse(String location) {
-        return new HttpResponse(
-                new StatusLine("HTTP/1.1", 302, "Found"),
-                Map.of("Location", location),
-                new byte[0]
-        );
-    }
-
-    private HttpResponse generateRedirectResponse(String location, String sessionId) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", location);
-        headers.put("Set-Cookie", "JSESSIONID=" + sessionId);
-
-        return new HttpResponse(
-                new StatusLine("HTTP/1.1", 302, "Found"),
-                headers,
-                new byte[0]
-        );
     }
 
     private Optional<User> authenticate(String account, String password) {

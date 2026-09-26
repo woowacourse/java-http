@@ -4,9 +4,9 @@ public class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if ("POST".equalsIgnoreCase(request.getMethod())) {
+        if (request.isMethod("POST")) {
             doPost(request, response);
-        } else if ("GET".equalsIgnoreCase(request.getMethod())) {
+        } else if (request.isMethod("GET")) {
             doGet(request, response);
         }
     }

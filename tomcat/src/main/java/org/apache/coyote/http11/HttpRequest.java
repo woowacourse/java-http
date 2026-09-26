@@ -97,6 +97,10 @@ public class HttpRequest {
         return method;
     }
 
+    public boolean isMethod(String expectedMethod) {
+        return method.equalsIgnoreCase(expectedMethod);
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

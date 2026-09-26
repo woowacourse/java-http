@@ -9,8 +9,8 @@
 
 ### HTTP 응답
 
-- [ ] HTTP 응답 처리 책임을 `HttpResponse`와 관련 객체로 분리한다.
-- [ ] 리팩터링 후에도 기존 HTTP 응답 동작을 유지한다.
+- [x] HTTP 응답 처리 책임을 `HttpResponse`와 관련 객체로 분리한다.
+- [x] 리팩터링 후에도 기존 HTTP 응답 동작을 유지한다.
 
 ### Controller
 

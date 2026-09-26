@@ -74,7 +74,9 @@ public class Http11Processor implements Runnable, Processor {
             return register(request);
         }
         if (request.matches("GET", LOGIN_PATH) && session.getAttribute("user") instanceof User) {
-            return HttpResponse.redirectTo("/index.html");
+            HttpResponse response = new HttpResponse();
+            response.sendRedirect("/index.html");
+            return response;
         }
         return handleResourceRequest(request);
     }
@@ -87,7 +89,9 @@ public class Http11Processor implements Runnable, Processor {
         String email = request.findFormParameter("email")
                 .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: email"));
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponse.redirectTo("/index.html");
+        HttpResponse response = new HttpResponse();
+        response.sendRedirect("/index.html");
+        return response;
     }
 
     private HttpResponse login(HttpRequest request, Session session) {
@@ -100,7 +104,9 @@ public class Http11Processor implements Runnable, Processor {
         user.ifPresent(value -> log.info("user : {}", value));
         Optional<User> authenticatedUser = user.filter(value -> value.checkPassword(password));
         if (authenticatedUser.isEmpty()) {
-            return HttpResponse.redirectTo("/401.html");
+            HttpResponse response = new HttpResponse();
+            response.sendRedirect("/401.html");
+            return response;
         }
 
         Session renewedSession = new Session(UUID.randomUUID().toString());
@@ -108,8 +114,9 @@ public class Http11Processor implements Runnable, Processor {
         sessionManager.remove(session.getId());
         sessionManager.add(renewedSession);
 
-        HttpResponse response = HttpResponse.redirectTo("/index.html");
+        HttpResponse response = new HttpResponse();
         response.addHeader("Set-Cookie", "JSESSIONID=" + renewedSession.getId());
+        response.sendRedirect("/index.html");
         return response;
     }
 
@@ -125,7 +132,11 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         String contentType = contentTypeOf(request.getExtension());
-        return new HttpResponse("200 OK", contentType, responseBody);
+        HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.OK);
+        response.addHeader("Content-Type", contentType);
+        response.setBody(responseBody);
+        return response;
     }
 
     private String resolveResourcePath(String requestPath) {

@@ -9,31 +9,41 @@ public final class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
-    private final String status;
+    private StatusLine statusLine;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private final byte[] body;
+    private byte[] body = new byte[0];
 
-    public HttpResponse(String status, String contentType, byte[] body) {
-        this.status = status;
-        this.headers.put("Content-Type", contentType);
-        this.headers.put("Content-Length", body.length + " ");
-        this.body = body.clone();
-    }
-
-    private HttpResponse(String status) {
-        this.status = status;
+    public HttpResponse() {
+        this.statusLine = new StatusLine(
+                HttpVersion.HTTP_1_1,
+                HttpStatus.OK
+        );
         this.headers.put("Content-Length", "0 ");
-        this.body = new byte[0];
     }
 
-    public static HttpResponse redirectTo(String location) {
-        HttpResponse response = new HttpResponse("302 FOUND");
-        response.addHeader("Location", location);
-        return response;
+    public void setStatus(final HttpStatus status) {
+        this.statusLine = new StatusLine(
+                HttpVersion.HTTP_1_1,
+                status
+        );
     }
 
-    public void addHeader(String name, String value) {
+    public void addHeader(
+            final String name,
+            final String value
+    ) {
         headers.put(name, value);
+    }
+
+    public void setBody(final byte[] body) {
+        this.body = body.clone();
+        headers.put("Content-Length", body.length + " ");
+    }
+
+    public void sendRedirect(final String location) {
+        setStatus(HttpStatus.FOUND);
+        addHeader("Location", location);
+        setBody(new byte[0]);
     }
 
     public boolean hasHeader(String name) {
@@ -42,8 +52,7 @@ public final class HttpResponse {
 
     public byte[] toByteArray() {
         var responseHead = new StringBuilder()
-                .append("HTTP/1.1 ")
-                .append(status)
+                .append(statusLine.serialize())
                 .append(" ")
                 .append(CRLF);
 

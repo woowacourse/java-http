@@ -19,4 +19,8 @@ public enum HttpVersion {
                 .orElseThrow(() ->
                         new IllegalArgumentException("지원하지 않는 HTTP Version: " + value));
     }
+
+    public String value() {
+        return value;
+    }
 }

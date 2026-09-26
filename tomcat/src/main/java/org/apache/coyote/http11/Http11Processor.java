@@ -6,7 +6,6 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
@@ -37,7 +36,15 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var response = buildResponseWith(inputStream);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            HttpRequest request = HttpRequest.from(reader);
+            HttpResponse response = new HttpResponse();
+
+            Session session = request.getSession();
+            routeRequest(request, response, session);
+            if (request.isNewSession()) {
+                response.addCookie("JSESSIONID", session.getId());
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -46,59 +53,51 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponseWith(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        HttpRequest request = HttpRequest.from(reader);
-
-        Session session = request.getSession();
-        String response = routeRequest(request, session);
-        if (request.isNewSession()) {
-            return withSessionCookie(response, session.getId());
-        }
-        return response;
-    }
-
-    private String routeRequest(HttpRequest request, Session session) throws IOException {
+    private void routeRequest(HttpRequest request, HttpResponse response, Session session) throws IOException {
         String path = request.getPath();
 
         if (path.startsWith("/login")) {
             if (request.isGet() && isLoggedIn(session)) {
-                return redirect("/index.html");
+                response.sendRedirect("/index.html");
+                return;
             }
             if (request.isPost()) {
-                return loginResponse(request, session);
+                login(request, response, session);
+                return;
             }
         }
 
         if (path.startsWith("/register") && request.isPost()) {
-            return registerResponse(request);
+            register(request, response);
+            return;
         }
 
-        return staticResponse(path);
+        serveStaticResource(path, response);
     }
 
-    private String loginResponse(HttpRequest request, Session session) {
+    private void login(HttpRequest request, HttpResponse response, Session session) {
         Optional<User> account = findAccount(request.getParameter("account"), request.getParameter("password"));
         if (account.isEmpty()) {
-            return redirect("/401.html");
+            response.sendRedirect("/401.html");
+            return;
         }
 
         session.setAttribute("user", account.get());
-        return redirect("/index.html");
+        response.sendRedirect("/index.html");
     }
 
     private boolean isLoggedIn(Session session) {
         return session.getAttribute("user") != null;
     }
 
-    private String registerResponse(HttpRequest request) {
+    private void register(HttpRequest request, HttpResponse response) {
         User user = new User(
                 request.getParameter("account"),
                 request.getParameter("password"),
                 request.getParameter("email")
         );
         InMemoryUserRepository.save(user);
-        return redirect("/index.html");
+        response.sendRedirect("/index.html");
     }
 
     private Optional<User> findAccount(String account, String password) {
@@ -115,30 +114,8 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String redirect(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location + " "
-        );
-    }
-
-    private String withSessionCookie(String response, String jSessionId) {
-        int statusLineEnd = response.indexOf("\r\n");
-        return response.substring(0, statusLineEnd)
-                + "\r\nSet-Cookie: JSESSIONID=" + jSessionId + " "
-                + response.substring(statusLineEnd);
-    }
-
-    private String staticResponse(String path) throws IOException {
-        String contentType = contentTypeOf(path);
-        String responseBody = resolveContentOf(path);
-
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private void serveStaticResource(String path, HttpResponse response) throws IOException {
+        response.setBody(contentTypeOf(path), resolveContentOf(path));
     }
 
     private String resolveContentOf(String filePath) throws IOException {

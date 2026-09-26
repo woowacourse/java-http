@@ -1,66 +1,58 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static support.ResponseAssertions.assertHtml;
+import static support.ResponseAssertions.resourceBytes;
+
 import com.techcourse.controller.StaticResourceController;
 import com.techcourse.view.ResourceRenderer;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.UUID;
 import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
     @Test
     void process() {
-        // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket,
+        var socket = new StubSocket();
+        var processor = new Http11Processor(socket,
                 new RequestMapping(new StaticResourceController(new ResourceRenderer())));
 
-        // when
         processor.process(socket);
 
-        // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertHtml(socket.output(), "Hello world!".getBytes(StandardCharsets.UTF_8));
+        assertSessionCookie(socket.output());
     }
 
     @Test
     void index() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket,
+        var socket = new StubSocket("GET /index.html HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        var processor = new Http11Processor(socket,
                 new RequestMapping(new StaticResourceController(new ResourceRenderer())));
 
-        // when
         processor.process(socket);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertHtml(socket.output(), resourceBytes("/index.html"));
+        assertSessionCookie(socket.output());
+    }
 
-        assertThat(socket.output()).isEqualTo(expected);
+    private void assertSessionCookie(String response) {
+        String headers = response.split("\r\n\r\n", 2)[0];
+        var cookies = Arrays.stream(headers.split("\r\n"))
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .toList();
+        assertThat(cookies).hasSize(1);
+        String sessionId = cookies.getFirst().substring("Set-Cookie: JSESSIONID=".length());
+        try {
+            assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
+            assertThat(SessionManager.getInstance().findSession(sessionId)).isNotNull();
+        } finally {
+            SessionManager.getInstance().remove(sessionId);
+        }
     }
 }

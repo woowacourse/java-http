@@ -1,5 +1,13 @@
 package com.techcourse.controller;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.HttpRequest;
@@ -23,6 +31,14 @@ public abstract class AbstractController implements Controller {
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         methodNotAllowed(response);
+    }
+
+    protected String readResource(String path) throws IOException, URISyntaxException {
+        URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            throw new FileNotFoundException(path);
+        }
+        return Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8);
     }
 
     protected String allowedMethods() {

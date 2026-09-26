@@ -4,10 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Optional;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.FormData;
@@ -39,9 +35,8 @@ public class LoginController extends AbstractController {
             response.setLocation(INDEX_PATH);
             return;
         }
-        URL resource = getClass().getClassLoader().getResource(LOGIN_PAGE);
         response.setContentType(ContentType.HTML);
-        response.setBody(Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8));
+        response.setBody(readResource(LOGIN_PAGE));
     }
 
     @Override

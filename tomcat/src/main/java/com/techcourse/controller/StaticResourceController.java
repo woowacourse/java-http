@@ -1,11 +1,8 @@
 package com.techcourse.controller;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -17,9 +14,10 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        URL resource = getClass().getClassLoader()
-                .getResource(STATIC_RESOURCE_DIRECTORY + request.getUri().getPath());
-        if (resource == null) {
+        String body;
+        try {
+            body = readResource(STATIC_RESOURCE_DIRECTORY + request.getUri().getPath());
+        } catch (FileNotFoundException e) {
             response.setStatus(HttpStatus.NOT_FOUND);
             response.setContentType(ContentType.TEXT);
             response.setBody(NOT_FOUND_MESSAGE);
@@ -27,7 +25,7 @@ public class StaticResourceController extends AbstractController {
         }
         response.setStatus(HttpStatus.OK);
         response.setContentType(ContentType.from(request.getUri().getPath()));
-        response.setBody(Files.readString(Paths.get(resource.toURI()), StandardCharsets.UTF_8));
+        response.setBody(body);
     }
 
     @Override

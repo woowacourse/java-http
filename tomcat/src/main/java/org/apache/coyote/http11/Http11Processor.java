@@ -5,6 +5,7 @@ import java.net.Socket;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.exception.UncheckedServletException;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +15,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapping requestMapping = new RequestMapping();
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
+        this.requestMapping = new RequestMapping(sessionManager);
     }
 
     @Override

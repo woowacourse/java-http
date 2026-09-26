@@ -17,6 +17,11 @@ import org.apache.coyote.http11.HttpResponse;
 public class LoginController implements Controller {
 
     private final Controller staticResourceController = new StaticResourceController();
+    private final SessionManager sessionManager;
+
+    public LoginController(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
@@ -55,7 +60,7 @@ public class LoginController implements Controller {
             return null;
         }
 
-        return SessionManager.findSession(sessionCookie.get().value());
+        return sessionManager.findSession(sessionCookie.get().value());
     }
 
     private boolean isLoggedIn(Session session) {
@@ -63,11 +68,11 @@ public class LoginController implements Controller {
     }
 
     @Nonnull
-    private static Session createSession(Optional<User> authenticatedUser) {
+    private Session createSession(Optional<User> authenticatedUser) {
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);
         session.setAttribute("user", authenticatedUser.get());
-        SessionManager.add(session);
+        sessionManager.add(session);
 
         return session;
     }

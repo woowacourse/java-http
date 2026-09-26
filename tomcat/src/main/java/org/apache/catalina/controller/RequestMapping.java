@@ -4,6 +4,7 @@ import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
 import java.util.Map;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -13,8 +14,8 @@ public class RequestMapping {
     private final Controller staticResourceController = new StaticResourceController();
     private final Controller methodNotAllowedController = request -> HttpResponse.empty(405, "Method Not Allowed");
 
-    public RequestMapping() {
-        Controller loginController = new LoginController();
+    public RequestMapping(SessionManager sessionManager) {
+        Controller loginController = new LoginController(sessionManager);
         controllers = Map.of(
                 new Route("GET", "/login"), loginController,
                 new Route("POST", "/login"), loginController,

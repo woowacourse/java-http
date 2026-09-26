@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -16,7 +17,7 @@ class Http11ProcessorTest {
     void redirectsFailedLogin() {
         StubSocket socket = new StubSocket("POST /login HTTP/1.1\r\nContent-Length: 0\r\n\r\n");
 
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, new SessionManager()).process(socket);
 
         assertThat(socket.output()).isEqualTo(
                 "HTTP/1.1 302 Found\r\nLocation: /401.html\r\nContent-Length: 0\r\n\r\n"
@@ -31,7 +32,7 @@ class Http11ProcessorTest {
                 + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n\r\n"
                 + body);
 
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, new SessionManager()).process(socket);
 
         assertThat(socket.output()).matches(
                 "HTTP/1\\.1 302 Found\r\nLocation: /index\\.html\r\n"
@@ -43,7 +44,7 @@ class Http11ProcessorTest {
     void returnsEmptyMethodNotAllowedResponse() {
         StubSocket socket = new StubSocket("PUT / HTTP/1.1\r\n\r\n");
 
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, new SessionManager()).process(socket);
 
         assertThat(socket.output()).isEqualTo(
                 "HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\n\r\n"
@@ -59,7 +60,7 @@ class Http11ProcessorTest {
                 "Cookie: JSESSIONID=test-session-id",
                 "",
                 ""));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);
@@ -87,7 +88,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
 
         // when
         processor.process(socket);

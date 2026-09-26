@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.MethodDispatchingController;
-import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.resource.StaticResourceRenderer;
 import org.apache.coyote.http11.HttpResponse;
 
 public final class RegisterController extends MethodDispatchingController {
@@ -14,15 +14,15 @@ public final class RegisterController extends MethodDispatchingController {
     private static final String PASSWORD_PARAMETER = "password";
     private static final String EMAIL_PARAMETER = "email";
 
-    private final StaticResourceController staticResourceController;
+    private final StaticResourceRenderer staticResourceRenderer;
 
-    public RegisterController(final StaticResourceController staticResourceController) {
-        this.staticResourceController = staticResourceController;
+    public RegisterController(final StaticResourceRenderer staticResourceRenderer) {
+        this.staticResourceRenderer = staticResourceRenderer;
     }
 
     @Override
     protected void doGet(final Request request, final HttpResponse response) throws IOException {
-        staticResourceController.serve("/register.html", response);
+        staticResourceRenderer.render("/register.html", response);
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.controller.MethodDispatchingController;
-import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.resource.StaticResourceRenderer;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +20,10 @@ public final class LoginController extends MethodDispatchingController {
     private static final String PASSWORD_PARAMETER = "password";
     private static final String INDEX_PATH = "/index.html";
 
-    private final StaticResourceController staticResourceController;
+    private final StaticResourceRenderer staticResourceRenderer;
 
-    public LoginController(final StaticResourceController staticResourceController) {
-        this.staticResourceController = staticResourceController;
+    public LoginController(final StaticResourceRenderer staticResourceRenderer) {
+        this.staticResourceRenderer = staticResourceRenderer;
     }
 
     @Override
@@ -32,7 +32,7 @@ public final class LoginController extends MethodDispatchingController {
             response.sendRedirect(INDEX_PATH);
             return;
         }
-        staticResourceController.serve("/login.html", response);
+        staticResourceRenderer.render("/login.html", response);
     }
 
     @Override

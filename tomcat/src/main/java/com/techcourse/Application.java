@@ -5,6 +5,7 @@ import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.catalina.mapper.RequestMapping;
+import org.apache.catalina.resource.StaticResourceRenderer;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
@@ -16,11 +17,12 @@ public class Application {
     }
 
     private static RequestMapping createRequestMapping() {
-        final StaticResourceController staticResourceController = new StaticResourceController();
+        final StaticResourceRenderer staticResourceRenderer = new StaticResourceRenderer();
+        final StaticResourceController staticResourceController = new StaticResourceController(staticResourceRenderer);
         final RequestMapping requestMapping = new RequestMapping(staticResourceController);
         requestMapping.addMapping("/", new HomeController());
-        requestMapping.addMapping("/login", new LoginController(staticResourceController));
-        requestMapping.addMapping("/register", new RegisterController(staticResourceController));
+        requestMapping.addMapping("/login", new LoginController(staticResourceRenderer));
+        requestMapping.addMapping("/register", new RegisterController(staticResourceRenderer));
         return requestMapping;
     }
 }

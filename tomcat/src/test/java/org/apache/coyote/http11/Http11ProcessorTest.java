@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.StaticResourceController;
 import org.apache.catalina.mapper.RequestMapping;
+import org.apache.catalina.resource.StaticResourceRenderer;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -18,7 +19,7 @@ class Http11ProcessorTest {
     private final RequestMapping requestMapping = createRequestMapping();
 
     private RequestMapping createRequestMapping() {
-        final RequestMapping mapping = new RequestMapping(new StaticResourceController());
+        final RequestMapping mapping = new RequestMapping(new StaticResourceController(new StaticResourceRenderer()));
         mapping.addMapping("/", new HomeController());
         return mapping;
     }

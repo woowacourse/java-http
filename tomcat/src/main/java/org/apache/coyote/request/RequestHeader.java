@@ -17,6 +17,7 @@ public enum RequestHeader {
     IF_UNMODIFIED_SINCE("If-Unmodified-Since"),
     MAX_FORWARDS("Max-Forwards"),
     PROXY_AUTHORIZATION("Proxy-Authorization"),
+    COOKIE("Cookie"),
     RANGE("Range"),
     REFERER("Referer"),
     TE("TE"),
@@ -27,5 +28,9 @@ public enum RequestHeader {
 
     RequestHeader(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public String fieldName() {
+        return fieldName;
     }
 }

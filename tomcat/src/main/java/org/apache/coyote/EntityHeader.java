@@ -19,4 +19,8 @@ public enum EntityHeader {
     EntityHeader(String fieldName) {
         this.fieldName = fieldName;
     }
+
+    public String fieldName() {
+        return fieldName;
+    }
 }

@@ -18,4 +18,8 @@ public enum GeneralHeader {
     GeneralHeader(String fieldName) {
         this.fieldName = fieldName;
     }
+
+    public String fieldName() {
+        return fieldName;
+    }
 }

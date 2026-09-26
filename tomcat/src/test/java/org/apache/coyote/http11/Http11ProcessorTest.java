@@ -294,6 +294,31 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void Content_Length_헤더_이름의_대소문자를_구분하지_않고_본문을_읽는다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "content-length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=password",
+                "",
+                "");
+        var socket = new StubSocket(httpRequest);
+        var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found ",
+                "Location: http://localhost:8080/index.html "
+        );
+    }
+
+    @Test
     void 세션이_필요하지_않은_정적_리소스_요청에는_세션_쿠키를_발급하지_않는다() {
         // given
         final String httpRequest = String.join("\r\n",

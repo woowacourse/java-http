@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = 0;
         while (!(line = br.readLine()).isEmpty()) {
             sb.append(line).append("\r\n");
-            if (line.startsWith("Content-Length:")) {
+            if (line.regionMatches(true, 0, "Content-Length:", 0, "Content-Length:".length())) {
                 contentLength = Integer.parseInt(line.substring("Content-Length:".length()).strip());
             }
         }

@@ -17,24 +17,25 @@ import java.util.stream.Collectors;
 
 public class MyHttpRequest {
 
-    private SessionManager manager = SessionManager.getInstance();
+    private final SessionManager manager = SessionManager.getInstance();
     private Session session;
     private boolean isNewSession;
-    private RequestLine requestLine;
-    private Map<String, Object> headerFields = new LinkedHashMap<>();
+    private final RequestLine requestLine;
+    private final Map<String, Object> headerFields = new LinkedHashMap<>();
     private HttpCookie cookie;
     private String body;
 
 
     public MyHttpRequest(RequestLine requestLine, Map<String, Object> headerFields, String body) {
         this.requestLine = requestLine;
-        setHeaders(headerFields);
-        String cookieString = headerFields.entrySet().stream()
+        Map<String, Object> copiedHeaders = new LinkedHashMap<>(headerFields);
+        String cookieString = copiedHeaders.entrySet().stream()
                 .filter(entry -> entry.getKey().equalsIgnoreCase("Cookie"))
                 .map(Entry::getValue)
                 .map(Object::toString)
                 .collect(Collectors.joining("; "));
         cookie = HttpCookie.from(cookieString);
+        setHeaders(copiedHeaders);
 
         this.body = body;
     }
@@ -89,6 +90,14 @@ public class MyHttpRequest {
 
     public Optional<String> getCookie(String name) {
         return cookie.getValue(name);
+    }
+
+    public Optional<String> getHeader(String name) {
+        return headerFields.entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(name))
+                .map(Entry::getValue)
+                .map(Object::toString)
+                .findFirst();
     }
 
     public boolean hasCookie(String name) {
@@ -162,28 +171,27 @@ public class MyHttpRequest {
      */
     private void setHeaders(Map<String, Object> headers) {
         for (GeneralHeader headerField : GeneralHeader.values()) {
-            if (headers.containsKey(headerField.name())) {
-                headerFields.put(headerField.name(), headers.remove(headerField.name()));
-            }
+            moveHeaderToOrderedFields(headers, headerField.fieldName());
         }
 
         for (RequestHeader headerField : RequestHeader.values()) {
-            Object fieldValue = null;
-            if (headers.containsKey(headerField.name())) {
-                fieldValue = headers.remove(headerField.name());
-                headerFields.put(headerField.name(), fieldValue);
-            }
-            if (headerField.name().equalsIgnoreCase("Cookie")) {
-                cookie.add(headerField.name(), (String) fieldValue);
-            }
+            moveHeaderToOrderedFields(headers, headerField.fieldName());
         }
 
         for (EntityHeader headerField : EntityHeader.values()) {
-            if (headers.containsKey(headerField.name())) {
-                headerFields.put(headerField.name(), headers.remove(headerField.name()));
-            }
+            moveHeaderToOrderedFields(headers, headerField.fieldName());
         }
 
         headerFields.putAll(headers);
+    }
+
+    private void moveHeaderToOrderedFields(Map<String, Object> headers, String fieldName) {
+        String actualName = headers.keySet().stream()
+                .filter(name -> name.equalsIgnoreCase(fieldName))
+                .findFirst()
+                .orElse(null);
+        if (actualName != null) {
+            headerFields.put(fieldName, headers.remove(actualName));
+        }
     }
 }

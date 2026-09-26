@@ -3,10 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -38,14 +36,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
 
         try (final var inputStream = connection.getInputStream();
-            final var outputStream = connection.getOutputStream()) {
-            final var reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            HttpRequest request = HttpRequest.parse(reader);
-
-            Optional<Cookie> sessionCookie = findSessionCookie(request.headers());
-            String response = handleRequest(request.requestLine().method(), request.requestLine().path(),
-                    request.body().content(), sessionCookie);
+             final var outputStream = connection.getOutputStream()) {
+            HttpRequest request = HttpRequest.parse(inputStream);
+            String response = handleRequest(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -78,16 +71,19 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private String handleRequest(String method, String path, String body, Optional<Cookie> sessionCookie)
-            throws IOException {
-        String resourcePath = path;
+    private String handleRequest(HttpRequest request) throws IOException {
+        String method = request.requestLine().method();
+        String path = request.requestLine().path();
+        String body = request.body().content();
+
+        Optional<Cookie> sessionCookie = findSessionCookie(request.headers());
 
         if ("GET".equals(method)) {
-            return handleGetRequest(resourcePath, sessionCookie);
+            return handleGetRequest(path, sessionCookie);
         }
 
         if ("POST".equals(method)) {
-            return handlePostRequest(resourcePath, body);
+            return handlePostRequest(path, body);
         }
 
         return emptyResponse("HTTP/1.1 405 Method Not Allowed");

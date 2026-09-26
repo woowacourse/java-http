@@ -63,10 +63,7 @@ public class HttpRequest {
 
     public Session getOrCreateSession() {
         if (findSession() == null) {
-            String id = cookies.hasSessionId()
-                    ? cookies.getSessionId()
-                    : UUID.randomUUID().toString();
-            session = new Session(id);
+            session = new Session(UUID.randomUUID().toString());
             SessionManager.add(session);
         }
 

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.RequestMapping;
+import org.apache.catalina.Session;
 import org.apache.catalina.controller.Controller;
 import java.io.IOException;
 import java.net.Socket;
@@ -44,10 +45,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addSessionCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.getCookies().hasSessionId()) {
-            return;
-        }
-
-        httpResponse.setCookie("JSESSIONID", httpRequest.getOrCreateSession().getId());
+        Session session = httpRequest.getOrCreateSession();
+        httpResponse.setCookie("JSESSIONID", session.getId());
     }
 }

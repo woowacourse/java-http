@@ -26,10 +26,8 @@ public class User {
         return account;
     }
 
-    public void isMatchPassword(String password) {
-        if (!this.password.equals(password)) {
-            throw new IllegalArgumentException("패스워드가 일치하지 않습니다.");
-        }
+    public boolean isMatchPassword(String password) {
+        return this.password.equals(password);
     }
 
     @Override

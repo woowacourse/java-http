@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.web.StaticResourceHandler;
+import com.techcourse.controller.Controller;
+import org.apache.catalina.mapper.RequestMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.*;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,22 +13,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final LoginController loginController;
-    private final RegisterController registerController;
-    private final StaticResourceHandler staticResourceHandler;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.loginController = new LoginController();
-        this.registerController = new RegisterController();
-        this.staticResourceHandler = new StaticResourceHandler();
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -50,31 +43,16 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = handleRequest(httpRequest);
 
             writeResponse(outputStream, response);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse handleRequest(final HttpRequest httpRequest) throws IOException {
-        final RequestLine requestLine = httpRequest.getRequestLine();
-        final HttpMethod httpMethod = requestLine.getHttpMethod();
-        final String target = requestLine.getTarget();
-        final URI uri = URI.create(target);
-        final String uriPath = uri.getPath();
-        final String requestBody = httpRequest.getBody().getContent();
-
-        final RequestHeaders headers = httpRequest.getHeaders();
-        final HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-
-        if (uriPath.equals("/login")) {
-            return loginController.handle(httpMethod, uri, httpCookie, requestBody);
-        }
-
-        if (uriPath.equals("/register")) {
-            return registerController.handle(requestBody);
-        }
-
-        return staticResourceHandler.handle(uriPath);
+    private HttpResponse handleRequest(final HttpRequest httpRequest) throws Exception {
+        final Controller controller = requestMapping.getController(httpRequest);
+        final HttpResponse response = new HttpResponse();
+        controller.service(httpRequest, response);
+        return response;
     }
 
     private void writeResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {

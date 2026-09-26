@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -14,20 +15,23 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RegisterController {
+public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     private static final String QUERY_PARAM_DELIMITER = "&";
     private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
 
-    public HttpResponse handle(final String requestBody) throws IOException {
-        if (requestBody != null) {
-            createUser(extractQueryParams(requestBody));
-        }
-
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final Path filePath = getFilePath("/register");
-        return new HttpResponse(HttpStatus.OK, filePath, getResponseBody(filePath), null, null);
+        response.set(HttpStatus.OK, filePath, Files.readString(filePath), null, null);
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+        createUser(extractQueryParams(request.getBody().getContent()));
+        response.set(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html", null);
     }
 
     private void createUser(final Map<String, String> params) {
@@ -56,10 +60,6 @@ public class RegisterController {
     private Path getFilePath(final String uriPath) {
         final String resourceName = "static/" + (uriPath.startsWith("/") ? uriPath.substring(1) : uriPath);
         return resolveResourcePath(resourceName);
-    }
-
-    private String getResponseBody(final Path filePath) throws IOException {
-        return Files.readString(filePath);
     }
 
     private Path resolveResourcePath(final String name) {

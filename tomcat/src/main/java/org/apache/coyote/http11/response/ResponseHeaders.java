@@ -12,6 +12,9 @@ public class ResponseHeaders {
 
     private final Map<String, String> headers = new LinkedHashMap<>();
 
+    public ResponseHeaders() {
+    }
+
     public ResponseHeaders(final Path filePath, final String location, final HttpCookie httpCookie) {
         add("Content-Type", getContentType(filePath));
 

@@ -5,7 +5,7 @@ import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
@@ -30,27 +30,48 @@ public class LoginController {
     private static final String JSESSION_ID_KEY = "JSESSIONID";
     private static final String LOGIN_USER_KEY = "user";
 
-    public HttpResponse handle(final HttpMethod httpMethod, final URI uri,
-                               final HttpCookie httpCookie, final String requestBody) throws IOException {
-        Path filePath = getFilePath(uri.getPath());
-
-        if (httpMethod == HttpMethod.GET && isLoggedIn(httpCookie)) {
-            return new HttpResponse(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html", httpCookie);
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        final HttpCookie httpCookie = getHttpCookie(request);
+        if (isLoggedIn(httpCookie)) {
+            redirect(response, "/index.html", httpCookie);
+            return;
         }
 
-        final String loginParameters = requestBody != null ? requestBody : uri.getQuery();
+        final URI uri = URI.create(request.getRequestLine().getTarget());
+        handleLogin(response, uri.getQuery(), httpCookie);
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        handleLogin(response, request.getBody().getContent(), getHttpCookie(request));
+    }
+
+    private void handleLogin(final HttpResponse response, final String loginParameters,
+                             final HttpCookie httpCookie) throws IOException {
         if (loginParameters == null) {
-            filePath = getFilePath("/login");
-            return new HttpResponse(HttpStatus.OK, filePath, getResponseBody(filePath), null, httpCookie);
+            final Path filePath = getFilePath("/login");
+            response.set(HttpStatus.OK, filePath, Files.readString(filePath), null, httpCookie);
+            return;
         }
 
         final Optional<User> user = authenticate(extractQueryParams(loginParameters));
         if (user.isPresent()) {
             saveUserInSession(httpCookie, user.get());
-            return new HttpResponse(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html", httpCookie);
+            redirect(response, "/index.html", httpCookie);
+            return;
         }
 
-        return new HttpResponse(HttpStatus.FOUND, getFilePath("/401.html"), "", "/401.html", httpCookie);
+        redirect(response, "/401.html", httpCookie);
+    }
+
+    private void redirect(final HttpResponse response, final String location,
+                          final HttpCookie httpCookie) {
+        response.set(HttpStatus.FOUND, getFilePath(location), "", location, httpCookie);
+    }
+
+    private HttpCookie getHttpCookie(final HttpRequest request) {
+        return new HttpCookie(request.getHeaders().get("Cookie"));
     }
 
     private boolean isLoggedIn(final HttpCookie httpCookie) throws IOException {
@@ -112,10 +133,6 @@ public class LoginController {
     private Path getFilePath(final String uriPath) {
         final String resourceName = "static/" + (uriPath.startsWith("/") ? uriPath.substring(1) : uriPath);
         return resolveResourcePath(resourceName);
-    }
-
-    private String getResponseBody(final Path filePath) throws IOException {
-        return Files.readString(filePath);
     }
 
     private Path resolveResourcePath(final String name) {

@@ -5,9 +5,14 @@ import org.apache.coyote.http11.HttpCookie;
 import java.nio.file.Path;
 
 public class HttpResponse {
-    private final HttpStatus httpStatus;
-    private final ResponseHeaders responseHeaders;
-    private final String body;
+    private HttpStatus httpStatus;
+    private ResponseHeaders responseHeaders;
+    private String body;
+
+    public HttpResponse() {
+        this.responseHeaders = new ResponseHeaders();
+        this.body = "";
+    }
 
     public HttpResponse(HttpStatus httpStatus, ResponseHeaders responseHeaders, String body) {
         this.httpStatus = httpStatus;
@@ -30,6 +35,19 @@ public class HttpResponse {
 
     public String body() {
         return body;
+    }
+
+    public void set(final HttpStatus httpStatus, final Path filePath, final String body,
+                    final String location, final HttpCookie httpCookie) {
+        this.httpStatus = httpStatus;
+        this.responseHeaders = new ResponseHeaders(filePath, location, httpCookie);
+        this.body = body;
+    }
+
+    public void copyFrom(final HttpResponse response) {
+        this.httpStatus = response.status();
+        this.responseHeaders = response.headers();
+        this.body = response.body();
     }
 
     public String toHttpMessage() {

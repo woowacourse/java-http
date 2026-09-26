@@ -10,6 +10,8 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private static final int MAX_THREADS = 250;
+
     private final RequestMapping requestMapping;
 
     public Tomcat(RequestMapping requestMapping) {
@@ -17,7 +19,7 @@ public class Tomcat {
     }
 
     public void start() {
-        var connector = new Connector(requestMapping);
+        var connector = new Connector(requestMapping, MAX_THREADS);
         connector.start();
 
         try {

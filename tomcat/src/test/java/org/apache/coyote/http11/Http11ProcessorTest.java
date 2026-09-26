@@ -1,22 +1,29 @@
 package org.apache.coyote.http11;
 
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.catalina.SessionManager;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, SessionManager.getInstance());
 
         // when
         processor.process(socket);
@@ -35,15 +42,16 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, SessionManager.getInstance());
 
         // when
         processor.process(socket);
@@ -53,7 +61,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);

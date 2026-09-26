@@ -11,6 +11,7 @@ import java.util.Optional;
 public class StaticResourceController implements Controller {
 
     private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String PAGE_NOT_FOUND_MESSAGE = "서버 오류가 발생했습니다.";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -18,7 +19,9 @@ public class StaticResourceController implements Controller {
         final Optional<String> body = StaticResources.read(path);
 
         if (body.isEmpty()) {
-            response.sendError(HttpStatus.NOT_FOUND, StaticResources.read(NOT_FOUND_PAGE).orElse(""));
+            StaticResources.read(NOT_FOUND_PAGE).ifPresentOrElse(
+                    resource -> response.sendError(HttpStatus.BAD_REQUEST, resource),
+                    () -> response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, PAGE_NOT_FOUND_MESSAGE));
             return;
         }
         response.ok(ContentType.from(path), body.get());

@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.login.LoginParser;
 import org.apache.coyote.login.LoginResult;
@@ -57,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             final var responseType = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
             // Path에 따른 비지니스 로직
-            if (httpInfo.get("Path").contains("/login?")) {
+            if (httpInfo.get("Path").contains("/login") && httpInfo.get("Method").equals("GET")) {
                 Map<String, String> queryString = parseQueryString();
                 LoginResult loginResult = authenticateUser(queryString.get("account"), queryString.get("password"));
 
@@ -78,9 +79,17 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if (httpInfo.get("Method").equals("POST") && httpInfo.get("Path").contains("/register")) {
+                // TODO
+            }
+
             // 200 OK 응답 반환
             final var responseBody = readStaticResource(null, responseType);
-            final var response = buildOKHttpResponse(responseBody, responseType);
+
+            var response = buildOKHttpResponse(responseBody, responseType);
+            if (parseCookies().get("JSESSIONID") == null) {
+                response = buildOKHttpResponseWithCookie(responseBody, responseType);
+            }
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -104,6 +113,28 @@ public class Http11Processor implements Runnable, Processor {
             }
             httpInfo.put(header[0], header[1]);
         }
+    }
+
+    private Map<String, String> parseCookies() {
+        final Map<String, String> cookies = new HashMap<>();
+        final String cookieHeader = httpInfo.get("Cookie");
+
+        if (cookieHeader == null || cookieHeader.isBlank()) {
+            return cookies;
+        }
+
+        final String[] cookiePairs = cookieHeader.split(";");
+        for (String cookiePair : cookiePairs) {
+            final String[] keyValue = cookiePair.trim().split("=", 2);
+            if (keyValue.length != 2) {
+                log.debug("[parseCookies] cookie의 형식이 올바르지 않습니다. cookie = {}", cookiePair);
+                continue;
+            }
+
+            cookies.put(keyValue[0], keyValue[1]);
+        }
+
+        return cookies;
     }
 
     private String resolveContentType(String acceptValue) {
@@ -183,11 +214,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 
-    private String buildOKHttpResponse(final String responseBody,
-        final String type) {
+    private String buildOKHttpResponse(final String responseBody, final String type) {
         return String.join("\r\n",
             String.format("HTTP/1.1 %d %s ", 200, "OK"),
             String.format("Content-Type: text/%s;charset=utf-8 ", type),
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+    }
+
+    private String buildOKHttpResponseWithCookie(final String responseBody, final String type) {
+        return String.join("\r\n",
+            String.format("HTTP/1.1 %d %s ", 200, "OK"),
+            String.format("Content-Type: text/%s;charset=utf-8 ", type),
+            String.format("Set-Cookie: JSESSIONID=%s; ", UUID.randomUUID()),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

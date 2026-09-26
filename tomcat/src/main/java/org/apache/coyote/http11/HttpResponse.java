@@ -30,8 +30,8 @@ public class HttpResponse {
     }
 
     public void write(final OutputStream outputStream) throws IOException {
-        headers.setHeader("Content-Length", String.valueOf(body.length));
         writeStatusLine(outputStream);
+        writeContentLength(outputStream);
         headers.writeTo(outputStream);
         outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
@@ -41,5 +41,18 @@ public class HttpResponse {
     private void writeStatusLine(final OutputStream outputStream) throws IOException {
         final String statusLine = httpVersion + " " + statusCode + " " + reasonPhrase + "\r\n";
         outputStream.write(statusLine.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void writeContentLength(final OutputStream outputStream) throws IOException {
+        final String contentLength = headers.getHeader("Content-Length");
+        final String bodyLength = String.valueOf(body.length);
+        if (contentLength == null) {
+            final String header = "Content-Length: " + bodyLength + "\r\n";
+            outputStream.write(header.getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+        if (!contentLength.trim().equals(bodyLength)) {
+            headers.setHeader("Content-Length", bodyLength);
+        }
     }
 }

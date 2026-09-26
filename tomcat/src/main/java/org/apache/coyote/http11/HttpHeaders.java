@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,6 +11,7 @@ import java.util.TreeMap;
 public class HttpHeaders {
 
     private final Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final List<String> headerNames = new ArrayList<>();
 
     public HttpHeaders() {
     }
@@ -25,12 +27,15 @@ public class HttpHeaders {
     }
 
     public void setHeader(final String name, final String value) {
+        if (!headers.containsKey(name)) {
+            headerNames.add(name);
+        }
         headers.put(name, value);
     }
 
     public void writeTo(final OutputStream outputStream) throws IOException {
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            final String line = header.getKey() + ": " + header.getValue() + "\r\n";
+        for (String name : headerNames) {
+            final String line = name + ": " + headers.get(name) + "\r\n";
             outputStream.write(line.getBytes(StandardCharsets.UTF_8));
         }
     }

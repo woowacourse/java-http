@@ -3,9 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,7 +28,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN = "/login";
     private static final String REGISTER = "/register";
     private static final String POST_METHOD = "POST";
-    private static final String COOKIE_HEADER = "Cookie";
     private static final String SET_COOKIE_HEADER = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String USER = "user";
@@ -55,50 +52,37 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream(); final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final String requestLine = reader.readLine();
-
-            if (requestLine == null) {
-                return;
-            }
-            final String[] requestParts = requestLine.split(" ");
-            final String method = requestParts[0];
-            String requestUri = requestParts[1];
-            final String version = requestParts[2];
-            final Map<String, String> headers = readHeaders(reader);
-            final String requestBody = readRequestBody(method, headers, reader);
-            final HttpCookie cookies = new HttpCookie(headers.get(COOKIE_HEADER));
-            final String sessionId = cookies.getValue(JSESSIONID);
+            final HttpRequest request = new HttpRequest(inputStream);
+            final String method = request.getMethod();
+            String requestUri = request.getUri();
+            final String version = request.getHttpVersion();
+            final HttpResponse response = new HttpResponse(version);
+            final String requestBody = request.getBody();
+            final String sessionId = request.getCookie(JSESSIONID);
             final Session session = SESSION_MANAGER.findSession(sessionId);
-            String setCookie = createSetCookieHeader(cookies);
+            String setCookie = createSetCookieHeader(sessionId);
 
             byte[] responseBody = "Hello world!".getBytes(StandardCharsets.UTF_8);
             final String requestPath = extractRequestPath(requestUri);
 
             if (method.equals(POST_METHOD) && requestPath.equals(LOGIN)) {
-                final String responseHeader = createLoginResponseHeader(version, requestBody, sessionId, setCookie);
-
-                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                setLoginResponse(response, requestBody, sessionId, setCookie);
+                response.write(outputStream);
                 return;
             }
 
             if (method.equals(POST_METHOD) && requestPath.equals(REGISTER)) {
                 saveUser(requestBody);
-                final String responseHeader = createRedirectResponseHeader(version, LOGIN_SUCCESS, setCookie);
-
-                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                setRedirectResponse(response, LOGIN_SUCCESS, setCookie);
+                response.write(outputStream);
                 return;
             }
 
             requestUri = requestPath;
 
             if (requestPath.equals(LOGIN) && isLoggedIn(session)) {
-                final String responseHeader = createRedirectResponseHeader(version, LOGIN_SUCCESS, "");
-
-                outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                setRedirectResponse(response, LOGIN_SUCCESS, "");
+                response.write(outputStream);
                 return;
             }
 
@@ -113,71 +97,42 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = Files.readAllBytes(path);
             }
 
-            final String responseHeader = createResponseHeader(version, contentType, responseBody.length, setCookie);
-
-            outputStream.write(responseHeader.getBytes(StandardCharsets.UTF_8));
-            outputStream.write(responseBody);
-            outputStream.flush();
+            setOkResponse(response, contentType, responseBody, setCookie);
+            response.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            final String[] header = line.split(":", 2);
-            final String name = header[0].trim();
-            final String value = header[1].trim();
-            headers.put(name, value);
+    private void setOkResponse(final HttpResponse response, final String contentType, final byte[] responseBody,
+                               final String setCookie) {
+        response.setStatus(200, "OK ");
+        if (!setCookie.isEmpty()) {
+            response.setHeader(SET_COOKIE_HEADER, setCookie + " ");
         }
-        return headers;
+        response.setHeader("Content-Type", contentType + " ");
+        response.setHeader("Content-Length", responseBody.length + " ");
+        response.setBody(responseBody);
     }
 
-    private String readRequestBody(final String method, final Map<String, String> headers, final BufferedReader reader)
-            throws IOException {
-        if (!method.equals(POST_METHOD)) {
-            return "";
+    private void setRedirectResponse(final HttpResponse response, final String location, final String setCookie) {
+        response.setStatus(302, "Found ");
+        if (!setCookie.isEmpty()) {
+            response.setHeader(SET_COOKIE_HEADER, setCookie + " ");
         }
-
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        final char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        response.setHeader("Location", location + " ");
+        response.setHeader("Content-Length", "0 ");
     }
 
-    private String createResponseHeader(final String version, final String contentType, final int contentLength,
-                                        final String setCookie) {
-        if (setCookie.isEmpty()) {
-            return String.join("\r\n", version + " 200 OK ", "Content-Type: " + contentType + " ",
-                    "Content-Length: " + contentLength + " ", "", "");
-        }
-
-        return String.join("\r\n", version + " 200 OK ", SET_COOKIE_HEADER + ": " + setCookie + " ",
-                "Content-Type: " + contentType + " ", "Content-Length: " + contentLength + " ", "", "");
-    }
-
-    private String createRedirectResponseHeader(final String version, final String location, final String setCookie) {
-        if (setCookie.isEmpty()) {
-            return String.join("\r\n", version + " 302 Found ", "Location: " + location + " ", "Content-Length: 0 ", "",
-                    "");
-        }
-
-        return String.join("\r\n", version + " 302 Found ", SET_COOKIE_HEADER + ": " + setCookie + " ",
-                "Location: " + location + " ", "Content-Length: 0 ", "", "");
-    }
-
-    private String createSetCookieHeader(final HttpCookie cookies) {
-        final String sessionId = cookies.getValue(JSESSIONID);
+    private String createSetCookieHeader(final String sessionId) {
         if (sessionId != null) {
             return "";
         }
         return JSESSIONID + "=" + UUID.randomUUID();
     }
 
-    private String createLoginResponseHeader(final String version, final String requestBody,
-                                             final String sessionId, final String setCookie) {
+    private void setLoginResponse(final HttpResponse response, final String requestBody,
+                                  final String sessionId, final String setCookie) {
         final String location = getLoginRedirectionLocation(requestBody);
         String responseCookie = setCookie;
 
@@ -188,7 +143,7 @@ public class Http11Processor implements Runnable, Processor {
             responseCookie = createSessionCookie(sessionId, loginSession);
         }
 
-        return createRedirectResponseHeader(version, location, responseCookie);
+        setRedirectResponse(response, location, responseCookie);
     }
 
     private Session getOrCreateSession(final String sessionId) {

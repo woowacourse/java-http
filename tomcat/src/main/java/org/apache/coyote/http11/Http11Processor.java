@@ -3,11 +3,10 @@ package org.apache.coyote.http11;
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final Controller registerController = new RegisterController();
     private final Controller loginController = new LoginController();
+    private final Controller staticResourceController = new StaticResourceController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<Cookie> sessionCookie = request.headers().getCookie("JSESSIONID");
 
         if ("GET".equals(method)) {
-            return handleGetRequest(path, sessionCookie);
+            return handleGetRequest(path, sessionCookie, request);
         }
 
         if ("POST".equals(method)) {
@@ -63,14 +63,15 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.empty(405, "Method Not Allowed");
     }
 
-    private HttpResponse handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie) throws IOException {
+    private HttpResponse handleGetRequest(String resourcePath, Optional<Cookie> sessionCookie, HttpRequest request)
+            throws IOException {
         Session session = findSession(sessionCookie);
 
         if ("/login".equals(resourcePath) && isLoggedIn(session)) {
             return HttpResponse.redirect("/index.html");
         }
 
-        return serveStaticResource(resourcePath);
+        return staticResourceController.handle(request);
     }
 
     private HttpResponse handlePostRequest(String resourcePath, HttpRequest request) throws IOException {
@@ -95,46 +96,5 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isLoggedIn(Session session) {
         return session != null && session.getAttribute("user") != null;
-    }
-
-    private HttpResponse serveStaticResource(String resourcePath) throws IOException {
-        byte[] bytes = resolveResponseBody(resourcePath);
-        String contentType = resolveContentType(resourcePath);
-
-        return HttpResponse.ok(contentType, bytes);
-    }
-
-    private String resolveContentType(String resourcePath) {
-        if (resourcePath.endsWith(".css")) {
-            return "text/css;charset=utf-8";
-        }
-
-        if (resourcePath.endsWith(".js")) {
-            return "text/javascript;charset=utf-8";
-        }
-
-        return "text/html;charset=utf-8";
-    }
-
-    private byte[] resolveResponseBody(String resourcePath) throws IOException {
-        if (resourcePath.equals("/")) {
-            return "Hello world!".getBytes(StandardCharsets.UTF_8);
-        }
-
-        if (resourcePath.equals("/login") || resourcePath.equals("/register")) {
-            return readResource("static" + resourcePath + ".html");
-        }
-
-        return readResource("static" + resourcePath);
-    }
-
-    private byte[] readResource(String resourcePath) throws IOException {
-        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (resourceStream == null) {
-                throw new IOException(resourcePath + " 파일을 찾을 수 없습니다.");
-            }
-
-            return resourceStream.readAllBytes();
-        }
     }
 }

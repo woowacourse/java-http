@@ -1,0 +1,194 @@
+package org.apache.coyote.http11;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIOException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
+class HttpRequestTest {
+
+    @Test
+    void readsRequestLineAndHeaders() throws IOException {
+        String message = "GET /login?next=index HTTP/1.1\r\n"
+                + "Host: localhost:8080\r\n"
+                + "cOoKiE: JSESSIONID=test-id\r\n\r\n";
+
+        HttpRequest request = HttpRequest.readFrom(input(message));
+
+        assertThat(request.method()).isEqualTo("GET");
+        assertThat(request.path()).isEqualTo("/login");
+        assertThat(request.httpVersion()).isEqualTo("HTTP/1.1");
+        assertThat(request.header("HOST")).isEqualTo("localhost:8080");
+        assertThat(request.header("Cookie")).isEqualTo("JSESSIONID=test-id");
+        assertThat(request.header("missing")).isNull();
+        assertThat(request.body()).isEmpty();
+    }
+
+    @Test
+    void readsBodyUsingByteLength() throws IOException {
+        String body = "note=가&account=gugu";
+        String message = "POST /login HTTP/1.1\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + body + "EXTRA";
+
+        HttpRequest request = HttpRequest.readFrom(input(message));
+
+        assertThat(request.method()).isEqualTo("POST");
+        assertThat(request.body()).isEqualTo(body);
+    }
+
+    @Test
+    void returnsNullWhenNoRequestArrives() throws IOException {
+        assertThat(HttpRequest.readFrom(input(""))).isNull();
+    }
+
+    @Test
+    void rejectsMalformedRequestLine() {
+        for (String message : List.of("\r\n", "GET\r\n\r\n")) {
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> HttpRequest.readFrom(input(message)));
+        }
+    }
+
+    @Test
+    void rejectsMalformedOrIncompleteHeaders() {
+        for (String message : List.of(
+                "GET / HTTP/1.1\r\nHost: localhost\r\n",
+                "GET / HTTP/1.1\r\nBrokenHeader\r\n\r\n")) {
+            assertThatIOException()
+                    .isThrownBy(() -> HttpRequest.readFrom(input(message)));
+        }
+    }
+
+    @Test
+    void rejectsInvalidContentLength() {
+        for (String length : List.of("-1", "invalid")) {
+            String message = "POST /login HTTP/1.1\r\nContent-Length: "
+                    + length + "\r\n\r\n";
+            assertThatIOException()
+                    .isThrownBy(() -> HttpRequest.readFrom(input(message)));
+        }
+    }
+
+    @Test
+    void rejectsTruncatedBody() {
+        String message = "POST /login HTTP/1.1\r\nContent-Length: 5\r\n\r\nabc";
+
+        assertThatIOException()
+                .isThrownBy(() -> HttpRequest.readFrom(input(message)));
+    }
+
+    @Test
+    void readsFormParametersAndPreservesBody() throws IOException {
+        String body = "account=gugu&password=password";
+        HttpRequest request = formRequest(body);
+
+        assertThat(request.parameter("account")).isEqualTo("gugu");
+        assertThat(request.parameter("password")).isEqualTo("password");
+        assertThat(request.body()).isEqualTo(body);
+    }
+
+    @Test
+    void decodesFormNamesAndValues() throws IOException {
+        HttpRequest request = formRequest(
+                "acc%6Funt=%67ugu&password=pass%77ord&note=%EA%B0%80+%2B");
+
+        assertThat(request.parameter("account")).isEqualTo("gugu");
+        assertThat(request.parameter("password")).isEqualTo("password");
+        assertThat(request.parameter("note")).isEqualTo("가 +");
+    }
+
+    @Test
+    void preservesEqualsInValueAndUsesLastDuplicate() throws IOException {
+        HttpRequest request = formRequest("token=a=b&account=first&account=last");
+
+        assertThat(request.parameter("token")).isEqualTo("a=b");
+        assertThat(request.parameter("account")).isEqualTo("last");
+    }
+
+    @Test
+    void distinguishesEmptyAndMissingParameters() throws IOException {
+        HttpRequest request = formRequest("account=&ignored&password=password");
+
+        assertThat(request.parameter("account")).isEmpty();
+        assertThat(request.parameter("ignored")).isNull();
+        assertThat(request.parameter("email")).isNull();
+        assertThat(request.parameter("password")).isEqualTo("password");
+    }
+
+    @Test
+    void rejectsInvalidEncodingWhenParametersAreRequested() throws IOException {
+        for (String value : List.of("%AZ", "%", "%1")) {
+            String body = "account=gugu&password=" + value;
+            HttpRequest request = formRequest(body);
+
+            assertThat(request.body()).isEqualTo(body);
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> request.parameter("account"));
+        }
+    }
+
+    @Test
+    void readsDecodedQueryParameters() throws IOException {
+        HttpRequest request = HttpRequest.readFrom(input(
+                "GET /login?acc%6Funt=%67ugu&note=a%2Bb+c HTTP/1.1\r\n\r\n"));
+
+        assertThat(request.queryParameter("account")).isEqualTo("gugu");
+        assertThat(request.queryParameter("note")).isEqualTo("a+b c");
+        assertThat(request.path()).isEqualTo("/login");
+    }
+
+    @Test
+    void keepsQueryAndFormParametersSeparate() throws IOException {
+        String body = "account=bob&bodyOnly=body-value";
+        String message = "POST /login?account=alice&queryOnly=query-value HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + body;
+        HttpRequest request = HttpRequest.readFrom(input(message));
+
+        assertThat(request.queryParameter("account")).isEqualTo("alice");
+        assertThat(request.parameter("account")).isEqualTo("bob");
+        assertThat(request.parameter("queryOnly")).isNull();
+        assertThat(request.queryParameter("bodyOnly")).isNull();
+        assertThat(request.parameter("bodyOnly")).isEqualTo("body-value");
+        assertThat(request.queryParameter("queryOnly")).isEqualTo("query-value");
+    }
+
+    @Test
+    void returnsNullForMissingQueryParameter() throws IOException {
+        for (String target : List.of("/login", "/login?", "/login?other=value")) {
+            HttpRequest request = HttpRequest.readFrom(input("GET " + target + " HTTP/1.1\r\n\r\n"));
+
+            assertThat(request.queryParameter("account")).isNull();
+        }
+    }
+
+    @Test
+    void rejectsInvalidQueryEncodingOnlyWhenQueried() throws IOException {
+        HttpRequest request = HttpRequest.readFrom(input(
+                "GET /login?note=%AZ HTTP/1.1\r\n\r\n"));
+
+        assertThat(request.path()).isEqualTo("/login");
+        assertThat(request.parameter("note")).isNull();
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> request.queryParameter("note"));
+    }
+
+    private HttpRequest formRequest(String body) throws IOException {
+        String message = "POST /login HTTP/1.1\r\n"
+                + "Content-Type: application/x-www-form-urlencoded\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length
+                + "\r\n\r\n" + body;
+        return HttpRequest.readFrom(input(message));
+    }
+
+    private ByteArrayInputStream input(String message) {
+        return new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+    }
+}

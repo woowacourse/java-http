@@ -1,62 +1,27 @@
 package org.apache.coyote.http11;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.StringTokenizer;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class Request {
 
-    private static final Logger log = LoggerFactory.getLogger(Request.class);
-    private final String method;
-    private final String path;
+    private final RequestHeader requestHeader;
+    private final RequestBody requestBody;
     private final RequestParams requestParams;
-    private final ContentType contentType;
 
-    private Request(String method, String path, RequestParams requestParams, ContentType contentType) {
-        this.method = method;
-        this.path = path;
+    public Request(RequestHeader requestHeader, RequestBody requestBody, RequestParams requestParams) {
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
         this.requestParams = requestParams;
-        this.contentType = contentType;
     }
 
-    public static Request from(String requestLine, Map<String, String> headers) {
-        StringTokenizer tokenizer = new StringTokenizer(requestLine);
-        String method = tokenizer.nextToken();
-        ContentType contentType = parseContentType(headers);
-        return splitUri(tokenizer, method, contentType);
-    }
-
-    @Nonnull
-    private static Request splitUri(StringTokenizer tokenizer, String method, ContentType contentType) {
-        String uri = tokenizer.nextToken();
-        int index = uri.indexOf('?');
-        if (index != -1) {
-            String path = uri.substring(0, index);
-            String queryString = uri.substring(index + 1);
-            RequestParams requestParams = RequestParams.of(queryString);
-            return new Request(method, path, requestParams, contentType);
-        }
-        return new Request(method, uri, null, contentType);
-    }
-
-    private static ContentType parseContentType(Map<String, String> headers) {
-        log.info(headers.entrySet().toString());
-        String acceptLine = headers.getOrDefault("accept", "");
-        return Arrays.stream(ContentType.values())
-                .filter(contentType -> acceptLine.contains(contentType.getType()))
-                .findFirst()
-                .orElse(ContentType.HTML);
-    }
-
-    public String getMethod() {
-        return method;
+    public HttpMethod getMethod() {
+        return requestHeader.method();
     }
 
     public String getPath() {
-        return path;
+        return requestHeader.getPath();
     }
 
     public String getRequestParam(String key) {
@@ -66,17 +31,44 @@ public class Request {
         return requestParams.getParams(key);
     }
 
-    public String getContentType() {
-        return contentType.getType();
+    public String getContentTypeName() {
+        return requestHeader.getContentTypeName();
+    }
+
+    public boolean hasJSessionId() {
+        return requestHeader.hasJSessionId();
+    }
+
+    public HttpCookie getCookie() {
+        return requestHeader.cookie();
+    }
+
+    public String getJSessionId() {
+        return requestHeader.getJSessionId();
     }
 
     @Override
     public String toString() {
+        String method = requestHeader.getMethodName();
+        String path = requestHeader.getPath();
+        String jSessionId = requestHeader.getJSessionId();
+        String contentType = requestHeader.getContentTypeName();
         return "Request{" +
                 "method='" + method + '\'' +
                 ", path='" + path + '\'' +
                 ", requestParams=" + requestParams +
                 ", contentType=" + contentType +
+                ", jSessionId='" + jSessionId + '\'' +
                 '}';
+    }
+
+    public Session getSession(boolean create) {
+        SessionManager manager = SessionManager.getInstance();
+        Session session = manager.findSession(getJSessionId());
+        if (session == null && create) {
+            session = new Session(UUID.randomUUID().toString());
+            manager.add(session);
+        }
+        return session;
     }
 }

@@ -7,8 +7,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class HttpResponse {
+
+    private static final Map<String, String> CONTENT_TYPES = Map.of(
+            "html", "text/html;charset=utf-8",
+            "css", "text/css;charset=utf-8",
+            "js", "text/javascript",
+            "svg", "image/svg+xml"
+    );
 
     private final OutputStream outputStream;
     private final List<String> headers = new ArrayList<>();
@@ -84,10 +93,12 @@ public class HttpResponse {
     }
 
     private String determineContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
+        final int extensionIndex = path.lastIndexOf('.');
+        if (extensionIndex < 0 || extensionIndex == path.length() - 1) {
+            return "application/octet-stream";
         }
-        return "text/html;charset=utf-8";
+        final String extension = path.substring(extensionIndex + 1).toLowerCase(Locale.ROOT);
+        return CONTENT_TYPES.getOrDefault(extension, "application/octet-stream");
     }
 
     public void send() throws IOException {

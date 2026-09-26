@@ -90,6 +90,30 @@ class HttpResponseTest {
     }
 
     @Test
+    void JavaScript_정적_파일을_응답한다() throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse response = new HttpResponse(outputStream);
+
+        response.forward("/js/scripts.js");
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8))
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .contains("Content-Type: text/javascript\r\n");
+    }
+
+    @Test
+    void SVG_정적_파일을_응답한다() throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse response = new HttpResponse(outputStream);
+
+        response.forward("/assets/img/error-404-monochrome.svg");
+
+        assertThat(outputStream.toString(StandardCharsets.UTF_8))
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .contains("Content-Type: image/svg+xml\r\n");
+    }
+
+    @Test
     void 존재하지_않는_정적_파일은_404_페이지를_응답한다() throws IOException {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         final HttpResponse response = new HttpResponse(outputStream);

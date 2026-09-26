@@ -50,12 +50,8 @@ public class LoginController extends AbstractController {
         if (account == null || password == null) {
             return Optional.empty();
         }
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            log.info("account doesn't exist: {}", account);
-            return Optional.empty();
-        }
-        return user.filter(foundUser -> foundUser.checkPassword(password));
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
     }
 
     private String addUserToSession(final HttpRequest request, final User user) {

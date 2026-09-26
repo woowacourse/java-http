@@ -3,14 +3,14 @@ package com.techcourse.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    protected HttpResponse doGet(HttpRequest request) throws IOException {
         String resourcePath = request.requestLine().path();
         byte[] bytes = resolveResponseBody(resourcePath);
         String contentType = resolveContentType(resourcePath);

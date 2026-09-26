@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -14,7 +15,7 @@ import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private final Controller staticResourceController = new StaticResourceController();
     private final SessionManager sessionManager;
@@ -24,11 +25,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
-        if ("GET".equals(request.requestLine().method())) {
-            return showLoginPage(request);
-        }
-
+    protected HttpResponse doPost(HttpRequest request) {
         Map<String, String> formData = request.body().parseFormData();
         String account = formData.get("account");
         String password = formData.get("password");
@@ -44,7 +41,8 @@ public class LoginController implements Controller {
         return HttpResponse.redirect("/index.html", new Cookie("JSESSIONID", session.getId()));
     }
 
-    private HttpResponse showLoginPage(HttpRequest request) throws IOException {
+    @Override
+    protected HttpResponse doGet(HttpRequest request) throws IOException {
         Optional<Cookie> sessionCookie = request.headers().getCookie("JSESSIONID");
         Session session = findSession(sessionCookie);
 

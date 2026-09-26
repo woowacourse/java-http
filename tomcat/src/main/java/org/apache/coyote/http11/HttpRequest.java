@@ -1,10 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -28,14 +27,13 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        RequestLine requestLine = RequestLine.of(reader.readLine());
+        RequestLine requestLine = RequestLine.of(readLine(inputStream));
         if (requestLine == null) {
             return null;
         }
 
-        Map<String, String> headers = readHeaders(reader);
-        String body = readBody(reader, requestLine, headers);
+        Map<String, String> headers = readHeaders(inputStream);
+        String body = readBody(inputStream, requestLine, headers);
         return new HttpRequest(requestLine, headers, body);
     }
 
@@ -71,10 +69,28 @@ public class HttpRequest {
         return cookie.get(name);
     }
 
-    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+    private static String readLine(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int previous = -1;
+        int current;
+        while ((current = inputStream.read()) != -1) {
+            if (previous == '\r' && current == '\n') {
+                byte[] bytes = buffer.toByteArray();
+                return new String(bytes, 0, bytes.length - 1, StandardCharsets.UTF_8);
+            }
+            buffer.write(current);
+            previous = current;
+        }
+        if (buffer.size() == 0) {
+            return null;
+        }
+        throw new EOFException("요청 라인 또는 헤더 읽기 실패");
+    }
+
+    private static Map<String, String> readHeaders(InputStream inputStream) throws IOException {
         Map<String, String> headers = new HashMap<>();
         while (true) {
-            String headerLine = reader.readLine();
+            String headerLine = readLine(inputStream);
             if (headerLine == null || headerLine.isEmpty()) {
                 return headers;
             }
@@ -83,7 +99,7 @@ public class HttpRequest {
         }
     }
 
-    private static String readBody(BufferedReader reader, RequestLine requestLine,
+    private static String readBody(InputStream inputStream, RequestLine requestLine,
                                    Map<String, String> headers) throws IOException {
         String contentLengthHeader = headers.get("Content-Length");
         if (!"POST".equals(requestLine.getMethod()) || contentLengthHeader == null) {
@@ -91,16 +107,16 @@ public class HttpRequest {
         }
 
         int contentLength = Integer.parseInt(contentLengthHeader);
-        char[] buffer = new char[contentLength];
+        byte[] buffer = new byte[contentLength];
         int totalRead = 0;
         while (totalRead < contentLength) {
-            int readLength = reader.read(buffer, totalRead, contentLength - totalRead);
+            int readLength = inputStream.read(buffer, totalRead, contentLength - totalRead);
             if (readLength == -1) {
                 throw new EOFException("본문 읽기 실패");
             }
             totalRead += readLength;
         }
-        return new String(buffer);
+        return new String(buffer, StandardCharsets.UTF_8);
     }
 
     private static Map<String, String> readParameters(RequestLine requestLine, String body) {

@@ -1,4 +1,4 @@
-package com.techcourse.model;
+package com.techcourse.http;
 
 
 public class HttpCookie {

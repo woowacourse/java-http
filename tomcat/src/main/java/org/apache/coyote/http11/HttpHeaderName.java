@@ -9,6 +9,7 @@ public enum HttpHeaderName {
     TRANSFER_ENCODING("Transfer-Encoding"),
     COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie"),
+    ALLOW("Allow"),
     LOCATION("Location");
 
     private final String value;

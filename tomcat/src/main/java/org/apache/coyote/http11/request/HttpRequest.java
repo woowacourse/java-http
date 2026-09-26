@@ -45,10 +45,6 @@ public class HttpRequest {
         }
     }
 
-    public String getMethod() {
-        return requestLine.getMethod().name();
-    }
-
     public String getPath() {
         return requestLine.getPath().getValue();
 
@@ -73,7 +69,9 @@ public class HttpRequest {
         return requestLine.isMethod(method);
     }
 
-
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
 
     public Session getSession() {
         return findSession().orElseGet(this::createSession);

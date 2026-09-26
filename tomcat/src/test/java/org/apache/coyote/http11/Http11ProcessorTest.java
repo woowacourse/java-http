@@ -313,6 +313,25 @@ class Http11ProcessorTest {
         assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request ");
     }
 
+    @Test
+    void 지원하지_않는_메서드는_405와_Allow를_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "PUT /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, sessionManager);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 405 Method Not Allowed ");
+        assertThat(socket.output()).contains("Allow: GET, HEAD, POST ");
+    }
+
     private static String formPost(final String path, final String body) {
         return String.join("\r\n",
                 "POST " + path + " HTTP/1.1 ",

@@ -4,6 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.HomeController;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.exception.HttpException;
@@ -29,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -46,18 +52,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final int LINE_FEED = '\n';
     private static final String CARRIAGE_RETURN = "\r";
 
-    private static final String ROOT_PATH = "/";
-    private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String NOT_FOUND_PAGE = "/404.html";
-    private static final String REGISTER_PATH = "/register";
-    private static final String REGISTER_PAGE = "/register.html";
-
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-    private static final String EMAIL = "email";
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping(
+            Map.of(
+                    "/", new HomeController(),
+                    "/login", new LoginController(),
+                    "/register", new RegisterController()
+            ),
+            new StaticResourceController()
+    );
 
     private final Socket connection;
     private final SessionManager sessionManager;
@@ -86,26 +88,52 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handle(final InputStream inputStream, final OutputStream outputStream)
             throws IOException, URISyntaxException {
+        final HttpResponse response;
         try {
-            final String rawRequestLine = readLine(inputStream);
-            final RequestLine requestLine = RequestLine.from(rawRequestLine);
-            final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
-            final RequestBody body = RequestBody.of(
-                    readBody(inputStream, headers.getContentLength()),
-                    headers.get(HttpHeaderName.CONTENT_TYPE)
-            );
-            final HttpRequest request = HttpRequest.of(requestLine, headers, body, sessionManager);
-            log.info("request: {}", requestLine);
-            final HttpResponse response = new HttpResponse();
-            route(request, response);
-            addSessionCookie(request, response);
-            response.writeTo(outputStream);
+            final Optional<HttpRequest> request = readRequest(inputStream);
+            if (request.isEmpty()) {
+                return;   // 요청 없이 연결이 닫힘
+            }
+            response = service(request.get());
         } catch (HttpException e) {
             log.info("invalid request [{}]: {}", e.getStatus().getCode(), e.getMessage());
             HttpResponse.error(e.getStatus()).writeTo(outputStream);
-        } catch (URISyntaxException | RuntimeException e) {
-            log.error("unexpected error while handling request", e);
+            return;
+        } catch (RuntimeException e) {
+            log.error("unexpected error while reading request", e);
             HttpResponse.error(HttpStatus.INTERNAL_SERVER_ERROR).writeTo(outputStream);
+            return;
+        }
+        response.writeTo(outputStream);
+    }
+
+    private Optional<HttpRequest> readRequest(final InputStream inputStream) throws IOException {
+        final String rawRequestLine = readLine(inputStream);
+        if (rawRequestLine == null) {
+            return Optional.empty();
+        }
+        final RequestLine requestLine = RequestLine.from(rawRequestLine);
+        final RequestHeaders headers = RequestHeaders.from(readHeaders(inputStream));
+        final RequestBody body = RequestBody.of(
+                readBody(inputStream, headers.getContentLength()),
+                headers.get(HttpHeaderName.CONTENT_TYPE)
+        );
+        log.info("request: {}", requestLine);
+        return Optional.of(HttpRequest.of(requestLine, headers, body, sessionManager));
+    }
+
+    private HttpResponse service(final HttpRequest request) {
+        try {
+            final HttpResponse response = new HttpResponse();
+            REQUEST_MAPPING.getController(request).service(request, response);
+            addSessionCookie(request, response);
+            return response;
+        } catch (HttpException e) {
+            log.info("request rejected [{}]: {}", e.getStatus().getCode(), e.getMessage());
+            return HttpResponse.error(e.getStatus());
+        } catch (Exception e) {
+            log.error("unexpected error in controller", e);
+            return HttpResponse.error(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -116,89 +144,10 @@ public class Http11Processor implements Runnable, Processor {
         });
     }
 
-    private void route(final HttpRequest request, final HttpResponse response)
-            throws IOException, URISyntaxException {
-        final String path = request.getPath();
-
-        if (ROOT_PATH.equals(path)) {
-            response.setContentType(ContentType.HTML);
-            response.setBody("Hello world!".getBytes(UTF_8));
-            return;
-        }
-
-        if (LOGIN_PATH.equals(path)) {
-            if (request.isMethod(HttpMethod.POST)) {
-                response.sendRedirect(login(request));
-                return;
-            }
-            if (isLoggedIn(request)) {
-                response.sendRedirect(INDEX_PAGE);
-                return;
-            }
-            staticFile(LOGIN_PAGE, response);
-            return;
-        }
-        if (REGISTER_PATH.equals(path)) {
-            if (request.isMethod(HttpMethod.POST)) {
-                response.sendRedirect(register(request));
-                return;
-            }
-            staticFile(REGISTER_PAGE, response);
-            return;
-        }
-        staticFile(path, response);
-    }
-
     private boolean isLoggedIn(final HttpRequest request) {
         return request.findSession()
                 .map(session -> session.getAttribute(USER))
                 .isPresent();
-    }
-    private void staticFile(final String filePath, final HttpResponse response)
-            throws IOException, URISyntaxException {
-        final Optional<Path> found = findStaticFile(filePath);
-        if (found.isEmpty()) {
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setContentType(ContentType.HTML);
-            response.setBody(readNotFoundBody());
-            return;
-        }
-        response.setContentType(ContentType.from(filePath));
-        response.setBody(Files.readAllBytes(found.get()));
-    }
-
-    private byte[] readNotFoundBody() throws IOException, URISyntaxException {
-        final Optional<Path> notFoundPage = findStaticFile(NOT_FOUND_PAGE);
-        if (notFoundPage.isPresent()) {
-            return Files.readAllBytes(notFoundPage.get());
-        }
-        return "Not Found".getBytes(UTF_8);
-    }
-
-    private Optional<Path> findStaticFile(final String url) throws URISyntaxException {
-        final URL resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + url);
-        if (resource == null) {
-            return Optional.empty();
-        }
-
-        final Path path = Path.of(resource.toURI());
-        if (!Files.isRegularFile(path)) {
-            return Optional.empty();
-        }
-        return Optional.of(path);
-    }
-
-    private String register(HttpRequest request) {
-        final Optional<String> account = request.getParameter(ACCOUNT);
-        final Optional<String> password = request.getParameter(PASSWORD);
-        final Optional<String> email = request.getParameter(EMAIL);
-        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            log.info("회원 가입을 하기위해서는 셋 다 입력이 되어야 합니다.");
-            return REGISTER_PAGE;
-        }
-        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
-
-        return INDEX_PAGE;
     }
 
     private List<String> readHeaders(final InputStream inputStream) throws IOException {
@@ -241,25 +190,5 @@ public class Http11Processor implements Runnable, Processor {
             return value.substring(0, value.length() - CARRIAGE_RETURN.length());
         }
         return value;
-    }
-
-    private String login(final HttpRequest request) {
-        final Optional<String> account = request.getParameter(ACCOUNT);
-        final Optional<String> password = request.getParameter(PASSWORD);
-        if (account.isEmpty() || password.isEmpty()) {
-            log.info("login parameters are missing");
-            return UNAUTHORIZED_PAGE;
-        }
-        return InMemoryUserRepository.findByAccount(account.get())
-                .filter(user -> user.checkPassword(password.get()))
-                .map(user -> {
-                    log.info("login success. account: {}", user.getAccount());
-                    request.getSession().setAttribute(USER, user);
-                    return INDEX_PAGE;
-                })
-                .orElseGet(() -> {
-                    log.info("login failed. account: {}", account.get());
-                    return UNAUTHORIZED_PAGE;
-                });
     }
 }

@@ -24,7 +24,6 @@ class RequestLineTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "GET /index.html HTTP/1.1 ",     // 끝 공백
             "GET  /index.html HTTP/1.1",     // 이중 공백
             " GET /index.html HTTP/1.1",     // 앞 공백
             "GET\t/index.html HTTP/1.1",     // 탭

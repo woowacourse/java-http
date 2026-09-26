@@ -107,6 +107,32 @@ class ConnectorTest {
         }
     }
 
+    @Test
+    void stopClosesConnectionsBlockedOnSocketReadAndTerminatesWorkers() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        try (TestServer server = startServer((request, response) -> calls.incrementAndGet(),
+                limits(5_000, 5_000, 100));
+             Socket active = new Socket("127.0.0.1", server.port())) {
+            active.setSoTimeout(2_000);
+            active.getOutputStream().write("GET / HTTP/1.1\r\nHost: localhost\r\n"
+                    .getBytes(StandardCharsets.US_ASCII));
+            try (Socket queued = request(server.port())) {
+                // 첫 작업은 헤더의 끝을 기다리므로 다음 요청은 큐에서 대기한다.
+                awaitQueuedRequests(server.connector(), 1);
+                long startedAt = System.nanoTime();
+
+                server.connector().stop();
+
+                assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt))
+                        .isLessThan(2_000);
+                assertConnectionClosed(active);
+                assertConnectionClosed(queued);
+                assertThat(server.connector().workersTerminated()).isTrue();
+                assertThat(calls.get()).isZero();
+            }
+        }
+    }
+
     private Connector.Limits limits(int readTimeoutMillis, int queueWaitTimeoutMillis,
                                     int shutdownTimeoutMillis) {
         return new Connector.Limits(1, 1, readTimeoutMillis, queueWaitTimeoutMillis,

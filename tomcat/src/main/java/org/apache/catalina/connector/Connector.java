@@ -176,6 +176,10 @@ public class Connector implements Runnable {
         return executorService.getQueue().size();
     }
 
+    boolean workersTerminated() {
+        return executorService.isTerminated();
+    }
+
     private void forceStop() {
         executorService.shutdownNow();
         for (Socket connection : openConnections) {

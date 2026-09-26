@@ -1,16 +1,12 @@
 package org.apache.coyote.http11.session;
 
-import jakarta.servlet.http.HttpSession;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.session.SessionManager;
-
+import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class HttpSessionHandler {
-
-    private static final String COOKIE_NAME = "JSESSIONID";
 
     private static final String SET_COOKIE = "Set-Cookie";
 
@@ -20,51 +16,27 @@ public class HttpSessionHandler {
         this.sessionManager = sessionManager;
     }
 
-    public void ensureSessionIdCookie(final HttpRequest request, final HttpResponse response) {
-        final Optional<String> existingSessionId = request.getCookie(COOKIE_NAME);
+    public void prepare(final HttpRequest request) {
+        request.setSessionManager(sessionManager);
+    }
 
-        if (existingSessionId.isPresent() && !existingSessionId.get().isBlank()) {
+    public void writeSessionCookie(final HttpRequest request, final HttpResponse response) {
+        request.getNewSession()
+                .ifPresentOrElse(
+                        session -> setSessionCookie(response, session.getId()),
+                        () -> ensureSessionIdCookie(request, response)
+                );
+    }
+
+    private void ensureSessionIdCookie(final HttpRequest request, final HttpResponse response) {
+        if (request.getRequestedSessionId().isPresent()) {
             return;
         }
 
-        final String newSessionId = UUID.randomUUID().toString();
-
-        setSessionCookie(response, newSessionId);
-    }
-
-    public HttpSession findSession(final HttpRequest request) {
-        final Optional<String> sessionId = request.getCookie(COOKIE_NAME);
-
-        if (sessionId.isEmpty() || sessionId.get().isBlank()) {
-
-            return null;
-        }
-
-        return sessionManager.findSession(sessionId.get());
-    }
-
-    public HttpSession createSession(final HttpResponse response) {
-        final HttpSession session = sessionManager.createSession();
-
-        setSessionCookie(response, session.getId());
-
-        return session;
-    }
-
-    public HttpSession replaceSession(
-            final HttpRequest request,
-            final HttpResponse response
-    ) {
-        final HttpSession existingSession = findSession(request);
-
-        if (existingSession != null) {
-            existingSession.invalidate();
-        }
-
-        return createSession(response);
+        setSessionCookie(response, UUID.randomUUID().toString());
     }
 
     private void setSessionCookie(final HttpResponse response, final String sessionId) {
-        response.addHeader(SET_COOKIE, COOKIE_NAME + "=" + sessionId);
+        response.addHeader(SET_COOKIE, HttpCookie.SESSION_COOKIE_NAME + "=" + sessionId);
     }
 }

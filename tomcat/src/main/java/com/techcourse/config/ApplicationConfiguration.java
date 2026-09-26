@@ -22,7 +22,7 @@ public class ApplicationConfiguration {
     private final HttpSessionHandler sessionHandler =
             new HttpSessionHandler(sessionManager);
 
-    private final Controller loginController = new LoginController(sessionHandler);
+    private final Controller loginController = new LoginController();
 
 
     private final Controller registerController = new RegisterController();

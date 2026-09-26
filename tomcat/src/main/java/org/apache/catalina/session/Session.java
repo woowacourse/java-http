@@ -160,6 +160,10 @@ public class Session implements HttpSession {
         removeAttribute(name);
     }
 
+    public boolean isValid() {
+        return valid;
+    }
+
     @Override
     public boolean isNew() {
         checkValid();

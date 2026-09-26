@@ -6,6 +6,8 @@ import java.util.Optional;
 
 public class HttpCookie {
 
+    public static final String SESSION_COOKIE_NAME = "JSESSIONID";
+
     private static final String COOKIE_DELIMITER = ";";
     private static final String NAME_VALUE_DELIMITER = "=";
 

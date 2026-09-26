@@ -1,13 +1,17 @@
 package org.apache.coyote.http11.request;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {
+
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Test
     void GET_요청을_파싱한다() throws Exception {
@@ -143,4 +147,88 @@ class HttpRequestTest {
         assertThat(request.getParameter("page")).hasValue("2");
     }
 
+    @Test
+    void JSESSIONID로_기존_세션을_조회한다() throws Exception {
+        // given
+        final HttpSession session = sessionManager.createSession();
+        final HttpRequest request = createSessionRequest("Cookie: JSESSIONID=" + session.getId());
+
+        try {
+            // when
+            final HttpSession foundSession = request.getSession(false);
+
+            // then
+            assertThat(foundSession).isSameAs(session);
+            assertThat(request.getNewSession()).isEmpty();
+        } finally {
+            session.invalidate();
+        }
+    }
+
+    @Test
+    void 세션이_없으면_getSession_false는_null을_반환한다() throws Exception {
+        // given
+        final HttpRequest request = createSessionRequest("Cookie: JSESSIONID=unknown-session");
+
+        // when & then
+        assertThat(request.getSession(false)).isNull();
+        assertThat(request.getNewSession()).isEmpty();
+    }
+
+    @Test
+    void 세션이_없으면_getSession은_새_세션을_생성한다() throws Exception {
+        // given
+        final HttpRequest request = createSessionRequest("Host: localhost:8080");
+
+        // when
+        final HttpSession session = request.getSession();
+
+        // then
+        try {
+            assertThat(request.getNewSession()).containsSame(session);
+            assertThat(request.getSession()).isSameAs(session);
+            assertThat(sessionManager.findSession(session.getId())).isSameAs(session);
+        } finally {
+            session.invalidate();
+        }
+    }
+
+    @Test
+    void 세션을_무효화한_뒤_getSession을_호출하면_새_세션을_생성한다() throws Exception {
+        // given
+        final HttpSession existingSession = sessionManager.createSession();
+        final HttpRequest request =
+                createSessionRequest("Cookie: JSESSIONID=" + existingSession.getId());
+
+        request.getSession(false).invalidate();
+
+        // when
+        final HttpSession newSession = request.getSession();
+
+        // then
+        try {
+            assertThat(newSession.getId()).isNotEqualTo(existingSession.getId());
+            assertThat(request.getNewSession()).containsSame(newSession);
+        } finally {
+            newSession.invalidate();
+        }
+    }
+
+    private HttpRequest createSessionRequest(final String header) throws Exception {
+        final String rawRequest = String.join(
+                "\r\n",
+                "GET /login HTTP/1.1",
+                header,
+                "",
+                ""
+        );
+
+        final HttpRequest request = HttpRequest.from(
+                new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8))
+        ).orElseThrow();
+
+        request.setSessionManager(sessionManager);
+
+        return request;
+    }
 }

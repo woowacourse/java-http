@@ -56,11 +56,12 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = optionalRequest.get();
             final HttpResponse response = new HttpResponse();
 
-            sessionHandler.ensureSessionIdCookie(request, response);
+            sessionHandler.prepare(request);
             serviceController(request, response);
             if (!response.hasStatus()) {// fallback구조
                 staticResourceController.service(request, response);
             }
+            sessionHandler.writeSessionCookie(request, response);
             response.writeTo(outputStream);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

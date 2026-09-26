@@ -29,7 +29,7 @@ class Http11ProcessorTest {
         final HttpSessionHandler sessionHandler = new HttpSessionHandler(sessionManager);
 
         final RequestMapping requestMapping = new RequestMapping(
-                Map.of("/login", new LoginController(sessionHandler),
+                Map.of("/login", new LoginController(),
                         "/register", new RegisterController()
                 )
         );

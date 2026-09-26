@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.HttpSessionHandler;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,11 +21,8 @@ class LoginControllerTest {
     private final SessionManager sessionManager =
             SessionManager.getInstance();
 
-    private final HttpSessionHandler sessionHandler =
-            new HttpSessionHandler(sessionManager);
-
     private final LoginController controller =
-            new LoginController(sessionHandler);
+            new LoginController();
 
     @Test
     void 로그인하지_않은_사용자가_GET_login을_요청하면_응답을_결정하지_않는다()
@@ -122,76 +118,61 @@ class LoginControllerTest {
             throws Exception {
 
         // given
-        final String body =
-                "account=gugu&password=password";
+        final HttpRequest request = createPostRequest("/login", "account=gugu&password=password");
+        final HttpResponse response = new HttpResponse();
 
-        final HttpRequest request =
-                createPostRequest(
-                        "/login",
-                        body
-                );
+        // when
+        controller.service(request, response);
 
-        final HttpResponse response =
-                new HttpResponse();
-
-        HttpSession createdSession = null;
+        // then
+        final HttpSession session = request.getSession(false);
 
         try {
-            // when
-            controller.service(
-                    request,
-                    response
-            );
+            assertThat(writeResponse(response))
+                    .contains("HTTP/1.1 302 Found")
+                    .contains("Location: /index.html");
 
-            // then
-            final String result =
-                    writeResponse(response);
-
-            assertThat(result)
-                    .contains(
-                            "HTTP/1.1 302 Found"
-                    )
-                    .contains(
-                            "Location: /index.html"
-                    )
-                    .contains(
-                            "Set-Cookie: JSESSIONID="
-                    );
-
-            final String sessionId =
-                    extractSessionId(result);
-
-            createdSession =
-                    sessionManager.findSession(
-                            sessionId
-                    );
-
-            assertThat(createdSession)
-                    .isNotNull();
-
-            final Object value =
-                    createdSession.getAttribute(
-                            USER_SESSION_KEY
-                    );
-
-            assertThat(value)
-                    .isInstanceOf(
-                            User.class
-                    );
-
-            final User loginUser =
-                    (User) value;
-
-            assertThat(
-                    loginUser.getAccount()
-            ).isEqualTo(
-                    "gugu"
-            );
-
+            assertThat(session).isNotNull();
+            assertThat(session.getAttribute(USER_SESSION_KEY))
+                    .isInstanceOfSatisfying(User.class,
+                            user -> assertThat(user.getAccount()).isEqualTo("gugu"));
         } finally {
-            if (createdSession != null) {
-                createdSession.invalidate();
-            }
+            session.invalidate();
+        }
+    }
+
+    @Test
+    void 기존_세션이_있는_사용자가_다시_로그인하면_기존_세션을_무효화하고_새_세션을_만든다()
+            throws Exception {
+
+        // given
+        final HttpSession existingSession = sessionManager.createSession();
+        final String existingSessionId = existingSession.getId();
+
+        final HttpRequest request = createRequest(String.join(
+                "\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=" + existingSessionId,
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=password"
+        ));
+        final HttpResponse response = new HttpResponse();
+
+        // when
+        controller.service(request, response);
+
+        // then
+        final HttpSession newSession = request.getSession(false);
+
+        try {
+            assertThat(sessionManager.findSession(existingSessionId)).isNull();
+            assertThat(newSession.getId()).isNotEqualTo(existingSessionId);
+            assertThat(request.getNewSession()).containsSame(newSession);
+        } finally {
+            newSession.invalidate();
         }
     }
 
@@ -228,10 +209,9 @@ class LoginControllerTest {
                 )
                 .contains(
                         "Location: /401.html"
-                )
-                .doesNotContain(
-                        "Set-Cookie: JSESSIONID="
                 );
+
+        assertThat(request.getNewSession()).isEmpty();
     }
 
     @Test
@@ -295,13 +275,17 @@ class LoginControllerTest {
             final String rawRequest
     ) throws Exception {
 
-        return HttpRequest.from(
+        final HttpRequest request = HttpRequest.from(
                 new ByteArrayInputStream(
                         rawRequest.getBytes(
                                 StandardCharsets.UTF_8
                         )
                 )
         ).orElseThrow();
+
+        request.setSessionManager(sessionManager);
+
+        return request;
     }
 
     private String writeResponse(
@@ -318,24 +302,5 @@ class LoginControllerTest {
         return outputStream.toString(
                 StandardCharsets.UTF_8
         );
-    }
-
-    private String extractSessionId(
-            final String response
-    ) {
-        return response.lines()
-                .filter(line ->
-                        line.startsWith(
-                                "Set-Cookie: JSESSIONID="
-                        )
-                )
-                .map(line ->
-                        line.substring(
-                                "Set-Cookie: JSESSIONID="
-                                        .length()
-                        ).trim()
-                )
-                .findFirst()
-                .orElseThrow();
     }
 }

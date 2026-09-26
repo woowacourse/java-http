@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 
@@ -20,6 +23,9 @@ public class HttpRequest {
     private final String body;
     private final Map<String, String> parameters;
     private final HttpCookie cookies;
+
+    private SessionManager sessionManager;
+    private Session session;
 
     private HttpRequest(final RequestLine requestLine,
                         final Map<String, String> headers, final String body) {
@@ -79,6 +85,55 @@ public class HttpRequest {
 
     public Optional<String> getCookie(final String name) {
         return cookies.get(name);
+    }
+
+    public Optional<String> getRequestedSessionId() {
+        return getCookie(HttpCookie.SESSION_COOKIE_NAME)
+                .filter(sessionId -> !sessionId.isBlank());
+    }
+
+    public void setSessionManager(final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
+
+    public HttpSession getSession() {
+        return getSession(true);
+    }
+
+    public HttpSession getSession(final boolean create) {
+        if (session != null && session.isValid()) {
+            return session;
+        }
+
+        session = findRequestedSession();
+
+        if (session == null && create) {
+            session = getSessionManager().createSession();
+        }
+
+        return session;
+    }
+
+    public Optional<HttpSession> getNewSession() {
+        if (session == null || !session.isValid() || !session.isNew()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(session);
+    }
+
+    private Session findRequestedSession() {
+        return getRequestedSessionId()
+                .map(getSessionManager()::findSession)
+                .orElse(null);
+    }
+
+    private SessionManager getSessionManager() {
+        if (sessionManager == null) {
+            throw new IllegalStateException("SessionManager가 설정되지 않았습니다.");
+        }
+
+        return sessionManager;
     }
 
     private static String readLine(final InputStream inputStream

@@ -25,137 +25,86 @@ class HttpSessionHandlerTest {
             throws Exception {
 
         // given
-        final HttpRequest request = createRequest(
-                String.join(
-                        "\r\n",
-                        "GET / HTTP/1.1",
-                        "Host: localhost:8080",
-                        "",
-                        ""
-                )
-        );
-
+        final HttpRequest request = createRequest("");
         final HttpResponse response = new HttpResponse();
 
         // when
-        sessionHandler.ensureSessionIdCookie(request, response);
-
-        response.ok("text/html;charset=utf-8", new byte[0]);
+        sessionHandler.writeSessionCookie(request, response);
 
         final String result = writeResponse(response);
-
-        final String sessionId = extractSessionId(result);
 
         // then
         assertThat(result).contains("Set-Cookie: JSESSIONID=");
 
-        assertThat(sessionManager.findSession(sessionId)).isNull();
+        assertThat(sessionManager.findSession(extractSessionId(result))).isNull();
     }
 
     @Test
-    void 요청의_JSESSIONID로_기존_세션을_조회한다()
+    void 요청_처리_중_세션이_생성되면_실제_세션_ID를_쿠키로_응답한다()
+            throws Exception {
+
+        // given
+        final HttpRequest request = createRequest("");
+        final HttpResponse response = new HttpResponse();
+
+        final HttpSession session = request.getSession();
+
+        try {
+            // when
+            sessionHandler.writeSessionCookie(request, response);
+
+            // then
+            assertThat(writeResponse(response))
+                    .contains("Set-Cookie: JSESSIONID=" + session.getId());
+        } finally {
+            session.invalidate();
+        }
+    }
+
+    @Test
+    void 기존_세션을_사용하면_쿠키를_다시_발급하지_않는다()
             throws Exception {
 
         // given
         final HttpSession session = sessionManager.createSession();
 
-        final HttpRequest request = createRequest(
-                String.join(
-                        "\r\n",
-                        "GET /login HTTP/1.1",
-                        "Host: localhost:8080",
-                        "Cookie: JSESSIONID="
-                                + session.getId(),
-                        "",
-                        ""
-                )
-        );
-
-        // when
-        final HttpSession foundSession = sessionHandler.findSession(request);
-
-        // then
-        assertThat(foundSession).isSameAs(session);
-    }
-
-    @Test
-    void 세션을_생성하면_실제_세션_ID를_쿠키로_응답한다()
-            throws Exception {
-
-        // given
+        final HttpRequest request = createRequest("Cookie: JSESSIONID=" + session.getId());
         final HttpResponse response = new HttpResponse();
-
-        // when
-        final HttpSession session = sessionHandler.createSession(response);
-
-        response.ok("text/html;charset=utf-8", new byte[0]);
-
-        final String result = writeResponse(response);
-
-        // then
-        assertThat(result)
-                .contains("Set-Cookie: JSESSIONID=" + session.getId());
-
-        assertThat(sessionManager.findSession(session.getId())).isSameAs(session);
-    }
-
-    @Test
-    void 기존_세션이_있으면_무효화하고_새로운_세션으로_교체한다() throws Exception {
-
-        // given
-        final HttpSession existingSession = sessionManager.createSession();
-
-        final String existingSessionId = existingSession.getId();
-
-        final HttpRequest request =
-                createRequest(String.join(
-                                "\r\n",
-                                "POST /login HTTP/1.1",
-                                "Host: localhost:8080",
-                                "Cookie: JSESSIONID="
-                                        + existingSessionId,
-                                "",
-                                ""
-                        )
-                );
-
-        final HttpResponse response = new HttpResponse();
-
-        HttpSession newSession = null;
 
         try {
+            request.getSession();
+
             // when
-            newSession = sessionHandler.replaceSession(request, response);
+            sessionHandler.writeSessionCookie(request, response);
 
             // then
-            assertThat(sessionManager.findSession(existingSessionId)).isNull();
-
-            assertThat(newSession.getId()).isNotEqualTo(existingSessionId);
-
-            assertThat(sessionManager.findSession(newSession.getId())).isSameAs(newSession);
-
-            response.ok("text/html;charset=utf-8", new byte[0]);
-
-            final String result = writeResponse(response);
-
-            assertThat(result).contains("Set-Cookie: JSESSIONID=" + newSession.getId());
-
+            assertThat(writeResponse(response)).doesNotContain("Set-Cookie: JSESSIONID=");
         } finally {
-            if (newSession != null) {
-                newSession.invalidate();
-            }
+            session.invalidate();
         }
     }
 
+    private HttpRequest createRequest(final String cookieHeader) throws Exception {
+        final String rawRequest = String.join(
+                "\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                cookieHeader,
+                "",
+                ""
+        ).replace("\r\n\r\n\r\n", "\r\n\r\n");
 
-    private HttpRequest createRequest(final String rawRequest) throws Exception {
-
-        return HttpRequest.from(new ByteArrayInputStream(
+        final HttpRequest request = HttpRequest.from(new ByteArrayInputStream(
                 rawRequest.getBytes(StandardCharsets.UTF_8))
         ).orElseThrow();
+
+        sessionHandler.prepare(request);
+
+        return request;
     }
 
     private String writeResponse(final HttpResponse response) throws Exception {
+        response.ok("text/html;charset=utf-8", new byte[0]);
 
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 

@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.HttpSessionHandler;
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
@@ -22,17 +21,11 @@ public class LoginController extends AbstractController {
     private static final String USER_SESSION_KEY = "user";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private final HttpSessionHandler sessionHandler;
-
-    public LoginController(final HttpSessionHandler sessionHandler) {
-        this.sessionHandler = sessionHandler;
-    }
-
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
 
-        final HttpSession session = sessionHandler.findSession(request);
+        final HttpSession session = request.getSession(false);
         if (session == null) {
             return;
         }
@@ -62,12 +55,22 @@ public class LoginController extends AbstractController {
 
         final User loginUser = user.get();
 
-        final HttpSession session = sessionHandler.replaceSession(request, response);
+        final HttpSession session = renewSession(request);
 
         session.setAttribute(USER_SESSION_KEY, loginUser);
         log.info("login success account: {}", loginUser.getAccount());
 
         response.sendRedirect(INDEX_PAGE);
+    }
+
+    private HttpSession renewSession(final HttpRequest request) {
+        final HttpSession existingSession = request.getSession(false);
+
+        if (existingSession != null) {
+            existingSession.invalidate();
+        }
+
+        return request.getSession();
     }
 
     private User getUser(final HttpSession session) {

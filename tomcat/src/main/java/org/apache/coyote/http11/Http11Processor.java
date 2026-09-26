@@ -84,30 +84,30 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final Map<String, String> requestParams = parseFormData(rawParams);
-            final String response;
+            final HttpResponse response;
 
             if ("POST".equals(requestMethod) && "/register".equals(path)) {
                 register(requestParams);
-                response = buildRedirectResponse("/index.html");
+                response = HttpResponse.redirect("/index.html");
             } else if ("POST".equals(requestMethod) && "/login".equals(path)) {
                 final Optional<User> user = findLoginUser(requestParams);
                 if (user.isPresent()) {
                     final Session session = new Session(UUID.randomUUID().toString());
                     session.setAttribute("user", user.get());
                     SessionManager.INSTANCE.add(session);
-                    response = buildRedirectResponseWithCookie("/index.html", session.getId());
+                    response = HttpResponse.redirectWithCookie("/index.html", session.getId());
                 } else {
-                    response = buildRedirectResponse("/401.html");
+                    response = HttpResponse.redirect("/401.html");
                 }
             } else if ("GET".equals(requestMethod) && "/login".equals(path) && isLoggedIn(httpRequestHeaders)) {
-                response = buildRedirectResponse("/index.html");
+                response = HttpResponse.redirect("/index.html");
             } else if ("/".equals(path)) {
-                response = buildOkResponse("text/html", "Hello world!");
+                response = HttpResponse.ok("text/html", "Hello world!");
             } else {
-                response = buildOkResponse(resolveContentType(path), readStaticFile(path));
+                response = HttpResponse.ok(resolveContentType(path), readStaticFile(path));
             }
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(response.format().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
@@ -194,33 +194,5 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css";
         }
         return "text/html";
-    }
-
-    private String buildOkResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                "",
-                responseBody);
-    }
-
-    private String buildRedirectResponse(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
-    }
-
-    private String buildRedirectResponseWithCookie(final String location, final String sessionId) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Set-Cookie: JSESSIONID=" + sessionId,
-                "Content-Length: 0",
-                "",
-                "");
     }
 }

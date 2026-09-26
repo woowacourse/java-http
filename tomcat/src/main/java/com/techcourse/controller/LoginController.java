@@ -8,10 +8,10 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.util.StaticResources;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,15 +27,19 @@ public class LoginController extends AbstractController {
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
 
+    private static final String PAGE_NOT_FOUND_MESSAGE = "페이지를 찾을 수 없습니다.";
+
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final Session session = findSession(request);
         if (session != null) {
             log.info("이미 로그인된 사용자: {}", session.getAttribute(USER));
             response.sendRedirect(INDEX_PAGE);
             return;
         }
-        response.okHtml(StaticResources.read(LOGIN_PAGE).orElse(""));
+        StaticResources.read(LOGIN_PAGE).ifPresentOrElse(
+                response::okHtml,
+                () -> response.sendError(HttpStatus.BAD_REQUEST, PAGE_NOT_FOUND_MESSAGE));
     }
 
     @Override

@@ -2,19 +2,27 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,28 +46,69 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final var bufferedReader = new BufferedReader(
-                        new InputStreamReader(
-                                connection.getInputStream(),
-                                StandardCharsets.UTF_8
-                        )
-                );
+                final var input = new BufferedInputStream(connection.getInputStream());
                 final var outputStream = connection.getOutputStream()) {
 
-            String requestLine = bufferedReader.readLine();
+            String requestLine = readLine(input);
             String[] splitRequestLine = requestLine.split(" ");
 
             String method = splitRequestLine[0];
             String requestTarget = splitRequestLine[1];
             String protocol = splitRequestLine[2];
 
+            Map<String, String> headers = readHeaders(input);
+
+            String requestBody = readRequestBody(headers, input);
+
             if (method.equals("GET")) {
                 handleGetRequest(outputStream, requestTarget);
+            } else if (method.equals("POST")) {
+                handlePostRequest(outputStream, requestTarget, headers, requestBody);
             }
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String readLine(InputStream input) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        int value;
+        while ((value = input.read()) != -1 && value != '\n') {
+            if (value != '\r') {
+                bytes.write(value);
+            }
+        }
+
+        return bytes.toString();
+    }
+
+    @Nonnull
+    private static String readRequestBody(Map<String, String> headers, BufferedInputStream input) throws IOException {
+        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
+        byte[] bodyBytes = input.readNBytes(contentLength);
+        if (bodyBytes.length != contentLength) {
+            throw new EOFException("요청 본문이 중간에 끝났습니다.");
+        }
+
+        String requestBody = new String(bodyBytes, StandardCharsets.UTF_8);
+        return requestBody;
+    }
+
+    @Nonnull
+    private static Map<String, String> readHeaders(BufferedInputStream input) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String line;
+
+        while ((line = readLine(input)) != null && !line.isEmpty()) {
+            int colonIndex = line.indexOf(":");
+
+            String name = line.substring(0, colonIndex).trim().toLowerCase(Locale.ROOT);
+            String value = line.substring(colonIndex + 1).trim();
+            headers.put(name, value);
+        }
+        return headers;
     }
 
     private void handleGetRequest(OutputStream outputStream, String requestTarget) throws IOException {
@@ -82,12 +131,49 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParameters = parsedTarget.queryParameters();
 
         if (resourceName.equals("/login")) {
-            if (queryParameters.get("account") == null || queryParameters.get("password") == null) {
-                status = HttpStatus.OK;
-                resourceName = "login.html";
-            }
-            else if (isLoginSuccessful(queryParameters)) {
-                status = HttpStatus.OK;
+            status = HttpStatus.OK;
+            resourceName = "login.html";
+        }
+
+        if (resourceName.equals("/register")) {
+            status = HttpStatus.OK;
+            resourceName = "register.html";
+        }
+
+        contentType = resolveContentType(resourceName);
+        responseBody = readResponseBody(resourceName);
+
+        writeResponse(outputStream, status, contentType, responseBody);
+    }
+
+    private void handlePostRequest(OutputStream outputStream,
+                                   String requestTarget,
+                                   Map<String, String> headers,
+                                   String requestBody) throws IOException {
+        Map<String, String> bodyFields = null;
+
+        if (headers.get("content-type").equals("application/x-www-form-urlencoded")) {
+            bodyFields = parseUrlEncodedParameters(requestBody);
+        }
+
+        String contentType;
+        HttpStatus status = HttpStatus.OK;
+        final byte[] responseBody;
+
+        ParsedTarget parsedTarget = parseRequestTarget(requestTarget);
+        String resourceName = parsedTarget.path();
+
+        log.info("POST path={}, bodyFields={}", resourceName, bodyFields);
+
+        if (resourceName.equals("/register")) {
+            handleRegister(bodyFields);
+            status = HttpStatus.FOUND;
+            resourceName = "index.html";
+        }
+
+        if (resourceName.equals("/login")) {
+            if (isLoginSuccessful(bodyFields)) {
+                status = HttpStatus.FOUND;
                 resourceName = "index.html";
             } else {
                 status = HttpStatus.UNAUTHORIZED;
@@ -99,6 +185,19 @@ public class Http11Processor implements Runnable, Processor {
         responseBody = readResponseBody(resourceName);
 
         writeResponse(outputStream, status, contentType, responseBody);
+    }
+
+    private void handleRegister(Map<String, String> bodyFields) {
+        String account = bodyFields.get("account");
+        String email = bodyFields.get("email");
+        String password = bodyFields.get("password");
+
+        if (account == null || email == null || password == null) {
+            return;
+        }
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
     }
 
     private ParsedTarget parseRequestTarget(String requestTarget) {
@@ -114,27 +213,27 @@ public class Http11Processor implements Runnable, Processor {
         String path = requestTarget.substring(0, queryStartIndex);
         String queryString = requestTarget.substring(queryStartIndex + 1);
 
-        return new ParsedTarget(path, parseQueryParameters(queryString));
+        return new ParsedTarget(path, parseUrlEncodedParameters(queryString));
     }
 
-    private Map<String, String> parseQueryParameters(String queryString) {
-        Map<String, String> queryParameters = new HashMap<>();
+    private Map<String, String> parseUrlEncodedParameters(String encodedParameters) {
+        Map<String, String> parameters = new HashMap<>();
 
-        if (queryString.isEmpty()) {
-            return queryParameters;
+        if (encodedParameters == null || encodedParameters.isEmpty()) {
+            return parameters;
         }
 
-        String[] parameters = queryString.split("&");
-
-        for (String parameter : parameters) {
+        for (String parameter : encodedParameters.split("&")) {
             String[] keyValue = parameter.split("=", 2);
 
             if (keyValue.length == 2) {
-                queryParameters.put(keyValue[0], keyValue[1]);
+                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                parameters.put(key, value);
             }
         }
 
-        return queryParameters;
+        return parameters;
     }
 
     private static boolean isLoginSuccessful(Map<String, String> queryParameters) {

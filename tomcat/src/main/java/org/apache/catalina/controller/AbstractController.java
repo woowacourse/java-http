@@ -8,10 +8,10 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse service(final HttpRequest request) throws Exception {
-        if (request.method().equals("POST")) {
+        if (request.requestLine().method().equals("POST")) {
             return doPost(request);
         }
-        if (request.method().equals("GET")) {
+        if (request.requestLine().method().equals("GET")) {
             return doGet(request);
         }
         return HttpResponse.empty(HttpStatus.METHOD_NOT_ALLOWED);

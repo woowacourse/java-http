@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record HttpRequest(
-        String method,
-        String requestUri,
+        RequestLine requestLine,
         Map<String, String> headers,
         String body
 ) {
@@ -14,6 +13,7 @@ public record HttpRequest(
     }
 
     public String path() {
+        final String requestUri = requestLine.requestUri();
         final int queryStringIndex = requestUri.indexOf("?");
         if (queryStringIndex == -1) {
             return requestUri;
@@ -22,10 +22,10 @@ public record HttpRequest(
     }
 
     public Map<String, String> params() {
-        if (method.equals("POST")) {
+        if (requestLine.method().equals("POST")) {
             return parseQueryString(body);
         }
-        return extractQueryParams(requestUri);
+        return extractQueryParams(requestLine.requestUri());
     }
 
     private Map<String, String> parseQueryString(final String queryString) {

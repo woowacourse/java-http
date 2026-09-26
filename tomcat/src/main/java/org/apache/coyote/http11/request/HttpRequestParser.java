@@ -26,8 +26,7 @@ public final class HttpRequestParser {
         final String body = readBody(bufferedInputStream, parsedRequestLine.method(), headers);
 
         return new HttpRequest(
-                parsedRequestLine.method(),
-                parsedRequestLine.requestUri(),
+                parsedRequestLine,
                 headers,
                 body
         );

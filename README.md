@@ -26,7 +26,7 @@
 
 ### HTTP 요청
 
-- [ ] `RequestLine`이 HTTP 메서드, 요청 경로, 버전을 구분한다.
+- [x] `RequestLine`이 HTTP 메서드, 요청 경로, 버전을 구분한다.
 - [ ] `HttpRequest`가 요청의 첫 줄, 헤더, 본문을 읽고 필요한 값을 제공한다.
 - [ ] GET 쿼리 문자열과 POST 폼 본문에서 파라미터를 읽는다. 폼 인코딩된 값은 디코딩한다.
 - [ ] 요청 쿠키에서 `JSESSIONID`를 읽어 기존 세션을 찾을 수 있다.
@@ -47,7 +47,7 @@
 
 ### 테스트 작성 순서
 
-- [ ] `RequestLine`이 `GET /login HTTP/1.1`을 메서드, 경로, 버전으로 나누는 테스트
+- [x] `RequestLine`이 `GET /login HTTP/1.1`을 메서드, 경로, 버전으로 나누는 테스트
 - [ ] `HttpRequest`가 GET 쿼리 문자열, 헤더, POST 폼 본문을 읽는 테스트
 - [ ] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
 - [ ] `RequestMapping`과 `AbstractController`가 경로와 메서드에 맞게 호출하는 테스트

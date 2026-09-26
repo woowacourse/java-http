@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class HttpResponse {
     private static final String CRLF = "\r\n";
@@ -25,6 +26,11 @@ public class HttpResponse {
     private static final char FIRST_VISIBLE = 0x21;
     private static final char LAST_VISIBLE = 0x7E;
     private static final byte[] EMPTY_BODY = new byte[0];
+
+    private static final Set<HttpHeaderName> FRAMING_HEADERS = Set.of(
+            HttpHeaderName.CONTENT_LENGTH,
+            HttpHeaderName.TRANSFER_ENCODING
+    );
 
     private final Map<HttpHeaderName, List<String>> headers = new LinkedHashMap<>();
     private HttpStatus status = HttpStatus.OK;
@@ -43,6 +49,7 @@ public class HttpResponse {
 
     /** 같은 이름의 헤더를 이 값 하나로 교체한다 */
     public void setHeader(final HttpHeaderName name, final String value) {
+        validateSettable(name);
         validateHeaderValue(value);
         final List<String> values = new ArrayList<>();
         values.add(value);
@@ -51,6 +58,7 @@ public class HttpResponse {
 
     /** 같은 이름의 헤더를 별도의 줄로 추가한다 */
     public void addHeader(final HttpHeaderName name, final String value) {
+        validateSettable(name);
         validateHeaderValue(value);
         headers.computeIfAbsent(name, key -> new ArrayList<>()).add(value);
     }
@@ -59,10 +67,8 @@ public class HttpResponse {
         setHeader(HttpHeaderName.CONTENT_TYPE, contentType.getValue());
     }
 
-    /** 본문과 Content-Length를 함께 설정한다 */
     public void setBody(final byte[] body) {
         this.body = body.clone();
-        setHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(this.body.length));
     }
 
     public void sendRedirect(final String location) {
@@ -92,9 +98,7 @@ public class HttpResponse {
         headers.forEach((name, values) ->
                 values.forEach(value -> appendHeader(head, name, value)));
 
-        if (!headers.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
-            appendHeader(head, HttpHeaderName.CONTENT_LENGTH, String.valueOf(body.length));
-        }
+        appendHeader(head, HttpHeaderName.CONTENT_LENGTH, String.valueOf(body.length));
         head.append(CRLF);
 
         outputStream.write(head.toString().getBytes(StandardCharsets.US_ASCII));
@@ -118,6 +122,12 @@ public class HttpResponse {
             if (!allowed) {
                 throw new IllegalArgumentException("응답 헤더 값에 허용되지 않는 문자가 포함되어 있습니다");
             }
+        }
+    }
+
+    private static void validateSettable(final HttpHeaderName name) {
+        if (FRAMING_HEADERS.contains(name)) {
+            throw new IllegalArgumentException(name.getValue() + " 헤더는 본문에서 계산되므로 직접 설정할 수 없습니다");
         }
     }
 

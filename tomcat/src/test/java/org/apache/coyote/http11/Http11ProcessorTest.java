@@ -133,13 +133,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expectedHeader = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Length: 0 ");
-
-        assertThat(socket.output()).startsWith(expectedHeader);
-        assertThat(socket.output()).containsPattern("Set-Cookie: JSESSIONID=.+; Path=/");
+        final String output = socket.output();
+        assertThat(output).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(output).contains("Location: /index.html \r\n", "Content-Length: 0 \r\n");
+        assertThat(output).containsPattern("Set-Cookie: JSESSIONID=.+; Path=/");
     }
 
     @Test

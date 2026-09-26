@@ -199,3 +199,14 @@ HTTP Method에 따라 Controller의 처리 흐름을 분기한다.
 
 - [x] GET 요청은 GET 처리에 위임한다.
 - [x] POST 요청은 POST 처리에 위임한다.
+ 
+## RequestMapping
+
+### 책임
+
+요청 경로에 대응하는 Controller를 선택한다.
+
+### 계약
+
+- [x] 등록된 요청 경로에 대응하는 Controller를 반환한다.
+- [x] 등록되지 않은 요청 경로에는 기본 Controller를 반환한다.

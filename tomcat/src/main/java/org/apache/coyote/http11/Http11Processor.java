@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +10,15 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,43 +42,72 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             final String requestLine = bufferedReader.readLine();
             final String[] requestLineParts = requestLine.split(" "); // 요청 첫 줄(Request Line) 분리
             final String requestUri = requestLineParts[1];
+            final String requestMethod = requestLineParts[0];
 
-            final int queryStartIndex = requestUri.indexOf('?');
-            final String path;
-            final String queryString;
+            String line;
+            final Map<String, String> httpRequestHeaders = new HashMap<>();
 
-            if (queryStartIndex == -1) { // 쿼리가 없는 경우
-                path = requestUri;
-                queryString = "";
+            while ((line = bufferedReader.readLine()) != null) { // 바디 전까지
+                if (line.isEmpty()) {
+                    break; // 빈 줄이면 헤더 끝
+                }
+
+                final String[] keyValue = line.split(":", 2);
+
+                if (keyValue.length == 2) {
+                    httpRequestHeaders.put(keyValue[0], keyValue[1].trim());
+                }
+            }
+
+            final String path = extractPath(requestUri);
+            final String queryString = extractQueryString(requestUri);
+
+            final String rawParams;
+            if ("POST".equals(requestMethod)) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                int totalRead = 0;
+                while (totalRead < contentLength) {
+                    final int read = bufferedReader.read(buffer, totalRead, contentLength - totalRead);
+                    if (read == -1) {
+                        throw new IOException("[ERROR] 요청 본문이 Content-Length보다 짧습니다.");
+                    }
+                    totalRead += read;
+                }
+                rawParams = new String(buffer);
             } else {
-                path = requestUri.substring(0, queryStartIndex);
-                queryString = requestUri.substring(queryStartIndex + 1);
+                rawParams = queryString;
             }
 
-            final Map<String, String> queryParams = parseQueryString(queryString);
+            final Map<String, String> requestParams = parseFormData(rawParams);
+            final String response;
 
-            if ("/login".equals(path)) {
-                logLoginUser(queryParams);
-            }
-
-            final String responseBody;
-            final String contentType;
-
-            if ("/".equals(path)) {
-                responseBody = "Hello world!";
-                contentType = "text/html";
+            if ("POST".equals(requestMethod) && "/register".equals(path)) {
+                register(requestParams);
+                response = buildRedirectResponse("/index.html");
+            } else if ("POST".equals(requestMethod) && "/login".equals(path)) {
+                final Optional<User> user = findLoginUser(requestParams);
+                if (user.isPresent()) {
+                    final Session session = new Session(UUID.randomUUID().toString());
+                    session.setAttribute("user", user.get());
+                    SessionManager.INSTANCE.add(session);
+                    response = buildRedirectResponseWithCookie("/index.html", session.getId());
+                } else {
+                    response = buildRedirectResponse("/401.html");
+                }
+            } else if ("GET".equals(requestMethod) && "/login".equals(path) && isLoggedIn(httpRequestHeaders)) {
+                response = buildRedirectResponse("/index.html");
+            } else if ("/".equals(path)) {
+                response = buildOkResponse("text/html", "Hello world!");
             } else {
-                responseBody = readStaticFile(path);
-                contentType = resolveContentType(path);
+                response = buildOkResponse(resolveContentType(path), readStaticFile(path));
             }
-
-            final String response = buildResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
@@ -83,27 +118,77 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> queryParams = new HashMap<>();
+    private String extractPath(final String requestUri) {
+        final int queryStartIndex = requestUri.indexOf('?');
+        if (queryStartIndex == -1) { // 쿼리가 없는 경우
+            return requestUri;
+        }
+        return requestUri.substring(0, queryStartIndex);
+    }
+
+    private String extractQueryString(String requestUri) {
+        final int queryStartIndex = requestUri.indexOf('?');
+        if (queryStartIndex == -1) { // 쿼리가 없는 경우
+            return "";
+        }
+        return requestUri.substring(queryStartIndex + 1);
+    }
+
+    private Map<String, String> parseFormData(final String queryString) {
+        final Map<String, String> requestParams = new HashMap<>();
         if (queryString.isEmpty()) {
-            return queryParams;
+            return requestParams;
         }
 
         for (final String pair : queryString.split("&")) { // "account=gugu", "password=password"
-            final String[] keyValue = pair.split("="); // ["account", "gugu"]
-            queryParams.put(keyValue[0], keyValue[1]); // "account" -> "gugu"
+            final String[] keyValue = pair.split("=", 2); // ["account", "gugu"]
+            if (keyValue.length == 2) {
+                requestParams.put(URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
+                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)); // "account" -> "gugu"
+            }
         }
-        return queryParams;
+        return requestParams;
     }
 
-    private void logLoginUser(final Map<String, String> queryParams) {
+    private void register(final Map<String, String> requestParams) {
+        final String account = requestParams.get("account");
+        final String password = requestParams.get("password");
+        final String email = requestParams.get("email");
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+    }
+
+    private Optional<User> findLoginUser(final Map<String, String> queryParams) {
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
 
-        if (account != null) {
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user -> log.info("user : {}", user));
+        if (account == null) {
+            return Optional.empty();
+        }
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(u -> u.checkPassword(password));
+        user.ifPresent(u -> log.info("로그인 성공! user: {}", u));
+
+        return user;
+    }
+
+    private boolean isLoggedIn(final Map<String, String> httpRequestHeaders) {
+        final HttpCookie cookie = new HttpCookie(httpRequestHeaders.get("Cookie"));
+        final String sessionId = cookie.get("JSESSIONID");
+
+        if (sessionId == null) {
+            return false;
+        }
+
+        final Session session = SessionManager.INSTANCE.findSession(sessionId);
+
+        if (session == null) {
+            return false;
+        } else if (session.getAttribute("user") == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -129,12 +214,31 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private String buildResponse(final String contentType, final String responseBody) {
+    private String buildOkResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
+    }
+
+    private String buildRedirectResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
+    }
+
+    private String buildRedirectResponseWithCookie(final String location, final String sessionId) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Set-Cookie: JSESSIONID=" + sessionId,
+                "Content-Length: 0",
+                "",
+                "");
     }
 }

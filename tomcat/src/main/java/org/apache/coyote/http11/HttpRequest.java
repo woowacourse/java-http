@@ -140,7 +140,8 @@ public class HttpRequest {
                 .map(parameter -> parameter.split("=", 2))
                 .collect(Collectors.toMap(
                         parts -> decode(parts[0]),
-                        parts -> parts.length > 1 ? decode(parts[1]) : ""
+                        parts -> parts.length > 1 ? decode(parts[1]) : "",
+                        (firstValue, ignoredValue) -> firstValue
                 ));
     }
 

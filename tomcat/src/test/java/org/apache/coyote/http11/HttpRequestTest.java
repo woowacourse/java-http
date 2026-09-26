@@ -70,4 +70,11 @@ class HttpRequestTest {
 
         assertThat(request.getBodyParameters()).isEmpty();
     }
+
+    @Test
+    void 같은_이름의_파라미터가_반복되면_첫_번째_값을_사용한다() {
+        HttpRequest request = httpRequest("GET /search?a=1&a=2 HTTP/1.1\r\n\r\n");
+
+        assertThat(request.getQueryParameters()).containsEntry("a", "1");
+    }
 }

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.login.LoginParser;
+import org.apache.coyote.login.LoginResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +46,34 @@ public class Http11Processor implements Runnable, Processor {
             // HTTP 요청 파싱
             parseHttpRequest(inputStream);
 
+            // Request Line
+            // Request Header
+            // Content-Type을 보고 Body가 어떤 타입인지 확인
+            // Content-Type이 없다면 body도 업는걸까?
+            // Accept를 보고 어떤 타입을 반환할지 결정
+            // Request Body
+
             // 반환 타입 확정
             final var type = resolveContentType(httpInfo.getOrDefault("Accept", "*/*"));
 
-            // 반환할 정적 파일 찾기
-            final var responseBody = readStaticResource(type);
-
             // Path에 따른 비지니스 로직
             if (httpInfo.get("Path").contains("/login?")) {
-                authenticateUser();
+                Map<String, String> queryString = parseQueryString();
+                LoginResult loginResult = authenticateUser(queryString.get("account"), queryString.get("password"));
+
+                if (loginResult == LoginResult.FAIL) {
+                    final var responseBody = readStaticResource("/401", type);
+                    final var response = buildHttpResponse(responseBody, type);
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
             }
+            // 지금 문제점.
+            // 비지니스 로직과 결과의 반영 여부가 다르다.
+
+            // 반환할 정적 파일 찾기
+            final var responseBody = readStaticResource(null, type);
 
             // HTTP 요청 응답 완성
             final var response = buildHttpResponse(responseBody, type);
@@ -94,11 +113,11 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String readStaticResource(String type) {
+    private String readStaticResource(String fileCode, String type) {
         final String path = "/static";
         final String NO_CONTENT = "Hello world!";
 
-        final String fileName = resolveResourcePath(type);
+        final String fileName = resolveResourcePath(fileCode, type);
         final URL resource = getClass().getResource(path + fileName);
         if (resource == null) {
             log.error("[getStaticResource] 파일을 찾을 수 없습니다. path = {}", path + fileName);
@@ -113,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String resolveResourcePath(String type) {
+    private String resolveResourcePath(String fileName, String type) {
         final String NO_CONTENT = "Hello world!";
 
         String uri = httpInfo.get("Path");
@@ -122,28 +141,41 @@ public class Http11Processor implements Runnable, Processor {
             return NO_CONTENT;
         }
 
-        uri = uri.split("\\?")[0];
+        uri = uri.split("\\?")[0]; // 순수 URL
 
         final String extension = "." + type;
         if (!uri.endsWith(extension)) {
             uri += extension;
         }
 
+        if (fileName != null) {
+            uri = fileName + extension;
+        }
+
         return uri;
     }
 
-    private void authenticateUser() {
+    private Map<String, String> parseQueryString() {
         final String path = httpInfo.getOrDefault("Path", "/");
         URI uri = URI.create(path);
 
-        Map<String, String> queryString = LoginParser.parseQueryString(uri.getQuery());
+        return LoginParser.parseQueryString(uri.getQuery());
+    }
 
-        User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow();
+    private LoginResult authenticateUser(String account, String password) {
+        try {
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
 
-        if (user.checkPassword(queryString.get("password"))) {
+            if (user.checkPassword(password)) {
+                log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
+                return LoginResult.FAIL;
+            }
+
             log.info("user : {}", user);
-        } else {
-            log.info("[authenticateUser] 회원 정보가 일치하지 않습니다.");
+            return LoginResult.SUCCESS;
+        } catch (Exception e) {
+            log.error("[authenticateUser] 회원 정보를 찾을 수 없습니다.");
+            return LoginResult.FAIL;
         }
     }
 

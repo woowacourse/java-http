@@ -4,7 +4,6 @@ import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -52,10 +51,10 @@ public class Http11Processor implements Runnable, Processor {
                 controller.service(request, response);
             } catch (IllegalArgumentException e) {
                 log.warn("잘못된 요청입니다. {}", e.getMessage());
-                setErrorResponse(response, HttpStatus.BAD_REQUEST, BAD_REQUEST_MESSAGE);
+                response.sendError(HttpStatus.BAD_REQUEST, BAD_REQUEST_MESSAGE);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MESSAGE);
             }
 
             outputStream.write(response.getResponse().getBytes());
@@ -63,11 +62,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void setErrorResponse(final HttpResponse response, final HttpStatus status, final String message) {
-        response.setStatus(status);
-        response.setContentType(ContentType.HTML);
-        response.setBody(message);
     }
 }

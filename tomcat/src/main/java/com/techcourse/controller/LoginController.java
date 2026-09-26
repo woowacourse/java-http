@@ -7,9 +7,7 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.util.StaticResources;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +35,7 @@ public class LoginController extends AbstractController {
             response.sendRedirect(INDEX_PAGE);
             return;
         }
-        response.setStatus(HttpStatus.OK);
-        response.setContentType(ContentType.HTML);
-        response.setBody(StaticResources.read(LOGIN_PAGE).orElse(""));
+        response.okHtml(StaticResources.read(LOGIN_PAGE).orElse(""));
     }
 
     @Override

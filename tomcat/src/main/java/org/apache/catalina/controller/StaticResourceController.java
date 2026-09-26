@@ -18,14 +18,9 @@ public class StaticResourceController implements Controller {
         final Optional<String> body = StaticResources.read(path);
 
         if (body.isEmpty()) {
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setContentType(ContentType.HTML);
-            response.setBody(StaticResources.read(NOT_FOUND_PAGE).orElse(""));
+            response.sendError(HttpStatus.NOT_FOUND, StaticResources.read(NOT_FOUND_PAGE).orElse(""));
             return;
         }
-
-        response.setStatus(HttpStatus.OK);
-        response.setContentType(ContentType.from(path));
-        response.setBody(body.get());
+        response.ok(ContentType.from(path), body.get());
     }
 }

@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.util.StaticResources;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -24,9 +23,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setStatus(HttpStatus.OK);
-        response.setContentType(ContentType.HTML);
-        response.setBody(StaticResources.read(REGISTER_PAGE).orElse(""));
+        response.okHtml(StaticResources.read(REGISTER_PAGE).orElse(""));
     }
 
     @Override
@@ -36,9 +33,7 @@ public class RegisterController extends AbstractController {
         final String email = request.getParameter(EMAIL);
 
         if (account == null || password == null || email == null) {
-            response.setStatus(HttpStatus.BAD_REQUEST);
-            response.setContentType(ContentType.HTML);
-            response.setBody(BAD_REQUEST_MESSAGE);
+            response.sendError(HttpStatus.BAD_REQUEST, BAD_REQUEST_MESSAGE);
             return;
         }
 

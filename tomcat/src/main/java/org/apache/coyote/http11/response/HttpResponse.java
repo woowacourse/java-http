@@ -31,6 +31,22 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void ok(final ContentType contentType, final String body) {
+        this.status = HttpStatus.OK;
+        this.body = body;
+        setContentType(contentType);
+    }
+
+    public void okHtml(final String body) {
+        ok(ContentType.HTML, body);
+    }
+
+    public void sendError(final HttpStatus status, final String body) {
+        this.status = status;
+        this.body = body;
+        setContentType(ContentType.HTML);
+    }
+
     public void sendRedirect(final String location) {
         this.status = HttpStatus.FOUND;
         this.body = "";

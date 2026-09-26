@@ -4,13 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -22,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -57,13 +56,20 @@ public class Http11Processor implements Runnable, Processor {
             String protocol = splitRequestLine[2];
 
             Map<String, String> headers = readHeaders(input);
+            HttpCookie cookie = new HttpCookie(headers.get("cookie"));
+            String sessionId = cookie.get("JSESSIONID");
+
+            Map<String, String> responseHeaders = new HashMap<>();
+            if (sessionId == null) {
+                responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            }
 
             String requestBody = readRequestBody(headers, input);
 
             if (method.equals("GET")) {
-                handleGetRequest(outputStream, requestTarget);
+                handleGetRequest(outputStream, requestTarget, responseHeaders);
             } else if (method.equals("POST")) {
-                handlePostRequest(outputStream, requestTarget, headers, requestBody);
+                handlePostRequest(outputStream, requestTarget, headers, requestBody, responseHeaders);
             }
 
         } catch (IOException | UncheckedServletException e) {
@@ -111,15 +117,14 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private void handleGetRequest(OutputStream outputStream, String requestTarget) throws IOException {
-        String contentType;
-        final byte[] responseBody;
-
+    private void handleGetRequest(OutputStream outputStream, String requestTarget, Map<String, String> responseHeaders) throws IOException {
         // root 처리
         if (requestTarget.equals("/")) {
+            responseHeaders.put("Content-Type", "text/html;charset=utf-8 ");
+
             writeResponse(outputStream,
                     HttpStatus.OK,
-                    "text/html;charset=utf-8 ",
+                    responseHeaders,
                     "Hello world!".getBytes(StandardCharsets.UTF_8));
 
             return;
@@ -127,36 +132,35 @@ public class Http11Processor implements Runnable, Processor {
 
         ParsedTarget parsedTarget = parseRequestTarget(requestTarget);
         String resourceName = parsedTarget.path();
-        HttpStatus status = HttpStatus.OK;
-        Map<String, String> queryParameters = parsedTarget.queryParameters();
 
         if (resourceName.equals("/login")) {
-            status = HttpStatus.OK;
             resourceName = "login.html";
-        }
-
-        if (resourceName.equals("/register")) {
-            status = HttpStatus.OK;
+        } else if (resourceName.equals("/register")) {
             resourceName = "register.html";
         }
 
-        contentType = resolveContentType(resourceName);
-        responseBody = readResponseBody(resourceName);
+        responseHeaders.put("Content-Type", resolveContentType(resourceName));
+        byte[] responseBody = readResponseBody(resourceName);
 
-        writeResponse(outputStream, status, contentType, responseBody);
+        writeResponse(
+                outputStream,
+                HttpStatus.OK,
+                responseHeaders,
+                responseBody
+        );
     }
 
     private void handlePostRequest(OutputStream outputStream,
                                    String requestTarget,
                                    Map<String, String> headers,
-                                   String requestBody) throws IOException {
+                                   String requestBody,
+                                   Map<String, String> responseHeaders) throws IOException {
         Map<String, String> bodyFields = null;
 
         if (headers.get("content-type").equals("application/x-www-form-urlencoded")) {
             bodyFields = parseUrlEncodedParameters(requestBody);
         }
 
-        String contentType;
         HttpStatus status = HttpStatus.OK;
         final byte[] responseBody;
 
@@ -181,10 +185,10 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        contentType = resolveContentType(resourceName);
+        responseHeaders.put("Content-Type", resolveContentType(resourceName));
         responseBody = readResponseBody(resourceName);
 
-        writeResponse(outputStream, status, contentType, responseBody);
+        writeResponse(outputStream, status, responseHeaders, responseBody);
     }
 
     private void handleRegister(Map<String, String> bodyFields) {
@@ -271,18 +275,31 @@ public class Http11Processor implements Runnable, Processor {
         return responseBody;
     }
 
-    private void writeResponse(OutputStream outputStream,
-                                      HttpStatus status,
-                                      String contentType,
-                                      byte[] responseBody) throws  IOException{
-        final var header = String.join("\r\n",
-                "HTTP/1.1 " + status.getCode() + " " + status.getReasonPhrase() + " ",
-                "Content-Type: " + contentType,
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "");
+    private void writeResponse(
+            OutputStream outputStream,
+            HttpStatus status,
+            Map<String, String> headers,
+            byte[] responseBody
+    ) throws IOException {
+        StringBuilder responseHead = new StringBuilder()
+                .append("HTTP/1.1 ")
+                .append(status.getCode())
+                .append(' ')
+                .append(status.getReasonPhrase())
+                .append(" \r\n");
 
-        outputStream.write(header.getBytes());
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            responseHead.append(header.getKey())
+                    .append(": ")
+                    .append(header.getValue())
+                    .append("\r\n");
+        }
+
+        responseHead.append("Content-Length: ")
+                .append(responseBody.length)
+                .append(" \r\n\r\n");
+
+        outputStream.write(responseHead.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
         outputStream.flush();
     }

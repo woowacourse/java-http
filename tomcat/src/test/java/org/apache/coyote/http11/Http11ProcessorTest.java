@@ -29,7 +29,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
@@ -53,7 +53,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         final var expected = String.join("\r\n",
-                "HTTP/1.1 404 Not Found ",
+                "HTTP/1.1 404 Not Found",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 13 ",
                 "",
@@ -80,7 +80,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         final var responseHeader = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + body.length + " ",
                 "",
@@ -111,7 +111,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
@@ -145,7 +145,7 @@ class Http11ProcessorTest {
         );
 
         final var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 200 OK",
                 "Content-Type: text/css ",
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
@@ -171,7 +171,7 @@ class Http11ProcessorTest {
         final var resource = getClass().getClassLoader().getResource("static/register.html");
         final var body = Files.readString(new File(resource.getFile()).toPath(), StandardCharsets.UTF_8);
         final var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",

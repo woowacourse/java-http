@@ -27,8 +27,8 @@ public class Http11Response {
 
     public void ok(String contentType) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.length));
+        headers.put("Content-Type", contentType + ";charset=utf-8 ");
+        headers.put("Content-Length", body.length + " ");
         setStatusCode(200);
         setStatusMessage("OK");
         setHeader(new ResponseHeader(headers));
@@ -49,7 +49,7 @@ public class Http11Response {
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {
-        String response = "HTTP/1.1 " + statusCode + " " + statusMessage + "\r\n";
+        String response = "HTTP/1.1 " + statusCode + " " + statusMessage + " \r\n";
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.write(header.buildHeaderResponse().getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);

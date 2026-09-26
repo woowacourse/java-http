@@ -1,21 +1,30 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.Manager;
+import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.session.SessionContext;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final Manager sessionManager = SessionManager.getInstance();
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
+        this(connection, new RequestMapping());
+    }
+
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -29,18 +38,22 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest request = HttpRequest.parse(inputStream);
+            if (request == null) {
+                return;
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            SessionContext sessionContext = new SessionContext(sessionManager, request.getCookie("JSESSIONID"));
+            request.setSessionContext(sessionContext);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            HttpResponse response = new HttpResponse();
+            requestMapping.getController(request).service(request, response);
+
+            if (sessionContext.isChanged()) {
+                response.setCookie("JSESSIONID", sessionContext.getSession().getId(), "/");
+            }
+            response.writeTo(outputStream);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

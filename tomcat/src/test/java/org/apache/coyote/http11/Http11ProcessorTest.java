@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.HomeController;
+import org.apache.catalina.controller.RequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -7,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,16 +19,21 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var requestMapping = new RequestMapping();
+        requestMapping.register("/", new HomeController());
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
+        final String sessionId = socket.output().split("Set-Cookie: JSESSIONID=", 2)[1].split(";", 2)[0];
+        final UUID uuid = UUID.fromString(sessionId);
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
+                "Set-Cookie: JSESSIONID=" + uuid + "; Path=/",
                 "",
                 "Hello world!");
 
@@ -49,10 +57,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        final String sessionId = socket.output().split("Set-Cookie: JSESSIONID=", 2)[1].split(";", 2)[0];
+        final UUID uuid = UUID.fromString(sessionId);
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Set-Cookie: JSESSIONID=" + uuid + "; Path=/\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

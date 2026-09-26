@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ public class HttpCookie {
     private final Map<String, String> httpCookies;
 
     private HttpCookie(Map<String, String> httpCookies) {
-        this.httpCookies = httpCookies;
+        this.httpCookies = Map.copyOf(httpCookies);
     }
 
     public static HttpCookie from(String cookieLine) {

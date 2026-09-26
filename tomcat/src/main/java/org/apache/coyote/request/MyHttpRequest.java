@@ -80,16 +80,8 @@ public class MyHttpRequest {
         return requestLine.getRequestTarget().getPath();
     }
 
-    public boolean isPath(String path) {
-        return requestLine.getRequestTarget().getPath().equals(path);
-    }
-
     public String getUri() {
         return requestLine.getUri();
-    }
-
-    public Optional<String> getCookie(String name) {
-        return cookie.getValue(name);
     }
 
     public Optional<String> getHeader(String name) {
@@ -118,14 +110,6 @@ public class MyHttpRequest {
             case "ico" -> ContentType.ICO;
             default -> ContentType.HTML;
         };
-    }
-
-    public boolean hasBody() {
-        return body != null && !body.isEmpty();
-    }
-
-    public boolean isStaticResourcePath(String staticResourcePath) {
-        return getResourcePath().contains(staticResourcePath);
     }
 
     public String getResourcePath() {

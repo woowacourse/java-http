@@ -25,16 +25,6 @@ public class MyHttpResponse {
         );
     }
 
-    public void addCookie(HttpCookie httpCookie) {
-        Map<String, String> cookies = httpCookie.cookies();
-        for (Entry<String, String> entry : cookies.entrySet()) {
-            addHeader(
-                    "Set-Cookie",
-                    String.join("=", entry.getKey(), entry.getValue())
-            );
-        }
-    }
-
     public void addHeader(String name, String value) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(value);

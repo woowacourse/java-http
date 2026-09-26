@@ -11,12 +11,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.Session;
 
 public final class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final HttpCookie cookies;
     private final String body;
+    private Session session;
 
     private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
         this.requestLine = requestLine;
@@ -73,12 +75,16 @@ public final class HttpRequest {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
-    public boolean matches(
-            final String expectedMethod,
-            final String expectedPath
-    ) {
-        return requestLine.method() == HttpMethod.from(expectedMethod)
-                && requestLine.target().hasPath(expectedPath);
+    void attachSession(final Session session) {
+        this.session = session;
+    }
+
+    public Session session() {
+        if (session == null) {
+            throw new IllegalStateException("요청에 세션이 연결되지 않았습니다.");
+        }
+
+        return session;
     }
 
     public String path() {

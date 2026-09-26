@@ -36,4 +36,29 @@ class SessionManagerTest {
         assertThat(manager.findSession("session-id"))
                 .isEmpty();
     }
+
+    @Test
+    void 세션을_생성하고_저장한다() {
+        Manager manager = new SessionManager();
+
+        Session session = manager.createSession();
+
+        assertThat(manager.findSession(session.getId()))
+                .contains(session);
+    }
+
+    @Test
+    void 세션을_갱신하면_기존_세션을_제거하고_새로운_세션을_저장한다() {
+        Manager manager = new SessionManager();
+        Session oldSession = manager.createSession();
+
+        Session newSession = manager.renewSession(oldSession);
+
+        assertThat(manager.findSession(oldSession.getId()))
+                .isEmpty();
+        assertThat(manager.findSession(newSession.getId()))
+                .contains(newSession);
+        assertThat(newSession.getId())
+                .isNotEqualTo(oldSession.getId());
+    }
 }

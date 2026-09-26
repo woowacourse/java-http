@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-    private static final String LOGIN_PATH = "/login";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -43,17 +43,19 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) {
                 return;
             }
+
             Optional<Session> existingSession = request.findCookie("JSESSIONID")
                     .flatMap(sessionManager::findSession);
-            Session session = existingSession.orElseGet(() -> {
-                Session newSession = new Session(UUID.randomUUID().toString());
-                sessionManager.add(newSession);
-                return newSession;
-            });
-            HttpResponse response = route(request, session);
+
+            Session session = existingSession.orElseGet(sessionManager::createSession);
+            request.attachSession(session);
+
+            HttpResponse response = route(request);
+
             if (existingSession.isEmpty() && !response.hasHeader("Set-Cookie")) {
                 response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
+
             outputStream.write(response.toByteArray());
             outputStream.flush();
         } catch (Exception e) {
@@ -61,48 +63,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse route(HttpRequest request, Session session)
-            throws Exception {
-        if (request.matches("POST", LOGIN_PATH)) {
-            return login(request, session);
-        }
-        if (request.matches("GET", LOGIN_PATH) && session.getAttribute("user") instanceof User) {
-            HttpResponse response = new HttpResponse();
-            response.sendRedirect("/index.html");
-            return response;
-        }
-
+    private HttpResponse route(final HttpRequest request) throws Exception {
         HttpResponse response = new HttpResponse();
 
         Controller controller = requestMapping.getController(request);
         controller.service(request, response);
 
-        return response;
-    }
-
-    private HttpResponse login(HttpRequest request, Session session) {
-        String account = request.findFormParameter("account")
-                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
-        String password = request.findFormParameter("password")
-                .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: password"));
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        user.ifPresent(value -> log.info("user : {}", value));
-        Optional<User> authenticatedUser = user.filter(value -> value.checkPassword(password));
-        if (authenticatedUser.isEmpty()) {
-            HttpResponse response = new HttpResponse();
-            response.sendRedirect("/401.html");
-            return response;
-        }
-
-        Session renewedSession = new Session(UUID.randomUUID().toString());
-        renewedSession.setAttribute("user", authenticatedUser.get());
-        sessionManager.remove(session.getId());
-        sessionManager.add(renewedSession);
-
-        HttpResponse response = new HttpResponse();
-        response.addHeader("Set-Cookie", "JSESSIONID=" + renewedSession.getId());
-        response.sendRedirect("/index.html");
         return response;
     }
 }

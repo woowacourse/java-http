@@ -247,6 +247,11 @@ class Step2Test {
                 "/register",
                 new RegisterController(staticResourceController)
         );
+
+        requestMapping.register(
+                "/login",
+                new LoginController(manager, staticResourceController)
+        );
         new Http11Processor(socket, manager, requestMapping)
                 .process(socket);
     }

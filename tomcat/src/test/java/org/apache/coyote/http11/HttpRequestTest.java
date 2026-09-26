@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.Session;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -27,7 +28,6 @@ class HttpRequestTest {
 
         HttpRequest request = HttpRequest.readFrom(input);
 
-        assertThat(request.matches("POST", "/login")).isTrue();
         assertThat(request.findHeader("Content-Length"))
                 .contains(String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         assertThat(request.findFormParameter("account")).contains("고래");
@@ -66,5 +66,39 @@ class HttpRequestTest {
 
         assertThatThrownBy(() -> HttpRequest.readFrom(input))
                 .isInstanceOf(EOFException.class);
+    }
+
+    @Test
+    void 연결된_세션을_제공한다() throws Exception {
+        String rawRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                ""
+        );
+        var request = request(rawRequest);
+
+        Session session = new Session("session-id");
+        request.attachSession(session);
+
+        assertThat(request.session()).isSameAs(session);
+    }
+
+    @Test
+    void 세션이_연결되지_않으면_세션을_제공할_수_없다() throws Exception {
+        String rawRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                ""
+        );
+        var request = request(rawRequest);
+
+        assertThatThrownBy(request::session)
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    private HttpRequest request(final String value) throws Exception {
+        return HttpRequest.readFrom(
+                new ByteArrayInputStream(
+                        value.getBytes(StandardCharsets.UTF_8)
+                )
+        );
     }
 }

@@ -1,5 +1,11 @@
 package org.apache.catalina.session;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +37,26 @@ class SessionManagerTest {
 
         // then
         assertThat(sessionManager.findSession("manager-remove")).isNull();
-        assertThat(session.getAttribute("user")).isNull();
+        assertThat(session.getAttribute("user")).isEqualTo("gugu");
+    }
+
+    @Test
+    void removingOldSessionDoesNotRemoveReplacement() {
+        // given
+        final Session oldSession = new Session("same-id");
+        oldSession.setAttribute("user", "old");
+        final Session replacement = new Session("same-id");
+        replacement.setAttribute("user", "replacement");
+        sessionManager.add(oldSession);
+        sessionManager.add(replacement);
+
+        // when
+        sessionManager.remove(oldSession);
+
+        // then
+        assertThat(sessionManager.findSession("same-id")).isSameAs(replacement);
+        assertThat(replacement.getAttribute("user")).isEqualTo("replacement");
+        assertThat(oldSession.getAttribute("user")).isEqualTo("old");
     }
 
     @Test
@@ -71,5 +96,43 @@ class SessionManagerTest {
 
         // then
         assertThat(other.findSession("manager-not-shared")).isNull();
+    }
+
+    @Test
+    void createsSessionsConcurrently() throws Exception {
+        // given
+        final int threadCount = 8;
+        final int sessionsPerThread = 50;
+        final var executor = Executors.newFixedThreadPool(threadCount);
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount);
+
+        try {
+            final List<Future<List<Session>>> futures = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) {
+                futures.add(executor.submit(() -> {
+                    barrier.await();
+                    final List<Session> created = new ArrayList<>();
+                    for (int j = 0; j < sessionsPerThread; j++) {
+                        created.add(sessionManager.createSession());
+                    }
+                    return created;
+                }));
+            }
+
+            // when
+            final List<Session> sessions = new ArrayList<>();
+            for (final Future<List<Session>> future : futures) {
+                sessions.addAll(future.get(5, TimeUnit.SECONDS));
+            }
+
+            // then
+            assertThat(sessions).hasSize(threadCount * sessionsPerThread);
+            assertThat(sessions).extracting(Session::getId).doesNotHaveDuplicates();
+            for (final Session session : sessions) {
+                assertThat(sessionManager.findSession(session.getId())).isSameAs(session);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

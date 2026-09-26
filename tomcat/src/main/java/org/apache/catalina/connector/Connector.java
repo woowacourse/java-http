@@ -1,5 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.pageController.RequestDispatcher;
@@ -18,16 +23,23 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private static final int MAX_THREADS = 250;
+    private static final int MAX_PENDING_QUEUE_SIZE = 100;
+    private static final int CONNECTION_TIMEOUT_MILLIS = 20_000;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 10;
+
     private final ServerSocket serverSocket;
     private final SessionManager sessionManager;
+    private final ExecutorService executorService;
     private final RequestDispatcher requestDispatcher;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS, MAX_PENDING_QUEUE_SIZE);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, final int maxPendingQueueSize) {
+        this.executorService = new ThreadPoolExecutor(maxThreads, maxThreads, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(maxPendingQueueSize));
         this.serverSocket = createServerSocket(port, acceptCount);
         this.sessionManager = new SessionManager();
         this.requestDispatcher = new RequestDispatcher();
@@ -73,7 +85,17 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, sessionManager, requestDispatcher);
-        new Thread(processor).start();
+        try {
+            connection.setSoTimeout(CONNECTION_TIMEOUT_MILLIS);
+            executorService.execute(processor);
+        } catch (IOException | RejectedExecutionException e) {
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error(closeException.getMessage(), closeException);
+            }
+        }
+
     }
 
     public void stop() {
@@ -82,6 +104,24 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            shutdownExecutor();
+        }
+    }
+
+    private void shutdownExecutor() {
+        executorService.shutdown();
+        try {
+            if (executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                return;
+            }
+            executorService.shutdownNow();
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.warn("요청 처리 스레드가 제한 시간 내에 종료되지 않았습니다.");
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

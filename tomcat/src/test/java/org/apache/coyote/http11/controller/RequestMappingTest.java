@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
@@ -22,11 +23,11 @@ class RequestMappingTest {
         );
 
         // when
-        final Controller result =
+        final Optional<Controller> result =
                 requestMapping.getController(request);
 
         // then
-        assertThat(result).isSameAs(controller);
+        assertThat(result).contains(controller);
     }
 
     @Test
@@ -42,11 +43,11 @@ class RequestMappingTest {
         );
 
         // when
-        final Controller result =
+        final Optional<Controller> result =
                 requestMapping.getController(request);
 
         // then
-        assertThat(result).isSameAs(controller);
+        assertThat(result).contains(controller);
     }
 
     private HttpRequest createRequest(final String requestLine) {

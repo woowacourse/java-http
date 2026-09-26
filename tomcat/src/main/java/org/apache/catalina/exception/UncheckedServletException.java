@@ -1,4 +1,4 @@
-package com.techcourse.exception;
+package org.apache.catalina.exception;
 
 public class UncheckedServletException extends RuntimeException {
 

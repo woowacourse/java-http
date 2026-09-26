@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.response;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpResponse {
 
@@ -15,13 +16,10 @@ public class HttpResponse {
     private static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> headers = new LinkedHashMap<>();
+    private final List<String> cookies = new ArrayList<>();
 
     private HttpStatus status = HttpStatus.OK;
     private String body = "";
-
-    public void setStatus(final HttpStatus status) {
-        this.status = status;
-    }
 
     public void setContentType(final ContentType contentType) {
         headers.put(CONTENT_TYPE, contentType.getValue());
@@ -54,7 +52,7 @@ public class HttpResponse {
     }
 
     public void addCookie(final String name, final String value) {
-        headers.put(SET_COOKIE, name + "=" + value);
+        cookies.add(name + "=" + value);
     }
 
     public void addJSessionId(final String sessionId) {
@@ -62,16 +60,14 @@ public class HttpResponse {
     }
 
     public String getResponse() {
-        final Map<String, String> responseHeaders = new LinkedHashMap<>(headers);
-        responseHeaders.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-
-        final String headerLines = responseHeaders.entrySet().stream()
-                .map(header -> header.getKey() + ": " + header.getValue() + " ")
-                .collect(Collectors.joining(CRLF));
+        final List<String> headerLines = new ArrayList<>();
+        headers.forEach((name, value) -> headerLines.add(name + ": " + value + " "));
+        cookies.forEach(cookie -> headerLines.add(SET_COOKIE + ": " + cookie + " "));
+        headerLines.add(CONTENT_LENGTH + ": " + body.getBytes().length + " ");
 
         return String.join(CRLF,
                 PROTOCOL + " " + status.getCode() + " " + status.getResponsePhrase() + " ",
-                headerLines,
+                String.join(CRLF, headerLines),
                 "",
                 body);
     }

@@ -1,13 +1,16 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestMapping;
+import org.apache.coyote.http11.Http11Processor;
+
+import org.apache.coyote.http11.session.HttpSessionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -18,15 +21,32 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final RequestMapping requestMapping;
+    private final Controller staticResourceController;
+    private final HttpSessionHandler sessionHandler;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(
+            final RequestMapping requestMapping,
+            final Controller staticResourceController,
+            final HttpSessionHandler sessionHandler
+    ) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, staticResourceController, sessionHandler);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final RequestMapping requestMapping,
+            final Controller staticResourceController,
+            final HttpSessionHandler sessionHandler
+    ) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.requestMapping = requestMapping;
+        this.staticResourceController = staticResourceController;
+        this.sessionHandler = sessionHandler;
         this.stopped = false;
     }
+
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
@@ -66,7 +86,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        final Http11Processor processor =
+                new Http11Processor(connection, requestMapping, staticResourceController, sessionHandler);
         new Thread(processor).start();
     }
 

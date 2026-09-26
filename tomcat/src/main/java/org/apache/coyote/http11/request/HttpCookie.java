@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class HttpCookie {
+
+    public static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private static final String COOKIE_DELIMITER = ";";
     private static final String NAME_VALUE_DELIMITER = "=";

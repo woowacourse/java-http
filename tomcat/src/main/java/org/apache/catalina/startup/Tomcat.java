@@ -9,15 +9,23 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private final Connector connector;
+
+    public Tomcat() {
+        this(new HttpServerConfiguration().createConnector());
+    }
+
+    public Tomcat(final Connector connector) {
+        this.connector = connector;
+    }
 
     public void start() {
-        var connector = new Connector();
         connector.start();
 
         try {
             // make the application wait until we press any key.
             System.in.read();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         } finally {
             log.info("web server stop.");

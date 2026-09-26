@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +15,10 @@ public class HttpCookie {
     }
 
     private void parse(final String cookieHeader) {
-        String[] pairs = cookieHeader.split(";");
+        final String[] pairs = cookieHeader.split(";");
 
-        for (String pair : pairs) {
-            String[] keyValue = pair.trim().split("=", 2);
+        for (final String pair : pairs) {
+            final String[] keyValue = pair.trim().split("=", 2);
             cookies.put(keyValue[0], keyValue[1]);
         }
     }

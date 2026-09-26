@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +18,16 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final Adapter adapter;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final Adapter adapter) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final Adapter adapter) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.adapter = adapter;
         this.stopped = false;
     }
 
@@ -33,13 +36,13 @@ public class Connector implements Runnable {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
             return new ServerSocket(checkedPort, checkedAcceptCount);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     public void start() {
-        var thread = new Thread(this);
+        final var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -57,7 +60,7 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             process(serverSocket.accept());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -66,7 +69,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        final var processor = new Http11Processor(connection, adapter);
         new Thread(processor).start();
     }
 
@@ -74,7 +77,7 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }

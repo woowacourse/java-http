@@ -12,8 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -45,7 +47,6 @@ public class Http11Processor implements Runnable, Processor {
             if (request == null) {
                 return;
             }
-            SessionManager sessionManager = new SessionManager();
             Optional<Session> existingSession = request.findCookie("JSESSIONID")
                     .flatMap(sessionManager::findSession);
             Session session = existingSession.orElseGet(() -> {
@@ -53,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
                 sessionManager.add(newSession);
                 return newSession;
             });
-            HttpResponse response = route(request, session, sessionManager);
+            HttpResponse response = route(request, session);
             if (existingSession.isEmpty() && !response.hasHeader("Set-Cookie")) {
                 response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             }
@@ -64,10 +65,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse route(HttpRequest request, Session session, SessionManager sessionManager)
+    private HttpResponse route(HttpRequest request, Session session)
             throws IOException, URISyntaxException {
         if (request.matches("POST", LOGIN_PATH)) {
-            return login(request, session, sessionManager);
+            return login(request, session);
         }
         if (request.matches("POST", "/register")) {
             return register(request);
@@ -89,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.redirectTo("/index.html");
     }
 
-    private HttpResponse login(HttpRequest request, Session session, SessionManager sessionManager) {
+    private HttpResponse login(HttpRequest request, Session session) {
         String account = request.findFormParameter("account")
                 .orElseThrow(() -> new IllegalArgumentException("필수 입력값 누락: account"));
         String password = request.findFormParameter("password")

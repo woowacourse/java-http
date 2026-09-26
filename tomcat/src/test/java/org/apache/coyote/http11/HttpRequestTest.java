@@ -56,4 +56,18 @@ class HttpRequestTest {
 
         assertThat(request.getBody()).isEqualTo(body);
     }
+
+    @Test
+    void 쿼리_문자열이_없으면_빈_파라미터를_반환한다() {
+        HttpRequest request = httpRequest("GET /index.html HTTP/1.1\r\n\r\n");
+
+        assertThat(request.getQueryParameters()).isEmpty();
+    }
+
+    @Test
+    void 요청_본문이_비어_있으면_빈_파라미터를_반환한다() {
+        HttpRequest request = httpRequest("GET /index.html HTTP/1.1\r\n\r\n");
+
+        assertThat(request.getBodyParameters()).isEmpty();
+    }
 }

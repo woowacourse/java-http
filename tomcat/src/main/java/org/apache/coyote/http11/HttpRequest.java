@@ -132,6 +132,10 @@ public class HttpRequest {
     }
 
     private Map<String, String> parseParameters(String parameters) {
+        if (parameters == null || parameters.isBlank()) {
+            return Map.of();
+        }
+
         return Arrays.stream(parameters.split("&"))
                 .map(parameter -> parameter.split("=", 2))
                 .collect(Collectors.toMap(

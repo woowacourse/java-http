@@ -1,9 +1,8 @@
-package org.apache.coyote.http11;
+package org.mvc.view;
 
 import java.util.Locale;
 import java.util.Map;
 
-// 현재 Http11Processor에서만 사용 가능함
 final class MimeTypeResolver {
 
     private static final String DEFAULT_MIME_TYPE = "application/octet-stream";

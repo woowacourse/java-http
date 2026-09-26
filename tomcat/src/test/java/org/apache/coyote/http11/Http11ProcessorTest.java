@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.HomeController;
+import org.mvc.controller.RequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -16,7 +18,10 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var requestMapping = new RequestMapping();
+        requestMapping.addController("/", new HomeController());
+        final var processor = new Http11Processor(socket, (request, response) ->
+                requestMapping.getController(request).service(request, response));
 
         // when
         processor.process(socket);
@@ -43,7 +48,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var requestMapping = new RequestMapping();
+        final Http11Processor processor = new Http11Processor(socket, (request, response) ->
+                requestMapping.getController(request).service(request, response));
 
         // when
         processor.process(socket);

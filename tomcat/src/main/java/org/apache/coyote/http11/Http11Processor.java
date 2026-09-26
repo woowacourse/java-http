@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -20,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Controller registerController = new RegisterController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -57,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("POST".equals(method)) {
-            return handlePostRequest(path, request.body());
+            return handlePostRequest(path, request);
         }
 
         return HttpResponse.empty(405, "Method Not Allowed");
@@ -73,12 +76,12 @@ public class Http11Processor implements Runnable, Processor {
         return serveStaticResource(resourcePath);
     }
 
-    private HttpResponse handlePostRequest(String resourcePath, RequestBody body) {
-        Map<String, String> formData = body.parseFormData();
-
+    private HttpResponse handlePostRequest(String resourcePath, HttpRequest request) throws IOException {
         if (resourcePath.equals("/register")) {
-            return handleRegister(formData);
+            return registerController.handle(request);
         }
+
+        Map<String, String> formData = request.body().parseFormData();
 
         if (resourcePath.equals("/login")) {
             return handleLogin(formData);
@@ -97,16 +100,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isLoggedIn(Session session) {
         return session != null && session.getAttribute("user") != null;
-    }
-
-    private HttpResponse handleRegister(Map<String, String> formData) {
-        String account = formData.get("account");
-        String email = formData.get("email");
-        String password = formData.get("password");
-
-        InMemoryUserRepository.save(new User(account, password, email));
-
-        return HttpResponse.redirect("/index.html");
     }
 
     private HttpResponse handleLogin(Map<String, String> formData) {

@@ -54,7 +54,7 @@ public class Response {
         outputStream.flush();
     }
 
-    public void response(OutputStream outputStream) throws IOException {
+    public void respond(OutputStream outputStream) throws IOException {
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + statusCode.getStatusCode(),
                 "Content-Type: text/" + request.getContentTypeName() + ";charset=utf-8 ",

@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         Response response = handling(request, StatusCode.OK);
-        response.response(outputStream);
+        response.respond(outputStream);
     }
 
     private Response handling(Request request, StatusCode statusCode) throws IOException {
@@ -65,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void empty(OutputStream outputStream, Request request) throws IOException {
         Response response = Response.empty(request);
-        response.response(outputStream);
+        response.respond(outputStream);
     }
 
     private void login(OutputStream outputStream, Request request) throws IOException {
@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         Response response = handling(request, StatusCode.OK);
-        response.response(outputStream);
+        response.respond(outputStream);
     }
 
     private void loginPost(OutputStream outputStream, Request request) throws IOException {
@@ -120,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
     private void register(OutputStream outputStream, Request request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
             Response response = handling(request, StatusCode.OK);
-            response.response(outputStream);
+            response.respond(outputStream);
             return;
         }
         String account = request.getRequestParam("account");

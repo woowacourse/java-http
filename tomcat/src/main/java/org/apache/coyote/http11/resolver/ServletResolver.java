@@ -1,21 +1,32 @@
 package org.apache.coyote.http11.resolver;
 
-import java.util.List;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
-import org.apache.coyote.http11.handler.LoginRequestHandler;
+import org.apache.coyote.http11.filter.FilterChainFactory;
 import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.handler.RootRequestHandler;
 
 public class ServletResolver implements RequestResolver {
-    private final List<RequestHandler> servlets = List.of(
-            new RootRequestHandler(),
-            new LoginRequestHandler()
-    );
+    private final RequestHandler[] handlers;
+    private final FilterChainFactory filterChainFactory;
+
+    public static ServletResolver create(FilterChainFactory filterChainFactory, RequestHandler... handlers) {
+        return new ServletResolver(filterChainFactory, handlers);
+    }
+
+    private ServletResolver(
+            FilterChainFactory filterChainFactory,
+            RequestHandler... handlers) {
+        this.handlers = handlers;
+        this.filterChainFactory = filterChainFactory;
+    }
 
     @Override
     public Response handleRequest(Request request) {
-        for (RequestHandler servlet : servlets) {
+        return filterChainFactory.create(this::handleServlet).doFilter(request);
+    }
+
+    private Response handleServlet(Request request) {
+        for (RequestHandler servlet : handlers) {
             if (servlet.canHandle(request)) {
                 return servlet.handle(request);
             }
@@ -26,6 +37,6 @@ public class ServletResolver implements RequestResolver {
 
     @Override
     public boolean canHandle(Request request) {
-      return true;
+        return true;
     }
 }

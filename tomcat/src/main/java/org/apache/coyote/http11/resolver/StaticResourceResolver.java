@@ -5,6 +5,7 @@ import static org.apache.coyote.http11.config.TomcatServerConfiguration.DEFAULT_
 import static org.apache.coyote.http11.config.TomcatServerConfiguration.STATIC_RESOURCE_PATH;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import org.apache.coyote.http11.data.Request;
 import org.apache.coyote.http11.data.Response;
@@ -15,9 +16,29 @@ public class StaticResourceResolver implements RequestResolver {
 
     private static final Logger log = LoggerFactory.getLogger(StaticResourceResolver.class);
 
+    private final String path;
+    private final Charset charset;
+    private final String charsetName;
+
+    private StaticResourceResolver(
+            final String path,
+            final Charset charset
+    ) {
+        this.path = path;
+        this.charset = charset;
+        this.charsetName = charset.name().toLowerCase();
+    }
+
+    public static StaticResourceResolver create(
+            final String path,
+            final Charset charset
+    ) {
+        return new StaticResourceResolver(path, charset);
+    }
+
     @Override
     public Response handleRequest(Request request) {
-        final String resourcePath = STATIC_RESOURCE_PATH + request.getRequestPoint().getPath();
+        final String resourcePath = path + request.getRequestPoint().getPath();
 
         try (var resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resourceStream == null) {
@@ -25,10 +46,10 @@ public class StaticResourceResolver implements RequestResolver {
             }
 
             final byte[] resourceBytes = resourceStream.readAllBytes();
-            final String responseBody = new String(resourceBytes, DEFAULT_CHARSET);
+            final String responseBody = new String(resourceBytes, charset);
 
             return Response.ok(
-                    Map.of("Content-Type", getContentType(resourcePath) + ";charset=" + DEFAULT_CHARSET_NAME),
+                    Map.of("Content-Type", getContentType(resourcePath) + ";charset=" + charsetName),
                     responseBody
             );
         } catch (IOException e) {

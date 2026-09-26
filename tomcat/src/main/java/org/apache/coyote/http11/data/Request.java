@@ -1,49 +1,58 @@
 package org.apache.coyote.http11.data;
 
+import static org.apache.coyote.http11.data.SessionManager.JSESSIONID_COOKIE_NAME;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.config.TomcatServerConfiguration;
 
 public class Request {
-    private final RequestPoint requestPoint;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final Map<String, String> queryParameters;
-    private final String body;
+    private final Map<String, String> bodyParameters;
+    private final Cookies cookies;
+    private Session session;
 
     private Request(
-            final RequestPoint requestPoint,
+            final RequestLine requestLine,
             final Map<String, String> headers,
             final Map<String, String> queryParameters,
-            final String body
+            final Map<String, String> bodyParameters,
+            final Cookies cookies
     ) {
-        this.requestPoint = requestPoint;
-        this.headers = headers;
-        this.queryParameters = queryParameters;
-        this.body = body;
+        this.requestLine = requestLine;
+        this.headers = Map.copyOf(headers);
+        this.queryParameters = Map.copyOf(queryParameters);
+        this.bodyParameters = Map.copyOf(bodyParameters);
+        this.cookies = cookies;
     }
 
     public static Request from(final InputStream inputStream) throws IOException {
-        final RequestPoint requestEndPoint = requestEndPoint(inputStream);
+        final RequestLine requestEndPoint = requestEndPoint(inputStream);
         final Map<String, String> queryParameters = parseQueryParameter(requestEndPoint.getQuery());
         final Map<String, String> headers = readHeader(inputStream);
-        final String body = readBody(inputStream, Integer.parseInt(headers.getOrDefault("Content-Length", "0")));
+        final Map<String, String> body = readBody(inputStream, Integer.parseInt(headers.getOrDefault("Content-Length", "0")));
+        final Cookies cookies = Cookies.fromHeaderValue(headers.getOrDefault("Cookie", ""));
 
-        return new Request(requestEndPoint, headers, queryParameters, body);
+        return new Request(requestEndPoint, headers, queryParameters, body, cookies);
     }
 
-    private static RequestPoint requestEndPoint(final InputStream inputStream) throws IOException {
+    private static RequestLine requestEndPoint(final InputStream inputStream) throws IOException {
         final String requestLine = readLine(inputStream);
 
         if (requestLine == null || requestLine.isEmpty()) {
             throw new IOException("HTTP 요청 라인이 전달되지 않았습니다.");
         }
 
-        return RequestPoint.from(requestLine);
+        return RequestLine.from(requestLine);
     }
 
     private static Map<String, String> readHeader(final InputStream inputStream) throws IOException {
@@ -104,13 +113,13 @@ public class Request {
         return line.toString(StandardCharsets.ISO_8859_1);
     }
 
-    private static String readBody(
+    private static Map<String, String> readBody(
             final InputStream inputStream,
             final int contentLength
     ) throws IOException {
 
         if (contentLength == 0) {
-            return "";
+            return Map.of();
         }
 
         final byte[] bodyBytes = inputStream.readNBytes(contentLength);
@@ -119,7 +128,21 @@ public class Request {
             throw new IOException("Request body를 모두 읽지 못했습니다.");
         }
 
-        return new String(bodyBytes, TomcatServerConfiguration.DEFAULT_CHARSET);
+        final String body = new String(bodyBytes, TomcatServerConfiguration.DEFAULT_CHARSET).trim();
+        final String[] bodySplit = body.split("&");
+
+        final Map<String, String> bodyMap = new HashMap<>();
+        for (String data : bodySplit) {
+            final String[] keyValue = data.split("=");
+
+            if (keyValue.length != 2) {
+                throw new IOException("잘못된 HTTP 요청 바디 형식입니다: " + body);
+            }
+
+            bodyMap.put(keyValue[0], URLDecoder.decode(keyValue[1], TomcatServerConfiguration.DEFAULT_CHARSET));
+        }
+
+        return bodyMap;
     }
 
     private static Map<String, String> parseQueryParameter(final String query) {
@@ -139,8 +162,8 @@ public class Request {
                 );
     }
 
-    public RequestPoint getRequestPoint() {
-        return requestPoint;
+    public RequestLine getRequestPoint() {
+        return requestLine;
     }
 
     public Map<String, String> getHeaders() {
@@ -151,30 +174,48 @@ public class Request {
         return queryParameters;
     }
 
-    public String getBody() {
-        return body;
+    public Map<String, String> getBody() {
+        return bodyParameters;
     }
 
-    public static class RequestPoint {
+    public Cookies getCookies() {
+        return cookies;
+    }
+
+    public Session getSession(boolean create) {
+        if (!create) {
+            return session;
+        }
+        session = cookies.getValue(JSESSIONID_COOKIE_NAME)
+                .flatMap(SessionManager::getSession)
+                .orElseGet(SessionManager::createSession);
+        return session;
+    }
+
+    public Session getSession() {
+        return getSession(true);
+    }
+
+    public static class RequestLine {
         private final String method;
         private final String path;
         private final String query;
         private final String version;
 
-        private RequestPoint(String method, String path, String query, String version) {
+        private RequestLine(String method, String path, String query, String version) {
             this.method = method;
             this.path = path;
             this.query = query;
             this.version = version;
         }
 
-        private static RequestPoint from(final String requestLine) {
+        private static RequestLine from(final String requestLine) {
             final String[] requestLineParts = requestLine.split(" ");
             final String[] split = requestLineParts[1].split("\\?");
             final String path = split[0];
             final String query = split.length > 1 ? split[1] : "";
 
-            return new RequestPoint(
+            return new RequestLine(
                     requestLineParts[0],
                     path,
                     query,

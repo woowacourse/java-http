@@ -139,10 +139,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 204 No Content \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found \r\n")
+                .contains("Location: /index.html \r\n")
+                .contains("Set-Cookie: JSESSIONID=")
+                .endsWith("Content-Length: 0 \r\n\r\n");
     }
 }

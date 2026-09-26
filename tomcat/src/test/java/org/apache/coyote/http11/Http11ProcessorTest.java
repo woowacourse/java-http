@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.StaticResourceController;
+import com.techcourse.view.ResourceRenderer;
 import org.apache.catalina.controller.RequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -18,7 +19,8 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new RequestMapping(new StaticResourceController()));
+        final var processor = new Http11Processor(socket,
+                new RequestMapping(new StaticResourceController(new ResourceRenderer())));
 
         // when
         processor.process(socket);
@@ -45,7 +47,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new RequestMapping(new StaticResourceController()));
+        final Http11Processor processor = new Http11Processor(socket,
+                new RequestMapping(new StaticResourceController(new ResourceRenderer())));
 
         // when
         processor.process(socket);

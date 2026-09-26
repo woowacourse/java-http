@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.view.ResourceRenderer;
 import java.io.IOException;
 import java.util.Optional;
 import org.apache.catalina.controller.AbstractController;
@@ -9,7 +10,11 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class LoginController extends AbstractController {
-    private final StaticResourceController resources = new StaticResourceController();
+    private final ResourceRenderer resourceRenderer;
+
+    public LoginController(ResourceRenderer resourceRenderer) {
+        this.resourceRenderer = resourceRenderer;
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
@@ -17,7 +22,7 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/index.html");
             return;
         }
-        resources.render("/login.html", response);
+        resourceRenderer.render("/login.html", response);
     }
 
     @Override

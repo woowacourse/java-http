@@ -1,7 +1,14 @@
 package org.apache.coyote.http11;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,14 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class Http11ProcessorTest {
 
@@ -50,11 +49,11 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 12 ",
+            "",
+            "Hello world!");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -123,13 +122,13 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                SESSION_COOKIE,
-                "",
-                "");
+        final String httpRequest = String.join("\r\n",
+            "GET /index.html HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            SESSION_COOKIE,
+            "",
+            "");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, requestDispatcher);
@@ -140,10 +139,10 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "Content-Length: 5564 \r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -152,7 +151,7 @@ class Http11ProcessorTest {
     @ValueSource(strings = {"/index.html", "/css/styles.css", "/js/scripts.js"})
     void get(String targetFilePath) throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
             String.format("GET %s HTTP/1.1", targetFilePath),
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
@@ -238,7 +237,7 @@ class Http11ProcessorTest {
         @Test
         void get_not_login() throws IOException {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -254,7 +253,8 @@ class Http11ProcessorTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            final String body = new String(
+                Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -274,7 +274,7 @@ class Http11ProcessorTest {
                 .findSession(SESSION_ID);
             session.addAttribute("user", user);
 
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -290,7 +290,8 @@ class Http11ProcessorTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            final String body = new String(
+                Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index ",
@@ -302,7 +303,7 @@ class Http11ProcessorTest {
         @Test
         void post_success() throws IOException {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -332,7 +333,7 @@ class Http11ProcessorTest {
         @Test
         void post_success_if_jsessionid_doesnt_exist() {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -365,7 +366,7 @@ class Http11ProcessorTest {
         void post_login_with_unknown_session_id_issues_new_session() {
             // given
             final String wrongSessionCookie = "Cookie: JSESSIONID=wrong-jsessionid";
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -390,7 +391,7 @@ class Http11ProcessorTest {
                     "HTTP/1.1 302 Found ",
                     "Location: /index "),
                 () -> assertThat(actual).containsPattern(
-                    "Set-Cookie: JSESSIONID=[^;]+")
+                        "Set-Cookie: JSESSIONID=[^;]+")
                     .doesNotContain("Set-Cookie: JSESSIONID=wrong-jsessionid")
             );
         }
@@ -444,7 +445,7 @@ class Http11ProcessorTest {
         @Test
         void post_failure1() throws IOException {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -463,7 +464,8 @@ class Http11ProcessorTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            final String body = new String(
+                Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -478,7 +480,7 @@ class Http11ProcessorTest {
         @Test
         void post_failure2() throws IOException {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -497,7 +499,8 @@ class Http11ProcessorTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            final String body = new String(
+                Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -516,7 +519,7 @@ class Http11ProcessorTest {
         @Test
         void get() throws IOException {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -532,7 +535,8 @@ class Http11ProcessorTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
-            final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+            final String body = new String(
+                Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -546,7 +550,7 @@ class Http11ProcessorTest {
         @Test
         void post() throws IOException {
             // given
-            final String httpRequest= String.join("\r\n",
+            final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

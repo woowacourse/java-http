@@ -18,5 +18,6 @@ public final class PathAliasesResolver {
         return PATH_ALIASES.getOrDefault(path, path);
     }
 
-    private PathAliasesResolver() {}
+    private PathAliasesResolver() {
+    }
 }

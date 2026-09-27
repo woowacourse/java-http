@@ -6,11 +6,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.DispatchResult;
-import org.apache.coyote.http11.WebController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RegisterRequest;
+import org.apache.coyote.http11.WebController;
 
 @WebController(path = "/register")
 public class RegisterController extends AbstractController {

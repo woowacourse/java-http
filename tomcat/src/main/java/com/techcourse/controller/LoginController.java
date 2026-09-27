@@ -8,13 +8,13 @@ import java.util.Optional;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.DispatchResult;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.WebController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.LoginRequest;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.WebController;
 
 @WebController(path = "/login")
 public class LoginController extends AbstractController {
@@ -22,7 +22,8 @@ public class LoginController extends AbstractController {
     @Override
     protected DispatchResult doPost(HttpRequest request, HttpResponse response) throws Exception {
         final LoginRequest loginRequest = LoginRequest.from(request.requestBody());
-        final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
+        final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(
+                loginRequest.account())
             .filter(foundUser -> foundUser.checkPassword(loginRequest.password()));
 
         if (filteredUser.isEmpty()) {

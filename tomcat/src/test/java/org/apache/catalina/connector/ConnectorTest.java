@@ -18,13 +18,15 @@ class ConnectorTest {
 
     @BeforeEach
     void setUp() {
-        this.requestDispatcher = new RequestDispatcher(new HandlerMapping("com.techcourse.controller"));
+        this.requestDispatcher = new RequestDispatcher(
+            new HandlerMapping("com.techcourse.controller"));
     }
 
     @Test
     void 설정한_스레드_수로_고정_스레드_풀을_생성한다() throws Exception {
         final int maxThreads = 3;
-        final Connector connector = new Connector(requestDispatcher, availablePort(), 100, maxThreads);
+        final Connector connector = new Connector(requestDispatcher, availablePort(), 100,
+            maxThreads);
 
         try {
             final ThreadPoolExecutor executor = threadPoolExecutorOf(connector);

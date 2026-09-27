@@ -2,10 +2,13 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.HomeController;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.controller.StaticResourceController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +18,21 @@ class Http11ProcessorTest {
 
     private SessionManager sessionManager;
     private Session session;
+    private StaticResourceController staticResourceController;
+    private RequestMapping mapping;
+    private SessionResolver sessionResolver;
 
     @BeforeEach
     void setUp() {
         sessionManager = new SessionManager();
         session = new Session("test-session-id");
         sessionManager.add(session);
+
+        staticResourceController = new StaticResourceController("static");
+        mapping = new RequestMapping(staticResourceController);
+        mapping.register("/", new HomeController());
+
+        sessionResolver = new SessionResolver(sessionManager);
     }
 
     @AfterEach
@@ -40,7 +52,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, mapping, sessionResolver);
 
         // when
         processor.process(socket);
@@ -68,7 +80,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+
+        final Http11Processor processor = new Http11Processor(socket, mapping, sessionResolver);
 
         // when
         processor.process(socket);

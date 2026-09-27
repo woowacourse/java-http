@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
 
@@ -10,6 +11,12 @@ public class SessionManager {
 
     public void add(Session session) {
         sessions.put(session.getId(), session);
+    }
+
+    public Session createSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        add(session);
+        return session;
     }
 
     public Session findSession(String id) throws IOException {

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 public class HttpRequest {
 
@@ -16,6 +20,7 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> parameters;
     private final HttpCookie cookies;
+    private Session session;
 
     private HttpRequest(final String method, final String uri, final Map<String, String> headers,
                         final String body) {
@@ -95,7 +100,14 @@ public class HttpRequest {
         return parameters.get(name);
     }
 
-    public HttpCookie getCookies() {
-        return cookies;
+    public Session getSession(final boolean create) {
+        if (session == null) {
+            session = SessionManager.getInstance().findSession(cookies.getValue(HttpCookie.JSESSIONID));
+        }
+        if (session == null && create) {
+            session = new Session(UUID.randomUUID().toString());
+            SessionManager.getInstance().add(session);
+        }
+        return session;
     }
 }

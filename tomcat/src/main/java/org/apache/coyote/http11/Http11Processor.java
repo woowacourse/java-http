@@ -13,7 +13,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -37,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = HttpRequest.read(inputStream);
-            final var responseHeaders = createCookieHeaders(request);
+            final var responseHeaders = createSessionHeaders(request);
             final var redirectPath = getRedirectPath(request);
             if (redirectPath != null) {
                 responseHeaders.put("Location", redirectPath);
@@ -54,16 +53,22 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> createCookieHeaders(final HttpRequest request) {
+    private Map<String, String> createSessionHeaders(final HttpRequest request) {
         final var headers = new LinkedHashMap<String, String>();
-        final var sessionId = request.getCookies().getValue(HttpCookie.JSESSIONID);
-        if (sessionId == null || sessionId.isBlank()) {
-            headers.put("Set-Cookie", HttpCookie.ofJSessionId(UUID.randomUUID().toString()));
+        if (request.getSession(false) == null) {
+            final var session = request.getSession(true);
+            headers.put("Set-Cookie", HttpCookie.ofJSessionId(session.getId()));
         }
         return headers;
     }
 
     private String getRedirectPath(final HttpRequest request) {
+        if ("GET".equals(request.getMethod()) && "/login".equals(request.getPath())) {
+            if (request.getSession(false).getAttribute("user") != null) {
+                return "/index.html";
+            }
+            return null;
+        }
         if ("POST".equals(request.getMethod()) && "/login".equals(request.getPath())) {
             return authenticate(request);
         }
@@ -84,6 +89,7 @@ public class Http11Processor implements Runnable, Processor {
         if (foundUser.isPresent()) {
             final var user = foundUser.get();
             if (user.checkPassword(password)) {
+                request.getSession(true).setAttribute("user", user);
                 return "/index.html";
             }
         }

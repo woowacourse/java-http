@@ -8,12 +8,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -28,17 +24,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String STATIC_RESOURCE_DIRECTORY = "static/";
-    private static final String DEFAULT_PAGE = "index.html";
-    private static final String LOGIN_PATH = "login";
-    private static final String LOGIN_PAGE = "login.html";
-    private static final String REGISTER_PATH = "register";
-    private static final String REGISTER_PAGE = "register.html";
+    private static final String STATIC_RESOURCE_DIRECTORY = "static";
+    private static final String ROOT_PATH = "/";
+    private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PAGE = "/login.html";
+    private static final String REGISTER_PATH = "/register";
+    private static final String REGISTER_PAGE = "/register.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String SESSION_USER = "user";
-    private static final String GET = "GET";
-    private static final String POST = "POST";
 
     private final Socket connection;
 
@@ -58,29 +52,21 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            final HttpRequest request = new HttpRequest(reader);
 
-            final String[] requestLine = readRequestLine(reader);
-            final String method = requestLine[0];
-            final String uri = requestLine[1].substring(1);
-            final String path = extractPath(uri);
-            final Map<String, String> headers = readHeaders(reader);
-            final String body = readBody(reader, headers);
-            final Map<String, String> formData = parseQueryString(body);
-            final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-
-            if (isLoginPostRequest(method, path)) {
-                write(outputStream, loginResponse(formData));
+            if (isLoginPostRequest(request)) {
+                write(outputStream, loginResponse(request));
                 return;
             }
-            if (isLoginPageRequest(method, path) && isLoggedIn(cookie)) {
+            if (isLoginPageRequest(request) && isLoggedIn(request.getCookie())) {
                 write(outputStream, redirectResponse(INDEX_PAGE));
                 return;
             }
-            if (isRegisterPostRequest(method, path)) {
-                write(outputStream, redirectResponse(registerLocation(formData)));
+            if (isRegisterPostRequest(request)) {
+                write(outputStream, redirectResponse(registerLocation(request)));
                 return;
             }
-            write(outputStream, staticResourceResponse(resourcePath(path)));
+            write(outputStream, staticResourceResponse(resourcePath(request.getPath())));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -88,62 +74,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        String line = reader.readLine();
-        while (line != null && !line.isEmpty()) {
-            final int index = line.indexOf(":");
-            if (index != -1) {
-                headers.put(line.substring(0, index).trim(), line.substring(index + 1).trim());
-            }
-            line = reader.readLine();
-        }
-        return headers;
+    private boolean isLoginPostRequest(final HttpRequest request) {
+        return request.isPost() && request.getPath().equals(LOGIN_PATH);
     }
 
-    private String[] readRequestLine(final BufferedReader reader) throws IOException {
-        return reader.readLine().split(" ");
-    }
-
-    private String readBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
-        if (!headers.containsKey("Content-Length")) {
-            return "";
-        }
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, buffer.length);
-        return new String(buffer);
-    }
-
-    private String extractPath(final String uri) {
-        final int index = uri.indexOf("?");
-        if (index == -1) {
-            return uri;
-        }
-        return uri.substring(0, index);
-    }
-
-    private Map<String, String> parseQueryString(String queryString) {
-        final Map<String, String> params = new HashMap<>();
-        queryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
-
-        final String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
-            final String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
-        }
-        return params;
-    }
-
-    private boolean isLoginPostRequest(final String method, final String path) {
-        return method.equals(POST) && path.equals(LOGIN_PATH);
-    }
-
-    private String loginResponse(final Map<String, String> params) {
-        final User existUser = InMemoryUserRepository.findByAccount(params.get("account"))
-                .filter(user -> user.checkPassword(params.get("password")))
+    private String loginResponse(final HttpRequest request) {
+        final User existUser = InMemoryUserRepository.findByAccount(request.getFormParameter("account"))
+                .filter(user -> user.checkPassword(request.getFormParameter("password")))
                 .orElse(null);
         if (existUser == null) {
             return redirectResponse(UNAUTHORIZED_PAGE);
@@ -155,8 +92,8 @@ public class Http11Processor implements Runnable, Processor {
         return redirectResponse(INDEX_PAGE, HttpCookie.ofJSessionId(session.getId()));
     }
 
-    private boolean isLoginPageRequest(final String method, final String path) {
-        return method.equals(GET) && path.equals(LOGIN_PATH);
+    private boolean isLoginPageRequest(final HttpRequest request) {
+        return request.isGet() && request.getPath().equals(LOGIN_PATH);
     }
 
     private boolean isLoggedIn(final HttpCookie cookie) {
@@ -166,12 +103,15 @@ public class Http11Processor implements Runnable, Processor {
                 .isPresent();
     }
 
-    private boolean isRegisterPostRequest(final String method, final String path) {
-        return method.equals(POST) && path.equals(REGISTER_PATH);
+    private boolean isRegisterPostRequest(final HttpRequest request) {
+        return request.isPost() && request.getPath().equals(REGISTER_PATH);
     }
 
-    private String registerLocation(final Map<String, String> params) {
-        User registerUser = new User(params.get("account"), params.get("password"), params.get("email"));
+    private String registerLocation(final HttpRequest request) {
+        User registerUser = new User(
+                request.getFormParameter("account"),
+                request.getFormParameter("password"),
+                request.getFormParameter("email"));
         InMemoryUserRepository.save(registerUser);
         return INDEX_PAGE;
     }
@@ -194,8 +134,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String resourcePath(final String path) {
-        if (path.isEmpty()) {
-            return DEFAULT_PAGE;
+        if (path.equals(ROOT_PATH)) {
+            return INDEX_PAGE;
         }
         if (path.equals(LOGIN_PATH)) {
             return LOGIN_PAGE;

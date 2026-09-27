@@ -21,7 +21,9 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(Session session) {
-        SESSIONS.put(session.getId(), session);
+        if (SESSIONS.putIfAbsent(session.getId(), session) != null) {
+            throw new IllegalStateException("Duplicate session ID");
+        }
     }
 
     @Override

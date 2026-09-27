@@ -16,6 +16,7 @@ public class HttpRequest {
     private final Map<String, String> queryParameters;
     private final String body;
     private final Cookie cookie;
+    private final FormBodyParser formBodyParser;
     private Session session;
 
     public HttpRequest(String method, String requestTarget, Map<String, String> queryParameters, String body, Cookie cookie) {
@@ -24,6 +25,7 @@ public class HttpRequest {
         this.queryParameters = queryParameters;
         this.body = body;
         this.cookie = cookie;
+        this.formBodyParser = new FormBodyParser(body);
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
@@ -108,6 +110,10 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public String getFormParameter(String name) {
+        return formBodyParser.getParameter(name);
     }
 
     public Cookie getCookie() {

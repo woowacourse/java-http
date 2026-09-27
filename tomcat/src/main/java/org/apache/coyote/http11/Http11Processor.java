@@ -39,22 +39,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             HttpResponse response = new HttpResponse();
-            String sessionId = request.getCookie("JSESSIONID");
+            prepareSession(request, response);
 
-            if (sessionId == null) {
-                sessionId = UUID.randomUUID().toString();
-                response.setHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-            }
-
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session session = sessionManager.findSession(sessionId);
-
-            if (session == null) {
-                session = new Session(sessionId);
-                sessionManager.add(session);
-            }
-
-            request.setSession(session);
             Controller controller = requestMapping.getController(request);
             controller.service(request, response);
             response.writeTo(outputStream);
@@ -64,4 +50,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void prepareSession(HttpRequest request, HttpResponse response) {
+        String sessionId = request.getCookie("JSESSIONID");
+
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+            response.setHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+        }
+
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findOrCreateSession(sessionId);
+
+        request.setSession(session);
+    }
 }

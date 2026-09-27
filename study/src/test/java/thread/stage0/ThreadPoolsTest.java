@@ -1,5 +1,7 @@
 package thread.stage0;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,41 +26,63 @@ class ThreadPoolsTest {
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolsTest.class);
 
     @Test
-    void testNewFixedThreadPool() {
+    void testNewFixedThreadPool() throws InterruptedException {
         final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
-        executor.submit(logWithSleep("hello fixed thread pools"));
-        executor.submit(logWithSleep("hello fixed thread pools"));
-        executor.submit(logWithSleep("hello fixed thread pools"));
-
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        CountDownLatch started = new CountDownLatch(2);
+        CountDownLatch release = new CountDownLatch(1);
+
+        try {
+            executor.submit(logWithLatch("hello fixed thread pools", started, release));
+            executor.submit(logWithLatch("hello fixed thread pools", started, release));
+            executor.submit(logWithLatch("hello fixed thread pools", started, release));
+
+            assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(executor.getPoolSize()).isEqualTo(expectedPoolSize);
+            assertThat(executor.getQueue().size()).isEqualTo(expectedQueueSize);
+        } finally {
+            release.countDown();
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
     }
 
     @Test
-    void testNewCachedThreadPool() {
+    void testNewCachedThreadPool() throws InterruptedException {
         final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        executor.submit(logWithSleep("hello cached thread pools"));
-        executor.submit(logWithSleep("hello cached thread pools"));
-        executor.submit(logWithSleep("hello cached thread pools"));
-
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        CountDownLatch started = new CountDownLatch(3);
+        CountDownLatch release = new CountDownLatch(1);
+
+        try {
+            executor.submit(logWithLatch("hello cached thread pools", started, release));
+            executor.submit(logWithLatch("hello cached thread pools", started, release));
+            executor.submit(logWithLatch("hello cached thread pools", started, release));
+
+            assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(executor.getPoolSize()).isEqualTo(expectedPoolSize);
+            assertThat(executor.getQueue().size()).isEqualTo(expectedQueueSize);
+        } finally {
+            release.countDown();
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
     }
 
-    private Runnable logWithSleep(final String message) {
+    private Runnable logWithLatch(final String message, CountDownLatch started, CountDownLatch release) {
         return () -> {
+            started.countDown();
             try {
-                Thread.sleep(1000);
+                release.await();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                return;
             }
             log.info(message);
         };

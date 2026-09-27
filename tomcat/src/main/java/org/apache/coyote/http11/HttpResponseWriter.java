@@ -48,6 +48,9 @@ public class HttpResponseWriter {
         if (path.endsWith(".css")) {
             return "text/css;charset=utf-8";
         }
+        if (path.endsWith(".js")) {
+            return "application/javascript;charset=utf-8";
+        }
         return "text/html;charset=utf-8";
     }
 }

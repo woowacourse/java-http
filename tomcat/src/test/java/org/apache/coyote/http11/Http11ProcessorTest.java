@@ -68,6 +68,76 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void CSS_정적_파일을_응답한다() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String responseBody = readStaticResource("css/styles.css");
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/css;charset=utf-8")
+                .endsWith(responseBody);
+    }
+
+    @Test
+    void JavaScript_정적_파일을_올바른_Content_Type으로_응답한다() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String responseBody = readStaticResource("js/scripts.js");
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("Content-Type: application/javascript;charset=utf-8")
+                .endsWith(responseBody);
+    }
+
+    @Test
+    void 존재하지_않는_정적_파일은_404로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/not-found.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found");
+    }
+
+    @Test
     void login() throws IOException, URISyntaxException {
         // given
         final String requestBody = "account=gugu&password=password";
@@ -179,5 +249,13 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 303 See Other");
+    }
+
+    private String readStaticResource(final String resourcePath) throws IOException, URISyntaxException {
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/" + resourcePath);
+
+        return Files.readString(Path.of(resource.toURI()));
     }
 }

@@ -91,6 +91,7 @@ public class LoginController extends AbstractController {
         response.setStatus(HttpStatus.OK);
 
         if (isLoggedIn(request)) {
+            response.setStatus(HttpStatus.FOUND);
             response.addHeader("Location", "/index.html");
         }
     }

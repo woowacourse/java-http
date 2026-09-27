@@ -11,7 +11,7 @@ public class StaticResourceController extends AbstractController {
         sendFile(request.requestLine().path(), response);
     }
 
-    void sendFile(String path, HttpResponse response) throws IOException {
+    public void sendFile(String path, HttpResponse response) throws IOException {
         String resourcePath = "static" + path;
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resource == null) {

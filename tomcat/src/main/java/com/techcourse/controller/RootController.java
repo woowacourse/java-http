@@ -1,6 +1,9 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import java.io.IOException;
+import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public class RootController extends AbstractController {
 

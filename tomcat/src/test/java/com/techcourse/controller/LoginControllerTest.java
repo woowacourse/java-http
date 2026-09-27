@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,6 +7,9 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.RequestLine;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {

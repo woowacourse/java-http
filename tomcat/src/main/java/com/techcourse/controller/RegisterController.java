@@ -1,8 +1,12 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.StaticResourceController;
 
 public class RegisterController extends AbstractController {
 

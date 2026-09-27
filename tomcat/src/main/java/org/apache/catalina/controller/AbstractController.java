@@ -1,9 +1,9 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.RequestLine;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 import java.io.IOException;
 

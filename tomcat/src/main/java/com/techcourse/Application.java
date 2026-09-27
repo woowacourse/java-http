@@ -5,7 +5,7 @@ import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticController;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.http11.RequestMapping;
+import org.apache.catalina.routing.RequestMapping;
 
 public class Application {
 

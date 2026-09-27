@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.HttpHeaders;
 
 import java.util.HashMap;
 import java.util.Map;

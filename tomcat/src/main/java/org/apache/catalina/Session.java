@@ -1,11 +1,12 @@
 package org.apache.catalina;
 
+import com.techcourse.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 // 클라이언트별 세션 데이터 관리
-public class Session {
+public class Session implements HttpSession {
 
     // id = uuid (JSESSION)
     private final String id;

@@ -1,11 +1,13 @@
 package org.apache.catalina;
 
+import com.techcourse.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // 모든 클라이언트의 세션 값을 관리하는 클래스
 // 각 세션의 id 는 uuid 사용
-public class SessionManager implements Manager{
+public class SessionManager implements Manager, SessionResolver {
 
     // key = JSESSION 아이디값,value = Session
     private static final Map<String, Session> SESSIONS = new HashMap<>();
@@ -24,6 +26,63 @@ public class SessionManager implements Manager{
     @Override
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public boolean hasValidSession(Map<String, List<String>> headers) {
+        String sessionId = getSessionId(headers);
+
+        return sessionId != null && findSession(sessionId) != null;
+    }
+
+    @Override
+    public String getSessionId(HttpSession session) {
+        if (session instanceof Session actualSession) {
+            return actualSession.getId();
+        }
+        return null;
+    }
+    public boolean hasSessionId(Map<String, List<String>> headers) {
+        return getSessionId(headers) != null;
+    }
+
+    private String getSessionId(Map<String, List<String>> requestHeaders) {
+        List<String> cookieHeaders = requestHeaders.get("cookie");
+
+        if (cookieHeaders == null) {
+            return null;
+        }
+
+        for (String cookieHeader : cookieHeaders) {
+            for (String cookie : cookieHeader.split(";")) {
+                String[] parts = cookie.trim().split("=", 2);
+
+                if (parts.length == 2 && parts[0].equals("JSESSIONID")) {
+                    return parts[1].trim();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Session getSession(Map<String, List<String>> requestHeaders, boolean create) {
+        String sessionId = getSessionId(requestHeaders);
+
+        if (sessionId != null) {
+            Session session = findSession(sessionId);
+
+            if (session != null) {
+                return session;
+            }
+        }
+
+        if (!create) {
+            return null;
+        }
+
+        Session session = Session.create();
+        add(session);
+        return session;
     }
 
     public SessionManager() {}

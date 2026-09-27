@@ -34,6 +34,9 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
+        validatePort(port);
+        validateAcceptCount(acceptCount);
+        validateMaxThreads(maxThreads);
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
@@ -41,9 +44,7 @@ public class Connector implements Runnable {
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(port, acceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -108,17 +109,21 @@ public class Connector implements Runnable {
         }
     }
 
-    private int checkPort(final int port) {
-        final var MIN_PORT = 1;
-        final var MAX_PORT = 65535;
-
-        if (port < MIN_PORT || MAX_PORT < port) {
-            return DEFAULT_PORT;
+    private void validatePort(final int port) {
+        if (port < 0 || 65535 < port) {
+            throw new IllegalArgumentException("port는 0 이상 65535 이하여야 합니다.");
         }
-        return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    private void validateAcceptCount(final int acceptCount) {
+        if (acceptCount <= 0) {
+            throw new IllegalArgumentException("acceptCount는 0보다 커야 합니다.");
+        }
+    }
+
+    private void validateMaxThreads(final int maxThreads) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads는 0보다 커야 합니다.");
+        }
     }
 }

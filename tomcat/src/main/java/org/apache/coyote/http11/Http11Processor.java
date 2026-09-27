@@ -5,15 +5,12 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -34,10 +31,8 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String HTTP_VERSION = "HTTP/1.1";
 
     public static final String CONTENT_TYPE_HEADER = "Content-Type";
-    public static final String CHARSET_UTF_8 = "charset=utf-8";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String SET_COOKIE = "Set-Cookie";
     private static final String LOCATION = "Location";
@@ -82,26 +77,25 @@ public class Http11Processor implements Runnable, Processor {
             HttpMethod httpMethod = request.getHttpMethod();
             String requestUri = request.getRequestTarget();
 
-            String cookieLine = request.getCookieLine();
-            HttpCookie cookie = HttpCookie.parse(cookieLine);
+            HttpCookie cookie = request.getCookie();
 
             Map<String, String> responseHeaders = new LinkedHashMap<>();
+            responseHeaders.put(CONTENT_TYPE_HEADER, getContentType(requestUri));
             Session session = getOrCreateJSessionId(cookie, responseHeaders);
 
             if (HttpMethod.POST.equals(httpMethod)) {
-                Map<String, String> parameters = parseFormParameters(requestBody);
 
                 if (requestUri.equals(REGISTER_PATH)) {
-                    User user = new User(parameters.get("account"), parameters.get("password"),
-                            parameters.get("email"));
+                    User user = new User(request.getParameters("account"), request.getParameters("password"),
+                            request.getParameters("email"));
 
                     InMemoryUserRepository.save(user);
                     responseHeaders.put(LOCATION, INDEX_HTML);
                 }
 
                 if (requestUri.equals(LOGIN_PATH)) {
-                    String account = parameters.get("account");
-                    String password = parameters.get("password");
+                    String account = request.getParameters("account");
+                    String password = request.getParameters("password");
 
                     Optional<User> authenticatedUser = authenticate(account, password);
                     if (authenticatedUser.isPresent()) {
@@ -129,7 +123,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            sendResponse(requestUri, responseHeaders, responseBody, outputStream);
+            HttpResponse response = HttpResponse.build(responseHeaders, responseBody);
+            outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -196,61 +192,6 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private void sendResponse(String requestUri, Map<String, String> headers, String responseBody,
-                              OutputStream outputStream)
-            throws IOException {
-        String contentType = getContentType(requestUri);
-
-        final var response = getResponse(contentType, headers, responseBody);
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
-    }
-
-    private String getResponse(String contentType, Map<String, String> headers, String responseBody) {
-        String httpStatus = "200 OK";
-        if (headers.containsKey(LOCATION)) {
-            httpStatus = "302 FOUND";
-        }
-
-        StringBuilder response = new StringBuilder();
-        response.append(HTTP_VERSION).append(" ").append(httpStatus).append(" ").append(CRLF);
-
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            response.append(header.getKey())
-                    .append(": ")
-                    .append(header.getValue())
-                    .append(CRLF);
-        }
-
-        response.append(contentType).append(CRLF);
-        response.append(CONTENT_LENGTH).append(": ")
-                .append(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                .append(" ")
-                .append(CRLF);
-        response.append(CRLF);
-        response.append(responseBody);
-
-        return response.toString();
-    }
-
-    private Map<String, String> parseFormParameters(String queryString) {
-        Map<String, String> encodedParameters = new HashMap<>();
-
-        String[] queryPairs = queryString.split("&");
-        for (String queryPair : queryPairs) {
-            String[] keyAndValue = queryPair.split("=", 2);
-
-            if (keyAndValue.length == 2) {
-                String key = URLDecoder.decode(keyAndValue[0], StandardCharsets.UTF_8);
-                String value = URLDecoder.decode(keyAndValue[1], StandardCharsets.UTF_8);
-
-                encodedParameters.put(key, value);
-            }
-        }
-        return encodedParameters;
-    }
-
     private Optional<User> authenticate(String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
@@ -258,9 +199,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(String requestUri) {
         if (requestUri.endsWith(".css")) {
-            return CONTENT_TYPE_HEADER + ": " + "text/css;" + CHARSET_UTF_8 + " ";
+            return "text/css; charset=utf-8";
         }
-        return CONTENT_TYPE_HEADER + ": " + "text/html;" + CHARSET_UTF_8 + " ";
+        return "text/html; charset=utf-8";
     }
 
     private String getResponseBody(String requestUri) throws URISyntaxException, IOException {

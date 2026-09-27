@@ -11,12 +11,12 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
-    private final String body;
+    private final Map<String, String> parameters;
 
-    private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
+    private HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> parameters) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
+        this.parameters = parameters;
     }
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
@@ -26,7 +26,7 @@ public class HttpRequest {
         }
         Map<String, String> headers = readHeaders(reader);
         String body = readRequestBody(reader, headers);
-        return new HttpRequest(new RequestLine(line), headers, body);
+        return new HttpRequest(new RequestLine(line), headers, parseFormParameters(body));
     }
 
     public String getMethod() {
@@ -42,7 +42,7 @@ public class HttpRequest {
     }
 
     public String getParameter(String name) {
-        return parseFormParameters(body).get(name);
+        return parameters.get(name);
     }
 
     private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
@@ -71,7 +71,7 @@ public class HttpRequest {
         return new String(buffer, 0, totalRead);
     }
 
-    private Map<String, String> parseFormParameters(String requestBody) {
+    private static Map<String, String> parseFormParameters(String requestBody) {
         Map<String, String> parameters = new HashMap<>();
         for (String pair : requestBody.split("&")) {
             String[] keyValue = pair.split("=", 2);

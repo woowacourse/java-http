@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.handle;
 
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 
-public interface Controller {
-    void service(HttpRequest request, HttpResponse response);
+public interface RequestHandler {
+    void handle(HttpRequest request, HttpResponse response);
     boolean canHandle(HttpRequest request);
 }

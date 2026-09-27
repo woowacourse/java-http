@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
@@ -12,9 +12,8 @@ public abstract class AbstractController implements Controller {
         switch (method) {
             case "GET" -> doGet(request, response);
             case "POST" -> doPost(request, response);
-            default -> response.badRequest();
+            default -> response.methodNotAllowed();
         }
-
     }
 
     protected void doGet(HttpRequest request, HttpResponse response){}

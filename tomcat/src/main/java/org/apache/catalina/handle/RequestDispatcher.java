@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.handle;
+package org.apache.catalina.handle;
 
-import org.apache.coyote.http11.controller.AbstractController;
-import org.apache.coyote.http11.controller.Controller;
+import com.techcourse.controller.AbstractController;
+import com.techcourse.controller.Controller;
+import org.apache.catalina.filter.FilterChainFactory;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
-import org.apache.coyote.http11.filter.FilterChainFactory;
 
 public class RequestDispatcher implements RequestHandler {
     private final Controller[] controllers;

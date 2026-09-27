@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
-import static org.apache.coyote.http11.config.TomcatServerConfiguration.DEFAULT_CHARSET_NAME;
+import static com.techcourse.Application.DEFAULT_CHARSET_NAME;
 
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;

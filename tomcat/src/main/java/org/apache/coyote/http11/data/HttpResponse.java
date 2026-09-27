@@ -36,6 +36,7 @@ public class HttpResponse {
             put(302, "Found");
             put(400, "Bad Request");
             put(404, "Not Found");
+            put(405, "Method Not Allowed");
             put(500, "Internal Server Error");
         }
     };
@@ -49,6 +50,11 @@ public class HttpResponse {
     public void badRequest() {
         this.statusCode = 400;
         this.body = "Bad Request";
+    }
+
+    public void methodNotAllowed() {
+        this.statusCode = 405;
+        this.body = "Method Not Allowed";
     }
 
     public void setViewName(final String viewName) {

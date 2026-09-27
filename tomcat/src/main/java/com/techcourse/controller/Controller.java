@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.handle;
+package com.techcourse.controller;
 
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
 
-public interface RequestHandler {
-    void handle(HttpRequest request, HttpResponse response);
+public interface Controller {
+    void service(HttpRequest request, HttpResponse response);
     boolean canHandle(HttpRequest request);
 }

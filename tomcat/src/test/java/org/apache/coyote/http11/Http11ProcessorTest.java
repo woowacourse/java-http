@@ -1,17 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static com.techcourse.Application.createRequestHandlerResolver;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.db.InMemoryUserRepository;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
+import org.apache.catalina.connector.CoyoteAdapter;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -19,7 +20,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
@@ -46,7 +47,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
@@ -73,7 +74,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
@@ -104,7 +105,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
@@ -138,7 +139,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
@@ -172,7 +173,7 @@ class Http11ProcessorTest {
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 body));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
@@ -193,21 +194,21 @@ class Http11ProcessorTest {
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 body));
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 400 Bad Request \r\n")
+                .startsWith("HTTP/1.1 405 Method Not Allowed \r\n")
                 .doesNotContain("Location:", "Set-Cookie:");
     }
 
     private void assertGetReturnsView(String path, String resourcePath) throws IOException {
         // given
         final var socket = new StubSocket("GET " + path + " HTTP/1.1\r\n\r\n");
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new CoyoteAdapter(createRequestHandlerResolver()));
         final String expectedBody;
         try (var resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             expectedBody = new String(resource.readAllBytes(), StandardCharsets.UTF_8);

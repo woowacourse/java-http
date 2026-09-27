@@ -1,13 +1,13 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.coyote.Adapter;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -17,15 +17,22 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final Adapter adapter;
+
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(Adapter adapter) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final Adapter adapter
+    ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.adapter = adapter;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -66,7 +73,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, adapter);
         new Thread(processor).start();
     }
 

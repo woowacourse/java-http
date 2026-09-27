@@ -1,13 +1,13 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;
-import org.apache.coyote.http11.data.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

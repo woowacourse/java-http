@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handle;
+package org.apache.catalina.handle;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.filter;
+package org.apache.catalina.filter;
 
 import org.apache.coyote.http11.data.HttpRequest;
 import org.apache.coyote.http11.data.HttpResponse;

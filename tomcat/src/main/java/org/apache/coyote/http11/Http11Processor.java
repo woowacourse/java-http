@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final HttpRequest request = new HttpRequest(reader);
         final HttpResponse response = new HttpResponse(request.getProtocolVersion(), request.getPath());
-        final RequestMapping requestMapping = new RequestMapping();
+        final RequestMapping requestMapping = RequestMapping.getInstance();
         final Controller controller = requestMapping.getController(request);
 
         controller.service(request, response);

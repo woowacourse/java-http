@@ -1,5 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -16,19 +21,24 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_QUEUE_CAPACITY = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount, RequestMapping requestMapping) {
+    public Connector(final int port, final int acceptCount, RequestMapping requestMapping, final int maxThreads) {
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = new ThreadPoolExecutor(maxThreads, maxThreads, 0, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -69,8 +79,18 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
+
         var processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.error(e.getMessage(), e);
+            try {
+                connection.close();
+            } catch (IOException ie) {
+                log.error(ie.getMessage(), ie);
+            }
+        }
     }
 
     public void stop() {
@@ -79,6 +99,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

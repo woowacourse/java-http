@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
 
     private final String httpVersion;
     private final HttpHeaders headers = new HttpHeaders();
@@ -16,6 +17,22 @@ public class HttpResponse {
 
     public HttpResponse(final String httpVersion) {
         this.httpVersion = httpVersion;
+    }
+
+    public void ok(final String contentType, final byte[] body) {
+        setStatus(200, "OK ");
+        putHeader("Content-Type", contentType + " ");
+        putHeader("Content-Length", body.length + " ");
+        setBody(body);
+    }
+
+    public void redirect(final String location, final String setCookie) {
+        setStatus(302, "Found ");
+        if (!setCookie.isEmpty()) {
+            putHeader(SET_COOKIE_HEADER, setCookie + " ");
+        }
+        putHeader("Location", location + " ");
+        putHeader("Content-Length", "0 ");
     }
 
     public void setStatus(final int statusCode, final String reasonPhrase) {

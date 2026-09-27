@@ -6,7 +6,6 @@ import org.apache.coyote.http11.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     protected static final String JSESSIONID = "JSESSIONID";
-    private static final String SET_COOKIE_HEADER = "Set-Cookie";
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -26,18 +25,10 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void setOkResponse(final HttpResponse response, final String contentType, final byte[] body) {
-        response.setStatus(200, "OK ");
-        response.putHeader("Content-Type", contentType + " ");
-        response.putHeader("Content-Length", body.length + " ");
-        response.setBody(body);
+        response.ok(contentType, body);
     }
 
     protected void setRedirectResponse(final HttpResponse response, final String location, final String setCookie) {
-        response.setStatus(302, "Found ");
-        if (!setCookie.isEmpty()) {
-            response.putHeader(SET_COOKIE_HEADER, setCookie + " ");
-        }
-        response.putHeader("Location", location + " ");
-        response.putHeader("Content-Length", "0 ");
+        response.redirect(location, setCookie);
     }
 }

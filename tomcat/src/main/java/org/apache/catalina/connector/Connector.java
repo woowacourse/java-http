@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connector implements Runnable {
 
@@ -16,18 +18,21 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestHandler requestHandler;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(final RequestHandler requestHandler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestHandler);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestHandler);
     }
 
-    public Connector(final int port, final int acceptCount, final RequestHandler requestHandler) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, final RequestHandler requestHandler) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestHandler = requestHandler;
+        this.executorService = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
         this.stopped = false;
     }
 
@@ -70,11 +75,12 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestHandler);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -94,5 +100,9 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        return Math.max(maxThreads, DEFAULT_MAX_THREADS);
     }
 }

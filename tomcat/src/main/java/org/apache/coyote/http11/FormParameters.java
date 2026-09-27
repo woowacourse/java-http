@@ -5,12 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-final class FormBodyParser {
+final class FormParameters {
 
     private final String body;
     private Map<String, String> parameters;
 
-    FormBodyParser(String body) {
+    FormParameters(String body) {
         this.body = body;
     }
 

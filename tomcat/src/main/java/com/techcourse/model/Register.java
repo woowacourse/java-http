@@ -1,11 +1,10 @@
 package com.techcourse.model;
 
 import com.techcourse.db.InMemoryUserRepository;
-import java.util.Optional;
 
 public class Register {
 
-    public static User register(String account, String email, String password) {
+    public static synchronized User register(String account, String email, String password) {
         User user = new User(account, password, email);
         if (isAlreadyRegistered(user)) {
             throw new IllegalArgumentException("이미 가입된 계정입니다.");
@@ -15,8 +14,8 @@ public class Register {
     }
 
     private static boolean isAlreadyRegistered(User user) {
-        Optional<User> foundUser = InMemoryUserRepository.findByAccount(user.getAccount());
-        return foundUser.isPresent();
+        return InMemoryUserRepository.findByAccount(user.getAccount())
+                .isPresent();
     }
 
     private Register() {

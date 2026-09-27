@@ -6,15 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
     private static final Logger log = LoggerFactory.getLogger(SessionManager.class);
-
     private static final SessionManager INSTANCE = new SessionManager();
-    private final Map<String, Session> sessions = new HashMap<>();
+
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public static SessionManager getInstance() {
         return INSTANCE;

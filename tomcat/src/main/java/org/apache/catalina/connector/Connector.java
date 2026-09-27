@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.Container;
 import org.apache.catalina.Manager;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
@@ -10,6 +11,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Connector implements Runnable {
 
@@ -17,21 +21,22 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
-    private final Manager manager;
-    private final RequestMapping requestMapping;
+    private final Container container;
     private boolean stopped;
 
-    public Connector(final Manager manager, RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, manager, requestMapping);
+    public Connector(final Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(int port, int acceptCount, Manager manager, RequestMapping requestMapping) {
+    public Connector(final Container container, int port, int acceptCount, int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.manager = manager;
-        this.requestMapping = requestMapping;
+        this.container = container;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -86,14 +91,15 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, requestMapping, manager);
-        new Thread(processor).start();
+        var processor = new Http11Processor(connection, container);
+        executorService.submit(new Thread(processor));
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            executorService.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

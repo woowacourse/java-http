@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Container;
 import org.apache.catalina.Manager;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.HttpStatus;
@@ -22,13 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Manager manager;
-    private final RequestMapping requestMapping;
+    private final Container container;
 
-    public Http11Processor(final Socket connection, RequestMapping requestMapping, final Manager manager) {
+    public Http11Processor(final Socket connection, final Container container) {
         this.connection = connection;
-        this.manager = manager;
-        this.requestMapping = requestMapping;
+        this.container = container;
     }
 
     @Override
@@ -44,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse httpResponse = new HttpResponse();
 
             try {
-                final HttpRequest httpRequest = new Http11RequestProcessor(inputStream, manager).process();
+                final HttpRequest httpRequest = new Http11RequestProcessor(inputStream, container.getManager()).process();
                 handleEndpoints(httpRequest, httpResponse);
                 attachSessionCookie(httpRequest, httpResponse);
             } catch (HttpParseException | URISyntaxException e) {
@@ -62,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleEndpoints(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        requestMapping.getController(httpRequest).service(httpRequest, httpResponse);
+        container.runService(httpRequest, httpResponse);
     }
 
     private void attachSessionCookie(HttpRequest request, HttpResponse response) {

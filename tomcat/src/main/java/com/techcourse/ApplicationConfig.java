@@ -3,6 +3,7 @@ package com.techcourse;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RootController;
+import org.apache.catalina.Container;
 import org.apache.catalina.Manager;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionManager;
@@ -19,11 +20,7 @@ public class ApplicationConfig {
         return requestMapping;
     }
 
-    public Manager manager() {
-        return manager;
-    }
-
-    public RequestMapping requestMapping() {
-        return requestMapping;
+    public Container container() {
+        return new Container(manager, requestMapping);
     }
 }

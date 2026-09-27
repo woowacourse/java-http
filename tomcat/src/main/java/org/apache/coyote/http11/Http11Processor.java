@@ -62,17 +62,16 @@ public class Http11Processor implements Runnable, Processor {
             String resourcePath = resolveResourcePath(requestPath);
             String responseBody = resolveResponseBody(resourcePath);
             if (responseBody == null) {
-                HttpResponse httpResponse = HttpResponse.createNotFoundResponse(
+                HttpResponse httpResponse = HttpResponse.notFound(
                         readNotFoundPage()
                 );
                 outputStream.write(httpResponse.toString().getBytes());
                 outputStream.flush();
             } else {
                 String contentType = resolveContentType(resourcePath);
-                HttpResponse httpResponse = HttpResponse.createOkResponse(
+                HttpResponse httpResponse = HttpResponse.ok(
                         contentType,
-                        responseBody,
-                        Map.of()
+                        responseBody
                 );
                 outputStream.write(httpResponse.toString().getBytes());
                 outputStream.flush();
@@ -102,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
             return handleLoginRequest(body, requestHeaders);
         }
         if ("POST".equals(method) && "/register".equals(requestPath)) {
-            return Optional.of(HttpResponse.createRedirectResponse(handleRegister(body), Map.of()));
+            return Optional.of(HttpResponse.redirect(handleRegister(body)));
         }
         return Optional.empty();
     }
@@ -146,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
 
         Session session = sessionManager.findSession(sessionId);
         if (session != null && getUser(session) != null) {
-            return Optional.of(HttpResponse.createRedirectResponse("/index.html", Map.of()));
+            return Optional.of(HttpResponse.redirect("/index.html"));
         }
         final Map<String, String> params = parseParams(body);
 
@@ -154,20 +153,19 @@ public class Http11Processor implements Runnable, Processor {
         String password = params.get("password");
         Optional<User> user = login(account, password);
         if (user.isEmpty()) {
-            return Optional.of(HttpResponse.createRedirectResponse("/401.html", Map.of()));
+            return Optional.of(HttpResponse.redirect("/401.html"));
         }
 
-        Map<String, String> responseHeaders = new LinkedHashMap<>();
-
+        HttpResponse response = HttpResponse.redirect("/index.html");
         if (sessionId == null) {
             sessionId = UUID.randomUUID().toString();
-            responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         }
 
         Session loginSession = new Session(sessionId);
         loginSession.setAttribute("user", user.get());
         sessionManager.add(loginSession);
-        return Optional.of(HttpResponse.createRedirectResponse("/index.html", responseHeaders));
+        return Optional.of(response);
     }
 
     private Optional<User> login(String account, String password) {

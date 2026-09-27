@@ -4,18 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionManager implements Manager {
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
-
+    private final Map<String, Session> sessions = new HashMap<>();
 
     @Override
     public void add(final Session session) {
         String sessionId = session.getId();
-        SESSIONS.putIfAbsent(sessionId, session);
+        sessions.putIfAbsent(sessionId, session);
     }
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override

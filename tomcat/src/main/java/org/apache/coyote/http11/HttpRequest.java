@@ -5,26 +5,27 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.catalina.Session;
 
 public class HttpRequest {
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String HEADER_NAME_VALUE_SEPARATOR = ":";
     private static final String COOKIE_HEADER = "Cookie";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String TRANSFER_ENCODING_HEADER = "Transfer-Encoding";
-    private static final String CONTENT_LENGTH_PATTERN = "[0-9]+";
-    private static final int MAX_HEADER_BYTES = 8 * 1024;
-    private static final int MAX_BODY_BYTES = 1024 * 1024;
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final HttpCookie cookies;
     private final String requestBody;
+    private Map<String, String> formParameters;
+    private Session session;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
@@ -56,6 +57,38 @@ public class HttpRequest {
         return requestBody;
     }
 
+    public String getFormParameter(String name) {
+        if (formParameters == null) {
+            formParameters = parseFormData();
+        }
+        return formParameters.get(name);
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    void setSession(Session session) {
+        this.session = session;
+    }
+
+    private Map<String, String> parseFormData() {
+        Map<String, String> parameters = new HashMap<>();
+        for (String field : requestBody.split("&")) {
+            int separatorIndex = field.indexOf('=');
+            if (separatorIndex < 0) {
+                continue;
+            }
+
+            String name = URLDecoder.decode(field.substring(0, separatorIndex),
+                    StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(field.substring(separatorIndex + 1),
+                    StandardCharsets.UTF_8);
+            parameters.putIfAbsent(name, value);
+        }
+        return parameters;
+    }
+
     private void validateRequestLinePresence(List<String> requestHeadLines) throws IOException {
         if (requestHeadLines.isEmpty()) {
             throw new IOException("요청 줄이 없습니다.");
@@ -64,13 +97,9 @@ public class HttpRequest {
 
     private List<String> readRequestHead(InputStream inputStream) throws IOException {
         List<String> requestHeadLines = new ArrayList<>();
-        int headerBytesRead = 0;
 
         while (true) {
-            String line = readHeaderLine(inputStream, headerBytesRead);
-            headerBytesRead += line.getBytes(StandardCharsets.ISO_8859_1).length
-                    + LINE_SEPARATOR.length();
-
+            String line = readHeaderLine(inputStream);
             if (line.isEmpty()) {
                 break;
             }
@@ -81,13 +110,11 @@ public class HttpRequest {
         return requestHeadLines;
     }
 
-    private String readHeaderLine(InputStream inputStream, int headerBytesRead) throws IOException {
+    private String readHeaderLine(InputStream inputStream) throws IOException {
         ByteArrayOutputStream lineBytes = new ByteArrayOutputStream();
         int previousByte = -1;
 
         while (true) {
-            validateHeaderSize(headerBytesRead + lineBytes.size());
-
             int currentByte = readHeaderByte(inputStream);
             lineBytes.write(currentByte);
 
@@ -111,12 +138,6 @@ public class HttpRequest {
         return currentByte;
     }
 
-    private void validateHeaderSize(int headerSize) throws IOException {
-        if (headerSize >= MAX_HEADER_BYTES) {
-            throw new IOException("요청 헤더의 최대 크기를 초과했습니다.");
-        }
-    }
-
     private Map<String, String> parseHeaders(List<String> headerLines) throws IOException {
         Map<String, String> parsedHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -127,7 +148,6 @@ public class HttpRequest {
             String name = headerParts[0].trim();
             String value = headerParts[1].trim();
 
-            validateContentLengthUniqueness(name, parsedHeaders);
             parsedHeaders.putIfAbsent(name, value);
         }
 
@@ -140,51 +160,20 @@ public class HttpRequest {
         }
     }
 
-    private void validateContentLengthUniqueness(String name, Map<String, String> parsedHeaders)
-            throws IOException {
-        if (name.equalsIgnoreCase(CONTENT_LENGTH_HEADER) && parsedHeaders.containsKey(name)) {
-            throw new IOException("Content-Length가 중복되었습니다.");
-        }
-    }
-
     private int extractContentLength() throws IOException {
-        validateTransferEncoding();
-
         String value = headers.get(CONTENT_LENGTH_HEADER);
         if (value == null) {
             return 0;
         }
 
-        return parseContentLength(value);
-    }
-
-    private int parseContentLength(String value) throws IOException {
-        validateContentLengthFormat(value);
-
         try {
             int contentLength = Integer.parseInt(value);
-            validateBodySize(contentLength);
+            if (contentLength < 0) {
+                throw new IOException("Content-Length는 음이 아닌 정수여야 합니다.");
+            }
             return contentLength;
         } catch (NumberFormatException exception) {
-            throw new IOException("Content-Length가 처리 범위를 초과했습니다.", exception);
-        }
-    }
-
-    private void validateTransferEncoding() throws IOException {
-        if (headers.containsKey(TRANSFER_ENCODING_HEADER)) {
-            throw new IOException("지원하지 않는 본문 전송 방식입니다.");
-        }
-    }
-
-    private void validateContentLengthFormat(String value) throws IOException {
-        if (!value.matches(CONTENT_LENGTH_PATTERN)) {
-            throw new IOException("Content-Length는 음이 아닌 정수여야 합니다.");
-        }
-    }
-
-    private void validateBodySize(int contentLength) throws IOException {
-        if (contentLength > MAX_BODY_BYTES) {
-            throw new IOException("요청 본문의 최대 크기를 초과했습니다.");
+            throw new IOException("Content-Length는 음이 아닌 정수여야 합니다.", exception);
         }
     }
 

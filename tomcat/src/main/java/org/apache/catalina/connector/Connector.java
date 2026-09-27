@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -18,7 +20,7 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_MAX_THREADS = 10;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
@@ -37,7 +39,13 @@ public class Connector implements Runnable {
     ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = requestMapping;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(acceptCount)
+        );
         this.stopped = false;
     }
 

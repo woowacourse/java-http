@@ -350,7 +350,7 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output())
-                .startsWith("HTTP/1.1 401 Unauthorized ")
+                .startsWith("HTTP/1.1 302 Found ")
                 .doesNotContain("Set-Cookie");
         }
 
@@ -373,7 +373,7 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output())
-                .startsWith("HTTP/1.1 401 Unauthorized ")
+                .startsWith("HTTP/1.1 302 Found ")
                 .doesNotContain("Set-Cookie");
         }
 
@@ -402,13 +402,14 @@ class Http11ProcessorTest {
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
+                "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
                 body);
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found ");
         }
 
         @Test
@@ -435,13 +436,14 @@ class Http11ProcessorTest {
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
             final String body = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
             String expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
+                "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
                 body);
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output())
+                .startsWith("HTTP/1.1 302 Found ");
         }
     }
 

@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.forward(HttpStatus.UNAUTHORIZED, "/401.html");
+        response.sendRedirect(HttpStatus.FOUND, "/401.html");
     }
 
     @Override

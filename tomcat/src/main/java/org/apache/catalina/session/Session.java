@@ -7,9 +7,18 @@ public class Session {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
+    private boolean isNew = true;
 
     public Session(String id) {
         this.id = id;
+    }
+
+    public void access() {
+        this.isNew = false;
+    }
+
+    public boolean isNew() {
+        return isNew;
     }
 
     public String getId() {

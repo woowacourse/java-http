@@ -1,29 +1,27 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.controller.RequestMapping;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final RequestMapping requestMapping = new RequestMapping();
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String HEADER_DELIMITER = ":";
 
     private final Socket connection;
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -42,198 +40,56 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var response = buildResponseWith(inputStream);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+            List<String> headLines = readHeadLines(reader);
+            String body = readBody(reader, contentLengthOf(headLines));
+
+            HttpRequest parsedRequest = HttpRequest.from(headLines, body);
+            Session session = sessionManager.findOrCreate(parsedRequest.getSessionId());
+
+            HttpRequest request = parsedRequest.withSessionId(session.getId());
+            HttpResponse response = HttpResponse.from(session);
+
+            requestMapping.service(request, response);
+
+            response.writeTo(outputStream);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String buildResponseWith(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    private List<String> readHeadLines(BufferedReader reader) throws IOException {
+        List<String> lines = new ArrayList<>();
 
-        String[] startLine = reader.readLine().split(" ");
-        String httpMethod = startLine[0];
-        String requestUri = startLine[1];
-
-        Map<String, String> headers = readHeaders(reader);
-        String requestBody = readBody(reader, headers);
-        HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-
-        Session session = findSession(cookie);
-        boolean isNewSession = session == null;
-        if (isNewSession) {
-            session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
-        }
-
-        String response = routeRequest(httpMethod, requestUri, requestBody, session);
-        if (isNewSession) {
-            return withSessionCookie(response, session.getId());
-        }
-        return response;
-    }
-
-    private Session findSession(HttpCookie cookie) {
-        if (!cookie.hasJSessionId()) {
-            return null;
-        }
-        return sessionManager.findSession(cookie.getJSessionId());
-    }
-
-    private String routeRequest(String httpMethod, String requestUri, String requestBody, Session session)
-            throws IOException {
-        String path = parsePathFrom(requestUri);
-
-        if (path.startsWith("/login")) {
-            if (httpMethod.equals("GET") && isLoggedIn(session)) {
-                return redirect("/index.html");
-            }
-            if (httpMethod.equals("POST")) {
-                return loginResponse(parseFormData(requestBody), session);
-            }
-        }
-
-        if (path.startsWith("/register") && httpMethod.equals("POST")) {
-            return registerResponse(parseFormData(requestBody));
-        }
-
-        return staticResponse(path);
-    }
-
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] keyValue = line.split(": ", 2);
-            headers.put(keyValue[0], keyValue[1]);
+            lines.add(line);
         }
-        return headers;
+
+        return lines;
     }
 
-    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        String contentLength = headers.get("Content-Length");
-        if (contentLength == null) {
-            return null;
-        }
-        int length = Integer.parseInt(contentLength);
-        char[] buffer = new char[length];
-        reader.read(buffer, 0, length);
-        return new String(buffer);
+    private int contentLengthOf(List<String> headLines) {
+        return headLines.stream()
+                .map(line -> line.split(HEADER_DELIMITER, 2))
+                .filter(keyValue -> keyValue.length == 2 && keyValue[0].trim().equalsIgnoreCase(CONTENT_LENGTH))
+                .map(keyValue -> Integer.parseInt(keyValue[1].trim()))
+                .findFirst()
+                .orElse(0);
     }
 
-    private Map<String, String> parseFormData(String data) {
-        Map<String, String> params = new HashMap<>();
-        if (data == null || data.isEmpty()) {
-            return params;
-        }
-        for (String pair : data.split("&")) {
-            String[] keyValue = pair.split("=", 2);
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
+    private String readBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        int read = 0;
+        while (read < contentLength) {
+            int count = reader.read(buffer, read, contentLength - read);
+            if (count == -1) {
+                break;
             }
+            read += count;
         }
-        return params;
-    }
-
-    private String loginResponse(Map<String, String> params, Session session) {
-        Optional<User> account = findAccount(params.get("account"), params.get("password"));
-        if (account.isEmpty()) {
-            return redirect("/401.html");
-        }
-
-        session.setAttribute("user", account.get());
-        return redirect("/index.html");
-    }
-
-    private boolean isLoggedIn(Session session) {
-        return session.getAttribute("user") != null;
-    }
-
-    private String registerResponse(Map<String, String> params) {
-        User user = new User(params.get("account"), params.get("password"), params.get("email"));
-        InMemoryUserRepository.save(user);
-        return redirect("/index.html");
-    }
-
-    private Optional<User> findAccount(String account, String password) {
-        if (account == null || password == null) {
-            return Optional.empty();
-        }
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("user : {}", user.get());
-            return user;
-        }
-
-        return Optional.empty();
-    }
-
-    private String redirect(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location + " "
-        );
-    }
-
-    private String withSessionCookie(String response, String jSessionId) {
-        int statusLineEnd = response.indexOf("\r\n");
-        return response.substring(0, statusLineEnd)
-                + "\r\nSet-Cookie: JSESSIONID=" + jSessionId + " "
-                + response.substring(statusLineEnd);
-    }
-
-    private String staticResponse(String path) throws IOException {
-        String contentType = contentTypeOf(path);
-        String responseBody = resolveContentOf(path);
-
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String parsePathFrom(String requestUri) {
-        String path = requestUri;
-        if (path.contains("?")) {
-            int queryFileStrEndIndex = requestUri.indexOf("?");
-            if (queryFileStrEndIndex != -1) {
-                path = path.substring(0, queryFileStrEndIndex);
-            }
-        }
-
-        if (!path.contains(".")) {
-            path = path.concat(".html");
-        }
-
-        return path;
-    }
-
-    private String resolveContentOf(String filePath) throws IOException {
-        URL resource = getResource(filePath);
-        if (!filePath.equals("/") && resource != null) {
-            return Files.readString(new File(resource.getFile()).toPath());
-        }
-        return "Hello world!";
-    }
-
-    private URL getResource(String filePath) {
-        String path = "static" + filePath;
-        return getClass().getClassLoader().getResource(path);
-    }
-
-    private String contentTypeOf(String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "text/javascript";
-        }
-        return "text/html";
+        return new String(buffer, 0, read);
     }
 }

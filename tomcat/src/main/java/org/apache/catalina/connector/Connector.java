@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Connector implements Runnable {
 
@@ -19,21 +18,26 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_MAX_QUEUE_SIZE = 100;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
+    private volatile boolean stopped;
     private final RequestMapping requestMapping;
     private final ExecutorService executorService;
 
     public Connector(final RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE,requestMapping);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, final int maxQueueSize, final RequestMapping requestMapping) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.requestMapping = requestMapping;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads, maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(maxQueueSize),
+                new ThreadPoolExecutor.AbortPolicy());
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -75,7 +79,16 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping);
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("대기 큐가 가득 차서 연결을 종료합니다.");
+            try {
+                connection.close();
+            } catch (IOException e1) {
+                log.error(e.getMessage(), e1);
+            }
+        }
     }
 
     public void stop() {

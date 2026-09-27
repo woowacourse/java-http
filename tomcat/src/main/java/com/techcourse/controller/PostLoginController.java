@@ -21,13 +21,13 @@ public class PostLoginController implements Controller, RouteInfo {
         final Optional<User> loginUser = authenticate(account, password);
         if (loginUser.isEmpty()) {
             response.sendRedirect("/401.html");
-            return "/401.html";
+            return "로그인에 실패했습니다. 오류 안내 페이지로 이동합니다.";
         }
 
         final HttpSession session = request.getSession(true);
         session.setAttribute(LOGIN_USER, loginUser.get());
         response.sendRedirect("/index.html");
-        return "/index.html";
+        return "로그인에 성공했습니다. 기본 페이지로 이동합니다.";
     }
 
     @Override

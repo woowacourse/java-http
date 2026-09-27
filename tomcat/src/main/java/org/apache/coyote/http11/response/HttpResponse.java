@@ -43,8 +43,6 @@ public final class HttpResponse {
 
     public void sendRedirect(final String location) {
         setStatus(HttpStatus.FOUND);
-        setContentType(HTML_CONTENT_TYPE);
-        setBody("");
         headers.set("Location", location);
     }
 

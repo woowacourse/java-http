@@ -13,7 +13,7 @@ public class GetLoginController implements RouteInfo, Controller {
     public String handle(final HttpRequest request, final HttpResponse response) {
         if (isLoggedIn(request)) {
             response.sendRedirect("/index.html");
-            return "/index.html";
+            return "로그인이 되어있어 기본 페이지로 이동합니다.";
         }
         return "/login.html";
     }

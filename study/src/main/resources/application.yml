@@ -3,8 +3,8 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 1 #운영체제 대기 줄(backlog) 길이. 수용 못 한 연결이 여기서 기다림
+    max-connections: 2 #톰캣이 동시에 들고 있는 연결 수 (처리 중 + 대기)
     threads:
-      min-spare: 2
-      max: 2
+      min-spare: 2 #미리 만들어 두는 유휴 워커 수
+      max: 2 #동시에 요청을 처리하는 워커 최대 수

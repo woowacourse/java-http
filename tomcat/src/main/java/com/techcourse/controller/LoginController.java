@@ -38,4 +38,9 @@ public class LoginController extends AbstractController {
         user.ifPresent(value -> request.getSession().setAttribute("user", value));
         response.sendRedirect(user.isPresent() ? "/index.html" : "/401.html");
     }
+
+    @Override
+    protected String allowedMethods() {
+        return "GET, POST";
+    }
 }

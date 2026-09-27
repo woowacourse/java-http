@@ -25,4 +25,9 @@ public class RegisterController extends AbstractController {
     private boolean isBlank(final String value) {
         return value == null || value.isBlank();
     }
+
+    @Override
+    protected String allowedMethods() {
+        return "POST";
+    }
 }

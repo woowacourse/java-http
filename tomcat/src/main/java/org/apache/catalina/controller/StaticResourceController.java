@@ -19,4 +19,8 @@ public class StaticResourceController extends AbstractController {
         resources.serve(request.getPath(), response);
     }
 
+    @Override
+    protected String allowedMethods() {
+        return "GET";
+    }
 }

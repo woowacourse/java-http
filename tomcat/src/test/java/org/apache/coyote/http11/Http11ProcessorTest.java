@@ -294,4 +294,29 @@ class Http11ProcessorTest {
         assertThat(writes.get()).isEqualTo(1);
         assertThat(socket.isClosed()).isTrue();
     }
+    @Test
+    void rejectsUnsupportedMethodWithAllowedMethods() {
+        assertMethodNotAllowed("PUT", "/login", "GET, POST");
+    }
+
+    @Test
+    void rejectsGetWhenControllerOnlyImplementsPost() {
+        assertMethodNotAllowed("GET", "/register", "POST");
+    }
+
+    @Test
+    void rejectsPostWhenControllerOnlyImplementsGet() {
+        assertMethodNotAllowed("POST", "/", "GET");
+        assertMethodNotAllowed("POST", "/index.html", "GET");
+    }
+
+    private void assertMethodNotAllowed(final String method, final String path, final String allowed) {
+        final var socket = new StubSocket(method + " " + path + " HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket, new SessionManager(), Application.createRequestMapping()).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 405 Method Not Allowed \r\n")
+                .contains("\r\nAllow: " + allowed + " \r\n")
+                .doesNotContain("Location:");
+    }
 }

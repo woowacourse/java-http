@@ -10,4 +10,9 @@ public class HomeController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setBody("Hello world!", "text/html");
     }
+
+    @Override
+    protected String allowedMethods() {
+        return "GET";
+    }
 }

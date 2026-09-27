@@ -47,12 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             SessionManager sessionManager = SessionManager.getInstance();
-            Session session = sessionManager.findSession(sessionId);
-
-            if (session == null) {
-                session = new Session(sessionId);
-                sessionManager.add(session);
-            }
+            Session session = sessionManager.findOrCreateSession(sessionId);
 
             request.setSession(session);
             Controller controller = requestMapping.getController(request);

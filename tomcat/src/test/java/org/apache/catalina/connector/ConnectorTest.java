@@ -7,11 +7,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -22,12 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
@@ -64,6 +55,12 @@ class ConnectorTest {
         clients = Executors.newFixedThreadPool(REQUEST_COUNT);
     }
 
+    private static int findFreePort() throws IOException {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        }
+    }
+
     @AfterEach
     void tearDown() {
         controller.release();
@@ -81,6 +78,39 @@ class ConnectorTest {
 
         // then
         assertThat(controller.maxInFlight()).isEqualTo(MAX_THREADS);
+    }
+
+    private List<Future<String>> sendConcurrently(final int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> clients.submit(() -> send(BLOCKING_PATH)))
+                .toList();
+    }
+
+    private String send(final String path) throws IOException {
+        try (Socket socket = new Socket(InetAddress.getLoopbackAddress(), port)) {
+            socket.setSoTimeout((int) TIMEOUT.toMillis());
+
+            final OutputStream outputStream = socket.getOutputStream();
+            final String request = String.join("\r\n",
+                    "GET " + path + " HTTP/1.1",
+                    "Host: localhost:" + port,
+                    "",
+                    "");
+            outputStream.write(request.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+
+            return new String(socket.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private void awaitUntil(final BooleanSupplier condition) throws InterruptedException {
+        final long deadline = System.nanoTime() + TIMEOUT.toNanos();
+        while (!condition.getAsBoolean()) {
+            if (System.nanoTime() > deadline) {
+                fail("제한 시간 안에 조건을 만족하지 못했습니다.");
+            }
+            Thread.sleep(10);
+        }
     }
 
     @Test
@@ -130,45 +160,6 @@ class ConnectorTest {
         for (final Thread thread : handlerThreads) {
             thread.join(TIMEOUT.toMillis());
             assertThat(thread.isAlive()).isFalse();
-        }
-    }
-
-    private List<Future<String>> sendConcurrently(final int count) {
-        return IntStream.range(0, count)
-                .mapToObj(i -> clients.submit(() -> send(BLOCKING_PATH)))
-                .toList();
-    }
-
-    private String send(final String path) throws IOException {
-        try (Socket socket = new Socket(InetAddress.getLoopbackAddress(), port)) {
-            socket.setSoTimeout((int) TIMEOUT.toMillis());
-
-            final OutputStream outputStream = socket.getOutputStream();
-            final String request = String.join("\r\n",
-                    "GET " + path + " HTTP/1.1",
-                    "Host: localhost:" + port,
-                    "",
-                    "");
-            outputStream.write(request.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-
-            return new String(socket.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        }
-    }
-
-    private void awaitUntil(final BooleanSupplier condition) throws InterruptedException {
-        final long deadline = System.nanoTime() + TIMEOUT.toNanos();
-        while (!condition.getAsBoolean()) {
-            if (System.nanoTime() > deadline) {
-                fail("제한 시간 안에 조건을 만족하지 못했습니다.");
-            }
-            Thread.sleep(10);
-        }
-    }
-
-    private static int findFreePort() throws IOException {
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
         }
     }
 

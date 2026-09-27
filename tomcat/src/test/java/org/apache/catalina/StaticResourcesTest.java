@@ -28,6 +28,11 @@ class StaticResourcesTest {
         assertThat(resource.get().content()).isEqualTo(readStatic("css/styles.css"));
     }
 
+    private byte[] readStatic(String name) throws URISyntaxException, IOException {
+        URL url = getClass().getClassLoader().getResource("static/" + name);
+        return Files.readAllBytes(Path.of(url.toURI()));
+    }
+
     @Test
     @DisplayName("존재하지 않는 파일이면 빈 값을 반환한다")
     void findMissingFile() throws URISyntaxException, IOException {
@@ -38,10 +43,5 @@ class StaticResourcesTest {
     @DisplayName("디렉터리면 빈 값을 반환한다")
     void findDirectory() throws URISyntaxException, IOException {
         assertThat(StaticResources.find("/css")).isEmpty();
-    }
-
-    private byte[] readStatic(String name) throws URISyntaxException, IOException {
-        URL url = getClass().getClassLoader().getResource("static/" + name);
-        return Files.readAllBytes(Path.of(url.toURI()));
     }
 }

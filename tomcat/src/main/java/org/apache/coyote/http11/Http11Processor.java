@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.Container;
-import org.apache.catalina.Manager;
-import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.HttpParseException;

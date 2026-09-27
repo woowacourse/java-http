@@ -40,14 +40,6 @@ class Http11ProcessorTest {
         return requestMapping;
     }
 
-    private Container container() {
-        return container(new SessionManager());
-    }
-
-    private Container container(final Manager manager) {
-        return new Container(manager, requestMapping);
-    }
-
     @Test
     @DisplayName("요청 경로가 /이면 기본 응답을 내려준다")
     void process() {
@@ -67,6 +59,14 @@ class Http11ProcessorTest {
                 "Hello world!");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private Container container() {
+        return container(new SessionManager());
+    }
+
+    private Container container(final Manager manager) {
+        return new Container(manager, requestMapping);
     }
 
     @Test
@@ -90,6 +90,17 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(staticResponse("index.html", "text/html;charset=utf-8"));
     }
 
+    private String staticResponse(String resourceName, String contentType) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
+        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        return "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: " + contentType + " \r\n" +
+                "Content-Length: " + body.length + " \r\n" +
+                "\r\n" +
+                new String(body, StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("확장자에 맞는 Content-Type으로 응답한다")
     void css() throws IOException {
@@ -111,17 +122,6 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "",
                 "");
-    }
-
-    private String staticResponse(String resourceName, String contentType) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
-        final byte[] body = Files.readAllBytes(new File(resource.getFile()).toPath());
-
-        return "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + contentType + " \r\n" +
-                "Content-Length: " + body.length + " \r\n" +
-                "\r\n" +
-                new String(body, StandardCharsets.UTF_8);
     }
 
     @Test
@@ -314,6 +314,12 @@ class Http11ProcessorTest {
         assertThat(((User) session.getAttribute("user")).getAccount()).isEqualTo("gugu");
     }
 
+    private String extractSessionId(String response) {
+        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
+        assertThat(matcher.find()).isTrue();
+        return matcher.group(1);
+    }
+
     @Test
     @DisplayName("세션이 있는 상태로 로그인하면 기존 세션을 제거하고 새 세션 아이디를 발급한다")
     void renewSessionOnLogin() {
@@ -345,12 +351,6 @@ class Http11ProcessorTest {
                 "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 body);
-    }
-
-    private String extractSessionId(String response) {
-        final Matcher matcher = Pattern.compile("Set-Cookie: JSESSIONID=(\\S+) ").matcher(response);
-        assertThat(matcher.find()).isTrue();
-        return matcher.group(1);
     }
 
     @Test

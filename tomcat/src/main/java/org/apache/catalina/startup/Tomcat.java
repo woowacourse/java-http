@@ -1,9 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.Container;
-import org.apache.catalina.Manager;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

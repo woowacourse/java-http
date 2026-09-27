@@ -66,6 +66,7 @@ public class HttpRequest {
         Session previousSession = getSession(false);
         if (previousSession != null) {
             sessionManager.remove(previousSession);
+            previousSession.invalidate();
         }
 
         session = sessionManager.createSession();

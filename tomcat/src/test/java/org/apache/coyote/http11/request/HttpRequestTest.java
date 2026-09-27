@@ -259,6 +259,27 @@ class HttpRequestTest {
         // then
         assertThat(request.getSession(false)).isNull();
     }
+
+    @Test
+    void renewSessionRemovesAndInvalidatesPreviousSession() {
+        // given
+        final Session previous = new Session("request-renew-session");
+        previous.setAttribute("user", "gugu");
+        sessionManager.add(previous);
+        final HttpHeaders headers = HttpHeaders.from(List.of("Cookie: JSESSIONID=request-renew-session"));
+        final HttpRequest request = request("GET /index.html HTTP/1.1", headers, HttpBody.empty());
+
+        // when
+        final Session renewed = request.renewSession();
+
+        // then
+        assertThat(renewed).isNotSameAs(previous);
+        assertThat(sessionManager.findSession("request-renew-session")).isNull();
+        assertThat(sessionManager.findSession(renewed.getId())).isSameAs(renewed);
+        assertThat(previous.getAttribute("user")).isNull();
+        assertThat(request.getSession(false)).isSameAs(renewed);
+    }
+
     private HttpRequest request(String requestLine, HttpHeaders headers, HttpBody body) {
         return HttpRequest.from(requestLine, headers, body, sessionManager);
     }

@@ -2,18 +2,15 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,17 +35,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var requestUri = getRequestUri(inputStream);
-            final var requestPath = getRequestPath(requestUri);
-            final var parameters = parseQueryString(requestUri);
+            final var request = HttpRequest.read(inputStream);
             final var responseHeaders = new LinkedHashMap<String, String>();
-            final var redirectPath = authenticate(requestPath, parameters);
+            final var redirectPath = getRedirectPath(request);
             if (redirectPath != null) {
                 responseHeaders.put("Location", redirectPath);
                 writeResponse(outputStream, "302 Found", "text/html;charset=utf-8", new byte[0], responseHeaders);
                 return;
             }
 
+            final var requestPath = request.getPath();
             final var responseBody = getResponseBody(requestPath);
             final var contentType = getContentType(requestPath);
             writeResponse(outputStream, "200 OK", contentType, responseBody, responseHeaders);
@@ -57,51 +53,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getRequestUri(final InputStream inputStream) throws IOException {
-        final var requestLine = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
-        ).readLine();
-        if (requestLine == null) {
-            return "/";
+    private String getRedirectPath(final HttpRequest request) {
+        if ("POST".equals(request.getMethod()) && "/login".equals(request.getPath())) {
+            return authenticate(request);
         }
-        return requestLine.split(" ")[1];
+        if ("POST".equals(request.getMethod()) && "/register".equals(request.getPath())) {
+            return register(request);
+        }
+        return null;
     }
 
-    private String getRequestPath(final String requestUri) {
-        final var queryStringIndex = requestUri.indexOf("?");
-        if (queryStringIndex >= 0) {
-            return requestUri.substring(0, queryStringIndex);
-        }
-        return requestUri;
-    }
-
-    private Map<String, String> parseQueryString(final String requestUri) {
-        final var parameters = new HashMap<String, String>();
-        final var queryStringIndex = requestUri.indexOf("?");
-        if (queryStringIndex < 0) {
-            return parameters;
-        }
-
-        final var queryString = requestUri.substring(queryStringIndex + 1);
-        if (!queryString.isEmpty()) {
-            final var queryParameters = queryString.split("&");
-            for (final var queryParameter : queryParameters) {
-                final var keyValue = queryParameter.split("=", 2);
-                if (keyValue.length == 2) {
-                    parameters.put(keyValue[0], keyValue[1]);
-                }
-            }
-        }
-
-        return parameters;
-    }
-
-    private String authenticate(final String requestPath, final Map<String, String> parameters) {
-        if (!"/login".equals(requestPath) || parameters.isEmpty()) {
-            return null;
-        }
-        final var account = parameters.get("account");
-        final var password = parameters.get("password");
+    private String authenticate(final HttpRequest request) {
+        final var account = request.getParameter("account");
+        final var password = request.getParameter("password");
         if (account == null || password == null) {
             return "/401.html";
         }
@@ -114,6 +78,19 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return "/401.html";
+    }
+
+    private String register(final HttpRequest request) {
+        final var account = request.getParameter("account");
+        final var password = request.getParameter("password");
+        final var email = request.getParameter("email");
+        if (account == null || account.isBlank() || password == null || password.isBlank()
+                || email == null || email.isBlank()) {
+            return "/register";
+        }
+        final var user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return "/index.html";
     }
 
     private byte[] getResponseBody(final String requestPath) throws IOException {
@@ -129,6 +106,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if ("/login".equals(requestPath)) {
             resourcePath = "static/login.html";
+        }
+        if ("/register".equals(requestPath)) {
+            resourcePath = "static/register.html";
         }
 
         if (!resourcePath.isEmpty()) {

@@ -1,29 +1,28 @@
 package org.apache.coyote.http11.filter;
 
-import java.util.function.Function;
-import org.apache.coyote.http11.data.Request;
-import org.apache.coyote.http11.data.Response;
+import java.util.function.BiConsumer;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
 
 public class FilterChain {
 
     private final Filter[] filters;
-    private final Function<Request, Response> target;
+    private final BiConsumer<HttpRequest, HttpResponse> target;
 
     private int currentFilterIndex = 0;
 
     FilterChain(
-            final Function<Request, Response> target,
+            final BiConsumer<HttpRequest, HttpResponse> target,
             final Filter... filters) {
         this.target = target;
         this.filters = filters;
     }
 
-    public Response doFilter(Request request) {
+    public void doFilter(HttpRequest request, HttpResponse response) {
         if (currentFilterIndex < filters.length) {
-            Filter currentFilter = filters[currentFilterIndex++];
-            return currentFilter.doFilter(request, this);
+            filters[currentFilterIndex++].doFilter(request, this);
         }
 
-        return target.apply(request);
+        target.accept(request, response);
     }
 }

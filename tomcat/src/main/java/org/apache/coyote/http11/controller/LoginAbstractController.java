@@ -1,29 +1,30 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.coyote.http11.data.Request;
-import org.apache.coyote.http11.data.Response;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
 import org.apache.coyote.http11.data.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginRequestHandler implements RequestHandler {
-    private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
+public class LoginAbstractController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(LoginAbstractController.class);
 
     @Override
-    public Response doGet(Request request) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         if (isLogin(request.getSession())) {
-            return Response.view("redirect:/index.html");
+            response.setViewName("redirect:/index.html");
+            return;
         }
-        return Response.view("/login.html");
+        response.setViewName("/login.html");
     }
 
     @Override
-    public Response doPost(Request request) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         final Session session = request.getSession();
 
         final Map<String, String> body = request.getBody();
@@ -31,7 +32,8 @@ public class LoginRequestHandler implements RequestHandler {
         final String password = body.get("password");
 
         if (!isValidateData(account, password)) {
-            return Response.badRequest();
+            response.badRequest();
+            return;
         }
 
         final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account)
@@ -39,10 +41,11 @@ public class LoginRequestHandler implements RequestHandler {
 
         if (optionalUser.isPresent()) {
             session.setAttribute("user", optionalUser.get());
-            return Response.view("redirect:/index.html");
+            response.setViewName("redirect:/index.html");
+            return;
         }
 
-        return Response.view("redirect:/401.html");
+        response.setViewName("redirect:/401.html");
     }
 
     private boolean isLogin(Session session) {
@@ -54,7 +57,7 @@ public class LoginRequestHandler implements RequestHandler {
     }
 
     @Override
-    public boolean canHandle(Request request) {
-        return request.getRequestPoint().getPath().equals("/login");
+    public boolean canHandle(HttpRequest request) {
+        return request.getRequestLine().getPath().equals("/login");
     }
 }

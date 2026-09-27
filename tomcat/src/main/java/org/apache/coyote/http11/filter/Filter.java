@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.filter;
 
-import org.apache.coyote.http11.data.Request;
-import org.apache.coyote.http11.data.Response;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
 
 public interface Filter {
-    Response doFilter(Request request, FilterChain chain);
+    HttpResponse doFilter(HttpRequest request, FilterChain chain);
 }

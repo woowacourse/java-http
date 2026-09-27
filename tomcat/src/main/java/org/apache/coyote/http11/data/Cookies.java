@@ -12,27 +12,26 @@ public class Cookies {
         this.cookies.addAll(Arrays.asList(cookies));
     }
 
-    public static Cookies of(Cookie... cookies) {
-        return new Cookies(cookies);
-    }
-
-
     public static Cookies empty() {
         return new Cookies();
     }
 
     public static Cookies fromHeaderValue(String headerValue) {
         final Cookies cookies = new Cookies();
-        final String[] cookiePairs = headerValue.split("; ");
+        final String[] cookiePairs = headerValue.split(";");
 
         for (String cookiePair : cookiePairs) {
             final String[] parts = cookiePair.split("=", 2);
 
             if (parts.length == 2) {
-                cookies.cookies.add(Cookie.create(parts[0], parts[1]));
+                cookies.cookies.add(Cookie.create(parts[0].trim(), parts[1].trim()));
             }
         }
         return cookies;
+    }
+
+    public void addCookie(Cookie cookie) {
+        cookies.add(cookie);
     }
 
     public Optional<String> getValue(String name) {
@@ -46,22 +45,5 @@ public class Cookies {
 
     public List<Cookie> values() {
         return List.copyOf(cookies);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (Cookie cookie : cookies) {
-            sb.append(cookie.toString()).append("; ");
-        }
-        return sb.toString();
-    }
-
-    public Cookies with(Cookie... cookies) {
-        Cookies newCookies = new Cookies();
-        newCookies.cookies.addAll(this.cookies);
-        newCookies.cookies.addAll(Arrays.asList(cookies));
-        return newCookies;
-
     }
 }

@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.filter;
 
-import java.util.function.Function;
-import org.apache.coyote.http11.data.Request;
-import org.apache.coyote.http11.data.Response;
+import java.util.function.BiConsumer;
+import org.apache.coyote.http11.data.HttpRequest;
+import org.apache.coyote.http11.data.HttpResponse;
 
 public class FilterChainFactory {
 
@@ -12,7 +12,7 @@ public class FilterChainFactory {
         this.filters = filters.clone();
     }
 
-    public FilterChain create(Function<Request, Response> target) {
+    public FilterChain create(BiConsumer<HttpRequest, HttpResponse> target) {
         return new FilterChain(target, filters);
     }
 }

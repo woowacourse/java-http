@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.resolver;
+package org.apache.coyote.http11.handle;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
-import org.apache.coyote.http11.data.Response;
+import org.apache.coyote.http11.data.HttpResponse;
 
 public class ViewResolver {
 
@@ -19,31 +19,30 @@ public class ViewResolver {
         this.charset = charset;
     }
 
-    public Response resolve(Response response) {
+    public HttpResponse resolve(HttpResponse response) {
         final var viewName = response.getViewName();
         if (viewName.isEmpty()) {
             return response;
         }
 
-        final String name = viewName.get();
-        if (name.startsWith(REDIRECT_PREFIX)) {
-            renderRedirect(name, response);
+        if (viewName.startsWith(REDIRECT_PREFIX)) {
+            renderRedirect(viewName, response);
             response.setViewName(null);
             return response;
         }
 
-        renderStaticView(name, response);
+        renderStaticView(viewName, response);
         response.setViewName(null);
         return response;
     }
 
-    private void renderRedirect(String viewName, Response response) {
+    private void renderRedirect(String viewName, HttpResponse response) {
         response.setStatusCode(302);
         response.setHeader("Location", viewName.substring(REDIRECT_PREFIX.length()));
         response.setBody("");
     }
 
-    private void renderStaticView(String viewName, Response response) {
+    private void renderStaticView(String viewName, HttpResponse response) {
         final String resourcePath = resolveResourcePath(viewName);
         final Optional<String> body = readResource(resourcePath);
         if (body.isEmpty()) {
@@ -72,7 +71,7 @@ public class ViewResolver {
         }
     }
 
-    private void renderNotFound(Response response) {
+    private void renderNotFound(HttpResponse response) {
         response.setStatusCode(404);
         response.setBody("Not Found");
     }

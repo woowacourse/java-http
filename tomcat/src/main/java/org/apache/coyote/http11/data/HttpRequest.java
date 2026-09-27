@@ -10,9 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.InvalidHttpRequestException;
 import org.apache.coyote.http11.config.TomcatServerConfiguration;
 
-public class Request {
+public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final Map<String, String> queryParameters;
@@ -20,7 +21,7 @@ public class Request {
     private final Cookies cookies;
     private Session session;
 
-    private Request(
+    private HttpRequest(
             final RequestLine requestLine,
             final Map<String, String> headers,
             final Map<String, String> queryParameters,
@@ -34,14 +35,26 @@ public class Request {
         this.cookies = cookies;
     }
 
-    public static Request from(final InputStream inputStream) throws IOException {
+    public static HttpRequest from(final InputStream inputStream) throws IOException {
         final RequestLine requestEndPoint = requestEndPoint(inputStream);
         final Map<String, String> queryParameters = parseQueryParameter(requestEndPoint.getQuery());
         final Map<String, String> headers = readHeader(inputStream);
-        final Map<String, String> body = readBody(inputStream, Integer.parseInt(headers.getOrDefault("Content-Length", "0")));
+        final Map<String, String> body = readBody(inputStream, parseContentLength(headers.getOrDefault("Content-Length", "0")));
         final Cookies cookies = Cookies.fromHeaderValue(headers.getOrDefault("Cookie", ""));
 
-        return new Request(requestEndPoint, headers, queryParameters, body, cookies);
+        return new HttpRequest(requestEndPoint, headers, queryParameters, body, cookies);
+    }
+
+    private static int parseContentLength(final String value) {
+        if (!value.matches("[0-9]+")) {
+            throw new InvalidHttpRequestException("잘못된 Content-Length 형식입니다.");
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidHttpRequestException("Content-Length가 처리 가능한 범위를 벗어났습니다.", e);
+        }
     }
 
     private static RequestLine requestEndPoint(final InputStream inputStream) throws IOException {
@@ -161,7 +174,7 @@ public class Request {
                 );
     }
 
-    public RequestLine getRequestPoint() {
+    public RequestLine getRequestLine() {
         return requestLine;
     }
 

@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -15,16 +20,28 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_QUEUE_CAPACITY = 100;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        int poolSize = checkMaxThreads(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                poolSize,
+                poolSize,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
         this.stopped = false;
     }
 
@@ -39,10 +56,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -66,12 +83,21 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        try {
+            executorService.execute(new Http11Processor(connection));
+        } catch (RejectedExecutionException e) {
+            log.warn("요청 처리 거절: 작업 큐가 가득 찼거나 서버가 종료 중입니다.");
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error("거절된 연결을 닫지 못했습니다.", closeException);
+            }
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -91,5 +117,13 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        if (maxThreads < 1) {
+            return DEFAULT_MAX_THREADS;
+        }
+
+        return maxThreads;
     }
 }

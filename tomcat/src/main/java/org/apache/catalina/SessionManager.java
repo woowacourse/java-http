@@ -1,7 +1,7 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 // 상속이 이미 private로 막혀있지만 명시적으로 final 클래스 임을 선언
 public final class SessionManager implements Manager {
@@ -9,7 +9,7 @@ public final class SessionManager implements Manager {
     // static!
     // key: JSESSIONID, value: Session
     private static final SessionManager INSTANCE = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -26,10 +26,12 @@ public final class SessionManager implements Manager {
 
     @Override
     public Session findSession(final String id) {
-        if (isExistSession(id)) {
-            return SESSIONS.get(id);
+        Session session = SESSIONS.get(id);
+        if (session == null) {
+            throw new IllegalArgumentException("해당 uid의 세션이 없음");
         }
-        throw new IllegalArgumentException("해당 uid의 세션이 없음");
+
+        return session;
     }
 
     @Override

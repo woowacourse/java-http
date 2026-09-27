@@ -16,10 +16,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     private static final String EXISTING_SESSION_ID = "existing-session-id";
+    private SessionManager sessionManager;
 
     @BeforeEach
     void registerExistingSession() {
-        new SessionManager().add(new Session(EXISTING_SESSION_ID));
+        sessionManager = new SessionManager();
+        sessionManager.add(new Session(EXISTING_SESSION_ID));
     }
 
     @Test
@@ -32,7 +34,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new RequestMapping(sessionManager));
 
         // when
         processor.process(socket);
@@ -60,7 +62,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new RequestMapping(sessionManager));
 
         // when
         processor.process(socket);

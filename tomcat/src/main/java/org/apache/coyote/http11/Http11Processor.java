@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
@@ -40,11 +41,17 @@ public class Http11Processor implements Runnable, Processor {
             final var requestUri = getRequestUri(inputStream);
             final var requestPath = getRequestPath(requestUri);
             final var parameters = parseQueryString(requestUri);
-            authenticate(requestPath, parameters);
+            final var responseHeaders = new LinkedHashMap<String, String>();
+            final var redirectPath = authenticate(requestPath, parameters);
+            if (redirectPath != null) {
+                responseHeaders.put("Location", redirectPath);
+                writeResponse(outputStream, "302 Found", "text/html;charset=utf-8", new byte[0], responseHeaders);
+                return;
+            }
 
             final var responseBody = getResponseBody(requestPath);
             final var contentType = getContentType(requestPath);
-            writeResponse(outputStream, contentType, responseBody);
+            writeResponse(outputStream, "200 OK", contentType, responseBody, responseHeaders);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -89,20 +96,24 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private void authenticate(final String requestPath, final Map<String, String> parameters) {
+    private String authenticate(final String requestPath, final Map<String, String> parameters) {
+        if (!"/login".equals(requestPath) || parameters.isEmpty()) {
+            return null;
+        }
         final var account = parameters.get("account");
         final var password = parameters.get("password");
-        if (!"/login".equals(requestPath) || account == null || password == null) {
-            return;
+        if (account == null || password == null) {
+            return "/401.html";
         }
 
         final var foundUser = InMemoryUserRepository.findByAccount(account);
         if (foundUser.isPresent()) {
             final var user = foundUser.get();
             if (user.checkPassword(password)) {
-                log.info("login user: {}", user);
+                return "/index.html";
             }
         }
+        return "/401.html";
     }
 
     private byte[] getResponseBody(final String requestPath) throws IOException {
@@ -110,6 +121,7 @@ public class Http11Processor implements Runnable, Processor {
         var resourcePath = "";
 
         if ("/index.html".equals(requestPath)
+                || "/401.html".equals(requestPath)
                 || "/css/styles.css".equals(requestPath)
                 || requestPath.startsWith("/js/")
                 || requestPath.startsWith("/assets/")) {
@@ -137,16 +149,18 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private void writeResponse(final OutputStream outputStream, final String contentType, final byte[] responseBody)
-            throws IOException {
-        final var responseHeaders = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "");
+    private void writeResponse(final OutputStream outputStream, final String status, final String contentType,
+                               final byte[] responseBody, final Map<String, String> headers) throws IOException {
+        final var responseHeaders = new StringBuilder();
+        responseHeaders.append("HTTP/1.1 ").append(status).append("\r\n");
+        responseHeaders.append("Content-Type: ").append(contentType).append("\r\n");
+        responseHeaders.append("Content-Length: ").append(responseBody.length).append("\r\n");
+        for (final var header : headers.entrySet()) {
+            responseHeaders.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
+        }
+        responseHeaders.append("\r\n");
 
-        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
         outputStream.flush();
     }

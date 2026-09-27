@@ -52,7 +52,9 @@ class HttpResponseTest {
     @Test
     void OK_응답에_상태줄과_필수_헤더와_body를_출력한다() throws IOException {
         // given
-        HttpResponse response = HttpResponse.ok("Hello world!", "text/html;charset=utf-8");
+        HttpResponse response = new HttpResponse();
+        response.setContent(HttpStatus.OK, "Hello world!".getBytes(StandardCharsets.UTF_8),
+                "text/html;charset=utf-8");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // when
@@ -71,7 +73,9 @@ class HttpResponseTest {
     @Test
     void 응답_Content_Length는_UTF_8_body의_바이트_크기다() throws IOException {
         // given
-        HttpResponse response = HttpResponse.ok("한글", "text/plain;charset=utf-8");
+        HttpResponse response = new HttpResponse();
+        response.setContent(HttpStatus.OK, "한글".getBytes(StandardCharsets.UTF_8),
+                "text/plain;charset=utf-8");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // when
@@ -84,7 +88,8 @@ class HttpResponseTest {
     @Test
     void redirect_응답에_302_상태와_Location_헤더를_출력한다() throws IOException {
         // given
-        HttpResponse response = HttpResponse.redirect("/index.html");
+        HttpResponse response = new HttpResponse();
+        response.sendRedirect("/index.html");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // when
@@ -99,7 +104,8 @@ class HttpResponseTest {
     @Test
     void body가_없는_redirect_응답의_Content_Length는_0이다() throws IOException {
         // given
-        HttpResponse response = HttpResponse.redirect("/index.html");
+        HttpResponse response = new HttpResponse();
+        response.sendRedirect("/index.html");
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // when

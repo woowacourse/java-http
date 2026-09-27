@@ -20,28 +20,6 @@ public class HttpResponse {
         this.body = new byte[0];
     }
 
-    private HttpResponse(HttpStatus status, byte[] body) {
-        this();
-        this.status = status;
-        this.body = body.clone();
-    }
-
-    public static HttpResponse ok(String body, String contentType) {
-        return of(HttpStatus.OK, body.getBytes(StandardCharsets.UTF_8), contentType);
-    }
-
-    public static HttpResponse of(HttpStatus status, byte[] body, String contentType) {
-        HttpResponse response = new HttpResponse(status, body);
-        response.addHeader("Content-Type", contentType);
-        return response;
-    }
-
-    public static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, new byte[0]);
-        response.addHeader("Location", location);
-        return response;
-    }
-
     public void addHeader(String name, String value) {
         headers.put(name, value);
     }
@@ -61,12 +39,12 @@ public class HttpResponse {
     }
 
     public void sendError(HttpStatus status) {
-        StaticResourceHandler resources = new StaticResourceHandler(getClass().getClassLoader());
+        StaticResourceHandler resources = new StaticResourceHandler();
         resources.fillError(status, this);
     }
 
     public void sendStaticFile(String path) throws IOException {
-        StaticResourceHandler resources = new StaticResourceHandler(getClass().getClassLoader());
+        StaticResourceHandler resources = new StaticResourceHandler();
         resources.serve(path, this);
     }
 

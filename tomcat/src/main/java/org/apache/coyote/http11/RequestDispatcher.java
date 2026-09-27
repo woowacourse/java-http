@@ -24,15 +24,7 @@ public class RequestDispatcher {
         controller.get()
             .service(request, response);
 
-        setJSessionId(request, response);
         handleForward(request, response);
-    }
-
-
-    private void setJSessionId(final HttpRequest request, HttpResponse response) {
-        request.createdSession()
-            .ifPresent(session ->
-                response.addHeader("Set-Cookie", "JSESSIONID=" + session.id()));
     }
 
     private void handleForward(final HttpRequest request, final HttpResponse response)

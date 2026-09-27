@@ -301,12 +301,13 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index ",
-                "Content-Length: 0 ");
-
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output())
+                .contains(
+                    "HTTP/1.1 302 Found ",
+                    "Location: /index ",
+                    "Content-Length: 0 ")
+                .containsPattern("Set-Cookie: JSESSIONID=[^;]+")
+                .doesNotContain("Set-Cookie: JSESSIONID=" + SESSION_ID);
         }
 
         @Test

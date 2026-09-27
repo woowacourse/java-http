@@ -6,6 +6,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
 import org.apache.coyote.controller.AbstractController;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.WebController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -22,21 +24,25 @@ public class LoginController extends AbstractController {
         final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
             .filter(foundUser -> foundUser.checkPassword(loginRequest.password()));
 
-        if (filteredUser.isPresent()) {
-            final User user = filteredUser.get();
-            final Session session = request.getSession();
-            log.info("user: {}", user);
-            session.addAttribute("user", user);
-            response.sendRedirect(HttpStatus.FOUND, "/index");
+        if (filteredUser.isEmpty()) {
+            response.sendRedirect(HttpStatus.FOUND, "/401.html");
             return;
         }
 
-        response.sendRedirect(HttpStatus.FOUND, "/401.html");
+        final Session session = SessionManager.getInstance()
+            .createNewSession();
+        log.info("user: {}", filteredUser.get());
+        session.addAttribute("user", filteredUser.get());
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.id());
+        response.sendRedirect(HttpStatus.FOUND, "/index");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final Session session = request.getSession(false);
+        final HttpCookie cookie = request.cookie();
+        final Session session = SessionManager.getInstance()
+            .findSession(cookie.getValue("JSESSIONID"));
+
         if (session != null && session.hasAttribute("user")) {
             response.sendRedirect(HttpStatus.FOUND, "/index");
             return;

@@ -39,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpResponse response = handleRequest(httpRequest);
 
+            addSessionCookie(httpRequest, response);
             writeResponse(outputStream, response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -56,5 +57,11 @@ public class Http11Processor implements Runnable, Processor {
         log.info("response status: {}", response.status());
         outputStream.write(response.toHttpMessage().getBytes());
         outputStream.flush();
+    }
+
+    private void addSessionCookie(final HttpRequest request, final HttpResponse response) throws IOException {
+        if (request.isNewSession()) {
+            response.headers().add("Set-Cookie", "JSESSIONID=" + request.getSession().getId());
+        }
     }
 }

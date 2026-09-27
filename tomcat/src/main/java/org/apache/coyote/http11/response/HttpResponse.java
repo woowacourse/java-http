@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpCookie;
-
 import java.nio.file.Path;
 
 public class HttpResponse {
@@ -21,8 +19,8 @@ public class HttpResponse {
     }
 
     public HttpResponse(final HttpStatus httpStatus, final Path filePath, final String body,
-                        final String location, final HttpCookie httpCookie) {
-        this(httpStatus, new ResponseHeaders(filePath, location, httpCookie), body);
+                        final String location) {
+        this(httpStatus, new ResponseHeaders(filePath, location), body);
     }
 
     public HttpStatus status() {
@@ -38,9 +36,9 @@ public class HttpResponse {
     }
 
     public void set(final HttpStatus httpStatus, final Path filePath, final String body,
-                    final String location, final HttpCookie httpCookie) {
+                    final String location) {
         this.httpStatus = httpStatus;
-        this.responseHeaders = new ResponseHeaders(filePath, location, httpCookie);
+        this.responseHeaders = new ResponseHeaders(filePath, location);
         this.body = body;
     }
 

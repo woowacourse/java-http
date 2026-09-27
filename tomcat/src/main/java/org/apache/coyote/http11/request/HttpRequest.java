@@ -1,5 +1,9 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
@@ -13,12 +17,20 @@ public class HttpRequest {
     private final RequestHeaders headers;
     private final RequestBody body;
     private final Map<String, String> parameters;
+    private final SessionManager sessionManager;
+    private Session session;
+    private boolean newSession;
 
     public HttpRequest(final InputStream inputStream) throws IOException {
+        this(inputStream, SessionManager.getInstance());
+    }
+
+    public HttpRequest(final InputStream inputStream, final SessionManager sessionManager) throws IOException {
         this.requestLine = new RequestLine(inputStream);
         this.headers = new RequestHeaders(inputStream);
         this.body = new RequestBody(inputStream, headers);
         this.parameters = parseParameters(requestLine.getTarget(), body.getContent());
+        this.sessionManager = sessionManager;
     }
 
     public RequestLine getRequestLine() {
@@ -39,6 +51,32 @@ public class HttpRequest {
 
     public boolean hasParameters() {
         return !parameters.isEmpty();
+    }
+
+    public Session getSession() throws IOException {
+        return getSession(true);
+    }
+
+    public Session getSession(final boolean create) throws IOException {
+        if (session != null) {
+            return session;
+        }
+
+        final HttpCookie cookies = new HttpCookie(headers.get("Cookie"));
+        final String sessionId = cookies.get("JSESSIONID");
+        if (sessionId != null) {
+            session = sessionManager.findSession(sessionId);
+        }
+
+        if (session == null && create) {
+            session = sessionManager.createSession();
+            newSession = true;
+        }
+        return session;
+    }
+
+    public boolean isNewSession() {
+        return newSession;
     }
 
     private Map<String, String> parseParameters(final String target, final String body) {

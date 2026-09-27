@@ -1,28 +1,21 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpCookie;
-
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseHeaders {
 
-    private static final String JSESSION_ID_KEY = "JSESSIONID";
-
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     public ResponseHeaders() {
     }
 
-    public ResponseHeaders(final Path filePath, final String location, final HttpCookie httpCookie) {
+    public ResponseHeaders(final Path filePath, final String location) {
         add("Content-Type", getContentType(filePath));
 
         if (location != null) {
             add("Location", location);
-        }
-        if (httpCookie != null && httpCookie.contains(JSESSION_ID_KEY)) {
-            add("Set-Cookie", JSESSION_ID_KEY + "=" + httpCookie.get(JSESSION_ID_KEY));
         }
     }
 

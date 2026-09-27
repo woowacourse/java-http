@@ -15,7 +15,7 @@ public class StaticResourceHandler {
     public HttpResponse handle(final String uriPath) throws IOException {
         if (uriPath.equals("/")) {
             final Path indexPath = getFilePath("/index.html");
-            return new HttpResponse(HttpStatus.OK, indexPath, "Hello world!", null, null);
+            return new HttpResponse(HttpStatus.OK, indexPath, "Hello world!", null);
         }
 
         final Path filePath = getFilePath(uriPath);
@@ -23,12 +23,12 @@ public class StaticResourceHandler {
             return notFoundResponse();
         }
 
-        return new HttpResponse(HttpStatus.OK, filePath, Files.readString(filePath), null, null);
+        return new HttpResponse(HttpStatus.OK, filePath, Files.readString(filePath), null);
     }
 
     private HttpResponse notFoundResponse() throws IOException {
         final Path filePath = getFilePath("/404.html");
-        return new HttpResponse(HttpStatus.NOT_FOUND, filePath, Files.readString(filePath), null, null);
+        return new HttpResponse(HttpStatus.NOT_FOUND, filePath, Files.readString(filePath), null);
     }
 
     private Path getFilePath(final String uriPath) {

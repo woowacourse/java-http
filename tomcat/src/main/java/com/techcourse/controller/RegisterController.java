@@ -20,13 +20,13 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final Path filePath = getFilePath("/register");
-        response.set(HttpStatus.OK, filePath, Files.readString(filePath), null, null);
+        response.set(HttpStatus.OK, filePath, Files.readString(filePath), null);
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         createUser(request);
-        response.set(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html", null);
+        response.set(HttpStatus.FOUND, getFilePath("/index.html"), "", "/index.html");
     }
 
     private void createUser(final HttpRequest request) {

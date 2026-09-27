@@ -2,11 +2,13 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.routing.controller.Controller;
 import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+@Controller
 public class RegisterController {
 
     @RequestMapping(method = HttpMethod.GET, path = "/register")

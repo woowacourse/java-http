@@ -1,20 +1,21 @@
 package com.techcourse.config;
 
-import com.techcourse.controller.HelloWorldRequestHandler;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import org.apache.catalina.Manager;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.routing.Dispatcher;
 import org.apache.catalina.routing.RequestRegistry;
 import org.apache.catalina.routing.RouteKey;
+import org.apache.catalina.routing.controller.Controller;
 import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11Processor;
+import org.reflections.Reflections;
 
 public final class WebConfig {
 
@@ -34,13 +35,15 @@ public final class WebConfig {
     }
 
     private void configureRoutes(final RequestRegistry requestRegistry) {
-        List<Object> handlers = List.of(
-                new LoginController(),
-                new RegisterController(),
-                new HelloWorldRequestHandler()
-        );
-
+        List<Object> handlers = getControllers();
         setRegistry(requestRegistry, handlers);
+    }
+
+    private List<Object> getControllers() {
+        Set<Class<?>> typesAnnotatedWith = new Reflections("com.techcourse.controller")
+                .getTypesAnnotatedWith(Controller.class);
+
+        return Arrays.asList(typesAnnotatedWith.toArray());
     }
 
     private void setRegistry(RequestRegistry registry, List<Object> handlers) {

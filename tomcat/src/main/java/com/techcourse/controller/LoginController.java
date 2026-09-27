@@ -4,11 +4,13 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
+import org.apache.catalina.routing.controller.Controller;
 import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+@Controller
 public class LoginController {
 
     public static final String LOGIN_USER = "loginUser";

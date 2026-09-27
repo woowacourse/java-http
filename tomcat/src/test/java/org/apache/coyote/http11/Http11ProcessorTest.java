@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.controller.HelloWorldRequestHandler;
+import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.db.InMemoryUserRepository;
@@ -45,7 +45,7 @@ class Http11ProcessorTest {
         final LoginController loginController = new LoginController();
         final RegisterController registerController = new RegisterController();
 
-        requestRegistry.add(new RouteKey(HttpMethod.GET, "/"), new HelloWorldRequestHandler());
+        requestRegistry.add(new RouteKey(HttpMethod.GET, "/"), new GreetingController());
         requestRegistry.add(new RouteKey(HttpMethod.GET, "/login"), loginController::getLoginPage);
         requestRegistry.add(new RouteKey(HttpMethod.POST, "/login"), loginController::handle);
         requestRegistry.add(new RouteKey(HttpMethod.GET, "/register"), registerController::getPage);

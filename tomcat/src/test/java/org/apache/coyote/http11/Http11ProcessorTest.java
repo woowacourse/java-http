@@ -1,15 +1,14 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.FrontController;
 import com.techcourse.model.User;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +19,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new FrontController());
 
         // when
         processor.process(socket);
@@ -45,7 +44,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new FrontController());
 
         // when
         processor.process(socket);
@@ -69,7 +68,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var firstSocket = new StubSocket(firstRequest);
-        new Http11Processor(firstSocket).process(firstSocket);
+        new Http11Processor(firstSocket, new FrontController()).process(firstSocket);
 
         final var sessionId = extractSessionId(firstSocket);
         final var sessionBeforeLogin = SessionManager.getInstance().findSession(sessionId);
@@ -85,7 +84,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(request);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new FrontController());
 
         // when
         processor.process(socket);
@@ -115,7 +114,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(request);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new FrontController());
 
         // when
         processor.process(socket);
@@ -139,7 +138,7 @@ class Http11ProcessorTest {
                 "",
                 requestBody);
         final var loginSocket = new StubSocket(loginRequest);
-        new Http11Processor(loginSocket).process(loginSocket);
+        new Http11Processor(loginSocket, new FrontController()).process(loginSocket);
 
         final var sessionId = loginSocket.output()
                 .lines()
@@ -157,7 +156,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(request);
 
         // when
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, new FrontController()).process(socket);
 
         // then
         final var expected = String.join("\r\n",

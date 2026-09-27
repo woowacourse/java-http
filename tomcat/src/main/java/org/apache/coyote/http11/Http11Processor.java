@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.FrontController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -18,10 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final FrontController frontController = new FrontController();
+    private final RequestHandler requestHandler;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestHandler requestHandler) {
         this.connection = connection;
+        this.requestHandler = requestHandler;
     }
 
     @Override
@@ -38,8 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             final var response = new HttpResponse();
             final var sessionIdToSet = prepareSession(request);
 
-            final var controller = frontController.handle(request);
-            controller.service(request, response);
+            requestHandler.service(request, response);
 
             if (sessionIdToSet != null) {
                 response.addHeader("Set-Cookie", "JSESSIONID=" + sessionIdToSet);

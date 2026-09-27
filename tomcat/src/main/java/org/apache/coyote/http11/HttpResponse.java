@@ -1,58 +1,65 @@
 package org.apache.coyote.http11;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class HttpResponse {
 
-    private StatusLine statusLine;
-    private final HttpHeaders headers;
-    private String body;
+    private static final String OK_STATUS_LINE = "HTTP/1.1 200 OK";
+    private static final String REDIRECT_STATUS_LINE = "HTTP/1.1 302 Found";
+    private static final String NOT_FOUND_STATUS_LINE = "HTTP/1.1 404 Not Found";
 
-    public HttpResponse() {
-        this(StatusLine.ok(), HttpHeaders.empty(), "");
-    }
+    private final String statusLine;
+    private final Map<String, String> headers = new LinkedHashMap<>();
+    private final String body;
 
-    private HttpResponse(final StatusLine statusLine, final HttpHeaders headers, final String body) {
+    public HttpResponse(final String statusLine, final String body) {
         this.statusLine = statusLine;
-        this.headers = headers;
         this.body = body;
     }
 
-    public static HttpResponse ok(
+    public static HttpResponse createOkResponse(
             String contentType,
-            String body) {
-        HttpHeaders headers = HttpHeaders.empty();
-        headers.add("Content-Type", contentType);
-        headers.add("Content-Length", String.valueOf(body.getBytes().length));
-        return new HttpResponse(StatusLine.ok(), headers, body);
+            String body,
+            Map<String, String> responseHeaders) {
+        HttpResponse httpResponse = new HttpResponse(OK_STATUS_LINE, body);
+        responseHeaders.forEach(httpResponse::addHeader);
+        httpResponse.addHeader("Content-Type", contentType);
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        return httpResponse;
     }
 
-    public static HttpResponse notFound(String body) {
-        HttpHeaders headers = HttpHeaders.empty();
-        headers.add("Content-Type", "text/html;charset=utf-8");
-        headers.add("Content-Length", String.valueOf(body.getBytes().length));
-        return new HttpResponse(StatusLine.notFound(), headers, body);
+    public static HttpResponse createRedirectResponse(
+            String redirectPath,
+            Map<String, String> responseHeaders) {
+        HttpResponse httpResponse = new HttpResponse(REDIRECT_STATUS_LINE, "");
+        httpResponse.addHeader("Location", redirectPath);
+        responseHeaders.forEach(httpResponse::addHeader);
+        httpResponse.addHeader("Content-Length", "0");
+        return httpResponse;
     }
 
-    public void addHeader(String name, String value) {
-        headers.add(name, value);
+    public static HttpResponse createNotFoundResponse(String body) {
+        HttpResponse httpResponse = new HttpResponse(NOT_FOUND_STATUS_LINE, body);
+        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+        httpResponse.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        return httpResponse;
     }
 
-    public void redirectTo(String path) {
-        statusLine = StatusLine.redirect();
-        headers.add("Location", path);
-        setBody("");
-    }
-
-    public void notFound() {
-        statusLine = StatusLine.notFound();
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-        headers.add("Content-Length", String.valueOf(body.getBytes().length));
+    public void addHeader(final String name, final String value) {
+        headers.put(name, value);
     }
 
     @Override
     public String toString() {
-        return statusLine + "\r\n" + headers + "\r\n\r\n" + body;
+        StringBuilder response = new StringBuilder(statusLine);
+        headers.forEach((name, value) ->
+                response.append("\r\n")
+                        .append(name)
+                        .append(": ")
+                        .append(value)
+        );
+        response.append("\r\n\r\n").append(body);
+        return response.toString();
     }
 }

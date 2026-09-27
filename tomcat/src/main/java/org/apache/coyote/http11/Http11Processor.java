@@ -43,6 +43,14 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
+    public void close() {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();

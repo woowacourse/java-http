@@ -119,6 +119,37 @@ class ConnectorTest {
     }
 
     @Test
+    void forcedStopClosesPendingConnections() throws Exception {
+        // given
+        final int port = availablePort();
+        final Connector connector = new Connector(port, 100, 1, 1);
+        connector.start();
+
+        try (final Socket running = new Socket("localhost", port);
+             final Socket pending = new Socket("localhost", port)) {
+            running.setSoTimeout(3_000);
+            pending.setSoTimeout(3_000);
+            running.getOutputStream().write("GET / HTTP/1.1\r\n".getBytes(StandardCharsets.UTF_8));
+            running.getOutputStream().flush();
+            awaitActiveWorker(connector);
+            awaitQueuedTask(connector);
+
+            // when
+            final Thread stopper = new Thread(connector::stop);
+            stopper.start();
+            stopper.interrupt();
+            stopper.join(3_000);
+
+            // then
+            assertThat(executorOf(connector).getQueue()).isEmpty();
+            assertThat(pending.getInputStream().read()).isEqualTo(-1);
+
+            running.getOutputStream().write("\r\n".getBytes(StandardCharsets.UTF_8));
+            running.getOutputStream().flush();
+        }
+    }
+
+    @Test
     void invalidWorkerConfigDoesNotBindPort() throws IOException {
         // given
         final int port = availablePort();

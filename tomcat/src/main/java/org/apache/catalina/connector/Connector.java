@@ -115,13 +115,21 @@ public class Connector implements Runnable {
             if (executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 return;
             }
-            executorService.shutdownNow();
+            shutdownExecutorNow();
             if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 log.warn("요청 처리 스레드가 제한 시간 내에 종료되지 않았습니다.");
             }
         } catch (InterruptedException e) {
-            executorService.shutdownNow();
+            shutdownExecutorNow();
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void shutdownExecutorNow() {
+        for (final Runnable pendingTask : executorService.shutdownNow()) {
+            if (pendingTask instanceof Http11Processor processor) {
+                processor.close();
+            }
         }
     }
 

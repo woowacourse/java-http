@@ -53,20 +53,10 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest request = new HttpRequest(reader);
+            final HttpResponse response = new HttpResponse();
 
-            if (isLoginPostRequest(request)) {
-                write(outputStream, loginResponse(request));
-                return;
-            }
-            if (isLoginPageRequest(request) && isLoggedIn(request.getCookie())) {
-                write(outputStream, redirectResponse(INDEX_PAGE));
-                return;
-            }
-            if (isRegisterPostRequest(request)) {
-                write(outputStream, redirectResponse(registerLocation(request)));
-                return;
-            }
-            write(outputStream, staticResourceResponse(resourcePath(request.getPath())));
+            handle(request, response);
+            write(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -74,22 +64,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void handle(final HttpRequest request, final HttpResponse response)
+            throws IOException, URISyntaxException {
+        if (isLoginPostRequest(request)) {
+            login(request, response);
+            return;
+        }
+        if (isLoginPageRequest(request) && isLoggedIn(request.getCookie())) {
+            response.sendRedirect(INDEX_PAGE);
+            return;
+        }
+        if (isRegisterPostRequest(request)) {
+            register(request, response);
+            return;
+        }
+        serveStaticResource(resourcePath(request.getPath()), response);
+    }
+
     private boolean isLoginPostRequest(final HttpRequest request) {
         return request.isPost() && request.getPath().equals(LOGIN_PATH);
     }
 
-    private String loginResponse(final HttpRequest request) {
+    private void login(final HttpRequest request, final HttpResponse response) {
         final User existUser = InMemoryUserRepository.findByAccount(request.getFormParameter("account"))
                 .filter(user -> user.checkPassword(request.getFormParameter("password")))
                 .orElse(null);
         if (existUser == null) {
-            return redirectResponse(UNAUTHORIZED_PAGE);
+            response.sendRedirect(UNAUTHORIZED_PAGE);
+            return;
         }
         log.info("user : {}", existUser);
         final Session session = new Session(UUID.randomUUID().toString());
         session.setAttribute(SESSION_USER, existUser);
         SessionManager.getInstance().add(session);
-        return redirectResponse(INDEX_PAGE, HttpCookie.ofJSessionId(session.getId()));
+        response.sendRedirect(INDEX_PAGE);
+        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
     }
 
     private boolean isLoginPageRequest(final HttpRequest request) {
@@ -107,30 +116,13 @@ public class Http11Processor implements Runnable, Processor {
         return request.isPost() && request.getPath().equals(REGISTER_PATH);
     }
 
-    private String registerLocation(final HttpRequest request) {
+    private void register(final HttpRequest request, final HttpResponse response) {
         User registerUser = new User(
                 request.getFormParameter("account"),
                 request.getFormParameter("password"),
                 request.getFormParameter("email"));
         InMemoryUserRepository.save(registerUser);
-        return INDEX_PAGE;
-    }
-
-    private String redirectResponse(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "",
-                "");
-    }
-
-    private String redirectResponse(final String location, final String cookie) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Set-Cookie: " + cookie + " ",
-                "",
-                "");
+        response.sendRedirect(INDEX_PAGE);
     }
 
     private String resourcePath(final String path) {
@@ -146,14 +138,9 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private String staticResourceResponse(final String path) throws IOException, URISyntaxException {
-        final byte[] responseBody = readStaticResource(path);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentTypeOf(path) + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                new String(responseBody));
+    private void serveStaticResource(final String path, final HttpResponse response)
+            throws IOException, URISyntaxException {
+        response.setBody(contentTypeOf(path), readStaticResource(path));
     }
 
     private byte[] readStaticResource(final String path) throws IOException, URISyntaxException {
@@ -169,8 +156,8 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private void write(final OutputStream outputStream, final String response) throws IOException {
-        outputStream.write(response.getBytes());
+    private void write(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        outputStream.write(response.toBytes());
         outputStream.flush();
     }
 }

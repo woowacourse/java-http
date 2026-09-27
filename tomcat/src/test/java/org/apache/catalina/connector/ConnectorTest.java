@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.Container;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionManager;
@@ -57,7 +58,8 @@ class ConnectorTest {
         requestMapping.register(BLOCKING_PATH, controller);
 
         port = findFreePort();
-        connector = new Connector(port, ACCEPT_COUNT, MAX_THREADS, new SessionManager(), requestMapping);
+        final Container container = new Container(new SessionManager(), requestMapping);
+        connector = new Connector(container, port, ACCEPT_COUNT, MAX_THREADS);
         connector.start();
         clients = Executors.newFixedThreadPool(REQUEST_COUNT);
     }

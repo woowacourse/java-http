@@ -26,8 +26,7 @@ public class StaticResourceController extends AbstractController {
 
         final String contentType = getContentType(requestUri);
         final byte[] body = getResponseBody(requestUri);
-        final String setCookie = createSetCookieHeader(request.getCookie(JSESSIONID));
-        setOkResponse(response, contentType, body, setCookie);
+        setOkResponse(response, contentType, body);
     }
 
     private byte[] getResponseBody(final String requestUri) throws IOException {

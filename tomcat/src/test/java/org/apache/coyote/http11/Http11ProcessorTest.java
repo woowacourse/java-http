@@ -215,7 +215,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void setCookieWhenJSessionIdIsMissing() {
+    void doesNotSetCookieWhenJSessionIdIsMissing() {
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -227,7 +227,7 @@ class Http11ProcessorTest {
 
         processor.process(socket);
 
-        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
+        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.techcourse.controller;
 
-import java.util.UUID;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -26,12 +25,8 @@ public abstract class AbstractController implements Controller {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
     }
 
-    protected void setOkResponse(final HttpResponse response, final String contentType, final byte[] body,
-                                 final String setCookie) {
+    protected void setOkResponse(final HttpResponse response, final String contentType, final byte[] body) {
         response.setStatus(200, "OK ");
-        if (!setCookie.isEmpty()) {
-            response.putHeader(SET_COOKIE_HEADER, setCookie + " ");
-        }
         response.putHeader("Content-Type", contentType + " ");
         response.putHeader("Content-Length", body.length + " ");
         response.setBody(body);
@@ -44,12 +39,5 @@ public abstract class AbstractController implements Controller {
         }
         response.putHeader("Location", location + " ");
         response.putHeader("Content-Length", "0 ");
-    }
-
-    protected String createSetCookieHeader(final String sessionId) {
-        if (sessionId != null) {
-            return "";
-        }
-        return JSESSIONID + "=" + UUID.randomUUID();
     }
 }

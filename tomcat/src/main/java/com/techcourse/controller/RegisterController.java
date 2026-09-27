@@ -1,6 +1,5 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.exception.HttpException;
@@ -45,8 +44,7 @@ public class RegisterController extends AbstractController {
             return;
         }
 
-        final String setCookie = createSetCookieHeader(request.getCookie(JSESSIONID));
-        setRedirectResponse(response, LOGIN_SUCCESS, setCookie);
+        setRedirectResponse(response, LOGIN_SUCCESS, "");
     }
 
     private boolean isValidAccount(final String account) {

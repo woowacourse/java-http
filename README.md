@@ -3,22 +3,24 @@
 ## 톰캣 구현하기
 
 ### 학습목표
+
 - 웹 서버 구현을 통해 HTTP 이해도를 높인다.
 - HTTP의 이해도를 높혀 성능 개선할 부분을 찾고 적용할 역량을 쌓는다.
 - 서블릿에 대한 이해도를 높인다.
 - 스레드, 스레드풀을 적용해보고 동시성 처리를 경험한다.
 
 ### 시작 가이드
+
 1. 미션을 시작하기 전에 파일, 입출력 스트림 학습 테스트를 먼저 진행합니다.
     - [File, I/O Stream](study/src/test/java/study)
     - 나머지 학습 테스트는 다음 강의 시간에 풀어봅시다.
 2. 학습 테스트를 완료하면 LMS의 1단계 미션부터 진행합니다.
 
 ## 학습 테스트
+
 1. [File, I/O Stream](study/src/test/java/study)
 2. [HTTP Cache](study/src/test/java/cache)
 3. [Thread](study/src/test/java/thread)
-
 
 ## 3단계 구현 요구사항
 
@@ -27,7 +29,8 @@
 ### HTTP 요청
 
 - [x] `RequestLine`이 HTTP 메서드, 요청 경로, 버전을 구분한다.
-- [ ] `HttpRequest`가 요청의 첫 줄, 헤더, 본문을 읽고 필요한 값을 제공한다.
+- [x] `HttpRequest`가 요청의 첫 줄, 헤더, 본문을 읽고 필요한 값을 제공한다.
+- [ ] `Content-Length`를 바이트 수로 처리해 한글이 포함된 본문도 정확히 읽는다.
 - [ ] GET 쿼리 문자열과 POST 폼 본문에서 파라미터를 읽는다. 폼 인코딩된 값은 디코딩한다.
 - [ ] 요청 쿠키에서 `JSESSIONID`를 읽어 기존 세션을 찾을 수 있다.
 
@@ -48,7 +51,8 @@
 ### 테스트 작성 순서
 
 - [x] `RequestLine`이 `GET /login HTTP/1.1`을 메서드, 경로, 버전으로 나누는 테스트
-- [ ] `HttpRequest`가 GET 쿼리 문자열, 헤더, POST 폼 본문을 읽는 테스트
+- [x] `HttpRequest`가 헤더와 `Content-Length`가 있는 POST 본문을 읽는 테스트
+- [ ] `HttpRequest`가 GET 쿼리와 POST 폼 파라미터를 디코딩하는 테스트
 - [ ] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
 - [ ] `RequestMapping`과 `AbstractController`가 경로와 메서드에 맞게 호출하는 테스트
 - [ ] 기존 `Http11ProcessorTest`가 계속 통과하는지 확인

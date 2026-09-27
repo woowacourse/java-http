@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             RequestLine requestLine = new RequestLine(request);
-            RequestHeader requestHeader = new RequestHeader(readHeaderLines(reader));
+            RequestHeaders requestHeader = new RequestHeaders(readHeaderLines(reader));
             RequestBody requestBody = new RequestBody(readBody(reader, requestHeader.get("Content-Length")));
 
             String method = requestLine.getMethod();
@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Cookie cookie = new Cookie(requestHeader.get("Cookie"));
 
-            String statusLine = "HTTP/1.1 200 OK ";
+            StatusLine statusLine = new StatusLine(200, "OK");
             String location = null;
             String setCookie = null;
 
@@ -68,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 //이미 로그인한 상태면 로그인 페이지를 보여줄 필요가 없음
                 if (isLoggedIn(cookie)) {
-                    statusLine = "HTTP/1.1 302 Found ";
+                    statusLine = new StatusLine(302, "Found");
                     location = "/index.html";
                 }
             }
@@ -79,12 +79,12 @@ public class Http11Processor implements Runnable, Processor {
                 Optional<User> user = InMemoryUserRepository.findByAccount(params.getOrDefault("account", ""))
                         .filter(it -> it.checkPassword(params.get("password")));
 
-                statusLine = "HTTP/1.1 401 Unauthorized ";
+                statusLine = new StatusLine(401, "Unauthorized");
                 requestUri = "/401.html";
 
                 if (user.isPresent()) {
                     log.info("user : {}", user.get());
-                    statusLine = "HTTP/1.1 302 Found ";
+                    statusLine = new StatusLine(302, "Found");
                     location = "/index.html";
 
                     //로그인 정보는 서버(세션)에 두고, 클라이언트에는 세션 아이디만 내려보냄
@@ -106,37 +106,36 @@ public class Http11Processor implements Runnable, Processor {
                 InMemoryUserRepository.save(
                         new User(params.get("account"), params.get("password"), params.get("email")));
 
-                statusLine = "HTTP/1.1 302 Found ";
+                statusLine = new StatusLine(302, "Found");
                 location = "/index.html";
             }
 
 
-            var responseBody = "";
+            var content = "";
 
             var contentType = "text/html";
 
             //302는 본문 없이 Location 헤더로 브라우저를 재요청시킴
             if (location == null) {
                 contentType = resolveContentType(requestUri);
-                responseBody = readStaticResource(requestUri);
+                content = readStaticResource(requestUri);
             }
 
-            List<String> lines = new ArrayList<>();
-            lines.add(statusLine);
+            ResponseBody responseBody = new ResponseBody(content);
+
+            ResponseHeaders responseHeaders = new ResponseHeaders();
             if (location != null) {
-                lines.add("Location: " + location + " ");
+                responseHeaders.add("Location", location);
             }
             if (setCookie != null) {
-                lines.add("Set-Cookie: " + setCookie + " ");
+                responseHeaders.add("Set-Cookie", setCookie);
             }
-            lines.add("Content-Type: " + contentType + ";charset=utf-8 ");
-            lines.add("Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ");
-            lines.add("");
-            lines.add(responseBody);
+            responseHeaders.add("Content-Type", contentType + ";charset=utf-8");
+            responseHeaders.add("Content-Length", String.valueOf(responseBody.getContentLength()));
 
-            final var response = String.join("\r\n", lines);
+            HttpResponse response = new HttpResponse(statusLine, responseHeaders, responseBody);
 
-            outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

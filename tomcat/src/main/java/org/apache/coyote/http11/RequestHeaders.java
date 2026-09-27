@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RequestHeader {
+public class RequestHeaders {
 
     private final Map<String, String> headers;
 
-    public RequestHeader(List<String> headerLines) {
+    public RequestHeaders(List<String> headerLines) {
         this.headers = parseHeaders(headerLines);
     }
 

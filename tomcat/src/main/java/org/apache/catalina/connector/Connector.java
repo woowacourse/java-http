@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Connector implements Runnable {
 
@@ -31,7 +30,7 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = createExecutorService(maxThreads);
+        this.executorService = createExecutorService(maxThreads, acceptCount);
         this.requestMapping = requestMapping;
         this.stopped = false;
     }
@@ -46,9 +45,16 @@ public class Connector implements Runnable {
         }
     }
 
-    private ExecutorService createExecutorService(final int maxThreads) {
+    private ExecutorService createExecutorService(final int maxThreads, final int acceptCount) {
         final int checkedMaxThreads = checkMaxThreads(maxThreads);
-        return Executors.newFixedThreadPool(checkedMaxThreads);
+        final int checkedAcceptCount = checkAcceptCount(acceptCount);
+        return new ThreadPoolExecutor(
+                checkedMaxThreads,
+                checkedMaxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(checkedAcceptCount)
+        );
     }
 
     public void start() {
@@ -80,7 +86,12 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping);
-        executorService.submit(processor);
+        try {
+            executorService.submit(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("대기 중인 요청이 가득 차 연결을 거절합니다.");
+            closeConnection(connection);
+        }
     }
 
     public void stop() {
@@ -112,5 +123,13 @@ public class Connector implements Runnable {
             return DEFAULT_MAX_THREADS;
         }
         return maxThreads;
+    }
+
+    private void closeConnection(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

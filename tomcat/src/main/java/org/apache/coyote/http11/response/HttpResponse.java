@@ -26,6 +26,15 @@ public record HttpResponse(
         return new HttpResponse(status, Map.of(), "");
     }
 
+    public static HttpResponse serviceUnavailable() {
+        final String body = "서버가 바쁩니다. 잠시 후 다시 시도해 주세요.";
+        final Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "text/plain; charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        headers.put("Connection", "close");
+        return new HttpResponse(HttpStatus.SERVICE_UNAVAILABLE, headers, body);
+    }
+
     public static HttpResponse redirect(final String location, final String newSessionId) {
         final Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Location", location);

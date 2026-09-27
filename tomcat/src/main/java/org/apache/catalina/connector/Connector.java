@@ -94,16 +94,8 @@ public class Connector implements Runnable {
         try {
             executorService.execute(processor);
         } catch (final RejectedExecutionException e) {
-            log.warn("스레드 풀 또는 대기열이 가득 찼거나 종료 중이어서 연결을 거절했습니다.");
-            closeConnection(connection);
-        }
-    }
-
-    private void closeConnection(final Socket connection) {
-        try {
-            connection.close();
-        } catch (final IOException e) {
-            log.error(e.getMessage(), e);
+            log.warn("스레드 풀 또는 대기열이 가득 찼거나 종료 중이어서 HTTP 503을 응답합니다.");
+            processor.sendServiceUnavailableResponse();
         }
     }
 

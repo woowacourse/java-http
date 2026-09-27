@@ -22,7 +22,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
         assertThat(socket.output()).contains("<title>로그인</title>");
     }
 
@@ -32,9 +32,11 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
         assertThat(socket.output()).contains("Location: /index.html");
         assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
+        assertThat(socket.output()).containsOnlyOnce("Set-Cookie:");
+        assertThat(socket.output()).endsWith("Content-Length: 0\r\n\r\n");
 
         Session session = SessionManager.getInstance().findSession(findSessionId(socket));
         assertThat(session.getAttribute("user"))
@@ -50,7 +52,7 @@ class Http11ProcessorTest {
                 + "Cookie: JSESSIONID=" + findSessionId(loginSocket) + "\r\n\r\n");
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
         assertThat(socket.output()).contains("Location: /index.html");
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
     }
@@ -66,7 +68,7 @@ class Http11ProcessorTest {
                 + "Cookie: JSESSIONID=" + sessionId + "\r\n\r\n");
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
         assertThat(socket.output()).contains("<title>로그인</title>");
     }
 
@@ -77,7 +79,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
         assertThat(socket.output()).contains("<title>로그인</title>");
     }
 
@@ -87,7 +89,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
         assertThat(socket.output()).contains("Location: /401.html");
         assertThat(SessionManager.getInstance().findSession(findSessionId(socket))).isNull();
     }
@@ -98,7 +100,7 @@ class Http11ProcessorTest {
 
         new Http11Processor(socket).process(socket);
 
-        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
         assertThat(socket.output()).contains("<title>회원가입</title>");
     }
 
@@ -110,8 +112,18 @@ class Http11ProcessorTest {
         new Http11Processor(socket).process(socket);
 
         assertThat(InMemoryUserRepository.findByAccount("new-user")).isPresent();
-        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found \r\n");
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
         assertThat(socket.output()).contains("Location: /index.html");
+    }
+
+    @Test
+    void 이미_존재하는_아이디로_가입하면_409로_응답한다() throws URISyntaxException {
+        var socket = post("/register", "account=gugu&password=password&email=gugu%40example.com");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 409 Conflict\r\n");
+        assertThat(socket.output()).endsWith("이미 존재하는 아이디입니다.");
     }
 
     private String findSessionId(StubSocket socket) {
@@ -142,9 +154,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -170,9 +182,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

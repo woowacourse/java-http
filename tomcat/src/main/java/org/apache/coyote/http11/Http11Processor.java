@@ -69,11 +69,11 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String path = findPath(request.getPath());
+            HttpResponse response = new HttpResponse();
 
             HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
-            String setCookieHeader = "";
             if (cookie.get("JSESSIONID") == null) {
-                setCookieHeader = "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + "\r\n";
+                response.setHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
             }
 
             SessionManager sessionManager = SessionManager.getInstance();
@@ -102,39 +102,32 @@ public class Http11Processor implements Runnable, Processor {
                     httpStatus = findUser(request.getParameters(), loginSession);
                     if (httpStatus == HttpStatus.FOUND) {
                         sessionManager.add(loginSession);
-                        setCookieHeader = "Set-Cookie: JSESSIONID=" + loginSession.getId() + "\r\n";
+                        response.setHeader("Set-Cookie", "JSESSIONID=" + loginSession.getId());
                     }
                 }
             }
 
             if (httpStatus == HttpStatus.FOUND || httpStatus == HttpStatus.UNAUTHORIZED) {
-                String location = httpStatus == HttpStatus.FOUND ? "/index.html" : "/401.html";
-                final String response = String.join("\r\n",
-                        "HTTP/1.1 " + HttpStatus.FOUND.getHttpStatus() + " ",
-                        setCookieHeader + "Location: " + location + " ",
-                        "Content-Length: 0 ",
-                        "",
-                        "");
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                String location = "/index.html";
+                if (httpStatus == HttpStatus.UNAUTHORIZED) {
+                    location = "/401.html";
+                }
+                response.setStatus(HttpStatus.FOUND);
+                response.setHeader("Location", location);
+                response.write(outputStream);
 
                 return;
             }
 
             final Path filePath = getPath(path);
-            final String responseBody = httpStatus == HttpStatus.CONFLICT
-                    ? "이미 존재하는 아이디입니다."
-                    : findResponseBody(filePath);
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 " + httpStatus.getHttpStatus() + " ",
-                    setCookieHeader + "Content-Type: " + findContentType(filePath) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            response.setStatus(httpStatus);
+            response.setHeader("Content-Type", findContentType(filePath) + ";charset=utf-8");
+            if (httpStatus == HttpStatus.CONFLICT) {
+                response.setBody("이미 존재하는 아이디입니다.");
+            } else {
+                response.setBody(findResponseBody(filePath));
+            }
+            response.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -311,23 +304,4 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public enum HttpStatus {
-
-        OK(200, "OK"),
-        FOUND(302, "Found"),
-        UNAUTHORIZED(401, "Unauthorized"),
-        CONFLICT(409, "Conflict");
-
-        int value;
-        String message;
-
-        HttpStatus(int value, String message) {
-            this.value = value;
-            this.message = message;
-        }
-
-        public String getHttpStatus() {
-            return this.value + " " + this.message;
-        }
-    }
 }

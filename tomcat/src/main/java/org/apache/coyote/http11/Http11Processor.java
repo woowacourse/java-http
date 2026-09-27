@@ -1,23 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.web.RequestMapping;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,29 +13,10 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, String> CONTENT_TYPE = Map.of("html", "text/html", "css", "text/css", "js",
-            "application/javascript");
 
-    private static final String STATIC_ROOT = "static";
-
-    private static final String GET_METHOD = "GET";
-    private static final String POST_METHOD = "POST";
-
-    private static final String DEFAULT_REQUEST = "/";
-    private static final String LOGIN_REQUEST = "/login";
-    private static final String REGISTER_REQUEST = "/register";
-
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String REGISTER_PAGE = "/register.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String NOT_FOUND_PAGE = "/404.html";
-
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String COOKIE_HEADER = "Cookie";
-    private static final String SET_COOKIE_HEADER = "Set-Cookie";
-    private static final String JSESSIONID = "JSESSIONID";
-    private static final String USER_ATTRIBUTE = "user";
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID=";
 
     private final Socket connection;
 
@@ -68,200 +37,22 @@ public class Http11Processor implements Runnable, Processor {
              final var inputReader = new InputStreamReader(inputStream);
              final var reader = new BufferedReader(inputReader)) {
 
-            String requestLine = reader.readLine();
-            if (requestLine == null || requestLine.isBlank()) {
-                return;
+            HttpRequest request = HttpRequest.from(reader);
+            HttpResponse response = new HttpResponse();
+
+            HttpCookie cookie = request.getCookie();
+            Session session = request.getSession(true);
+            if (!cookie.hasJSessionId()) {
+                response.addHeader(SET_COOKIE, JSESSIONID + session.getId());
             }
 
-            String[] requestLineParts = requestLine.split(" ");
-            String httpMethod = requestLineParts[0];
-            String requestUri = requestLineParts[1];
+            Controller controller = REQUEST_MAPPING.getController(request);
+            controller.service(request, response);
 
-            Map<String, String> headers = readHeaders(reader);
-            String requestBody = readBody(reader, headers);
-            HttpCookie cookie = HttpCookie.from(headers.get(COOKIE_HEADER));
-            Session session = findSession(cookie);
-
-            String[] uriParts = requestUri.split("\\?");
-            String path = uriParts[0];
-
-            if (path.equals(DEFAULT_REQUEST)) {
-                path = INDEX_PAGE;
-            }
-
-            if (path.equals(LOGIN_REQUEST) && httpMethod.equals(POST_METHOD)) {
-                writeResponse(outputStream, handleLogin(requestBody, session), cookie);
-                return;
-            }
-            if (path.equals(LOGIN_REQUEST) && httpMethod.equals(GET_METHOD)) {
-                if (isLoggedIn(session)) {
-                    writeResponse(outputStream, HttpResponse.redirect(INDEX_PAGE), cookie);
-                    return;
-                }
-                path = LOGIN_PAGE;
-            }
-
-            if (path.equals(REGISTER_REQUEST) && httpMethod.equals(POST_METHOD)) {
-                writeResponse(outputStream, handleRegister(requestBody), cookie);
-                return;
-            }
-            if (path.equals(REGISTER_REQUEST) && httpMethod.equals(GET_METHOD)) {
-                path = REGISTER_PAGE;
-            }
-
-            URL url = getClass().getClassLoader().getResource(STATIC_ROOT + path);
-            if (url == null) {
-                writeResponse(outputStream, makeNotFoundResponse(), cookie);
-                return;
-            }
-            writeResponse(outputStream, makeOkResponse(path), cookie);
-        } catch (IOException | UncheckedServletException e) {
+            outputStream.write(response.toHttpMessage().getBytes());
+            outputStream.flush();
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
-    }
-
-    private HttpResponse handleLogin(String requestBody, Session session) {
-        Map<String, String> params = parseFormData(requestBody);
-        Optional<User> user = login(params);
-
-        if (user.isEmpty()) {
-            return HttpResponse.redirect(UNAUTHORIZED_PAGE);
-        }
-
-        if (session != null) {
-            session.setAttribute(USER_ATTRIBUTE, user.get());
-            return HttpResponse.redirect(INDEX_PAGE);
-        }
-
-        Session newSession = new Session(UUID.randomUUID().toString());
-        newSession.setAttribute(USER_ATTRIBUTE, user.get());
-        SessionManager.getInstance().add(newSession);
-
-        HttpResponse response = HttpResponse.redirect(INDEX_PAGE);
-        response.addHeader(SET_COOKIE_HEADER, JSESSIONID + "=" + newSession.getId());
-        return response;
-    }
-
-    private HttpResponse handleRegister(String requestBody) {
-        Map<String, String> params = parseFormData(requestBody);
-        String account = params.get("account");
-        String password = params.get("password");
-        String email = params.get("email");
-
-        if (account == null || password == null || email == null) {
-            return HttpResponse.redirect(REGISTER_PAGE);
-        }
-
-        InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponse.redirect(INDEX_PAGE);
-    }
-
-    private HttpResponse makeOkResponse(String resourcePath) throws IOException, URISyntaxException {
-        String body = readResource(resourcePath);
-        return HttpResponse.ok(contentTypeOf(resourcePath), body);
-    }
-
-    private HttpResponse makeNotFoundResponse() throws IOException, URISyntaxException {
-        String body = readResource(NOT_FOUND_PAGE);
-        return HttpResponse.notFound(contentTypeOf(NOT_FOUND_PAGE), body);
-    }
-
-    private String readResource(String resourcePath) throws IOException, URISyntaxException {
-        URL url = getClass().getClassLoader().getResource(STATIC_ROOT + resourcePath);
-        return new String(Files.readAllBytes(Paths.get(url.toURI())));
-    }
-
-    private String contentTypeOf(String resourcePath) {
-        String extension = getExtension(resourcePath);
-        return CONTENT_TYPE.getOrDefault(extension, "text/html") + ";charset=utf-8";
-    }
-
-    private void writeResponse(OutputStream outputStream, HttpResponse response, HttpCookie cookie) throws IOException {
-        if (!cookie.hasJSessionId()) {
-            Session session = new Session(UUID.randomUUID().toString());
-            SessionManager.getInstance().add(session);
-            response.addHeader(SET_COOKIE_HEADER, JSESSIONID + "=" + session.getId());
-        }
-
-        outputStream.write(response.toHttpMessage().getBytes());
-        outputStream.flush();
-    }
-
-    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            int colonIndex = line.indexOf(":");
-            if (colonIndex == -1) {
-                continue;
-            }
-
-            String name = line.substring(0, colonIndex).trim();
-            String value = line.substring(colonIndex + 1).trim();
-            headers.put(name, value);
-        }
-        return headers;
-    }
-
-    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        String contentLength = headers.get(CONTENT_LENGTH_HEADER);
-        if (contentLength == null) {
-            return "";
-        }
-
-        int length = Integer.parseInt(contentLength);
-        char[] buffer = new char[length];
-        reader.read(buffer, 0, length);
-
-        return new String(buffer);
-    }
-
-    private Session findSession(HttpCookie cookie) {
-        return cookie.getValue(JSESSIONID)
-                .map(id -> SessionManager.getInstance().findSession(id))
-                .orElse(null);
-    }
-
-    private boolean isLoggedIn(Session session) {
-        return session != null && session.getAttribute(USER_ATTRIBUTE) != null;
-    }
-
-    private Map<String, String> parseFormData(String formData) {
-        Map<String, String> params = new HashMap<>();
-        if (formData.isEmpty()) {
-            return params;
-        }
-
-        for (String param : formData.split("&")) {
-            String[] keyAndValue = param.split("=", 2);
-            if (keyAndValue.length == 2) {
-                params.put(keyAndValue[0], keyAndValue[1]);
-            }
-        }
-
-        return params;
-    }
-
-    private Optional<User> login(Map<String, String> params) {
-        String account = params.get("account");
-        String password = params.get("password");
-        if (account == null || password == null) {
-            return Optional.empty();
-        }
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("회원 조회 결과: user={}", user.get());
-            return user;
-        }
-        return Optional.empty();
-    }
-
-    private String getExtension(String resourcePath) {
-        int lastIndex = resourcePath.lastIndexOf(".");
-        return resourcePath.substring(lastIndex + 1);
     }
 }

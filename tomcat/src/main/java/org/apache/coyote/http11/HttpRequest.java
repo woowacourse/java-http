@@ -15,6 +15,7 @@ public class HttpRequest {
     private final String method;
     private final String path;
     private final Map<String, String> parameters;
+    private final HttpCookie cookies;
 
     private HttpRequest(final String method, final String uri, final Map<String, String> headers,
                         final String body) {
@@ -23,6 +24,7 @@ public class HttpRequest {
         this.path = parts[0];
         final var queryString = parts.length == 2 ? parts[1] : "";
         this.parameters = parseParameters("POST".equals(method) ? body : queryString);
+        this.cookies = new HttpCookie(headers.get("Cookie"));
     }
 
     public static HttpRequest read(final InputStream inputStream) throws IOException {
@@ -91,5 +93,9 @@ public class HttpRequest {
 
     public String getParameter(final String name) {
         return parameters.get(name);
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
     }
 }

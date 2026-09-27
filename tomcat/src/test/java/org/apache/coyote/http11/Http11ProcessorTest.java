@@ -286,6 +286,21 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 요청_라인이_비어있으면_400_Bad_Request를_응답한다() {
+        // given
+        final String httpRequest = "\r\n\r\n";
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request ");
+    }
+
+    @Test
     void 로그인_페이지에서_발급받은_세션이_있으면_로그인_성공_시_세션을_재사용한다() {
         // given
         final String requestBody = "account=gugu&password=password";

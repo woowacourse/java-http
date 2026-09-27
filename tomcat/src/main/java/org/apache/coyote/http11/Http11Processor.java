@@ -33,15 +33,31 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final HttpRequest request = HttpRequest.from(inputStream);
-            final HttpResponse response = new HttpResponse();
+            final HttpRequest request;
+            try {
+                request = HttpRequest.from(inputStream);
+            } catch (IllegalArgumentException e) {
+                log.error(e.getMessage(), e);
+                sendBadRequest(outputStream);
+                return;
+            }
+            if (request == null) {
+                return;
+            }
 
+            final HttpResponse response = new HttpResponse();
             log.debug("{} {} 요청을 받았습니다.", request.getMethod(), request.getPath());
 
             service(request, response, outputStream);
-        } catch (IOException | IllegalArgumentException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendBadRequest(final OutputStream outputStream) throws IOException {
+        final HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.BAD_REQUEST);
+        response.write(outputStream);
     }
 
     private void service(final HttpRequest request, final HttpResponse response, final OutputStream outputStream)

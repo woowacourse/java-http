@@ -27,10 +27,12 @@ class ControllerTest {
     }
 
     @Test
-    void 지원하지_않는_HTTP_메서드는_405를_응답한다() throws Exception {
+    void 지원하지_않는_HTTP_메서드는_405와_Allow_헤더를_응답한다() throws Exception {
         final HttpRequest request = request("POST / HTTP/1.1 \r\n\r\n");
 
-        assertThat(service(request)).startsWith("HTTP/1.1 405 Method Not Allowed ");
+        assertThat(service(request))
+                .startsWith("HTTP/1.1 405 Method Not Allowed ")
+                .contains("Allow: GET ");
     }
 
     @Test

@@ -72,9 +72,14 @@ class HttpRequestTest {
     }
 
     @Test
-    void 빈_요청이면_예외가_발생한다() {
-        assertThatThrownBy(() -> request(""))
-                .isInstanceOf(IOException.class);
+    void 클라이언트가_데이터_없이_연결을_종료하면_null을_반환한다() throws IOException {
+        assertThat(request("")).isNull();
+    }
+
+    @Test
+    void 요청_라인이_빈_줄이면_예외가_발생한다() {
+        assertThatThrownBy(() -> request("\r\n"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private HttpRequest request(final String raw) throws IOException {

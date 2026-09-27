@@ -3,7 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.util.Set;
 import org.apache.catalina.AbstractController;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -46,5 +48,10 @@ public class RegisterController extends AbstractController {
 
     private boolean isBlank(final String value) {
         return value == null || value.isBlank();
+    }
+
+    @Override
+    protected Set<HttpMethod> allowedMethods() {
+        return Set.of(HttpMethod.GET, HttpMethod.POST);
     }
 }

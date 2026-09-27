@@ -29,10 +29,6 @@ public class Connector implements Runnable {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, connectionHandler);
     }
 
-    public Connector(final int port, final int acceptCount, Consumer<Http11Processor> connectionHandler) {
-        this(port, acceptCount, DEFAULT_MAX_THREADS, connectionHandler);
-    }
-
     public Connector(final int port, final int acceptCount, final int maxThreads, Consumer<Http11Processor> connectionHandler) {
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);

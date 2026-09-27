@@ -47,9 +47,9 @@
   - [x] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 index.html 페이지로 리다이렉트 처리한다.
 
 ## 3단계 - 리팩토링
-- [ ] HttpRequest 클래스 구현하기
-  - [ ] HTTP 요청을 처리하는 클래스를 추가한다.
-  - [ ] RequestLine 클래스를 추가하고 HTTP 요청의 첫 줄에서 처리해야 되는 역할을 맡긴다.
+- [x] HttpRequest 클래스 구현하기
+  - [x] HTTP 요청을 처리하는 클래스를 추가한다.
+  - [x] RequestLine 클래스를 추가하고 HTTP 요청의 첫 줄에서 처리해야 되는 역할을 맡긴다.
 - [ ] HttpResponse 클래스 구현하기
   - [ ] HTTP 응답을 처리하는 클래스를 추가한다.
 - [ ] Controller 인터페이스 추가하기

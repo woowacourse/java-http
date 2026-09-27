@@ -19,7 +19,9 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -49,15 +51,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestLine = readLine(inputStream);
+            final RequestLine requestLine = RequestLine.parse(readLine(inputStream));
             if (requestLine == null) return;
 
-            final Map<String, String> messageHeaders = readMessageHeaders(inputStream);
+            final HttpHeaders headers = HttpHeaders.from(readHeaders(inputStream));
 
             final Map<String, String> responseHeader  = new HashMap<>();
 
             Session session;
-            final HttpCookie httpCookie = HttpCookie.from(messageHeaders.get("Cookie"));
+            final HttpCookie httpCookie = HttpCookie.from(headers.get("cookie"));
             if (httpCookie.contains("JSESSIONID")) {
                 final String sessionId = httpCookie.get("JSESSIONID");
                 session = sessionManager.findSession(sessionId);
@@ -68,9 +70,12 @@ public class Http11Processor implements Runnable, Processor {
                 responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
-            final int contentLength = Integer.parseInt(messageHeaders.getOrDefault("Content-Length", "0"));
-            final String messageBody = readMessageBody(contentLength, inputStream);
-            final String response = handleRequest(requestLine, messageBody, responseHeader, session);
+            final int contentLength = headers.getContentLength();
+            final byte[] messageBody = inputStream.readNBytes(contentLength);
+
+            final HttpRequest request = new HttpRequest(requestLine, headers, messageBody);
+
+            final String response = handleRequest(request, responseHeader, session);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -106,11 +111,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(final String requestLine, final String messageBody, final Map<String, String> responseHeaders, final Session session) throws IOException {
-        final String[] parsedRequestLine = requestLine.split("\\s+");
+    private List<String> readHeaders(final InputStream reader) throws IOException {
+        final List<String> headers = new ArrayList<>();
+        String line;
+        while  (!(line = readLine(reader)).isBlank()) {
+            headers.add(line);
+        }
+        return headers;
+    }
 
-        final String httpMethod = parsedRequestLine[0];
-        final String requestTarget = parsedRequestLine[1];
+    private String handleRequest(final HttpRequest httpRequest, final Map<String, String> responseHeaders, final Session session) throws IOException {
+        final String httpMethod = httpRequest.requestLine().method();
+        final String requestTarget = httpRequest.requestLine().path();
+        final String messageBody = new String(httpRequest.body());
 
         if (httpMethod.equals("GET")) {
             return handleGetRequest(requestTarget, responseHeaders, session);
@@ -121,24 +134,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
-    }
-
-    private Map<String, String> readMessageHeaders(final InputStream reader) throws IOException {
-        final Map<String, String> messageHeaders = new HashMap<>();
-        String line;
-        while  (!(line = readLine(reader)).isBlank()) {
-            final String[] parsedHeader = line.split(":\\s+");
-            messageHeaders.put(parsedHeader[0], parsedHeader[1].trim());
-        }
-        return messageHeaders;
-    }
-
-    private String readMessageBody(final int contentLength, final InputStream inputStream) throws IOException {
-        if (contentLength == 0) {
-            return null;
-        }
-        final byte[] messageBody = inputStream.readNBytes(contentLength);
-        return new String(messageBody);
     }
 
     private String handleGetRequest(final String requestTarget, final Map<String, String> responseHeaders, final Session session) throws IOException {

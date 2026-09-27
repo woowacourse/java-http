@@ -2,7 +2,7 @@ package org.apache.coyote.http11.session;
 
 public class HttpCookie {
 
-    private static final String COOKIE_NAME = "JSESSIONID";
+    public static final String JSESSION_ID = "JSESSIONID";
 
     private final String cookieHeader;
 
@@ -19,16 +19,12 @@ public class HttpCookie {
             String[] nameAndValue = cookie.trim().split("=", 2);
 
             if (nameAndValue.length == 2
-                    && nameAndValue[0].equals(COOKIE_NAME)
+                    && nameAndValue[0].equals(JSESSION_ID)
                     && !nameAndValue[1].isBlank()) {
                 return nameAndValue[1];
             }
         }
 
         return null;
-    }
-
-    public String createSetCookieHeaderForResponse(String sessionId) {
-        return "Set-Cookie: " + COOKIE_NAME + "=" + sessionId;
     }
 }

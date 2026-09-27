@@ -1,10 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.RootController;
 import java.util.Map;
-import org.apache.catalina.Session;
 
 public class RequestMapping {
 
@@ -18,14 +14,6 @@ public class RequestMapping {
     public RequestMapping(Map<String, Controller> controllers, Controller fallbackController) {
         this.controllers = Map.copyOf(controllers);
         this.fallbackController = fallbackController;
-    }
-
-    public static RequestMapping forSession(Session session) {
-        return new RequestMapping(
-                Map.of("/", new RootController(),
-                        "/login", new LoginController(session),
-                        "/register", new RegisterController()),
-                new StaticResourceController());
     }
 
     public Controller getController(HttpRequest request) {

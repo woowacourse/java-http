@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.net.Socket;
 import java.util.UUID;
+import java.util.function.Function;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
@@ -13,9 +14,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Function<Session, RequestMapping> requestMappingFactory;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection,
+            Function<Session, RequestMapping> requestMappingFactory) {
         this.connection = connection;
+        this.requestMappingFactory = requestMappingFactory;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpResponse response = new HttpResponse(outputStream, setCookie);
-            RequestMapping mapping = RequestMapping.forSession(session);
+            RequestMapping mapping = requestMappingFactory.apply(session);
             Controller controller = mapping.getController(request);
             controller.service(request, response);
         } catch (Exception e) {

@@ -508,5 +508,44 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+
+        @Test
+        void 이미_존재하는_계정으로_회원가입하면_기존_회원정보를_유지한다() throws IOException {
+            // given
+            final String body =
+                "account=gugu&password=changed&email=changed%40example.com";
+            final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+            final StubSocket socket = new StubSocket(httpRequest);
+            final Http11Processor processor =
+                new Http11Processor(socket, requestDispatcher);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final User user = InMemoryUserRepository.findByAccount("gugu")
+                .orElseThrow();
+            final URL resource = getClass().getClassLoader().getResource("static/register.html");
+            final String responseBody = new String(
+                Files.readAllBytes(new File(resource.getPath()).toPath()));
+            final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                String.format("Content-Length: %d ", responseBody.getBytes().length),
+                "",
+                responseBody);
+
+            assertAll(
+                () -> assertThat(user.checkPassword("password")).isTrue(),
+                () -> assertThat(user.checkPassword("changed")).isFalse(),
+                () -> assertThat(socket.output()).isEqualTo(expected)
+            );
+        }
     }
 }

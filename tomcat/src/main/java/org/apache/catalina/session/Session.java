@@ -21,6 +21,11 @@ public class Session {
     }
 
     public void setAttribute(String name, Object value) {
+        if (value == null) {
+            removeAttribute(name);
+            return;
+        }
+
         values.put(name, value);
     }
 

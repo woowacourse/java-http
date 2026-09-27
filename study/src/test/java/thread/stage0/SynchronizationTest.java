@@ -37,11 +37,61 @@ class SynchronizationTest {
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
     }
 
-    private static final class SynchronizedMethods {
+    @Test
+    void compareSynchronizationTime() {
+        int incrementsPerThread = 100_000;
+        var withoutSynchronization = new UnsynchronizedMethods();
+        var withSynchronization = new SynchronizedMethods();
+
+        long withoutNanos = measureWithThreeThreads(() -> {
+            for (int i = 0; i < incrementsPerThread; i++) {
+                withoutSynchronization.calculate();
+            }
+        });
+        long withNanos = measureWithThreeThreads(() -> {
+            for (int i = 0; i < incrementsPerThread; i++) {
+                withSynchronization.calculate();
+            }
+        });
+
+        System.out.printf("동기화 없음: %.3f ms, 합계: %d%n",
+                withoutNanos / 1_000_000.0, withoutSynchronization.getSum());
+        System.out.printf("동기화 있음: %.3f ms, 합계: %d%n",
+                withNanos / 1_000_000.0, withSynchronization.getSum());
+
+        assertThat(withSynchronization.getSum()).isEqualTo(3 * incrementsPerThread);
+    }
+
+    private long measureWithThreeThreads(Runnable task) {
+        long start = System.nanoTime();
+        try (var executor = Executors.newFixedThreadPool(3)) {
+            IntStream.range(0, 3).forEach(count -> executor.execute(task));
+        }
+        return System.nanoTime() - start;
+    }
+
+    private static final class UnsynchronizedMethods {
 
         private int sum = 0;
 
         public void calculate() {
+            setSum(getSum() + 1);
+        }
+
+        public int getSum() {
+            return sum;
+        }
+
+        public void setSum(int sum) {
+            this.sum = sum;
+        }
+    }
+
+    private static final class SynchronizedMethods {
+
+        private int sum = 0;
+
+        public synchronized void calculate() {
             setSum(getSum() + 1);
         }
 

@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +7,7 @@ import java.util.Map;
 public class RequestMapping {
 
     private static final Map<String, Controller> controllerMap = new HashMap<>();
+    private static final Controller DEFAULT_CONTROLLER = new StaticResourceController();
 
     static {
         controllerMap.put("/login", new LoginController());
@@ -16,6 +15,6 @@ public class RequestMapping {
     }
 
     public static Controller getController(String path) {
-        return controllerMap.get(path);
+        return controllerMap.getOrDefault(path, DEFAULT_CONTROLLER);
     }
 }

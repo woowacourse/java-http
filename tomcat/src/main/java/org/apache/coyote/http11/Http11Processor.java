@@ -2,9 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.Processor;
@@ -49,47 +46,11 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             Controller controller = RequestMapping.getController(request.getPath());
-            if(controller != null) {
-                controller.service(request, response);
-            } else {
-                // 매칭된 컨트롤러가 없으면, 정적 리소스 파일처리
-                serveStaticResource(request, response);
-            }
+            controller.service(request, response);
 
             response.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void serveStaticResource(HttpRequest request, HttpResponse response) throws Exception {
-        String targetPath = request.getPath();
-        if ("/".equals(targetPath)) {
-            targetPath = "/index.html";
-        } else if ("/login".equals(targetPath)) {
-            targetPath = "/login.html";
-        } else if ("/register".equals(targetPath)) {
-            targetPath = "/register.html";
-        }
-
-        byte[] body;
-        final String contentType;
-        final var resourceUrl = getClass().getClassLoader().getResource("static" + targetPath);
-
-        if (resourceUrl != null && !Files.isDirectory(Path.of(resourceUrl.toURI()))) {
-            body = Files.readAllBytes(Path.of(resourceUrl.toURI()));
-            if (targetPath.endsWith(".css")) {
-                contentType = "text/css;charset=utf-8";
-            } else if (targetPath.endsWith(".js")) {
-                contentType = "application/javascript;charset=utf-8";
-            } else {
-                contentType = "text/html;charset=utf-8";
-            }
-        } else {
-            body = "Hello world!".getBytes(StandardCharsets.UTF_8);
-            contentType = "text/html;charset=utf-8";
-        }
-
-        response.writeBody(body, contentType);
     }
 }

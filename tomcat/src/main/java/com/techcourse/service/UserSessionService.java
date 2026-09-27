@@ -3,9 +3,10 @@ package com.techcourse.service;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public final class UserSessionService {
 
@@ -13,8 +14,8 @@ public final class UserSessionService {
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
-    public Optional<User> findUser(String sessionId) {
-        Session session = sessionManager.findSession(sessionId);
+    public Optional<User> findUser(HttpRequest request) {
+        Session session = sessionManager.findSession(request);
         if (session == null) {
             return Optional.empty();
         }
@@ -26,24 +27,12 @@ public final class UserSessionService {
         return Optional.empty();
     }
 
-    public Session startAuthenticatedSession(String previousSessionId, User user) {
-        if (previousSessionId != null) {
-            Session previousSession = sessionManager.findSession(previousSessionId);
-            if (previousSession != null) {
-                previousSession.invalidate();
-            }
-        }
-
-        Session newSession = new Session(UUID.randomUUID().toString());
+    public void startAuthenticatedSession(HttpRequest request, HttpResponse response, User user) {
+        Session newSession = sessionManager.replaceSession(request, response);
         newSession.setAttribute(SESSION_USER, user);
-        sessionManager.add(newSession);
-        return newSession;
     }
 
-    public void invalidate(String sessionId) {
-        Session session = sessionManager.findSession(sessionId);
-        if (session != null) {
-            session.invalidate();
-        }
+    public void invalidate(HttpRequest request, HttpResponse response) {
+        sessionManager.invalidate(request, response);
     }
 }

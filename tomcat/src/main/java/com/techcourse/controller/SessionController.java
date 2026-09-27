@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.model.User;
 import com.techcourse.service.UserSessionService;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -21,8 +20,7 @@ public final class SessionController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        Optional<User> loginUser = request.getCookie(HttpCookie.JSESSION_ID)
-                .flatMap(userSessions::findUser);
+        Optional<User> loginUser = userSessions.findUser(request);
         String responseBody = loginUser
                 .map(user -> "{\"loggedIn\":true,\"account\":\""
                         + escapeJson(user.getAccount()) + "\"}")

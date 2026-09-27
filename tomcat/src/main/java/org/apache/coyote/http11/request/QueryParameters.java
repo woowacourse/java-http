@@ -15,31 +15,32 @@ final class QueryParameters {
         this.values = Collections.unmodifiableMap(values);
     }
 
-    static QueryParameters empty() {
-        return new QueryParameters(Collections.emptyMap());
-    }
-
     static QueryParameters from(final String rawQuery) {
         if (rawQuery == null || rawQuery.isEmpty()) {
             return new QueryParameters(Collections.emptyMap());
         }
 
         final Map<String, String> values = new HashMap<>();
-        for (String parameter : rawQuery.split("&")) {
+        for (final String parameter : rawQuery.split("&")) {
             final int separatorIndex = parameter.indexOf('=');
-            if (separatorIndex == -1) {
-                throw new IllegalArgumentException("잘못된 Query String 형식입니다: " + parameter);
-            }
 
-            final String name = decode(parameter.substring(0, separatorIndex));
-            final String value = decode(parameter.substring(separatorIndex + 1));
+            String name = parameter;
+            String value = "";
+            if (separatorIndex != -1) {
+                name = decode(parameter.substring(0, separatorIndex));
+                value = decode(parameter.substring(separatorIndex + 1));
+            }
             values.put(name, value);
         }
         return new QueryParameters(values);
     }
 
     private static String decode(final String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidHttpRequestException(e.getMessage(), e);
+        }
     }
 
     Optional<String> get(final String name) {

@@ -102,6 +102,25 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 경로에서_지원하지_않는_메서드는_405를_응답한다() {
+        final String httpRequest = String.join("\r\n",
+            "POST /index HTTP/1.1",
+            "Host: localhost:8080",
+            "",
+            "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor =
+            new Http11Processor(socket, requestDispatcher);
+
+        processor.process(socket);
+
+        final String expected = String.join("\r\n",
+            "HTTP/1.1 405 Method Not Allowed ",
+            "Content-Length: 0 ");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",

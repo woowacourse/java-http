@@ -7,30 +7,21 @@ import java.nio.file.Files;
 
 public class StaticResourceHandler {
 
-    public void handle(final HttpRequest request, final HttpResponse response) throws IOException {
-        final String filePath = getFilePath(request, response);
-        final String body = readResource(request, response);
+    public void handle(final String path, final HttpResponse response) throws IOException {
+        final String body = readResource(path, response);
         response.addBody(body);
         if (!response.hasStatusLine()) {
             response.addStatusLine(StatusLine.http11(HttpStatus.OK));
         }
-        response.addHeader("Content-Type", getContentType(filePath));
+        response.addHeader("Content-Type", getContentType(path));
         response.addHeader("Content-Length", String.valueOf(getContentLength(body)));
     }
 
-    private String getFilePath(final HttpRequest request, final HttpResponse response) {
-        if (response.hasForwardPath()) {
-            return response.forwardPath();
-        }
-        return request.path();
-    }
-
-    private String readResource(final HttpRequest request, final HttpResponse response) throws IOException {
-        final String filePath = getFilePath(request, response);
-        if (filePath.equals("/")) {
+    private String readResource(final String path, final HttpResponse response) throws IOException {
+        if (path.equals("/")) {
             return "Hello world!";
         }
-        final String staticResourceTarget = "/static" + filePath;
+        final String staticResourceTarget = "/static" + path;
 
         final URL resource = getClass().getResource(staticResourceTarget);
         if (resource == null) {

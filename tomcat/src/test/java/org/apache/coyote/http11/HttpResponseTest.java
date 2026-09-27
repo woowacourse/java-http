@@ -10,9 +10,10 @@ class HttpResponseTest {
     void 리다이렉트_응답은_본문_없이_위치와_길이를_포함한다() {
         // given
         final HttpResponse response = HttpResponse.init();
+        response.addStatusLine(StatusLine.http11(HttpStatus.FOUND));
 
         // when
-        response.sendRedirect(HttpStatus.FOUND, "/index");
+        response.sendRedirect("/index");
 
         // then
         assertThat(response.getMessage()).isEqualTo(String.join("\r\n",
@@ -24,15 +25,11 @@ class HttpResponseTest {
     @Test
     void 포워드_응답의_상태를_정적_리소스_처리가_덮어쓰지_않는다() throws Exception {
         // given
-        final HttpRequest request = new HttpRequest(
-            new RequestLine(HttpMethod.POST, "/login", HttpVersion.VERSION_11),
-            HttpHeaders.empty(),
-            "");
         final HttpResponse response = HttpResponse.init();
-        response.forward(HttpStatus.UNAUTHORIZED, "/401.html");
+        response.addStatusLine(StatusLine.http11(HttpStatus.UNAUTHORIZED));
 
         // when
-        new StaticResourceHandler().handle(request, response);
+        new StaticResourceHandler().handle("/401.html", response);
 
         // then
         assertThat(response.getMessage()).startsWith("HTTP/1.1 401 Unauthorized ");

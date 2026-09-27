@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import java.util.Map;
+import org.apache.coyote.http11.DispatchResult;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -13,15 +14,15 @@ public abstract class AbstractController implements Controller {
     );
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public DispatchResult service(HttpRequest request, HttpResponse response) throws Exception {
         final HttpMethod method = request.method();
-        methodHandlerMap.get(method)
+        return methodHandlerMap.get(method)
             .handle(request, response);
     }
 
-    protected abstract void doPost(HttpRequest request, HttpResponse response)
+    protected abstract DispatchResult doPost(HttpRequest request, HttpResponse response)
         throws Exception;
 
-    protected abstract void doGet(HttpRequest request, HttpResponse response)
+    protected abstract DispatchResult doGet(HttpRequest request, HttpResponse response)
         throws Exception;
 }

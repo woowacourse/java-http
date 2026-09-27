@@ -11,6 +11,10 @@ public class HttpException extends RuntimeException {
         this.status = status;
     }
 
+    public static HttpException methodNotAllowed() {
+        return new HttpException(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.");
+    }
+
     public HttpStatus status() {
         return status;
     }

@@ -1,12 +1,12 @@
 package org.apache.catalina;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public final class SessionManager {
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -16,11 +16,7 @@ public final class SessionManager {
     }
 
     public static Session create(final String id) {
-        final var session = new Session(id);
-
-        SESSIONS.put(session.getId(), session);
-
-        return session;
+        return SESSIONS.computeIfAbsent(id, Session::new);
     }
 
     public static Optional<Session> findSession(final String id) {

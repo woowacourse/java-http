@@ -1,18 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,20 +16,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String STATIC_RESOURCE_DIRECTORY = "static";
-    private static final String ROOT_PATH = "/";
-    private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String REGISTER_PATH = "/register";
-    private static final String REGISTER_PAGE = "/register.html";
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String SESSION_USER = "user";
-
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -55,105 +39,12 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = new HttpRequest(reader);
             final HttpResponse response = new HttpResponse();
 
-            handle(request, response);
+            final Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
             write(outputStream, response);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
-    }
-
-    private void handle(final HttpRequest request, final HttpResponse response)
-            throws IOException, URISyntaxException {
-        if (isLoginPostRequest(request)) {
-            login(request, response);
-            return;
-        }
-        if (isLoginPageRequest(request) && isLoggedIn(request.getCookie())) {
-            response.sendRedirect(INDEX_PAGE);
-            return;
-        }
-        if (isRegisterPostRequest(request)) {
-            register(request, response);
-            return;
-        }
-        serveStaticResource(resourcePath(request.getPath()), response);
-    }
-
-    private boolean isLoginPostRequest(final HttpRequest request) {
-        return request.isPost() && request.getPath().equals(LOGIN_PATH);
-    }
-
-    private void login(final HttpRequest request, final HttpResponse response) {
-        final User existUser = InMemoryUserRepository.findByAccount(request.getFormParameter("account"))
-                .filter(user -> user.checkPassword(request.getFormParameter("password")))
-                .orElse(null);
-        if (existUser == null) {
-            response.sendRedirect(UNAUTHORIZED_PAGE);
-            return;
-        }
-        log.info("user : {}", existUser);
-        final Session session = new Session(UUID.randomUUID().toString());
-        session.setAttribute(SESSION_USER, existUser);
-        SessionManager.getInstance().add(session);
-        response.sendRedirect(INDEX_PAGE);
-        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
-    }
-
-    private boolean isLoginPageRequest(final HttpRequest request) {
-        return request.isGet() && request.getPath().equals(LOGIN_PATH);
-    }
-
-    private boolean isLoggedIn(final HttpCookie cookie) {
-        return cookie.getJSessionId()
-                .map(SessionManager.getInstance()::findSession)
-                .map(session -> session.getAttribute(SESSION_USER))
-                .isPresent();
-    }
-
-    private boolean isRegisterPostRequest(final HttpRequest request) {
-        return request.isPost() && request.getPath().equals(REGISTER_PATH);
-    }
-
-    private void register(final HttpRequest request, final HttpResponse response) {
-        User registerUser = new User(
-                request.getFormParameter("account"),
-                request.getFormParameter("password"),
-                request.getFormParameter("email"));
-        InMemoryUserRepository.save(registerUser);
-        response.sendRedirect(INDEX_PAGE);
-    }
-
-    private String resourcePath(final String path) {
-        if (path.equals(ROOT_PATH)) {
-            return INDEX_PAGE;
-        }
-        if (path.equals(LOGIN_PATH)) {
-            return LOGIN_PAGE;
-        }
-        if (path.equals(REGISTER_PATH)) {
-            return REGISTER_PAGE;
-        }
-        return path;
-    }
-
-    private void serveStaticResource(final String path, final HttpResponse response)
-            throws IOException, URISyntaxException {
-        response.setBody(contentTypeOf(path), readStaticResource(path));
-    }
-
-    private byte[] readStaticResource(final String path) throws IOException, URISyntaxException {
-        final URL url = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + path);
-        return Files.readAllBytes(Path.of(url.toURI()));
-    }
-
-    private String contentTypeOf(final String path) {
-        final String extension = path.substring(path.lastIndexOf(".") + 1);
-        if (extension.equals("css")) {
-            return "text/css;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
     }
 
     private void write(final OutputStream outputStream, final HttpResponse response) throws IOException {

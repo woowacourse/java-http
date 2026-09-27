@@ -9,9 +9,22 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+
+    private final int maxThreads;
+
+    public Tomcat() {
+        this(DEFAULT_MAX_THREADS);
+    }
+
+    public Tomcat(final int maxThreads) {
+        this.maxThreads = maxThreads;
+    }
 
     public void start() {
-        var connector = new Connector();
+        var connector = new Connector(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
         connector.start();
 
         try {

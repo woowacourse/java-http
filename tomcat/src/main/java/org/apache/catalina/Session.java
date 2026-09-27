@@ -1,9 +1,9 @@
 package org.apache.catalina;
 
 import com.techcourse.http.HttpSession;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 // 클라이언트별 세션 데이터 관리
 public class Session implements HttpSession {
@@ -12,7 +12,7 @@ public class Session implements HttpSession {
     private final String id;
 
     // key = 어떤 데이터인지, value = 실제 데이터
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     private Session(final String id) {
         this.id = id;

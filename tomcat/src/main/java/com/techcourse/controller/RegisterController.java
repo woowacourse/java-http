@@ -13,9 +13,16 @@ public class RegisterController extends AbstractController {
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
         final String email = request.getParameter("email");
-        if (account != null && password != null && email != null) {
-            InMemoryUserRepository.save(new User(account, password, email));
+        if (isBlank(account) || isBlank(password) || isBlank(email)) {
+            response.setStatus(400, "Bad Request");
+            response.setBody("Account, password and email are required.", "text/plain");
+            return;
         }
+        InMemoryUserRepository.save(new User(account, password, email));
         response.sendRedirect("/index.html");
+    }
+
+    private boolean isBlank(final String value) {
+        return value == null || value.isBlank();
     }
 }

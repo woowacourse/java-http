@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.ControllerResolver;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
@@ -16,25 +18,29 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private final ControllerResolver controllerResolver;
     private final SessionManager sessionManager;
     private boolean stopped;
 
     public Connector(ControllerResolver controllerResolver) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllerResolver);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllerResolver, DEFAULT_MAX_THREADS);
     }
 
     public Connector(
             int port,
             int acceptCount,
-            ControllerResolver controllerResolver
+            ControllerResolver controllerResolver,
+            int maxThreads
     ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.controllerResolver = controllerResolver;
         this.sessionManager = new SessionManager();
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -76,7 +82,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, sessionManager, controllerResolver);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
@@ -86,6 +92,7 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executorService.shutdown();
     }
 
     private int checkPort(final int port) {

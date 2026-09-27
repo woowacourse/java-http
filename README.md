@@ -65,3 +65,10 @@
   `Session`을 로그인 Controller에 전달한다.
 - [x] `HttpResponse`의 상태별 메서드는 유지하고, 반복되는 상태 줄·헤더·본문 출력을 `writeResponse()`로 묶는다.
 - [x] 현재 사용하지 않는 `Session.removeAttribute()`와 `Session.invalidate()`를 제거한다. 필요해질 때 실제 사용 사례와 함께 추가한다.
+
+## 3단계 두 번째 리뷰 반영 목록
+
+- [ ] `RequestMapping`은 전달받은 경로와 Controller를 조회하는 역할만 맡는다.
+- [ ] 로그인·회원가입·기본 경로 Controller와 URI 등록을 애플리케이션 영역으로 옮긴다.
+- [ ] 애플리케이션에서 만든 매핑을 서버 시작 시 전달하고, 요청별 `Session`은 로그인 Controller에 전달한다.
+- [ ] 기존 로그인·회원가입·정적 파일 응답이 계속 동작하는지 확인한다.

@@ -9,16 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-//    private static final String DEFAULT_RESOURCE_PATH = "/";
-//    private static final String DEFAULT_VALUE = "Hello world!";
 
     private final Socket connection;
     private final RequestMapping requestMapping;

@@ -61,7 +61,7 @@ class LoginControllerGetTest {
         loginController.service(request, response);
 
         // then
-        assertThat(response.status()).isEqualTo(HttpStatus.OK);
+        assertThat(response.status()).isEqualTo(HttpStatus.FOUND);
         assertThat(response.headers())
                 .containsEntry("Location", "/index.html");
     }

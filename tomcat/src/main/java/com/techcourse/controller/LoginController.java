@@ -59,7 +59,7 @@ public class LoginController extends AbstractController {
 
     private void removeOldSession(HttpRequest httpRequest) {
         final HttpCookie cookie = new HttpCookie(
-                httpRequest.headers().getOrDefault("Set-Cookie", "")
+                httpRequest.headers().getOrDefault("cookie", "")
         );
 
         try {
@@ -83,8 +83,6 @@ public class LoginController extends AbstractController {
         SessionManager.getInstance().add(session);
         return sessionId;
     }
-
-
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception{

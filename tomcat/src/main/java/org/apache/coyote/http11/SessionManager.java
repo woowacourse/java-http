@@ -5,6 +5,7 @@ import org.apache.catalina.Manager;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager implements Manager {
 
@@ -14,6 +15,12 @@ public class SessionManager implements Manager {
     @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);
+    }
+
+    public Session createSession() {
+        final Session session = new Session(UUID.randomUUID().toString());
+        add(session);
+        return session;
     }
 
     @Override

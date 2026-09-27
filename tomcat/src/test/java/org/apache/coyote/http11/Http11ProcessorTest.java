@@ -60,9 +60,9 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/404.html");
         var expected = List.of(
-                "HTTP/1.1 404 Not Found \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: " + resource.length + " \r\n",
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + resource.length,
                 new String(resource)
         );
 
@@ -88,9 +88,9 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = List.of(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 5564 \r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 5564",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );
 
@@ -177,9 +177,9 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/register.html");
         var expected = List.of(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: "+ resource.length + " \r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: "+ resource.length,
                 new String(resource)
         );
 
@@ -208,9 +208,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = List.of(
-                "HTTP/1.1 302 Found \r\n",
-                "Location: /index.html \r\n",
-                "Content-Length: 0 \r\n"
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0"
         );
 
         assertThat(socket.output()).contains(expected);
@@ -239,9 +239,9 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/register.html");
         var expected = List.of(
-                "HTTP/1.1 400 Bad Request \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: "+ resource.length + " \r\n",
+                "HTTP/1.1 400 Bad Request",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: "+ resource.length,
                 new String(resource)
         );
 
@@ -335,8 +335,8 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(
-                "HTTP/1.1 302 Found \r\n",
-                "Location: /index.html \r\n"
+                "HTTP/1.1 302 Found",
+                "Location: /index.html"
         );
     }
 

@@ -14,24 +14,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_RESOURCE_FOLDER = "static";
 
     private final Socket connection;
     private final Manager sessionManager = SessionManager.getInstance();
@@ -53,13 +45,14 @@ public class Http11Processor implements Runnable, Processor {
 
             final RequestLine requestLine = RequestLine.parse(readLine(inputStream));
             if (requestLine == null) return;
+            final HttpHeaders requestHeaders = HttpHeaders.from(readHeaders(inputStream));
+            final byte[] messageBody = inputStream.readNBytes(requestHeaders.getContentLength());
 
-            final HttpHeaders headers = HttpHeaders.from(readHeaders(inputStream));
+            final HttpRequest request = new HttpRequest(requestLine, requestHeaders, messageBody);
 
-            final Map<String, String> responseHeader  = new HashMap<>();
-
+            final HttpHeaders responseHeaders  = new HttpHeaders(new HashMap<>());
             Session session;
-            final HttpCookie httpCookie = HttpCookie.from(headers.get("cookie"));
+            final HttpCookie httpCookie = HttpCookie.from(requestHeaders.get("Cookie"));
             if (httpCookie.contains("JSESSIONID")) {
                 final String sessionId = httpCookie.get("JSESSIONID");
                 session = sessionManager.findSession(sessionId);
@@ -67,15 +60,10 @@ public class Http11Processor implements Runnable, Processor {
                 final String sessionId = String.valueOf(UUID.randomUUID());
                 session = new Session(sessionId);
                 sessionManager.add(session);
-                responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
+                responseHeaders.add("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
-            final int contentLength = headers.getContentLength();
-            final byte[] messageBody = inputStream.readNBytes(contentLength);
-
-            final HttpRequest request = new HttpRequest(requestLine, headers, messageBody);
-
-            final String response = handleRequest(request, responseHeader, session);
+            final HttpResponse response = handleRequest(request, responseHeaders, session);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -120,83 +108,103 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String handleRequest(final HttpRequest httpRequest, final Map<String, String> responseHeaders, final Session session) throws IOException {
-        final String httpMethod = httpRequest.requestLine().method();
-        final String requestTarget = httpRequest.requestLine().path();
+    private HttpResponse handleRequest(final HttpRequest httpRequest, final HttpHeaders responseHeaders, final Session session) throws IOException {
+        final RequestLine requestLine = httpRequest.requestLine();
         final String messageBody = new String(httpRequest.body());
 
-        if (httpMethod.equals("GET")) {
-            return handleGetRequest(requestTarget, responseHeaders, session);
+        if (requestLine.isGetMethod()) {
+            return handleGetRequest(requestLine, responseHeaders, session);
         }
 
-        if (httpMethod.equals("POST")) {
-            return handlePostRequest(requestTarget, messageBody, responseHeaders, session);
+        if (requestLine.isPostMethod()) {
+            return handlePostRequest(requestLine, messageBody, responseHeaders, session);
         }
 
-        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
+        return HttpResponse.createForwardResponse(
+                new StatusLine(requestLine.protocolVersion(), HttpStatusCode.NOT_FOUND),
+                "/404.html",
+                responseHeaders);
     }
 
-    private String handleGetRequest(final String requestTarget, final Map<String, String> responseHeaders, final Session session) throws IOException {
-        if (requestTarget.equals("/")) {
-            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/index.html", responseHeaders);
+    private HttpResponse handleGetRequest(final RequestLine requestLine, final HttpHeaders responseHeaders, final Session session) throws IOException {
+        final String requestURI = requestLine.path();
+        final String protocolVersion = requestLine.protocolVersion();
+
+        if (requestURI.equals("/")) {
+            return HttpResponse.createForwardResponse(
+                    new StatusLine(protocolVersion, HttpStatusCode.OK),
+                    "/index.html",
+                    responseHeaders
+            );
         }
 
-        if (requestTarget.equals("/login") || requestTarget.equals("/login.html")) {
+        if (requestURI.equals("/login") || requestURI.equals("/login.html")) {
             if (session.getAttribute("user") != null) {
-                return createRedirectResponse("/index.html", responseHeaders);
+                return HttpResponse.createRedirectResponse(
+                        protocolVersion,
+                        "/index.html",
+                        responseHeaders
+                );
             }
-            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/login.html", responseHeaders);
+            return HttpResponse.createForwardResponse(
+                    new StatusLine(protocolVersion, HttpStatusCode.OK),
+                    "/login.html",
+                    responseHeaders
+            );
         }
 
-        if (requestTarget.equals("/register")) {
-            return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + "/register.html", responseHeaders);
+        if (requestURI.equals("/register")) {
+            return HttpResponse.createForwardResponse(
+                    new StatusLine(protocolVersion, HttpStatusCode.OK),
+                    "/register.html",
+                    responseHeaders);
         }
 
-        return createForwardResponse(HttpStatusCode.OK, DEFAULT_RESOURCE_FOLDER + requestTarget, responseHeaders);
+        return HttpResponse.createForwardResponse(
+                new StatusLine(protocolVersion, HttpStatusCode.OK),
+                requestURI,
+                responseHeaders);
     }
 
-    private String createForwardResponse(final HttpStatusCode httpStatusCode, final String resourcePath, final Map<String, String> responseHeaders) throws IOException {
-        final String headers = parseResponseHeaders(responseHeaders);
-        final String contentType = URLConnection.guessContentTypeFromName(resourcePath);
-        final String responseBody = readResource(resourcePath);
+    private HttpResponse handlePostRequest(final RequestLine requestLine, final String messageBody, final HttpHeaders responseHeaders, final Session session) throws IOException {
+        final String requestURI = requestLine.path();
+        final String protocolVersion = requestLine.protocolVersion();
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getReasonPhrase() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                headers,
-                "",
-                responseBody);
-    }
-
-    private String parseResponseHeaders(final Map<String, String> responseHeaders) {
-        final StringBuilder response = new StringBuilder();
-        for (Entry<String, String> entry : responseHeaders.entrySet()) {
-            response.append(entry.getKey()).append(": ");
-            response.append(entry.getValue()).append(" ");
-            response.append("\r\n");
-        }
-        return response.toString();
-    }
-
-    private String handlePostRequest(final String requestTarget, final String messageBody, final Map<String, String> responseHeaders, final Session session) throws IOException {
-        if (requestTarget.equals("/login")) {
+        if (requestURI.equals("/login")) {
             final boolean hasLoginSucceeded = loginAndRetrieveUserInfo(messageBody, session);
             if (hasLoginSucceeded) {
-                return createRedirectResponse("/index.html", responseHeaders);
+                return HttpResponse.createRedirectResponse(
+                        protocolVersion,
+                        "/index.html",
+                        responseHeaders
+                );
             }
-            return createRedirectResponse("/401.html", responseHeaders);
+            return HttpResponse.createRedirectResponse(
+                    protocolVersion,
+                    "/401.html",
+                    responseHeaders
+            );
         }
 
-        if (requestTarget.equals("/register")) {
+        if (requestURI.equals("/register")) {
             final boolean isRegistered  = registerNewUser(messageBody);
             if (isRegistered) {
-                return createRedirectResponse("/index.html", responseHeaders);
+                return HttpResponse.createRedirectResponse(
+                        protocolVersion,
+                        "/index.html",
+                        responseHeaders
+                );
             }
-            return createForwardResponse(HttpStatusCode.BAD_REQUEST, DEFAULT_RESOURCE_FOLDER + "/register.html", responseHeaders);
+            return HttpResponse.createForwardResponse(
+                    new StatusLine(protocolVersion, HttpStatusCode.BAD_REQUEST),
+                    "/register.html",
+                    responseHeaders);
         }
 
-        return createForwardResponse(HttpStatusCode.NOT_FOUND, DEFAULT_RESOURCE_FOLDER + "/404.html", responseHeaders);
+        return HttpResponse.createForwardResponse(
+                new StatusLine(protocolVersion, HttpStatusCode.NOT_FOUND),
+                "/404.html",
+                responseHeaders);
     }
 
     private boolean loginAndRetrieveUserInfo(final String messageBody, final Session session) {
@@ -232,18 +240,6 @@ public class Http11Processor implements Runnable, Processor {
         return queryPairs;
     }
 
-    private String createRedirectResponse(final String redirectURL, final Map<String, String> responseHeaders) {
-        final String headers = parseResponseHeaders(responseHeaders);
-        return String.join("\r\n",
-                "HTTP/1.1 " + HttpStatusCode.FOUND.getStatusCode() + " " + HttpStatusCode.FOUND.getReasonPhrase() + " ",
-                "Location: " + redirectURL + " ",
-                "Content-Length: 0 ",
-                headers,
-                "",
-                ""
-        );
-    }
-
     private boolean registerNewUser(final String messageBody) {
         final Map<String, String> registerInfoPairs = parseQuery(messageBody);
         String account = registerInfoPairs.getOrDefault("account", "");
@@ -257,18 +253,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return false;
-    }
-
-    private String readResource(final String resourcePath) throws IOException {
-        try {
-            final URI resourceURI = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(resourcePath)).toURI();
-            final Path path = Path.of(resourceURI);
-            return Files.readString(path);
-        } catch (NullPointerException e) {
-            log.error("{} 자료가 존재하지 않습니다.", resourcePath);
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage(), e);
-        }
-        return "";
     }
 }

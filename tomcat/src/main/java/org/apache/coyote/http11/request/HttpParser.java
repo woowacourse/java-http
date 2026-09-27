@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 public class HttpParser {
 
@@ -34,8 +33,7 @@ public class HttpParser {
         return new HttpRequestBody(requestBody);
     }
 
-    private static HttpRequestParams parseParams(HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody)
-            throws UnsupportedEncodingException {
+    private static HttpRequestParams parseParams(HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
         String queryString = httpRequestHeader.getQueryString();
         if (httpRequestHeader.getMethod() == HttpMethod.POST) {
             queryString = httpRequestBody.rawBody();

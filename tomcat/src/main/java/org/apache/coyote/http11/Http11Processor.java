@@ -9,11 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,49 +50,14 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String[] requestLine = request.split(" ");
+            RequestLine requestLine = new RequestLine(request);
+            RequestHeader requestHeader = new RequestHeader(readHeaderLines(reader));
+            RequestBody requestBody = new RequestBody(readBody(reader, requestHeader.get("Content-Length")));
 
-            String method = requestLine[0];
-            String requestUri = requestLine[1];
+            String method = requestLine.getMethod();
+            String requestUri = requestLine.getPath();
 
-            Map<String, String> headers = new HashMap<>();
-
-            String line = reader.readLine();
-
-            while (line != null && !line.isEmpty()) {
-                String[] keyValue = line.split(": ", 2);
-                if (keyValue.length == 2) {
-                    headers.put(keyValue[0], keyValue[1]);
-                }
-
-                line = reader.readLine();
-            }
-
-            String requestBody = "";
-            if (headers.containsKey("Content-Length")) {
-                int contentLength = Integer.parseInt(headers.get("Content-Length").trim());
-                char[] buffer = new char[contentLength];
-
-                int totalRead = 0;
-                while (totalRead < contentLength) {
-                    int read = reader.read(buffer, totalRead, contentLength - totalRead);
-                    if (read == -1) {
-                        break;
-                    }
-                    totalRead += read;
-                }
-
-                requestBody = new String(buffer, 0, totalRead);
-            }
-
-            String queryString = "";
-            int index = requestUri.indexOf("?");
-            if (index != -1) {
-                queryString = requestUri.substring(index + 1);
-                requestUri = requestUri.substring(0, index);
-            }
-
-            Cookie cookie = new Cookie(headers.get("Cookie"));
+            Cookie cookie = new Cookie(requestHeader.get("Cookie"));
 
             String statusLine = "HTTP/1.1 200 OK ";
             String location = null;
@@ -111,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestUri.equals("/login") && method.equals("POST")) {
-                Map<String, String> params = parseParam(requestBody);
+                Map<String, String> params = requestBody.parseParams();
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(params.getOrDefault("account", ""))
                         .filter(it -> it.checkPassword(params.get("password")));
@@ -138,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestUri.equals("/register") && method.equals("POST")) {
-                Map<String, String> params = parseParam(requestBody);
+                Map<String, String> params = requestBody.parseParams();
 
                 InMemoryUserRepository.save(
                         new User(params.get("account"), params.get("password"), params.get("email")));
@@ -197,16 +160,34 @@ public class Http11Processor implements Runnable, Processor {
         return (User) session.getAttribute("user");
     }
 
-    private Map<String, String> parseParam(String queryString) {
-        Map<String, String> params = new HashMap<>();
-        for (String param : queryString.split("&")) {
-            String[] keyValue = param.split("=", 2);
-            if (keyValue.length != 2 || keyValue[1].isBlank()) {
-                continue;
-            }
-            params.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+    private List<String> readHeaderLines(final BufferedReader reader) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+        String line = reader.readLine();
+        while (line != null && !line.isEmpty()) {
+            headerLines.add(line);
+            line = reader.readLine();
         }
-        return params;
+        return headerLines;
+    }
+
+    private String readBody(final BufferedReader reader, final String contentLengthHeader) throws IOException {
+        if (contentLengthHeader == null) {
+            return "";
+        }
+
+        int contentLength = Integer.parseInt(contentLengthHeader.trim());
+        char[] buffer = new char[contentLength];
+
+        int totalRead = 0;
+        while (totalRead < contentLength) {
+            int read = reader.read(buffer, totalRead, contentLength - totalRead);
+            if (read == -1) {
+                break;
+            }
+            totalRead += read;
+        }
+
+        return new String(buffer, 0, totalRead);
     }
 
     private String resolveContentType(final String requestUri) {

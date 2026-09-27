@@ -1,5 +1,8 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.apache.catalina.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +18,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
+    private final Container container;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final Container container, final int port, final int acceptCount,
+        final int maxThreads) {
+        this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.container = container;
+        this.stopped = false;
     }
 
-    public Connector(final int port, final int acceptCount) {
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
+    public Connector(final Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -44,6 +53,16 @@ public class Connector implements Runnable {
         thread.start();
         stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
+    }
+
+    public void stop() {
+        stopped = true;
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        executorService.shutdown();
     }
 
     @Override
@@ -66,17 +85,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
-    }
-
-    public void stop() {
-        stopped = true;
-        try {
-            serverSocket.close();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+        executorService.execute(new Http11Processor(connection, container));
     }
 
     private int checkPort(final int port) {

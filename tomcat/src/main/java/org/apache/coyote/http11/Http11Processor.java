@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.RequestMapping;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import org.apache.catalina.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,12 +17,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
-
     private final Socket connection;
+    private final Container container;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Container container) {
         this.connection = connection;
+        this.container = container;
     }
 
     @Override
@@ -42,8 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequest.from(bufferedReader);
             HttpResponse response = new HttpResponse();
 
-            Controller controller = REQUEST_MAPPING.getController(request);
-            controller.service(request, response);
+            container.service(request, response);
 
             response.writeTo(outputStream);
         } catch (IllegalArgumentException e) {

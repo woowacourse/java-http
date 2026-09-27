@@ -20,6 +20,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 10_000;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
@@ -95,7 +96,11 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection, requestMapping);
         try {
+            connection.setSoTimeout(DEFAULT_READ_TIMEOUT_MILLIS);
             executorService.execute(processor);
+        } catch (IOException e) {
+            connection.close();
+            throw e;
         } catch (RejectedExecutionException e) {
             connection.close();
         }

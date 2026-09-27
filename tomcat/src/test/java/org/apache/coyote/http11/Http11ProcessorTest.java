@@ -138,6 +138,35 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void Controller가_만든_응답_본문을_정적_파일로_덮어쓰지_않는다() {
+        // given
+        final String controllerBody = "controller response";
+        final String httpRequest = String.join("\r\n",
+                "GET /index HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new RequestMapping(java.util.Map.of(
+                "/index",
+                (request, response) -> response.setBody(
+                        controllerBody.getBytes(StandardCharsets.UTF_8)
+                )
+        ));
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("Content-Length: " + controllerBody.getBytes(StandardCharsets.UTF_8).length)
+                .endsWith(controllerBody);
+    }
+
+    @Test
     void login() throws IOException, URISyntaxException {
         // given
         final String requestBody = "account=gugu&password=password";
@@ -158,17 +187,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/index.html");
-
-        final byte[] expectedBody = Files.readAllBytes(
-                Path.of(resource.toURI())
-        );
-
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found")
-                .endsWith(new String(expectedBody, StandardCharsets.UTF_8));
+                .contains("Location: /index.html")
+                .contains("Content-Length: 0")
+                .endsWith("\r\n\r\n");
     }
 
     @Test

@@ -1,6 +1,5 @@
 package org.apache.catalina;
 
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.enums.HttpStatus;
 
@@ -16,27 +15,21 @@ public class StaticResourceHandler {
     private static final String DEFAULT_RESOURCE_PATH = "/";
     private static final String DEFAULT_VALUE = "Hello world!";
 
-    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException{
-        if (httpRequest.path().equals(DEFAULT_RESOURCE_PATH)) {
+    public void handle(String requestPath, HttpResponse httpResponse) throws IOException{
+        if (requestPath.equals(DEFAULT_RESOURCE_PATH)) {
             httpResponse.setStatus(HttpStatus.OK);
             httpResponse.setBody(DEFAULT_VALUE.getBytes());
             return;
         }
 
-        URL resource = getStaticPath(httpRequest, httpResponse);
+        URL resource = getStaticPath(requestPath, httpResponse);
         final var responseBody = getResponseBody(resource);
         httpResponse.setBody(responseBody);
     }
 
-    private URL getStaticPath(HttpRequest httpRequest, HttpResponse httpResponse){
-        String responsePath = httpRequest.path();
-
-        if (httpResponse.headers().containsKey("Location")){
-            responsePath = httpResponse.headers().get("Location");
-        }
-
-        String resourcePath = "static" + responsePath;
-        if (!responsePath.contains(".")) {
+    private URL getStaticPath(String requestPath, HttpResponse httpResponse){
+        String resourcePath = "static" + requestPath;
+        if (!requestPath.contains(".")) {
             resourcePath = resourcePath.concat(".html");
         }
 

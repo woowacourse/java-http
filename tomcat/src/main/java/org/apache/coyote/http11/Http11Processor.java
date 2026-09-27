@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import org.apache.catalina.StaticResourceHandler;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.enums.HttpMethod;
 import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +55,26 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleRequest(HttpRequest request) throws Exception{
         final HttpResponse response = new HttpResponse();
         final Optional<Controller> controller = requestMapping.getController(request);
+        final StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
 
         if (controller.isPresent()){
             controller.get().service(request, response);
+
+            if (shouldHandleStaticResource(request, response)) {
+                staticResourceHandler.handle(request.path(), response);
+            }
+
+            return response;
         }
 
-        StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
-        staticResourceHandler.handle(request, response);
+        staticResourceHandler.handle(request.path(), response);
         return response;
+    }
+
+    private boolean shouldHandleStaticResource(HttpRequest request, HttpResponse response) {
+        return request.httpMethod() == HttpMethod.GET
+                && response.status() == HttpStatus.OK
+                && response.body().length == 0
+                && !response.headers().containsKey("Location");
     }
 }

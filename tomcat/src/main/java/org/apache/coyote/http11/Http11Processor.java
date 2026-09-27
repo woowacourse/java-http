@@ -1,9 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Session;
@@ -32,8 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            HttpRequest request = HttpRequest.parse(reader);
+            HttpRequest request = HttpRequest.parse(inputStream);
 
             SessionManager sessionManager = SessionManager.getInstance();
             String sessionId = new HttpCookie(request.headers().get("cookie")).getValue("JSESSIONID");

@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -17,7 +17,7 @@ class HttpRequestTest {
                      + "\r\n";
 
         //when
-        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(raw)));
+        HttpRequest request = parse(raw);
 
         //then
         assertThat(request.requestLine()).isEqualTo(new RequestLine("GET", "/login", "", "HTTP/1.1"));
@@ -36,7 +36,7 @@ class HttpRequestTest {
                      + body;
 
         //when
-        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(raw)));
+        HttpRequest request = parse(raw);
 
         //then
         assertThat(request.requestLine()).isEqualTo(new RequestLine("POST", "/login", "", "HTTP/1.1"));
@@ -51,7 +51,7 @@ class HttpRequestTest {
                      + "\r\n";
 
         //when
-        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(raw)));
+        HttpRequest request = parse(raw);
 
         //then
         assertThat(request.parameter("account")).isEqualTo("gugu");
@@ -60,6 +60,7 @@ class HttpRequestTest {
 
     @Test
     void postFormParameter() throws IOException {
+        //given
         String body = "account=gugu&name=%ED%95%9C%EA%B8%80+test";
         String raw = "POST /register HTTP/1.1\r\n"
                      + "Content-Type: application/x-www-form-urlencoded\r\n"
@@ -68,10 +69,32 @@ class HttpRequestTest {
                      + body;
 
         //when
-        HttpRequest request = HttpRequest.parse(new BufferedReader(new StringReader(raw)));
+        HttpRequest request = parse(raw);
 
         //then
         assertThat(request.parameter("account")).isEqualTo("gugu");
         assertThat(request.parameter("name")).isEqualTo("한글 test");
+    }
+
+    @Test
+    void readsPostBodyUsingByteLength() throws IOException {
+        //given
+        String body = "name=한글";
+        String raw = "POST /register HTTP/1.1\r\n"
+                + "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n"
+                + "\r\n"
+                + body;
+        ByteArrayInputStream input = new ByteArrayInputStream(raw.getBytes(StandardCharsets.UTF_8));
+
+        //when
+        HttpRequest request = HttpRequest.parse(input);
+
+        //then
+        assertThat(request.body()).isEqualTo(body);
+        assertThat(request.parameter("name")).isEqualTo("한글");
+    }
+
+    private HttpRequest parse(String raw) throws IOException {
+        return HttpRequest.parse(new ByteArrayInputStream(raw.getBytes(StandardCharsets.UTF_8)));
     }
 }

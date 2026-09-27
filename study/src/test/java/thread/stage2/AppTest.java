@@ -21,6 +21,24 @@ class AppTest {
      * - http call count
      * - 테스트 결과값
      */
+    // 기본
+        // accept-count: 1
+        // max-connections: 1
+        // threads-max: 2
+    // 2026-09-27T15:01:21.906+09:00 [nio-8080-exec-1] http call count : 1
+    // 2026-09-27T15:01:23.479+09:00 [nio-8080-exec-1] http call count : 2
+    // 테스트 실패: Exception in thread "Thread-4" java.lang.RuntimeException: java.net.http.HttpConnectTimeoutException: HTTP connect timed out
+        // Expected :2
+        // Actual   :1
+    // 수정
+        // accept-count: 1
+        // max-connections: 2
+        // threads-max: 2
+    // 2026-09-27T15:08:59.684+09:00 [nio-8080-exec-2]: http call count : 1
+    // 2026-09-27T15:08:59.684+09:00 [nio-8080-exec-1]: http call count : 2
+    // 2026-09-27T15:09:01.319+09:00 [nio-8080-exec-2]: http call count : 3
+    // 테스트 통과:
+        // 하지만 HTTP connect timed out 예외는 발생
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;

@@ -21,7 +21,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
@@ -50,8 +50,8 @@ public class Connector implements Runnable {
     public void start() {
         var thread = new Thread(this);
         thread.setDaemon(true);
-        thread.start();
         stopped = false;
+        thread.start();
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -67,7 +67,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 

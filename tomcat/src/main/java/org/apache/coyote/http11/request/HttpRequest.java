@@ -137,22 +137,33 @@ public class HttpRequest {
     }
 
     private Map<String, String> parseParameters() {
-        final String rawParameters;
+        final var parameters = new HashMap<String, String>();
+        final var queryIndex = getUri().indexOf('?');
 
-        if ("POST".equals(getMethod())) {
-            rawParameters = body;
-        } else {
-            final var queryIndex = getUri().indexOf('?');
-            if (queryIndex < 0 || queryIndex == getUri().length() - 1) {
-                return Map.of();
-            }
-            rawParameters = getUri().substring(queryIndex + 1);
+        if (queryIndex >= 0 && queryIndex < getUri().length() - 1) {
+            final var queryString = getUri().substring(queryIndex + 1);
+            parameters.putAll(parseUrlEncodedParameters(queryString));
         }
 
-        if (rawParameters.isEmpty()) {
-            return Map.of();
+        if (isFormUrlEncoded() && !body.isEmpty()) {
+            parameters.putAll(parseUrlEncodedParameters(body));
         }
 
+        return parameters;
+    }
+
+    private boolean isFormUrlEncoded() {
+        final var contentType = getHeader("content-type");
+
+        if (contentType == null) {
+            return false;
+        }
+
+        return contentType.toLowerCase(Locale.ROOT)
+                .startsWith("application/x-www-form-urlencoded");
+    }
+
+    private Map<String, String> parseUrlEncodedParameters(final String rawParameters) {
         return Arrays.stream(rawParameters.split("&"))
                 .map(this::parseParameter)
                 .collect(Collectors.toMap(

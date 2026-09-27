@@ -1,6 +1,5 @@
 package org.apache.catalina.handle;
 
-import com.techcourse.controller.AbstractController;
 import com.techcourse.controller.Controller;
 import org.apache.catalina.filter.FilterChainFactory;
 import org.apache.coyote.http11.data.HttpRequest;
@@ -14,14 +13,14 @@ public class RequestDispatcher implements RequestHandler {
     public static RequestDispatcher create(
             FilterChainFactory filterChainFactory,
             ViewResolver viewResolver,
-            AbstractController... handlers) {
+            Controller... handlers) {
         return new RequestDispatcher(filterChainFactory, viewResolver, handlers);
     }
 
     private RequestDispatcher(
             FilterChainFactory filterChainFactory,
             ViewResolver viewResolver,
-            AbstractController... controllers) {
+            Controller... controllers) {
         this.controllers = controllers;
         this.filterChainFactory = filterChainFactory;
         this.viewResolver = viewResolver;

@@ -42,6 +42,10 @@ public class HttpResponse {
         setBody("");
     }
 
+    public void notFound() {
+        statusLine = StatusLine.notFound();
+    }
+
     public void setBody(String body) {
         this.body = body;
         headers.add("Content-Length", String.valueOf(body.getBytes().length));

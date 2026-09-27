@@ -25,11 +25,6 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (!request.getParameters().isEmpty()) {
-            login(request, response);
-            return;
-        }
-
         if (isLoggedIn(request.getCookie())) {
             response.redirect("/index.html");
             return;

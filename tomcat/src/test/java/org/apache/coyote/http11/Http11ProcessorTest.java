@@ -64,8 +64,13 @@ class Http11ProcessorTest {
 
     @Test
     void loginSuccessRedirectsToIndex() {
-        final var socket = new StubSocket(
-                "GET /login?account=gugu&password=password HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var socket = new StubSocket(String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password"));
         final var processor = new Http11Processor(socket, requestMapping);
 
         processor.process(socket);
@@ -82,8 +87,13 @@ class Http11ProcessorTest {
 
     @Test
     void loginFailureRedirectsToUnauthorizedPage() {
-        final var socket = new StubSocket(
-                "GET /login?account=gugu&password=wrong HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var socket = new StubSocket(String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 27",
+                "",
+                "account=gugu&password=wrong"));
         final var processor = new Http11Processor(socket, requestMapping);
 
         processor.process(socket);
@@ -98,8 +108,13 @@ class Http11ProcessorTest {
 
     @Test
     void loggedInUserIsRedirectedFromLoginPageToIndex() {
-        final var loginSocket = new StubSocket(
-                "GET /login?account=gugu&password=password HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        final var loginSocket = new StubSocket(String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password"));
         new Http11Processor(loginSocket, requestMapping).process(loginSocket);
         String setCookie = loginSocket.output().lines()
                 .filter(line -> line.startsWith("Set-Cookie:"))
@@ -120,6 +135,19 @@ class Http11ProcessorTest {
                 "Content-Length: 0",
                 "",
                 ""));
+    }
+
+    @Test
+    void getLoginWithCredentialsDoesNotLogIn() {
+        final var socket = new StubSocket(
+                "GET /login?account=gugu&password=password HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+
+        new Http11Processor(socket, requestMapping).process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK\r\n")
+                .doesNotContain("Set-Cookie:")
+                .contains("<form method=\"post\" action=\"login\">");
     }
 
     @Test

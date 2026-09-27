@@ -1,7 +1,12 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestDispatcher;
 import org.slf4j.Logger;
@@ -23,7 +28,7 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private final RequestDispatcher requestDispatcher;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector(final RequestDispatcher requestDispatcher) {
         this(requestDispatcher, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
@@ -31,7 +36,14 @@ public class Connector implements Runnable {
 
     public Connector(final RequestDispatcher requestDispatcher, final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+            maxThreads,
+            maxThreads,
+            0L,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(acceptCount),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
         this.requestDispatcher = requestDispatcher;
         this.stopped = false;
     }
@@ -70,12 +82,16 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
         var processor = new Http11Processor(connection, requestDispatcher);
-        executorService.submit(processor);
+        try {
+            executorService.submit(processor);
+        } catch (RejectedExecutionException e) {
+            connection.close();
+        }
     }
 
     public void stop() {

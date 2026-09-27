@@ -2,7 +2,7 @@ package org.apache.catalina.startup;
 
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.controller.RequestMapping;
+import org.apache.coyote.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,14 +10,14 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final RequestMapping requestMapping;
+    private final Adapter adapter;
 
-    public Tomcat(RequestMapping requestMapping) {
-        this.requestMapping = requestMapping;
+    public Tomcat(final Adapter adapter) {
+        this.adapter = adapter;
     }
 
     public void start() {
-        var connector = new Connector(requestMapping);
+        var connector = new Connector(adapter);
         connector.start();
 
         try {

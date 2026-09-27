@@ -10,22 +10,25 @@ import com.techcourse.controller.HomeController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import org.apache.catalina.SessionManager;
+import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.catalina.controller.RequestMapping;
+import org.apache.coyote.Adapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private RequestMapping requestMapping;
+    private Adapter adapter;
 
     @BeforeEach
     void setUp() {
         final var sessionManager = SessionManager.getInstance();
-        requestMapping = new RequestMapping();
+        final var requestMapping = new RequestMapping();
         requestMapping.addController("/", new HomeController());
         requestMapping.addController("/login", new LoginController(sessionManager));
         requestMapping.addController("/register", new RegisterController());
+        adapter = new CoyoteAdapter(requestMapping);
     }
 
     @Test
@@ -39,7 +42,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket, requestMapping);
+        final var processor = new Http11Processor(socket, adapter);
 
         // when
         processor.process(socket);
@@ -67,7 +70,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, adapter);
 
         // when
         processor.process(socket);

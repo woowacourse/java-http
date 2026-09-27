@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.apache.catalina.controller.RequestMapping;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +25,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String TEXT_CSS = "text/css";
 
     private final Socket connection;
-    private final RequestMapping requestMapping;
+    private final Adapter adapter;
 
-    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
-        this.requestMapping = requestMapping;
+        this.adapter = adapter;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
                 response.setHeader(SET_COOKIE_HEADER, setCookie);
             }
 
-            requestMapping.getController(request).service(request, response);
+            adapter.service(request, response);
 
             log.info("{}", response);
 

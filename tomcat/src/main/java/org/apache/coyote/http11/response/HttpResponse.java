@@ -16,25 +16,12 @@ public final class HttpResponse {
         this(HttpStatus.OK, HTML_CONTENT_TYPE, "");
     }
 
-    public HttpResponse(final HttpStatus status, final String contentType, final String body) {
+    HttpResponse(final HttpStatus status, final String contentType, final String body) {
         this.body = Objects.requireNonNull(body);
         this.status = Objects.requireNonNull(status);
         this.headers = new HttpHeaders();
         headers.add("Content-Type", contentType);
         headers.add("Content-Length", "0");
-    }
-
-    public static HttpResponse badRequest(String message) {
-        return new HttpResponse(HttpStatus.BAD_REQUEST, "text/plain", message);
-    }
-
-    public static HttpResponse ok(final String contentType, final String body) {
-        return new HttpResponse(HttpStatus.OK, contentType, body);
-    }
-
-    public static HttpResponse redirect(final String location) {
-        return new HttpResponse(HttpStatus.FOUND, HTML_CONTENT_TYPE, "")
-                .addHeader("Location", location);
     }
 
     public HttpResponse addHeader(final String name, final String value) {

@@ -1,8 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.controller;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 // RequestMapping에 등록된 경로와 매칭되지 않을 때 기본으로 사용되는 정적 리소스 처리 컨트롤러
 public class StaticResourceController implements Controller {

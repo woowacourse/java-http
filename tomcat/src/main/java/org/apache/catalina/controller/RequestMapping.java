@@ -4,7 +4,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class RequestMapping {
     private final Map<String, Controller> controllers = new HashMap<>();

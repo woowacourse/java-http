@@ -10,7 +10,8 @@ import java.util.Optional;
 public final class StaticResources {
     private static final String STATIC_RESOURCE_PREFIX = "static";
 
-    private StaticResources() {}
+    private StaticResources() {
+    }
 
     public static Optional<StaticResource> find(String path) throws URISyntaxException, IOException {
         URL resourceUrl = StaticResources.class.getClassLoader().getResource(STATIC_RESOURCE_PREFIX + path);

@@ -64,18 +64,6 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public Optional<HttpSession> findSession() throws IOException {
-        if (session != null) {
-            return Optional.of(session);
-        }
-        Optional<Cookie> sessionCookie = cookies.find(SESSION_ID);
-        if (sessionCookie.isEmpty()) {
-            return Optional.empty();
-        }
-        HttpSession foundSession = manager.findSession(sessionCookie.get().value());
-        return Optional.ofNullable(foundSession);
-    }
-
     public Optional<HttpSession> createdSession() {
         if (isNewSession) {
             return Optional.of(session);
@@ -88,5 +76,17 @@ public class HttpRequest {
         this.session = manager.createSession();
         isNewSession = true;
         return session;
+    }
+
+    public Optional<HttpSession> findSession() throws IOException {
+        if (session != null) {
+            return Optional.of(session);
+        }
+        Optional<Cookie> sessionCookie = cookies.find(SESSION_ID);
+        if (sessionCookie.isEmpty()) {
+            return Optional.empty();
+        }
+        HttpSession foundSession = manager.findSession(sessionCookie.get().value());
+        return Optional.ofNullable(foundSession);
     }
 }

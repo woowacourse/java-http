@@ -2,6 +2,7 @@ package org.apache.catalina.session;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import support.ConcurrentRunner;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SessionTest {
     private static final long NOW = 1_000L;
     private static final long THIRTY_MINUTES = Duration.ofMinutes(30).toMillis();
+    private static final int THREAD_COUNT = 50;
+    private static final int ATTRIBUTES_PER_THREAD = 100;
 
     @Test
     @DisplayName("주어진 아이디를 그대로 가진다")
@@ -95,6 +98,23 @@ class SessionTest {
 
         // then
         assertThat(names).containsExactlyInAnyOrder("user", "theme");
+    }
+
+    @Test
+    @DisplayName("여러 스레드가 동시에 속성을 담아도 유실되지 않는다")
+    void keepAllAttributesStoredConcurrently() throws Exception {
+        // given
+        final Session session = Session.create(NOW);
+
+        // when
+        ConcurrentRunner.run(THREAD_COUNT, index -> {
+            for (int i = 0; i < ATTRIBUTES_PER_THREAD; i++) {
+                session.setAttribute(index + "-" + i, i);
+            }
+        });
+
+        // then
+        assertThat(Collections.list(session.getAttributeNames())).hasSize(THREAD_COUNT * ATTRIBUTES_PER_THREAD);
     }
 
     @Test

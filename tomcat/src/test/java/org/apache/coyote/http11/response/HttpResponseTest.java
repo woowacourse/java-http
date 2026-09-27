@@ -31,6 +31,10 @@ class HttpResponseTest {
                         "\r\n");
     }
 
+    private String message(HttpResponse response) {
+        return new String(response.toHttpBytes(), StandardCharsets.UTF_8);
+    }
+
     @Test
     @DisplayName("쿠키를 추가하면 Set-Cookie 헤더로 내려보낸다")
     void redirectWithCookie() {
@@ -115,9 +119,5 @@ class HttpResponseTest {
         // when & then
         assertThatThrownBy(() -> response.setError(HttpStatus.OK))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    private String message(HttpResponse response) {
-        return new String(response.toHttpBytes(), StandardCharsets.UTF_8);
     }
 }

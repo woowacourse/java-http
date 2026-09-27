@@ -1,8 +1,7 @@
 package org.apache.catalina.startup;
 
-import org.apache.catalina.Manager;
+import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,16 +11,14 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final Manager manager;
-    private final RequestMapping requestMapping;
+    private final Container container;
 
-    public Tomcat(Manager manager, RequestMapping requestMapping) {
-        this.manager = manager;
-        this.requestMapping = requestMapping;
+    public Tomcat(Container container) {
+        this.container = container;
     }
 
     public void start() {
-        var connector = new Connector(manager, requestMapping);
+        var connector = new Connector(container);
         connector.start();
 
         try {

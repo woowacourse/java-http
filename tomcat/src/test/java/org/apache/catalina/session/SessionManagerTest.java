@@ -4,8 +4,11 @@ import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import support.ConcurrentRunner;
 
 import java.time.Duration;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,6 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SessionManagerTest {
     private static final long THIRTY_MINUTES = Duration.ofMinutes(30).toMillis();
     private static final long TWENTY_MINUTES = Duration.ofMinutes(20).toMillis();
+    private static final int THREAD_COUNT = 50;
+    private static final int SESSIONS_PER_THREAD = 100;
 
     private AtomicLong now;
     private SessionManager manager;
@@ -122,5 +127,26 @@ class SessionManagerTest {
 
         // then
         assertThat(manager.findSession(session.getId())).isNull();
+    }
+
+    @Test
+    @DisplayName("여러 스레드가 동시에 세션을 만들어도 모두 등록된다")
+    void registerAllSessionsCreatedConcurrently() throws Exception {
+        // given
+        final Set<String> ids = ConcurrentHashMap.newKeySet();
+
+        // when
+        ConcurrentRunner.run(THREAD_COUNT, index -> {
+            for (int i = 0; i < SESSIONS_PER_THREAD; i++) {
+                ids.add(manager.createSession().getId());
+            }
+        });
+
+        // then
+        final long unregistered = ids.stream()
+                .filter(id -> manager.findSession(id) == null)
+                .count();
+        assertThat(ids).hasSize(THREAD_COUNT * SESSIONS_PER_THREAD);
+        assertThat(unregistered).isZero();
     }
 }

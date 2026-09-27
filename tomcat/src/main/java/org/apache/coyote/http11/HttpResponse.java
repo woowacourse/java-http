@@ -31,6 +31,14 @@ public record HttpResponse(OutputStream output, String setCookie) {
         output.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
+    public void sendBadRequest() throws IOException {
+        String response = "HTTP/1.1 400 Bad Request\r\n"
+                + "Content-Length: 0\r\n"
+                + cookieHeader()
+                + "\r\n";
+        output.write(response.getBytes(StandardCharsets.UTF_8));
+    }
+
     private String cookieHeader() {
         if (setCookie == null) {
             return "";

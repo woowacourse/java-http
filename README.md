@@ -45,10 +45,10 @@
 - [x] `Controller`가 `service(HttpRequest, HttpResponse)` 계약을 정의한다.
 - [x] `AbstractController`가 HTTP 메서드에 따라 `doGet` 또는 `doPost`를 호출한다.
 - [x] 로그인 로직을 `LoginController`로 옮긴다.
-- [ ] 회원가입 로직을 `RegisterController`로 옮긴다.
+- [x] 회원가입 로직을 `RegisterController`로 옮긴다.
 - [x] 정적 파일 응답 로직을 `StaticResourceController`로 옮긴다.
 - [x] `RequestMapping`이 요청 경로에 맞는 컨트롤러를 찾는다.
-- [ ] `Http11Processor`는 요청 생성, 컨트롤러 호출, 응답 출력 흐름을 연결한다.
+- [x] `Http11Processor`는 요청 생성, 컨트롤러 호출, 응답 출력 흐름을 연결한다.
 
 ### 테스트 작성 순서
 
@@ -57,4 +57,4 @@
 - [x] `HttpRequest`가 GET 쿼리와 POST 폼 파라미터를 디코딩하는 테스트
 - [x] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
 - [x] `RequestMapping`과 `AbstractController`가 경로와 메서드에 맞게 호출하는 테스트
-- [ ] 기존 `Http11ProcessorTest`가 계속 통과하는지 확인
+- [x] 기존 `Http11ProcessorTest`가 계속 통과하는지 확인

@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.controller.RequestMapping;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_QUEUE_CAPACITY = 100;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
@@ -25,11 +28,13 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector(final RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, DEFAULT_QUEUE_CAPACITY, requestMapping);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
-        this.executor = Executors.newFixedThreadPool(maxThreads);
+    public Connector(final int port, final int acceptCount, final int maxThreads, final int queueCapacity,
+                     final RequestMapping requestMapping) {
+        this.executor = new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(queueCapacity));
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = requestMapping;
         this.stopped = false;

@@ -12,10 +12,10 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.routing.Controller;
-import org.apache.coyote.routing.Dispatcher;
-import org.apache.coyote.routing.RequestMapping;
-import org.apache.coyote.routing.RouteInfo;
+import org.apache.catalina.routing.Controller;
+import org.apache.catalina.routing.Dispatcher;
+import org.apache.catalina.routing.RequestMapping;
+import org.apache.catalina.routing.RouteInfo;
 
 public final class WebConfig {
 

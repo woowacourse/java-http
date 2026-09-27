@@ -1,9 +1,12 @@
-package org.apache.coyote.routing;
+package org.apache.catalina.session.routing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
+import org.apache.catalina.routing.Controller;
+import org.apache.catalina.routing.RequestMapping;
+import org.apache.catalina.routing.RouteKey;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

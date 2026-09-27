@@ -5,9 +5,9 @@ import com.techcourse.model.User;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.routing.Controller;
-import org.apache.coyote.routing.RouteInfo;
-import org.apache.coyote.routing.RouteKey;
+import org.apache.catalina.routing.Controller;
+import org.apache.catalina.routing.RouteInfo;
+import org.apache.catalina.routing.RouteKey;
 
 public class PostRegisterController implements Controller, RouteInfo {
 

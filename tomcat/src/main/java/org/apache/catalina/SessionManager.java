@@ -25,10 +25,6 @@ public class SessionManager {
         return sessionInfo.get(id);
     }
 
-    public void clear() {
-        sessionInfo.clear();
-    }
-
     public boolean hasUser(String sessionId) {
         Session session = findSession(sessionId);
         if (session == null) {

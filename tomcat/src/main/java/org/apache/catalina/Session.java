@@ -1,6 +1,5 @@
 package org.apache.catalina;
 
-import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,17 +12,8 @@ public class Session {
         this.id = id;
     }
 
-    public Session(String id, String key, Object value) {
-        this.id = id;
-        values.put(key, value);
-    }
-
     public String getId() {
         return id;
-    }
-
-    public void removeAttribute(String name) {
-        values.remove(name);
     }
 
     public Object getAttribute(String key) {

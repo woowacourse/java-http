@@ -34,10 +34,6 @@ public class HttpHeaders {
         return HttpCookie.from(cookieLine);
     }
 
-    public boolean hasJSessionId() {
-        return !getJSessionId().isEmpty();
-    }
-
     public String getJSessionId() {
         return getHttpCookie().getJSessionId();
     }

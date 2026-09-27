@@ -42,15 +42,15 @@ public record HttpRequestHeader(
         return httpRequestLine.method();
     }
 
-    public HttpCookie getHttpCookie() {
-        return httpHeaders.getHttpCookie();
-    }
-
     public String getProtocolVersion() {
         return httpRequestLine.protocolVersion();
     }
 
     public String getPathWithoutExtension() {
         return httpRequestLine.getPathWithoutExtension();
+    }
+
+    public HttpCookie getCookie() {
+        return httpHeaders.getHttpCookie();
     }
 }

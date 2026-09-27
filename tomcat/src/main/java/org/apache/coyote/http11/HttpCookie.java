@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
-    private static final HttpCookie EMPTY = new HttpCookie(Map.of());
 
     private final Map<String, String> cookies;
 
@@ -33,15 +33,17 @@ public class HttpCookie {
         return new HttpCookie(parsed);
     }
 
-    public static HttpCookie empty() {
-        return EMPTY;
-    }
-
     public String getJSessionId() {
         return cookies.getOrDefault(JSESSIONID, "");
     }
 
-    public boolean hasJSessionId() {
-        return cookies.containsKey(JSESSIONID);
+    public String toCookieLine() {
+        if (cookies.isEmpty()) {
+            return "";
+        }
+
+        return cookies.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining("; "));
     }
 }

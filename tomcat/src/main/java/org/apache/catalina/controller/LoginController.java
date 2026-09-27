@@ -5,6 +5,7 @@ import static com.techcourse.db.InMemoryUserRepository.findByAccount;
 import com.techcourse.model.User;
 import java.io.IOException;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -48,7 +49,10 @@ public class LoginController extends AbstractController {
     private String loginSuccess(HttpRequest httpRequest, User user) throws IOException {
         final var session = httpRequest.getSession(true);
         session.setAttribute("user", user);
-        HttpResponse httpResponse = HttpResponse.of(httpRequest);
+
+        String rawCookie = "JSESSIONID=" + session.getId();
+        HttpCookie httpCookie = HttpCookie.from(rawCookie);
+        HttpResponse httpResponse = HttpResponse.from(httpRequest, httpCookie);
         return httpResponse.found("/index.html");
     }
 }

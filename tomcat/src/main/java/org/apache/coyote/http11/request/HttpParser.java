@@ -13,7 +13,7 @@ public class HttpParser {
         HttpRequestHeader httpRequestHeader = parseHeader(reader);
         HttpRequestBody httpRequestBody = parseBody(reader, httpRequestHeader);
         HttpRequestParams httpRequestParams = parseParams(httpRequestHeader, httpRequestBody);
-        return new HttpRequest(httpRequestHeader, httpRequestBody, httpRequestParams);
+        return new HttpRequest(httpRequestHeader, httpRequestParams);
     }
 
     private static HttpRequestHeader parseHeader(BufferedReader reader) throws IOException {

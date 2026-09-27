@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -15,7 +14,7 @@ public class HttpRequestParams {
         this.params = Collections.unmodifiableMap(params);
     }
 
-    public static HttpRequestParams of(String queryString) throws UnsupportedEncodingException {
+    public static HttpRequestParams of(String queryString) {
         Map<String, String> params = new HashMap<>();
         String[] parameters = queryString.split("&");
         for (String param : parameters) {
@@ -24,11 +23,7 @@ public class HttpRequestParams {
         return new HttpRequestParams(params);
     }
 
-    public static HttpRequestParams empty() {
-        return new HttpRequestParams(Collections.emptyMap());
-    }
-
-    private static void putParams(String param, Map<String, String> params) throws UnsupportedEncodingException {
+    private static void putParams(String param, Map<String, String> params) {
         String[] keyValue = param.split("=");
         if (keyValue.length == 2) {
             String key = keyValue[0].trim();

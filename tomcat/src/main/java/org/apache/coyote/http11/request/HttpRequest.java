@@ -9,13 +9,10 @@ import org.apache.coyote.http11.HttpCookie;
 public class HttpRequest {
 
     private final HttpRequestHeader httpRequestHeader;
-    private final HttpRequestBody httpRequestBody;
     private final HttpRequestParams httpRequestParams;
 
-    public HttpRequest(HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody,
-                       HttpRequestParams httpRequestParams) {
+    public HttpRequest(HttpRequestHeader httpRequestHeader, HttpRequestParams httpRequestParams) {
         this.httpRequestHeader = httpRequestHeader;
-        this.httpRequestBody = httpRequestBody;
         this.httpRequestParams = httpRequestParams;
     }
 
@@ -32,10 +29,6 @@ public class HttpRequest {
             return "";
         }
         return httpRequestParams.getParams(key);
-    }
-
-    public HttpCookie getCookie() {
-        return httpRequestHeader.getHttpCookie();
     }
 
     public String getJSessionId() {
@@ -81,5 +74,9 @@ public class HttpRequest {
             return path + "." + getContentType();
         }
         return path;
+    }
+
+    public HttpCookie getCookie() {
+        return httpRequestHeader.getCookie();
     }
 }

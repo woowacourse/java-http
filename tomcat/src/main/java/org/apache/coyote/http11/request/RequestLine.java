@@ -1,0 +1,38 @@
+package org.apache.coyote.http11.request;
+
+public class RequestLine {
+
+    private final String method;
+    private final String uri;
+    private final String version;
+
+    public RequestLine(final String requestLine) {
+        final String[] parts = requestLine.split(" ");
+
+        method = parts[0].trim();
+        uri = parts[1].trim();
+        version = parts[2].trim();
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getPath() {
+        final int index = uri.indexOf("?");
+
+        if (index == -1) {
+            return uri;
+        }
+
+        return uri.substring(0, index);
+    }
+}

@@ -108,6 +108,7 @@ class Http11ProcessorTest {
             final var response = process(post("/login", "account=gugu&password=password", ""));
 
             assertRedirect(response, "/index.html");
+            assertThat(header(response, "Set-Cookie")).startsWith("JSESSIONID=");
         }
 
         @Test
@@ -115,6 +116,8 @@ class Http11ProcessorTest {
             final var response = process(post("/login", "account=gugu&password=wrong", ""));
 
             assertRedirect(response, "/401.html");
+            final var nextResponse = process(get("/login", sessionCookie(response)));
+            assertThat(nextResponse).startsWith("HTTP/1.1 200 OK");
         }
 
         @Test
@@ -134,8 +137,10 @@ class Http11ProcessorTest {
         @Test
         void getDoesNotLogIn() {
             final var response = process(get("/login?account=gugu&password=password", ""));
+            final var nextResponse = process(get("/login", sessionCookie(response)));
 
             assertThat(response).startsWith("HTTP/1.1 200 OK");
+            assertThat(nextResponse).startsWith("HTTP/1.1 200 OK");
         }
 
         @Test
@@ -161,7 +166,7 @@ class Http11ProcessorTest {
 
             assertRedirect(response, "/index.html");
             final var loginResponse = process(post("/login",
-                    "account=" + account + "&password=p%2Bass%3Dword", ""));
+                    "account=" + account + "&password=p%2Bass%3Dword", sessionCookie(response)));
             assertRedirect(loginResponse, "/index.html");
         }
 
@@ -173,6 +178,24 @@ class Http11ProcessorTest {
             final var response = process(post("/login", "account=" + account + "&password=password", ""));
 
             assertRedirect(response, "/401.html");
+        }
+
+        @Test
+        void createsSessionCookie() {
+            final var response = process(get("/index.html", "yummy_cookie=choco; tasty_cookie=strawberry"));
+
+            final var cookie = sessionCookie(response);
+            assertThat(cookie).startsWith("JSESSIONID=");
+            assertThat(UUID.fromString(cookie.substring("JSESSIONID=".length())).toString())
+                    .isEqualTo(cookie.substring("JSESSIONID=".length()));
+        }
+
+        @Test
+        void reusesSessionCookie() {
+            final var firstResponse = process(get("/login", ""));
+            final var response = process(get("/index.html", "yummy_cookie=choco; " + sessionCookie(firstResponse)));
+
+            assertThat(header(response, "Set-Cookie")).isNull();
         }
 
         @Test
@@ -225,6 +248,12 @@ class Http11ProcessorTest {
 
     private String body(final String response) {
         return response.split("\r\n\r\n", 2)[1];
+    }
+
+    private String sessionCookie(final String response) {
+        final var cookie = header(response, "Set-Cookie");
+        assertThat(cookie).isNotNull();
+        return cookie.split(";", 2)[0];
     }
 
     private void assertRedirect(final String response, final String location) {

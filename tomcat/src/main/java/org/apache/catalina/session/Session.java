@@ -1,6 +1,7 @@
 package org.apache.catalina.session;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
@@ -9,6 +10,7 @@ public class Session {
     private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     Session(final String id) {
+        Objects.requireNonNull(id);
         this.id = id;
     }
 
@@ -21,6 +23,10 @@ public class Session {
     }
 
     public void setAttribute(final String name, final Object value) {
+        if (value == null) {
+            removeAttribute(name);
+            return;
+        }
         values.put(name, value);
     }
 

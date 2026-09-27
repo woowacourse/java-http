@@ -12,12 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,8 +22,6 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private static final String QUERY_PARAM_DELIMITER = "&";
-    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
     private static final String JSESSION_ID_KEY = "JSESSIONID";
     private static final String LOGIN_USER_KEY = "user";
 
@@ -38,24 +33,23 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        final URI uri = URI.create(request.getRequestLine().getTarget());
-        handleLogin(response, uri.getQuery(), httpCookie);
+        handleLogin(request, response, httpCookie);
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        handleLogin(response, request.getBody().getContent(), getHttpCookie(request));
+        handleLogin(request, response, getHttpCookie(request));
     }
 
-    private void handleLogin(final HttpResponse response, final String loginParameters,
+    private void handleLogin(final HttpRequest request, final HttpResponse response,
                              final HttpCookie httpCookie) throws IOException {
-        if (loginParameters == null) {
+        if (!request.hasParameters()) {
             final Path filePath = getFilePath("/login");
             response.set(HttpStatus.OK, filePath, Files.readString(filePath), null, httpCookie);
             return;
         }
 
-        final Optional<User> user = authenticate(extractQueryParams(loginParameters));
+        final Optional<User> user = authenticate(request.getParameter("account"), request.getParameter("password"));
         if (user.isPresent()) {
             saveUserInSession(httpCookie, user.get());
             redirect(response, "/index.html", httpCookie);
@@ -103,10 +97,7 @@ public class LoginController extends AbstractController {
         session.setAttribute(LOGIN_USER_KEY, user);
     }
 
-    private Optional<User> authenticate(final Map<String, String> params) {
-        final String account = params.get("account");
-        final String password = params.get("password");
-
+    private Optional<User> authenticate(final String account, final String password) {
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             log.error("login error");
@@ -115,19 +106,6 @@ public class LoginController extends AbstractController {
 
         log.info("user : {}", user.get());
         return user;
-    }
-
-    private Map<String, String> extractQueryParams(final String query) {
-        final String[] queryParams = query.split(QUERY_PARAM_DELIMITER);
-        final Map<String, String> params = new HashMap<>();
-
-        for (String queryParam : queryParams) {
-            final String[] pair = queryParam.split(QUERY_PARAM_VALUE_DELIMITER, 2);
-            final String key = pair[0];
-            final String value = pair.length == 2 ? pair[1] : "";
-            params.put(key, value);
-        }
-        return params;
     }
 
     private Path getFilePath(final String uriPath) {

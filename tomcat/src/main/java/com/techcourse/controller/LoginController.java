@@ -41,7 +41,7 @@ public class LoginController extends AbstractController {
         final String sessionId = request.getCookie(JSESSIONID);
         final Optional<User> authenticatedUser = authenticate(request.getBody());
         if (authenticatedUser.isEmpty()) {
-            setRedirectResponse(response, LOGIN_FAILURE, createSetCookieHeader(sessionId));
+            setRedirectResponse(response, LOGIN_FAILURE, "");
             return;
         }
 

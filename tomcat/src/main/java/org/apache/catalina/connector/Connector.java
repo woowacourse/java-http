@@ -31,7 +31,7 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = createExecutorService(maxThreads);
         this.requestMapping = requestMapping;
         this.stopped = false;
     }
@@ -44,6 +44,11 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private ExecutorService createExecutorService(final int maxThreads) {
+        final int checkedMaxThreads = checkMaxThreads(maxThreads);
+        return Executors.newFixedThreadPool(checkedMaxThreads);
     }
 
     public void start() {
@@ -100,5 +105,12 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        if (maxThreads < 1) {
+            return DEFAULT_MAX_THREADS;
+        }
+        return maxThreads;
     }
 }

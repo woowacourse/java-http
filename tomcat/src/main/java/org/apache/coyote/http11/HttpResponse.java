@@ -3,7 +3,9 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,7 +15,7 @@ public class HttpResponse {
     private static final byte[] EMPTY_BODY = new byte[0];
 
     private final OutputStream outputStream;
-    private final Map<String, String> headers = new LinkedHashMap<>();
+    private final Map<String, List<String>> headers = new LinkedHashMap<>();
 
     private HttpStatus status = HttpStatus.OK;
     private byte[] body = EMPTY_BODY;
@@ -28,7 +30,11 @@ public class HttpResponse {
     }
 
     public void setHeader(String name, String value) {
-        headers.put(name, value);
+        headers.put(name, new ArrayList<>(List.of(value)));
+    }
+
+    public void addHeader(String name, String value) {
+        headers.computeIfAbsent(name, ignored -> new ArrayList<>()).add(value);
     }
 
     public void setContentType(String contentType) {
@@ -50,7 +56,7 @@ public class HttpResponse {
     }
 
     public void addCookie(String name, String value) {
-        setHeader("Set-Cookie", name + "=" + value);
+        addHeader("Set-Cookie", name + "=" + value);
     }
 
     public void reset(HttpStatus status) {
@@ -64,7 +70,7 @@ public class HttpResponse {
             return;
         }
 
-        headers.put("Content-Length", String.valueOf(body.length));
+        setHeader("Content-Length", String.valueOf(body.length));
         outputStream.write(createHead().getBytes(StandardCharsets.UTF_8));
         outputStream.write(body);
         outputStream.flush();
@@ -74,11 +80,11 @@ public class HttpResponse {
     private String createHead() {
         StringBuilder responseHead = new StringBuilder();
         responseHead.append(new StatusLine(HTTP_VERSION, status)).append("\r\n");
-        headers.forEach((name, value) -> responseHead
+        headers.forEach((name, values) -> values.forEach(value -> responseHead
                 .append(name)
                 .append(": ")
                 .append(value)
-                .append("\r\n"));
+                .append("\r\n")));
         return responseHead.append("\r\n").toString();
     }
 }

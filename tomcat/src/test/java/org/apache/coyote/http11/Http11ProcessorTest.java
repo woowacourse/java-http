@@ -8,12 +8,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.catalina.RequestMapping;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
     private final RequestMapping requestMapping = WebApplication.createRequestMapping();
+    private final SessionManager sessionManager = new SessionManager();
 
     @Test
     void process() {
@@ -78,8 +80,8 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found\r\n")
                 .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f-]{36}\\r\\n")
+                .contains("Location: /index.html\r\n")
                 .endsWith(String.join("\r\n",
-                        "Location: /index.html",
                         "Content-Length: 0",
                         "",
                         ""));
@@ -115,7 +117,7 @@ class Http11ProcessorTest {
                 "Content-Length: 30",
                 "",
                 "account=gugu&password=password"));
-        new Http11Processor(loginSocket, requestMapping).process(loginSocket);
+        new Http11Processor(loginSocket, requestMapping, sessionManager).process(loginSocket);
         String setCookie = loginSocket.output().lines()
                 .filter(line -> line.startsWith("Set-Cookie:"))
                 .findFirst()
@@ -127,7 +129,7 @@ class Http11ProcessorTest {
                 setCookie.replace("Set-Cookie:", "Cookie:"),
                 "",
                 ""));
-        new Http11Processor(loginPageSocket, requestMapping).process(loginPageSocket);
+        new Http11Processor(loginPageSocket, requestMapping, sessionManager).process(loginPageSocket);
 
         assertThat(loginPageSocket.output()).isEqualTo(String.join("\r\n",
                 "HTTP/1.1 302 Found",

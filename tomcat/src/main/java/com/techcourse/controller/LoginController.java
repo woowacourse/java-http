@@ -2,30 +2,25 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.UUID;
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.AbstractController;
 import org.apache.catalina.StaticResource;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.session.HttpCookie;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_USER = "user";
 
-    private final SessionManager sessionManager;
     private final StaticResource staticResource;
 
-    public LoginController(SessionManager sessionManager, StaticResource staticResource) {
-        this.sessionManager = sessionManager;
+    public LoginController(StaticResource staticResource) {
         this.staticResource = staticResource;
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (isLoggedIn(request.getCookie())) {
+        if (isLoggedIn(request.getSession(false))) {
             response.redirect("/index.html");
             return;
         }
@@ -46,12 +41,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        Session session = findSession(request.getCookie());
-        if (session == null) {
-            session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
-            response.addCookie(HttpCookie.JSESSION_ID, session.getId());
-        }
+        HttpSession session = request.getSession();
         session.setAttribute(LOGIN_USER, user);
         response.redirect("/index.html");
     }
@@ -67,12 +57,7 @@ public class LoginController extends AbstractController {
                 .orElse(null);
     }
 
-    private boolean isLoggedIn(HttpCookie cookie) {
-        Session session = findSession(cookie);
+    private boolean isLoggedIn(HttpSession session) {
         return session != null && session.getAttribute(LOGIN_USER) != null;
-    }
-
-    private Session findSession(HttpCookie cookie) {
-        return sessionManager.findSession(cookie.getJSessionId());
     }
 }

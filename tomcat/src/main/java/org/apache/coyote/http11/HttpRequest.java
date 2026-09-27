@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.session.HttpCookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -15,12 +18,22 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final String body;
     private final Map<String, String> parameters;
+    private final SessionManager sessionManager;
+
+    private Session session;
+    private boolean sessionResolved;
+    private boolean sessionCreated;
 
     public HttpRequest(InputStream inputStream) throws IOException {
+        this(inputStream, new SessionManager());
+    }
+
+    public HttpRequest(InputStream inputStream, SessionManager sessionManager) throws IOException {
         this.requestLine = new RequestLine(readLine(inputStream));
         this.headers = readHeaders(inputStream);
         this.body = readBody(inputStream, headers.getContentLength());
         this.parameters = mergeParameters(requestLine.getQueryParameters(), body);
+        this.sessionManager = sessionManager;
     }
 
     public HttpMethod getMethod() {
@@ -43,8 +56,28 @@ public class HttpRequest {
         return parameters;
     }
 
-    public HttpCookie getCookie() {
-        return new HttpCookie(getHeader("Cookie"));
+    public HttpSession getSession() {
+        return getSession(true);
+    }
+
+    public HttpSession getSession(boolean create) {
+        if (!sessionResolved) {
+            String sessionId = new HttpCookie(getHeader("Cookie")).getJSessionId();
+            session = sessionManager.findSession(sessionId);
+            sessionResolved = true;
+        }
+        if (session == null && create) {
+            session = sessionManager.createSession();
+            sessionCreated = true;
+        }
+        return session;
+    }
+
+    String getCreatedSessionId() {
+        if (!sessionCreated) {
+            return null;
+        }
+        return session.getId();
     }
 
     private String readLine(InputStream inputStream) throws IOException {

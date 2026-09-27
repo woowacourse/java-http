@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.exception.HttpException;
 
 public class StaticResourceController extends AbstractController {

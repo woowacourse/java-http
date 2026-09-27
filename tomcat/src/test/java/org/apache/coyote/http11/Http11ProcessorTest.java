@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.connector.CoyoteAdapter;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 import com.techcourse.model.User;
@@ -24,7 +27,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -48,7 +51,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -66,7 +69,7 @@ class Http11ProcessorTest {
                 "",
                 "a=b");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -88,7 +91,7 @@ class Http11ProcessorTest {
                 };
             }
         };
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -108,7 +111,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -125,7 +128,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -146,7 +149,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -174,7 +177,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -197,7 +200,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=wrong");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -220,7 +223,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -240,7 +243,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -252,5 +255,9 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private Http11Processor createProcessor(final StubSocket socket) {
+        return new Http11Processor(socket, new CoyoteAdapter());
     }
 }

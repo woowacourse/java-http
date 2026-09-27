@@ -1,5 +1,10 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.exception.HttpException;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.net.URLDecoder;
@@ -7,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.exception.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

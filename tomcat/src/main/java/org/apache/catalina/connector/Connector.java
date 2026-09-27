@@ -1,8 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_QUEUE_CAPACITY = 100;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -29,7 +32,13 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY)
+        );
         this.serverSocket = createServerSocket(port, acceptCount);
     }
 

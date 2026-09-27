@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connector implements Runnable {
 
@@ -18,18 +20,26 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private final Function<Session, RequestMapping> requestMappingFactory;
     private boolean stopped;
 
     public Connector(Function<Session, RequestMapping> requestMappingFactory) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMappingFactory);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMappingFactory);
     }
 
     public Connector(final int port, final int acceptCount,
             Function<Session, RequestMapping> requestMappingFactory) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, requestMappingFactory);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads,
+            Function<Session, RequestMapping> requestMappingFactory) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.requestMappingFactory = requestMappingFactory;
         this.stopped = false;
     }
@@ -73,11 +83,12 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMappingFactory);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {

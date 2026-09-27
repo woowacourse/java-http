@@ -22,6 +22,9 @@
 2. [HTTP Cache](study/src/test/java/cache)
 3. [Thread](study/src/test/java/thread)
 
+<details>
+<summary>3단계 · HTTP 요청·응답과 컨트롤러 분리</summary>
+
 ## 3단계 구현 요구사항
 
 기존 로그인, 회원가입, 세션, 정적 파일 응답은 유지하면서 `Http11Processor`의 역할을 나눈다.
@@ -71,3 +74,38 @@
 - [x] 로그인, 회원가입, 기본 경로 Controller와 URI 등록을 애플리케이션 영역으로 옮긴다.
 - [x] 애플리케이션에서 만든 매핑을 서버 시작 시 전달하고, 요청별 `Session`은 로그인 Controller에 전달한다.
 - [x] 기존 로그인, 회원가입, 정적 파일 응답이 계속 동작하는지 확인한다.
+
+</details>
+
+<details open>
+<summary>4단계 · 스레드 풀과 세션 동시성</summary>
+
+## 4단계 구현 요구사항
+
+### 스레드 풀
+
+- [x] `Connector`에 `maxThreads` 설정을 추가한다.
+- [x] 요청마다 `new Thread`를 만드는 대신 `ExecutorService`에 처리 작업을 맡긴다.
+- [x] 서버를 멈출 때 스레드 풀도 종료한다.
+
+### 세션 동시성
+
+- [x] `SessionManager`와 `Session`의 저장소에 `ConcurrentHashMap`을 사용한다. 이전 단계에서 적용했다.
+- [x] 여러 요청이 같은 세션에 접근할 때, 단일 연산과 여러 연산을 묶은 처리의 차이를 확인한다.
+
+`ConcurrentHashMap`의 `get`, `put`은 각각 안전하지만, `get` 후 `put`까지 한 번에 처리되는 것은 아니다. 현재 세션은 UUID로 새 ID를 만들어 저장하므로 같은 키에 대한 갱신 경쟁은 없다.
+
+### 확인할 동작
+
+- [x] 동시에 요청이 들어와도 작업 스레드 수가 `maxThreads`를 넘지 않는지 확인한다.
+- [x] 기존 HTTP 요청·응답 테스트가 계속 통과하는지 확인한다.
+
+### 생각해보기
+
+- `acceptCount`와 `maxThreads`는 각각 어느 대기 공간과 스레드 수를 제한할까?
+- `Executors.newFixedThreadPool()`에서 모든 스레드가 바쁘면 새 작업은 어디에서 기다릴까?
+- 작업 스레드 최대 250개, 대기 작업 최대 100개를 제한하려면 무엇을 설정해야 할까?
+
+`acceptCount`는 연결을 수락하기 전 대기열 설정이고, `maxThreads`는 동시에 요청을 처리하는 작업 스레드 수다. `newFixedThreadPool()`의 작업 대기열에는 크기 제한이 없다. 대기 작업도 100개로 제한하려면 크기가 100인 큐를 사용하는 `ThreadPoolExecutor`가 필요하다.
+
+</details>

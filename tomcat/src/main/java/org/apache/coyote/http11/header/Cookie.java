@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-final class Cookie {
+public final class Cookie {
 
     private static final Cookie EMPTY = new Cookie(Map.of());
 
@@ -16,11 +16,11 @@ final class Cookie {
         this.values = Map.copyOf(values);
     }
 
-    static Cookie empty() {
+    public static Cookie empty() {
         return EMPTY;
     }
 
-    static Cookie from(final String cookieHeader) {
+    public static Cookie from(final String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isBlank()) {
             return empty();
         }
@@ -41,22 +41,18 @@ final class Cookie {
         return new Cookie(values);
     }
 
-    static Cookie of(final String name, final String value) {
+    public static Cookie of(final String name, final String value) {
         return new Cookie(Map.of(
                 Objects.requireNonNull(name),
                 Objects.requireNonNull(value)
         ));
     }
 
-    Optional<String> get(final String name) {
+    public Optional<String> get(final String name) {
         return Optional.ofNullable(values.get(name));
     }
 
-    boolean isEmpty() {
-        return values.isEmpty();
-    }
-
-    String toHeaderValue() {
+    public String toHeaderValue() {
         return values.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));

@@ -13,7 +13,7 @@ import java.util.Map;
 public class Application {
 
     private static final int MAX_THREADS = 250;
-    private static final int ACCEPT_COUNT = 100;
+    private static final int WAITING_QUEUE_SIZE = 100;
 
     public static void main(String[] args) {
         final Map<String, Controller> controllers = Map.of(
@@ -22,7 +22,7 @@ public class Application {
                 "/register", new RegisterController()
         );
         final var requestMapping = new RequestMapping(controllers, new StaticResourceController());
-        final var tomcat = new Tomcat(requestMapping, ACCEPT_COUNT, MAX_THREADS);
+        final var tomcat = new Tomcat(requestMapping, MAX_THREADS, WAITING_QUEUE_SIZE);
         tomcat.start();
     }
 }

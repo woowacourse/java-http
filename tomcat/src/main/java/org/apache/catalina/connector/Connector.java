@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -27,22 +29,28 @@ public class Connector implements Runnable {
 
     public Connector(
             final RequestMapping requestMapping,
-            final int acceptCount,
-            final int maxThreads
+            final int maxThreads,
+            final int waitingQueueSize
     ) {
-        this(requestMapping, DEFAULT_PORT, acceptCount, maxThreads);
+        this(requestMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads, waitingQueueSize);
     }
 
     public Connector(
             final RequestMapping requestMapping,
             final int port,
             final int acceptCount,
-            final int maxThreads
+            final int maxThreads,
+            final int waitingQueueSize
     ) {
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(waitingQueueSize)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

@@ -3,7 +3,7 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.controller.StaticResource;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -20,6 +20,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        new StaticResourceController().service(request, response);
+        response.ok("text/html", StaticResource.read("/register.html"));
     }
 }

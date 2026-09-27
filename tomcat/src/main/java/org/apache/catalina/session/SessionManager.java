@@ -1,14 +1,14 @@
 package org.apache.catalina.session;
 
 import com.techcourse.model.User;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private final Map<String, Session> sessionInfo = new HashMap<>();
+    private final Map<String, Session> sessionInfo = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

@@ -17,6 +17,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void 파비콘_파일이_없으면_404로_응답한다() {
+        var socket = new StubSocket("GET /favicon.ico HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found\r\n");
+        assertThat(socket.output()).endsWith("Content-Length: 0\r\n\r\n");
+    }
+
+    @Test
+    void 존재하지_않는_정적_파일은_404로_응답한다() {
+        var socket = new StubSocket("GET /missing.html HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found\r\n");
+        assertThat(socket.output()).endsWith("Content-Length: 0\r\n\r\n");
+    }
+
+    @Test
     void 로그인_페이지를_GET으로_조회한다() throws URISyntaxException {
         var socket = new StubSocket("GET /login HTTP/1.1\r\nHost: localhost\r\n\r\n");
 

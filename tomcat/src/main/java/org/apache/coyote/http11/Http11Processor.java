@@ -4,8 +4,8 @@ import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.UUID;
 import org.apache.catalina.controller.Controller;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
-    public static final String FAVICON_PATH = "/favicon.ico";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -38,16 +37,9 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             HttpRequest request = new HttpRequest(bufferedReader);
-            if (request.getUri().equals(FAVICON_PATH)) {
-                return;
-            }
-
             HttpResponse response = new HttpResponse();
 
-            HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
-            if (cookie.get("JSESSIONID") == null) {
-                response.setHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-            }
+            SessionManager.getInstance().setSessionCookie(request, response);
 
             Controller controller = requestMapping.getController(request);
             controller.service(request, response);

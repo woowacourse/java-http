@@ -7,10 +7,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 public class StaticResourceController extends AbstractController {
 
@@ -33,7 +33,13 @@ public class StaticResourceController extends AbstractController {
 
     public void render(String path, HttpResponse response) {
         try {
-            Path filePath = getPath(findPath(path));
+            URL resource = getClass().getClassLoader().getResource(findPath(path));
+            if (resource == null) {
+                response.setStatus(HttpStatus.NOT_FOUND);
+                return;
+            }
+
+            Path filePath = Paths.get(resource.toURI());
             response.setHeader("Content-Type", findContentType(filePath) + ";charset=utf-8");
             response.setBody(findResponseBody(filePath));
         } catch (IOException | URISyntaxException e) {
@@ -49,11 +55,6 @@ public class StaticResourceController extends AbstractController {
         }
 
         return STATIC_PATH + path;
-    }
-
-    private Path getPath(String path) throws URISyntaxException {
-        URL resource = getClass().getClassLoader().getResource(path);
-        return Paths.get(Objects.requireNonNull(resource).toURI());
     }
 
     private String findContentType(Path filePath) {

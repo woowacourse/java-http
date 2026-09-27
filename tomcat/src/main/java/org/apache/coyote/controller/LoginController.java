@@ -24,7 +24,6 @@ public class LoginController extends AbstractController {
 
         if (session == null) {
             session = new Session(UUID.randomUUID().toString());
-            SessionManager.getInstance().add(session);
         }
 
         Map<String, String> loginInfo = new HashMap<>();
@@ -66,7 +65,6 @@ public class LoginController extends AbstractController {
 
         if (session == null) {
             session = new Session(UUID.randomUUID().toString());
-            SessionManager.getInstance().add(session);
         }
 
         Map<String, String> loginInfo = new HashMap<>();
@@ -113,6 +111,7 @@ public class LoginController extends AbstractController {
         response.addHeader("Content-Length", "0");
 
         if (loginSuccess) {
+            SessionManager.getInstance().add(session);
             HttpCookie responseCookie = HttpCookie.ofJSessionId(session.getId());
             response.addHeader("Set-Cookie", responseCookie.toHeaderValue());
         }

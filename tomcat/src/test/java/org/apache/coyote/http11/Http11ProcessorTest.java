@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import support.StubSocket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,35 +100,42 @@ class Http11ProcessorTest {
 
             assertThat(response).startsWith("HTTP/1.1 200 OK");
             assertThat(body(response)).isEqualTo(resource("login.html"));
-            assertThat(body(response)).contains("<form method=\"get\" action=\"login\">");
+            assertThat(body(response)).contains("<form method=\"post\" action=\"login\">");
         }
 
         @Test
         void loginSuccess() {
-            final var response = process(get("/login?account=gugu&password=password", ""));
+            final var response = process(post("/login", "account=gugu&password=password", ""));
 
             assertRedirect(response, "/index.html");
         }
 
         @Test
         void loginFailure() {
-            final var response = process(get("/login?account=gugu&password=wrong", ""));
+            final var response = process(post("/login", "account=gugu&password=wrong", ""));
 
             assertRedirect(response, "/401.html");
         }
 
         @Test
         void loginWithUnknownAccount() {
-            final var response = process(get("/login?account=unknown&password=password", ""));
+            final var response = process(post("/login", "account=unknown&password=password", ""));
 
             assertRedirect(response, "/401.html");
         }
 
         @Test
         void loginWithoutPassword() {
-            final var response = process(get("/login?account=gugu", ""));
+            final var response = process(post("/login", "account=gugu", ""));
 
             assertRedirect(response, "/401.html");
+        }
+
+        @Test
+        void getDoesNotLogIn() {
+            final var response = process(get("/login?account=gugu&password=password", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 200 OK");
         }
 
         @Test
@@ -134,6 +143,53 @@ class Http11ProcessorTest {
             final var response = process(get("/401.html", ""));
 
             assertThat(body(response)).isEqualTo(resource("401.html"));
+        }
+
+        @Test
+        void registerPage() throws IOException {
+            final var response = process(get("/register", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 200 OK");
+            assertThat(body(response)).isEqualTo(resource("register.html"));
+        }
+
+        @Test
+        void registerAndLogIn() {
+            final var account = "new-user-" + UUID.randomUUID();
+            final var response = process(post("/register",
+                    "account=" + account + "&password=p%2Bass%3Dword&email=user%40example.com", ""));
+
+            assertRedirect(response, "/index.html");
+            final var loginResponse = process(post("/login",
+                    "account=" + account + "&password=p%2Bass%3Dword", ""));
+            assertRedirect(loginResponse, "/index.html");
+        }
+
+        @Test
+        void getDoesNotRegister() {
+            final var account = "get-user-" + UUID.randomUUID();
+            process(get("/register?account=" + account + "&password=password&email=user%40example.com", ""));
+
+            final var response = process(post("/login", "account=" + account + "&password=password", ""));
+
+            assertRedirect(response, "/401.html");
+        }
+
+        @Test
+        void registerWithoutRequiredFields() {
+            final var response = process(post("/register", "", ""));
+
+            assertRedirect(response, "/register");
+        }
+
+        @Test
+        void registerWithEmptyPassword() {
+            final var account = "empty-password-" + UUID.randomUUID();
+            final var response = process(post("/register",
+                    "account=" + account + "&password=&email=user%40example.com", ""));
+
+            assertRedirect(response, "/register");
+            assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
         }
 
     }
@@ -146,6 +202,17 @@ class Http11ProcessorTest {
 
     private String get(final String path, final String cookie) {
         return "GET " + path + " HTTP/1.1\r\nHost: localhost:8080\r\nCookie: " + cookie + "\r\n\r\n";
+    }
+
+    private String post(final String path, final String body, final String cookie) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "Cookie: " + cookie,
+                "",
+                body);
     }
 
     private String header(final String response, final String name) {

@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class Connector implements Runnable {
@@ -16,16 +18,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private final Consumer<Http11Processor> connectionHandler;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector(Consumer<Http11Processor> connectionHandler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, connectionHandler);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, connectionHandler);
     }
 
     public Connector(final int port, final int acceptCount, Consumer<Http11Processor> connectionHandler) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, connectionHandler);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads, Consumer<Http11Processor> connectionHandler) {
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.connectionHandler = connectionHandler;
         this.stopped = false;
@@ -44,16 +53,20 @@ public class Connector implements Runnable {
     public void start() {
         var thread = new Thread(this);
         thread.setDaemon(true);
-        thread.start();
         stopped = false;
+        thread.start();
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
     @Override
     public void run() {
         // 클라이언트가 연결될때까지 대기한다.
-        while (!stopped) {
-            connect();
+        try {
+            while (!stopped) {
+                connect();
+            }
+        } finally {
+            executorService.shutdown();
         }
     }
 
@@ -71,13 +84,13 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        new Thread(() -> {
+        executorService.execute(() -> {
             try (connection) {
                 connectionHandler.accept(processor);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
-        }).start();
+        });
     }
 
     public void stop() {

@@ -3,25 +3,15 @@ package org.apache.catalina.session;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SessionManager implements Manager {
+public class SessionManager {
 
-    private static final SessionManager INSTANCE = new SessionManager();
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    private SessionManager() {
-    }
-
-    public static SessionManager getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public void add(final Session session) {
+    public static void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    @Override
-    public Session findSession(final String id) {
+    public static Session findSession(final String id) {
         final Session registeredSession = SESSIONS.get(id);
         if (registeredSession == null)  {
             final Session newSession  = new Session(id);
@@ -31,8 +21,5 @@ public class SessionManager implements Manager {
         return registeredSession;
     }
 
-    @Override
-    public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
-    }
+    private SessionManager() {}
 }

@@ -11,29 +11,45 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public record HttpResponse(StatusLine statusLine, HttpHeaders headers, byte[] body) {
+public class HttpResponse {
 
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
-    public static HttpResponse createForwardResponse(final StatusLine statusLine, final String resourceName, final HttpHeaders responseHeaders) throws IOException {
-        final byte[] body = readResource(resourceName);
+    private StatusLine statusLine;
+    private final HttpHeaders headers;
+    private byte[] body;
+
+    private HttpResponse(final StatusLine statusLine, final HttpHeaders headers, final byte[] body) {
+        this.statusLine = statusLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
+    public static HttpResponse createDefaultResponse(final String protocolVersion, final HttpHeaders headers) {
+        return new HttpResponse(
+                new StatusLine(protocolVersion, HttpStatusCode.OK),
+                headers,
+                new byte[0]
+        );
+    }
+
+    public void sendForwardResponse(final HttpStatusCode statusCode, final String resourceName) throws IOException {
+        this.statusLine = new StatusLine(this.statusLine.protocolVersion(), statusCode);
+
+        this.body = readResource(resourceName);
 
         final int contentLength = body.length;
         if (contentLength > 0) {
             final String contentType = URLConnection.guessContentTypeFromName(resourceName);
-            responseHeaders.add("Content-Type", contentType + ";charset=utf-8 ");
+            this.headers.add("Content-Type", contentType + ";charset=utf-8 ");
         }
-        responseHeaders.add("Content-Length", contentLength + "");
-
-        return new HttpResponse(statusLine, responseHeaders, body);
+        this.headers.add("Content-Length", contentLength + "");
     }
 
-    public static HttpResponse createRedirectResponse(final String protocolVersion, final String redirectURL, final HttpHeaders responseHeaders) {
-        final StatusLine statusLine = new StatusLine(protocolVersion, HttpStatusCode.FOUND);
-        responseHeaders.add("Location", redirectURL);
-        responseHeaders.add("Content-Length", "0");
-
-        return new HttpResponse(statusLine, responseHeaders, new byte[0]);
+    public void sendRedirectResponse(final String redirectURL) {
+        this.statusLine = new StatusLine(this.statusLine.protocolVersion(), HttpStatusCode.FOUND);
+        this.headers.add("Location", redirectURL);
+        this.headers.add("Content-Length", "0");
     }
 
     @Override

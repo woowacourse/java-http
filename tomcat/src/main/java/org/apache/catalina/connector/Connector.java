@@ -1,14 +1,18 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.HttpHandler;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import org.apache.coyote.HttpHandler;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -16,22 +20,37 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int WORK_QUEUE_CAPACITY = 100;
 
     private final ServerSocket serverSocket;
     private final HttpHandler handler;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector(final HttpHandler handler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, handler);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, handler);
     }
 
-    public Connector(final int port, final int acceptCount, final HttpHandler handler) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(final int port, final int acceptCount, final int maxThreads, final HttpHandler handler) {
+        this(createServerSocket(port, acceptCount), maxThreads, handler);
+    }
+
+    public Connector(final ServerSocket serverSocket, final int maxThreads, final HttpHandler handler) {
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(WORK_QUEUE_CAPACITY),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+        this.serverSocket = serverSocket;
         this.handler = handler;
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    private static ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
@@ -45,7 +64,6 @@ public class Connector implements Runnable {
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -65,16 +83,21 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
         var processor = new Http11Processor(connection, handler);
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            connection.close();
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -82,7 +105,7 @@ public class Connector implements Runnable {
         }
     }
 
-    private int checkPort(final int port) {
+    private static int checkPort(final int port) {
         final var MIN_PORT = 1;
         final var MAX_PORT = 65535;
 
@@ -92,7 +115,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
+    private static int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

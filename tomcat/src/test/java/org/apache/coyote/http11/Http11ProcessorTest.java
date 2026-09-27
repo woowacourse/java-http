@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -199,6 +200,36 @@ class Http11ProcessorTest {
         }
 
         @Test
+        void loggedInUserIsRedirected() {
+            final var response = process(post("/login", "account=gugu&password=password", ""));
+            final var nextResponse = process(get("/login", "yummy_cookie=choco; " + sessionCookie(response)));
+
+            assertRedirect(nextResponse, "/index.html");
+        }
+
+        @Test
+        void storesUserInSession() {
+            final var response = process(post("/login", "account=gugu&password=password", ""));
+            final var sessionId = sessionCookie(response).substring("JSESSIONID=".length());
+
+            final var session = SessionManager.getInstance().findSession(sessionId);
+
+            assertThat(session.getAttribute("user")).isSameAs(InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+        }
+
+        @Test
+        void invalidatedSessionCannotAccessLoginAsAuthenticatedUser() {
+            final var loginResponse = process(post("/login", "account=gugu&password=password", ""));
+            final var cookie = sessionCookie(loginResponse);
+            SessionManager.getInstance().findSession(cookie.substring("JSESSIONID=".length())).invalidate();
+
+            final var response = process(get("/login", cookie));
+
+            assertThat(response).startsWith("HTTP/1.1 200 OK");
+            assertThat(sessionCookie(response)).isNotEqualTo(cookie);
+        }
+
+        @Test
         void registerWithoutRequiredFields() {
             final var response = process(post("/register", "", ""));
 
@@ -215,6 +246,33 @@ class Http11ProcessorTest {
             assertThat(InMemoryUserRepository.findByAccount(account)).isEmpty();
         }
 
+        @Test
+        void logsInWithExistingSession() {
+            final var firstResponse = process(get("/login", ""));
+            final var cookie = sessionCookie(firstResponse);
+            final var response = process(post("/login", "account=gugu&password=password", cookie));
+            final var nextResponse = process(get("/login", cookie));
+
+            assertRedirect(response, "/index.html");
+            assertRedirect(nextResponse, "/index.html");
+        }
+
+        @Test
+        void sessionsAreIsolated() {
+            process(post("/login", "account=gugu&password=password", ""));
+
+            final var response = process(get("/login", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 200 OK");
+        }
+
+        @Test
+        void unknownSessionIsReplaced() {
+            final var response = process(get("/login", "JSESSIONID=unknown-session"));
+
+            assertThat(response).startsWith("HTTP/1.1 200 OK");
+            assertThat(sessionCookie(response)).startsWith("JSESSIONID=").isNotEqualTo("JSESSIONID=unknown-session");
+        }
     }
 
     private String process(final String request) {

@@ -64,4 +64,15 @@ class HttpRequestTest {
         assertThatThrownBy(() -> HttpRequest.read(input)).isInstanceOf(IOException.class);
     }
 
+    @Test
+    void createsSessionOnlyWhenRequested() throws IOException {
+        final var input = new ByteArrayInputStream("GET /login HTTP/1.1\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+        final var request = HttpRequest.read(input);
+
+        assertThat(request.getSession(false)).isNull();
+        final var session = request.getSession(true);
+        assertThat(request.getSession(false)).isSameAs(session);
+        assertThat(request.getSession(true)).isSameAs(session);
+        session.invalidate();
+    }
 }

@@ -18,6 +18,6 @@ public class StatusLine {
 
     @Override
     public String toString() {
-        return httpVersion + " " + statusCode.getCode() + " " + statusCode.getReasonPhrase() + CRLF;
+        return httpVersion + " " + statusCode.getCode() + " " + statusCode.getReasonPhrase() + " " + CRLF;
     }
 }

@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
@@ -13,19 +14,17 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final Map<String, String> parameters;
+    private Session session;
 
-    public static HttpRequest parse(String requestHead, String body) {
+    public static HttpRequest parse(String requestHead) {
         String[] requestLines = requestHead.split(CRLF);
 
         RequestLine requestLine = RequestLine.parse(requestLines[0]);
 
         Map<String, String> headers = parseHeader(requestLines);
         Map<String, String> parameters = new HashMap<>();
-        if(requestLine.getHttpMethod() == HttpMethod.POST){
-            parameters = parseFormParameters(body);
-        }
 
-        return new HttpRequest(requestLine, headers, parameters);
+        return new HttpRequest(requestLine, headers, parameters, null);
     }
 
     private static Map<String, String> parseHeader(String[] requestLines) {
@@ -43,16 +42,16 @@ public class HttpRequest {
         return headers;
     }
 
-    private HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> parameters) {
+    private HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> parameters,
+                        Session session) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.parameters = parameters;
+        this.session = session;
     }
 
-    private static Map<String, String> parseFormParameters(String queryString) {
-        Map<String, String> encodedParameters = new HashMap<>();
-
-        String[] queryPairs = queryString.split("&");
+    public void parseBody(String requestBody) {
+        String[] queryPairs = requestBody.split("&");
         for (String queryPair : queryPairs) {
             String[] keyAndValue = queryPair.split("=", 2);
 
@@ -60,13 +59,21 @@ public class HttpRequest {
                 String key = URLDecoder.decode(keyAndValue[0], StandardCharsets.UTF_8);
                 String value = URLDecoder.decode(keyAndValue[1], StandardCharsets.UTF_8);
 
-                encodedParameters.put(key, value);
+                parameters.put(key, value);
             }
         }
-        return encodedParameters;
     }
 
-    public HttpCookie getCookie(){
+    public Integer getContentLength() {
+        String contentLength = headers.get("Content-Length");
+
+        if (contentLength == null) {
+            return null;
+        }
+        return Integer.parseInt(contentLength);
+    }
+
+    public HttpCookie getCookie() {
         String cookieLine = headers.getOrDefault("Cookie", null);
         return HttpCookie.parse(cookieLine);
     }
@@ -75,11 +82,19 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public String getParameters(String name){
+    public String getParameters(String name) {
         return parameters.get(name);
     }
 
     public String getRequestTarget() {
         return requestLine.getRequestTarget();
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

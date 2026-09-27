@@ -1,6 +1,7 @@
 package org.apache.coyote.response;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
@@ -8,23 +9,25 @@ public class HttpResponse {
     private static final String LOCATION = "Location";
     public static final String CRLF = "\r\n";
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final Map<String, String> headers;
-    private final String body;
+    private String body;
 
-    public static HttpResponse build(Map<String, String> headers, String body){
+    public static HttpResponse create() {
+        Map<String, String> headers = new HashMap<>();
         StatusCode statusCode = StatusCode.OK;
-        if (headers.containsKey(LOCATION)) {
-            statusCode = StatusCode.FOUND;
-        }
 
-        return new HttpResponse(StatusLine.build(statusCode), headers, body);
+        return new HttpResponse(StatusLine.build(statusCode), headers, "");
     }
 
     private HttpResponse(StatusLine statusLine, Map<String, String> headers, String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
+    }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 
     public String getResponse() {
@@ -46,5 +49,14 @@ public class HttpResponse {
         response.append(body);
 
         return response.toString();
+    }
+
+    public void sendRedirect(String location) {
+        statusLine = StatusLine.build(StatusCode.FOUND);
+        headers.put(LOCATION, location);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

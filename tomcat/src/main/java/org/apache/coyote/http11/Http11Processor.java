@@ -1,25 +1,20 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticController;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.HttpMethod;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
@@ -29,20 +24,17 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public static final String CONTENT_TYPE_HEADER = "Content-Type";
-    public static final String CONTENT_LENGTH = "Content-Length";
     public static final String SET_COOKIE = "Set-Cookie";
-    private static final String LOCATION = "Location";
-
-    public static final String HOME_PATH = "/";
-    public static final String LOGIN_PATH = "/login";
     public static final String CRLF = "\r\n";
-    public static final String HTML_EXTENSION = ".html";
-    public static final String REGISTER_PATH = "/register";
-    public static final String INDEX_HTML = "/index.html";
+
+    Map<String, Controller> controllers = Map.of(
+            "/login", new LoginController(),
+            "/register", new RegisterController(),
+            "/", new HomeController()
+    );
 
     private final Socket connection;
     private final SessionManager sessionManager;
@@ -67,68 +59,29 @@ public class Http11Processor implements Runnable, Processor {
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             String requestHead = getRequestHead(bufferedReader);
-            String[] requestHeadLines = requestHead.split(CRLF);
 
-            Integer contentLength = getContentLength(requestHeadLines);
-            String requestBody = getRequestBody(bufferedReader, contentLength);
+            HttpRequest request = HttpRequest.parse(requestHead);
+            String requestBody = getRequestBody(bufferedReader, request.getContentLength());
+            request.parseBody(requestBody);
 
-            HttpRequest request = HttpRequest.parse(requestHead, requestBody);
-
-            HttpMethod httpMethod = request.getHttpMethod();
             String requestUri = request.getRequestTarget();
 
-            HttpCookie cookie = request.getCookie();
+            HttpResponse response = HttpResponse.create();
+            response.addHeader(CONTENT_TYPE_HEADER, getContentType(requestUri));
+            Session session = getOrCreateJSessionId(request.getCookie(), response);
+            request.setSession(session);
 
-            Map<String, String> responseHeaders = new LinkedHashMap<>();
-            responseHeaders.put(CONTENT_TYPE_HEADER, getContentType(requestUri));
-            Session session = getOrCreateJSessionId(cookie, responseHeaders);
+            Controller controller = controllers.getOrDefault(request.getRequestTarget(), new StaticController());
+            controller.service(request, response);
 
-            if (HttpMethod.POST.equals(httpMethod)) {
-
-                if (requestUri.equals(REGISTER_PATH)) {
-                    User user = new User(request.getParameters("account"), request.getParameters("password"),
-                            request.getParameters("email"));
-
-                    InMemoryUserRepository.save(user);
-                    responseHeaders.put(LOCATION, INDEX_HTML);
-                }
-
-                if (requestUri.equals(LOGIN_PATH)) {
-                    String account = request.getParameters("account");
-                    String password = request.getParameters("password");
-
-                    Optional<User> authenticatedUser = authenticate(account, password);
-                    if (authenticatedUser.isPresent()) {
-                        User user = authenticatedUser.get();
-                        session.setAttribute("user", user);
-
-                        log.info("로그인 성공! 아이디 : {}", user.getAccount());
-                        responseHeaders.put(LOCATION, INDEX_HTML);
-                    } else {
-                        responseHeaders.put(LOCATION, "/401.html");
-                    }
-
-                }
-            }
-
-            if (HttpMethod.GET.equals(httpMethod) && LOGIN_PATH.equals(requestUri)) {
-                User user = (User) session.getAttribute("user");
-                if (user != null) {
-                    responseHeaders.put(LOCATION, INDEX_HTML);
-                }
-            }
-
-            final String responseBody = getResponseBody(requestUri);
-            if (responseBody == null) {
-                return;
-            }
-
-            HttpResponse response = HttpResponse.build(responseHeaders, responseBody);
             outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -146,40 +99,6 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer, 0, readCount);
     }
 
-    private Session getOrCreateJSessionId(HttpCookie cookie, Map<String, String> headers) throws IOException {
-        if (!cookie.contains("JSESSIONID")) {
-            return createSession(headers);
-        }
-
-        String jSessionId = cookie.getJSessionId();
-        Session session = sessionManager.findSession(jSessionId);
-
-        if (session == null) {
-            return createSession(headers);
-        }
-
-        return session;
-    }
-
-    private Session createSession(Map<String, String> headers) {
-        Session session;
-        String sessionId = UUID.randomUUID().toString();
-        headers.put(SET_COOKIE, "JSESSIONID=" + sessionId + ";");
-
-        session = new Session(sessionId);
-        sessionManager.add(session);
-        return session;
-    }
-
-    private Integer getContentLength(String[] requestHeadLines) {
-        for (String requestHeadLine : requestHeadLines) {
-            if (requestHeadLine.contains(CONTENT_LENGTH + ":")) {
-                return Integer.parseInt(requestHeadLine.split(" ")[1]);
-            }
-        }
-        return null;
-    }
-
     private String getRequestHead(BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
 
@@ -192,40 +111,31 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private Optional<User> authenticate(String account, String password) {
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
+    private Session getOrCreateJSessionId(HttpCookie cookie, HttpResponse response) throws IOException {
+        if (!cookie.contains("JSESSIONID")) {
+            return createSession(response);
+        }
+
+        String jSessionId = cookie.getJSessionId();
+        Session session = sessionManager.findSession(jSessionId);
+
+        if (session == null) {
+            return createSession(response);
+        }
+
+        return session;
+    }
+
+    private Session createSession(HttpResponse response) {
+        Session session = sessionManager.createSession();
+        response.addHeader(SET_COOKIE, "JSESSIONID=" + session.getId() + ";");
+        return session;
     }
 
     private String getContentType(String requestUri) {
         if (requestUri.endsWith(".css")) {
-            return "text/css; charset=utf-8";
+            return "text/css;charset=utf-8 ";
         }
-        return "text/html; charset=utf-8";
-    }
-
-    private String getResponseBody(String requestUri) throws URISyntaxException, IOException {
-        if (Objects.equals(requestUri, HOME_PATH)) {
-            return "Hello world!";
-        }
-
-        if (requestUri.equals(LOGIN_PATH)) {
-            requestUri = LOGIN_PATH + HTML_EXTENSION;
-        }
-
-        if (requestUri.equals(REGISTER_PATH)) {
-            requestUri = REGISTER_PATH + HTML_EXTENSION;
-        }
-
-        final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-        if (resource == null) {
-            log.warn("존재하지 않는 경로 : {}", requestUri);
-            return null;
-        }
-
-        final Path path = Paths.get(resource.toURI());
-
-        byte[] bytes = Files.readAllBytes(path);
-        return new String(bytes);
+        return "text/html;charset=utf-8 ";
     }
 }

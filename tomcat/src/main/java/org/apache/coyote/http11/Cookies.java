@@ -16,7 +16,10 @@ public class Cookies {
             final String[] nameAndValue = cookie.split("=", 2);
 
             if (nameAndValue.length == 2) {
-                cookies.put(nameAndValue[0].strip(), nameAndValue[1].strip());
+                cookies.put(
+                        nameAndValue[0].strip(),
+                        nameAndValue[1].strip()
+                );
             }
         }
     }

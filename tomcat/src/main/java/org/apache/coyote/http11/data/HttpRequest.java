@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.data;
 
-import static org.apache.coyote.http11.data.SessionManager.JSESSIONID_COOKIE_NAME;
+import static org.apache.catalina.session.SessionManager.JSESSIONID_COOKIE_NAME;
 
+import com.techcourse.Application;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.InvalidHttpRequestException;
-import org.apache.coyote.http11.config.TomcatServerConfiguration;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -104,7 +106,7 @@ public class HttpRequest {
 
         while ((current = inputStream.read()) != -1) {
             if (previous == '\r' && current == '\n') {
-                return line.toString(TomcatServerConfiguration.DEFAULT_CHARSET);
+                return line.toString(Application.DEFAULT_CHARSET);
             }
 
             if (previous != -1) {
@@ -140,7 +142,7 @@ public class HttpRequest {
             throw new IOException("Request body를 모두 읽지 못했습니다.");
         }
 
-        final String body = new String(bodyBytes, TomcatServerConfiguration.DEFAULT_CHARSET).trim();
+        final String body = new String(bodyBytes, Application.DEFAULT_CHARSET).trim();
         final String[] bodySplit = body.split("&");
 
         final Map<String, String> bodyMap = new HashMap<>();
@@ -151,7 +153,7 @@ public class HttpRequest {
                 throw new IOException("잘못된 HTTP 요청 바디 형식입니다: " + body);
             }
 
-            bodyMap.put(keyValue[0], URLDecoder.decode(keyValue[1], TomcatServerConfiguration.DEFAULT_CHARSET));
+            bodyMap.put(keyValue[0], URLDecoder.decode(keyValue[1], Application.DEFAULT_CHARSET));
         }
 
         return bodyMap;

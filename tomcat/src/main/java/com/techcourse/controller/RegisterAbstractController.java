@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

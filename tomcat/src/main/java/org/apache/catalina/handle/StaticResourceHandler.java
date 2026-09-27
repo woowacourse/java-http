@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handle;
+package org.apache.catalina.handle;
 
 import java.nio.charset.Charset;
 import org.apache.coyote.http11.data.HttpRequest;

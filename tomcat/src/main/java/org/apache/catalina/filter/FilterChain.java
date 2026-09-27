@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.filter;
+package org.apache.catalina.filter;
 
 import java.util.function.BiConsumer;
 import org.apache.coyote.http11.data.HttpRequest;
@@ -21,6 +21,7 @@ public class FilterChain {
     public void doFilter(HttpRequest request, HttpResponse response) {
         if (currentFilterIndex < filters.length) {
             filters[currentFilterIndex++].doFilter(request, this);
+            return;
         }
 
         target.accept(request, response);

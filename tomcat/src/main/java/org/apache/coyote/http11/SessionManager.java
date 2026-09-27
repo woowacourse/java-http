@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
-    private final Map<String, Session> SESSIONS = new HashMap<>();
+    private final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public void add(final Session session) {
         SESSIONS.put(session.getId(), session);

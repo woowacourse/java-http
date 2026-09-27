@@ -37,7 +37,7 @@
 ### HTTP 응답
 
 - [x] `HttpResponse`가 상태 줄, 헤더, 빈 줄, 본문 순서로 응답을 출력한다.
-- [ ] 정적 파일 응답의 `Content-Type`과 UTF-8 바이트 기준 `Content-Length`를 설정한다.
+- [x] 정적 파일 응답의 `Content-Type`과 UTF-8 바이트 기준 `Content-Length`를 설정한다.
 - [x] 리다이렉트할 때 `302`와 `Location`을, 새 세션이 필요할 때 `Set-Cookie`를 설정한다.
 
 ### 컨트롤러와 요청 매핑

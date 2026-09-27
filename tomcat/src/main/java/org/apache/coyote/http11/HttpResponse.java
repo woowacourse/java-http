@@ -39,6 +39,14 @@ public record HttpResponse(OutputStream output, String setCookie) {
         output.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
+    public void sendNotFound() throws IOException {
+        String response = "HTTP/1.1 404 Not Found\r\n"
+                + "Content-Length: 0\r\n"
+                + cookieHeader()
+                + "\r\n";
+        output.write(response.getBytes(StandardCharsets.UTF_8));
+    }
+
     private String cookieHeader() {
         if (setCookie == null) {
             return "";

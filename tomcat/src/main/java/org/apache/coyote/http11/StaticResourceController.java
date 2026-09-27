@@ -15,7 +15,8 @@ public class StaticResourceController extends AbstractController {
         String resourcePath = "static" + path;
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resource == null) {
-                throw new IOException("정적 파일을 찾을 수 없습니다: " + resourcePath);
+                response.sendNotFound();
+                return;
             }
             String body = new String(resource.readAllBytes(), StandardCharsets.UTF_8);
             response.send(contentType(path), body);
@@ -25,6 +26,12 @@ public class StaticResourceController extends AbstractController {
     private String contentType(String path) {
         if (path.endsWith(".css")) {
             return "text/css;charset=utf-8";
+        }
+        if (path.endsWith(".js")) {
+            return "text/javascript;charset=utf-8";
+        }
+        if (path.endsWith(".svg")) {
+            return "image/svg+xml;charset=utf-8";
         }
         return "text/html;charset=utf-8";
     }

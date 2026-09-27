@@ -53,6 +53,6 @@
 - [x] `RequestLine`이 `GET /login HTTP/1.1`을 메서드, 경로, 버전으로 나누는 테스트
 - [x] `HttpRequest`가 헤더와 `Content-Length`가 있는 POST 본문을 읽는 테스트
 - [x] `HttpRequest`가 GET 쿼리와 POST 폼 파라미터를 디코딩하는 테스트
-- [ ] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
+- [x] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
 - [ ] `RequestMapping`과 `AbstractController`가 경로와 메서드에 맞게 호출하는 테스트
 - [ ] 기존 `Http11ProcessorTest`가 계속 통과하는지 확인

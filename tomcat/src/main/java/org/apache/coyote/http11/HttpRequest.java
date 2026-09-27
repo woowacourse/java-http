@@ -2,12 +2,12 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.exception.HttpException;
 
 public class HttpRequest {
 
@@ -20,7 +20,7 @@ public class HttpRequest {
     private final HttpCookie cookies;
     private final String body;
 
-    public HttpRequest(final InputStream inputStream) throws IOException {
+    public HttpRequest(final InputStream inputStream) {
         final BufferedInputStream input = toBufferedInputStream(inputStream);
 
         this.requestLine = readRequestLine(input);
@@ -60,27 +60,39 @@ public class HttpRequest {
         return new BufferedInputStream(inputStream);
     }
 
-    private RequestLine readRequestLine(final InputStream input) throws IOException {
-        final String rawRequestLine = readLine(input);
+    private RequestLine readRequestLine(final InputStream input) {
+        final String rawRequestLine;
+        try {
+            rawRequestLine = readLine(input);
+        } catch (IOException e) {
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "요청 라인을 읽지 못했습니다.", e);
+        }
         if (rawRequestLine == null) {
-            throw new EOFException("요청 라인을 읽기 전에 연결이 종료됐습니다.");
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "요청 라인을 읽기 전에 연결이 종료됐습니다.");
         }
         return new RequestLine(rawRequestLine);
     }
 
-    private HttpHeaders readHeaders(final InputStream input) throws IOException {
+    private HttpHeaders readHeaders(final InputStream input) {
         final List<String> headerLines = new ArrayList<>();
-        String line;
-        while ((line = readLine(input)) != null && !line.isEmpty()) {
+        while (true) {
+            final String line;
+            try {
+                line = readLine(input);
+            } catch (IOException e) {
+                throw new HttpException(HttpException.Status.BAD_REQUEST, "요청 헤더를 읽지 못했습니다.", e);
+            }
+            if (line == null) {
+                throw new HttpException(HttpException.Status.BAD_REQUEST, "요청 헤더를 모두 읽기 전에 연결이 종료됐습니다.");
+            }
+            if (line.isEmpty()) {
+                return new HttpHeaders(headerLines);
+            }
             headerLines.add(line);
         }
-        if (line == null) {
-            throw new EOFException("요청 헤더를 모두 읽기 전에 연결이 종료됐습니다.");
-        }
-        return new HttpHeaders(headerLines);
     }
 
-    private int parseContentLength() throws IOException {
+    private int parseContentLength() {
         final String contentLength = getHeader("Content-Length");
         if (contentLength == null) {
             return 0;
@@ -90,19 +102,26 @@ public class HttpRequest {
         try {
             length = Integer.parseInt(contentLength);
         } catch (NumberFormatException e) {
-            throw new IOException("잘못된 Content-Length입니다: " + contentLength, e);
+            throw new HttpException(HttpException.Status.BAD_REQUEST,
+                    "숫자가 아닌 Content-Length입니다: " + contentLength, e);
         }
         if (length < 0) {
-            throw new IOException("잘못된 Content-Length입니다: " + contentLength);
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "음수 Content-Length입니다: " + contentLength);
         }
         return length;
     }
 
-    private String readBody(final InputStream input, final int contentLength) throws IOException {
-        final byte[] body = input.readNBytes(contentLength);
+    private String readBody(final InputStream input, final int contentLength) {
+        final byte[] body;
+        try {
+            body = input.readNBytes(contentLength);
+        } catch (IOException e) {
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "요청 본문을 읽지 못했습니다.", e);
+        }
         if (body.length < contentLength) {
-            throw new EOFException("요청 본문을 모두 읽기 전에 연결이 종료됐습니다. expected="
-                    + contentLength + ", actual=" + body.length);
+            throw new HttpException(HttpException.Status.BAD_REQUEST,
+                    "요청 본문을 모두 읽기 전에 연결이 종료됐습니다. expected="
+                            + contentLength + ", actual=" + body.length);
         }
         return new String(body, StandardCharsets.UTF_8);
     }

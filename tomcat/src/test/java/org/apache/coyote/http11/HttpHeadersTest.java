@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.util.List;
+import org.apache.coyote.http11.exception.HttpException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ class HttpHeadersTest {
 
     @Test
     @DisplayName("헤더 이름의 대소문자를 구분하지 않고 값을 조회한다")
-    void getsHeaderRegardlessOfNameCase() throws IOException {
+    void getsHeaderRegardlessOfNameCase() {
         final HttpHeaders headers = new HttpHeaders(List.of(
                 "Host: localhost:8080",
                 "Content-Type: text/plain"));
@@ -25,6 +25,7 @@ class HttpHeadersTest {
     @DisplayName("콜론으로 구분되지 않은 헤더를 거부한다")
     void rejectsHeaderWithoutColon() {
         assertThatThrownBy(() -> new HttpHeaders(List.of("Host localhost")))
-                .isInstanceOf(IOException.class);
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("요청 헤더");
     }
 }

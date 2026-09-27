@@ -1,12 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.exception.HttpException;
 
 public class StaticResourceController extends AbstractController {
 
@@ -40,7 +39,7 @@ public class StaticResourceController extends AbstractController {
     private String getResourcePath(final String path) {
         final URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
-            throw new UncheckedServletException(new FileNotFoundException("리소스를 찾을 수 없습니다: " + path));
+            throw new HttpException(HttpException.Status.NOT_FOUND, "리소스를 찾을 수 없습니다: " + path);
         }
         return resource.getPath();
     }

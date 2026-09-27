@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.exception.HttpException;
+
 public class RequestLine {
 
     private final String method;
@@ -8,12 +10,12 @@ public class RequestLine {
 
     public RequestLine(final String requestLine) {
         if (requestLine == null || requestLine.isBlank()) {
-            throw new IllegalArgumentException("요청 라인은 비어 있을 수 없습니다.");
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "요청 라인은 비어 있을 수 없습니다.");
         }
 
         final String[] parts = requestLine.trim().split("\\s+");
         if (parts.length != 3) {
-            throw new IllegalArgumentException("잘못된 요청 라인입니다: " + requestLine);
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "잘못된 요청 라인입니다: " + requestLine);
         }
 
         this.method = parts[0];

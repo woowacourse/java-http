@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.exception.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,6 +103,10 @@ public class LoginController extends AbstractController {
         if (keyValue.length < 2) {
             return;
         }
-        formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+        try {
+            formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+        } catch (IllegalArgumentException e) {
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "잘못된 폼 데이터입니다.", e);
+        }
     }
 }

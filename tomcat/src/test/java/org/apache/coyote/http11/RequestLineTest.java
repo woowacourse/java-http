@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.exception.HttpException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -22,6 +23,7 @@ class RequestLineTest {
     @DisplayName("세 부분으로 구성되지 않은 요청 라인은 거부한다")
     void rejectsRequestLineWithoutThreeParts() {
         assertThatThrownBy(() -> new RequestLine("GET /"))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("요청 라인");
     }
 }

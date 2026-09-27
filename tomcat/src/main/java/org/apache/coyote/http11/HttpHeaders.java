@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.coyote.http11.exception.HttpException;
 
 public class HttpHeaders {
 
@@ -16,7 +17,7 @@ public class HttpHeaders {
     public HttpHeaders() {
     }
 
-    public HttpHeaders(final List<String> headerLines) throws IOException {
+    public HttpHeaders(final List<String> headerLines) {
         for (String line : headerLines) {
             addHeader(line);
         }
@@ -40,15 +41,15 @@ public class HttpHeaders {
         }
     }
 
-    private void addHeader(final String line) throws IOException {
+    private void addHeader(final String line) {
         final int separator = line.indexOf(':');
         if (separator <= 0) {
-            throw new IOException("잘못된 요청 헤더입니다: " + line);
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "잘못된 요청 헤더입니다: " + line);
         }
 
         final String name = line.substring(0, separator).trim();
         if (name.isEmpty()) {
-            throw new IOException("잘못된 요청 헤더입니다: " + line);
+            throw new HttpException(HttpException.Status.BAD_REQUEST, "잘못된 요청 헤더입니다: " + line);
         }
         final String value = line.substring(separator + 1).trim();
         putHeader(name, value);

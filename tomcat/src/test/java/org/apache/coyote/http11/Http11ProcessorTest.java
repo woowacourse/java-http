@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 
@@ -37,6 +38,100 @@ class Http11ProcessorTest {
                 "Hello world!");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void respondsWithBadRequestWhenRequestLineIsInvalid() {
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 extra",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request ")
+                .contains("\r\n\r\nBad Request");
+    }
+
+    @Test
+    void respondsWithBadRequestWhenRequestBodyIsIncomplete() {
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: 10",
+                "",
+                "a=b");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request ")
+                .contains("\r\n\r\nBad Request");
+    }
+
+    @Test
+    void respondsWithInternalServerErrorWhenUnexpectedRequestParsingExceptionOccurs() {
+        final var socket = new StubSocket() {
+            @Override
+            public InputStream getInputStream() {
+                return new InputStream() {
+                    @Override
+                    public int read() {
+                        throw new IllegalStateException("요청을 읽을 수 없습니다.");
+                    }
+                };
+            }
+        };
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 500 Internal Server Error ")
+                .contains("\r\n\r\nInternal Server Error");
+    }
+
+    @Test
+    void respondsWithBadRequestWhenFormDataEncodingIsInvalid() {
+        final String body = "account=%";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request ")
+                .contains("\r\n\r\nBad Request");
+    }
+
+    @Test
+    void respondsWithNotFoundWhenStaticResourceDoesNotExist() {
+        final String httpRequest = String.join("\r\n",
+                "GET /does-not-exist.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 404 Not Found ")
+                .contains("\r\n\r\nNot Found");
     }
 
     @Test

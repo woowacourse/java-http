@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
 import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import org.apache.coyote.http11.exception.HttpException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -59,8 +59,27 @@ class HttpRequestTest {
     }
 
     @Test
-    @DisplayName("Content-Length보다 본문이 짧으면 EOF 예외를 던진다")
-    void throwsEofWhenRequestBodyEndsBeforeContentLength() {
+    @DisplayName("요청 라인을 읽기 전에 연결이 종료되면 전용 예외를 던진다")
+    void throwsWhenRequestLineIsIncomplete() {
+        assertThatThrownBy(() -> new HttpRequest(new ByteArrayInputStream(new byte[0])))
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("요청 라인");
+    }
+
+    @Test
+    @DisplayName("헤더를 모두 읽기 전에 연결이 종료되면 전용 예외를 던진다")
+    void throwsWhenHeadersAreIncomplete() {
+        final String request = "GET / HTTP/1.1\r\nHost: localhost:8080\r\n";
+
+        assertThatThrownBy(() -> new HttpRequest(
+                new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8))))
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("요청 헤더");
+    }
+
+    @Test
+    @DisplayName("Content-Length보다 본문이 짧으면 본문 미완료 예외를 던진다")
+    void throwsWhenRequestBodyIsIncomplete() {
         final String body = "short";
         final byte[] fullRequest = createRequest(body + "-tail");
         final String requestText = new String(fullRequest, StandardCharsets.ISO_8859_1);
@@ -68,21 +87,24 @@ class HttpRequestTest {
         final byte[] incompleteRequest = Arrays.copyOf(fullRequest, bodyStart + body.length());
 
         assertThatThrownBy(() -> new HttpRequest(new ByteArrayInputStream(incompleteRequest)))
-                .isInstanceOf(EOFException.class);
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("요청 본문");
     }
 
     @Test
     @DisplayName("숫자가 아닌 Content-Length를 거부한다")
     void rejectsNonNumericContentLength() {
         assertThatThrownBy(() -> new HttpRequest(new ByteArrayInputStream(createRequest("abc", "invalid"))))
-                .isInstanceOf(IOException.class);
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("Content-Length");
     }
 
     @Test
     @DisplayName("음수 Content-Length를 거부한다")
     void rejectsNegativeContentLength() {
         assertThatThrownBy(() -> new HttpRequest(new ByteArrayInputStream(createRequest("", "-1"))))
-                .isInstanceOf(IOException.class);
+                .isInstanceOf(HttpException.class)
+                .hasMessageContaining("Content-Length");
     }
 
     private byte[] createRequest(final String body) {

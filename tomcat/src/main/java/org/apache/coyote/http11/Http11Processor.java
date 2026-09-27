@@ -79,7 +79,10 @@ public class Http11Processor implements Runnable, Processor {
             skipHeaders(reader);
 
             if (LOGIN_PATH.equals(path) && !queryString.isEmpty()) {
-                login(queryString);
+                final String location = login(queryString) ? "/index.html" : "/401.html";
+                outputStream.write(redirect(location).getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
             }
 
             final ResponseData responseData = loadResponseData(path);
@@ -150,9 +153,9 @@ public class Http11Processor implements Runnable, Processor {
                 new String(responseBody, StandardCharsets.UTF_8));
     }
 
-    private void login(final String queryString) {
+    private boolean login(final String queryString) {
         if (queryString.isEmpty()) {
-            return;
+            return false;
         }
 
         final Map<String, String> parameters = Arrays.stream(queryString.split("&"))
@@ -166,13 +169,25 @@ public class Http11Processor implements Runnable, Processor {
         final String password = parameters.get("password");
 
         if (account == null || password == null) {
-            return;
+            return false;
         }
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("로그인한 회원: {}", user.get());
+            log.info("로그인한 회원: {}", account);
+            return true;
         }
+
+        return false;
+    }
+
+    private String redirect(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                "");
     }
 }

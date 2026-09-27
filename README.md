@@ -58,3 +58,10 @@
 - [x] `HttpResponse`가 200 응답과 302 리다이렉트를 출력하는 테스트
 - [x] `RequestMapping`과 `AbstractController`가 경로와 메서드에 맞게 호출하는 테스트
 - [x] 기존 `Http11ProcessorTest`가 계속 통과하는지 확인
+
+## 3단계 리뷰 후 리팩터링 목록
+
+- [x] URI와 Controller 등록을 `Http11Processor`에서 `RequestMapping.forSession()`으로 옮긴다. 새 URI를 추가할 때 Processor를 수정하지 않고, 요청별
+  `Session`을 로그인 Controller에 전달한다.
+- [x] `HttpResponse`의 응답 생성 방식을 검토한다. 현재는 상태별 메서드가 동작을 읽기 쉽게 보여주므로 유지한다. 상태 코드나 헤더 조합이 늘어나 중복 변경이 반복되면 공통 작성 메서드를 추출한다.
+- [x] 현재 사용하지 않는 `Session.removeAttribute()`와 `Session.invalidate()`를 제거한다. 필요해질 때 실제 사용 사례와 함께 추가한다.

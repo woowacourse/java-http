@@ -8,6 +8,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class HandlerMappingTest {
 
+    private static final String CONTROLLER_PACKAGE = "com.techcourse.controller";
+    private final HandlerMapping handlerMapping = new HandlerMapping(CONTROLLER_PACKAGE);
+
     @ParameterizedTest
     @ValueSource(strings = {"/index", "/login", "/register"})
     void 등록된_경로의_컨트롤러를_찾는다(final String path) {
@@ -15,7 +18,7 @@ class HandlerMappingTest {
         final HttpRequest request = createRequest(path);
 
         // then
-        assertThat(new HandlerMapping().getController(request)).isPresent();
+        assertThat(handlerMapping.getController(request)).isPresent();
     }
 
     @ParameterizedTest
@@ -25,7 +28,7 @@ class HandlerMappingTest {
         final HttpRequest request = createRequest(path);
 
         // then
-        assertThat(new HandlerMapping().getController(request)).isEmpty();
+        assertThat(handlerMapping.getController(request)).isEmpty();
     }
 
     private HttpRequest createRequest(final String path) {

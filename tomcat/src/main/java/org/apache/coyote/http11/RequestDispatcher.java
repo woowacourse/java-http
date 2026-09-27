@@ -6,9 +6,13 @@ import org.apache.coyote.controller.Controller;
 
 public class RequestDispatcher {
 
-    private final HandlerMapping handlerMapping = new HandlerMapping();
+    private final HandlerMapping handlerMapping;
     private final StaticResourceHandler staticResourceHandler =
         new StaticResourceHandler();
+
+    public RequestDispatcher(final HandlerMapping handlerMapping) {
+        this.handlerMapping = handlerMapping;
+    }
 
     public void dispatch(final HttpRequest request, final HttpResponse response)
         throws Exception {

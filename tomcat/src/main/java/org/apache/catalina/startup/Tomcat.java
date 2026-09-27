@@ -1,6 +1,8 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.HandlerMapping;
+import org.apache.coyote.http11.RequestDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +12,14 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
+    private final RequestDispatcher requestDispatcher;
+
+    public Tomcat(final RequestDispatcher requestDispatcher) {
+        this.requestDispatcher = requestDispatcher;
+    }
+
     public void start() {
-        var connector = new Connector();
+        final Connector connector = new Connector(requestDispatcher);
         connector.start();
 
         try {

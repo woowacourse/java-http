@@ -15,12 +15,13 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestDispatcher REQUEST_DISPATCHER = new RequestDispatcher();
 
     private final Socket connection;
+    private final RequestDispatcher requestDispatcher;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestDispatcher requestDispatcher) {
         this.connection = connection;
+        this.requestDispatcher = requestDispatcher;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = readRequest(bufferedReader);
             final HttpResponse response = HttpResponse.init();
 
-            REQUEST_DISPATCHER.dispatch(request, response);
+            requestDispatcher.dispatch(request, response);
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {

@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,19 +22,30 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
+    private final RequestMapping requestMapping;
     private volatile boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
+        this(new RequestMapping());
+    }
+
+    public Connector(final RequestMapping requestMapping) {
+        this(requestMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
     public Connector(final int port, final int acceptCount) {
-        this(port, acceptCount, DEFAULT_MAX_THREADS);
+        this(new RequestMapping(), port, acceptCount, DEFAULT_MAX_THREADS);
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this(new RequestMapping(), port, acceptCount, maxThreads);
+    }
+
+    public Connector(final RequestMapping requestMapping, final int port,
+                     final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
+        this.requestMapping = requestMapping;
         this.stopped = false;
     }
 
@@ -75,7 +87,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, requestMapping);
         executorService.execute(processor);
     }
 

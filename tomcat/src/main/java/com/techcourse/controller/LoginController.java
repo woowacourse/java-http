@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

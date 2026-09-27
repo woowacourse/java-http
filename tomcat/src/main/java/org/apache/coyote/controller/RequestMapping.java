@@ -10,8 +10,11 @@ public class RequestMapping {
     private final Controller defaultController;
 
     public RequestMapping() {
-        controllers.put("/login", new LoginController());
-        controllers.put("/register", new RegisterController());
+        this(Map.of());
+    }
+
+    public RequestMapping(Map<String, Controller> controllers) {
+        this.controllers.putAll(controllers);
 
         defaultController = new StaticResourceController();
     }

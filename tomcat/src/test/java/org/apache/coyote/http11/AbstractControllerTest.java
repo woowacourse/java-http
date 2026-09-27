@@ -79,10 +79,13 @@ class AbstractControllerTest {
         String raw = method + " /example HTTP/1.1\r\n\r\n";
         ByteArrayInputStream input = new ByteArrayInputStream(raw.getBytes(StandardCharsets.UTF_8));
         HttpRequest request = new HttpRequestParser(input).parse();
+
         HttpResponse response = new HttpResponse();
         controller.service(request, response);
+
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         response.writeTo(output);
+
         return output.toString(StandardCharsets.UTF_8);
     }
 }

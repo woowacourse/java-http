@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.HttpRequestHandler;
+import com.techcourse.controller.RequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -17,10 +19,9 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
 
         // when
-        processor.process(socket);
+        new HttpRequestHandler(new RequestMapping()).handle(new Http11Processor(socket));
 
         // then
         var expected = String.join("\r\n",
@@ -44,10 +45,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
 
         // when
-        processor.process(socket);
+        new HttpRequestHandler(new RequestMapping()).handle(new Http11Processor(socket));
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

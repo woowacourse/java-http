@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 public class Connector implements Runnable {
 
@@ -17,14 +18,16 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final Consumer<Http11Processor> connectionHandler;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(Consumer<Http11Processor> connectionHandler) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, connectionHandler);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, Consumer<Http11Processor> connectionHandler) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.connectionHandler = connectionHandler;
         this.stopped = false;
     }
 
@@ -66,8 +69,15 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
+        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        new Thread(() -> {
+            try (connection) {
+                connectionHandler.accept(processor);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }).start();
     }
 
     public void stop() {

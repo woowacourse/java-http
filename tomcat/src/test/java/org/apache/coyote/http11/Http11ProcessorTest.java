@@ -62,4 +62,23 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void servesStaticResourceWhenControllerIsNotMapped() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = new Http11Processor(socket, new SessionManager());
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
+    }
 }

@@ -39,6 +39,11 @@ public class Http11Processor implements Runnable, Processor {
             String path = request.getPath();
 
             Controller controller = ControllerMapper.getController(path);
+            if (controller == null) {
+                response.forward(getDefaultPath(path));
+                return;
+            }
+
             String sessionId = request.getCookies().getCookie("JSESSIONID");
             Session session = sessionManager.findSession(sessionId);
             if (session == null) {

@@ -15,8 +15,7 @@ public class Application {
         requestMapping.addController("/login", new LoginController());
 
         final var tomcat = new Tomcat();
-        tomcat.addHandler((request, response) ->
+        tomcat.start((request, response) ->
                 requestMapping.getController(request).service(request, response));
-        tomcat.start();
     }
 }

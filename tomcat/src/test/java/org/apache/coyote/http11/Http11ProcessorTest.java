@@ -50,7 +50,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 200 OK \r\n")
+                .startsWith("HTTP/1.1 200 OK\r\n")
                 .contains("Content-Type: text/html;charset=utf-8")
                 .contains("Set-Cookie: JSESSIONID=")
                 .endsWith(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
@@ -74,8 +74,8 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).startsWith(String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 "));
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/css;charset=utf-8"));
     }
 
     @Test

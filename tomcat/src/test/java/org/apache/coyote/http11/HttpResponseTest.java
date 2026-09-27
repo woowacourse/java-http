@@ -45,4 +45,19 @@ class HttpResponseTest {
                 + "\r\n"
         );
     }
+
+    @Test
+    void sendWithCookie() throws IOException {
+        //given
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        HttpResponse response = new HttpResponse(output, "JSESSIONID=abc; Path=/; HttpOnly");
+
+        //when
+        response.send("text/html;charset=utf-8", "ok");
+
+        //then
+        assertThat(output.toString(StandardCharsets.UTF_8))
+                .contains("Set-Cookie: JSESSIONID=abc; Path=/; HttpOnly\r\n")
+                .endsWith("\r\n\r\nok");
+    }
 }

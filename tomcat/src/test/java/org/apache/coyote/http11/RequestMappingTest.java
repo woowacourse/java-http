@@ -34,4 +34,20 @@ class RequestMappingTest {
         //then
         assertThat(mapping.getController(request)).isNull();
     }
+
+    @Test
+    void usesFallbackControllerForUnmappedPath() {
+        //given
+        Controller staticController = (request, response) -> {
+        };
+        RequestMapping mapping = new RequestMapping(Map.of(), staticController);
+        HttpRequest request = new HttpRequest(
+                new RequestLine("GET", "/index.html", "", "HTTP/1.1"), Map.of(), "");
+
+        //when
+        Controller controller = mapping.getController(request);
+
+        //then
+        assertThat(controller).isSameAs(staticController);
+    }
 }

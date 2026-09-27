@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
@@ -46,24 +45,10 @@ public class Http11Processor implements Runnable, Processor {
 
             final var bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            final String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-
-            final String method = requestLine.split(" ")[0];
-            final String requestUri = requestLine.split(" ")[1];
-            final String requestPath = requestPath(requestUri);
-
-            final Map<String, String> headers = new HashMap<>();
-            String headerLine;
-            while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isEmpty()) {
-                final int colonIndex = headerLine.indexOf(":");
-                if (colonIndex > 0) {
-                    headers.put(headerLine.substring(0, colonIndex).toLowerCase(),
-                            headerLine.substring(colonIndex + 1).trim());
-                }
-            }
+            final HttpRequest request = HttpRequest.parse(bufferedReader);
+            final String method = request.requestLine().method();
+            final String requestPath = request.requestLine().path();
+            final Map<String, String> headers = request.headers();
 
             final SessionManager sessionManager = SessionManager.getInstance();
             final String sessionId = new HttpCookie(headers.get("cookie")).getValue("JSESSIONID");
@@ -75,20 +60,7 @@ public class Http11Processor implements Runnable, Processor {
                 setCookie = "JSESSIONID=" + session.getId() + "; Path=/; HttpOnly";
             }
 
-            String requestBody = "";
-            if ("POST".equals(method)) {
-                final int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
-                final char[] buffer = new char[contentLength];
-                int readCount = 0;
-                while (readCount < contentLength) {
-                    final int count = bufferedReader.read(buffer, readCount, contentLength - readCount);
-                    if (count == -1) {
-                        throw new IOException("Request body ended early");
-                    }
-                    readCount += count;
-                }
-                requestBody = new String(buffer);
-            }
+            final String requestBody = request.body();
 
             if ("POST".equals(method) && "/register".equals(requestPath)) {
                 final Map<String, String> parameters = queryParameters(requestBody);
@@ -124,6 +96,14 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            if ("GET".equals(method) && !"/".equals(requestPath)
+                    && !"/login".equals(requestPath) && !"/register".equals(requestPath)) {
+                RequestMapping mapping = new RequestMapping(Map.of(), new StaticResourceController());
+                Controller controller = mapping.getController(request);
+                controller.service(request, new HttpResponse(outputStream, setCookie));
+                return;
+            }
+
             final String responseBody = responseBody(requestPath);
             final String contentType = contentType(requestPath);
 
@@ -134,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
@@ -152,14 +132,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String cookieHeader(final String setCookie) {
         return setCookie == null ? "" : "Set-Cookie: " + setCookie + "\r\n";
-    }
-
-    private String requestPath(final String requestUri) {
-        final int queryStringIndex = requestUri.indexOf("?");
-        if (queryStringIndex < 0) {
-            return requestUri;
-        }
-        return requestUri.substring(0, queryStringIndex);
     }
 
     private boolean logIn(final Map<String, String> parameters) {

@@ -144,17 +144,28 @@ public class MyHttpRequest {
 
     public Map<String, String> getFormParameters() {
         Map<String, String> params = new HashMap<>();
+        if (body.isEmpty()) {
+            return Map.of();
+        }
         for (String parameter : body.split("&")) {
             int separatorIndex = parameter.indexOf('=');
-            String key = parameter.substring(0, separatorIndex);
-            String value = parameter.substring(separatorIndex + 1);
+            String key = parameter;
+            String value = "";
+            if (separatorIndex >= 0) {
+                key = parameter.substring(0, separatorIndex);
+                value = parameter.substring(separatorIndex + 1);
+            }
             params.put(decode(key), decode(value));
         }
         return Map.copyOf(params);
     }
 
     private String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new MalformedRequestException("잘못된 폼 인코딩입니다: " + value);
+        }
     }
 
     /**

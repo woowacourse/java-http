@@ -41,7 +41,7 @@ public class HttpRequestParser {
     private static void addHeader(Map<String, Object> headers, String line) {
         int separatorIndex = line.indexOf(':');
         if (separatorIndex <= 0) {
-            throw new IllegalArgumentException("잘못된 HTTP 헤더입니다: " + line);
+            throw new MalformedRequestException("잘못된 HTTP 헤더입니다: " + line);
         }
         String name = line.substring(0, separatorIndex).strip();
         String value = line.substring(separatorIndex + 1).strip();

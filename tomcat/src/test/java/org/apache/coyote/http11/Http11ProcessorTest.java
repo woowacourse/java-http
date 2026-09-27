@@ -11,6 +11,7 @@ import com.techcourse.controller.StaticResourceController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.controller.RequestMapping;
+import org.apache.coyote.response.StatusCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +50,64 @@ class Http11ProcessorTest {
     @AfterEach
     void tearDown() {
         manager.remove(session.getId());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "GET / HTTP/1.1\r\nHost localhost\r\n\r\n",
+            "GET / HTTP/1.1\r\nCookie: Cookie: token=abc\r\n\r\n",
+            "POST /login HTTP/1.1\r\nContent-Length: abc\r\n\r\n",
+            "POST /login HTTP/1.1\r\nContent-Length: -1\r\n\r\n",
+            "POST /login HTTP/1.1\r\nContent-Length: +1\r\n\r\na",
+            "POST /login HTTP/1.1\r\nContent-Length: 5\r\n\r\nabc"
+    })
+    void 잘못된_요청은_400으로_응답한다(String request) {
+        var socket = new StubSocket(request);
+
+        new Http11Processor(socket, requestMapping).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "POST /login HTTP/1.1\r\nHost: localhost\r\n\r\n",
+            "POST /login HTTP/1.1\r\nHost: localhost\r\nContent-Length: 7\r\n\r\naccount",
+            "POST /register HTTP/1.1\r\nHost: localhost\r\n\r\n"
+    })
+    void 필수_폼_값이_없으면_400으로_응답한다(String request) {
+        var socket = new StubSocket(request);
+
+        new Http11Processor(socket, requestMapping).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"account=%&password=x", "account=%GG&password=x"})
+    void 잘못된_폼_인코딩은_400으로_응답한다(String body) {
+        String request = "POST /login HTTP/1.1\r\nContent-Length: "
+                + body.length()
+                + "\r\n\r\n" + body;
+        var socket = new StubSocket(request);
+
+        new Http11Processor(socket, requestMapping).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 400 Bad Request");
+    }
+
+    @Test
+    void 컨트롤러의_예상하지_못한_예외는_500으로_응답한다() {
+        var mapping = new RequestMapping(Map.of("/", (request, response) -> {
+            response.setStatusCode(StatusCode.OK);
+            throw new IllegalStateException("unexpected failure");
+        }), new RootController());
+        var socket = new StubSocket();
+
+        new Http11Processor(socket, mapping).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 500 Internal Server Error");
+        assertThat(socket.output()).doesNotContain("200 OK");
     }
 
     @Test

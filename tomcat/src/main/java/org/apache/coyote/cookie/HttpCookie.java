@@ -1,5 +1,7 @@
 package org.apache.coyote.cookie;
 
+import org.apache.coyote.request.MalformedRequestException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +19,7 @@ public class HttpCookie {
             return new HttpCookie(Map.of());
         }
         if (cookieString.startsWith("Cookie: ")) {
-            throw new IllegalArgumentException("잘못된 Cookie 형식입니다: " + cookieString);
+            throw new MalformedRequestException("잘못된 Cookie 형식입니다: " + cookieString);
         }
 
         Map<String, String> cookies = new HashMap<>();

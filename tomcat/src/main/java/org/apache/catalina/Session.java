@@ -8,7 +8,7 @@ public class Session {
     private final String id;
     private final Map<String, Object> values = new ConcurrentHashMap<>();
 
-    public Session(final String id) {
+    Session(final String id) {
         this.id = id;
     }
 

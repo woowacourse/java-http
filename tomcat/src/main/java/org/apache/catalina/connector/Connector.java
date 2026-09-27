@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class Connector implements Runnable {
 
@@ -16,16 +19,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final HttpHandler handler;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector(final HttpHandler handler) {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, handler);
     }
 
     public Connector(final int port, final int acceptCount, final HttpHandler handler) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, handler);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads, final HttpHandler handler) {
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.handler = handler;
         this.stopped = false;
@@ -45,7 +55,6 @@ public class Connector implements Runnable {
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -65,16 +74,21 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
         var processor = new Http11Processor(connection, handler);
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            connection.close();
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {

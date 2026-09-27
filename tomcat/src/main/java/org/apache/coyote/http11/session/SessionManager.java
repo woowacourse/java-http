@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.session;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public static Session createSession() {
         final Session session = new Session(UUID.randomUUID().toString());
@@ -27,11 +27,11 @@ public class SessionManager {
     }
 
     public static void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        SESSIONS.putIfAbsent(session.getId(), session);
     }
 
     public static void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        SESSIONS.remove(session.getId(), session);
     }
 
     private SessionManager() {

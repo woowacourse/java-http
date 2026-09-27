@@ -109,6 +109,10 @@ public class HttpRequest {
         return httpCookies;
     }
 
+    public String getJsessionId() {
+        return httpCookies.getCookie("JSESSIONID");
+    }
+
     public Map<String, String> getParameters() {
         return parameters;
     }

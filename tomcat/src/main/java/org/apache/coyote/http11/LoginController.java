@@ -9,8 +9,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         // GET /login 처리 (이미 로그인된 세션이 있으면 /index.html로 리다이렉트)
-        String jsessionId = request.getHttpCookies().getCookie("JSESSIONID");
-        Session session = SessionManager.findSession(jsessionId);
+        Session session = SessionManager.findSession(request.getJsessionId());
 
         if (session != null && session.getAttribute("user") != null) {
             response.sendRedirect("/index.html");
@@ -25,7 +24,7 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
-            String jsessionId = request.getHttpCookies().getCookie("JSESSIONID");
+            String jsessionId = request.getJsessionId();
             Session session = SessionManager.findSession(jsessionId);
             if (session == null) {
                 session = new Session(jsessionId);

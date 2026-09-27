@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = new HttpResponse(outputStream);
 
             // 2. 쿠키 및 세션 ID 처리
-            String jsessionId = request.getHttpCookies().getCookie("JSESSIONID");
+            String jsessionId = request.getJsessionId();
             if (jsessionId == null) {
                 jsessionId = UUID.randomUUID().toString();
                 response.addCookie("JSESSIONID", jsessionId);

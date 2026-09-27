@@ -19,9 +19,9 @@ public class RequestMapping {
         controllers.put(path, controller);
     }
 
-    public Controller getController(final HttpRequest request) {
+    public Controller getController(final String path) {
         return controllers.getOrDefault(
-                request.path(),
+                path,
                 defaultController
         );
     }

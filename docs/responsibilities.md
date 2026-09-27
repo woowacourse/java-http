@@ -223,7 +223,7 @@ HTTP Method에 따라 Controller의 처리 흐름을 분기한다.
 
 ### 책임
 
-요청 경로에 대응하는 Controller를 선택한다.
+경로 문자열에 대응하는 Controller를 선택한다.
 
 ### 계약
 

@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.SessionResolver;
@@ -17,18 +23,38 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREAD = 250;
+    private static final int MAX_WAITING_TASKS = 100;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private final RequestMapping mapping;
     private final SessionResolver sessionResolver;
-    private boolean stopped;
+
+    private volatile boolean stopped;
 
     public Connector(RequestMapping mapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, mapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD, mapping);
     }
 
-    public Connector(final int port, final int acceptCount, RequestMapping mapping) {
+    public Connector(int port, int acceptCount, RequestMapping mapping) {
+        this(port, acceptCount, DEFAULT_MAX_THREAD, mapping);
+    }
+
+    public Connector(int port, int acceptCount, int maxThreads, RequestMapping mapping) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads 0보다 커야 합니다.");
+        }
+
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(MAX_WAITING_TASKS),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
         this.mapping = mapping;
         this.sessionResolver = new SessionResolver(new SessionManager());
         this.stopped = false;
@@ -45,10 +71,12 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
         stopped = false;
+
+        Thread acceptThread = new Thread(this);
+        acceptThread.setDaemon(true);
+        acceptThread.start();
+
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -64,16 +92,27 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
     private void process(final Socket connection) {
-        if (connection == null) {
-            return;
+        Http11Processor processor = new Http11Processor(connection, mapping, sessionResolver);
+
+        try {
+            // 새 Thread를 만들지 않고 풀에 작업을 제출한다.
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            // 스레드와 작업 대기열이 모두 찼거나 풀이 종료된 경우
+            log.warn("요청 작업을 제출할 수 없어 연결을 닫습니다.");
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error(closeException.getMessage(), closeException);
+            }
         }
-        var processor = new Http11Processor(connection, mapping, sessionResolver);
-        new Thread(processor).start();
     }
 
     public void stop() {
@@ -82,6 +121,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

@@ -21,6 +21,7 @@ public class FilterChain {
     public void doFilter(HttpRequest request, HttpResponse response) {
         if (currentFilterIndex < filters.length) {
             filters[currentFilterIndex++].doFilter(request, this);
+            return;
         }
 
         target.accept(request, response);

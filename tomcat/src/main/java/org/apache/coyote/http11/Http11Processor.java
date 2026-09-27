@@ -2,18 +2,16 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
@@ -37,72 +35,78 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var requestUri = getRequestUri(inputStream);
-            final var requestPath = getRequestPath(requestUri);
-            final var parameters = parseQueryString(requestUri);
-            authenticate(requestPath, parameters);
+            final var request = HttpRequest.read(inputStream);
+            final var responseHeaders = createSessionHeaders(request);
+            final var redirectPath = getRedirectPath(request);
+            if (redirectPath != null) {
+                responseHeaders.put("Location", redirectPath);
+                writeResponse(outputStream, "302 Found", "text/html;charset=utf-8", new byte[0], responseHeaders);
+                return;
+            }
 
+            final var requestPath = request.getPath();
             final var responseBody = getResponseBody(requestPath);
             final var contentType = getContentType(requestPath);
-            writeResponse(outputStream, contentType, responseBody);
+            writeResponse(outputStream, "200 OK", contentType, responseBody, responseHeaders);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getRequestUri(final InputStream inputStream) throws IOException {
-        final var requestLine = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
-        ).readLine();
-        if (requestLine == null) {
-            return "/";
+    private Map<String, String> createSessionHeaders(final HttpRequest request) {
+        final var headers = new LinkedHashMap<String, String>();
+        if (request.getSession(false) == null) {
+            final var session = request.getSession(true);
+            headers.put("Set-Cookie", HttpCookie.ofJSessionId(session.getId()));
         }
-        return requestLine.split(" ")[1];
+        return headers;
     }
 
-    private String getRequestPath(final String requestUri) {
-        final var queryStringIndex = requestUri.indexOf("?");
-        if (queryStringIndex >= 0) {
-            return requestUri.substring(0, queryStringIndex);
-        }
-        return requestUri;
-    }
-
-    private Map<String, String> parseQueryString(final String requestUri) {
-        final var parameters = new HashMap<String, String>();
-        final var queryStringIndex = requestUri.indexOf("?");
-        if (queryStringIndex < 0) {
-            return parameters;
-        }
-
-        final var queryString = requestUri.substring(queryStringIndex + 1);
-        if (!queryString.isEmpty()) {
-            final var queryParameters = queryString.split("&");
-            for (final var queryParameter : queryParameters) {
-                final var keyValue = queryParameter.split("=", 2);
-                if (keyValue.length == 2) {
-                    parameters.put(keyValue[0], keyValue[1]);
-                }
+    private String getRedirectPath(final HttpRequest request) {
+        if ("GET".equals(request.getMethod()) && "/login".equals(request.getPath())) {
+            if (request.getSession(false).getAttribute("user") != null) {
+                return "/index.html";
             }
+            return null;
         }
-
-        return parameters;
+        if ("POST".equals(request.getMethod()) && "/login".equals(request.getPath())) {
+            return authenticate(request);
+        }
+        if ("POST".equals(request.getMethod()) && "/register".equals(request.getPath())) {
+            return register(request);
+        }
+        return null;
     }
 
-    private void authenticate(final String requestPath, final Map<String, String> parameters) {
-        final var account = parameters.get("account");
-        final var password = parameters.get("password");
-        if (!"/login".equals(requestPath) || account == null || password == null) {
-            return;
+    private String authenticate(final HttpRequest request) {
+        final var account = request.getParameter("account");
+        final var password = request.getParameter("password");
+        if (account == null || password == null) {
+            return "/401.html";
         }
 
         final var foundUser = InMemoryUserRepository.findByAccount(account);
         if (foundUser.isPresent()) {
             final var user = foundUser.get();
             if (user.checkPassword(password)) {
-                log.info("login user: {}", user);
+                request.getSession(true).setAttribute("user", user);
+                return "/index.html";
             }
         }
+        return "/401.html";
+    }
+
+    private String register(final HttpRequest request) {
+        final var account = request.getParameter("account");
+        final var password = request.getParameter("password");
+        final var email = request.getParameter("email");
+        if (account == null || account.isBlank() || password == null || password.isBlank()
+                || email == null || email.isBlank()) {
+            return "/register";
+        }
+        final var user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return "/index.html";
     }
 
     private byte[] getResponseBody(final String requestPath) throws IOException {
@@ -110,6 +114,7 @@ public class Http11Processor implements Runnable, Processor {
         var resourcePath = "";
 
         if ("/index.html".equals(requestPath)
+                || "/401.html".equals(requestPath)
                 || "/css/styles.css".equals(requestPath)
                 || requestPath.startsWith("/js/")
                 || requestPath.startsWith("/assets/")) {
@@ -117,6 +122,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if ("/login".equals(requestPath)) {
             resourcePath = "static/login.html";
+        }
+        if ("/register".equals(requestPath)) {
+            resourcePath = "static/register.html";
         }
 
         if (!resourcePath.isEmpty()) {
@@ -137,16 +145,18 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private void writeResponse(final OutputStream outputStream, final String contentType, final byte[] responseBody)
-            throws IOException {
-        final var responseHeaders = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                "");
+    private void writeResponse(final OutputStream outputStream, final String status, final String contentType,
+                               final byte[] responseBody, final Map<String, String> headers) throws IOException {
+        final var responseHeaders = new StringBuilder();
+        responseHeaders.append("HTTP/1.1 ").append(status).append("\r\n");
+        responseHeaders.append("Content-Type: ").append(contentType).append("\r\n");
+        responseHeaders.append("Content-Length: ").append(responseBody.length).append("\r\n");
+        for (final var header : headers.entrySet()) {
+            responseHeaders.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
+        }
+        responseHeaders.append("\r\n");
 
-        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
+        outputStream.write(responseHeaders.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
         outputStream.flush();
     }

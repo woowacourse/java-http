@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -19,9 +22,11 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 5;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executor;
+    private final Set<Socket> connections;
     private volatile boolean stopped;
 
     public Connector() {
@@ -38,6 +43,7 @@ public class Connector implements Runnable {
         }
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executor = Executors.newFixedThreadPool(maxThreads);
+        this.connections = ConcurrentHashMap.newKeySet();
         this.stopped = false;
     }
 
@@ -80,16 +86,21 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        connections.add(connection);
         try {
-            executor.execute(processor);
+            executor.execute(() -> processConnection(connection));
         } catch (RejectedExecutionException e) {
             log.error("Request processing rejected", e);
-            try {
-                connection.close();
-            } catch (IOException closeException) {
-                log.error("Failed to close rejected connection", closeException);
-            }
+            connections.remove(connection);
+            closeConnection(connection, "Failed to close rejected connection");
+        }
+    }
+
+    private void processConnection(final Socket connection) {
+        try {
+            new Http11Processor(connection).run();
+        } finally {
+            connections.remove(connection);
         }
     }
 
@@ -101,6 +112,38 @@ public class Connector implements Runnable {
             log.error(e.getMessage(), e);
         } finally {
             executor.shutdown();
+        }
+        awaitTermination();
+    }
+
+    private void awaitTermination() {
+        try {
+            if (executor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                return;
+            }
+            closeConnections();
+            executor.shutdownNow();
+            if (!executor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.error("Request processing did not terminate after forced shutdown");
+            }
+        } catch (InterruptedException e) {
+            closeConnections();
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void closeConnections() {
+        for (final var connection : connections) {
+            closeConnection(connection, "Failed to close connection during shutdown");
+        }
+    }
+
+    private void closeConnection(final Socket connection, final String message) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(message, e);
         }
     }
 

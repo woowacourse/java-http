@@ -1,21 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,21 +16,10 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     public static final String FAVICON_PATH = "/favicon.ico";
-    public static final String STATIC_PATH = "static";
-
-    public static final String SLASH = "/";
-    public static final String EXTENSION_DELIMITER = ".";
-    public static final String HTML_EXTENSION = ".html";
-    public static final String CSS_EXTENSION = ".css";
-    public static final String JS_EXTENSION = ".js";
-
-    public static final String CSS_CONTENT_TYPE = "text/css";
-    public static final String JS_CONTENT_TYPE = "text/javascript";
-    public static final String HTML_CONTENT_TYPE = "text/html";
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -49,26 +28,20 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        try {
-            process(connection);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        process(connection);
     }
 
     @Override
-    public void process(final Socket connection) throws URISyntaxException {
+    public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             HttpRequest request = new HttpRequest(bufferedReader);
-            String method = request.getMethod();
             if (request.getUri().equals(FAVICON_PATH)) {
                 return;
             }
 
-            String path = findPath(request.getPath());
             HttpResponse response = new HttpResponse();
 
             HttpCookie cookie = new HttpCookie(request.getHeader("Cookie"));
@@ -76,231 +49,11 @@ public class Http11Processor implements Runnable, Processor {
                 response.setHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
             }
 
-            SessionManager sessionManager = SessionManager.getInstance();
-            Session session = sessionManager.findSession(cookie.get("JSESSIONID"));
-
-            HttpStatus httpStatus = HttpStatus.OK;
-            if (method.equals("GET") && path.equals("static/login.html")
-                    && session != null && session.getAttribute("user") != null) {
-                httpStatus = HttpStatus.FOUND;
-            }
-
-            if (method.equals("POST")) {
-                if (path.equals("static/register.html")) {
-                    String account = request.getParameter("account");
-                    if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-                        httpStatus = HttpStatus.CONFLICT;
-                    } else {
-                        User user = new User(account, request.getParameter("password"), request.getParameter("email"));
-                        InMemoryUserRepository.save(user);
-                        httpStatus = HttpStatus.FOUND;
-                    }
-                }
-
-                if (path.equals("static/login.html")) {
-                    Session loginSession = new Session(UUID.randomUUID().toString());
-                    httpStatus = findUser(request.getParameters(), loginSession);
-                    if (httpStatus == HttpStatus.FOUND) {
-                        sessionManager.add(loginSession);
-                        response.setHeader("Set-Cookie", "JSESSIONID=" + loginSession.getId());
-                    }
-                }
-            }
-
-            if (httpStatus == HttpStatus.FOUND || httpStatus == HttpStatus.UNAUTHORIZED) {
-                String location = "/index.html";
-                if (httpStatus == HttpStatus.UNAUTHORIZED) {
-                    location = "/401.html";
-                }
-                response.setStatus(HttpStatus.FOUND);
-                response.setHeader("Location", location);
-                response.write(outputStream);
-
-                return;
-            }
-
-            final Path filePath = getPath(path);
-            response.setStatus(httpStatus);
-            response.setHeader("Content-Type", findContentType(filePath) + ";charset=utf-8");
-            if (httpStatus == HttpStatus.CONFLICT) {
-                response.setBody("이미 존재하는 아이디입니다.");
-            } else {
-                response.setBody(findResponseBody(filePath));
-            }
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
             response.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private String findPath(String path) {
-        if (!path.isBlank()) {
-            if (!path.equals(SLASH) && !path.contains(EXTENSION_DELIMITER)) {
-                path += HTML_EXTENSION;
-            }
-        }
-
-        return STATIC_PATH + path;
-    }
-
-    private Path getPath(String path) throws URISyntaxException {
-        URL resource = getClass().getClassLoader().getResource(path);
-        return Paths.get(Objects.requireNonNull(resource).toURI());
-    }
-
-    private String findContentType(Path filePath) {
-        if (filePath.toString().endsWith(CSS_EXTENSION)) {
-            return CSS_CONTENT_TYPE;
-        } else if (filePath.toString().endsWith(JS_EXTENSION)) {
-            return JS_CONTENT_TYPE;
-        }
-        return HTML_CONTENT_TYPE;
-    }
-
-    private String findResponseBody(Path filePath) throws IOException {
-        if (Files.isDirectory(filePath)) {
-            return "Hello world!";
-        }
-
-        return Files.readString(filePath);
-    }
-
-    private HttpStatus findUser(Map<String, String> queryParams, Session session) {
-        if (queryParams.isEmpty()) {
-            return HttpStatus.OK;
-        }
-
-        final String account = queryParams.get("account");
-        if (account == null || account.isBlank()) {
-            log.info("아이디는 필수값입니다.");
-            return HttpStatus.UNAUTHORIZED;
-        }
-
-        final String password = queryParams.get("password");
-        if (password == null || password.isBlank()) {
-            log.info("비밀번호는 필수값입니다.");
-            return HttpStatus.UNAUTHORIZED;
-        }
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            return HttpStatus.UNAUTHORIZED;
-        }
-
-        User foundUser = user.get();
-        if (checkPassword(queryParams, foundUser)) {
-            session.setAttribute("user", foundUser);
-            log.info("user: {}", foundUser);
-            return HttpStatus.FOUND;
-        }
-
-        return HttpStatus.UNAUTHORIZED;
-    }
-
-    private boolean checkPassword(Map<String, String> queryParams, User user) {
-        if (!user.checkPassword(queryParams.get("password"))) {
-            log.info("비밀번호가 일치하지 않습니다.");
-            return false;
-        }
-
-        return true;
-    }
-
-    public static class Session {
-
-        private final String id;
-        private final Map<String, Object> values = new HashMap<>();
-        private boolean valid = true;
-
-        public Session(final String id) {
-            this.id = id;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setAttribute(String name, Object value) {
-            checkValid();
-            if (value == null) {
-                removeAttribute(name);
-                return;
-            }
-            values.put(name, value);
-        }
-
-        public Object getAttribute(String name) {
-            checkValid();
-            return values.get(name);
-        }
-
-        public void removeAttribute(String name) {
-            checkValid();
-            values.remove(name);
-        }
-
-        public void invalidate() {
-            checkValid();
-            SessionManager.getInstance().remove(id);
-            values.clear();
-            valid = false;
-        }
-
-        private void checkValid() {
-            if (!valid) {
-                throw new IllegalStateException("무효화된 세션입니다.");
-            }
-        }
-
-    }
-
-    public static class SessionManager {
-
-        private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
-        private static final SessionManager INSTANCE = new SessionManager();
-
-        private SessionManager() {
-        }
-
-        public static SessionManager getInstance() {
-            return INSTANCE;
-        }
-
-        public void add(final Session session) {
-            SESSIONS.put(session.getId(), session);
-        }
-
-        public Session findSession(final String id) {
-            if (id == null) {
-                return null;
-            }
-            return SESSIONS.get(id);
-        }
-
-        public void remove(final Session session) {
-            remove(session.getId());
-        }
-
-        public void remove(final String id) {
-            SESSIONS.remove(id);
-        }
-    }
-
-    public static class HttpCookie {
-
-        private final Map<String, String> cookies = new HashMap<>();
-
-        public HttpCookie(String cookieHeader) {
-            for (String cookie : cookieHeader.split(";")) {
-                String[] pair = cookie.trim().split("=", 2);
-                if (pair.length == 2) {
-                    cookies.put(pair[0].trim(), pair[1].trim());
-                }
-            }
-        }
-
-        public String get(String name) {
-            return cookies.get(name);
         }
     }
 

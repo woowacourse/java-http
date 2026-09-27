@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import java.net.URISyntaxException;
-import org.apache.coyote.http11.Http11Processor.Session;
-import org.apache.coyote.http11.Http11Processor.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -95,6 +95,38 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 빈_POST_로그인_요청은_로그인_페이지를_보여준다() throws URISyntaxException {
+        var socket = post("/login", "");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("<title>로그인</title>");
+    }
+
+    @Test
+    void html_확장자가_있는_로그인_페이지를_조회한다() throws URISyntaxException {
+        var socket = new StubSocket("GET /login.html HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("<title>로그인</title>");
+    }
+
+    @Test
+    void html_확장자가_있는_경로로_로그인한다() throws URISyntaxException {
+        var socket = post("/login.html", "account=gugu&password=password");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+        assertThat(socket.output()).contains("Location: /index.html");
+        assertThat(SessionManager.getInstance().findSession(findSessionId(socket)).getAttribute("user"))
+                .isEqualTo(InMemoryUserRepository.findByAccount("gugu").orElseThrow());
+    }
+
+    @Test
     void 회원가입_페이지를_GET으로_조회한다() throws URISyntaxException {
         var socket = new StubSocket("GET /register HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
@@ -124,6 +156,67 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).startsWith("HTTP/1.1 409 Conflict\r\n");
         assertThat(socket.output()).endsWith("이미 존재하는 아이디입니다.");
+    }
+
+    @Test
+    void CSS_파일을_올바른_ContentType으로_응답한다() throws URISyntaxException {
+        var socket = new StubSocket("GET /css/styles.css HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("Content-Type: text/css;charset=utf-8\r\n");
+    }
+
+    @Test
+    void html_확장자가_있는_회원가입_페이지를_조회한다() {
+        var socket = new StubSocket("GET /register.html HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("<title>회원가입</title>");
+    }
+
+    @Test
+    void html_확장자가_있는_경로로_회원가입한다() {
+        var socket = post("/register.html", "account=html-user&password=password&email=html%40example.com");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(InMemoryUserRepository.findByAccount("html-user")).isPresent();
+        assertThat(socket.output()).startsWith("HTTP/1.1 302 Found\r\n");
+        assertThat(socket.output()).contains("Location: /index.html");
+    }
+
+    @Test
+    void 정적_파일의_POST_요청도_파일을_응답한다() {
+        var socket = post("/css/styles.css", "");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("Content-Type: text/css;charset=utf-8\r\n");
+    }
+
+    @Test
+    void GET_POST_외_로그인_요청은_파일을_응답한다() {
+        var socket = new StubSocket("PUT /login HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("<title>로그인</title>");
+    }
+
+    @Test
+    void JS_파일을_올바른_ContentType으로_응답한다() throws URISyntaxException {
+        var socket = new StubSocket("GET /js/scripts.js HTTP/1.1\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK\r\n");
+        assertThat(socket.output()).contains("Content-Type: text/javascript;charset=utf-8\r\n");
     }
 
     private String findSessionId(StubSocket socket) {

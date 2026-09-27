@@ -2,9 +2,13 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final HttpHeaders headers;
-    private final String body;
+    private String body;
+
+    public HttpResponse() {
+        this(StatusLine.ok(), HttpHeaders.empty(), "");
+    }
 
     private HttpResponse(final StatusLine statusLine, final HttpHeaders headers, final String body) {
         this.statusLine = statusLine;
@@ -21,13 +25,6 @@ public class HttpResponse {
         return new HttpResponse(StatusLine.ok(), headers, body);
     }
 
-    public static HttpResponse redirect(String redirectPath) {
-        HttpHeaders headers = HttpHeaders.empty();
-        headers.add("Location", redirectPath);
-        headers.add("Content-Length", "0");
-        return new HttpResponse(StatusLine.redirect(), headers, "");
-    }
-
     public static HttpResponse notFound(String body) {
         HttpHeaders headers = HttpHeaders.empty();
         headers.add("Content-Type", "text/html;charset=utf-8");
@@ -37,6 +34,17 @@ public class HttpResponse {
 
     public void addHeader(String name, String value) {
         headers.add(name, value);
+    }
+
+    public void redirectTo(String path) {
+        statusLine = StatusLine.redirect();
+        headers.add("Location", path);
+        setBody("");
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        headers.add("Content-Length", String.valueOf(body.getBytes().length));
     }
 
     @Override

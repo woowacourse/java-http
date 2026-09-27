@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+
 /**
  * 자바로 동시에 여러 작업을 처리할 때 스레드를 사용한다.
  * 스레드 객체를 직접 생성하는 방법부터 알아보자.
@@ -34,6 +36,58 @@ class ThreadTest {
 
         // thread의 작업이 완료될 때까지 기다린다.
          thread.join();
+    }
+
+    @Test
+    void testExtendedThread2() throws InterruptedException {
+        Thread thread = new Thread(() -> {
+            System.out.printf("[%s] %s 작업 시작%n",
+                    Thread.currentThread().getName(), LocalDateTime.now());
+
+            try {
+                Thread.sleep(10_000); // 10초
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            System.out.printf("[%s] %s 작업 끝%n",
+                    Thread.currentThread().getName(), LocalDateTime.now());
+        }, "worker");
+
+        thread.start();
+
+        System.out.printf("[%s] %s join 전%n",
+                Thread.currentThread().getName(), LocalDateTime.now());
+
+        thread.join();
+
+        System.out.printf("[%s] %s join 후%n",
+                Thread.currentThread().getName(), LocalDateTime.now());
+    }
+
+    @Test
+    void testRunDirectly() {
+        Thread thread = new Thread(() -> {
+            System.out.printf("[%s] %s 작업 시작%n",
+                    Thread.currentThread().getName(), LocalDateTime.now());
+
+            try {
+                Thread.sleep(10_000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            System.out.printf("[%s] %s 작업 끝%n",
+                    Thread.currentThread().getName(), LocalDateTime.now());
+        }, "worker");
+
+        System.out.printf("[%s] %s run 전%n",
+                Thread.currentThread().getName(), LocalDateTime.now());
+
+        thread.run(); // 새 스레드를 시작하지 않음
+
+        System.out.printf("[%s] %s run 후%n",
+                Thread.currentThread().getName(), LocalDateTime.now());
     }
 
     /**

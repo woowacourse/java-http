@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,11 +33,47 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello fixed thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+    }
+
+    @Test
+    void testNewFixedThreadPool2() throws InterruptedException {
+        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        executor.submit(logWithSleep2("hello fixed thread pools"));
+        executor.submit(logWithSleep2("hello fixed thread pools"));
+        executor.submit(logWithSleep2("hello fixed thread pools"));
+
+        // 올바른 값으로 바꿔서 테스트를 통과시키자.
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
+
+        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
+        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        executor.shutdown();
+        assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+    }
+
+    @Test
+    void testNewFixedThreadPool3() throws Exception {
+        var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        try {
+            var first = executor.submit(logWithSleep2("첫 번째"));
+            var second = executor.submit(logWithSleep2("두 번째"));
+            var third = executor.submit(logWithSleep2("세 번째"));
+
+            assertThat(executor.getPoolSize()).isEqualTo(2);
+            assertThat(executor.getQueue().size()).isEqualTo(1);
+
+            first.get();
+            second.get();
+            third.get(); // 세 번째 작업까지 끝날 때까지 기다림
+        } finally {
+            executor.shutdown();
+        }
     }
 
     @Test
@@ -46,7 +84,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
@@ -61,6 +99,22 @@ class ThreadPoolsTest {
                 throw new RuntimeException(e);
             }
             log.info(message);
+        };
+    }
+    private Runnable logWithSleep2(final String message) {
+        return () -> {
+            log.info("[{}] {} 작업 시작",
+                    Thread.currentThread().getName(), LocalDateTime.now());
+
+            try {
+                Thread.sleep(1_000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            log.info("[{}] {} 작업 끝: {}",
+                    Thread.currentThread().getName(), LocalDateTime.now(), message);
         };
     }
 }

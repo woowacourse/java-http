@@ -78,27 +78,10 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if ("GET".equals(method) && "/login".equals(requestPath)
-                    && session.getAttribute("user") != null) {
-                sendRedirect(outputStream, "/index.html", setCookie);
-                return;
-            }
-
-            if ("POST".equals(method) && "/login".equals(requestPath)) {
-                final Map<String, String> loginParameters = queryParameters(requestBody);
-                final boolean logInIsSuccess = logIn(loginParameters);
-                if (logInIsSuccess) {
-                    session.setAttribute("user", InMemoryUserRepository
-                            .findByAccount(loginParameters.get("account")).orElseThrow());
-                }
-                final String location = logInIsSuccess ? "/index.html" : "/401.html";
-                sendRedirect(outputStream, location, setCookie);
-                return;
-            }
-
-            if ("GET".equals(method) && !"/".equals(requestPath)
-                    && !"/login".equals(requestPath) && !"/register".equals(requestPath)) {
-                RequestMapping mapping = new RequestMapping(Map.of(), new StaticResourceController());
+            if ("/login".equals(requestPath) || ("GET".equals(method)
+                    && !"/".equals(requestPath) && !"/register".equals(requestPath))) {
+                RequestMapping mapping = new RequestMapping(
+                        Map.of("/login", new LoginController(session)), new StaticResourceController());
                 Controller controller = mapping.getController(request);
                 controller.service(request, new HttpResponse(outputStream, setCookie));
                 return;
@@ -132,21 +115,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String cookieHeader(final String setCookie) {
         return setCookie == null ? "" : "Set-Cookie: " + setCookie + "\r\n";
-    }
-
-    private boolean logIn(final Map<String, String> parameters) {
-        final String account = parameters.get("account");
-        final String password = parameters.get("password");
-        if (account == null || password == null) {
-            return false;
-        }
-
-        final var user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return false;
-        }
-        log.info("login user: {}", account);
-        return true;
     }
 
     private Map<String, String> queryParameters(final String queryString) {

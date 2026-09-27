@@ -96,8 +96,8 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output())
                 .startsWith(String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 "))
+                        "HTTP/1.1 200 OK",
+                        "Content-Type: text/html;charset=utf-8"))
                 .contains("<title>로그인</title>");
     }
 

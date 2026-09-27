@@ -8,7 +8,10 @@ public class StaticResourceController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        String path = request.requestLine().path();
+        sendFile(request.requestLine().path(), response);
+    }
+
+    void sendFile(String path, HttpResponse response) throws IOException {
         String resourcePath = "static" + path;
         try (InputStream resource = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (resource == null) {

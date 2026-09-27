@@ -32,19 +32,21 @@
 - [x] `HttpRequest`가 요청의 첫 줄, 헤더, 본문을 읽고 필요한 값을 제공한다.
 - [ ] `Content-Length`를 바이트 수로 처리해 한글이 포함된 본문도 정확히 읽는다.
 - [x] GET 쿼리 문자열과 POST 폼 본문에서 파라미터를 읽는다. 폼 인코딩된 값은 디코딩한다.
-- [ ] 요청 쿠키에서 `JSESSIONID`를 읽어 기존 세션을 찾을 수 있다.
+- [x] 요청 쿠키에서 `JSESSIONID`를 읽어 기존 세션을 찾을 수 있다.
 
 ### HTTP 응답
 
 - [x] `HttpResponse`가 상태 줄, 헤더, 빈 줄, 본문 순서로 응답을 출력한다.
 - [ ] 정적 파일 응답의 `Content-Type`과 UTF-8 바이트 기준 `Content-Length`를 설정한다.
-- [ ] 리다이렉트할 때 `302`와 `Location`을, 새 세션이 필요할 때 `Set-Cookie`를 설정한다.
+- [x] 리다이렉트할 때 `302`와 `Location`을, 새 세션이 필요할 때 `Set-Cookie`를 설정한다.
 
 ### 컨트롤러와 요청 매핑
 
 - [x] `Controller`가 `service(HttpRequest, HttpResponse)` 계약을 정의한다.
 - [x] `AbstractController`가 HTTP 메서드에 따라 `doGet` 또는 `doPost`를 호출한다.
-- [ ] 로그인, 회원가입, 정적 파일 응답 로직을 각각 컨트롤러로 옮긴다.
+- [x] 로그인 로직을 `LoginController`로 옮긴다.
+- [ ] 회원가입 로직을 `RegisterController`로 옮긴다.
+- [x] 정적 파일 응답 로직을 `StaticResourceController`로 옮긴다.
 - [x] `RequestMapping`이 요청 경로에 맞는 컨트롤러를 찾는다.
 - [ ] `Http11Processor`는 요청 생성, 컨트롤러 호출, 응답 출력 흐름을 연결한다.
 

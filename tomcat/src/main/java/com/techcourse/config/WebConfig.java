@@ -1,21 +1,20 @@
 package com.techcourse.config;
 
-import com.techcourse.controller.GetLoginController;
-import com.techcourse.controller.GetRegisterController;
-import com.techcourse.controller.HelloWorldController;
-import com.techcourse.controller.PostLoginController;
-import com.techcourse.controller.PostRegisterController;
+import com.techcourse.controller.HelloWorldRequestHandler;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.catalina.Manager;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.routing.Dispatcher;
+import org.apache.catalina.routing.RequestRegistry;
+import org.apache.catalina.routing.RouteKey;
+import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.catalina.routing.Controller;
-import org.apache.catalina.routing.Dispatcher;
-import org.apache.catalina.routing.RequestMapping;
-import org.apache.catalina.routing.RouteInfo;
 
 public final class WebConfig {
 
@@ -28,33 +27,40 @@ public final class WebConfig {
         return new Tomcat(connector);
     }
 
-    private RequestMapping requestMapping() {
-        final RequestMapping requestMapping = new RequestMapping(new HashMap<>());
-        configureRoutes(requestMapping);
-        return requestMapping;
+    private RequestRegistry requestMapping() {
+        final RequestRegistry requestRegistry = new RequestRegistry(new HashMap<>());
+        configureRoutes(requestRegistry);
+        return requestRegistry;
     }
 
-    private void configureRoutes(final RequestMapping requestMapping) {
-        List<Controller> handlers = List.of(
-                new GetLoginController(),
-                new PostLoginController(),
-                new GetRegisterController(),
-                new PostRegisterController(),
-                new HelloWorldController()
+    private void configureRoutes(final RequestRegistry requestRegistry) {
+        List<Object> handlers = List.of(
+                new LoginController(),
+                new RegisterController(),
+                new HelloWorldRequestHandler()
         );
 
-        List<RouteInfo> routeInfos = List.of(
-                new GetLoginController(),
-                new PostLoginController(),
-                new GetRegisterController(),
-                new PostRegisterController(),
-                new HelloWorldController()
-        );
-        for (int i = 0; i < handlers.size(); i++) {
-            final Controller handler = handlers.get(i);
-            final RouteInfo routeInfo = routeInfos.get(i);
+        setRegistry(requestRegistry, handlers);
+    }
 
-            requestMapping.add(routeInfo.getRouteKey(), handler);
+    private void setRegistry(RequestRegistry registry, List<Object> handlers) {
+        for (Object handler : handlers) {
+            for (Method method : handler.getClass().getDeclaredMethods()) {
+                RequestMapping mapping = method.getAnnotation(RequestMapping.class);
+                if (mapping == null) {
+                    continue;
+                }
+                RouteKey routeKey = new RouteKey(mapping.method(), mapping.path());
+
+                registry.add(routeKey, (request, response) -> {
+                    try {
+                        return (String) method.invoke(handler, request, response);
+                    } catch (ReflectiveOperationException e) {
+                        throw new IllegalStateException("처리 메서드 호출 실패: " + method, e);
+                    }
+                });
+
+            }
         }
     }
 }

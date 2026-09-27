@@ -2,25 +2,23 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.catalina.routing.Controller;
-import org.apache.catalina.routing.RouteInfo;
-import org.apache.catalina.routing.RouteKey;
 
-public class PostRegisterController implements Controller, RouteInfo {
+public class RegisterController {
 
-    @Override
-    public String handle(final HttpRequest request, final HttpResponse response) {
+    @RequestMapping(method = HttpMethod.GET, path = "/register")
+    public String getPage(final HttpRequest request, final HttpResponse response) {
+        return "/register.html";
+    }
+
+    @RequestMapping(method = HttpMethod.POST, path = "/register")
+    public String register(final HttpRequest request, final HttpResponse response) {
         saveUser(request);
         response.sendRedirect("/index.html");
         return "/index.html";
-    }
-
-    @Override
-    public RouteKey getRouteKey() {
-        return new RouteKey(HttpMethod.POST, "/register");
     }
 
     private void saveUser(final HttpRequest request) {

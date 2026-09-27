@@ -2,11 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.controller.GetLoginController;
-import com.techcourse.controller.GetRegisterController;
-import com.techcourse.controller.HelloWorldController;
-import com.techcourse.controller.PostLoginController;
-import com.techcourse.controller.PostRegisterController;
+import com.techcourse.controller.HelloWorldRequestHandler;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
@@ -19,12 +17,12 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.catalina.Manager;
+import org.apache.catalina.routing.Dispatcher;
+import org.apache.catalina.routing.RequestRegistry;
+import org.apache.catalina.routing.RouteKey;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.catalina.routing.Controller;
-import org.apache.catalina.routing.Dispatcher;
-import org.apache.catalina.routing.RequestMapping;
-import org.apache.catalina.routing.RouteInfo;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,6 +31,27 @@ import support.StubSocket;
 
 @DisplayName("HTTP/1.1 요청 처리")
 class Http11ProcessorTest {
+
+    private static Http11Processor createProcessor(final StubSocket socket) {
+        return createProcessor(socket, new SessionManager());
+    }
+
+    private static Http11Processor createProcessor(final StubSocket socket, final Manager manager) {
+        return new Http11Processor(socket, manager, createDispatcher());
+    }
+
+    private static Dispatcher createDispatcher() {
+        final RequestRegistry requestRegistry = new RequestRegistry(new HashMap<>());
+        final LoginController loginController = new LoginController();
+        final RegisterController registerController = new RegisterController();
+
+        requestRegistry.add(new RouteKey(HttpMethod.GET, "/"), new HelloWorldRequestHandler());
+        requestRegistry.add(new RouteKey(HttpMethod.GET, "/login"), loginController::getLoginPage);
+        requestRegistry.add(new RouteKey(HttpMethod.POST, "/login"), loginController::handle);
+        requestRegistry.add(new RouteKey(HttpMethod.GET, "/register"), registerController::getPage);
+        requestRegistry.add(new RouteKey(HttpMethod.POST, "/register"), registerController::register);
+        return new Dispatcher(requestRegistry);
+    }
 
     @Test
     @DisplayName("존재하지 않는 경로를 요청하면 404 Not Found를 반환한다")
@@ -70,6 +89,63 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .contains("HTTP/1.1 400 Bad Request")
                 .doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    @DisplayName("루트 경로 요청에 기본 응답을 반환한다")
+    void respondsToRootRequest() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=existing-id ",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final var processor = createProcessor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/plain ",
+                "Content-Length: 11 ",
+                "",
+                "hello world");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("정적 index.html 파일을 반환한다")
+    void respondsWithIndexPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=existing-id ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final var processor = createProcessor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Nested
@@ -143,63 +219,6 @@ class Http11ProcessorTest {
             // then
             assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
         }
-    }
-
-    @Test
-    @DisplayName("루트 경로 요청에 기본 응답을 반환한다")
-    void respondsToRootRequest() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET / HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Cookie: JSESSIONID=existing-id ",
-                "",
-                "");
-        final var socket = new StubSocket(httpRequest);
-        final var processor = createProcessor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/plain ",
-                "Content-Length: 11 ",
-                "",
-                "hello world");
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("정적 index.html 파일을 반환한다")
-    void respondsWithIndexPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: JSESSIONID=existing-id ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final var processor = createProcessor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
-
-        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Nested
@@ -416,29 +435,5 @@ class Http11ProcessorTest {
             final HttpSession currentSession = manager.findSession("login-session-id");
             assertThat(currentSession.getAttribute("loginUser")).isSameAs(loginUser);
         }
-    }
-
-    private static Http11Processor createProcessor(final StubSocket socket) {
-        return createProcessor(socket, new SessionManager());
-    }
-
-    private static Http11Processor createProcessor(final StubSocket socket, final Manager manager) {
-        return new Http11Processor(socket, manager, createDispatcher());
-    }
-
-    private static Dispatcher createDispatcher() {
-        final RequestMapping requestMapping = new RequestMapping(new HashMap<>());
-        register(requestMapping, new HelloWorldController());
-        register(requestMapping, new GetLoginController());
-        register(requestMapping, new PostLoginController());
-        register(requestMapping, new GetRegisterController());
-        register(requestMapping, new PostRegisterController());
-        return new Dispatcher(requestMapping);
-    }
-
-    private static void register(final RequestMapping requestMapping,
-                                 final Controller controller) {
-        final RouteInfo routeInfo = (RouteInfo) controller;
-        requestMapping.add(routeInfo.getRouteKey(), controller);
     }
 }

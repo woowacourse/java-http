@@ -20,14 +20,14 @@ public class Dispatcher {
     private static final String RESOURCES_PREFIX = "static";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String NOT_FOUND_PAGE = "/404.html";
-    private final RequestMapping mapping;
+    private final RequestRegistry mapping;
 
-    public Dispatcher(RequestMapping mapping) {
+    public Dispatcher(RequestRegistry mapping) {
         this.mapping = mapping;
     }
 
     public void doDispatch(final HttpRequest request, final HttpResponse response) {
-        Controller handler = mapping.getHandler(RouteKey.from(request))
+        RequestHandler handler = mapping.getHandler(RouteKey.from(request))
                 .orElseGet(() -> (request1, response1) -> request.getPath());
 
         String handle = handler.handle(request, response);
@@ -73,7 +73,7 @@ public class Dispatcher {
     }
 
     private String getContentType(String path) {
-        if(path.startsWith("/")) {
+        if (path.startsWith("/")) {
             if (path.endsWith(".html")) {
                 return "text/html;charset=utf-8";
             }

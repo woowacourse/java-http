@@ -1,21 +1,16 @@
 package com.techcourse.controller;
 
+import org.apache.catalina.routing.RequestHandler;
+import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.catalina.routing.Controller;
-import org.apache.catalina.routing.RouteInfo;
-import org.apache.catalina.routing.RouteKey;
 
-public class HelloWorldController implements Controller, RouteInfo {
+public class HelloWorldRequestHandler implements RequestHandler {
 
     @Override
+    @RequestMapping(method = HttpMethod.GET, path = "/")
     public String handle(final HttpRequest request, final HttpResponse response) {
         return "hello world";
-    }
-
-    @Override
-    public RouteKey getRouteKey() {
-        return new RouteKey(HttpMethod.GET,"/");
     }
 }

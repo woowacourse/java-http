@@ -4,16 +4,25 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
+import org.apache.catalina.routing.requestMapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.catalina.routing.Controller;
-import org.apache.catalina.routing.RouteInfo;
-import org.apache.catalina.routing.RouteKey;
 
-public class PostLoginController implements Controller, RouteInfo {
+public class LoginController {
+
     public static final String LOGIN_USER = "loginUser";
 
+    @RequestMapping(method = HttpMethod.GET, path = "/login")
+    public String getLoginPage(final HttpRequest request, final HttpResponse response) {
+        if (isLoggedIn(request)) {
+            response.sendRedirect("/index.html");
+            return "로그인이 되어있어 기본 페이지로 이동합니다.";
+        }
+        return "/login.html";
+    }
+
+    @RequestMapping(method = HttpMethod.POST, path = "/login")
     public String handle(final HttpRequest request, final HttpResponse response) {
         final String account = request.getBodyParameter("account");
         final String password = request.getBodyParameter("password");
@@ -30,9 +39,9 @@ public class PostLoginController implements Controller, RouteInfo {
         return "로그인에 성공했습니다. 기본 페이지로 이동합니다.";
     }
 
-    @Override
-    public RouteKey getRouteKey() {
-        return new RouteKey(HttpMethod.POST, "/login");
+    private boolean isLoggedIn(final HttpRequest request) {
+        final HttpSession session = request.getSession(false);
+        return session != null && session.getAttribute(LOGIN_USER) != null;
     }
 
     private Optional<User> authenticate(final String account, final String password) {

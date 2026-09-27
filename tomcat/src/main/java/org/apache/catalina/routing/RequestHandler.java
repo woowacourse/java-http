@@ -4,6 +4,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 @FunctionalInterface
-public interface Controller {
+public interface RequestHandler {
     String handle(HttpRequest request, HttpResponse response);
 }

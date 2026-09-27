@@ -4,9 +4,11 @@ public enum HttpStatus {
     OK("OK", 200),
     FOUND("Found", 302),
     SEE_OTHER("See Other", 303),
-    PERMANENT_REDIRECT("Permanent Redirect", 308),
+    BAD_REQUEST("Bad Request", 400),
     UNAUTHORIZED("Unauthorized", 401),
-    NOT_FOUND("Not Found", 404);
+    NOT_FOUND("Not Found", 404),
+    METHOD_NOT_ALLOWED("Method Not Allowed", 405),
+    HTTP_VERSION_NOT_SUPPORTED("HTTP Version Not Supported", 505);
 
     private final String name;
     private final int code;
@@ -19,7 +21,9 @@ public enum HttpStatus {
     public String getName() {
         return name;
     }
-    public int code() {
-        return code;
+
+    @Override
+    public String toString() {
+        return code + " " + name;
     }
 }

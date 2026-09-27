@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -14,6 +16,14 @@ public class SessionManager implements Manager {
 
     public static SessionManager getInstance() {
         return SessionManagerInstanceHolder.INSTANCE;
+    }
+
+    public Session createNewSession() {
+        final UUID uuid = UUID.randomUUID();
+        final Session newSession = Session.init(uuid.toString());
+        add(newSession);
+
+        return newSession;
     }
 
     @Override

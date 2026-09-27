@@ -3,12 +3,16 @@ package org.apache.coyote.http11;
 import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
-    private final String status;
-    private final String message;
-    private final String contentType;
-    private final String responseBody;
-    private final String location;
+    private String status;
+    private String message;
+    private String contentType;
+    private String responseBody;
+    private String location;
     private HttpCookie cookie;
+
+    public HttpResponse() {
+        this("200", "OK", null, "", null);
+    }
 
     private HttpResponse(
             String status,
@@ -66,6 +70,23 @@ public class HttpResponse {
 
     public void addCookie(HttpCookie cookie) {
         this.cookie = cookie;
+    }
+
+    public void setStatus(String status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String convertString() {

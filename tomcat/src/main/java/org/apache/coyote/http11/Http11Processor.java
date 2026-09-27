@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.net.Socket;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -45,11 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpResponse response = new HttpResponse(outputStream, setCookie);
-            RequestMapping mapping = new RequestMapping(
-                    Map.of("/", new RootController(),
-                            "/login", new LoginController(session),
-                            "/register", new RegisterController()),
-                    new StaticResourceController());
+            RequestMapping mapping = RequestMapping.forSession(session);
             Controller controller = mapping.getController(request);
             controller.service(request, response);
         } catch (Exception e) {

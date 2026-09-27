@@ -2,12 +2,8 @@ package com.techcourse.controller;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.exception.HttpException;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -29,7 +25,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> formData = parseFormData(request.getBody());
+        final Map<String, String> formData = FormDataParser.parse(request.getBody());
         final String account = formData.get("account");
         final String password = formData.get("password");
         final String email = formData.get("email");
@@ -59,27 +55,5 @@ public class RegisterController extends AbstractController {
 
     private boolean isValidEmail(final String email) {
         return email != null && EMAIL_PATTERN.matcher(email).matches();
-    }
-
-    private Map<String, String> parseFormData(final String requestBody) {
-        final Map<String, String> formData = new HashMap<>();
-        final String[] formFields = requestBody.split("&");
-
-        for (String formField : formFields) {
-            addFormField(formData, formField);
-        }
-        return formData;
-    }
-
-    private void addFormField(final Map<String, String> formData, final String formField) {
-        final String[] keyValue = formField.split("=", 2);
-        if (keyValue.length < 2) {
-            return;
-        }
-        try {
-            formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
-        } catch (IllegalArgumentException e) {
-            throw new HttpException(HttpException.Status.BAD_REQUEST, "잘못된 폼 데이터입니다.", e);
-        }
     }
 }

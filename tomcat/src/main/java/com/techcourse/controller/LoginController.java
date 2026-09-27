@@ -4,12 +4,8 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.exception.HttpException;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -79,7 +75,7 @@ public class LoginController extends AbstractController {
     }
 
     private Optional<User> authenticate(final String requestBody) {
-        final Map<String, String> formData = parseFormData(requestBody);
+        final Map<String, String> formData = FormDataParser.parse(requestBody);
         final String account = formData.get("account");
         final String password = formData.get("password");
         if (account == null || password == null) {
@@ -90,27 +86,5 @@ public class LoginController extends AbstractController {
                 .filter(user -> user.checkPassword(password));
         authenticatedUser.ifPresent(user -> log.info("로그인 성공: {}", user));
         return authenticatedUser;
-    }
-
-    private Map<String, String> parseFormData(final String requestBody) {
-        final Map<String, String> formData = new HashMap<>();
-        final String[] formFields = requestBody.split("&");
-
-        for (String formField : formFields) {
-            addFormField(formData, formField);
-        }
-        return formData;
-    }
-
-    private void addFormField(final Map<String, String> formData, final String formField) {
-        final String[] keyValue = formField.split("=", 2);
-        if (keyValue.length < 2) {
-            return;
-        }
-        try {
-            formData.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
-        } catch (IllegalArgumentException e) {
-            throw new HttpException(HttpException.Status.BAD_REQUEST, "잘못된 폼 데이터입니다.", e);
-        }
     }
 }

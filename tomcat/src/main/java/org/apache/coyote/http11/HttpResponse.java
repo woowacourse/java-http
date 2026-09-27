@@ -31,9 +31,9 @@ public class HttpResponse {
         return sb.toString();
     }
 
-    public void ok(final String contentType, final String responseBody) {
+    public void ok(final ContentType contentType, final String responseBody) {
         this.statusLine = new StatusLine(HttpStatus.OK);
-        addHeader("Content-Type", contentType + ";charset=utf-8");
+        addHeader("Content-Type", contentType.getValue() + ";charset=utf-8");
         this.body = responseBody;
     }
 

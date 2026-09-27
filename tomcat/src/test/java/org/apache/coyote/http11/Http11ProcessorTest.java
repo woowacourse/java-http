@@ -83,6 +83,26 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void js() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(staticFileResponse("static/js/scripts.js", "text/javascript"));
+    }
+
+    @Test
     void loginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

@@ -19,13 +19,6 @@ public final class StaticResource {
         return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
     }
 
-    public static String contentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        return "text/html";
-    }
-
     // 요청 path를 받아서, 서버에서 찾을 파일 이름을 돌려 줌
     private static String resolveFileName(final String path) {
         if (!path.contains(".")) {

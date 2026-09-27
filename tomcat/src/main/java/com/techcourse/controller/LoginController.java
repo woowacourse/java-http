@@ -9,6 +9,7 @@ import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.StaticResource;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class LoginController extends AbstractController {
             response.redirect("/index.html");
             return;
         }
-        response.ok("text/html", StaticResource.read("/login.html"));
+        response.ok(ContentType.HTML, StaticResource.read("/login.html"));
     }
 
     private boolean isLoggedIn(final HttpRequest request) {

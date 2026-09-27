@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class Connector implements Runnable {
 
@@ -16,11 +19,13 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
+    private final ExecutorService executorService;
 
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector(final RequestMapping requestMapping) {
         this(
@@ -46,11 +51,43 @@ public class Connector implements Runnable {
             final int acceptCount,
             final RequestMapping requestMapping
     ) {
+        this(
+                port,
+                acceptCount,
+                DEFAULT_MAX_THREADS,
+                requestMapping
+        );
+    }
+
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int maxThreads
+    ) {
+        this(
+                port,
+                acceptCount,
+                maxThreads,
+                new RequestMapping()
+        );
+    }
+
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final RequestMapping requestMapping
+    ) {
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket =
                 createServerSocket(port, acceptCount);
 
         this.requestMapping = requestMapping;
         this.stopped = false;
+    }
+
+    public int getLocalPort() {
+        return serverSocket.getLocalPort();
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -67,7 +104,6 @@ public class Connector implements Runnable {
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -83,7 +119,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -95,7 +133,19 @@ public class Connector implements Runnable {
                 connection,
                 requestMapping
         );
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            closeConnection(connection);
+        }
+    }
+
+    private void closeConnection(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public void stop() {
@@ -104,11 +154,13 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 
     private int checkPort(final int port) {
-        final var MIN_PORT = 1;
+        final var MIN_PORT = 0;
         final var MAX_PORT = 65535;
 
         if (port < MIN_PORT || MAX_PORT < port) {

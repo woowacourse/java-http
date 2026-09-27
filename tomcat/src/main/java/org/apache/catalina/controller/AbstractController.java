@@ -20,6 +20,8 @@ public class AbstractController implements Controller {
             return;
         }
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setHeader("Allow", "GET, POST");
+        response.setBody("405 Method Not Allowed".getBytes());
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {/* NOOP */ }

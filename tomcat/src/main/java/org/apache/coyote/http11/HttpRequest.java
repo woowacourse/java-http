@@ -29,12 +29,18 @@ public class HttpRequest {
         this.bodyParams = bodyParams;
     }
 
+    /**
+     * @return 파싱된 요청, 또는 클라이언트가 데이터 없이 연결을 종료했다면 null
+     */
     public static HttpRequest from(final InputStream rawInputStream) throws IOException {
         final InputStream inputStream = new BufferedInputStream(rawInputStream);
 
         final String requestLine = readLine(inputStream);
-        if (requestLine == null || requestLine.isBlank()) {
-            throw new IOException("빈 요청입니다.");
+        if (requestLine == null) {
+            return null;
+        }
+        if (requestLine.isBlank()) {
+            throw new IllegalArgumentException("요청 라인이 비어 있습니다.");
         }
 
         final Map<String, String> headers = readHeaders(inputStream);

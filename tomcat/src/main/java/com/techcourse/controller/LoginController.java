@@ -4,11 +4,13 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.catalina.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
@@ -87,5 +89,10 @@ public class LoginController extends AbstractController {
         final Session session = new Session(UUID.randomUUID().toString());
         SessionManager.getInstance().add(session);
         return session;
+    }
+
+    @Override
+    protected Set<HttpMethod> allowedMethods() {
+        return Set.of(HttpMethod.GET, HttpMethod.POST);
     }
 }

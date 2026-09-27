@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -11,34 +12,35 @@ import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class LoginRequestHandler implements RequestHandler {
-    private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
+public class LoginController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        final Map<String, String> headers = new HashMap<>();
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        response.setStatus(HttpStatus.FOUND);
+        String location = "/index.html";
+
         try {
-            login(httpRequest, headers);
+            login(request, response);
         } catch (IllegalArgumentException e) {
-            headers.put("Location", "/401.html");
-            return new HttpResponse("/401.html", HttpStatus.UNAUTHORIZED, headers);
+            location = "/401.html";
+            response.setStatus(HttpStatus.SEE_OTHER);
         }
-        headers.put("Location", "/index.html");
-        return new HttpResponse("/index.html", HttpStatus.FOUND, headers);
+
+        response.addHeader("Location", location);
     }
 
-    private void login(HttpRequest httpRequest, Map<String, String> headers) {
+    private void login(HttpRequest httpRequest, HttpResponse response) {
         User user = getValidatedUser(httpRequest.params());
         log.info("user: {}", user.toString());
 
         removeOldSession(httpRequest);
 
         String sessionId = saveSession(user);
-        headers.put("cookie", sessionId);
+        response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 
     private User getValidatedUser(Map<String, String> paramsMap) {
@@ -80,5 +82,39 @@ public class LoginRequestHandler implements RequestHandler {
 
         SessionManager.getInstance().add(session);
         return sessionId;
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception{
+        response.setStatus(HttpStatus.OK);
+
+        if (isLoggedIn(request)) {
+            response.setStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/index.html");
+        }
+    }
+
+    private boolean isLoggedIn(HttpRequest httpRequest) {
+        final HttpCookie cookie = new HttpCookie(
+                httpRequest.headers().getOrDefault("cookie", "")
+        );
+
+        try {
+            final String sessionId = cookie.getSessionId();
+            final SessionManager sessionManager = SessionManager.getInstance();
+
+            if (!sessionManager.isExistSession(sessionId)) {
+                return false;
+            }
+
+            final Session session = sessionManager.findSession(sessionId);
+            return getUser(session) != null;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 }

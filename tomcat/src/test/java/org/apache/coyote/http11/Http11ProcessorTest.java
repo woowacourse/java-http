@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.config.ControllerConfig;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -19,7 +20,8 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -46,7 +48,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -65,6 +68,105 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void CSS_정적_파일을_응답한다() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String responseBody = readStaticResource("css/styles.css");
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("Content-Type: text/css;charset=utf-8")
+                .endsWith(responseBody);
+    }
+
+    @Test
+    void JavaScript_정적_파일을_올바른_Content_Type으로_응답한다() throws IOException, URISyntaxException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String responseBody = readStaticResource("js/scripts.js");
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("Content-Type: application/javascript;charset=utf-8")
+                .endsWith(responseBody);
+    }
+
+    @Test
+    void 존재하지_않는_정적_파일은_404로_응답한다() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/not-found.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).startsWith("HTTP/1.1 404 Not Found");
+    }
+
+    @Test
+    void Controller가_만든_응답_본문을_정적_파일로_덮어쓰지_않는다() {
+        // given
+        final String controllerBody = "controller response";
+        final String httpRequest = String.join("\r\n",
+                "GET /index HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final RequestMapping requestMapping = new RequestMapping(java.util.Map.of(
+                "/index",
+                (request, response) -> response.setBody(
+                        controllerBody.getBytes(StandardCharsets.UTF_8)
+                )
+        ));
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 200 OK")
+                .contains("Content-Length: " + controllerBody.getBytes(StandardCharsets.UTF_8).length)
+                .endsWith(controllerBody);
+    }
+
+    @Test
     void login() throws IOException, URISyntaxException {
         // given
         final String requestBody = "account=gugu&password=password";
@@ -78,23 +180,18 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/index.html");
-
-        final byte[] expectedBody = Files.readAllBytes(
-                Path.of(resource.toURI())
-        );
-
         assertThat(socket.output())
                 .startsWith("HTTP/1.1 302 Found")
-                .endsWith(new String(expectedBody, StandardCharsets.UTF_8));
+                .contains("Location: /index.html")
+                .contains("Content-Length: 0")
+                .endsWith("\r\n\r\n");
     }
 
     @Test
@@ -107,7 +204,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -140,7 +238,8 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -151,7 +250,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 비밀번호가_틀리면_401을_응답한다() {
+    void 비밀번호가_틀리면_401_페이지로_리다이렉트한다() {
         // given
         final String requestBody = "account=gugu&password=wrong";
         final String httpRequest = String.join("\r\n",
@@ -164,13 +263,22 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final RequestMapping requestMapping = new ControllerConfig().requestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output())
-                .startsWith("HTTP/1.1 401 Unauthorized");
+                .startsWith("HTTP/1.1 303 See Other");
+    }
+
+    private String readStaticResource(final String resourcePath) throws IOException, URISyntaxException {
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/" + resourcePath);
+
+        return Files.readString(Path.of(resource.toURI()));
     }
 }

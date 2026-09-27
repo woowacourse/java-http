@@ -1,29 +1,29 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.enums.HttpMethod;
-
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class HttpRequestParser {
 
     public HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         final String line = getHttpRequestLine(bufferedReader);
-        final HttpRequestLine requestLine = parseRequestLine(line);
+        final RequestLine requestLine = new RequestLine(line);
         final Map<String, String> headers = parserHeader(bufferedReader);
         final String parserBody = parserBody(headers, bufferedReader);
 
-        final Map<String, String > params = new HashMap<>(requestLine.params);
+        final Map<String, String > params = new HashMap<>(requestLine.getParams());
 
         if (isFormUrlEncoded(headers)) {
             params.putAll(getParamsMap(parserBody));
         }
 
         return HttpRequest.builder()
-                .httpMethod(requestLine.httpMethod)
-                .path(requestLine.path)
-                .version(requestLine.version)
+                .httpMethod(requestLine.getHttpMethod())
+                .path(requestLine.getPath())
+                .version(requestLine.getVersion())
                 .headers(headers)
                 .params(params)
                 .body(parserBody)
@@ -36,49 +36,6 @@ public class HttpRequestParser {
             throw new IllegalArgumentException("HTTP Request Line은 null일 수 없습니다.");
         }
         return line;
-    }
-
-    private HttpRequestLine parseRequestLine(String line) {
-        final String[] tokens = line.split(" ", 3);
-        final HttpMethod method = HttpMethod.of(tokens[0].trim());
-        final String uri = tokens[1].trim();
-        final String version = tokens[2].trim();
-
-        final String path = getPath(uri);
-        final Map<String, String> params = getParams(uri);
-        return new HttpRequestLine(method, path, version, params);
-    }
-
-    private String getPath(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return uri.substring(0, index);
-        }
-        return uri;
-    }
-
-    private Map<String, String> getParams(String uri) {
-        return getQueryString(uri)
-                .map(this::getParamsMap)
-                .orElseGet(Collections::emptyMap);
-    }
-
-    private Optional<String> getQueryString(String uri) {
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
-            return Optional.of(uri.substring(index + 1));
-        }
-        return Optional.empty();
-    }
-
-    private Map<String, String> getParamsMap(String str) {
-        Map<String, String> paramsMap = new HashMap<>();
-        String[] data = str.split("\\&");
-        for (String d : data) {
-            String[] param = d.split("\\=");
-            paramsMap.put(param[0], param[1]);
-        }
-        return paramsMap;
     }
 
     private Map<String, String> parserHeader(BufferedReader bufferedReader) throws IOException {
@@ -128,10 +85,16 @@ public class HttpRequestParser {
                 .startsWith("application/x-www-form-urlencoded");
     }
 
-    private record HttpRequestLine(
-            HttpMethod httpMethod,
-            String path,
-            String version,
-            Map<String, String> params) {
+    private Map<String, String> getParamsMap(String str) {
+        Map<String, String> paramsMap = new HashMap<>();
+        String[] data = str.split("\\&");
+        for (String d : data) {
+            String[] param = d.split("\\=");
+            String key = URLDecoder.decode(param[0], StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(param[1], StandardCharsets.UTF_8);
+
+            paramsMap.put(key, value);
+        }
+        return paramsMap;
     }
 }

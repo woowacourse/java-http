@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
@@ -25,7 +26,7 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
     private final ExecutorService executor;
-    private boolean stopped;
+    private volatile boolean stopped;
 
     public Connector(final RequestMapping requestMapping) {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, DEFAULT_QUEUE_CAPACITY, requestMapping);
@@ -51,10 +52,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -79,11 +80,21 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping);
-        executor.execute(processor);
+        try {
+            executor.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("작업 대기열이 가득 찼거나 스레드 풀이 종료되어 연결을 닫습니다.");
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error(closeException.getMessage(), closeException);
+            }
+        }
     }
 
     public void stop() {
         stopped = true;
+        executor.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {

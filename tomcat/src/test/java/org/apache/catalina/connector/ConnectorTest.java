@@ -9,8 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestMapping;
 import org.junit.jupiter.api.AfterEach;
@@ -21,14 +19,9 @@ class ConnectorTest {
     private Connector connector;
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         if (connector != null) {
             connector.stop();
-            var executorField = Connector.class.getDeclaredField("executor");
-            executorField.setAccessible(true);
-            var executor = (ExecutorService) executorField.get(connector);
-            executor.shutdownNow();
-            assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
         }
     }
 

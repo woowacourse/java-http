@@ -21,10 +21,12 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 5_000;
 
     private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
+    private final int readTimeoutMillis;
     private volatile boolean stopped;
 
     public Connector(
@@ -42,8 +44,23 @@ public class Connector implements Runnable {
             final int maxThreads,
             final int waitingQueueSize
     ) {
+        this(requestMapping, port, acceptCount, maxThreads, waitingQueueSize, DEFAULT_READ_TIMEOUT_MILLIS);
+    }
+
+    public Connector(
+            final RequestMapping requestMapping,
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final int waitingQueueSize,
+            final int readTimeoutMillis
+    ) {
+        if (readTimeoutMillis <= 0) {
+            throw new IllegalArgumentException("읽기 제한 시간은 양수여야 합니다.");
+        }
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.readTimeoutMillis = readTimeoutMillis;
         this.stopped = false;
         this.executorService = new ThreadPoolExecutor(
                 maxThreads,
@@ -91,10 +108,10 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, requestMapping);
         try {
-            executorService.execute(processor);
-        } catch (RejectedExecutionException e) {
+            connection.setSoTimeout(readTimeoutMillis);
+            executorService.execute(new Http11Processor(connection, requestMapping));
+        } catch (IOException | RejectedExecutionException e) {
             try {
                 connection.close();
             } catch (IOException closeException) {

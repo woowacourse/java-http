@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
@@ -78,6 +79,8 @@ public class Http11Processor implements Runnable, Processor {
 
             writeResponse(outputStream, httpResponse);
             log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
+        } catch (SocketTimeoutException e) {
+            log.debug("request read timed out", e);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

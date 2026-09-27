@@ -1,23 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +24,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionManager sessionManager = SessionManager.getInstance();
+    private final RequestMapping requestMapping = createRequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -88,95 +83,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Optional<HttpResponse> dispatchRequest(HttpRequest request) {
-        RequestLine requestLine = request.getRequestLine();
-        String method = requestLine.getMethod();
-        String requestPath = extractRequestPath(requestLine.getPath());
-        String body = request.getBody();
-        HttpHeaders requestHeaders = request.getHeaders();
-
-        if ("GET".equals(method) && "/login".equals(requestPath) && isLoggedIn(requestHeaders)) {
-            return handleLoginRequest(body, requestHeaders);
+        Controller controller = requestMapping.getController(request);
+        if (controller == null) {
+            return Optional.empty();
         }
-        if ("POST".equals(method) && "/login".equals(requestPath)) {
-            return handleLoginRequest(body, requestHeaders);
+        HttpResponse response = new HttpResponse();
+        try {
+            controller.service(request, response);
+        } catch (Exception e) {
+            throw new UncheckedServletException(e);
         }
-        if ("POST".equals(method) && "/register".equals(requestPath)) {
-            return Optional.of(HttpResponse.redirect(handleRegister(body)));
-        }
-        return Optional.empty();
-    }
-
-    private boolean isLoggedIn(HttpHeaders requestHeaders) {
-        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
-        String sessionId = cookie.get("JSESSIONID");
-
-        Session session = sessionManager.findSession(sessionId);
-        if (session == null) {
-            return false;
-        }
-        User user = getUser(session);
-        return user != null;
-    }
-
-    private String handleRegister(String body) {
-        final Map<String, String> params = parseParams(body);
-        User user = new User(
-                params.get("account"),
-                params.get("password"),
-                params.get("email")
-        );
-        InMemoryUserRepository.save(user);
-        return "/index.html";
-    }
-
-    private Map<String, String> parseParams(String body) {
-        String[] parameterPairs = body.split("&");
-
-        return Arrays.stream(parameterPairs)
-                .map(parameterPair -> parameterPair.split("="))
-                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
-    }
-
-    private Optional<HttpResponse> handleLoginRequest(
-            String body,
-            HttpHeaders requestHeaders) {
-        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
-        String sessionId = cookie.get("JSESSIONID");
-
-        Session session = sessionManager.findSession(sessionId);
-        if (session != null && getUser(session) != null) {
-            return Optional.of(HttpResponse.redirect("/index.html"));
-        }
-        final Map<String, String> params = parseParams(body);
-
-        String account = params.get("account");
-        String password = params.get("password");
-        Optional<User> user = login(account, password);
-        if (user.isEmpty()) {
-            return Optional.of(HttpResponse.redirect("/401.html"));
-        }
-
-        HttpResponse response = HttpResponse.redirect("/index.html");
-        if (sessionId == null) {
-            sessionId = UUID.randomUUID().toString();
-            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
-        }
-
-        Session loginSession = new Session(sessionId);
-        loginSession.setAttribute("user", user.get());
-        sessionManager.add(loginSession);
         return Optional.of(response);
     }
 
-    private Optional<User> login(String account, String password) {
-        Optional<User> user = InMemoryUserRepository.findByAccount(account)
-                .filter(foundUser -> foundUser.checkPassword(password));
-        user.ifPresent(foundUser -> log.info("user={}", foundUser));
-        return user;
-    }
-
-    private User getUser(Session session) {
-        return (User) session.getAttribute("user");
+    private RequestMapping createRequestMapping() {
+        RequestMapping mapping = new RequestMapping();
+        LoginController loginController = new LoginController();
+        mapping.addController("/login", loginController);
+        mapping.addController("/register", new RegisterController());
+        return mapping;
     }
 
     private String extractRequestPath(String requestTarget) {
@@ -187,21 +112,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return requestTarget.substring(0, queryStartIndex);
-    }
-
-    private Map<String, String> parseQueryParameters(String requestTarget) {
-        int queryStartIndex = requestTarget.indexOf('?');
-
-        if (queryStartIndex < 0) {
-            return Map.of();
-        }
-
-        String queryString = requestTarget.substring(queryStartIndex + 1);
-        String[] parameterPairs = queryString.split("&");
-
-        return Arrays.stream(parameterPairs)
-                .map(parameterPair -> parameterPair.split("="))
-                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
     private String resolveResourcePath(String requestPath) {

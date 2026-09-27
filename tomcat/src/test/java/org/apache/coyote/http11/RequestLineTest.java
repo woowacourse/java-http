@@ -27,4 +27,18 @@ class RequestLineTest {
         // then
         assertThat(requestLine.path()).isEqualTo(expectedPath);
     }
+
+    @ParameterizedTest
+    @CsvSource({
+        "'GET   /index.html   HTTP/1.1', /index",
+        "'GET\t/login.html\tHTTP/1.1', /login"
+    })
+    void 여러_공백으로_구분된_요청_줄을_파싱한다(
+        final String rawRequestLine,
+        final String expectedPath
+    ) {
+        final RequestLine requestLine = RequestLine.from(rawRequestLine);
+
+        assertThat(requestLine.path()).isEqualTo(expectedPath);
+    }
 }

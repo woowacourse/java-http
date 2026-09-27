@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.error.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +34,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(connection.getInputStream()));
+            new InputStreamReader(connection.getInputStream()));
             final var outputStream = connection.getOutputStream()) {
-
-            final HttpRequest request = readRequest(bufferedReader);
-            final HttpResponse response = HttpResponse.init();
-
-            requestDispatcher.dispatch(request, response);
-
-            writeResponse(outputStream, response);
+            dispatchRequest(bufferedReader, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
@@ -49,22 +44,39 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeResponse(final OutputStream outputStream, final HttpResponse response)
-        throws IOException {
-        final String message = response.getMessage();
+    private void dispatchRequest(final BufferedReader bufferedReader,
+        final OutputStream outputStream) throws IOException {
+        final HttpResponse response = HttpResponse.init();
 
+        try {
+            final HttpRequest request = readRequest(bufferedReader);
+
+            requestDispatcher.dispatch(request, response);
+            writeResponse(outputStream, response.getMessage());
+        } catch (HttpException e) {
+            response.addStatusLine(StatusLine.http11(e.status()));
+            response.addHeader("Content-Length", "0");
+            writeResponse(outputStream, response.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void writeResponse(final OutputStream outputStream, final String message)
+        throws IOException {
         outputStream.write(message.getBytes());
         outputStream.flush();
     }
 
     private HttpRequest readRequest(final BufferedReader bufferedReader) throws IOException {
-        final String rawRequestLine = bufferedReader.readLine().trim();
+        final String rawRequestLine = bufferedReader.readLine();
+        final RequestLine requestLine = RequestLine.from(rawRequestLine);
         final HttpHeaders headers = HttpHeaders.from(readRequestHeaderLines(bufferedReader));
         final String requestBody =
             readRequestBody(bufferedReader, headers.valueOf("Content-Length"));
 
         return new HttpRequest(
-            RequestLine.from(rawRequestLine),
+            requestLine,
             headers,
             requestBody);
     }
@@ -73,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         throws IOException {
         final List<String> requestHeaderLines = new ArrayList<>();
         String line;
-        while (!(line = bufferedReader.readLine()).isBlank()) {
+        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
             requestHeaderLines.add(line);
         }
 

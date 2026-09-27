@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
@@ -55,6 +56,48 @@ class Http11ProcessorTest {
                 "",
                 "Hello world!");
 
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "'GET /index', 'HTTP/1.1 400 Bad Request '",
+        "'PUT /index HTTP/1.1', 'HTTP/1.1 405 Method Not Allowed '",
+        "'GET /index HTTP/2.0', 'HTTP/1.1 505 HTTP Version Not Supported '",
+        "'GET index HTTP/1.1', 'HTTP/1.1 400 Bad Request '"
+    })
+    void 잘못된_요청_줄에_해당하는_HTTP_오류를_응답한다(
+        final String requestLine,
+        final String expectedStatusLine
+    ) {
+        final String httpRequest = String.join("\r\n",
+            requestLine,
+            "Host: localhost:8080",
+            "",
+            "");
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor =
+            new Http11Processor(socket, requestDispatcher);
+
+        processor.process(socket);
+
+        final String expected = String.join("\r\n",
+            expectedStatusLine,
+            "Content-Length: 0 ");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 빈_요청은_400을_응답한다() {
+        final StubSocket socket = new StubSocket("");
+        final Http11Processor processor =
+            new Http11Processor(socket, requestDispatcher);
+
+        processor.process(socket);
+
+        final String expected = String.join("\r\n",
+            "HTTP/1.1 400 Bad Request ",
+            "Content-Length: 0 ");
         assertThat(socket.output()).isEqualTo(expected);
     }
 

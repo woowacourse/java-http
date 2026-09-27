@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.RequestMapping;
+import com.techcourse.controller.ViewResolver;
+import com.techcourse.controller.ViewResolver.View;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,7 +50,12 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         final HttpRequest request = new HttpRequest(reader);
-        final HttpResponse response = new HttpResponse(request.getProtocolVersion(), request.getPath());
+        final ViewResolver resolver = ViewResolver.getINSTANCE();
+
+        View view = resolver.resolve(request.getPath());
+        final HttpResponse response = new HttpResponse(request.getProtocolVersion());
+        response.setBody(view.body());
+        response.addHeader("Content-Type", view.contentType());
         final RequestMapping requestMapping = RequestMapping.getInstance();
         final Controller controller = requestMapping.getController(request);
 

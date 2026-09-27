@@ -1,10 +1,13 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,6 +24,8 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int MIN_QUEUE_CAPACITY = 1;
+    private static final int SOCKET_TIMEOUT_MILLIS = 30_000;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -31,9 +36,8 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        final int checkedAcceptCount = checkAcceptCount(acceptCount);
-        this.serverSocket = createServerSocket(port, checkedAcceptCount);
-        this.executorService = createExecutorService(maxThreads, checkedAcceptCount);
+        this.serverSocket = createServerSocket(port, checkAcceptCount(acceptCount));
+        this.executorService = createExecutorService(maxThreads, checkQueueCapacity(acceptCount));
         this.stopped = false;
     }
 
@@ -57,6 +61,10 @@ public class Connector implements Runnable {
         );
     }
 
+    private int checkQueueCapacity(final int acceptCount) {
+        return Math.max(acceptCount, MIN_QUEUE_CAPACITY);
+    }
+
     public void start() {
         var thread = new Thread(this);
         thread.setDaemon(true);
@@ -75,7 +83,12 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            final Socket connection = serverSocket.accept();
+            if (connection != null) {
+                // 요청을 보내지 않고 연결만 유지하는 클라이언트가 워커를 계속 점유하지 않도록 읽기 타임아웃을 둔다.
+                connection.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
+            }
+            process(connection);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -90,6 +103,19 @@ public class Connector implements Runnable {
             executorService.execute(processor);
         } catch (RejectedExecutionException e) {
             log.error("스레드 풀과 대기열이 가득 차 요청을 처리할 수 없습니다.", e);
+            respondServiceUnavailable(connection);
+        }
+    }
+
+    private void respondServiceUnavailable(final Socket connection) {
+        try {
+            final OutputStream outputStream = connection.getOutputStream();
+            final HttpResponse response = new HttpResponse();
+            response.setStatus(HttpStatus.SERVICE_UNAVAILABLE);
+            response.write(outputStream);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } finally {
             closeQuietly(connection);
         }
     }

@@ -22,7 +22,13 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        final Session registeredSession = SESSIONS.get(id);
+        if (registeredSession == null)  {
+            final Session newSession  = new Session(id);
+            SESSIONS.put(id, newSession);
+            return newSession;
+        }
+        return registeredSession;
     }
 
     @Override

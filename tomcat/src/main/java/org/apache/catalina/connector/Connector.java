@@ -30,7 +30,7 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        workers = Executors.newFixedThreadPool(maxThread);
+        workers = Executors.newFixedThreadPool(checkMaxThread(maxThread));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -97,5 +97,12 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThread(final int maxThread) {
+        if (maxThread <= 0) {
+            return DEFAULT_MAX_THREAD;
+        }
+        return maxThread;
     }
 }

@@ -11,17 +11,19 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
 
 public final class HttpRequest {
-    private final String method;
-    private final RequestTarget target;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final HttpCookie cookies;
     private final String body;
+    private Session session;
+    private Manager sessionManager;
 
-    private HttpRequest(String method, RequestTarget target, Map<String, String> headers, String body) {
-        this.method = method;
-        this.target = target;
+    private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
+        this.requestLine = requestLine;
         this.headers = Map.copyOf(headers);
         this.cookies = new HttpCookie(this.headers.getOrDefault("cookie", ""));
         this.body = body;
@@ -29,11 +31,13 @@ public final class HttpRequest {
 
     public static HttpRequest readFrom(InputStream inputStream) throws IOException {
         BufferedInputStream input = new BufferedInputStream(inputStream);
-        String requestLine = readLine(input);
-        if (requestLine == null) {
+        String requestLineValue = readLine(input);
+
+        if (requestLineValue == null) {
             return null;
         }
-        String[] parts = requestLine.split(" ");
+
+        RequestLine requestLine = RequestLine.from(requestLineValue);
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while ((headerLine = readLine(input)) != null && !headerLine.isEmpty()) {
@@ -49,8 +53,11 @@ public final class HttpRequest {
         if (bodyBytes.length < contentLength) {
             throw new EOFException("요청 본문이 Content-Length보다 짧습니다");
         }
-        return new HttpRequest(parts[0], new RequestTarget(parts[1]), headers,
-                new String(bodyBytes, StandardCharsets.UTF_8));
+        return new HttpRequest(
+                requestLine,
+                headers,
+                new String(bodyBytes, StandardCharsets.UTF_8)
+        );
     }
 
     private static String readLine(InputStream input) throws IOException {
@@ -70,16 +77,42 @@ public final class HttpRequest {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
-    public boolean matches(String expectedMethod, String expectedPath) {
-        return method.equals(expectedMethod) && target.hasPath(expectedPath);
+    void attachSession(
+            final Session session,
+            final Manager sessionManager
+    ) {
+        this.session = session;
+        this.sessionManager = sessionManager;
     }
 
-    public String getPath() {
-        return target.getPath();
+    public Session session() {
+        if (session == null) {
+            throw new IllegalStateException("요청에 세션이 연결되지 않았습니다.");
+        }
+
+        return session;
     }
 
-    public String getExtension() {
-        return target.getExtension();
+    public Session renewSession() {
+        Session currentSession = session();
+        if (sessionManager == null) {
+            throw new IllegalStateException("요청에 세션 관리자가 연결되지 않았습니다.");
+        }
+
+        session = sessionManager.renewSession(currentSession);
+        return session;
+    }
+
+    public String path() {
+        return requestLine.target().path();
+    }
+
+    public String extension() {
+        return requestLine.target().extension();
+    }
+
+    public HttpMethod method() {
+        return requestLine.method();
     }
 
     public Optional<String> findHeader(String name) {

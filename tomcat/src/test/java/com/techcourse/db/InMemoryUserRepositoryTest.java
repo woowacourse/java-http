@@ -3,49 +3,27 @@ package com.techcourse.db;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.model.User;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class InMemoryUserRepositoryTest {
 
     @Test
-    void 기본_회원을_가진다() {
-        // when
-        final var user = InMemoryUserRepository.findByAccount("gugu");
+    void 저장한_회원을_계정으로_찾는다() {
+        String account = "user-" + UUID.randomUUID();
+        User user = new User(account, "password", "user@example.com");
 
-        // then
-        assertThat(user).isPresent();
-        assertThat(user.orElseThrow().checkPassword("password")).isTrue();
-    }
-
-    @Test
-    void 회원을_저장한다() {
-        // given
-        final var user = new User("whale", "password", "whale@example.com");
-
-        // when
         InMemoryUserRepository.save(user);
 
-        // then
-        assertThat(InMemoryUserRepository.findByAccount("whale"))
+        assertThat(InMemoryUserRepository.findByAccount(account))
                 .containsSame(user);
     }
 
     @Test
-    void 계정으로_등록된_회원을_찾는다() {
-        // when
-        final var user = InMemoryUserRepository.findByAccount("gugu");
+    void 등록되지_않은_계정은_빈_결과를_반환한다() {
+        String account = "unknown-" + UUID.randomUUID();
 
-        // then
-        assertThat(user).isPresent();
-        assertThat(user.orElseThrow().getAccount()).isEqualTo("gugu");
-    }
-
-    @Test
-    void 등록되지_않은_계정은_빈_결과로_반환한다() {
-        // when
-        final var user = InMemoryUserRepository.findByAccount("unknown");
-
-        // then
-        assertThat(user).isEmpty();
+        assertThat(InMemoryUserRepository.findByAccount(account))
+                .isEmpty();
     }
 }

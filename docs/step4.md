@@ -13,4 +13,4 @@
 ### 동시성 컬렉션
 
 - [x] `SessionManager`의 Session 저장소가 동시 접근에 안전한 컬렉션을 사용한다.
-- [ ] `Session`의 attribute 저장소가 동시 접근에 안전한 컬렉션을 사용한다.
+- [x] `Session`의 attribute 저장소가 동시 접근에 안전한 컬렉션을 사용한다.

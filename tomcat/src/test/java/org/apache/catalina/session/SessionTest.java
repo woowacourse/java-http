@@ -1,4 +1,4 @@
-package org.catalina.session;
+package org.apache.catalina.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

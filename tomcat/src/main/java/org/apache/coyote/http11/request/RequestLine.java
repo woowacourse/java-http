@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class RequestLine {
 
@@ -10,8 +10,8 @@ public class RequestLine {
     private final String protocol;
     private final String version;
 
-    public RequestLine(final BufferedReader bufferedReader) throws IOException {
-        final String requestLine = bufferedReader.readLine();
+    public RequestLine(final InputStream inputStream) throws IOException {
+        final String requestLine = HttpInput.readLine(inputStream);
         if (requestLine == null || requestLine.isBlank()) {
             throw new IOException("Request line is empty");
         }

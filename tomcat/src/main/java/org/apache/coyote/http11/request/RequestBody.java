@@ -1,18 +1,22 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class RequestBody {
 
     private final String content;
 
-    public RequestBody(final BufferedReader bufferedReader, final RequestHeaders httpRequestHeaders) throws IOException {
+    public RequestBody(final InputStream inputStream, final RequestHeaders httpRequestHeaders) throws IOException {
         if (httpRequestHeaders.contains("Content-Length")) {
             int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            content = new String(buffer);
+            byte[] buffer = inputStream.readNBytes(contentLength);
+            if (buffer.length != contentLength) {
+                throw new EOFException("Request body is shorter than Content-Length");
+            }
+            content = new String(buffer, StandardCharsets.UTF_8);
             return;
         }
         content = null;

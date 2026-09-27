@@ -152,3 +152,40 @@ HTTP 응답은 어떤 형태로 구성되어 있는가?
 
 HTTP 요청, 응답을 다른 객체에게 역할을 맡기고 나니까 uri 경로에 따른 if절 분기 처리가 남는다.
 if절 분기는 어떻게 리팩터링하는게 좋을까?
+
+## 4단계 - 동시성 확장하기
+
+> 서버는 동시에 여러 사용자가 접속할 수 있다.
+> 현재 서버는 동시 접속자가 많아지면 스레드가 무한대로 생성되면서 서버가 다운될 위험이 있다.
+> Java에서 제공하는 ThreadPoolExecutor를 사용해서 스레드 풀(thread pool) 기능을 추가하여 스레드를 관리해보자.
+
+> 이 단계의 요구사항은 자바가 제공하는 API를 활용하면 쉽게 구현할 수 있다.
+> 이 단계의 핵심 학습 목표는 요구사항을 만족하는 것보다 WAS에서 Thead Pool의 동작 원리를 이해하는 것이 더 중요하다.
+> 힌트와 학습 테스트를 진행해 보면서 WAS의 Thead Pool 동작 원리를 이해할 것을 추천한다.
+
+### 기능 요구 사항
+
+#### 1. Executors로 Thread Pool 적용
+
+지금은 Connector 클래스의 void process(final Socket connection) 메서드에서 요청마다 스레드를 새로 생성하고 있다.
+
+- [ ] Connector 클래스에서 Executors 클래스를 사용해서 ExecutorService 객체를 만들어보자.
+    - [ ] 스레드 갯수는 maxThreads라는 변수로 지정한다.
+
+```java
+// maxThreads를 추가했다.
+public Connector(final Container container, final int port, final int acceptCount, final int maxThreads) {
+// 생성자에서 스레드 풀 생성
+}
+
+// 생각해보기 🤔
+// acceptCount와 maxThreads는 각각 어떤 설정일까?
+// 최대 ThradPool의 크기는 250, 모든 Thread가 사용 중인(Busy) 상태이면 100명까지 대기 상태로 만들려면 어떻게 할까?
+```
+
+#### 2. 동시성 컬렉션 사용하기
+
+SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시에 접근할 수 있다.
+그러다보니 Session 컬렉션에 여러 스레드가 동시에 접근하여 읽고 쓰다보면 스레드 안정성을 보장하기 어렵다.
+
+- [ ] 동시성 컬렉션(Concurrent Collections)을 적용해서 스레드 안정성과 원자성을 보장해보자.

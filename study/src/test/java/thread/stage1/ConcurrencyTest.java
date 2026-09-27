@@ -1,8 +1,8 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
@@ -35,6 +35,11 @@ class ConcurrencyTest {
 
         // 이미 gugu로 가입한 사용자가 있어서 UserServlet.join() 메서드의 if절 조건은 false가 되고 크기는 1이다.
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
+        // 가입 여부 확인과 회원 추가가 별개의 연산이기 때문에, 그 사이에 다른 스레드가 끼어들 수 있기 때문이다.
+        // 두 스레드가 모두 회원이 없다고 판단한 뒤 각각 추가하면 중복 가입이 발생할 수 있다.
+        // 일반 실행에서는 한 스레드가 먼저 추가까지 마쳐 테스트가 통과할 수 있지만,
+        // 디버거로 추가 직전에 멈추면 이러한 경쟁 조건을 재현할 수 있었다.
+        // 따라서 확인과 추가를 하나의 원자적 작업으로 수행할 수 있도록 동기화해야 한다.
         assertThat(userServlet.getUsers()).hasSize(1);
     }
 }

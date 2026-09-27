@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.Manager;
 import org.apache.catalina.mapper.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
@@ -16,19 +18,28 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
     private final Manager sessionManager;
     private boolean stopped;
+    private final ExecutorService executorService;
 
     public Connector(final RequestMapping requestMapping, final Manager sessionManager) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, sessionManager);
+        this(
+                DEFAULT_PORT,
+                DEFAULT_ACCEPT_COUNT,
+                DEFAULT_MAX_THREADS,
+                requestMapping,
+                sessionManager
+        );
     }
 
     public Connector(
             final int port,
             final int acceptCount,
+            final int maxThreads,
             final RequestMapping requestMapping,
             final Manager sessionManager
     ) {
@@ -36,6 +47,7 @@ public class Connector implements Runnable {
         this.requestMapping = requestMapping;
         this.sessionManager = sessionManager;
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -77,7 +89,8 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping, sessionManager);
-        new Thread(processor).start();
+
+        executorService.execute(processor);
     }
 
     public void stop() {
@@ -86,6 +99,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

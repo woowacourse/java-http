@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
-import org.apache.coyote.http11.Http11Processor.Session;
-import org.apache.coyote.http11.Http11Processor.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class SessionTest {

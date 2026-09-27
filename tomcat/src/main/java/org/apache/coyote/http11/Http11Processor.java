@@ -10,7 +10,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,22 +47,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String[] requestMessage = extractRequestMessage(bufferedReader);
-            Map<String, String> requestHeaders = extractRequestHeaders(bufferedReader);
-            String body = extractRequestBody(bufferedReader, requestHeaders);
+            HttpRequest request = HttpRequest.from(bufferedReader);
 
-            String method = requestMessage[0];
-            String requestTarget = requestMessage[1];
-            String requestPath = extractRequestPath(requestTarget);
-            Map<String, String> queryParameters = parseQueryParameters(requestTarget);
+            RequestLine requestLine = request.getRequestLine();
+            String requestPath = extractRequestPath(requestLine.getPath());
 
-            Optional<HttpResponse> handledResponse = dispatchRequest(
-                    method,
-                    requestPath,
-                    queryParameters,
-                    body,
-                    requestHeaders
-            );
+            Optional<HttpResponse> handledResponse = dispatchRequest(request);
             if (handledResponse.isPresent()) {
                 outputStream.write(handledResponse.get().toString().getBytes());
                 outputStream.flush();
@@ -94,27 +83,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
-        final String contentLength = headers.get("Content-Length");
-        if (contentLength == null) {
-            return "";
-        }
-        final char[] buffer = new char[Integer.parseInt(contentLength)];
-        bufferedReader.read(buffer);
-        return new String(buffer);
-    }
-
     private String readNotFoundPage() throws IOException {
         URL resourceUrl = getClass().getClassLoader().getResource("static/404.html");
         return readStaticResource(resourceUrl);
     }
 
-    private Optional<HttpResponse> dispatchRequest(
-            String method,
-            String requestPath,
-            Map<String, String> queryParameters,
-            String body,
-            Map<String, String> requestHeaders) {
+    private Optional<HttpResponse> dispatchRequest(HttpRequest request) {
+        RequestLine requestLine = request.getRequestLine();
+        String method = requestLine.getMethod();
+        String requestPath = extractRequestPath(requestLine.getPath());
+        String body = request.getBody();
+        HttpHeaders requestHeaders = request.getHeaders();
 
         if ("GET".equals(method) && "/login".equals(requestPath) && isLoggedIn(requestHeaders)) {
             return handleLoginRequest(body, requestHeaders);
@@ -128,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.empty();
     }
 
-    private boolean isLoggedIn(Map<String, String> requestHeaders) {
+    private boolean isLoggedIn(HttpHeaders requestHeaders) {
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");
 
@@ -161,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Optional<HttpResponse> handleLoginRequest(
             String body,
-            Map<String, String> requestHeaders) {
+            HttpHeaders requestHeaders) {
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");
 
@@ -237,12 +216,6 @@ public class Http11Processor implements Runnable, Processor {
         return "static" + requestPath;
     }
 
-    private String[] extractRequestMessage(BufferedReader bufferedReader) throws IOException {
-        String requestLine = bufferedReader.readLine();
-
-        return requestLine.split(" ");
-    }
-
     private String resolveResponseBody(String resourcePath) throws IOException {
         if ("/".equals(resourcePath)) {
             return "Hello world!";
@@ -269,15 +242,4 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private Map<String, String> extractRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> requestHeaders = new HashMap<>();
-
-        String headerLine;
-        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isEmpty()) {
-            String[] parts = headerLine.split(":", 2);
-            requestHeaders.put(parts[0], parts[1].trim());
-        }
-
-        return requestHeaders;
-    }
 }

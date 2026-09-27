@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
@@ -18,8 +20,10 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private boolean stopped;
     private final RequestMapping requestMapping;
     private final Controller staticResourceController;
@@ -30,17 +34,20 @@ public class Connector implements Runnable {
             final Controller staticResourceController,
             final HttpSessionHandler sessionHandler
     ) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, staticResourceController, sessionHandler);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS,
+                requestMapping, staticResourceController, sessionHandler);
     }
 
     public Connector(
             final int port,
             final int acceptCount,
+            final int maxThreads,
             final RequestMapping requestMapping,
             final Controller staticResourceController,
             final HttpSessionHandler sessionHandler
     ) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
         this.requestMapping = requestMapping;
         this.staticResourceController = staticResourceController;
         this.sessionHandler = sessionHandler;
@@ -88,7 +95,7 @@ public class Connector implements Runnable {
         }
         final Http11Processor processor =
                 new Http11Processor(connection, requestMapping, staticResourceController, sessionHandler);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
@@ -112,5 +119,12 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        if (maxThreads < 1) {
+            return DEFAULT_MAX_THREADS;
+        }
+        return maxThreads;
     }
 }

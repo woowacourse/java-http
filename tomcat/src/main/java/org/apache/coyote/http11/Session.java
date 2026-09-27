@@ -1,30 +1,20 @@
 package org.apache.coyote.http11;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String id;
     private final Map<String, Object> values;
-    private boolean created;
 
-    private Session(final String id, final boolean created) {
+    private Session(final String id) {
         this.id = id;
-        this.created = created;
-        this.values = new LinkedHashMap<>();
+        this.values = new ConcurrentHashMap<>();
     }
 
     public static Session init(final String id) {
-        return new Session(id, true);
-    }
-
-    public void found() {
-        this.created = false;
-    }
-
-    public boolean isCreated() {
-        return created;
+        return new Session(id);
     }
 
     public String id() {

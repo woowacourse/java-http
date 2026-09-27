@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.DispatchType.FORWARD;
-import static org.apache.coyote.http11.DispatchType.REDIRECT;
-
 import java.io.IOException;
 import java.util.Optional;
 import org.apache.coyote.controller.Controller;

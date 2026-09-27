@@ -59,9 +59,11 @@ public class LoginController extends AbstractController {
             final User user
     ) throws IOException {
         final String sessionId = cookie.get(SESSION_COOKIE_NAME);
-        final HttpSession previousSession = SESSION_MANAGER.findSession(sessionId);
-        if (previousSession != null) {
-            SESSION_MANAGER.remove(previousSession);
+        if (sessionId != null) {
+            final HttpSession previousSession = SESSION_MANAGER.findSession(sessionId);
+            if (previousSession != null) {
+                SESSION_MANAGER.remove(previousSession);
+            }
         }
 
         final HttpSession newSession = new Session(UUID.randomUUID().toString());

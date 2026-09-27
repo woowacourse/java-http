@@ -1,29 +1,26 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestReader;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.util.Optional;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestHandler requestHandler;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection, RequestHandler requestHandler) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
-        this.requestHandler = requestHandler;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -35,18 +32,19 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8))) {
+             final var outputStream = connection.getOutputStream()) {
 
-            final Optional<HttpRequest> request = HttpRequest.from(reader);
-            if (request.isEmpty()) {
+            final Optional<HttpRequest> readRequest = new HttpRequestReader(inputStream).read();
+            if (readRequest.isEmpty()) {
                 return;
             }
-            final HttpResponse response = requestHandler.handle(request.get());
+            final HttpRequest request = readRequest.get();
+            final HttpResponse response = new HttpResponse();
+            requestMapping.getController(request).service(request, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException | HttpRequestParseException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

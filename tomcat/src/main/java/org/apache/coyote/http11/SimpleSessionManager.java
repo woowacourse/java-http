@@ -1,17 +1,17 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.catalina.Manager;
 
 public class SimpleSessionManager implements Manager {
 
-    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, HttpSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public void add(HttpSession session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     @Override
@@ -19,7 +19,7 @@ public class SimpleSessionManager implements Manager {
         if (id == null) {
             return null;
         }
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
@@ -28,6 +28,6 @@ public class SimpleSessionManager implements Manager {
             return;
         }
 
-        SESSIONS.remove(session.getId());
+        sessions.remove(session.getId(), session);
     }
 }

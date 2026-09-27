@@ -9,7 +9,10 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -28,19 +31,30 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        final int checkedAcceptCount = checkAcceptCount(acceptCount);
+        this.serverSocket = createServerSocket(port, checkedAcceptCount);
+        this.executorService = createExecutorService(maxThreads, checkedAcceptCount);
         this.stopped = false;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkedPort, acceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private ExecutorService createExecutorService(final int maxThreads, final int queueCapacity) {
+        // maxThreads(코어=최대 풀 크기)가 모두 사용 중이면 queueCapacity만큼 요청을 대기시킨다.
+        return new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(queueCapacity)
+        );
     }
 
     public void start() {
@@ -72,7 +86,20 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.error("스레드 풀과 대기열이 가득 차 요청을 처리할 수 없습니다.", e);
+            closeQuietly(connection);
+        }
+    }
+
+    private void closeQuietly(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public void stop() {

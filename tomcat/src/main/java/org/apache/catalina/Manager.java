@@ -21,6 +21,13 @@ import java.io.IOException;
 public interface Manager {
 
     /**
+     * Create and register a new Session with a generated id.
+     *
+     * @return the newly created session
+     */
+    Session createSession();
+
+    /**
      * Add this Session to the set of active Sessions for this Manager.
      *
      * @param session Session to be added

@@ -1,0 +1,46 @@
+package com.techcourse.controller;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import java.io.IOException;
+import java.util.Map;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.controller.MethodDispatchingController;
+import org.apache.catalina.resource.StaticResourceRenderer;
+import org.apache.coyote.http11.HttpResponse;
+
+public final class RegisterController extends MethodDispatchingController {
+    private static final String ACCOUNT_PARAMETER = "account";
+    private static final String PASSWORD_PARAMETER = "password";
+    private static final String EMAIL_PARAMETER = "email";
+
+    private final StaticResourceRenderer staticResourceRenderer;
+
+    public RegisterController(final StaticResourceRenderer staticResourceRenderer) {
+        this.staticResourceRenderer = staticResourceRenderer;
+    }
+
+    @Override
+    protected void doGet(final Request request, final HttpResponse response) throws IOException {
+        staticResourceRenderer.render("/register.html", response);
+    }
+
+    @Override
+    protected void doPost(final Request request, final HttpResponse response) {
+        final Map<String, String> formParameters = request.formParameters();
+        final String account = getRequiredParameter(formParameters, ACCOUNT_PARAMETER);
+        final String password = getRequiredParameter(formParameters, PASSWORD_PARAMETER);
+        final String email = getRequiredParameter(formParameters, EMAIL_PARAMETER);
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        response.sendRedirect("/index.html");
+    }
+
+    private String getRequiredParameter(final Map<String, String> formParameters, final String name) {
+        final String value = formParameters.get(name);
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Missing form parameter: " + name);
+        }
+        return value;
+    }
+}

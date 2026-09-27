@@ -1,11 +1,28 @@
 package com.techcourse;
 
+import com.techcourse.controller.HomeController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import org.apache.catalina.controller.StaticResourceController;
+import org.apache.catalina.mapper.RequestMapping;
+import org.apache.catalina.resource.StaticResourceRenderer;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
 
     public static void main(String[] args) {
-        final var tomcat = new Tomcat();
+        final RequestMapping requestMapping = createRequestMapping();
+        final var tomcat = new Tomcat(requestMapping);
         tomcat.start();
+    }
+
+    private static RequestMapping createRequestMapping() {
+        final StaticResourceRenderer staticResourceRenderer = new StaticResourceRenderer();
+        final StaticResourceController staticResourceController = new StaticResourceController(staticResourceRenderer);
+        final RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        requestMapping.addMapping("/", new HomeController());
+        requestMapping.addMapping("/login", new LoginController(staticResourceRenderer));
+        requestMapping.addMapping("/register", new RegisterController(staticResourceRenderer));
+        return requestMapping;
     }
 }

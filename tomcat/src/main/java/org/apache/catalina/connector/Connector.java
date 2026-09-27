@@ -2,6 +2,7 @@ package org.apache.catalina.connector;
 
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.response.Http11ErrorResponder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +88,7 @@ public class Connector implements Runnable {
             executorService.execute(processor);
         } catch (RejectedExecutionException e) {
             log.warn("대기 큐가 가득 차서 연결을 종료합니다.");
+            Http11ErrorResponder.sendServiceUnavailable(connection);
             try {
                 connection.close();
             } catch (IOException e1) {

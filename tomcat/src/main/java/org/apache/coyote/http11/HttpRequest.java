@@ -11,13 +11,15 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String body;
-    private final Map<String, String> parameters;
+    private final Map<String, String> queryParameters;
+    private final Map<String, String> bodyParameters;
 
     private HttpRequest(final RequestLine requestLine, final Map<String, String> headers, final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.parameters = parseFormData(resolveRawParameters(requestLine, body));
+        this.queryParameters = parseFormData(requestLine.getQueryString());
+        this.bodyParameters = parseFormData(body);
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
@@ -62,13 +64,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    private static String resolveRawParameters(final RequestLine requestLine, final String body) {
-        if ("POST".equals(requestLine.getMethod())) {
-            return body;
-        }
-        return requestLine.getQueryString();
-    }
-
     private static Map<String, String> parseFormData(final String rawParameters) {
         final Map<String, String> parameters = new HashMap<>();
         if (rawParameters.isEmpty()) {
@@ -101,11 +96,11 @@ public class HttpRequest {
         return body;
     }
 
-    public String getParameter(final String name) {
-        return parameters.get(name);
+    public String getQueryParameter(final String name) {
+        return queryParameters.get(name);
     }
 
-    public Map<String, String> getParameters() {
-        return Map.copyOf(parameters);
+    public String getBodyParameter(final String name) {
+        return bodyParameters.get(name);
     }
 }

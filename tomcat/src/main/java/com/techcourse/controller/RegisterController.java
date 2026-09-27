@@ -12,9 +12,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final String account = request.getParameter("account");
-        final String password = request.getParameter("password");
-        final String email = request.getParameter("email");
+        final String account = request.getBodyParameter("account");
+        final String password = request.getBodyParameter("password");
+        final String email = request.getBodyParameter("email");
         InMemoryUserRepository.save(new User(account, password, email));
         response.redirect("/index.html");
     }

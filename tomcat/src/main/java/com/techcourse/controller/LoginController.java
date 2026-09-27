@@ -33,8 +33,8 @@ public class LoginController extends AbstractController {
     }
 
     private Optional<User> findLoginUser(final HttpRequest request) {
-        final String account = request.getParameter("account");
-        final String password = request.getParameter("password");
+        final String account = request.getBodyParameter("account");
+        final String password = request.getBodyParameter("password");
 
         if (account == null) {
             return Optional.empty();

@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -18,6 +19,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int EXECUTOR_TERMINATION_TIMEOUT_SECONDS = 5;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -83,11 +85,26 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
-        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+        shutdownExecutorService();
+    }
+
+    private void shutdownExecutorService() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    log.warn("ExecutorService did not terminate.");
+                }
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

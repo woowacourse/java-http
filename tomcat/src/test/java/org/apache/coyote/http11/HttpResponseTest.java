@@ -47,6 +47,40 @@ class HttpResponseTest {
     }
 
     @Test
+    void sendBadRequest() throws IOException {
+        //given
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        HttpResponse response = new HttpResponse(output);
+
+        //when
+        response.sendBadRequest();
+
+        //then
+        assertThat(output.toString(StandardCharsets.UTF_8)).isEqualTo(
+                "HTTP/1.1 400 Bad Request\r\n"
+                + "Content-Length: 0\r\n"
+                + "\r\n"
+        );
+    }
+
+    @Test
+    void sendNotFound() throws IOException {
+        //given
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        HttpResponse response = new HttpResponse(output);
+
+        //when
+        response.sendNotFound();
+
+        //then
+        assertThat(output.toString(StandardCharsets.UTF_8)).isEqualTo(
+                "HTTP/1.1 404 Not Found\r\n"
+                + "Content-Length: 0\r\n"
+                + "\r\n"
+        );
+    }
+
+    @Test
     void sendWithCookie() throws IOException {
         //given
         ByteArrayOutputStream output = new ByteArrayOutputStream();

@@ -63,5 +63,5 @@
 
 - [x] URI와 Controller 등록을 `Http11Processor`에서 `RequestMapping.forSession()`으로 옮긴다. 새 URI를 추가할 때 Processor를 수정하지 않고, 요청별
   `Session`을 로그인 Controller에 전달한다.
-- [x] `HttpResponse`의 응답 생성 방식을 검토한다. 현재는 상태별 메서드가 동작을 읽기 쉽게 보여주므로 유지한다. 상태 코드나 헤더 조합이 늘어나 중복 변경이 반복되면 공통 작성 메서드를 추출한다.
+- [x] `HttpResponse`의 상태별 메서드는 유지하고, 반복되는 상태 줄·헤더·본문 출력을 `writeResponse()`로 묶는다.
 - [x] 현재 사용하지 않는 `Session.removeAttribute()`와 `Session.invalidate()`를 제거한다. 필요해질 때 실제 사용 사례와 함께 추가한다.

@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestMapping;
 import org.slf4j.Logger;
@@ -36,7 +39,11 @@ public class Connector implements Runnable {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = requestMapping;
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads, maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(100)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -78,7 +85,16 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping);
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException rejectedExecutionException) {
+            log.warn("요청 처리가 거절되었습니다.", rejectedExecutionException);
+            try {
+                connection.close();
+            } catch (IOException ioException) {
+                log.error(ioException.getMessage(), ioException);
+            }
+        }
     }
 
     public void stop() {

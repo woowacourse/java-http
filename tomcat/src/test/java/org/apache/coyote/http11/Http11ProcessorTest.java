@@ -6,6 +6,11 @@ import support.StubSocket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -292,6 +297,33 @@ class Http11ProcessorTest {
 
         session.invalidate();
         assertThat(Http11Processor.SessionManager.findById(sessionId)).isEmpty();
+    }
+
+    @Test
+    void createsOnlyOneSessionWhenTheSameIdIsRequestedConcurrently() throws Exception {
+        // given
+        final String sessionId = "concurrent-session";
+        final ExecutorService executorService = Executors.newFixedThreadPool(10);
+        final List<Callable<Http11Processor.Session>> tasks = java.util.stream.IntStream.range(0, 100)
+                .<Callable<Http11Processor.Session>>mapToObj(index -> () -> Http11Processor.SessionManager.getOrCreate(sessionId))
+                .toList();
+
+        // when
+        final var sessions = executorService.invokeAll(tasks).stream()
+                .map(future -> {
+                    try {
+                        return future.get();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
+        executorService.shutdown();
+        executorService.awaitTermination(1, TimeUnit.SECONDS);
+
+        // then
+        assertThat(sessions).allSatisfy(session -> assertThat(session)
+                .isSameAs(Http11Processor.SessionManager.findById(sessionId).orElseThrow()));
     }
 
     private String extractSessionId(final String response) {

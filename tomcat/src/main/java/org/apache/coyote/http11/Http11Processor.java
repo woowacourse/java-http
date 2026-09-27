@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public static final class SessionManager {
 
-        private static final Map<String, Session> sessions = new HashMap<>();
+        private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
         private SessionManager() {
         }

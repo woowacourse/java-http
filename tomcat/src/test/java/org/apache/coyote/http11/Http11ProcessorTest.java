@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -9,6 +12,7 @@ import support.StubSocket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,16 +28,16 @@ class Http11ProcessorTest {
     void process() {
         // given
         final StubSocket socket = new StubSocket();
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping());
 
         // when
         processor.process(socket);
 
         // then
         final String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -47,9 +51,9 @@ class Http11ProcessorTest {
         final String response = execute(malformedRequest);
 
         final String expected = String.join("\r\n",
-                "HTTP/1.1 400 Bad Request ",
-                "Content-Type: text/plain;charset=utf-8 ",
-                "Content-Length: 11 ",
+                "HTTP/1.1 400 Bad Request",
+                "Content-Type: text/plain;charset=utf-8",
+                "Content-Length: 11",
                 "",
                 "Bad Request");
 
@@ -67,7 +71,7 @@ class Http11ProcessorTest {
                 "");
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping());
 
         // when
         processor.process(socket);
@@ -81,9 +85,9 @@ class Http11ProcessorTest {
         }
 
         final String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + bodyBytes.length + " ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + bodyBytes.length,
                 "",
                 new String(bodyBytes, StandardCharsets.UTF_8));
 
@@ -148,7 +152,7 @@ class Http11ProcessorTest {
 
         try {
             final Session session = SessionManager.getInstance().findSession(sessionId);
-            assertThat(removeAndValidateSessionCookie(response)).startsWith("HTTP/1.1 200 OK ");
+            assertThat(removeAndValidateSessionCookie(response)).startsWith("HTTP/1.1 200 OK\r\n");
             assertThat(session).isNotNull();
             assertThat(session.getAttribute("user")).isNull();
         } finally {
@@ -177,11 +181,119 @@ class Http11ProcessorTest {
         }
     }
 
+    @Test
+    void 중복_아이디로_회원가입하면_기존_사용자를_유지한다() {
+        final String requestBody = "account=gugu&password=new-password&email=new%40example.com";
+
+        final String response = execute(formRequest("/register", requestBody, null));
+        final String sessionId = extractSessionId(response);
+
+        try {
+            final byte[] expectedBody = "이미 사용 중인 아이디입니다.".getBytes(StandardCharsets.UTF_8);
+            assertThat(removeAndValidateSessionCookie(response))
+                    .isEqualTo(String.join("\r\n",
+                            "HTTP/1.1 409 Conflict",
+                            "Content-Type: text/plain;charset=utf-8",
+                            "Content-Length: " + expectedBody.length,
+                            "",
+                            new String(expectedBody, StandardCharsets.UTF_8)));
+            assertThat(InMemoryUserRepository.findByAccount("gugu"))
+                    .hasValueSatisfying(user -> {
+                        assertThat(user.checkPassword("password")).isTrue();
+                        assertThat(user.checkPassword("new-password")).isFalse();
+                    });
+        } finally {
+            SessionManager.getInstance().remove(sessionId);
+        }
+    }
+
+    @Test
+    void 회원가입_페이지를_GET으로_조회한다() {
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final String response = execute(httpRequest);
+        final String sessionId = extractSessionId(response);
+
+        try {
+            assertThat(response).startsWith("HTTP/1.1 200 OK\r\n");
+            assertThat(response).contains("Content-Type: text/html;charset=utf-8\r\n");
+            assertThat(response).contains("<form");
+            assertThat(response).contains("name=\"account\"");
+            assertThat(response).contains("name=\"email\"");
+        } finally {
+            SessionManager.getInstance().remove(sessionId);
+        }
+    }
+
+    @Test
+    void CSS_파일을_응답한다() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final byte[] cssBytes;
+        try (InputStream resourceInputStream = getClass().getClassLoader()
+                .getResourceAsStream("static/css/styles.css")) {
+            assertThat(resourceInputStream).isNotNull();
+            cssBytes = resourceInputStream.readAllBytes();
+        }
+
+        final String response = execute(httpRequest);
+        final String sessionId = extractSessionId(response);
+
+        try {
+            assertThat(response).startsWith("HTTP/1.1 200 OK\r\n");
+            assertThat(response).contains("Content-Type: text/css\r\n");
+            assertThat(response).contains("Content-Length: " + cssBytes.length + "\r\n");
+            assertThat(response).endsWith(new String(cssBytes, StandardCharsets.UTF_8));
+        } finally {
+            SessionManager.getInstance().remove(sessionId);
+        }
+    }
+
+    @Test
+    void 존재하지_않는_파일은_404를_응답한다() {
+        final String httpRequest = String.join("\r\n",
+                "GET /does-not-exist.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+
+        final String response = execute(httpRequest);
+        final String sessionId = extractSessionId(response);
+
+        try {
+            assertThat(removeAndValidateSessionCookie(response))
+                    .isEqualTo(String.join("\r\n",
+                            "HTTP/1.1 404 Not Found",
+                            "Content-Type: text/plain;charset=utf-8",
+                            "Content-Length: 9",
+                            "",
+                            "Not Found"));
+        } finally {
+            SessionManager.getInstance().remove(sessionId);
+        }
+    }
+
     private String execute(final String httpRequest) {
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping());
         processor.process(socket);
         return socket.output();
+    }
+
+    private RequestMapping requestMapping() {
+        final Map<String, Controller> controllers = Map.of(
+                "/login", new LoginController(),
+                "/register", new RegisterController()
+        );
+        return new RequestMapping(controllers, new StaticResourceController());
     }
 
     private String formRequest(final String path, final String requestBody,
@@ -203,9 +315,9 @@ class Http11ProcessorTest {
 
     private String redirectResponse(final String location) {
         return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Length: 0 ",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
                 "",
                 "");
     }

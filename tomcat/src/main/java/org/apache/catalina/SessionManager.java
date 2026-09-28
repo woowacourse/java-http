@@ -3,13 +3,13 @@ package org.apache.catalina;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager implements Manager {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final ConcurrentMap<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

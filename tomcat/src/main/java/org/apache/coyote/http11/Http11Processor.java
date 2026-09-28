@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -59,17 +60,18 @@ public class Http11Processor implements Runnable, Processor {
             final var requestPath = extractRequestPath(requestUri);
             final var requestBody = readRequestBody(reader, requestHeaders);
             final var parameters = findParameters(requestMethod, requestUri, requestBody);
+            final var sessionCookie = createSessionCookie(requestHeaders);
 
             final var redirectLocation = processForm(requestMethod, requestPath, parameters);
             if (redirectLocation != null) {
-                writeRedirect(outputStream, redirectLocation);
+                writeRedirect(outputStream, redirectLocation, sessionCookie);
                 return;
             }
 
             final var responseBody = readResponseBody(requestPath);
             final var contentType = findContentType(requestPath);
 
-            writeResponse(outputStream, contentType, responseBody);
+            writeResponse(outputStream, contentType, responseBody, sessionCookie);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -272,18 +274,31 @@ public class Http11Processor implements Runnable, Processor {
         return contentType;
     }
 
+    private String createSessionCookie(final Map<String, String> requestHeaders) {
+        final var cookies = HttpCookie.parse(requestHeaders.get("Cookie"));
+        final var sessionId = cookies.get("JSESSIONID");
+
+        if (sessionId != null && !sessionId.isBlank()) {
+            return null;
+        }
+
+        return "JSESSIONID=" + UUID.randomUUID();
+    }
+
     private void writeResponse(
             final OutputStream outputStream,
             final String contentType,
-            final byte[] responseBody
+            final byte[] responseBody,
+            final String sessionCookie
     ) throws IOException {
-        final var responseHeaders = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                ""
-        );
+        final var responseHeaders = "HTTP/1.1 200 OK \r\n"
+                + createSetCookieHeader(sessionCookie)
+                + String.join("\r\n",
+                        "Content-Type: " + contentType + " ",
+                        "Content-Length: " + responseBody.length + " ",
+                        "",
+                        ""
+                );
 
         outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
@@ -292,17 +307,27 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeRedirect(
             final OutputStream outputStream,
-            final String location
+            final String location,
+            final String sessionCookie
     ) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                ""
-        );
+        final var response = "HTTP/1.1 302 Found\r\n"
+                + createSetCookieHeader(sessionCookie)
+                + String.join("\r\n",
+                        "Location: " + location,
+                        "Content-Length: 0",
+                        "",
+                        ""
+                );
 
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
+    }
+
+    private String createSetCookieHeader(final String sessionCookie) {
+        if (sessionCookie == null) {
+            return "";
+        }
+
+        return "Set-Cookie: " + sessionCookie + "\r\n";
     }
 }

@@ -15,7 +15,13 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket(String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=session-id",
+                "",
+                ""
+        ));
         final var processor = new Http11Processor(socket);
 
         // when
@@ -39,6 +45,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=session-id ",
                 "",
                 "");
 
@@ -77,6 +84,7 @@ class Http11ProcessorTest {
             final var httpRequest = String.join("\r\n",
                     "GET " + path + " HTTP/1.1",
                     "Host: localhost:8080",
+                    "Cookie: JSESSIONID=session-id",
                     "",
                     ""
             );
@@ -96,6 +104,7 @@ class Http11ProcessorTest {
         final var httpRequest = String.join("\r\n",
                 "GET /a..b.js HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=session-id",
                 "",
                 ""
         );
@@ -164,12 +173,40 @@ class Http11ProcessorTest {
                 .contains("Location: /index.html");
     }
 
+    @Test
+    void JSESSIONID가_없으면_쿠키를_발급한다() {
+        final var socket = new StubSocket("GET /index.html HTTP/1.1\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f\\-]{36}");
+    }
+
+    @Test
+    void JSESSIONID가_있으면_쿠키를_다시_발급하지_않는다() {
+        final var request = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Cookie: yummy_cookie=choco; JSESSIONID=session-id; tasty_cookie=strawberry",
+                "",
+                ""
+        );
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
     private String postRequest(final String path, final String requestBody) {
         return String.join("\r\n",
                 "POST " + path + " HTTP/1.1",
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Content-Length: " + requestBody.length(),
+                "Cookie: JSESSIONID=session-id",
                 "",
                 requestBody
         );

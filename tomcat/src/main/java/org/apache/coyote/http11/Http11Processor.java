@@ -6,11 +6,12 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeMap;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +24,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
 
     private static final Map<String, String> RESOURCE_PATH_BY_REQUEST_PATH = Map.of(
-            LOGIN_PATH,  "/login.html"
+            LOGIN_PATH,  "/login.html",
+            REGISTER_PATH, "/register.html"
     );
 
     private static final Map<String, String> CONTENT_TYPE_BY_EXTENSION = Map.of(
@@ -61,25 +64,23 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String requestUri = requestLine.split(" ")[1];
+            final String[] requestParts = requestLine.split(" ");
+            final String method = requestParts[0];
+            final String path = requestParts[1].split("\\?", 2)[0];
+            final Map<String, String> headers = readHeaders(reader);
 
-            final int queryStringIndex = requestUri.indexOf("?");
+            if ("POST".equals(method) && (REGISTER_PATH.equals(path) || LOGIN_PATH.equals(path))) {
+                final int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+                final String requestBody = readBody(reader, contentLength);
+                final Map<String, String> parameters = parseForm(requestBody);
 
-            final String path;
-            final String queryString;
+                final String location;
+                if (REGISTER_PATH.equals(path)) {
+                    location = register(parameters) ? "/index.html" : REGISTER_PATH;
+                } else {
+                    location = login(parameters) ? "/index.html" : "/401.html";
+                }
 
-            if (queryStringIndex == -1) {
-                path = requestUri;
-                queryString = "";
-            } else {
-                path = requestUri.substring(0, queryStringIndex);
-                queryString = requestUri.substring(queryStringIndex + 1);
-            }
-
-            skipHeaders(reader);
-
-            if (LOGIN_PATH.equals(path) && !queryString.isEmpty()) {
-                final String location = login(queryString) ? "/index.html" : "/401.html";
                 outputStream.write(redirect(location).getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
@@ -95,6 +96,81 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        String line;
+        while ((line = reader.readLine()) != null && !line.isBlank()) {
+            final int colon = line.indexOf(':');
+            if (colon > 0) {
+                headers.put(line.substring(0, colon).trim(), line.substring(colon + 1).trim());
+            }
+        }
+
+        return headers;
+    }
+
+    private String readBody(final BufferedReader reader, final int length) throws IOException {
+        final char[] buffer = new char[length];
+        int offset = 0;
+
+        while (offset < length) {
+            final int count = reader.read(buffer, offset, length - offset);
+            if (count == -1) {
+                throw new IOException("요청 본문을 끝까지 읽지 못했습니다.");
+            }
+            offset += count;
+        }
+        return new String(buffer);
+    }
+
+    private Map<String, String> parseForm(final String body) {
+        final Map<String, String> parameters = new HashMap<>();
+
+        for (String pair : body.split("&")) {
+            if (pair.isEmpty()) {
+                continue;
+            }
+            final String[] entry = pair.split("=", 2);
+            final String name = URLDecoder.decode(entry[0], StandardCharsets.UTF_8);
+            final String keyValue = entry.length == 2 ? URLDecoder.decode(entry[1], StandardCharsets.UTF_8) : "";
+            parameters.put(name, keyValue);
+        }
+        return parameters;
+    }
+
+    private boolean register(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+        final String email = parameters.get("email");
+
+        if (account == null || account.isBlank() || password == null || password.isBlank() || email == null || email.isBlank()) {
+            return false;
+        }
+
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return true;
+    }
+
+    private boolean login(final Map<String, String> parameters) {
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
+
+        if (account == null || password == null) {
+            return false;
+        }
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("로그인한 회원: {}", account);
+            return true;
+        }
+
+        return false;
     }
 
     private ResponseData loadResponseData(final String requestPath) throws IOException {
@@ -134,16 +210,6 @@ public class Http11Processor implements Runnable, Processor {
     private record ResponseData(byte[] body, String contentType) {
     }
 
-    private void skipHeaders(final BufferedReader reader) throws IOException {
-        while (true) {
-            final String headerLine = reader.readLine();
-
-            if (headerLine == null || headerLine.isEmpty()) {
-                return;
-            }
-        }
-    }
-
     private String response(final byte[] responseBody, final String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -151,35 +217,6 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 new String(responseBody, StandardCharsets.UTF_8));
-    }
-
-    private boolean login(final String queryString) {
-        if (queryString.isEmpty()) {
-            return false;
-        }
-
-        final Map<String, String> parameters = Arrays.stream(queryString.split("&"))
-                .map(parameter -> parameter.split("=", 2))
-                .collect(Collectors.toMap(
-                        parameter -> parameter[0],
-                        parameter -> parameter.length > 1 ? parameter[1] : ""
-                ));
-
-        final String account = parameters.get("account");
-        final String password = parameters.get("password");
-
-        if (account == null || password == null) {
-            return false;
-        }
-
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("로그인한 회원: {}", account);
-            return true;
-        }
-
-        return false;
     }
 
     private String redirect(final String location) {

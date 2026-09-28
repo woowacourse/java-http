@@ -1,15 +1,11 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestMapping;
-import org.apache.coyote.http11.controller.StaticResourceController;
-import org.apache.coyote.http11.resource.StaticResourceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +19,9 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
-        this.requestMapping = createRequestMapping();
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -60,14 +56,4 @@ public class Http11Processor implements Runnable, Processor {
         }
         return response;
     }
-
-    private RequestMapping createRequestMapping() {
-        StaticResourceReader staticResourceReader = new StaticResourceReader();
-        RequestMapping mapping = new RequestMapping(new StaticResourceController(staticResourceReader));
-        LoginController loginController = new LoginController(staticResourceReader);
-        mapping.addController("/login", loginController);
-        mapping.addController("/register", new RegisterController(staticResourceReader));
-        return mapping;
-    }
-
 }

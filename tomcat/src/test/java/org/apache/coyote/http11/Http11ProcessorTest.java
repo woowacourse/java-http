@@ -1,10 +1,15 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.catalina.Manager;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.routing.RequestMapping;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -19,13 +24,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
+    private RequestMapping requestMapping;
+
+    @BeforeEach
+    void setUp() {
+        requestMapping = new RequestMapping(new StaticController());
+
+        final Controller loginController = new LoginController();
+        requestMapping.register("/login", loginController);
+        requestMapping.register("/login.html", loginController);
+
+        final Controller registerController = new RegisterController();
+        requestMapping.register("/register", registerController);
+        requestMapping.register("/register.html", registerController);
+    }
 
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -52,7 +70,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -60,9 +78,9 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/404.html");
         var expected = List.of(
-                "HTTP/1.1 404 Not Found \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: " + resource.length + " \r\n",
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + resource.length,
                 new String(resource)
         );
 
@@ -80,7 +98,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -88,9 +106,9 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = List.of(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: 5564 \r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 5564",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );
 
@@ -112,7 +130,7 @@ class Http11ProcessorTest {
                 loginInfo);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -142,7 +160,7 @@ class Http11ProcessorTest {
                 loginInfo);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -169,7 +187,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -177,9 +195,9 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/register.html");
         var expected = List.of(
-                "HTTP/1.1 200 OK \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: "+ resource.length + " \r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: "+ resource.length,
                 new String(resource)
         );
 
@@ -201,16 +219,16 @@ class Http11ProcessorTest {
                 registerInfo);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
         var expected = List.of(
-                "HTTP/1.1 302 Found \r\n",
-                "Location: /index.html \r\n",
-                "Content-Length: 0 \r\n"
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "Content-Length: 0"
         );
 
         assertThat(socket.output()).contains(expected);
@@ -231,7 +249,7 @@ class Http11ProcessorTest {
                 registerInfo);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -239,9 +257,9 @@ class Http11ProcessorTest {
         // then
         final byte[] resource = readResource("static/register.html");
         var expected = List.of(
-                "HTTP/1.1 400 Bad Request \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
-                "Content-Length: "+ resource.length + " \r\n",
+                "HTTP/1.1 400 Bad Request",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: "+ resource.length,
                 new String(resource)
         );
 
@@ -260,7 +278,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -291,7 +309,7 @@ class Http11ProcessorTest {
                 loginInfo);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -301,7 +319,7 @@ class Http11ProcessorTest {
         final int sessionIdBeginIndex = socketOutput.indexOf("JSESSIONID=") + "JSESSIONID=".length();
         final int sessionIdEndIndex = socketOutput.indexOf("\r\n", sessionIdBeginIndex);
         final String sessionId = socketOutput.substring(sessionIdBeginIndex, sessionIdEndIndex).trim();
-        final Session session = SESSION_MANAGER.findSession(sessionId);
+        final Session session = SessionManager.findSession(sessionId);
         final User loggedInUser = (User) session.getAttribute("user");
 
         assertThat(loggedInUser.getAccount()).isEqualTo(account);
@@ -317,7 +335,7 @@ class Http11ProcessorTest {
 
         final Session session = new Session(sessionId);
         session.setAttribute("user", user);
-        SESSION_MANAGER.add(session);
+        SessionManager.add(session);
 
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -328,15 +346,15 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output()).contains(
-                "HTTP/1.1 302 Found \r\n",
-                "Location: /index.html \r\n"
+                "HTTP/1.1 302 Found",
+                "Location: /index.html"
         );
     }
 

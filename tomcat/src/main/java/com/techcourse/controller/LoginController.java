@@ -37,10 +37,6 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        handleLoginRequest(request, response);
-    }
-
-    private void handleLoginRequest(HttpRequest request, HttpResponse response) {
         HttpHeaders requestHeaders = request.getHeaders();
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");

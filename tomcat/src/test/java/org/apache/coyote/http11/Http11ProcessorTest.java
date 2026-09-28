@@ -1,6 +1,10 @@
 package org.apache.coyote.http11;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.techcourse.Application;
+import com.techcourse.controller.LoginController;
 import com.techcourse.db.InMemoryUserRepository;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
@@ -8,6 +12,7 @@ import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 import java.io.IOException;
@@ -145,6 +150,29 @@ class Http11ProcessorTest {
 
             assertRedirect(response, "/index.html");
             assertThat(header(response, "Set-Cookie")).startsWith("JSESSIONID=");
+        }
+
+        @Test
+        void logsOnlySuccessfulLoginWithoutPassword() {
+            final var logger = (Logger) LoggerFactory.getLogger(LoginController.class);
+            final var appender = new ListAppender<ILoggingEvent>();
+            appender.start();
+            logger.addAppender(appender);
+            try {
+                final var response = process(post("/login", "account=gugu&password=password", ""));
+
+                assertRedirect(response, "/index.html");
+                assertThat(appender.list).hasSize(1);
+                assertThat(appender.list.getFirst().getFormattedMessage()).contains("gugu").doesNotContain("password");
+
+                final var failedResponse = process(post("/login", "account=gugu&password=wrong", ""));
+
+                assertRedirect(failedResponse, "/401.html");
+                assertThat(appender.list).hasSize(1);
+            } finally {
+                logger.detachAppender(appender);
+                appender.stop();
+            }
         }
 
         @Test

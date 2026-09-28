@@ -15,10 +15,8 @@ public class HttpCookie {
     public static HttpCookie parse(String cookieLine) {
         Map<String, String> cookies = new HashMap<>();
 
-        if (cookieLine != null && cookieLine.startsWith("Cookie:")) {
-            String cookieValue = cookieLine.substring("Cookie:".length()).trim();
-
-            String[] cookiePairs = cookieValue.split(";");
+        if (cookieLine != null) {
+            String[] cookiePairs = cookieLine.trim().split(";");
             for (String cookiePair : cookiePairs) {
                 String[] keyAndValues = cookiePair.trim().split("=", 2);
                 String key = keyAndValues[0];

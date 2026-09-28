@@ -34,6 +34,7 @@ public final class LoginController extends AbstractController {
             return;
         }
 
+        invalidateExistingSession(request);
         Session session = createSession(user.get());
         response.setResponse(HttpResponse.redirectWithCookie("/index.html", session.getId()));
     }
@@ -55,6 +56,14 @@ public final class LoginController extends AbstractController {
         session.setAttribute(SESSION_USER_KEY, user);
         SessionManager.add(session);
         return session;
+    }
+
+    private void invalidateExistingSession(HttpRequest request) {
+        Cookie cookies = Cookie.from(request.header("Cookie").orElse(""));
+        Session existingSession = SessionManager.findSession(cookies.get("JSESSIONID"));
+        if (existingSession != null) {
+            existingSession.invalidate();
+        }
     }
 
     private Optional<User> findLoginUser(HttpRequest request) {

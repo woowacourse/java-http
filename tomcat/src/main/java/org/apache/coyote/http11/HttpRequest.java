@@ -16,36 +16,36 @@ import java.util.UUID;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
+    private final RequestLine requestLine;
+    private final Map<String, String> headers;
+    private final String body;
     private final Map<String, String> parameters;
     private final HttpCookie cookies;
     private Session session;
 
-    private HttpRequest(final String method, final String uri, final Map<String, String> headers,
+    private HttpRequest(final RequestLine requestLine, final Map<String, String> headers,
                         final String body) {
-        this.method = method;
-        final var parts = uri.split("\\?", 2);
-        this.path = parts[0];
-        final var queryString = parts.length == 2 ? parts[1] : "";
-        this.parameters = parseParameters("POST".equals(method) ? body : queryString);
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
+        this.parameters = parseParameters("POST".equals(requestLine.getMethod()) ? body : requestLine.getQueryString());
         this.cookies = new HttpCookie(headers.get("Cookie"));
     }
 
     public static HttpRequest read(final InputStream inputStream) throws IOException {
         final var input = new BufferedInputStream(inputStream);
-        final var requestLine = readLine(input);
-        if (requestLine == null) {
-            return new HttpRequest("GET", "/", Map.of(), "");
+        final var line = readLine(input);
+        if (line == null) {
+            return new HttpRequest(new RequestLine("GET / HTTP/1.1"), Map.of(), "");
         }
-        final var parts = requestLine.split(" ");
+        final var requestLine = new RequestLine(line);
         final var headers = readHeaders(input);
         final var contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
         final var body = input.readNBytes(contentLength);
         if (body.length != contentLength) {
             throw new IOException("Incomplete request body");
         }
-        return new HttpRequest(parts[0], parts[1], headers, new String(body, StandardCharsets.UTF_8));
+        return new HttpRequest(requestLine, headers, new String(body, StandardCharsets.UTF_8));
     }
 
     private static Map<String, String> readHeaders(final InputStream input) throws IOException {
@@ -89,15 +89,36 @@ public class HttpRequest {
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
+    }
+
+    public String getVersion() {
+        return requestLine.getVersion();
+    }
+
+    public String getHeader(final String name) {
+        return headers.get(name);
+    }
+
+    public String getBody() {
+        return body;
     }
 
     public String getParameter(final String name) {
         return parameters.get(name);
+    }
+
+    public Session renewSession() {
+        final var previous = getSession(false);
+        if (previous != null) {
+            previous.invalidate();
+        }
+        session = null;
+        return getSession(true);
     }
 
     public Session getSession(final boolean create) {

@@ -1,19 +1,51 @@
 package org.apache.coyote.http11;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.techcourse.Application;
+import com.techcourse.controller.LoginController;
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @Test
+    void unsupportedMethodReturnsMethodNotAllowed() {
+        final var response = process("DELETE /login HTTP/1.1\r\n\r\n");
+
+        assertThat(response).startsWith("HTTP/1.1 405 Method Not Allowed\r\n");
+        assertThat(header(response, "Allow")).isEqualTo("GET, POST");
+        assertThat(header(response, "Content-Length")).isEqualTo("0");
+        assertThat(body(response)).isEmpty();
+    }
+
+    @Test
+    void processesApplicationProvidedController() {
+        final Controller controller = (request, response) -> response.body("Hello " + request.getParameter("name"));
+        final var mapping = new RequestMapping(Map.of("/custom", controller), controller);
+        final var socket = new StubSocket(get("/custom?name=java", ""));
+
+        new Http11Processor(socket, mapping).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
+        assertThat(body(socket.output())).isEqualTo("Hello java");
+        assertThat(header(socket.output(), "Set-Cookie")).startsWith("JSESSIONID=");
+    }
 
     @Nested
     @DisplayName("step1 - HTTP 요청과 정적 파일 응답")
@@ -23,7 +55,7 @@ class Http11ProcessorTest {
         void root() {
             // given
             final var socket = new StubSocket();
-            final var processor = new Http11Processor(socket);
+            final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
             // when
             processor.process(socket);
@@ -46,7 +78,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
 
             // when
             processor.process(socket);
@@ -89,6 +121,24 @@ class Http11ProcessorTest {
             assertThat(response).startsWith("HTTP/1.1 200 OK");
             assertThat(body(response)).isEqualTo(resource("index.html"));
         }
+
+        @Test
+        void unknownPathReturnsNotFound() {
+            final var response = process(get("/unknown", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 404 Not Found\r\n");
+            assertThat(header(response, "Content-Length")).isEqualTo("0");
+            assertThat(body(response)).isEmpty();
+        }
+
+        @Test
+        void missingStaticFileReturnsNotFound() {
+            final var response = process(get("/assets/missing.js", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 404 Not Found\r\n");
+            assertThat(header(response, "Content-Length")).isEqualTo("0");
+            assertThat(body(response)).isEmpty();
+        }
     }
 
     @Nested
@@ -110,6 +160,29 @@ class Http11ProcessorTest {
 
             assertRedirect(response, "/index.html");
             assertThat(header(response, "Set-Cookie")).startsWith("JSESSIONID=");
+        }
+
+        @Test
+        void logsOnlySuccessfulLoginWithoutPassword() {
+            final var logger = (Logger) LoggerFactory.getLogger(LoginController.class);
+            final var appender = new ListAppender<ILoggingEvent>();
+            appender.start();
+            logger.addAppender(appender);
+            try {
+                final var response = process(post("/login", "account=gugu&password=password", ""));
+
+                assertRedirect(response, "/index.html");
+                assertThat(appender.list).hasSize(1);
+                assertThat(appender.list.getFirst().getFormattedMessage()).contains("gugu").doesNotContain("password");
+
+                final var failedResponse = process(post("/login", "account=gugu&password=wrong", ""));
+
+                assertRedirect(failedResponse, "/401.html");
+                assertThat(appender.list).hasSize(1);
+            } finally {
+                logger.detachAppender(appender);
+                appender.stop();
+            }
         }
 
         @Test
@@ -247,14 +320,28 @@ class Http11ProcessorTest {
         }
 
         @Test
-        void logsInWithExistingSession() {
-            final var firstResponse = process(get("/login", ""));
-            final var cookie = sessionCookie(firstResponse);
-            final var response = process(post("/login", "account=gugu&password=password", cookie));
-            final var nextResponse = process(get("/login", cookie));
+        void rotatesSessionAfterSuccessfulLogin() {
+            final var oldCookie = sessionCookie(process(get("/login", "")));
+            final var response = process(post("/login", "account=gugu&password=password", oldCookie));
+            final var newCookie = sessionCookie(response);
 
             assertRedirect(response, "/index.html");
-            assertRedirect(nextResponse, "/index.html");
+            assertThat(newCookie).isNotEqualTo(oldCookie);
+            assertThat(SessionManager.getInstance().findSession(oldCookie.substring("JSESSIONID=".length())))
+                    .isNull();
+            assertRedirect(process(get("/login", newCookie)), "/index.html");
+            assertThat(process(get("/login", oldCookie))).startsWith("HTTP/1.1 200 OK");
+        }
+
+        @Test
+        void failedLoginKeepsExistingSession() {
+            final var cookie = sessionCookie(process(get("/login", "")));
+            final var response = process(post("/login", "account=gugu&password=wrong", cookie));
+
+            assertRedirect(response, "/401.html");
+            assertThat(header(response, "Set-Cookie")).isNull();
+            assertThat(SessionManager.getInstance().findSession(cookie.substring("JSESSIONID=".length()))
+                    .getAttribute("user")).isNull();
         }
 
         @Test
@@ -277,7 +364,7 @@ class Http11ProcessorTest {
 
     private String process(final String request) {
         final var socket = new StubSocket(request);
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, Application.createRequestMapping()).process(socket);
         return socket.output();
     }
 

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -10,6 +11,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpRequestTest {
+
+    @Test
+    void exposesVersionHeadersAndBody() throws IOException {
+        final var input = new ByteArrayInputStream(
+                ("POST /login HTTP/1.1\r\nhost: localhost:8080\r\nContent-Length: 12\r\n\r\naccount=gugu")
+                        .getBytes(StandardCharsets.UTF_8));
+
+        final var request = HttpRequest.read(input);
+
+        assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
+        assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
+        assertThat(request.getHeader("HOST")).isEqualTo("localhost:8080");
+        assertThat(request.getHeader("Unknown")).isNull();
+        assertThat(request.getBody()).isEqualTo("account=gugu");
+    }
 
     @Test
     void parsesQueryString() throws IOException {
@@ -74,5 +90,22 @@ class HttpRequestTest {
         assertThat(request.getSession(false)).isSameAs(session);
         assertThat(request.getSession(true)).isSameAs(session);
         session.invalidate();
+    }
+
+    @Test
+    void renewalReplacesTheCachedSession() throws IOException {
+        final var request = HttpRequest.read(new ByteArrayInputStream(
+                "GET /login HTTP/1.1\r\n\r\n".getBytes(StandardCharsets.UTF_8)));
+        final var oldSession = request.getSession(true);
+        oldSession.setAttribute("user", "old-user");
+
+        final var renewed = request.renewSession();
+
+        assertThat(renewed.getId()).isNotEqualTo(oldSession.getId());
+        assertThat(SessionManager.getInstance().findSession(oldSession.getId())).isNull();
+        assertThat(oldSession.getAttribute("user")).isNull();
+        assertThat(request.getSession(false)).isSameAs(renewed);
+        assertThat(renewed.getAttribute("user")).isNull();
+        renewed.invalidate();
     }
 }

@@ -29,4 +29,8 @@ public class HttpCookie {
         String value = values.get(name);
         return value != null && !value.isBlank();
     }
+
+    public String get(final String name) {
+        return values.get(name);
+    }
 }

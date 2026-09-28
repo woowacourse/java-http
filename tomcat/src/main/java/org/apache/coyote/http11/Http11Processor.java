@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     private static final Map<String, String> RESOURCE_PATH_BY_REQUEST_PATH = Map.of(
             LOGIN_PATH,  "/login.html",
@@ -73,7 +75,20 @@ public class Http11Processor implements Runnable, Processor {
             final String path = requestParts[1].split("\\?", 2)[0];
             final Map<String, String> headers = readHeaders(reader);
             final HttpCookie cookies = new HttpCookie(headers.get("Cookie"));
-            final String setCookieHeader = cookies.has(SESSION_COOKIE_NAME) ? null : "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + UUID.randomUUID();
+            final String sessionId = cookies.get(SESSION_COOKIE_NAME);
+            Session session = SESSION_MANAGER.findSession(sessionId);
+            String setCookieHeader = null;
+
+            if (sessionId == null || sessionId.isBlank()) {
+                session = SESSION_MANAGER.createSession();
+                setCookieHeader = "Set=Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
+            }
+
+            if ("GET".equals(method) && LOGIN_PATH.equals(path) && session != null && session.getAttribute("user") != null) {
+                outputStream.write(redirect("/index.html", setCookieHeader).getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
 
             if ("POST".equals(method) && (REGISTER_PATH.equals(path) || LOGIN_PATH.equals(path))) {
                 final int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
@@ -84,7 +99,18 @@ public class Http11Processor implements Runnable, Processor {
                 if (REGISTER_PATH.equals(path)) {
                     location = register(parameters) ? "/index.html" : REGISTER_PATH;
                 } else {
-                    location = login(parameters) ? "/index.html" : "/401.html";
+                    final Optional<User> user = login(parameters);
+
+                    if (user.isPresent()) {
+                        if (session == null) {
+                            session = SESSION_MANAGER.createSession();
+                            setCookieHeader = "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
+                        }
+                        session.setAttribute("user", user.get());
+                        location = "/index.html";
+                    } else {
+                        location = "/401.html";
+                    }
                 }
 
                 outputStream.write(redirect(location, setCookieHeader).getBytes(StandardCharsets.UTF_8));
@@ -161,22 +187,19 @@ public class Http11Processor implements Runnable, Processor {
         return true;
     }
 
-    private boolean login(final Map<String, String> parameters) {
+    private Optional<User> login(final Map<String, String> parameters) {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
 
         if (account == null || password == null) {
-            return false;
+            return Optional.empty();
         }
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(found -> found.checkPassword(password));
 
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("로그인한 회원: {}", account);
-            return true;
-        }
-
-        return false;
+        user.ifPresent(found -> log.info("로그인한 회원: {}", account));
+        return user;
     }
 
     private ResponseData loadResponseData(final String requestPath) throws IOException {

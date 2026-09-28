@@ -107,4 +107,28 @@ class Http11ProcessorTest {
                 .contains("HTTP/1.1 200 OK")
                 .contains("path is valid");
     }
+
+    @Test
+    void 로그인에_성공하면_인덱스_페이지로_리다이렉트한다() {
+        final var socket = new StubSocket("GET /login?account=gugu&password=password HTTP/1.1\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    void 로그인에_실패하면_401_페이지로_리다이렉트한다() {
+        final var socket = new StubSocket("GET /login?account=gugu&password=wrong HTTP/1.1\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /401.html");
+    }
 }

@@ -57,7 +57,11 @@ public class Http11Processor implements Runnable, Processor {
             final var requestPath = extractRequestPath(requestUri);
             final var queryParameters = parseQueryParameters(requestUri);
 
-            logLoginUser(requestPath, queryParameters);
+            final var redirectLocation = findLoginRedirect(requestPath, queryParameters);
+            if (redirectLocation != null) {
+                writeRedirect(outputStream, redirectLocation);
+                return;
+            }
 
             final var responseBody = readResponseBody(requestPath);
             final var contentType = findContentType(requestPath);
@@ -123,24 +127,30 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private void logLoginUser(
+    private String findLoginRedirect(
             final String requestPath,
             final Map<String, String> queryParameters
     ) {
         if (!"/login".equals(requestPath)) {
-            return;
+            return null;
         }
 
         final var account = queryParameters.get("account");
         final var password = queryParameters.get("password");
 
         if (account == null || password == null) {
-            return;
+            return null;
         }
 
-        InMemoryUserRepository.findByAccount(account)
+        final var loginSucceeded = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info("회원 조회 결과: account={}", user.getAccount()));
+                .isPresent();
+
+        if (loginSucceeded) {
+            return "/index.html";
+        }
+
+        return "/401.html";
     }
 
     private byte[] readResponseBody(final String requestPath) throws IOException {
@@ -209,6 +219,22 @@ public class Http11Processor implements Runnable, Processor {
 
         outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
         outputStream.write(responseBody);
+        outputStream.flush();
+    }
+
+    private void writeRedirect(
+            final OutputStream outputStream,
+            final String location
+    ) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + location,
+                "Content-Length: 0",
+                "",
+                ""
+        );
+
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
     }
 }

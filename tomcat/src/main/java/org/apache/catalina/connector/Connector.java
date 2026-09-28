@@ -51,8 +51,12 @@ public class Connector implements Runnable {
 
     @Override
     public void run() {
-        while (!stopped) {
-            acceptConnection();
+        try {
+            while (!stopped) {
+                acceptConnection();
+            }
+        } finally {
+            executorService.shutdown();
         }
     }
 
@@ -82,7 +86,5 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-
-        executorService.shutdown();
     }
 }

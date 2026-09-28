@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -29,27 +32,32 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads, final Adapter adapter) {
+        final int checkedAcceptCount = checkAcceptCount(acceptCount);
+        final int checkedMaxThreads = checkMaxThreads(maxThreads);
+
         this.adapter = adapter;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
-        this.serverSocket = createServerSocket(port, acceptCount);
+        this.serverSocket = createServerSocket(port, checkedAcceptCount);
+        this.executorService = new ThreadPoolExecutor(
+                checkedMaxThreads,
+                checkedMaxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(checkedAcceptCount));
         this.stopped = false;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkPort(port), acceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -65,7 +73,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -74,16 +84,30 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, adapter);
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("요청을 받을 수 없어 거절합니다. {}", e.getMessage());
+            closeQuietly(connection);
+        }
+    }
+
+    private void closeQuietly(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.warn("거절한 연결을 닫지 못했습니다. {}", e.getMessage());
+        }
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
-            executorService.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.close();
         }
     }
 
@@ -99,5 +123,9 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        return Math.max(maxThreads, 1);
     }
 }

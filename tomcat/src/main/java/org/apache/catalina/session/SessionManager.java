@@ -1,17 +1,17 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 }

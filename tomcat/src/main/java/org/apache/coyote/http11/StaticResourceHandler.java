@@ -10,32 +10,38 @@ class StaticResourceHandler {
 
     private final ClassLoader classLoader;
 
+    StaticResourceHandler() {
+        this(StaticResourceHandler.class.getClassLoader());
+    }
+
     StaticResourceHandler(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
-    HttpResponse respond(String path) throws IOException {
+    void serve(String path, HttpResponse response) throws IOException {
         if (!isResourcePath(path)) {
-            return error(HttpStatus.NOT_FOUND);
+            fillError(HttpStatus.NOT_FOUND, response);
+            return;
         }
         try (InputStream resource = classLoader.getResourceAsStream("static" + path)) {
             if (resource == null) {
-                return error(HttpStatus.NOT_FOUND);
+                fillError(HttpStatus.NOT_FOUND, response);
+                return;
             }
-            return HttpResponse.of(HttpStatus.OK, resource.readAllBytes(), contentType(path));
+            response.setContent(HttpStatus.OK, resource.readAllBytes(), contentType(path));
         }
     }
 
-    HttpResponse error(HttpStatus status) {
+    void fillError(HttpStatus status, HttpResponse response) {
+        byte[] body = status.getReasonPhrase().getBytes(StandardCharsets.UTF_8);
+        response.setContent(status, body, "text/plain;charset=utf-8");
+
         try (InputStream resource = classLoader.getResourceAsStream("static/" + status.getCode() + ".html")) {
             if (resource != null) {
-                return HttpResponse.of(status, resource.readAllBytes(), "text/html;charset=utf-8");
+                response.setContent(status, resource.readAllBytes(), "text/html;charset=utf-8");
             }
         } catch (IOException ignored) {
-            // 오류 페이지를 읽지 못해도 같은 상태 코드의 기본 본문을 응답한다.
         }
-        byte[] body = status.getReasonPhrase().getBytes(StandardCharsets.UTF_8);
-        return HttpResponse.of(status, body, "text/plain;charset=utf-8");
     }
 
     private boolean isResourcePath(String path) {

@@ -10,34 +10,42 @@ public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private final HttpStatus status;
+    private HttpStatus status;
     private final Map<String, String> headers;
-    private final byte[] body;
+    private byte[] body;
 
-    private HttpResponse(HttpStatus status, byte[] body) {
-        this.status = status;
+    public HttpResponse() {
+        this.status = HttpStatus.OK;
         this.headers = new LinkedHashMap<>();
-        this.body = body.clone();
-    }
-
-    public static HttpResponse ok(String body, String contentType) {
-        return of(HttpStatus.OK, body.getBytes(StandardCharsets.UTF_8), contentType);
-    }
-
-    public static HttpResponse of(HttpStatus status, byte[] body, String contentType) {
-        HttpResponse response = new HttpResponse(status, body);
-        response.addHeader("Content-Type", contentType);
-        return response;
-    }
-
-    public static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, new byte[0]);
-        response.addHeader("Location", location);
-        return response;
+        this.body = new byte[0];
     }
 
     public void addHeader(String name, String value) {
         headers.put(name, value);
+    }
+
+    public void setContent(HttpStatus status, byte[] body, String contentType) {
+        this.status = status;
+        this.body = body.clone();
+        headers.remove("Location");
+        headers.put("Content-Type", contentType);
+    }
+
+    public void sendRedirect(String location) {
+        this.status = HttpStatus.FOUND;
+        this.body = new byte[0];
+        headers.remove("Content-Type");
+        headers.put("Location", location);
+    }
+
+    public void sendError(HttpStatus status) {
+        StaticResourceHandler resources = new StaticResourceHandler();
+        resources.fillError(status, this);
+    }
+
+    public void sendStaticFile(String path) throws IOException {
+        StaticResourceHandler resources = new StaticResourceHandler();
+        resources.serve(path, this);
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {

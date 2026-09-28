@@ -19,9 +19,11 @@ class StaticResourceHandlerTest {
         // given
         StaticResourceHandler handler = new StaticResourceHandler(getClass().getClassLoader());
         byte[] expected = getClass().getResourceAsStream("/static/assets/chart-area.js").readAllBytes();
+        HttpResponse response = new HttpResponse();
 
         // when
-        ByteArrayOutputStream output = write(handler.respond("/assets/chart-area.js"));
+        handler.serve("/assets/chart-area.js", response);
+        ByteArrayOutputStream output = write(response);
 
         // then
         assertThat(output.toString(StandardCharsets.UTF_8))
@@ -37,9 +39,11 @@ class StaticResourceHandlerTest {
         ClassLoader loader = mock(ClassLoader.class);
         when(loader.getResourceAsStream("static/image.png")).thenReturn(new ByteArrayInputStream(bytes));
         StaticResourceHandler handler = new StaticResourceHandler(loader);
+        HttpResponse response = new HttpResponse();
 
         // when
-        ByteArrayOutputStream output = write(handler.respond("/image.png"));
+        handler.serve("/image.png", response);
+        ByteArrayOutputStream output = write(response);
 
         // then
         assertThat(output.toByteArray()).endsWith(bytes);
@@ -53,9 +57,11 @@ class StaticResourceHandlerTest {
         when(loader.getResourceAsStream("static/file.unmappedextension"))
                 .thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
         StaticResourceHandler handler = new StaticResourceHandler(loader);
+        HttpResponse response = new HttpResponse();
 
         // when
-        ByteArrayOutputStream output = write(handler.respond("/file.unmappedextension"));
+        handler.serve("/file.unmappedextension", response);
+        ByteArrayOutputStream output = write(response);
 
         // then
         assertThat(output.toString()).contains("Content-Type: application/octet-stream");
@@ -66,9 +72,11 @@ class StaticResourceHandlerTest {
     void 정적_디렉터리_밖의_파일을_요청하면_404를_응답한다() throws IOException {
         // given
         StaticResourceHandler handler = new StaticResourceHandler(getClass().getClassLoader());
+        HttpResponse response = new HttpResponse();
 
         // when
-        ByteArrayOutputStream output = write(handler.respond("/../outside.html"));
+        handler.serve("/../outside.html", response);
+        ByteArrayOutputStream output = write(response);
 
         // then
         assertThat(output.toString()).startsWith("HTTP/1.1 404 Not Found");
@@ -82,9 +90,11 @@ class StaticResourceHandlerTest {
         when(broken.readAllBytes()).thenThrow(new IOException("read failed"));
         when(loader.getResourceAsStream("static/500.html")).thenReturn(broken);
         StaticResourceHandler handler = new StaticResourceHandler(loader);
+        HttpResponse response = new HttpResponse();
 
         // when
-        ByteArrayOutputStream output = write(handler.error(HttpStatus.INTERNAL_SERVER_ERROR));
+        handler.fillError(HttpStatus.INTERNAL_SERVER_ERROR, response);
+        ByteArrayOutputStream output = write(response);
 
         // then
         assertThat(output.toString()).startsWith("HTTP/1.1 500 Internal Server Error")

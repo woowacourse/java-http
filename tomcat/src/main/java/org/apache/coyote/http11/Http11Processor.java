@@ -3,13 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import jakarta.servlet.http.HttpSession;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -18,13 +14,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.request.ParsedTarget;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,15 +49,9 @@ public class Http11Processor implements Runnable, Processor {
                 final var input = new BufferedInputStream(connection.getInputStream());
                 final var outputStream = connection.getOutputStream()) {
 
-            String requestLine = readLine(input);
-            String[] splitRequestLine = requestLine.split(" ");
+            HttpRequest httpRequest = parseHttpRequest(input);
 
-            String method = splitRequestLine[0];
-            String requestTarget = splitRequestLine[1];
-            String protocol = splitRequestLine[2];
-
-            Map<String, String> headers = readHeaders(input);
-            HttpCookie cookie = new HttpCookie(headers.get("cookie"));
+            HttpCookie cookie = new HttpCookie(httpRequest.header("cookie"));
             String sessionId = cookie.get("JSESSIONID");
 
             Map<String, String> responseHeaders = new HashMap<>();
@@ -67,12 +60,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseHeaders.put("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
-            String requestBody = readRequestBody(headers, input);
-
-            if (method.equals("GET")) {
-                handleGetRequest(outputStream, requestTarget, sessionId, responseHeaders);
-            } else if (method.equals("POST")) {
-                handlePostRequest(outputStream, requestTarget, headers, sessionId, requestBody, responseHeaders);
+            if (httpRequest.isMethod(HttpMethod.GET)) {
+                handleGetRequest(outputStream, httpRequest.getRequestLine().getPath(), sessionId, responseHeaders);
+            } else if (httpRequest.isMethod(HttpMethod.POST)) {
+                handlePostRequest(outputStream, httpRequest.getRequestLine().getPath(), httpRequest.getHeaders(), sessionId, httpRequest.getBody(), responseHeaders);
             }
 
         } catch (IOException | UncheckedServletException e) {
@@ -80,44 +71,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String readLine(InputStream input) throws IOException {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    private HttpRequest parseHttpRequest(final BufferedInputStream input) throws IOException{
+        RequestLine requestLine = HttpRequestParser.readRequestLine(input);
+        Map<String, String> headers = HttpRequestParser.readHeaders(input);
+        String requestBody = HttpRequestParser.readRequestBody(headers, input);
 
-        int value;
-        while ((value = input.read()) != -1 && value != '\n') {
-            if (value != '\r') {
-                bytes.write(value);
-            }
-        }
-
-        return bytes.toString();
-    }
-
-    @Nonnull
-    private static String readRequestBody(Map<String, String> headers, BufferedInputStream input) throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("content-length", "0"));
-        byte[] bodyBytes = input.readNBytes(contentLength);
-        if (bodyBytes.length != contentLength) {
-            throw new EOFException("요청 본문이 중간에 끝났습니다.");
-        }
-
-        String requestBody = new String(bodyBytes, StandardCharsets.UTF_8);
-        return requestBody;
-    }
-
-    @Nonnull
-    private static Map<String, String> readHeaders(BufferedInputStream input) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line;
-
-        while ((line = readLine(input)) != null && !line.isEmpty()) {
-            int colonIndex = line.indexOf(":");
-
-            String name = line.substring(0, colonIndex).trim().toLowerCase(Locale.ROOT);
-            String value = line.substring(colonIndex + 1).trim();
-            headers.put(name, value);
-        }
-        return headers;
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 
     private void handleGetRequest(OutputStream outputStream, String requestTarget, String sessionId, Map<String, String> responseHeaders) throws IOException {

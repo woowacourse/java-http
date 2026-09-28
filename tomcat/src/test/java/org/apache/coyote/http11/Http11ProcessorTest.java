@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -110,7 +111,8 @@ class Http11ProcessorTest {
 
     @Test
     void 로그인에_성공하면_인덱스_페이지로_리다이렉트한다() {
-        final var socket = new StubSocket("GET /login?account=gugu&password=password HTTP/1.1\r\n\r\n");
+        final var requestBody = "account=gugu&password=password";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -122,7 +124,8 @@ class Http11ProcessorTest {
 
     @Test
     void 로그인에_실패하면_401_페이지로_리다이렉트한다() {
-        final var socket = new StubSocket("GET /login?account=gugu&password=wrong HTTP/1.1\r\n\r\n");
+        final var requestBody = "account=gugu&password=wrong";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
         final var processor = new Http11Processor(socket);
 
         processor.process(socket);
@@ -130,5 +133,45 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .contains("HTTP/1.1 302 Found")
                 .contains("Location: /401.html");
+    }
+
+    @Test
+    void 회원가입_페이지를_응답한다() {
+        final var socket = new StubSocket("GET /register HTTP/1.1\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("회원 가입");
+    }
+
+    @Test
+    void 회원가입을_완료하면_회원을_저장하고_인덱스_페이지로_리다이렉트한다() {
+        final var requestBody = "account=hello&password=world&email=hello%40example.com";
+        final var socket = new StubSocket(postRequest("/register", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(InMemoryUserRepository.findByAccount("hello"))
+                .isPresent()
+                .get()
+                .matches(user -> user.checkPassword("world"));
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    private String postRequest(final String path, final String requestBody) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.length(),
+                "",
+                requestBody
+        );
     }
 }

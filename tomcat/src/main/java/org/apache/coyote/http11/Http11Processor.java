@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,13 +52,15 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            readHeaders(reader);
-
-            final var requestUri = extractRequestUri(requestLine);
+            final var requestParts = splitRequestLine(requestLine);
+            final var requestMethod = requestParts[0];
+            final var requestUri = requestParts[1];
+            final var requestHeaders = readHeaders(reader);
             final var requestPath = extractRequestPath(requestUri);
-            final var queryParameters = parseQueryParameters(requestUri);
+            final var requestBody = readRequestBody(reader, requestHeaders);
+            final var parameters = findParameters(requestMethod, requestUri, requestBody);
 
-            final var redirectLocation = findLoginRedirect(requestPath, queryParameters);
+            final var redirectLocation = processForm(requestMethod, requestPath, parameters);
             if (redirectLocation != null) {
                 writeRedirect(outputStream, redirectLocation);
                 return;
@@ -72,17 +75,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void readHeaders(final BufferedReader reader) throws IOException {
+    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
         String line;
 
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {
-                return;
+                break;
+            }
+
+            final var separatorIndex = line.indexOf(':');
+            if (separatorIndex > 0) {
+                headers.put(
+                        line.substring(0, separatorIndex).trim(),
+                        line.substring(separatorIndex + 1).trim()
+                );
             }
         }
+
+        return headers;
     }
 
-    private String extractRequestUri(final String requestLine) {
+    private String[] splitRequestLine(final String requestLine) {
         final var requestParts = requestLine.trim().split("\\s+");
 
         if (requestParts.length != 3) {
@@ -91,7 +105,30 @@ public class Http11Processor implements Runnable, Processor {
             );
         }
 
-        return requestParts[1];
+        return requestParts;
+    }
+
+    private String readRequestBody(
+            final BufferedReader reader,
+            final Map<String, String> requestHeaders
+    ) throws IOException {
+        final var contentLength = requestHeaders.get("Content-Length");
+        if (contentLength == null) {
+            return "";
+        }
+
+        final var buffer = new char[Integer.parseInt(contentLength)];
+        var offset = 0;
+
+        while (offset < buffer.length) {
+            final var readLength = reader.read(buffer, offset, buffer.length - offset);
+            if (readLength < 0) {
+                break;
+            }
+            offset += readLength;
+        }
+
+        return new String(buffer, 0, offset);
     }
 
     private String extractRequestPath(final String requestUri) {
@@ -111,10 +148,30 @@ public class Http11Processor implements Runnable, Processor {
             return Map.of();
         }
 
-        final Map<String, String> parameters = new HashMap<>();
         final var queryString = requestUri.substring(queryIndex + 1);
+        return parseParameters(queryString);
+    }
 
-        for (final var parameter : queryString.split("&")) {
+    private Map<String, String> findParameters(
+            final String requestMethod,
+            final String requestUri,
+            final String requestBody
+    ) {
+        if ("POST".equals(requestMethod)) {
+            return parseParameters(requestBody);
+        }
+
+        return parseQueryParameters(requestUri);
+    }
+
+    private Map<String, String> parseParameters(final String value) {
+        if (value.isBlank()) {
+            return Map.of();
+        }
+
+        final Map<String, String> parameters = new HashMap<>();
+
+        for (final var parameter : value.split("&")) {
             final var nameAndValue = parameter.split("=", 2);
             if (nameAndValue.length == 2) {
                 parameters.put(
@@ -127,30 +184,37 @@ public class Http11Processor implements Runnable, Processor {
         return parameters;
     }
 
-    private String findLoginRedirect(
+    private String processForm(
+            final String requestMethod,
             final String requestPath,
-            final Map<String, String> queryParameters
+            final Map<String, String> parameters
     ) {
-        if (!"/login".equals(requestPath)) {
+        if (!"POST".equals(requestMethod)) {
             return null;
         }
 
-        final var account = queryParameters.get("account");
-        final var password = queryParameters.get("password");
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
 
-        if (account == null || password == null) {
-            return null;
-        }
-
-        final var loginSucceeded = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
-
-        if (loginSucceeded) {
+        if ("/register".equals(requestPath)) {
+            final var email = parameters.get("email");
+            InMemoryUserRepository.save(new User(account, password, email));
             return "/index.html";
         }
 
-        return "/401.html";
+        if ("/login".equals(requestPath)) {
+            final var loginSucceeded = InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .isPresent();
+
+            if (loginSucceeded) {
+                return "/index.html";
+            }
+
+            return "/401.html";
+        }
+
+        return null;
     }
 
     private byte[] readResponseBody(final String requestPath) throws IOException {
@@ -175,6 +239,10 @@ public class Http11Processor implements Runnable, Processor {
     private String findResourcePath(final String requestPath) {
         if ("/login".equals(requestPath)) {
             return STATIC_ROOT + "/login.html";
+        }
+
+        if ("/register".equals(requestPath)) {
+            return STATIC_ROOT + "/register.html";
         }
 
         return STATIC_ROOT + requestPath;

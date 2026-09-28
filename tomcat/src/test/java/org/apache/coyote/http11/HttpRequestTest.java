@@ -12,6 +12,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HttpRequestTest {
 
     @Test
+    void exposesVersionHeadersAndBody() throws IOException {
+        final var input = new ByteArrayInputStream(
+                ("POST /login HTTP/1.1\r\nhost: localhost:8080\r\nContent-Length: 12\r\n\r\naccount=gugu")
+                        .getBytes(StandardCharsets.UTF_8));
+
+        final var request = HttpRequest.read(input);
+
+        assertThat(request.getVersion()).isEqualTo("HTTP/1.1");
+        assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
+        assertThat(request.getHeader("HOST")).isEqualTo("localhost:8080");
+        assertThat(request.getHeader("Unknown")).isNull();
+        assertThat(request.getBody()).isEqualTo("account=gugu");
+    }
+
+    @Test
     void parsesQueryString() throws IOException {
         // given
         final var input = new ByteArrayInputStream(

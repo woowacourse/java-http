@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Application;
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -9,11 +12,25 @@ import support.StubSocket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @Test
+    void processesApplicationProvidedController() {
+        final Controller controller = (request, response) -> response.body("Hello " + request.getParameter("name"));
+        final var mapping = new RequestMapping(Map.of("/custom", controller), controller);
+        final var socket = new StubSocket(get("/custom?name=java", ""));
+
+        new Http11Processor(socket, mapping).process(socket);
+
+        assertThat(socket.output()).startsWith("HTTP/1.1 200 OK");
+        assertThat(body(socket.output())).isEqualTo("Hello java");
+        assertThat(header(socket.output(), "Set-Cookie")).startsWith("JSESSIONID=");
+    }
 
     @Nested
     @DisplayName("step1 - HTTP 요청과 정적 파일 응답")
@@ -23,7 +40,7 @@ class Http11ProcessorTest {
         void root() {
             // given
             final var socket = new StubSocket();
-            final var processor = new Http11Processor(socket);
+            final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
             // when
             processor.process(socket);
@@ -46,7 +63,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
 
             // when
             processor.process(socket);
@@ -277,7 +294,7 @@ class Http11ProcessorTest {
 
     private String process(final String request) {
         final var socket = new StubSocket(request);
-        new Http11Processor(socket).process(socket);
+        new Http11Processor(socket, Application.createRequestMapping()).process(socket);
         return socket.output();
     }
 

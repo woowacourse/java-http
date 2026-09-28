@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -24,13 +25,13 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(withoutSetCookie(socket.output())).isEqualTo(expected);
     }
 
     @Test
@@ -53,13 +54,14 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.length + " \r\n" +
                 "\r\n" +
                 new String(responseBody, StandardCharsets.UTF_8);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(withoutSetCookie(socket.output())).isEqualTo(expected);
+
     }
 
     @Test
@@ -105,12 +107,41 @@ class Http11ProcessorTest {
                 .getResource("static/login.html");
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-        final String expected = "HTTP/1.1 200 OK \r\n" +
+        final String expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.length + " \r\n" +
                 "\r\n" +
                 new String(responseBody, StandardCharsets.UTF_8);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(withoutSetCookie(socket.output())).isEqualTo(expected);
+    }
+
+    @Test
+    void doesNotIssueSessionCookieAgain() {
+        final String request = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: yummy_cookie=choco; JSESSIONID=existing-id",
+                "",
+                "");
+
+        final var socket = new StubSocket(request);
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie:");
+    }
+
+    private String withoutSetCookie(final String response) {
+        final String prefix = "Set-Cookie: JSESSIONID=";
+        final int start = response.indexOf(prefix);
+        assertThat(start).isGreaterThan(0);
+
+        final int end = response.indexOf("\r\n", start);
+        assertThat(end).isGreaterThan(start);
+
+        final String sessionId = response.substring(start + prefix.length(), end);
+        assertThat(UUID.fromString(sessionId).toString()).isEqualTo(sessionId);
+
+        return response.substring(0, start) + response.substring(end + 2);
     }
 }

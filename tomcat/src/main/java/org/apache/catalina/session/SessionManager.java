@@ -18,14 +18,11 @@ public class SessionManager {
     }
 
     public Session create() {
-        String sessionId = UUID.randomUUID().toString();
+        Session session = Session.from(UUID.randomUUID().toString());
 
-        while (sessions.containsKey(sessionId)) {
-            sessionId = UUID.randomUUID().toString();
+        while (sessions.putIfAbsent(session.getId(), session) != null) {
+            session = Session.from(UUID.randomUUID().toString());
         }
-
-        final Session session = Session.from(sessionId);
-        sessions.put(sessionId, session);
 
         return session;
     }

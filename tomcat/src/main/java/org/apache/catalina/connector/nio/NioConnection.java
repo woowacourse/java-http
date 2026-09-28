@@ -1,5 +1,6 @@
 package org.apache.catalina.connector.nio;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,11 @@ final class NioConnection {
         requestBuffer.put(source);
     }
 
+    int read() throws IOException {
+        ensureCapacity(1);
+        return channel.read(requestBuffer);
+    }
+
     boolean isRequestComplete() {
         final byte[] request = requestBytes();
         final int headerEnd = findHeaderEnd(request);
@@ -44,6 +50,10 @@ final class NioConnection {
 
     SocketChannel channel() {
         return channel;
+    }
+
+    void close() throws IOException {
+        channel.close();
     }
 
     private int findHeaderEnd(final byte[] request) {

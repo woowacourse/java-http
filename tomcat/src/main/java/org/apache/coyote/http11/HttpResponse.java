@@ -46,7 +46,8 @@ public class HttpResponse {
     public void forward(final String path) throws IOException {
         try (final var resource = getClass().getClassLoader().getResourceAsStream("static" + path)) {
             if (resource == null) {
-                throw new IOException("Resource not found: " + path);
+                sendError(404, "Not Found");
+                return;
             }
             body(resource.readAllBytes(), getContentType(path));
         }

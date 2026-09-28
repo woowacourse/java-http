@@ -115,6 +115,15 @@ class Http11ProcessorTest {
             assertThat(header(response, "Content-Length")).isEqualTo("0");
             assertThat(body(response)).isEmpty();
         }
+
+        @Test
+        void missingStaticFileReturnsNotFound() {
+            final var response = process(get("/assets/missing.js", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 404 Not Found\r\n");
+            assertThat(header(response, "Content-Length")).isEqualTo("0");
+            assertThat(body(response)).isEmpty();
+        }
     }
 
     @Nested

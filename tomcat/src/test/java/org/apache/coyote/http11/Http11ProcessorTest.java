@@ -131,6 +131,43 @@ class Http11ProcessorTest {
         assertThat(socket.output()).doesNotContain("Set-Cookie:");
     }
 
+    @Test
+    void returnsBadRequestForIncompleteRequestLine() {
+        final var socket = new StubSocket("GET\r\n\r\n");
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n");
+    }
+
+    @Test
+    void returnsBadRequestForInvalidContentLength() {
+        final String request = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: abc",
+                "",
+                "");
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n");
+    }
+
+    @Test
+    void returnsBadRequestForNegativeContentLength() {
+        final String request = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Content-Length: -1",
+                "",
+                "");
+        final var socket = new StubSocket(request);
+
+        new Http11Processor(socket).process(socket);
+
+        assertThat(socket.output()).isEqualTo("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n");
+    }
+
     private String withoutSetCookie(final String response) {
         final String prefix = "Set-Cookie: JSESSIONID=";
         final int start = response.indexOf(prefix);

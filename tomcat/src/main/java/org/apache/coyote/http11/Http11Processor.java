@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -71,6 +72,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String[] requestParts = requestLine.split(" ");
+            if (requestParts.length != 3) {
+                writeBadRequest(outputStream);
+                return;
+            }
             final String method = requestParts[0];
             final String path = requestParts[1].split("\\?", 2)[0];
             final Map<String, String> headers = readHeaders(reader);
@@ -91,7 +96,17 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if ("POST".equals(method) && (REGISTER_PATH.equals(path) || LOGIN_PATH.equals(path))) {
-                final int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+                final int contentLength;
+                try {
+                    contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+                } catch (NumberFormatException e) {
+                    writeBadRequest(outputStream);
+                    return;
+                }
+                if (contentLength < 0) {
+                    writeBadRequest(outputStream);
+                    return;
+                }
                 final String requestBody = readBody(reader, contentLength);
                 final Map<String, String> parameters = parseForm(requestBody);
 
@@ -142,6 +157,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return headers;
+    }
+
+    private void writeBadRequest(final OutputStream outputStream) throws IOException {
+        outputStream.write("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
+                .getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
     }
 
     private String readBody(final BufferedReader reader, final int length) throws IOException {

@@ -13,7 +13,7 @@ public class StaticResourceController
             HttpResponse response
     ) throws IOException {
         String resourceName =
-                removeLeadingSlash(request.path());
+                removeLeadingSlash(request.getPath());
 
         response.fromResource(resourceName);
     }

@@ -16,7 +16,7 @@ public final class HttpRequestParser {
     private HttpRequestParser() {
     }
 
-    public static HttpRequest parse(
+    public static HttpRequestData parse(
             BufferedInputStream input
     ) throws IOException {
         String requestLineValue = readRequestLine(input);
@@ -34,7 +34,7 @@ public final class HttpRequestParser {
 
         Map<String, String> parsedBody = BodyParserResolver.parse(contentType, rawBody);
 
-        return new HttpRequest(
+        return new HttpRequestData(
                 requestLine,
                 headers,
                 parsedBody

@@ -11,16 +11,14 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
-    private final SessionManager sessionManager =
-            SessionManager.getInstance();
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     protected void doGet(
             HttpRequest request,
             HttpResponse response
     ) throws IOException {
-        Session session =
-                sessionManager.findSession(request);
+        Session session = request.getSession();
 
         if (session != null
                 && session.getAttribute("user") != null) {
@@ -43,12 +41,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        Session session =
-                sessionManager.findSession(request);
-
-        if (session == null) {
-            session = sessionManager.createSession(response);
-        }
+        Session session = request.getSession();
 
         session.setAttribute("user", user.get());
         response.addHeader("Location", "/index.html");

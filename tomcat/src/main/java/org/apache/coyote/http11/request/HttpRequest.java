@@ -1,16 +1,19 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.Session;
 
 public class HttpRequest {
-    private RequestLine requestLine;
-    private Map<String, String> headers;
-    private Map<String, String> body;
+    private final RequestLine requestLine;
+    private final Map<String, String> headers;
+    private final Map<String, String> body;
+    private final Session session;
 
-    public HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> body) {
-        this.requestLine = requestLine;
-        this.headers = headers;
-        this.body = Map.copyOf(body);
+    public HttpRequest(HttpRequestData requestData, Session session) {
+        this.requestLine = requestData.requestLine();
+        this.headers = requestData.headers();
+        this.body = Map.copyOf(requestData.body());
+        this.session = session;
     }
 
     public String getHeader(String headerName) {
@@ -29,7 +32,11 @@ public class HttpRequest {
         return body.getOrDefault(name, null);
     }
 
-    public String path() {
+    public String getPath() {
         return requestLine.path();
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

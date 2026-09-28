@@ -20,7 +20,7 @@ public class ControllerResolver {
 
     public static Controller resolve(HttpRequest request) {
         return CONTROLLERS.getOrDefault(
-                request.path(),
+                request.getPath(),
                 STATIC_RESOURCE_CONTROLLER
         );
     }

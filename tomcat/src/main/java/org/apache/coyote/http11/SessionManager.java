@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestData;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class SessionManager implements Manager {
@@ -38,19 +38,17 @@ public class SessionManager implements Manager {
         SESSIONS.remove(id);
     }
 
-    public Session findSession(HttpRequest request) {
-        HttpCookie cookie =
-                new HttpCookie(request.getHeader("cookie"));
+    public Session findOrCreate(HttpRequestData requestData, HttpResponse response) {
 
+        HttpCookie cookie = new HttpCookie(requestData.headers().get("cookie"));
         String sessionId = cookie.get("JSESSIONID");
+        Session session = findSession(sessionId);
 
-        return findSession(sessionId);
-    }
+        if (session != null) {
+            return session;
+        }
 
-    public Session createSession(HttpResponse response) {
-        Session session =
-                new Session(UUID.randomUUID().toString());
-
+        session = new Session(UUID.randomUUID().toString());
         add(session);
 
         response.addHeader(

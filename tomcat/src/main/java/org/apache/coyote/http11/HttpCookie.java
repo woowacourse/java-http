@@ -26,8 +26,4 @@ public class HttpCookie {
     public String get(String name) {
         return values.get(name);
     }
-
-    public void put(String name, String value) {
-        values.put(name, value);
-    }
 }

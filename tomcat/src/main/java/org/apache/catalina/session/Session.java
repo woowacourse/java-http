@@ -21,6 +21,9 @@ public class Session {
     }
 
     public void setAttribute(final String name, final Object value) {
+        if (name == null || value == null) {
+            throw new IllegalArgumentException("속성 이름과 값은 null일 수 없습니다.");
+        }
         values.put(name, value);
     }
 

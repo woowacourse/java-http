@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -11,10 +15,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    @BeforeEach
+    void setUp() {
+        SessionManager.getInstance().add(new Session("session-id"));
+    }
+
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket(String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Cookie: JSESSIONID=session-id",
+                "",
+                ""
+        ));
         final var processor = new Http11Processor(socket);
 
         // when
@@ -38,6 +53,7 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=session-id ",
                 "",
                 "");
 
@@ -76,6 +92,7 @@ class Http11ProcessorTest {
             final var httpRequest = String.join("\r\n",
                     "GET " + path + " HTTP/1.1",
                     "Host: localhost:8080",
+                    "Cookie: JSESSIONID=session-id",
                     "",
                     ""
             );
@@ -95,6 +112,7 @@ class Http11ProcessorTest {
         final var httpRequest = String.join("\r\n",
                 "GET /a..b.js HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=session-id",
                 "",
                 ""
         );
@@ -106,5 +124,121 @@ class Http11ProcessorTest {
         assertThat(socket.output())
                 .contains("HTTP/1.1 200 OK")
                 .contains("path is valid");
+    }
+
+    @Test
+    void 로그인에_성공하면_인덱스_페이지로_리다이렉트한다() {
+        final var requestBody = "account=gugu&password=password";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    void 로그인에_실패하면_401_페이지로_리다이렉트한다() {
+        final var requestBody = "account=gugu&password=wrong";
+        final var socket = new StubSocket(postRequest("/login", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /401.html");
+    }
+
+    @Test
+    void 회원가입_페이지를_응답한다() {
+        final var socket = new StubSocket("GET /register HTTP/1.1\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 200 OK")
+                .contains("회원 가입");
+    }
+
+    @Test
+    void 회원가입을_완료하면_회원을_저장하고_인덱스_페이지로_리다이렉트한다() {
+        final var requestBody = "account=hello&password=world&email=hello%40example.com";
+        final var socket = new StubSocket(postRequest("/register", requestBody));
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(InMemoryUserRepository.findByAccount("hello"))
+                .isPresent()
+                .get()
+                .matches(user -> user.checkPassword("world"));
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    @Test
+    void JSESSIONID가_없으면_쿠키를_발급한다() {
+        final var socket = new StubSocket("GET /index.html HTTP/1.1\r\n\r\n");
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .containsPattern("Set-Cookie: JSESSIONID=[0-9a-f\\-]{36}");
+    }
+
+    @Test
+    void JSESSIONID가_있으면_쿠키를_다시_발급하지_않는다() {
+        final var request = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Cookie: yummy_cookie=choco; JSESSIONID=session-id; tasty_cookie=strawberry",
+                "",
+                ""
+        );
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void 로그인된_사용자가_로그인_페이지에_접근하면_인덱스_페이지로_리다이렉트한다() {
+        final var loginBody = "account=gugu&password=password";
+        final var loginSocket = new StubSocket(postRequest("/login", loginBody));
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final var request = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Cookie: JSESSIONID=session-id",
+                "",
+                ""
+        );
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
+    }
+
+    private String postRequest(final String path, final String requestBody) {
+        return String.join("\r\n",
+                "POST " + path + " HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.length(),
+                "Cookie: JSESSIONID=session-id",
+                "",
+                requestBody
+        );
     }
 }

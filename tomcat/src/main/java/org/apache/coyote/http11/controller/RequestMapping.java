@@ -7,14 +7,14 @@ import org.apache.coyote.http11.HttpRequest;
 public class RequestMapping {
 
     private final Map<String, Controller> controllers = new HashMap<>();
-    private Controller defaultController;
+    private final Controller defaultController;
+
+    public RequestMapping(Controller defaultController) {
+        this.defaultController = defaultController;
+    }
 
     public void addController(String path, Controller controller) {
         controllers.put(path, controller);
-    }
-
-    public void setDefaultController(Controller controller) {
-        this.defaultController = controller;
     }
 
     public Controller getController(HttpRequest request) {

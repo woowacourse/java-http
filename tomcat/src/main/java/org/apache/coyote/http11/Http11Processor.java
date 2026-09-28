@@ -20,10 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapping requestMapping = createRequestMapping();
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestMapping = createRequestMapping();
     }
 
     @Override
@@ -60,11 +61,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestMapping createRequestMapping() {
-        RequestMapping mapping = new RequestMapping();
+        RequestMapping mapping = new RequestMapping(new StaticResourceController());
         LoginController loginController = new LoginController();
         mapping.addController("/login", loginController);
         mapping.addController("/register", new RegisterController());
-        mapping.setDefaultController(new StaticResourceController());
         return mapping;
     }
 

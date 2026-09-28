@@ -21,6 +21,11 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
+    public void redirect(String location) {
+        status = HttpStatus.FOUND;
+        addHeader("Location", location);
+    }
+
     public void addBody(byte[] body) {
         this.body = body.clone();
         headers.put("Content-Length", String.valueOf(body.length));

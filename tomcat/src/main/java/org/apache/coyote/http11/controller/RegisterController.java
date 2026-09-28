@@ -33,6 +33,6 @@ public class RegisterController extends AbstractController {
                 new User(account, password, email)
         );
 
-        response.addHeader("Location", "/index.html");
+        response.redirect("/index.html");
     }
 }

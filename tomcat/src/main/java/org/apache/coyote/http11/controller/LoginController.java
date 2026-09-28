@@ -5,13 +5,10 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
-
-    private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     protected void doGet(
@@ -22,7 +19,7 @@ public class LoginController extends AbstractController {
 
         if (session != null
                 && session.getAttribute("user") != null) {
-            response.addHeader("Location", "/index.html");
+            response.redirect("/index.html");
             return;
         }
 
@@ -44,7 +41,7 @@ public class LoginController extends AbstractController {
         Session session = request.getSession();
 
         session.setAttribute("user", user.get());
-        response.addHeader("Location", "/index.html");
+        response.redirect("/index.html");
     }
 
     private Optional<User> authenticate(HttpRequest request) {

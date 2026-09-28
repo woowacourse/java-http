@@ -1,25 +1,19 @@
 package thread.stage2;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);
 
     /**
-     * 1. App 클래스의 애플리케이션을 실행시켜 서버를 띄운다.
-     * 2. 아래 테스트를 실행시킨다.
-     * 3. AppTest가 아닌 App의 콘솔에서 SampleController가 생성한 http call count 로그를 확인한다.
-     * 4. application.yml에서 설정값을 변경해보면서 어떤 차이점이 있는지 분석해본다.
-     * - 로그가 찍힌 시간
-     * - 스레드명(nio-8080-exec-x)으로 생성된 스레드 갯수를 파악
-     * - http call count
-     * - 테스트 결과값
+     * 1. App 클래스의 애플리케이션을 실행시켜 서버를 띄운다. 2. 아래 테스트를 실행시킨다. 3. AppTest가 아닌 App의 콘솔에서 SampleController가 생성한 http call
+     * count 로그를 확인한다. 4. application.yml에서 설정값을 변경해보면서 어떤 차이점이 있는지 분석해본다. - 로그가 찍힌 시간 - 스레드명(nio-8080-exec-x)으로 생성된 스레드
+     * 갯수를 파악 - http call count - 테스트 결과값
      */
     @Test
     void test() throws Exception {
@@ -47,4 +41,17 @@ class AppTest {
             count.incrementAndGet();
         }
     }
+
+    /*
+    server:
+      tomcat:
+        accept-count: 1     // 바로 수락하지 못한 tcp 연결 대기열
+        max-connections: 1  // tomcat이 동시에 받아서 처리할 수 있는 연결 수
+        threads:
+          min-spare: 2      // 최소 유지 작업 스레드 수
+          max: 2            // 요청을 동시에 처리할 수 있는 최대 작업 스레드 수
+
+
+
+     */
 }

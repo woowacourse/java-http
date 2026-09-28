@@ -76,12 +76,12 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = readHeaders(reader);
             final HttpCookie cookies = new HttpCookie(headers.get("Cookie"));
             final String sessionId = cookies.get(SESSION_COOKIE_NAME);
-            Session session = SESSION_MANAGER.findSession(sessionId);
+            Session session = sessionId == null ? null : SESSION_MANAGER.findSession(sessionId);
             String setCookieHeader = null;
 
             if (sessionId == null || sessionId.isBlank()) {
                 session = SESSION_MANAGER.createSession();
-                setCookieHeader = "Set=Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
+                setCookieHeader = "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
             }
 
             if ("GET".equals(method) && LOGIN_PATH.equals(path) && session != null && session.getAttribute("user") != null) {

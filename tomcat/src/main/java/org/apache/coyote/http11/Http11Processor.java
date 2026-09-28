@@ -49,6 +49,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    public void sendServiceUnavailableResponse() {
+        try (final Socket socket = connection;
+             final OutputStream outputStream = socket.getOutputStream()) {
+            writeResponse(outputStream, HttpResponse.serviceUnavailable());
+        } catch (final IOException e) {
+            log.warn("HTTP 503 응답을 클라이언트에 전달하지 못했습니다.", e);
+        }
+    }
+
     private Optional<HttpRequest> parseRequest(final InputStream inputStream,
                                               final OutputStream outputStream) throws IOException {
         try {

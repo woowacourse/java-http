@@ -1,15 +1,35 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class RegisterController extends AbstractController {
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        URL resourceUrl = getClass().getClassLoader().getResource("static/register.html");
+
+        if (resourceUrl == null) {
+            throw new IllegalArgumentException("register.html 리소스를 찾을 수 없습니다.");
+        }
+
+        String registerPage = Files.readString(Paths.get(resourceUrl.toURI()), StandardCharsets.UTF_8);
+
+        response.setBody(registerPage);
+        response.addHeader("Content-Type", "text/html;charset=utf-8");
+        response.addHeader("Content-Length",
+                String.valueOf(registerPage.getBytes(StandardCharsets.UTF_8).length));
+    }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {

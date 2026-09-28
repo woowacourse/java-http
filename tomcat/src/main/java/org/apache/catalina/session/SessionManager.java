@@ -1,14 +1,14 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
     private static final SessionManager INSTANCE = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -18,10 +18,10 @@ public class SessionManager implements Manager {
     }
 
     public Session findOrCreate(String id) {
-        if (id == null || !SESSIONS.containsKey(id)) {
+        Session session = findSession(id);
+        if (session == null) {
             return create();
         }
-        Session session = SESSIONS.get(id);
         session.access();
         return session;
     }

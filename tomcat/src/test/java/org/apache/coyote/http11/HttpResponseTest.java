@@ -11,6 +11,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpResponseTest {
 
     @Test
+    void errorClearsRedirectAndBodyButPreservesOtherHeaders() throws IOException {
+        final var output = new ByteArrayOutputStream();
+        final var response = new HttpResponse(output);
+        response.sendRedirect("/index.html");
+        response.body("old body");
+        response.addHeader("Set-Cookie", "JSESSIONID=test");
+
+        response.sendError(404, "Not Found");
+        response.flush();
+
+        assertThat(output.toString(StandardCharsets.UTF_8))
+                .startsWith("HTTP/1.1 404 Not Found\r\n")
+                .contains("Content-Length: 0\r\n", "Set-Cookie: JSESSIONID=test\r\n")
+                .doesNotContain("Location:", "old body")
+                .endsWith("\r\n\r\n");
+    }
+
+    @Test
     void forwardsStaticResourceWithItsContentType() throws IOException {
         final var output = new ByteArrayOutputStream();
         final var response = new HttpResponse(output);

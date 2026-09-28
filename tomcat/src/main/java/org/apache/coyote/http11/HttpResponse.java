@@ -37,6 +37,12 @@ public class HttpResponse {
         body = new byte[0];
     }
 
+    public void sendError(final int statusCode, final String reasonPhrase) {
+        status = statusCode + " " + reasonPhrase;
+        headers.remove("Location");
+        body = new byte[0];
+    }
+
     public void forward(final String path) throws IOException {
         try (final var resource = getClass().getClassLoader().getResourceAsStream("static" + path)) {
             if (resource == null) {

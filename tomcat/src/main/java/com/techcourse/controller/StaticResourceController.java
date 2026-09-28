@@ -19,7 +19,11 @@ public class StaticResourceController extends AbstractController {
             response.forward(path);
             return;
         }
-        response.body("Hello world!");
+        if ("/".equals(path)) {
+            response.body("Hello world!");
+            return;
+        }
+        response.sendError(404, "Not Found");
     }
 
     @Override

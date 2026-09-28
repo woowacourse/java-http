@@ -106,6 +106,15 @@ class Http11ProcessorTest {
             assertThat(response).startsWith("HTTP/1.1 200 OK");
             assertThat(body(response)).isEqualTo(resource("index.html"));
         }
+
+        @Test
+        void unknownPathReturnsNotFound() {
+            final var response = process(get("/unknown", ""));
+
+            assertThat(response).startsWith("HTTP/1.1 404 Not Found\r\n");
+            assertThat(header(response, "Content-Length")).isEqualTo("0");
+            assertThat(body(response)).isEmpty();
+        }
     }
 
     @Nested

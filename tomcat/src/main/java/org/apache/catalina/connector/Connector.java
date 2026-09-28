@@ -38,8 +38,8 @@ public class Connector implements Runnable {
         // Executors로 FixedThreadPool을 만든다.
         // ExecutorService는 만들어진 풀을 사용하는 인터페이스
         this.executor = new ThreadPoolExecutor(
-                10,
-                checkMaxThreads(maxThreads),
+                maxThreads,
+                maxThreads,
                 // core thread 개수를 넘어선 스레드는 작업 완료 후 0초 후에 제거된다.
                 0L,
                 TimeUnit.MILLISECONDS,
@@ -126,14 +126,5 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
-    }
-
-    private int checkMaxThreads(int maxThreads) {
-        final var MIN = 1;
-
-        if (maxThreads < MIN || DEFAULT_MAX_THREADS < maxThreads) {
-            return DEFAULT_MAX_THREADS;
-        }
-        return maxThreads;
     }
 }

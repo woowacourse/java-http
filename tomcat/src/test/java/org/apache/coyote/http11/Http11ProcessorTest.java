@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -11,6 +14,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        SessionManager.getInstance().add(new Session("session-id"));
+    }
 
     @Test
     void process() {
@@ -198,6 +206,28 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         assertThat(socket.output()).doesNotContain("Set-Cookie");
+    }
+
+    @Test
+    void 로그인된_사용자가_로그인_페이지에_접근하면_인덱스_페이지로_리다이렉트한다() {
+        final var loginBody = "account=gugu&password=password";
+        final var loginSocket = new StubSocket(postRequest("/login", loginBody));
+        new Http11Processor(loginSocket).process(loginSocket);
+
+        final var request = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Cookie: JSESSIONID=session-id",
+                "",
+                ""
+        );
+        final var socket = new StubSocket(request);
+        final var processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /index.html");
     }
 
     private String postRequest(final String path, final String requestBody) {

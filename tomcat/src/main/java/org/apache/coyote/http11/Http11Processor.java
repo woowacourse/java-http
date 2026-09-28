@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_ROOT = "static";
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+    private static final String USER_SESSION_KEY = "user";
 
     private final Socket connection;
 
@@ -60,9 +62,16 @@ public class Http11Processor implements Runnable, Processor {
             final var requestPath = extractRequestPath(requestUri);
             final var requestBody = readRequestBody(reader, requestHeaders);
             final var parameters = findParameters(requestMethod, requestUri, requestBody);
-            final var sessionCookie = createSessionCookie(requestHeaders);
+            final var requestedSessionId = HttpCookie.parse(requestHeaders.get("Cookie")).get("JSESSIONID");
+            final var session = findSession(requestedSessionId);
+            final var sessionCookie = createSessionCookie(requestedSessionId, session);
 
-            final var redirectLocation = processForm(requestMethod, requestPath, parameters);
+            if (isLoginPageRequest(requestMethod, requestPath, session)) {
+                writeRedirect(outputStream, "/index.html", sessionCookie);
+                return;
+            }
+
+            final var redirectLocation = processForm(requestMethod, requestPath, parameters, session);
             if (redirectLocation != null) {
                 writeRedirect(outputStream, redirectLocation, sessionCookie);
                 return;
@@ -189,7 +198,8 @@ public class Http11Processor implements Runnable, Processor {
     private String processForm(
             final String requestMethod,
             final String requestPath,
-            final Map<String, String> parameters
+            final Map<String, String> parameters,
+            final Session session
     ) {
         if (!"POST".equals(requestMethod)) {
             return null;
@@ -205,11 +215,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(requestPath)) {
-            final var loginSucceeded = InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .isPresent();
+            final var user = InMemoryUserRepository.findByAccount(account)
+                    .filter(foundUser -> foundUser.checkPassword(password));
 
-            if (loginSucceeded) {
+            if (user.isPresent()) {
+                session.setAttribute(USER_SESSION_KEY, user.get());
                 return "/index.html";
             }
 
@@ -274,15 +284,35 @@ public class Http11Processor implements Runnable, Processor {
         return contentType;
     }
 
-    private String createSessionCookie(final Map<String, String> requestHeaders) {
-        final var cookies = HttpCookie.parse(requestHeaders.get("Cookie"));
-        final var sessionId = cookies.get("JSESSIONID");
+    private Session findSession(final String sessionId) {
+        final var sessionManager = SessionManager.getInstance();
 
-        if (sessionId != null && !sessionId.isBlank()) {
+        if (sessionId != null) {
+            final var session = sessionManager.findSession(sessionId);
+            if (session instanceof Session) {
+                return (Session) session;
+            }
+        }
+
+        return sessionManager.createSession();
+    }
+
+    private String createSessionCookie(final String requestedSessionId, final Session session) {
+        if (session.getId().equals(requestedSessionId)) {
             return null;
         }
 
-        return "JSESSIONID=" + UUID.randomUUID();
+        return "JSESSIONID=" + session.getId();
+    }
+
+    private boolean isLoginPageRequest(
+            final String requestMethod,
+            final String requestPath,
+            final Session session
+    ) {
+        return "GET".equals(requestMethod)
+                && "/login".equals(requestPath)
+                && session.getAttribute(USER_SESSION_KEY) != null;
     }
 
     private void writeResponse(

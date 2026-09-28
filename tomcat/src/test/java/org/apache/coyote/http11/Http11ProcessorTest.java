@@ -1,11 +1,15 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.connector.CoyoteAdapter;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 import com.techcourse.model.User;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 
@@ -23,7 +27,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -40,6 +44,100 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void respondsWithBadRequestWhenRequestLineIsInvalid() {
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 extra",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = createProcessor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request ")
+                .contains("\r\n\r\nBad Request");
+    }
+
+    @Test
+    void respondsWithBadRequestWhenRequestBodyIsIncomplete() {
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: 10",
+                "",
+                "a=b");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = createProcessor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request ")
+                .contains("\r\n\r\nBad Request");
+    }
+
+    @Test
+    void respondsWithInternalServerErrorWhenUnexpectedRequestParsingExceptionOccurs() {
+        final var socket = new StubSocket() {
+            @Override
+            public InputStream getInputStream() {
+                return new InputStream() {
+                    @Override
+                    public int read() {
+                        throw new IllegalStateException("요청을 읽을 수 없습니다.");
+                    }
+                };
+            }
+        };
+        final Http11Processor processor = createProcessor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 500 Internal Server Error ")
+                .contains("\r\n\r\nInternal Server Error");
+    }
+
+    @Test
+    void respondsWithBadRequestWhenFormDataEncodingIsInvalid() {
+        final String body = "account=%";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                body);
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = createProcessor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 400 Bad Request ")
+                .contains("\r\n\r\nBad Request");
+    }
+
+    @Test
+    void respondsWithNotFoundWhenStaticResourceDoesNotExist() {
+        final String httpRequest = String.join("\r\n",
+                "GET /does-not-exist.html HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = createProcessor(socket);
+
+        processor.process(socket);
+
+        assertThat(socket.output())
+                .startsWith("HTTP/1.1 404 Not Found ")
+                .contains("\r\n\r\nNot Found");
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -51,7 +149,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         // when
         processor.process(socket);
@@ -79,7 +177,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -102,7 +200,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=wrong");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -117,7 +215,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void setCookieWhenJSessionIdIsMissing() {
+    void doesNotSetCookieWhenJSessionIdIsMissing() {
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -125,11 +223,11 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
-        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
+        assertThat(socket.output()).doesNotContain("Set-Cookie: JSESSIONID=");
     }
 
     @Test
@@ -145,7 +243,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = createProcessor(socket);
 
         processor.process(socket);
 
@@ -157,5 +255,9 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private Http11Processor createProcessor(final StubSocket socket) {
+        return new Http11Processor(socket, new CoyoteAdapter());
     }
 }

@@ -14,6 +14,7 @@ final class NioConnection {
 
     private final SocketChannel channel;
     private ByteBuffer requestBuffer = ByteBuffer.allocate(INITIAL_REQUEST_BUFFER_SIZE);
+    private ByteBuffer responseBuffer;
 
     NioConnection(final SocketChannel channel) {
         this.channel = channel;
@@ -46,6 +47,18 @@ final class NioConnection {
         final byte[] request = new byte[copy.remaining()];
         copy.get(request);
         return request;
+    }
+
+    void prepareResponse(final byte[] responseBytes) {
+        responseBuffer = ByteBuffer.wrap(responseBytes);
+    }
+
+    int write() throws IOException {
+        return channel.write(responseBuffer);
+    }
+
+    boolean isResponseComplete() {
+        return responseBuffer != null && !responseBuffer.hasRemaining();
     }
 
     SocketChannel channel() {

@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 final class Poller implements Runnable {
 
@@ -19,11 +19,12 @@ final class Poller implements Runnable {
 
     private final Selector selector;
     private final Executor executor;
-    private final Consumer<NioConnection> processor;
+    private final Function<byte[], byte[]> processor;
     private final ConcurrentLinkedQueue<SocketChannel> pendingConnections = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<NioConnection> pendingResponses = new ConcurrentLinkedQueue<>();
     private volatile boolean stopped;
 
-    Poller(final Selector selector, final Executor executor, final Consumer<NioConnection> processor) {
+    Poller(final Selector selector, final Executor executor, final Function<byte[], byte[]> processor) {
         this.selector = selector;
         this.executor = executor;
         this.processor = processor;
@@ -39,6 +40,7 @@ final class Poller implements Runnable {
         while (!stopped) {
             try {
                 registerPendingConnections();
+                registerPendingResponses();
                 selector.select();
                 processSelectedKeys();
             } catch (IOException e) {
@@ -65,6 +67,18 @@ final class Poller implements Runnable {
         }
     }
 
+    private void registerPendingResponses() {
+        NioConnection connection;
+        while ((connection = pendingResponses.poll()) != null) {
+            final SelectionKey key = connection.channel().keyFor(selector);
+            if (key == null || !key.isValid()) {
+                close(connection.channel());
+                continue;
+            }
+            key.interestOps(SelectionKey.OP_WRITE);
+        }
+    }
+
     private void processSelectedKeys() throws IOException {
         final Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
         while (iterator.hasNext()) {
@@ -77,10 +91,15 @@ final class Poller implements Runnable {
     }
 
     void processKey(final SelectionKey key) throws IOException {
-        if (!key.isReadable()) {
-            return;
+        if (key.isReadable()) {
+            read(key);
         }
+        if (key.isValid() && key.isWritable()) {
+            write(key);
+        }
+    }
 
+    private void read(final SelectionKey key) throws IOException {
         final NioConnection connection = (NioConnection) key.attachment();
         final int readBytes = connection.read();
         if (readBytes < 0) {
@@ -88,17 +107,37 @@ final class Poller implements Runnable {
             return;
         }
         if (connection.isRequestComplete()) {
-            key.cancel();
+            key.interestOps(0);
             execute(connection);
+        }
+    }
+
+    private void write(final SelectionKey key) throws IOException {
+        final NioConnection connection = (NioConnection) key.attachment();
+        connection.write();
+        if (connection.isResponseComplete()) {
+            close(key, connection);
         }
     }
 
     private void execute(final NioConnection connection) {
         try {
-            executor.execute(() -> processor.accept(connection));
+            executor.execute(() -> process(connection));
         } catch (RejectedExecutionException e) {
             close(connection.channel());
             log.warn("Request rejected because the thread pool and work queue are full.");
+        }
+    }
+
+    private void process(final NioConnection connection) {
+        try {
+            final byte[] responseBytes = processor.apply(connection.requestBytes());
+            connection.prepareResponse(responseBytes);
+            pendingResponses.add(connection);
+            selector.wakeup();
+        } catch (RuntimeException e) {
+            close(connection.channel());
+            log.error(e.getMessage(), e);
         }
     }
 

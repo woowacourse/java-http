@@ -6,7 +6,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,7 +20,7 @@ class PollerTest {
     void 새_채널을_읽기_이벤트와_NioConnection으로_등록한다() throws Exception {
         final var selector = mock(Selector.class);
         final var channel = mock(SocketChannel.class);
-        final var poller = new Poller(selector, Runnable::run, connection -> { });
+        final var poller = new Poller(selector, Runnable::run, request -> new byte[0]);
 
         poller.register(channel);
         poller.registerPendingConnections();
@@ -39,18 +39,21 @@ class PollerTest {
         final var key = mock(SelectionKey.class);
         final var connection = mock(NioConnection.class);
         @SuppressWarnings("unchecked")
-        final Consumer<NioConnection> processor = mock(Consumer.class);
+        final Function<byte[], byte[]> processor = mock(Function.class);
         final Executor directExecutor = Runnable::run;
         final var poller = new Poller(selector, directExecutor, processor);
         when(key.isReadable()).thenReturn(true);
         when(key.attachment()).thenReturn(connection);
         when(connection.read()).thenReturn(10);
         when(connection.isRequestComplete()).thenReturn(true);
+        when(connection.requestBytes()).thenReturn(new byte[0]);
+        when(processor.apply(any())).thenReturn(new byte[0]);
 
         poller.processKey(key);
 
-        verify(key).cancel();
-        verify(processor).accept(connection);
+        verify(key).interestOps(0);
+        verify(processor).apply(any());
+        verify(connection).prepareResponse(any());
     }
 
     @Test
@@ -58,13 +61,31 @@ class PollerTest {
         final var selector = mock(Selector.class);
         final var key = mock(SelectionKey.class);
         final var connection = mock(NioConnection.class);
-        final var poller = new Poller(selector, Runnable::run, ignored -> { });
+        final var poller = new Poller(selector, Runnable::run, request -> new byte[0]);
         when(key.isReadable()).thenReturn(true);
         when(key.attachment()).thenReturn(connection);
         when(connection.read()).thenReturn(-1);
 
         poller.processKey(key);
 
+        verify(key).cancel();
+        verify(connection).close();
+    }
+
+    @Test
+    void 응답을_모두_쓰면_키와_채널을_정리한다() throws Exception {
+        final var selector = mock(Selector.class);
+        final var key = mock(SelectionKey.class);
+        final var connection = mock(NioConnection.class);
+        final var poller = new Poller(selector, Runnable::run, request -> new byte[0]);
+        when(key.isWritable()).thenReturn(true);
+        when(key.isValid()).thenReturn(true);
+        when(key.attachment()).thenReturn(connection);
+        when(connection.isResponseComplete()).thenReturn(true);
+
+        poller.processKey(key);
+
+        verify(connection).write();
         verify(key).cancel();
         verify(connection).close();
     }

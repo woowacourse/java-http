@@ -37,31 +37,36 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        HttpHeaders requestHeaders = request.getHeaders();
-        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
-        String sessionId = cookie.get("JSESSIONID");
-
-        Session session = sessionManager.findSession(sessionId);
-        if (session != null && getUser(session) != null) {
+        if (isLoggedIn(request.getHeaders())) {
             response.redirectTo("/index.html");
             return;
         }
 
-        Map<String, String> params = parseParams(request.getBody());
-        Optional<User> user = login(params.get("account"), params.get("password"));
+        Optional<User> user = authenticate(request.getBody());
         if (user.isEmpty()) {
             response.redirectTo("/401.html");
             return;
         }
 
+        createLoginSession(user.get(), request.getHeaders(), response);
         response.redirectTo("/index.html");
+    }
+
+    private Optional<User> authenticate(String body) {
+        Map<String, String> params = parseParams(body);
+        return login(params.get("account"), params.get("password"));
+    }
+
+    private void createLoginSession(User user, HttpHeaders requestHeaders, HttpResponse response) {
+        HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
+        String sessionId = cookie.get("JSESSIONID");
         if (sessionId == null) {
             sessionId = UUID.randomUUID().toString();
             response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         }
 
         Session loginSession = new Session(sessionId);
-        loginSession.setAttribute("user", user.get());
+        loginSession.setAttribute("user", user);
         sessionManager.add(loginSession);
     }
 

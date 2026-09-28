@@ -112,6 +112,15 @@ public class HttpRequest {
         return parameters.get(name);
     }
 
+    public Session renewSession() {
+        final var previous = getSession(false);
+        if (previous != null) {
+            previous.invalidate();
+        }
+        session = null;
+        return getSession(true);
+    }
+
     public Session getSession(final boolean create) {
         if (session == null) {
             session = SessionManager.getInstance().findSession(cookies.getValue(HttpCookie.JSESSIONID));

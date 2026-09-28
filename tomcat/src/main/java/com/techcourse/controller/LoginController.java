@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
         if (foundUser.isPresent()) {
             final var user = foundUser.get();
             if (user.checkPassword(password)) {
-                request.getSession(true).setAttribute("user", user);
+                request.renewSession().setAttribute("user", user);
                 response.sendRedirect("/index.html");
                 return;
             }

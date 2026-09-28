@@ -264,14 +264,28 @@ class Http11ProcessorTest {
         }
 
         @Test
-        void logsInWithExistingSession() {
-            final var firstResponse = process(get("/login", ""));
-            final var cookie = sessionCookie(firstResponse);
-            final var response = process(post("/login", "account=gugu&password=password", cookie));
-            final var nextResponse = process(get("/login", cookie));
+        void rotatesSessionAfterSuccessfulLogin() {
+            final var oldCookie = sessionCookie(process(get("/login", "")));
+            final var response = process(post("/login", "account=gugu&password=password", oldCookie));
+            final var newCookie = sessionCookie(response);
 
             assertRedirect(response, "/index.html");
-            assertRedirect(nextResponse, "/index.html");
+            assertThat(newCookie).isNotEqualTo(oldCookie);
+            assertThat(SessionManager.getInstance().findSession(oldCookie.substring("JSESSIONID=".length())))
+                    .isNull();
+            assertRedirect(process(get("/login", newCookie)), "/index.html");
+            assertThat(process(get("/login", oldCookie))).startsWith("HTTP/1.1 200 OK");
+        }
+
+        @Test
+        void failedLoginKeepsExistingSession() {
+            final var cookie = sessionCookie(process(get("/login", "")));
+            final var response = process(post("/login", "account=gugu&password=wrong", cookie));
+
+            assertRedirect(response, "/401.html");
+            assertThat(header(response, "Set-Cookie")).isNull();
+            assertThat(SessionManager.getInstance().findSession(cookie.substring("JSESSIONID=".length()))
+                    .getAttribute("user")).isNull();
         }
 
         @Test

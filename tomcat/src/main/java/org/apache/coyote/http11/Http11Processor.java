@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.controller.RequestMapping;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +33,20 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = HttpRequest.read(inputStream);
             final var response = new HttpResponse(outputStream);
-            addSessionCookie(request, response);
+            final var previousSession = request.getSession(false);
 
             final var controller = requestMapping.getController(request);
             controller.service(request, response);
+            addSessionCookie(request, response, previousSession);
             response.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void addSessionCookie(final HttpRequest request, final HttpResponse response) {
-        if (request.getSession(false) == null) {
-            final var session = request.getSession(true);
+    private void addSessionCookie(final HttpRequest request, final HttpResponse response, final Session previousSession) {
+        final var session = request.getSession(true);
+        if (previousSession == null || !previousSession.getId().equals(session.getId())) {
             response.addHeader("Set-Cookie", HttpCookie.ofJSessionId(session.getId()));
         }
     }

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -41,24 +40,28 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = new HttpRequest(inputStream);
+            final var response = new HttpResponse(outputStream);
             final var session = request.getSession(true);
             final var sessionCookie = createSessionCookie(request.getRequestedSessionId(), session);
+            if (sessionCookie != null) {
+                response.addCookie(sessionCookie);
+            }
 
             if (isLoginPageRequest(request, session)) {
-                writeRedirect(outputStream, "/index.html", sessionCookie);
+                response.sendRedirect("/index.html");
                 return;
             }
 
             final var redirectLocation = processForm(request, session);
             if (redirectLocation != null) {
-                writeRedirect(outputStream, redirectLocation, sessionCookie);
+                response.sendRedirect(redirectLocation);
                 return;
             }
 
             final var responseBody = readResponseBody(request.getPath());
             final var contentType = findContentType(request.getPath());
 
-            writeResponse(outputStream, contentType, responseBody, sessionCookie);
+            response.send(contentType, responseBody);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -168,49 +171,4 @@ public class Http11Processor implements Runnable, Processor {
                 && session.getAttribute(USER_SESSION_KEY) != null;
     }
 
-    private void writeResponse(
-            final OutputStream outputStream,
-            final String contentType,
-            final byte[] responseBody,
-            final String sessionCookie
-    ) throws IOException {
-        final var responseHeaders = "HTTP/1.1 200 OK \r\n"
-                + createSetCookieHeader(sessionCookie)
-                + String.join("\r\n",
-                        "Content-Type: " + contentType + " ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "",
-                        ""
-                );
-
-        outputStream.write(responseHeaders.getBytes(StandardCharsets.UTF_8));
-        outputStream.write(responseBody);
-        outputStream.flush();
-    }
-
-    private void writeRedirect(
-            final OutputStream outputStream,
-            final String location,
-            final String sessionCookie
-    ) throws IOException {
-        final var response = "HTTP/1.1 302 Found\r\n"
-                + createSetCookieHeader(sessionCookie)
-                + String.join("\r\n",
-                        "Location: " + location,
-                        "Content-Length: 0",
-                        "",
-                        ""
-                );
-
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
-    }
-
-    private String createSetCookieHeader(final String sessionCookie) {
-        if (sessionCookie == null) {
-            return "";
-        }
-
-        return "Set-Cookie: " + sessionCookie + "\r\n";
-    }
 }

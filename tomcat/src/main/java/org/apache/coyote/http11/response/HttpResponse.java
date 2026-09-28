@@ -74,10 +74,11 @@ public class HttpResponse {
             final URI resourceURI = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(resourcePath)).toURI();
             final Path path = Path.of(resourceURI);
             return Files.readAllBytes(path);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | URISyntaxException e) {
             log.error("{} 자료가 존재하지 않습니다.", resourcePath);
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage(), e);
+            if (!resourceName.equals("/404.html")) {
+                return readResource("/404.html");
+            }
         }
         return new byte[0];
     }

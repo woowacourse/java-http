@@ -48,8 +48,8 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        createLoginSession(user.get(), request.getHeaders(), response);
         response.redirectTo("/index.html");
+        createLoginSession(user.get(), request.getHeaders(), response);
     }
 
     private Optional<User> authenticate(String body) {
@@ -60,14 +60,16 @@ public class LoginController extends AbstractController {
     private void createLoginSession(User user, HttpHeaders requestHeaders, HttpResponse response) {
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");
-        if (sessionId == null) {
+
+        Session loginSession = sessionManager.findSession(sessionId);
+        if (loginSession == null) {
             sessionId = UUID.randomUUID().toString();
+            loginSession = new Session(sessionId);
+            sessionManager.add(loginSession);
             response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
         }
 
-        Session loginSession = new Session(sessionId);
         loginSession.setAttribute("user", user);
-        sessionManager.add(loginSession);
     }
 
     private boolean isLoggedIn(HttpHeaders requestHeaders) {

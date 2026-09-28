@@ -12,13 +12,21 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     private final RequestMapping requestMapping;
+    private final int maxThreads;
+    private final int waitingQueueSize;
 
-    public Tomcat(final RequestMapping requestMapping) {
+    public Tomcat(
+            final RequestMapping requestMapping,
+            final int maxThreads,
+            final int waitingQueueSize
+    ) {
         this.requestMapping = requestMapping;
+        this.maxThreads = maxThreads;
+        this.waitingQueueSize = waitingQueueSize;
     }
 
     public void start() {
-        var connector = new Connector(requestMapping);
+        var connector = new Connector(requestMapping, maxThreads, waitingQueueSize);
         connector.start();
 
         try {

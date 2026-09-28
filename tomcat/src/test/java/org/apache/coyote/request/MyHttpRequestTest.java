@@ -40,6 +40,17 @@ class MyHttpRequestTest {
     }
 
     @Test
+    void 등호가_없는_폼_항목은_빈_값으로_읽는다() {
+        assertThat(requestWithBody("account").getFormParameters())
+                .containsEntry("account", "");
+    }
+
+    @Test
+    void 빈_본문은_빈_폼으로_읽는다() {
+        assertThat(requestWithBody("").getFormParameters()).isEmpty();
+    }
+
+    @Test
     void Accept_헤더가_중복되면_대소문자와_순서를_유지해_결합한다() {
         String rawRequest = String.join("\r\n",
                 "GET / HTTP/1.1",

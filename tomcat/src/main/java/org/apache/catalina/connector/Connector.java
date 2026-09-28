@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -16,19 +21,53 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 5_000;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
-    private boolean stopped;
+    private final int readTimeoutMillis;
+    private volatile boolean stopped;
 
-    public Connector(final RequestMapping requestMapping) {
-        this(requestMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(
+            final RequestMapping requestMapping,
+            final int maxThreads,
+            final int waitingQueueSize
+    ) {
+        this(requestMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads, waitingQueueSize);
     }
 
-    public Connector(final RequestMapping requestMapping, final int port, final int acceptCount) {
+    public Connector(
+            final RequestMapping requestMapping,
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final int waitingQueueSize
+    ) {
+        this(requestMapping, port, acceptCount, maxThreads, waitingQueueSize, DEFAULT_READ_TIMEOUT_MILLIS);
+    }
+
+    public Connector(
+            final RequestMapping requestMapping,
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final int waitingQueueSize,
+            final int readTimeoutMillis
+    ) {
+        if (readTimeoutMillis <= 0) {
+            throw new IllegalArgumentException("읽기 제한 시간은 양수여야 합니다.");
+        }
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.readTimeoutMillis = readTimeoutMillis;
         this.stopped = false;
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(waitingQueueSize)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -69,8 +108,16 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+        try {
+            connection.setSoTimeout(readTimeoutMillis);
+            executorService.execute(new Http11Processor(connection, requestMapping));
+        } catch (IOException | RejectedExecutionException e) {
+            try {
+                connection.close();
+            } catch (IOException closeException) {
+                log.error(closeException.getMessage(), closeException);
+            }
+        }
     }
 
     public void stop() {
@@ -79,6 +126,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

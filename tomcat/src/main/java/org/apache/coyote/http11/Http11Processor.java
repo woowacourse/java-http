@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.EntityHeader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
@@ -18,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 public class Http11Processor implements Runnable, Processor {
@@ -57,22 +58,31 @@ public class Http11Processor implements Runnable, Processor {
             MyHttpResponse httpResponse = new MyHttpResponse();
             log.info("start request: {} {}", httpRequest.method(), httpRequest.getUri());
 
-            Controller controller = requestMapping.getController(httpRequest);
-            controller.service(httpRequest, httpResponse);
+            try {
+                Controller controller = requestMapping.getController(httpRequest);
+                controller.service(httpRequest, httpResponse);
 
-            if (httpRequest.isNewSession()) {
-                httpResponse.addHeader(
-                        "Set-Cookie",
-                        "JSESSIONID=" + httpRequest.getSession(false).getId()
-                );
+                if (httpRequest.isNewSession()) {
+                    httpResponse.addHeader(
+                            "Set-Cookie",
+                            "JSESSIONID=" + httpRequest.getSession(false).getId()
+                    );
+                }
+            } catch (MalformedRequestException e) {
+                writeErrorResponse(outputStream, StatusCode.BAD_REQUEST);
+                return;
+            } catch (Exception e) {
+                log.error("failed to process request", e);
+                writeErrorResponse(outputStream, StatusCode.INTERNAL_SERVER_ERROR);
+                return;
             }
 
             writeResponse(outputStream, httpResponse);
             log.info("end request: {} {}", httpRequest.method(), httpRequest.getUri());
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (SocketTimeoutException e) {
+            log.debug("request read timed out", e);
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -101,8 +111,10 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
             sb.append(line).append("\r\n");
-            if (line.regionMatches(true, 0, "Content-Length:", 0, "Content-Length:".length())) {
-                contentLength = Integer.parseInt(line.substring("Content-Length:".length()).strip());
+            int separatorIndex = line.indexOf(':');
+            if (separatorIndex > 0
+                    && line.substring(0, separatorIndex).equalsIgnoreCase(EntityHeader.CONTENT_LENGTH.fieldName())) {
+                contentLength = parseContentLength(line.substring(separatorIndex + 1).strip());
             }
         }
         sb.append("\r\n");
@@ -112,11 +124,22 @@ public class Http11Processor implements Runnable, Processor {
         while (read < contentLength) {
             int count = br.read(cbuf, read, contentLength - read);
             if (count == -1) {
-                break;
+                throw new MalformedRequestException("Content-Length보다 본문이 짧습니다.");
             }
             read += count;
         }
         sb.append(cbuf, 0, read);
         return sb.toString();
+    }
+
+    private static int parseContentLength(String value) {
+        if (!value.matches("[0-9]+")) {
+            throw new MalformedRequestException("잘못된 Content-Length입니다: " + value);
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new MalformedRequestException("잘못된 Content-Length입니다: " + value);
+        }
     }
 }

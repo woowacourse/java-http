@@ -4,7 +4,6 @@ import com.techcourse.StaticResourceReader;
 import com.techcourse.model.Register;
 import com.techcourse.model.User;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.request.Method;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
@@ -40,6 +39,10 @@ public class RegisterController extends AbstractController {
 
     private void register(MyHttpRequest httpRequest, MyHttpResponse httpResponse) {
         Map<String, String> params = httpRequest.getFormParameters();
+        if (hasMissingRegistrationFields(params)) {
+            httpResponse.setStatusCode(StatusCode.BAD_REQUEST);
+            return;
+        }
 
         try {
             User registeredUser = Register.register(params.get("account"), params.get("email"), params.get("password"));
@@ -51,4 +54,9 @@ public class RegisterController extends AbstractController {
         }
     }
 
+    private boolean hasMissingRegistrationFields(Map<String, String> params) {
+        return params.getOrDefault("account", "").isBlank()
+                || params.getOrDefault("email", "").isBlank()
+                || params.getOrDefault("password", "").isBlank();
+    }
 }

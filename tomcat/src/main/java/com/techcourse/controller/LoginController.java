@@ -5,7 +5,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.request.Method;
 import org.apache.coyote.request.MyHttpRequest;
 import org.apache.coyote.response.MyHttpResponse;
@@ -49,6 +48,10 @@ public class LoginController extends AbstractController {
 
     private void authenticate(MyHttpRequest httpRequest, MyHttpResponse httpResponse) throws IOException {
         Map<String, String> params = httpRequest.getFormParameters();
+        if (hasMissingCredentials(params)) {
+            httpResponse.setStatusCode(StatusCode.BAD_REQUEST);
+            return;
+        }
         Optional<User> foundUser = findUserByAccount(params.get("account"));
         if (foundUser.isEmpty()) {
             log.info("authenticate failed: user not found");
@@ -65,6 +68,11 @@ public class LoginController extends AbstractController {
         }
         log.info("authenticate failed: incorrectly password");
         httpResponse.sendRedirect("401.html");
+    }
+
+    private boolean hasMissingCredentials(Map<String, String> params) {
+        return params.getOrDefault("account", "").isBlank()
+                || params.getOrDefault("password", "").isBlank();
     }
 
     private User getUser(Session session) {

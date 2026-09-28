@@ -17,7 +17,7 @@ public class Tomcat {
 
     public void start() {
         var connector = new Connector(
-                8080, 100, controllerResolver
+                8080, 100, controllerResolver, 250
         );
         connector.start();
 

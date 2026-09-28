@@ -1,16 +1,16 @@
 package org.apache.catalina;
 
 import com.techcourse.http.HttpSession;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 // 모든 클라이언트의 세션 값을 관리하는 클래스
 // 각 세션의 id 는 uuid 사용
 public class SessionManager implements Manager, SessionResolver {
 
     // key = JSESSION 아이디값,value = Session
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(final Session session) {

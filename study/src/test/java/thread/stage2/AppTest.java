@@ -21,6 +21,63 @@ class AppTest {
      * - http call count
      * - 테스트 결과값
      */
+
+    /**
+     * 첫번째 결과
+     *
+     * server:
+     *   tomcat:
+     *     accept-count: 1
+     *     max-connections: 1
+     *     threads:
+     *       min-spare: 2
+     *       max: 2
+     *
+     * 2026-09-27T16:46:50.332+09:00  INFO 17323 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+     * 2026-09-27T16:46:50.850+09:00  INFO 17323 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 1
+     * 2026-09-27T16:46:52.624+09:00  INFO 17323 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 2
+     *
+     */
+
+    /**
+     * 두 번째 테스트
+     *
+     * server:
+     *   tomcat:
+     *     accept-count: 2
+     *     max-connections: 1
+     *     threads:
+     *       min-spare: 2
+     *       max: 2
+     *
+     * 2026-09-27T16:51:43.340+09:00  INFO 18714 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 1
+     * 2026-09-27T16:51:45.155+09:00  INFO 18714 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 2
+     * 2026-09-27T16:51:45.662+09:00  INFO 18714 --- [nio-8080-exec-2] thread.stage2.SampleController           : http call count : 3
+     *
+     */
+
+    /**
+     * 세번째 테스트
+     *
+     * server:
+     *   tomcat:
+     *     accept-count: 10
+     *     max-connections: 2
+     *     threads:
+     *       min-spare: 2
+     *       max: 2
+     *
+     * 2026-09-27T16:53:17.235+09:00  INFO 19204 --- [nio-8080-exec-2] thread.stage2.SampleController           : http call count : 1
+     * 2026-09-27T16:53:17.239+09:00  INFO 19204 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 2
+     * 2026-09-27T16:53:19.044+09:00  INFO 19204 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 4
+     * 2026-09-27T16:53:19.044+09:00  INFO 19204 --- [nio-8080-exec-2] thread.stage2.SampleController           : http call count : 3
+     * 2026-09-27T16:53:19.551+09:00  INFO 19204 --- [nio-8080-exec-2] thread.stage2.SampleController           : http call count : 5
+     * 2026-09-27T16:53:19.553+09:00  INFO 19204 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 6
+     * 2026-09-27T16:53:20.059+09:00  INFO 19204 --- [nio-8080-exec-2] thread.stage2.SampleController           : http call count : 7
+     * 2026-09-27T16:53:20.060+09:00  INFO 19204 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 8
+     * 2026-09-27T16:53:20.564+09:00  INFO 19204 --- [nio-8080-exec-2] thread.stage2.SampleController           : http call count : 9
+     * 2026-09-27T16:53:20.566+09:00  INFO 19204 --- [nio-8080-exec-1] thread.stage2.SampleController           : http call count : 10
+     */
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;

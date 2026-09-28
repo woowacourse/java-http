@@ -5,6 +5,8 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.ProcessorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,21 +16,27 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_MAX_THREADS = 250;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private final ProcessorFactory processorFactory;
-    private boolean stopped;
+
+    private volatile boolean stopped;
 
     public Connector(final ProcessorFactory processorFactory) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, processorFactory);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, processorFactory);
     }
 
     public Connector(final int port,
                      final int acceptCount,
+                     final int maxThreads,
                      final ProcessorFactory processorFactory) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.processorFactory = Objects.requireNonNull(processorFactory);
+
         this.stopped = false;
     }
 
@@ -43,10 +51,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -71,7 +79,7 @@ public class Connector implements Runnable {
             return;
         }
         final Runnable processor = processorFactory.create(connection);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
@@ -80,6 +88,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

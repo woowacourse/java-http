@@ -16,6 +16,16 @@ class SessionTest {
     }
 
     @Test
+    void 값으로_null을_저장하면_해당_속성이_삭제된다() {
+        final Session session = new Session("656cef62");
+        session.setAttribute("user", "gugu");
+
+        session.setAttribute("user", null);
+
+        assertThat(session.getAttribute("user")).isNull();
+    }
+
+    @Test
     void 값을_비우면_저장된_값이_모두_사라진다() {
         final Session session = new Session("656cef62");
         session.setAttribute("user", "gugu");

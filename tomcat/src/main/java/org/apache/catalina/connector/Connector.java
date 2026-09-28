@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.*;
 
 public class Connector implements Runnable {
 
@@ -16,19 +17,22 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private final RequestMapping requestMapping;
     private boolean stopped;
 
     public Connector(final RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMapping);
     }
 
-    public Connector(final int port, final int acceptCount, final RequestMapping requestMapping) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
+        this.executorService = createExecutorService(maxThreads, acceptCount);
         this.requestMapping = requestMapping;
+        this.stopped = false;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -39,6 +43,18 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private ExecutorService createExecutorService(final int maxThreads, final int acceptCount) {
+        final int checkedMaxThreads = checkMaxThreads(maxThreads);
+        final int checkedAcceptCount = checkAcceptCount(acceptCount);
+        return new ThreadPoolExecutor(
+                checkedMaxThreads,
+                checkedMaxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(checkedAcceptCount)
+        );
     }
 
     public void start() {
@@ -70,7 +86,12 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+        try {
+            executorService.submit(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("대기 중인 요청이 가득 차 연결을 거절합니다.");
+            closeConnection(connection);
+        }
     }
 
     public void stop() {
@@ -80,6 +101,7 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executorService.close();
     }
 
     private int checkPort(final int port) {
@@ -94,5 +116,20 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThreads(final int maxThreads) {
+        if (maxThreads < 1) {
+            return DEFAULT_MAX_THREADS;
+        }
+        return maxThreads;
+    }
+
+    private void closeConnection(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

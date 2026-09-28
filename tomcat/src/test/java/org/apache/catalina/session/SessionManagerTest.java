@@ -2,6 +2,11 @@ package org.apache.catalina.session;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -22,6 +27,22 @@ class SessionManagerTest {
         final Session second = sessionManager.createSession();
 
         assertThat(first.getId()).isNotEqualTo(second.getId());
+    }
+
+    @Test
+    void 여러_스레드가_동시에_세션을_생성해도_모두_찾을_수_있다() {
+        final int sessionCount = 1000;
+        final List<Session> sessions = new CopyOnWriteArrayList<>();
+
+        try (final ExecutorService executorService = Executors.newFixedThreadPool(10)) {
+            for (int i = 0; i < sessionCount; i++) {
+                executorService.submit(() -> sessions.add(sessionManager.createSession()));
+            }
+        }
+
+        assertThat(sessions).hasSize(sessionCount);
+        assertThat(sessions).allSatisfy(session ->
+                assertThat(sessionManager.findSession(session.getId())).isSameAs(session));
     }
 
     @Test

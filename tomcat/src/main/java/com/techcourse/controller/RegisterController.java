@@ -8,12 +8,13 @@ import org.apache.catalina.resource.ResourceReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+import java.io.IOException;
+
 public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Resource resource = ResourceReader.read("/register.html").orElseThrow();
-        response.setBody(resource.contentType(), resource.content());
+        showRegisterPage(response);
     }
 
     @Override
@@ -21,20 +22,26 @@ public class RegisterController extends AbstractController {
         final String account = request.getParameter("account");
         final String password = request.getParameter("password");
         final String email = request.getParameter("email");
-        if (isBlank(account) || isBlank(password) || isBlank(email) || isRegistered(account)) {
-            final Resource resource = ResourceReader.read("/register.html").orElseThrow();
-            response.setBody(resource.contentType(), resource.content());
+        if (register(account, password, email)) {
+            response.sendRedirect("/index.html");
             return;
         }
-        InMemoryUserRepository.save(new User(account, password, email));
-        response.sendRedirect("/index.html");
+        showRegisterPage(response);
+    }
+
+    private boolean register(final String account, final String password, final String email) {
+        if (isBlank(account) || isBlank(password) || isBlank(email)) {
+            return false;
+        }
+        return InMemoryUserRepository.save(new User(account, password, email));
     }
 
     private boolean isBlank(final String value) {
         return value == null || value.isBlank();
     }
 
-    private boolean isRegistered(final String account) {
-        return InMemoryUserRepository.findByAccount(account).isPresent();
+    private void showRegisterPage(final HttpResponse response) throws IOException {
+        final Resource resource = ResourceReader.read("/register.html").orElseThrow();
+        response.setBody(resource.contentType(), resource.content());
     }
 }

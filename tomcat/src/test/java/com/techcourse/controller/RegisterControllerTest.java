@@ -10,6 +10,10 @@ import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,6 +62,32 @@ class RegisterControllerTest {
         final User gugu = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
         assertThat(gugu.checkPassword("password")).isTrue();
         assertThat(gugu.checkPassword("hacked")).isFalse();
+    }
+
+    @Test
+    void 같은_계정으로_동시에_가입해도_처음_저장된_계정만_남는다() {
+        final int requestCount = 100;
+        final List<String> registeredPasswords = new CopyOnWriteArrayList<>();
+        final CountDownLatch start = new CountDownLatch(1);
+
+        try (final ExecutorService executorService = Executors.newFixedThreadPool(requestCount)) {
+            for (int i = 0; i < requestCount; i++) {
+                final String password = "pw" + i;
+                executorService.submit(() -> {
+                    start.await();
+                    final String message = service(post("account=register-concurrent&password=" + password + "&email=a%40b.com"));
+                    if (message.startsWith("HTTP/1.1 302 Found ")) {
+                        registeredPasswords.add(password);
+                    }
+                    return null;
+                });
+            }
+            start.countDown();
+        }
+
+        assertThat(registeredPasswords).hasSize(1);
+        final User saved = InMemoryUserRepository.findByAccount("register-concurrent").orElseThrow();
+        assertThat(saved.checkPassword(registeredPasswords.get(0))).isTrue();
     }
 
     private HttpRequest post(final String body) {

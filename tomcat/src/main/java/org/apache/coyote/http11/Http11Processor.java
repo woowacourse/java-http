@@ -270,13 +270,4 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join("\r\n", lines);
     }
-
-    private String redirect(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + location,
-                "Content-Length: 0",
-                "",
-                "");
-    }
 }

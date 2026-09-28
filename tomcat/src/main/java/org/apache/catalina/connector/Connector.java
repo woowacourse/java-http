@@ -22,6 +22,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 30L;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -90,7 +91,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -117,11 +120,22 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
-        executorService.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+        executorService.shutdown();
+
+        try {
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                log.warn("요청 처리가 종료되지 않아 스레드 풀을 강제 종료합니다.");
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+            log.warn("스레드 풀 종료 대기 중 인터럽트가 발생했습니다.");
         }
     }
 

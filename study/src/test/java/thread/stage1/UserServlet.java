@@ -7,7 +7,7 @@ public class UserServlet {
 
     private final List<User> users = new ArrayList<>();
 
-    public void service(final User user) {
+    public synchronized void service(final User user) {
         join(user);
     }
 
@@ -21,7 +21,7 @@ public class UserServlet {
         return users.size();
     }
 
-    public List<User> getUsers() {
+    public synchronized List<User> getUsers() {
         return users;
     }
 }

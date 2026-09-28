@@ -5,15 +5,15 @@ import java.util.Map;
 public class HttpRequest {
     private RequestLine requestLine;
     private Map<String, String> headers;
-    private String body;
+    private Map<String, String> body;
 
-    public HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
+    public HttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> body) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
+        this.body = Map.copyOf(body);
     }
 
-    public String header(String headerName) {
+    public String getHeader(String headerName) {
         return headers.get(headerName);
     }
 
@@ -21,15 +21,15 @@ public class HttpRequest {
         return requestLine.method() == method;
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public boolean matchesPath(String path) {
+        return requestLine.matchPath(path);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public String getBodyValue(String name) {
+        return body.getOrDefault(name, null);
     }
 
-    public String getBody() {
-        return body;
+    public String path() {
+        return requestLine.path();
     }
 }

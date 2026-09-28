@@ -16,6 +16,11 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
+    protected String getAllowedMethods() {
+        return "GET, POST";
+    }
+
+    @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (request.getSession().getAttribute("user") != null) {
             response.sendRedirect("/index.html");

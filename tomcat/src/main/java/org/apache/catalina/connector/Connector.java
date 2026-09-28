@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class Connector implements Runnable {
 
@@ -16,10 +19,13 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 10_000;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector() {
         this(new RequestMapping());
@@ -34,8 +40,17 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final RequestMapping requestMapping) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, requestMapping);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads,
+                     final RequestMapping requestMapping) {
+        if (maxThreads < 1) {
+            throw new IllegalArgumentException("최대 스레드 수는 1 이상이어야 합니다.");
+        }
         this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -50,10 +65,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -69,16 +84,26 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+        try {
+            connection.setSoTimeout(DEFAULT_READ_TIMEOUT_MILLIS);
+            executorService.execute(processor);
+        } catch (IOException e) {
+            connection.close();
+            throw e;
+        } catch (RejectedExecutionException e) {
+            connection.close();
+        }
     }
 
     public void stop() {
@@ -87,6 +112,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

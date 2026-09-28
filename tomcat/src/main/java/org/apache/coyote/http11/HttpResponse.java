@@ -54,7 +54,15 @@ public class HttpResponse {
     }
 
     public void writeTo(OutputStream outputStream) throws IOException {
-        setHeader("Content-Length", Integer.toString(body.length));
+        writeTo(outputStream, true);
+    }
+
+    void writeTo(OutputStream outputStream, boolean includeBody) throws IOException {
+        if (includeBody) {
+            setHeader("Content-Length", Integer.toString(body.length));
+        } else {
+            headers.remove("Content-Length");
+        }
 
         String lineEnd = status == HttpStatus.OK ? " \r\n" : "\r\n";
         StringBuilder response = new StringBuilder("HTTP/1.1 ")
@@ -65,7 +73,9 @@ public class HttpResponse {
         response.append("\r\n");
 
         outputStream.write(response.toString().getBytes(StandardCharsets.ISO_8859_1));
-        outputStream.write(body);
+        if (includeBody) {
+            outputStream.write(body);
+        }
         outputStream.flush();
     }
 }

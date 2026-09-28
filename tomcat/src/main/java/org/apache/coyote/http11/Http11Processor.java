@@ -38,21 +38,34 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequest.parse(inputStream);
+            HttpResponse response = new HttpResponse();
+            HttpRequest request;
+            try {
+                request = HttpRequest.parse(inputStream);
+            } catch (IllegalArgumentException e) {
+                response.sendError(HttpStatus.BAD_REQUEST, "올바르지 않은 HTTP 요청입니다.");
+                response.writeTo(outputStream);
+                return;
+            }
             if (request == null) {
                 return;
             }
 
-            SessionContext sessionContext = new SessionContext(sessionManager, request.getCookie("JSESSIONID"));
-            request.setSessionContext(sessionContext);
+            try {
+                SessionContext sessionContext = new SessionContext(sessionManager, request.getCookie("JSESSIONID"));
+                request.setSessionContext(sessionContext);
 
-            HttpResponse response = new HttpResponse();
-            requestMapping.getController(request).service(request, response);
+                requestMapping.getController(request).service(request, response);
 
-            if (sessionContext.isChanged()) {
-                response.setCookie("JSESSIONID", sessionContext.getSession().getId(), "/");
+                if (sessionContext.isChanged()) {
+                    response.setCookie("JSESSIONID", sessionContext.getSession().getId(), "/");
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                response = new HttpResponse();
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
             }
-            response.writeTo(outputStream);
+            response.writeTo(outputStream, !request.getMethod().equals("HEAD"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

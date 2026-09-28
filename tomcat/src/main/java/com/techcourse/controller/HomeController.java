@@ -7,6 +7,11 @@ import org.apache.coyote.http11.HttpResponse;
 public class HomeController extends AbstractController {
 
     @Override
+    protected String getAllowedMethods() {
+        return "GET";
+    }
+
+    @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setContentType("text/html;charset=utf-8");
         response.setBody("Hello world!");

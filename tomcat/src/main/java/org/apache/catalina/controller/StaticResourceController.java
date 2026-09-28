@@ -21,12 +21,23 @@ public class StaticResourceController extends AbstractController {
     );
 
     @Override
+    protected String getAllowedMethods() {
+        return "GET";
+    }
+
+    @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         serve(request.getPath(), response);
     }
 
     public static void serve(String path, HttpResponse response) throws IOException {
-        String decodedPath = decodePath(path);
+        String decodedPath;
+        try {
+            decodedPath = decodePath(path);
+        } catch (IllegalArgumentException e) {
+            response.sendError(HttpStatus.NOT_FOUND, "리소스를 찾을 수 없습니다.");
+            return;
+        }
         String contentType = contentType(decodedPath);
         if (contentType == null || decodedPath.endsWith("/")) {
             response.sendError(HttpStatus.NOT_FOUND, "리소스를 찾을 수 없습니다.");

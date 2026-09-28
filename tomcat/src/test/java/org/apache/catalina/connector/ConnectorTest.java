@@ -71,6 +71,63 @@ class ConnectorTest {
         assertThat(worker.isAlive()).isFalse();
     }
 
+    @Test
+    @DisplayName("작업 대기열이 가득 차면 연결을 닫고 이후 연결은 계속 처리한다")
+    void rejectsConnectionWhenQueueIsFull() throws IOException, InterruptedException {
+        final int port = availablePort();
+        final AtomicInteger created = new AtomicInteger();
+        final AtomicInteger processed = new AtomicInteger();
+        final CountDownLatch firstStarted = new CountDownLatch(1);
+        final CountDownLatch releaseFirst = new CountDownLatch(1);
+        final CountDownLatch secondFinished = new CountDownLatch(1);
+        final CountDownLatch fourthFinished = new CountDownLatch(1);
+
+        final ProcessorFactory processorFactory = connection -> {
+            final int requestNumber = created.incrementAndGet();
+            return () -> {
+                try (connection) {
+                    if (requestNumber == 1) {
+                        firstStarted.countDown();
+                        releaseFirst.await();
+                    }
+                    processed.incrementAndGet();
+                    if (requestNumber == 2) {
+                        secondFinished.countDown();
+                    }
+                    if (requestNumber == 4) {
+                        fourthFinished.countDown();
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            };
+        };
+
+        final Connector connector = new Connector(port, 100, 1, 1, processorFactory);
+        connector.start();
+        try (Socket first = new Socket("127.0.0.1", port)) {
+            assertThat(firstStarted.await(5, TimeUnit.SECONDS)).isTrue();
+            try (Socket second = new Socket("127.0.0.1", port);
+                 Socket third = new Socket("127.0.0.1", port)) {
+                third.setSoTimeout((int) TimeUnit.SECONDS.toMillis(5));
+                assertThat(third.getInputStream().read()).isEqualTo(-1);
+                assertThat(created.get()).isEqualTo(3);
+
+                releaseFirst.countDown();
+                assertThat(secondFinished.await(5, TimeUnit.SECONDS)).isTrue();
+                try (Socket fourth = new Socket("127.0.0.1", port)) {
+                    assertThat(fourthFinished.await(5, TimeUnit.SECONDS)).isTrue();
+                }
+                assertThat(processed.get()).isEqualTo(3);
+            }
+        } finally {
+            releaseFirst.countDown();
+            connector.stop();
+        }
+    }
+
     private int availablePort() throws IOException {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();

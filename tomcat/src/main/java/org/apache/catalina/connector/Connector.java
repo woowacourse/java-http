@@ -5,8 +5,11 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.ProcessorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_MAX_THREADS = 250;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_QUEUED_REQUESTS = 100;
 
     private final ExecutorService executorService;
     private final ServerSocket serverSocket;
@@ -26,15 +30,24 @@ public class Connector implements Runnable {
     private volatile boolean stopped;
 
     public Connector(final ProcessorFactory processorFactory) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, processorFactory);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUED_REQUESTS, processorFactory);
     }
 
     public Connector(final int port,
                      final int acceptCount,
                      final int maxThreads,
                      final ProcessorFactory processorFactory) {
+        this(port, acceptCount, maxThreads, DEFAULT_MAX_QUEUED_REQUESTS, processorFactory);
+    }
+
+    public Connector(final int port,
+                     final int acceptCount,
+                     final int maxThreads,
+                     final int maxQueuedRequests,
+                     final ProcessorFactory processorFactory) {
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(maxQueuedRequests));
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.processorFactory = Objects.requireNonNull(processorFactory);
 
         this.stopped = false;
@@ -79,7 +92,20 @@ public class Connector implements Runnable {
             return;
         }
         final Runnable processor = processorFactory.create(connection);
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("쓰레드 풀이 꽉차서 커넥션 못함요.", e);
+            closeRejectedConnection(connection);
+        }
+    }
+
+    private void closeRejectedConnection(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.warn("거절된 커넥션 닫는데 실패함요.", e);
+        }
     }
 
     public void stop() {

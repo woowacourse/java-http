@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_MAX_THREADS = 250;
     private final ServerSocket serverSocket;
-    private final ThreadPoolExecutor executor;
+    private final ExecutorService executor;
     private boolean stopped;
 
     public Connector() {
@@ -31,7 +31,9 @@ public class Connector implements Runnable {
         // 반환된 serverSocket은 최대 acceptCount개 만큼 연결을 대기할 수 있다.
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
+        // Executors로 FixedThreadPool을 만든다.
+        // ExecutorService는 만들어진 풀을 사용하는 인터페이스
+        this.executor = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -63,6 +65,7 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
+            // serverSocket.accept()는 ServerSocket(listen backlog)에 대기 중인 요청을 가져온다.
             process(serverSocket.accept());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -73,7 +76,9 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        executor.submit(new Http11Processor(connection));
+        // 요청이 존재하면, 스레드 풀에서 스레드를 할당한다.
+        // 반환 값이 없는 실행이므로, execute를 사용하는 게 적절하다.
+        executor.execute(new Http11Processor(connection));
     }
 
     public void stop() {

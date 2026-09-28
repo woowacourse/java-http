@@ -8,10 +8,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String DEFAULT_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private static final Map<String, String> RESOURCE_PATH_BY_REQUEST_PATH = Map.of(
             LOGIN_PATH,  "/login.html",
@@ -68,6 +72,8 @@ public class Http11Processor implements Runnable, Processor {
             final String method = requestParts[0];
             final String path = requestParts[1].split("\\?", 2)[0];
             final Map<String, String> headers = readHeaders(reader);
+            final HttpCookie cookies = new HttpCookie(headers.get("Cookie"));
+            final String setCookieHeader = cookies.has(SESSION_COOKIE_NAME) ? null : "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + UUID.randomUUID();
 
             if ("POST".equals(method) && (REGISTER_PATH.equals(path) || LOGIN_PATH.equals(path))) {
                 final int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
@@ -81,14 +87,14 @@ public class Http11Processor implements Runnable, Processor {
                     location = login(parameters) ? "/index.html" : "/401.html";
                 }
 
-                outputStream.write(redirect(location).getBytes(StandardCharsets.UTF_8));
+                outputStream.write(redirect(location, setCookieHeader).getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 return;
             }
 
             final ResponseData responseData = loadResponseData(path);
             outputStream.write(
-                    response(responseData.body(), responseData.contentType()).getBytes(StandardCharsets.UTF_8)
+                    response(responseData.body(), responseData.contentType(), setCookieHeader).getBytes(StandardCharsets.UTF_8)
             );
 
             outputStream.flush();
@@ -210,13 +216,36 @@ public class Http11Processor implements Runnable, Processor {
     private record ResponseData(byte[] body, String contentType) {
     }
 
-    private String response(final byte[] responseBody, final String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                new String(responseBody, StandardCharsets.UTF_8));
+    private String response(final byte[] responseBody, final String contentType, final String setCookieHeader) {
+        final List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 200 OK");
+
+        if (setCookieHeader != null) {
+            lines.add(setCookieHeader);
+        }
+
+        lines.add("Content-Type: " + contentType + " ");
+        lines.add("Content-Length: " + responseBody.length + " ");
+        lines.add("");
+        lines.add(new String(responseBody, StandardCharsets.UTF_8));
+
+        return String.join("\r\n", lines);
+    }
+
+    private String redirect(final String location, final String setCookieHeader) {
+        final List<String> lines = new ArrayList<>();
+        lines.add("HTTP/1.1 302 Found");
+
+        if (setCookieHeader != null) {
+            lines.add(setCookieHeader);
+        }
+
+        lines.add("Location: " + location);
+        lines.add("Content-Length: 0");
+        lines.add("");
+        lines.add("");
+
+        return String.join("\r\n", lines);
     }
 
     private String redirect(final String location) {

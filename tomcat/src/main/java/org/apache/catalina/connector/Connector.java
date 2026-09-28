@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -15,22 +17,25 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestHandler requestHandler;
+    private final ExecutorService executorService;
 
     private volatile boolean stopped;
 
-    private Connector(ServerSocket serverSocket, RequestHandler requestHandler, boolean stopped) {
+    private Connector(ServerSocket serverSocket, RequestHandler requestHandler, ExecutorService executorService, boolean stopped) {
         this.serverSocket = serverSocket;
         this.requestHandler = requestHandler;
+        this.executorService = executorService;
         this.stopped = stopped;
     }
 
     public static Connector of(final RequestHandler requestHandler) {
         try {
             return new Connector(new ServerSocket(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT),
-                    requestHandler, false);
+                    requestHandler, Executors.newFixedThreadPool(DEFAULT_MAX_THREADS), false);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -46,8 +51,12 @@ public class Connector implements Runnable {
 
     @Override
     public void run() {
-        while (!stopped) {
-            acceptConnection();
+        try {
+            while (!stopped) {
+                acceptConnection();
+            }
+        } finally {
+            executorService.shutdown();
         }
     }
 
@@ -66,9 +75,7 @@ public class Connector implements Runnable {
 
     private void dispatch(final Socket connection) {
         Http11Processor processor = new Http11Processor(connection, requestHandler);
-
-        Thread thread = new Thread(processor);
-        thread.start();
+        executorService.execute(processor);
     }
 
     public void stopListening() {

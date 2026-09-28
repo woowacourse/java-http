@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
+import com.techcourse.controller.ControllerResolver;
 import com.techcourse.controller.HomeController;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
@@ -30,18 +31,15 @@ public class Http11Processor implements Runnable, Processor {
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String CRLF = "\r\n";
 
-    Map<String, Controller> controllers = Map.of(
-            "/login", new LoginController(),
-            "/register", new RegisterController(),
-            "/", new HomeController()
-    );
-
     private final Socket connection;
     private final SessionManager sessionManager;
+    private final ControllerResolver controllerResolver;
 
-    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager,
+                           final ControllerResolver controllerResolver) {
         this.connection = connection;
         this.sessionManager = sessionManager;
+        this.controllerResolver = controllerResolver;
     }
 
     @Override
@@ -71,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
             Session session = getOrCreateJSessionId(request.getCookie(), response);
             request.setSession(session);
 
-            Controller controller = controllers.getOrDefault(request.getRequestTarget(), new StaticController());
+            Controller controller = controllerResolver.resolve(request.getRequestTarget());
             controller.service(request, response);
 
             outputStream.write(response.getResponse().getBytes(StandardCharsets.UTF_8));

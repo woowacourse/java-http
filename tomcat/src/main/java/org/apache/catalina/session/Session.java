@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpSessionContext;
 import java.util.Collections;
 
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class Session implements HttpSession {
@@ -15,12 +15,12 @@ public class Session implements HttpSession {
     private final String id;
     private final Manager manager;
     private final long creationTime;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
-    private long lastAccessedTime;
-    private int maxInactiveInterval;
-    private boolean isNew;
-    private boolean valid;
+    private volatile long lastAccessedTime;
+    private volatile int maxInactiveInterval;
+    private volatile boolean isNew;
+    private volatile boolean valid;
 
     public Session(final String id, final Manager manager) {
         this.id = id;

@@ -1,10 +1,9 @@
 package org.apache.catalina.session;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
-
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -12,7 +11,7 @@ public class SessionManager implements Manager {
             new SessionManager();
 
     private final Map<String, Session> sessions =
-            new HashMap<>();
+            new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

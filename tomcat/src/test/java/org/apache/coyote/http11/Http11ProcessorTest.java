@@ -7,16 +7,29 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
+import org.apache.coyote.http11.controller.ControllerResolver;
+import org.apache.coyote.http11.controller.RootController;
+import org.apache.coyote.http11.controller.StaticResourceController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private final ControllerResolver controllerResolver =
+            new ControllerResolver(
+                    Map.of("/", new RootController()),
+                    new StaticResourceController()
+            );
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(
+                socket,
+                controllerResolver
+        );
 
         // when
         processor.process(socket);
@@ -41,7 +54,10 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(
+                socket,
+                controllerResolver
+        );
 
         // when
         processor.process(socket);

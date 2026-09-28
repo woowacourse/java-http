@@ -5,23 +5,21 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class ControllerResolver {
 
-    private static final Controller STATIC_RESOURCE_CONTROLLER =
-            new StaticResourceController();
+    private final Map<String, Controller> controllers;
+    private final Controller defaultController;
 
-    private static final Map<String, Controller> CONTROLLERS =
-            Map.of(
-                    "/", new RootController(),
-                    "/login", new LoginController(),
-                    "/register", new RegisterController()
-            );
-
-    private ControllerResolver() {
+    public ControllerResolver(
+            Map<String, Controller> controllers,
+            Controller defaultController
+    ) {
+        this.controllers = Map.copyOf(controllers);
+        this.defaultController = defaultController;
     }
 
-    public static Controller resolve(HttpRequest request) {
-        return CONTROLLERS.getOrDefault(
+    public Controller resolve(HttpRequest request) {
+        return controllers.getOrDefault(
                 request.getPath(),
-                STATIC_RESOURCE_CONTROLLER
+                defaultController
         );
     }
 }

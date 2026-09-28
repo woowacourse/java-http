@@ -1,19 +1,14 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerResolver;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;

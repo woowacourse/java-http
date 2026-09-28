@@ -25,6 +25,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void unsupportedMethodReturnsMethodNotAllowed() {
+        final var response = process("DELETE /login HTTP/1.1\r\n\r\n");
+
+        assertThat(response).startsWith("HTTP/1.1 405 Method Not Allowed\r\n");
+        assertThat(header(response, "Allow")).isEqualTo("GET, POST");
+        assertThat(header(response, "Content-Length")).isEqualTo("0");
+        assertThat(body(response)).isEmpty();
+    }
+
+    @Test
     void processesApplicationProvidedController() {
         final Controller controller = (request, response) -> response.body("Hello " + request.getParameter("name"));
         final var mapping = new RequestMapping(Map.of("/custom", controller), controller);

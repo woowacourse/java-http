@@ -11,6 +11,9 @@ public abstract class AbstractController implements Controller {
             doGet(request, response);
         } else if ("POST".equals(request.getMethod())) {
             doPost(request, response);
+        } else {
+            response.sendError(405, "Method Not Allowed");
+            response.addHeader("Allow", "GET, POST");
         }
     }
 

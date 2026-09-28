@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,8 +36,14 @@ class AbstractControllerTest {
     }
 
     @Test
-    void doesNothingForOtherMethods() throws Exception {
-        assertThat(service(controller, "DELETE")).endsWith("Content-Length: 0\r\n\r\n");
+    void rejectsUnsupportedMethods() throws Exception {
+        for (final var method : List.of("PUT", "PATCH", "DELETE", "HEAD", "OPTIONS")) {
+            assertThat(service(controller, method))
+                    .as("%s response", method)
+                    .startsWith("HTTP/1.1 405 Method Not Allowed\r\n")
+                    .contains("Allow: GET, POST\r\n", "Content-Length: 0\r\n")
+                    .endsWith("\r\n\r\n");
+        }
     }
 
     @Test

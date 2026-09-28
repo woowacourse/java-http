@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -15,24 +20,50 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_MAX_QUEUE_SIZE = 100;
+    private static final int EXECUTOR_TERMINATION_TIMEOUT_SECONDS = 5;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE);
     }
 
     public Connector(final int port, final int acceptCount) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this(port, acceptCount, maxThreads, DEFAULT_MAX_QUEUE_SIZE);
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads, final int maxQueueSize) {
+        validatePort(port);
+        validateAcceptCount(acceptCount);
+        validateMaxThreads(maxThreads);
+        validateMaxQueueSize(maxQueueSize);
+        this.executorService = createExecutorService(maxThreads, maxQueueSize);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
 
+    private ExecutorService createExecutorService(final int maxThreads, final int maxQueueSize) {
+        return new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(maxQueueSize),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+    }
+
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(port, acceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -41,8 +72,8 @@ public class Connector implements Runnable {
     public void start() {
         var thread = new Thread(this);
         thread.setDaemon(true);
-        thread.start();
         stopped = false;
+        thread.start();
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -58,16 +89,31 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void process(final Socket connection) {
+    void process(final Socket connection) {
         if (connection == null) {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("Request rejected because the thread pool and work queue are full.");
+            close(connection);
+        }
+    }
+
+    private void close(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public void stop() {
@@ -77,19 +123,45 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        shutdownExecutorService();
     }
 
-    private int checkPort(final int port) {
-        final var MIN_PORT = 1;
-        final var MAX_PORT = 65535;
-
-        if (port < MIN_PORT || MAX_PORT < port) {
-            return DEFAULT_PORT;
+    private void shutdownExecutorService() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(EXECUTOR_TERMINATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    log.warn("ExecutorService did not terminate.");
+                }
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
-        return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    private void validatePort(final int port) {
+        if (port < 0 || 65535 < port) {
+            throw new IllegalArgumentException("port는 0 이상 65535 이하여야 합니다.");
+        }
+    }
+
+    private void validateAcceptCount(final int acceptCount) {
+        if (acceptCount <= 0) {
+            throw new IllegalArgumentException("acceptCount는 0보다 커야 합니다.");
+        }
+    }
+
+    private void validateMaxThreads(final int maxThreads) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads는 0보다 커야 합니다.");
+        }
+    }
+
+    private void validateMaxQueueSize(final int maxQueueSize) {
+        if (maxQueueSize <= 0) {
+            throw new IllegalArgumentException("maxQueueSize는 0보다 커야 합니다.");
+        }
     }
 }

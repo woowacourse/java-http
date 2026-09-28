@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -16,18 +21,49 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int DEFAULT_MAX_QUEUE_SIZE = 100;
 
+    private final RequestHandler requestHandler;
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final RequestHandler requestHandler;
+    private final ExecutorService executorService;
 
     public Connector(final RequestHandler requestHandler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT,  requestHandler);
+        this(
+                requestHandler,
+                DEFAULT_PORT,
+                DEFAULT_ACCEPT_COUNT,
+                DEFAULT_MAX_THREADS,
+                DEFAULT_MAX_QUEUE_SIZE
+        );
     }
 
-    public Connector(final int port, final int acceptCount, RequestHandler requestHandler) {
+    public Connector(
+            final RequestHandler requestHandler,
+            final int port,
+            final int acceptCount,
+            final int maxThreads
+    ) {
+        this(requestHandler, port, acceptCount, maxThreads, DEFAULT_MAX_QUEUE_SIZE);
+    }
+
+    public Connector(
+            final RequestHandler requestHandler,
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final int maxQueueSize
+    ) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestHandler = requestHandler;
+        this.executorService = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(maxQueueSize)
+        );
         this.stopped = false;
     }
 
@@ -69,14 +105,31 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, requestHandler);
-        new Thread(processor).start();
+
+        final var processor = new Http11Processor(connection, requestHandler);
+
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            close(connection);
+            log.warn("요청 처리 용량을 초과했습니다.", e);
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
+
         try {
             serverSocket.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void close(final Socket connection) {
+        try {
+            connection.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

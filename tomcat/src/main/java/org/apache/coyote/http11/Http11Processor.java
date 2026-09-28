@@ -4,22 +4,16 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,39 +40,23 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8)
-            );
+            final var request = new HttpRequest(inputStream);
+            final var session = request.getSession(true);
+            final var sessionCookie = createSessionCookie(request.getRequestedSessionId(), session);
 
-            final String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-
-            final var requestParts = splitRequestLine(requestLine);
-            final var requestMethod = requestParts[0];
-            final var requestUri = requestParts[1];
-            final var requestHeaders = readHeaders(reader);
-            final var requestPath = extractRequestPath(requestUri);
-            final var requestBody = readRequestBody(reader, requestHeaders);
-            final var parameters = findParameters(requestMethod, requestUri, requestBody);
-            final var requestedSessionId = HttpCookie.parse(requestHeaders.get("Cookie")).get("JSESSIONID");
-            final var session = findSession(requestedSessionId);
-            final var sessionCookie = createSessionCookie(requestedSessionId, session);
-
-            if (isLoginPageRequest(requestMethod, requestPath, session)) {
+            if (isLoginPageRequest(request, session)) {
                 writeRedirect(outputStream, "/index.html", sessionCookie);
                 return;
             }
 
-            final var redirectLocation = processForm(requestMethod, requestPath, parameters, session);
+            final var redirectLocation = processForm(request, session);
             if (redirectLocation != null) {
                 writeRedirect(outputStream, redirectLocation, sessionCookie);
                 return;
             }
 
-            final var responseBody = readResponseBody(requestPath);
-            final var contentType = findContentType(requestPath);
+            final var responseBody = readResponseBody(request.getPath());
+            final var contentType = findContentType(request.getPath());
 
             writeResponse(outputStream, contentType, responseBody, sessionCookie);
         } catch (IOException | UncheckedServletException e) {
@@ -86,135 +64,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        String line;
-
-        while ((line = reader.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-
-            final var separatorIndex = line.indexOf(':');
-            if (separatorIndex > 0) {
-                headers.put(
-                        line.substring(0, separatorIndex).trim(),
-                        line.substring(separatorIndex + 1).trim()
-                );
-            }
-        }
-
-        return headers;
-    }
-
-    private String[] splitRequestLine(final String requestLine) {
-        final var requestParts = requestLine.trim().split("\\s+");
-
-        if (requestParts.length != 3) {
-            throw new UncheckedServletException(
-                    new IllegalArgumentException("유효하지 않은 요청 라인입니다: " + requestLine)
-            );
-        }
-
-        return requestParts;
-    }
-
-    private String readRequestBody(
-            final BufferedReader reader,
-            final Map<String, String> requestHeaders
-    ) throws IOException {
-        final var contentLength = requestHeaders.get("Content-Length");
-        if (contentLength == null) {
-            return "";
-        }
-
-        final var buffer = new char[Integer.parseInt(contentLength)];
-        var offset = 0;
-
-        while (offset < buffer.length) {
-            final var readLength = reader.read(buffer, offset, buffer.length - offset);
-            if (readLength < 0) {
-                break;
-            }
-            offset += readLength;
-        }
-
-        return new String(buffer, 0, offset);
-    }
-
-    private String extractRequestPath(final String requestUri) {
-        final var queryIndex = requestUri.indexOf('?');
-
-        if (queryIndex < 0) {
-            return requestUri;
-        }
-
-        return requestUri.substring(0, queryIndex);
-    }
-
-    private Map<String, String> parseQueryParameters(final String requestUri) {
-        final var queryIndex = requestUri.indexOf('?');
-
-        if (queryIndex < 0 || queryIndex == requestUri.length() - 1) {
-            return Map.of();
-        }
-
-        final var queryString = requestUri.substring(queryIndex + 1);
-        return parseParameters(queryString);
-    }
-
-    private Map<String, String> findParameters(
-            final String requestMethod,
-            final String requestUri,
-            final String requestBody
-    ) {
-        if ("POST".equals(requestMethod)) {
-            return parseParameters(requestBody);
-        }
-
-        return parseQueryParameters(requestUri);
-    }
-
-    private Map<String, String> parseParameters(final String value) {
-        if (value.isBlank()) {
-            return Map.of();
-        }
-
-        final Map<String, String> parameters = new HashMap<>();
-
-        for (final var parameter : value.split("&")) {
-            final var nameAndValue = parameter.split("=", 2);
-            if (nameAndValue.length == 2) {
-                parameters.put(
-                        URLDecoder.decode(nameAndValue[0], StandardCharsets.UTF_8),
-                        URLDecoder.decode(nameAndValue[1], StandardCharsets.UTF_8)
-                );
-            }
-        }
-
-        return parameters;
-    }
-
     private String processForm(
-            final String requestMethod,
-            final String requestPath,
-            final Map<String, String> parameters,
+            final HttpRequest request,
             final Session session
     ) {
-        if (!"POST".equals(requestMethod)) {
+        if (!"POST".equals(request.getMethod())) {
             return null;
         }
 
-        final var account = parameters.get("account");
-        final var password = parameters.get("password");
+        final var account = request.getParameter("account");
+        final var password = request.getParameter("password");
 
-        if ("/register".equals(requestPath)) {
-            final var email = parameters.get("email");
+        if ("/register".equals(request.getPath())) {
+            final var email = request.getParameter("email");
             InMemoryUserRepository.save(new User(account, password, email));
             return "/index.html";
         }
 
-        if ("/login".equals(requestPath)) {
+        if ("/login".equals(request.getPath())) {
             final var user = InMemoryUserRepository.findByAccount(account)
                     .filter(foundUser -> foundUser.checkPassword(password));
 
@@ -284,19 +151,6 @@ public class Http11Processor implements Runnable, Processor {
         return contentType;
     }
 
-    private Session findSession(final String sessionId) {
-        final var sessionManager = SessionManager.getInstance();
-
-        if (sessionId != null) {
-            final var session = sessionManager.findSession(sessionId);
-            if (session instanceof Session) {
-                return (Session) session;
-            }
-        }
-
-        return sessionManager.createSession();
-    }
-
     private String createSessionCookie(final String requestedSessionId, final Session session) {
         if (session.getId().equals(requestedSessionId)) {
             return null;
@@ -306,12 +160,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoginPageRequest(
-            final String requestMethod,
-            final String requestPath,
+            final HttpRequest request,
             final Session session
     ) {
-        return "GET".equals(requestMethod)
-                && "/login".equals(requestPath)
+        return "GET".equals(request.getMethod())
+                && "/login".equals(request.getPath())
                 && session.getAttribute(USER_SESSION_KEY) != null;
     }
 

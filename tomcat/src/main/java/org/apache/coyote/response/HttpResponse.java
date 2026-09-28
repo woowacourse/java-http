@@ -56,6 +56,10 @@ public class HttpResponse {
         headers.put(LOCATION, location);
     }
 
+    public void setStatus(StatusCode statusCode) {
+        statusLine = StatusLine.build(statusCode);
+    }
+
     public void setBody(String body) {
         this.body = body;
     }

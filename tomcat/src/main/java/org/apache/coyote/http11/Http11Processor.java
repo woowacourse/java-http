@@ -2,17 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.ControllerResolver;
-import com.techcourse.controller.HomeController;
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.StaticController;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -88,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             return "";
         }
 
-        char[] buffer = new char[Objects.requireNonNull(contentLength)];
+        char[] buffer = new char[contentLength];
         int readCount = bufferedReader.read(buffer, 0, contentLength);
 
         if (readCount == -1) {

@@ -15,7 +15,9 @@ public abstract class AbstractController implements Controller {
         }
         if ("POST".equals(requestLine.getMethod())) {
             doPost(request, response);
+            return;
         }
+        throw new IllegalArgumentException("Unsupported HTTP method: " + requestLine.getMethod());
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

@@ -1,12 +1,17 @@
 package org.apache.coyote.http11.controller;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.resource.StaticResourceReader;
 
 public class StaticResourceController extends AbstractController {
+
+    private final StaticResourceReader staticResourceReader;
+
+    public StaticResourceController(StaticResourceReader staticResourceReader) {
+        this.staticResourceReader = staticResourceReader;
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
@@ -27,16 +32,17 @@ public class StaticResourceController extends AbstractController {
         }
 
         String resourcePath = resolveResourcePath(requestPath);
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
-        if (resource == null) {
+        var resourceContent = staticResourceReader.read(resourcePath);
+        if (resourceContent.isEmpty()) {
             response.notFound();
             response.addHeader("Content-Type", "text/html;charset=utf-8");
-            response.setBody(readResource("static/404.html"));
+            response.setBody(staticResourceReader.read("static/404.html")
+                    .orElseThrow(() -> new IllegalStateException("resource not found: static/404.html")));
             return;
         }
 
         response.addHeader("Content-Type", resolveContentType(resourcePath));
-        response.setBody(readResource(resource));
+        response.setBody(resourceContent.get());
     }
 
     private String extractPath(String requestTarget) {
@@ -62,19 +68,5 @@ public class StaticResourceController extends AbstractController {
             return "application/javascript;charset=utf-8";
         }
         return "text/html;charset=utf-8";
-    }
-
-    private String readResource(URL resource) throws IOException {
-        try (var inputStream = resource.openStream()) {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        }
-    }
-
-    private String readResource(String resourcePath) throws IOException {
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
-        if (resource == null) {
-            throw new IllegalStateException("resource not found: " + resourcePath);
-        }
-        return readResource(resource);
     }
 }

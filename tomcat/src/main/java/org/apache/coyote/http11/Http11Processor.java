@@ -9,6 +9,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.coyote.http11.resource.StaticResourceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +62,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestMapping createRequestMapping() {
-        RequestMapping mapping = new RequestMapping(new StaticResourceController());
-        LoginController loginController = new LoginController();
+        StaticResourceReader staticResourceReader = new StaticResourceReader();
+        RequestMapping mapping = new RequestMapping(new StaticResourceController(staticResourceReader));
+        LoginController loginController = new LoginController(staticResourceReader);
         mapping.addController("/login", loginController);
-        mapping.addController("/register", new RegisterController());
+        mapping.addController("/register", new RegisterController(staticResourceReader));
         return mapping;
     }
 

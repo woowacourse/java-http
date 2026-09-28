@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.ControllerResolver;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -42,98 +44,14 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequestParser.parse(input);
             HttpResponse response = new HttpResponse();
-            Session session = SessionManager.getInstance().findSession(request);
 
-            if (request.isMethod(HttpMethod.GET)) {
-                handleGetRequest(session, request, response);
-            } else if (request.isMethod(HttpMethod.POST)) {
-                handlePostRequest(session, request, response);
-            }
+            Controller controller = ControllerResolver.resolve(request);
+            controller.service(request, response);
 
             writeResponse(outputStream, response);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void handleGetRequest(Session session, HttpRequest request, HttpResponse response) throws IOException {
-        if (request.matchesPath("/")) {
-            response.addHeader(
-                    "Content-Type",
-                    "text/html;charset=utf-8"
-            );
-            response.addBody(
-                    "Hello world!".getBytes(StandardCharsets.UTF_8)
-            );
-            return;
-        }
-
-        String resourceName = request.path().substring(1);
-
-        if (request.matchesPath("/login")) {
-            if (session != null && session.getAttribute("user") != null) {
-                response.addHeader("Location", "/index.html");
-                return;
-            }
-
-            resourceName = "login.html";
-        } else if (request.matchesPath("/register")) {
-            resourceName = "register.html";
-        }
-
-        response.fromResource(resourceName);
-    }
-
-    private void handlePostRequest(Session session,
-                                   HttpRequest request,
-                                   HttpResponse response) throws IOException {
-
-        if (request.matchesPath("/register")) {
-            handleRegister(request);
-            response.addHeader("Location", "/index.html");
-            return;
-        }
-
-        if (request.matchesPath("/login")) {
-            Optional<User> authenticatedUser = authenticate(request);
-
-            if (authenticatedUser.isPresent()) {
-                if (session == null) {
-                    session = SessionManager.getInstance().createSession(response);
-                }
-
-                session.setAttribute("user", authenticatedUser.get());
-                response.addHeader("Location", "/index.html");
-                return;
-            }
-
-            response.fromResource("401.html");
-        }
-    }
-
-    private void handleRegister(HttpRequest request) {
-        String account = request.getBodyValue("account");
-        String email = request.getBodyValue("email");
-        String password = request.getBodyValue("password");
-
-        if (account == null || email == null || password == null) {
-            return;
-        }
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-    }
-
-    private static Optional<User> authenticate(HttpRequest request) {
-        String account = request.getBodyValue("account");
-        String password = request.getBodyValue("password");
-
-        if (account == null || password == null) {
-            return Optional.empty();
-        }
-
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
     }
 
     private void writeResponse(

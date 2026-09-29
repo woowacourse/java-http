@@ -92,6 +92,28 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("요청 본문의 잘못된 인코딩에는 400 Bad Request를 반환한다")
+    void respondsWithBadRequestWhenBodyEncodingIsInvalid() {
+        // given
+        final String body = "account=%ZZ";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.length(),
+                "",
+                body
+        );
+        final var socket = new StubSocket(httpRequest);
+        final var processor = createProcessor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 400 Bad Request");
+    }
+
+    @Test
     @DisplayName("루트 경로 요청에 기본 응답을 반환한다")
     void respondsToRootRequest() {
         // given

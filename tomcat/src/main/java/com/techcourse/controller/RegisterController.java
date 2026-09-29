@@ -20,7 +20,7 @@ public class RegisterController {
     public String register(final HttpRequest request, final HttpResponse response) {
         saveUser(request);
         response.sendRedirect("/index.html");
-        return "/index.html";
+        return "회원가입에 성공했습니다. 자동으로 기본 페이지로 이동합니다.";
     }
 
     private void saveUser(final HttpRequest request) {

@@ -399,6 +399,15 @@ class HttpRequestTest {
     }
 
     @Test
+    @DisplayName("등호가 없는 쿼리 파라미터는 빈 문자열 값으로 읽는다")
+    void parsesQueryParameterWithoutEqualsAsEmptyValue() throws IOException {
+        final HttpRequest request = createRequest(List.of("GET /login?abc HTTP/1.1"), null);
+
+        assertThat(request.getParameter("abc")).isEqualTo("");
+        assertThat(request.getParameter("missing")).isNull();
+    }
+
+    @Test
     @DisplayName("쿼리 문자열이 없으면 파라미터는 null이다")
     void returnsNullWhenQueryStringIsMissing() throws IOException {
         final HttpRequest request = createRequest(List.of("GET /login HTTP/1.1"), null);

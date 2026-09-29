@@ -68,9 +68,16 @@ class ConnectorTest {
                 assertThat(firstTwoStarted.await(5, TimeUnit.SECONDS)).isTrue();
                 assertThat(thirdStarted.await(200, TimeUnit.MILLISECONDS)).isFalse();
 
-                connector.stop();
+                final Thread stopThread = new Thread(connector::stop);
+                stopThread.start();
+                assertThat(listeningSocketClosed.await(5, TimeUnit.SECONDS)).isTrue();
+                stopThread.join(200);
+                assertThat(stopThread.isAlive()).isTrue();
+
                 releaseWorkers.countDown();
                 assertThat(thirdStarted.await(5, TimeUnit.SECONDS)).isTrue();
+                stopThread.join(5000);
+                assertThat(stopThread.isAlive()).isFalse();
                 for (final Thread worker : workers) {
                     worker.join(5000);
                     assertThat(worker.isAlive()).isFalse();

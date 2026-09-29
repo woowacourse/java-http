@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -101,6 +102,18 @@ public class Connector implements Runnable {
             log.error(e.getMessage(), e);
         } finally {
             executorService.shutdown();
+            awaitRequestCompletion();
+        }
+    }
+
+    private void awaitRequestCompletion() {
+        try {
+            while (!executorService.awaitTermination(1, TimeUnit.DAYS)) {
+                // Continue waiting while accepted requests are still running.
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

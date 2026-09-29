@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,20 @@ import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class ConnectorTest {
+
+    @Test
+    void rejectsInvalidMaxThreads() throws IOException {
+        for (final int maxThreads : new int[]{0, -1}) {
+            final int port = freePort();
+
+            assertThatThrownBy(() -> new Connector(port, 100, maxThreads))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            try (final var socket = new ServerSocket(port)) {
+                assertThat(socket.getLocalPort()).isEqualTo(port);
+            }
+        }
+    }
 
     @Test
     void rejectsExcessConnection() throws IOException, InterruptedException {

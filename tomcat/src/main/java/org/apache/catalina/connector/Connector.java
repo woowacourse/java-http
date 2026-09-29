@@ -32,6 +32,9 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads must be greater than 0");
+        }
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = new ThreadPoolExecutor(
                 maxThreads, maxThreads,

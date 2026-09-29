@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
+
+import org.apache.coyote.http11.HttpStatus;
 
 public record DispatchResult(
     DispatchType type,

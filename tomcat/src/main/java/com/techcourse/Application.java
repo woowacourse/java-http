@@ -1,8 +1,8 @@
 package com.techcourse;
 
+import org.apache.catalina.HandlerMapping;
+import org.apache.catalina.RequestDispatcher;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.http11.HandlerMapping;
-import org.apache.coyote.http11.RequestDispatcher;
 
 public class Application {
 

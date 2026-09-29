@@ -1,9 +1,9 @@
 package com.techcourse.controller;
 
-import org.apache.coyote.controller.AbstractController;
+import org.apache.catalina.DispatchResult;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.WebController;
 import org.apache.coyote.error.HttpException;
-import org.apache.coyote.http11.DispatchResult;
-import org.apache.coyote.http11.WebController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;

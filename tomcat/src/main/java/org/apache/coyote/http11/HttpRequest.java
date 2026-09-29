@@ -6,7 +6,8 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final String requestBody;
 
-    public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final String requestBody) {
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders headers,
+        final String requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;

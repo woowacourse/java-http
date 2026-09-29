@@ -2,19 +2,19 @@ package com.techcourse.controller;
 
 import static org.reflections.Reflections.log;
 
+import com.techcourse.controller.dto.LoginRequest;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Optional;
-import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.DispatchResult;
+import org.apache.catalina.DispatchResult;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.WebController;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.WebController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.LoginRequest;
-import org.apache.coyote.http11.Session;
 
 @WebController(path = "/login")
 public class LoginController extends AbstractController {
@@ -22,7 +22,8 @@ public class LoginController extends AbstractController {
     @Override
     protected DispatchResult doPost(HttpRequest request, HttpResponse response) throws Exception {
         final LoginRequest loginRequest = LoginRequest.from(request.requestBody());
-        final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(loginRequest.account())
+        final Optional<User> filteredUser = InMemoryUserRepository.findByAccount(
+                loginRequest.account())
             .filter(foundUser -> foundUser.checkPassword(loginRequest.password()));
 
         if (filteredUser.isEmpty()) {

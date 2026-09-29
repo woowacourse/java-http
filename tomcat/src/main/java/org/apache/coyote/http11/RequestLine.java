@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.PathAliasesResolver;
 import org.apache.coyote.error.HttpException;
 
 public record RequestLine(

@@ -18,7 +18,8 @@ public enum HttpVersion {
             .filter(httpVersion -> Objects.equals(httpVersion.name, name))
             .findFirst()
             .orElseThrow(() ->
-                new HttpException(HttpStatus.HTTP_VERSION_NOT_SUPPORTED, "지원하지 않는 HTTP Version 입니다: " + name));
+                new HttpException(HttpStatus.HTTP_VERSION_NOT_SUPPORTED,
+                    "지원하지 않는 HTTP Version 입니다: " + name));
     }
 
     public String getName() {

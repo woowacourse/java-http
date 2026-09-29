@@ -2,7 +2,10 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.coyote.http11.request.HttpRequestData;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class SessionManager implements Manager {
 
@@ -23,11 +26,36 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        if (id == null) {
+            return null;
+        }
+
+        return SESSIONS.getOrDefault(id, null);
     }
 
     @Override
     public void remove(final String id) {
         SESSIONS.remove(id);
+    }
+
+    public Session findOrCreate(HttpRequestData requestData, HttpResponse response) {
+
+        HttpCookie cookie = new HttpCookie(requestData.headers().get("cookie"));
+        String sessionId = cookie.get("JSESSIONID");
+        Session session = findSession(sessionId);
+
+        if (session != null) {
+            return session;
+        }
+
+        session = new Session(UUID.randomUUID().toString());
+        add(session);
+
+        response.addHeader(
+                "Set-Cookie",
+                "JSESSIONID=" + session.getId()
+        );
+
+        return session;
     }
 }

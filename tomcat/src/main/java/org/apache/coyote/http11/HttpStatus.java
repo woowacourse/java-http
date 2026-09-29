@@ -6,7 +6,8 @@ public enum HttpStatus {
     FOUND(302, "Found"),
     BAD_REQUEST(400, "Bad Request"),
     NOT_FOUND(404, "Not Found"),
-    INTERNAL_SERVER_ERROR(500, "Internal Server Error")
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
+    SERVICE_UNAVAILABLE(503, "Service Unavailable")
     ;
 
     private final int code;

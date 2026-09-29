@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
         Optional<User> user = authenticate(request);
 
         if (user.isEmpty()) {
-            response.fromResource("401.html");
+            response.redirect("/401.html");
             return;
         }
 

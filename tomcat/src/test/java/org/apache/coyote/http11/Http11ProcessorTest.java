@@ -6,9 +6,11 @@ import support.StubSocket;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 import org.apache.coyote.http11.controller.ControllerResolver;
+import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RootController;
 import org.apache.coyote.http11.controller.StaticResourceController;
 
@@ -18,7 +20,10 @@ class Http11ProcessorTest {
 
     private final ControllerResolver controllerResolver =
             new ControllerResolver(
-                    Map.of("/", new RootController()),
+                    Map.of(
+                            "/", new RootController(),
+                            "/login", new LoginController()
+                    ),
                     new StaticResourceController()
             );
 
@@ -74,5 +79,32 @@ class Http11ProcessorTest {
                 .contains("Content-Type: text/html; charset=utf-8")
                 .contains("Content-Length: 5564")
                 .endsWith(expectedBody);
+    }
+
+    @Test
+    void redirectToUnauthorizedPageWhenLoginFails() {
+        // given
+        String body = "account=gugu&password=wrong";
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+
+        var socket = new StubSocket(httpRequest);
+        var processor = new Http11Processor(
+                socket,
+                controllerResolver
+        );
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: /401.html");
     }
 }

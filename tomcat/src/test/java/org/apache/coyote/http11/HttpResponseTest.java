@@ -2,17 +2,15 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class HttpResponseTest {
 
     @Test
     void createsHttpResponse() {
-        HttpResponse httpResponse = HttpResponse.createOkResponse(
+        HttpResponse httpResponse = HttpResponse.ok(
                 "text/plain",
-                "Hello",
-                Map.of()
+                "Hello"
         );
 
         assertThat(httpResponse.toString()).isEqualTo(
@@ -26,7 +24,7 @@ class HttpResponseTest {
 
     @Test
     void createsNotFoundResponse() {
-        HttpResponse httpResponse = HttpResponse.createNotFoundResponse("Not Found");
+        HttpResponse httpResponse = HttpResponse.notFound("Not Found");
 
         assertThat(httpResponse.toString()).startsWith("HTTP/1.1 404 Not Found\r\n");
     }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Application;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.catalina.session.Session;
@@ -20,7 +21,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -45,7 +46,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -68,7 +69,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -97,7 +98,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -106,8 +107,8 @@ class Http11ProcessorTest {
         String response = socket.output();
         String sessionId = response.split("Set-Cookie: JSESSIONID=")[1].split("\r\n")[0];
 
-        assertThat(response).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html\r\nSet-Cookie: JSESSIONID=");
-        assertThat(response).endsWith("\r\nContent-Length: 0\r\n\r\n");
+        assertThat(response).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html\r\nContent-Length: 0");
+        assertThat(response).contains("Set-Cookie: JSESSIONID=");
         assertThat(sessionId).matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
         Session session = SessionManager.getInstance().findSession(sessionId);
@@ -130,7 +131,7 @@ class Http11ProcessorTest {
                 "",
                 "");
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -159,7 +160,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);
@@ -188,7 +189,7 @@ class Http11ProcessorTest {
                 "",
                 body);
         final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, Application.createRequestMapping());
 
         // when
         processor.process(socket);

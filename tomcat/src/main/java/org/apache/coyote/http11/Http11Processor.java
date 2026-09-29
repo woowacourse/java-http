@@ -39,7 +39,39 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+            final String requestLine = reader.readLine();
+
+            if (requestLine == null || requestLine.isBlank()) {
+                return;
+            }
+
+            final String[] requestParts = requestLine.split(" ");
+            final String method = requestParts[0];
+            final String path = requestParts[1].split("\\?", 2)[0];
+            final Map<String, String> headers = readHeaders(reader);
+            final HttpCookie cookies = new HttpCookie(headers.get("Cookie"));
+            final String sessionId = cookies.get(SESSION_COOKIE_NAME);
+            Session session = sessionId == null ? null : SESSION_MANAGER.findSession(sessionId);
+            String setCookieHeader = null;
+
+            if (sessionId == null || sessionId.isBlank()) {
+                session = SESSION_MANAGER.createSession();
+                setCookieHeader = "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
+            }
+
+            if ("GET".equals(method) && LOGIN_PATH.equals(path) && session != null && session.getAttribute("user") != null) {
+                outputStream.write(redirect("/index.html", setCookieHeader).getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                return;
+            }
+
+            if ("POST".equals(method) && (REGISTER_PATH.equals(path) || LOGIN_PATH.equals(path))) {
+                final int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+                final String requestBody = readBody(reader, contentLength);
+                final Map<String, String> parameters = parseForm(requestBody);
 
             final HttpResponse response = new HttpResponse(outputStream);
             final HttpRequest request;

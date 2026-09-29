@@ -1,15 +1,15 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.request.HttpRequestData;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager INSTANCE = new SessionManager();
 
     private SessionManager() {

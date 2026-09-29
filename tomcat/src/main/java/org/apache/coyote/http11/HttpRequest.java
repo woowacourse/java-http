@@ -8,12 +8,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public final class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final byte[] body;
+    private Session session;
 
     private HttpRequest(
             final RequestLine requestLine,
@@ -138,5 +141,21 @@ public final class HttpRequest {
         }
 
         return parameters;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public Session getOrCreateSession(final HttpResponse response) {
+        if (session == null) {
+            session = SessionManager.getInstance().createSession();
+            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        }
+        return session;
+    }
+
+    void setSession(final Session session) {
+        this.session = session;
     }
 }

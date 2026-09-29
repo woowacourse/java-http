@@ -1,8 +1,8 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
+import org.apache.catalina.RequestDispatcher;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.RequestDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

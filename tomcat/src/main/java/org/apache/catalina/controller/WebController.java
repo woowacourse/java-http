@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.controller;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

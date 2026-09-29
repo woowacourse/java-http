@@ -1,8 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import java.io.IOException;
 import java.util.Optional;
-import org.apache.coyote.controller.Controller;
+import org.apache.catalina.controller.Controller;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.StaticResourceHandler;
+import org.apache.coyote.http11.StatusLine;
 
 public class RequestDispatcher {
 

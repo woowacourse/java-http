@@ -1,7 +1,7 @@
-package org.apache.coyote.controller;
+package org.apache.catalina.controller;
 
 import java.util.Map;
-import org.apache.coyote.http11.DispatchResult;
+import org.apache.catalina.DispatchResult;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

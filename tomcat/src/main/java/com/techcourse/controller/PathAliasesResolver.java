@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package com.techcourse.controller;
 
 import java.util.Map;
 import org.apache.coyote.error.HttpException;
+import org.apache.coyote.http11.HttpStatus;
 
 public final class PathAliasesResolver {
 

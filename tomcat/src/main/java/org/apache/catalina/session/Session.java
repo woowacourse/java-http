@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.error.HttpException;
+import org.apache.coyote.http11.HttpStatus;
 
 public class Session {
 

@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.catalina.DispatchResult;
+import org.apache.catalina.DispatchType;
 import org.junit.jupiter.api.Test;
 
 class DispatchResultTest {

@@ -34,6 +34,8 @@ class SynchronizationTest {
                 .forEach(count -> executorService.submit(synchronizedMethods::calculate));
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
 
+        executorService.shutdown();
+        assertThat(executorService.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
         assertThat(synchronizedMethods.getSum()).isEqualTo(1000);
     }
 
@@ -41,7 +43,7 @@ class SynchronizationTest {
 
         private int sum = 0;
 
-        public void calculate() {
+        public synchronized void calculate() {
             setSum(getSum() + 1);
         }
 

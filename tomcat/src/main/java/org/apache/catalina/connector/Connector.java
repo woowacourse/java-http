@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -16,22 +22,36 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int MAX_QUEUED_REQUESTS = 100;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
+    private volatile boolean stopped;
     private final RequestMapping requestMapping;
+    private final ExecutorService executorService;
 
     public Connector(final RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMapping);
     }
 
-    public Connector(final int port, final int acceptCount, final RequestMapping requestMapping) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+    public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
+        this(createServerSocket(port, acceptCount), createExecutor(maxThreads, MAX_QUEUED_REQUESTS), requestMapping);
+    }
+
+    Connector(final ServerSocket serverSocket, final ExecutorService executorService, final RequestMapping requestMapping) {
+        this.serverSocket = serverSocket;
+        this.executorService = executorService;
         this.requestMapping = requestMapping;
         this.stopped = false;
     }
 
-    private ServerSocket createServerSocket(final int port, final int acceptCount) {
+    static ThreadPoolExecutor createExecutor(final int maxThreads, final int queueCapacity) {
+        return new ThreadPoolExecutor(
+                maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(queueCapacity));
+    }
+
+    private static ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
@@ -61,7 +81,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -70,7 +92,22 @@ public class Connector implements Runnable {
             return;
         }
         final Http11Processor processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            respondServiceUnavailable(connection);
+        }
+    }
+
+    private void respondServiceUnavailable(final Socket connection) {
+        try (connection) {
+            final HttpResponse response = new HttpResponse();
+            response.setStatus(503, "Service Unavailable");
+            response.setHeader("Connection", "close");
+            response.writeTo(connection.getOutputStream());
+        } catch (IOException e) {
+            log.error("503 응답 전송 중 오류가 발생했습니다.", e);
+        }
     }
 
     public void stop() {
@@ -80,9 +117,10 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executorService.shutdown();
     }
 
-    private int checkPort(final int port) {
+    private static int checkPort(final int port) {
         final var MIN_PORT = 1;
         final var MAX_PORT = 65535;
 
@@ -92,7 +130,7 @@ public class Connector implements Runnable {
         return port;
     }
 
-    private int checkAcceptCount(final int acceptCount) {
+    private static int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

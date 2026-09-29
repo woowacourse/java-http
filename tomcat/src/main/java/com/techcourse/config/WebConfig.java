@@ -1,7 +1,6 @@
 package com.techcourse.config;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +42,17 @@ public final class WebConfig {
         Set<Class<?>> typesAnnotatedWith = new Reflections("com.techcourse.controller")
                 .getTypesAnnotatedWith(Controller.class);
 
-        return Arrays.asList(typesAnnotatedWith.toArray());
+        return typesAnnotatedWith.stream()
+                .map(this::createController)
+                .toList();
+    }
+
+    private Object createController(final Class<?> controllerType) {
+        try {
+            return controllerType.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("컨트롤러 생성 실패: " + controllerType.getName(), e);
+        }
     }
 
     private void setRegistry(RequestRegistry registry, List<Object> handlers) {

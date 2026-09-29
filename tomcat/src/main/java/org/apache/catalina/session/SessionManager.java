@@ -1,7 +1,7 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -9,7 +9,7 @@ public class SessionManager implements Manager {
     private static final SessionManager INSTANCE = new SessionManager();
 
     //모든 클라이언트의 세션을 한 곳에서 관리하므로 static
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {}
 

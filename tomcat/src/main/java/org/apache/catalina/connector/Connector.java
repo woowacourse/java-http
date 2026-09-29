@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class Connector implements Runnable {
 
@@ -17,18 +20,21 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
     private final Manager manager;
-    private boolean stopped;
+    private final ExecutorService executorService;
+    private volatile boolean stopped;
 
     public Connector(RequestMapping requestMapping, Manager manager) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, manager);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMapping, manager);
     }
 
-    public Connector(final int port, final int acceptCount, RequestMapping requestMapping,
-            Manager manager) {
+    public Connector(final int port, final int acceptCount, final int maxThreads,
+            RequestMapping requestMapping, Manager manager) {
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = requestMapping;
         this.manager = manager;
@@ -46,10 +52,10 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        stopped = false;
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
-        stopped = false;
         log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
@@ -65,7 +71,9 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            if (!stopped) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -74,7 +82,15 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, requestMapping, manager);
-        new Thread(processor).start();
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            try {
+                connection.close();
+            } catch (IOException exception) {
+                log.error(exception.getMessage(), exception);
+            }
+        }
     }
 
     public void stop() {
@@ -83,6 +99,8 @@ public class Connector implements Runnable {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
     }
 

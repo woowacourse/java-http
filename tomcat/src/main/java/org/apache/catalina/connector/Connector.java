@@ -24,7 +24,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = Math.max(2, Runtime.getRuntime().availableProcessors());
-    private static final int DEFAULT_MAX_QUEUED_REQUESTS = 100;
+    private static final int DEFAULT_MAX_QUEUED_REQUESTS = 50;
 
     private final ServerSocket serverSocket;
     private final ControllerResolver mapping;

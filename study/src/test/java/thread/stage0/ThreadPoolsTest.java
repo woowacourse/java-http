@@ -30,9 +30,9 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello fixed thread pools"));
         executor.submit(logWithSleep("hello fixed thread pools"));
 
-        // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        // 코어 스레드 2개가 즉시 생성되고, 3번째 작업은 큐(LinkedBlockingQueue)에서 대기
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
@@ -45,8 +45,8 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
 
-        // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        // SynchronousQueue라 작업을 담아둘 수 없어 요청마다 스레드를 새로 만든다. 큐에는 쌓이지 않는다.
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

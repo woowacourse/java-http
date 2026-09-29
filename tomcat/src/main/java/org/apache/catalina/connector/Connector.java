@@ -45,6 +45,12 @@ public class Connector implements Runnable {
                      final int maxThreads,
                      final int maxQueuedRequests,
                      final ProcessorFactory processorFactory) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads must be greater than 0: " + maxThreads);
+        }
+        if (maxQueuedRequests <= 0) {
+            throw new IllegalArgumentException("maxQueuedRequests must be greater than 0: " + maxQueuedRequests);
+        }
         this.executorService = new ThreadPoolExecutor(
                 maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(maxQueuedRequests));
         this.serverSocket = createServerSocket(port, acceptCount);

@@ -26,8 +26,8 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -55,8 +55,8 @@ class Http11ProcessorTest {
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
         var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: " + responseBody.length + "\r\n" +
                 "\r\n" +
                 new String(responseBody, StandardCharsets.UTF_8);
 
@@ -108,8 +108,8 @@ class Http11ProcessorTest {
         final byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
         final String expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: " + responseBody.length + "\r\n" +
                 "\r\n" +
                 new String(responseBody, StandardCharsets.UTF_8);
 

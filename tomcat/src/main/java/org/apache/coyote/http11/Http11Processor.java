@@ -4,10 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.catalina.Session;
@@ -59,11 +56,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            final HttpResponse response = new HttpResponse(outputStream);
+
             final HttpRequest request;
-            try{
+            try {
                 request = HttpRequest.read(inputStream);
             } catch (IllegalArgumentException e) {
-                writeBadRequest(outputStream);
+                writeBadRequest(response);
                 return;
             }
 
@@ -76,16 +75,19 @@ public class Http11Processor implements Runnable, Processor {
             final HttpCookie cookies = new HttpCookie(request.getHeader("Cookie"));
             final String sessionId = cookies.get(SESSION_COOKIE_NAME);
             Session session = sessionId == null ? null : SESSION_MANAGER.findSession(sessionId);
-            String setCookieHeader = null;
 
             if (sessionId == null || sessionId.isBlank()) {
                 session = SESSION_MANAGER.createSession();
-                setCookieHeader = "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
+                response.addHeader("Set-Cookie", SESSION_COOKIE_NAME + "=" + session.getId());
             }
 
-            if ("GET".equals(method) && LOGIN_PATH.equals(path) && session != null && session.getAttribute("user") != null) {
-                outputStream.write(redirect("/index.html", setCookieHeader).getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+            if ("GET".equals(method)
+                    && LOGIN_PATH.equals(path)
+                    && session != null
+                    && session.getAttribute("user") != null) {
+                response.setStatus(302, "Found");
+                response.addHeader("Location", "/index.html");
+                response.write();
                 return;
             }
 
@@ -94,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
                 try {
                     parameters = request.getFormParameters();
                 } catch (IllegalArgumentException e) {
-                    writeBadRequest(outputStream);
+                    writeBadRequest(response);
                     return;
                 }
 
@@ -107,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
                     if (user.isPresent()) {
                         if (session == null) {
                             session = SESSION_MANAGER.createSession();
-                            setCookieHeader = "Set-Cookie: " + SESSION_COOKIE_NAME + "=" + session.getId();
+                            response.addHeader("Set-Cookie", SESSION_COOKIE_NAME + "=" + session.getId());
                         }
                         session.setAttribute("user", user.get());
                         location = "/index.html";
@@ -116,27 +118,25 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 }
 
-                outputStream.write(redirect(location, setCookieHeader).getBytes(StandardCharsets.UTF_8));
-                outputStream.flush();
+                response.setStatus(302, "Found");
+                response.addHeader("Location", location);
+                response.write();
                 return;
             }
 
             final ResponseData responseData = loadResponseData(path);
-            outputStream.write(
-                    response(responseData.body(), responseData.contentType(), setCookieHeader).getBytes(StandardCharsets.UTF_8)
-            );
-
-            outputStream.flush();
+            response.addHeader("Content-Type", responseData.contentType());
+            response.setBody(responseData.body());
+            response.write();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void writeBadRequest(final OutputStream outputStream) throws IOException {
-        outputStream.write("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
-                .getBytes(StandardCharsets.UTF_8));
-        outputStream.flush();
+    private void writeBadRequest(final HttpResponse response) throws IOException {
+        response.setStatus(400, "Bad Request");
+        response.write();
     }
 
     private boolean register(final Map<String, String> parameters) {
@@ -203,37 +203,5 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private record ResponseData(byte[] body, String contentType) {
-    }
-
-    private String response(final byte[] responseBody, final String contentType, final String setCookieHeader) {
-        final List<String> lines = new ArrayList<>();
-        lines.add("HTTP/1.1 200 OK");
-
-        if (setCookieHeader != null) {
-            lines.add(setCookieHeader);
-        }
-
-        lines.add("Content-Type: " + contentType + " ");
-        lines.add("Content-Length: " + responseBody.length + " ");
-        lines.add("");
-        lines.add(new String(responseBody, StandardCharsets.UTF_8));
-
-        return String.join("\r\n", lines);
-    }
-
-    private String redirect(final String location, final String setCookieHeader) {
-        final List<String> lines = new ArrayList<>();
-        lines.add("HTTP/1.1 302 Found");
-
-        if (setCookieHeader != null) {
-            lines.add(setCookieHeader);
-        }
-
-        lines.add("Location: " + location);
-        lines.add("Content-Length: 0");
-        lines.add("");
-        lines.add("");
-
-        return String.join("\r\n", lines);
     }
 }

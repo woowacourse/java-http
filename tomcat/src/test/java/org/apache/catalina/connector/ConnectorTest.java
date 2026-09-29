@@ -1,16 +1,23 @@
 package org.apache.catalina.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.HandlerMapping;
 import org.apache.coyote.http11.RequestDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import support.BlockingSocket;
 
 class ConnectorTest {
 
@@ -46,6 +53,49 @@ class ConnectorTest {
         connector.stop();
 
         assertThat(executorService.isShutdown()).isTrue();
+    }
+
+    @Test
+    void 스레드와_대기열이_가득_차면_추가_연결을_종료한다() throws Exception {
+        final int maxThreads = 2;
+        final int acceptCount = 1;
+        final Connector connector = new Connector(
+            requestDispatcher,
+            availablePort(),
+            acceptCount,
+            maxThreads);
+        final ThreadPoolExecutor executor = threadPoolExecutorOf(connector);
+        final CountDownLatch workersStarted = new CountDownLatch(maxThreads);
+        final CountDownLatch releaseWorkers = new CountDownLatch(1);
+        final Socket first = new BlockingSocket(workersStarted, releaseWorkers);
+        final Socket second = new BlockingSocket(workersStarted, releaseWorkers);
+        final Socket queued = new BlockingSocket(workersStarted, releaseWorkers);
+        final Socket rejected = mock(Socket.class);
+
+        try {
+            process(connector, first);
+            process(connector, second);
+            assertThat(workersStarted.await(1, TimeUnit.SECONDS)).isTrue();
+            assertThat(executor.getActiveCount()).isEqualTo(maxThreads);
+
+            process(connector, queued);
+            assertThat(executor.getQueue()).hasSize(acceptCount);
+
+            process(connector, rejected);
+
+            verify(rejected).close();
+            assertThat(executor.getQueue()).hasSize(acceptCount);
+        } finally {
+            releaseWorkers.countDown();
+            connector.stop();
+            executor.awaitTermination(1, TimeUnit.SECONDS);
+        }
+    }
+
+    private void process(final Connector connector, final Socket socket) throws Exception {
+        final Method method = Connector.class.getDeclaredMethod("process", Socket.class);
+        method.setAccessible(true);
+        method.invoke(connector, socket);
     }
 
     private ThreadPoolExecutor threadPoolExecutorOf(final Connector connector)

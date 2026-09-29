@@ -22,6 +22,8 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
     private static final int MAX_WAITING_REQUESTS = 100;
+    private static final int SOCKET_READ_TIMEOUT_MILLIS = 5_000;
+    private static final int SHUTDOWN_TIMEOUT_MILLIS = 5_000;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -87,13 +89,21 @@ public class Connector implements Runnable {
         }
 
         try {
+            connection.setSoTimeout(SOCKET_READ_TIMEOUT_MILLIS);
             executorService.execute(new Http11Processor(connection));
+        } catch (IOException e) {
+            log.error("연결을 설정하는 중 오류가 발생했습니다.", e);
+            closeConnection(connection);
         } catch (RejectedExecutionException e) {
-            try {
-                connection.close();
-            } catch (IOException closeError) {
-                log.error("연결을 닫는 중 오류가 발생했습니다.", closeError);
-            }
+            closeConnection(connection);
+        }
+    }
+
+    private void closeConnection(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error("연결을 닫는 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -105,6 +115,13 @@ public class Connector implements Runnable {
             log.error(e.getMessage(), e);
         }
         executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
+                log.warn("Request processing did not finish within {} ms.", SHUTDOWN_TIMEOUT_MILLIS);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private int checkPort(final int port) {

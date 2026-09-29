@@ -6,12 +6,30 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class ConnectorTest {
+
+    @Test
+    void timesOutIncompleteRequest() throws IOException {
+        final int port = freePort();
+        final var connector = new Connector(port, 100, 1);
+        connector.start();
+
+        try (final var client = new Socket("127.0.0.1", port)) {
+            client.setSoTimeout(8_000);
+            client.getOutputStream().write("GET / HTTP/1.1".getBytes(StandardCharsets.UTF_8));
+
+            assertThat(client.getInputStream().read()).isEqualTo(-1);
+        } finally {
+            connector.stop();
+        }
+    }
 
     @Test
     void rejectsInvalidMaxThreads() throws IOException {

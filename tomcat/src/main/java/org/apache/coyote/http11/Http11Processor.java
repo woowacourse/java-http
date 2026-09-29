@@ -3,18 +3,13 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
@@ -62,24 +57,23 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+             final var outputStream = connection.getOutputStream()) {
 
-            final String requestLine = reader.readLine();
-
-            if (requestLine == null || requestLine.isBlank()) {
-                return;
-            }
-
-            final String[] requestParts = requestLine.split(" ");
-            if (requestParts.length != 3) {
+            final HttpRequest request;
+            try{
+                request = HttpRequest.read(inputStream);
+            } catch (IllegalArgumentException e) {
                 writeBadRequest(outputStream);
                 return;
             }
-            final String method = requestParts[0];
-            final String path = requestParts[1].split("\\?", 2)[0];
-            final Map<String, String> headers = readHeaders(reader);
-            final HttpCookie cookies = new HttpCookie(headers.get("Cookie"));
+
+            if (request == null) {
+                return;
+            }
+
+            final String method = request.getMethod();
+            final String path = request.getPath();
+            final HttpCookie cookies = new HttpCookie(request.getHeader("Cookie"));
             final String sessionId = cookies.get(SESSION_COOKIE_NAME);
             Session session = sessionId == null ? null : SESSION_MANAGER.findSession(sessionId);
             String setCookieHeader = null;
@@ -96,19 +90,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if ("POST".equals(method) && (REGISTER_PATH.equals(path) || LOGIN_PATH.equals(path))) {
-                final int contentLength;
+                final Map<String, String> parameters;
                 try {
-                    contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-                } catch (NumberFormatException e) {
+                    parameters = request.getFormParameters();
+                } catch (IllegalArgumentException e) {
                     writeBadRequest(outputStream);
                     return;
                 }
-                if (contentLength < 0) {
-                    writeBadRequest(outputStream);
-                    return;
-                }
-                final String requestBody = readBody(reader, contentLength);
-                final Map<String, String> parameters = parseForm(requestBody);
 
                 final String location;
                 if (REGISTER_PATH.equals(path)) {
@@ -145,53 +133,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-
-        String line;
-        while ((line = reader.readLine()) != null && !line.isBlank()) {
-            final int colon = line.indexOf(':');
-            if (colon > 0) {
-                headers.put(line.substring(0, colon).trim(), line.substring(colon + 1).trim());
-            }
-        }
-
-        return headers;
-    }
-
     private void writeBadRequest(final OutputStream outputStream) throws IOException {
         outputStream.write("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
                 .getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
-    }
-
-    private String readBody(final BufferedReader reader, final int length) throws IOException {
-        final char[] buffer = new char[length];
-        int offset = 0;
-
-        while (offset < length) {
-            final int count = reader.read(buffer, offset, length - offset);
-            if (count == -1) {
-                throw new IOException("요청 본문을 끝까지 읽지 못했습니다.");
-            }
-            offset += count;
-        }
-        return new String(buffer);
-    }
-
-    private Map<String, String> parseForm(final String body) {
-        final Map<String, String> parameters = new HashMap<>();
-
-        for (String pair : body.split("&")) {
-            if (pair.isEmpty()) {
-                continue;
-            }
-            final String[] entry = pair.split("=", 2);
-            final String name = URLDecoder.decode(entry[0], StandardCharsets.UTF_8);
-            final String keyValue = entry.length == 2 ? URLDecoder.decode(entry[1], StandardCharsets.UTF_8) : "";
-            parameters.put(name, keyValue);
-        }
-        return parameters;
     }
 
     private boolean register(final Map<String, String> parameters) {

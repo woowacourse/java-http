@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.error.HttpException;
 
 public class Session {
 
@@ -26,6 +27,9 @@ public class Session {
     }
 
     public void addAttribute(final String name, final Object value) {
+        if (name == null || value == null) {
+            throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류입니다.");
+        }
         values.put(name, value);
     }
 

@@ -81,9 +81,6 @@ public class Connector implements Runnable {
     }
 
     private void process(final Socket connection) {
-        if (connection == null) {
-            return;
-        }
         var processor = new Http11Processor(connection, sessionManager, requestMapping);
         try {
             executorService.execute(processor);

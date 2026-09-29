@@ -40,8 +40,13 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads,
                      final RequestMapping requestMapping) {
+        this(port, acceptCount, requestMapping, Executors.newFixedThreadPool(maxThreads));
+    }
+
+    Connector(final int port, final int acceptCount, final RequestMapping requestMapping,
+              final ExecutorService executorService) {
         this.requestMapping = requestMapping;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = executorService;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }

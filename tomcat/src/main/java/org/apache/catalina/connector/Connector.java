@@ -1,7 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.RequestHandler;
+import org.apache.catalina.controller.ControllerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +25,14 @@ public class Connector implements Runnable {
     private final RequestHandler requestHandler;
     private volatile boolean stopped;
 
-    public Connector(RequestHandler requestHandler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestHandler);
+    public Connector(ControllerMapping controllerMapping) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, controllerMapping);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads, RequestHandler requestHandler) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, ControllerMapping controllerMapping) {
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.requestHandler = requestHandler;
+        this.requestHandler = new RequestHandler(controllerMapping);
         this.stopped = false;
     }
 
@@ -82,7 +82,7 @@ public class Connector implements Runnable {
         var processor = new Http11Processor(connection);
         executorService.execute(() -> {
             try (connection) {
-                processor.process(requestHandler);
+                requestHandler.handle(processor);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }

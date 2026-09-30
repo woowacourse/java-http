@@ -6,8 +6,7 @@ import org.apache.catalina.startup.Tomcat;
 public class Application {
 
     public static void main(String[] args) {
-        final var requestHandler = new HttpRequestHandler(new RequestMapping());
-        final var tomcat = new Tomcat(requestHandler);
+        final var tomcat = new Tomcat(new RequestMapping());
         tomcat.start();
     }
 }

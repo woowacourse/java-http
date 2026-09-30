@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.RequestMapping;
+import org.apache.catalina.connector.RequestHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -14,13 +16,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    void processesRequestWithApplicationProvidedMapping() {
+        final var socket = new StubSocket("GET /custom HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+
+        new RequestHandler(path -> {
+            assertThat(path).isEqualTo("/custom");
+            return request -> HttpResponse.create("200 OK", "text/plain", "custom response");
+        }).handle(new Http11Processor(socket));
+
+        assertThat(socket.output()).isEqualTo(String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/plain;charset=utf-8",
+                "Content-Length: 15 ",
+                "",
+                "custom response"));
+    }
+
+    @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
 
         // when
-        processor.process(socket);
+        new RequestHandler(new RequestMapping()).handle(new Http11Processor(socket));
 
         // then
         var expected = String.join("\r\n",
@@ -44,10 +62,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
 
         // when
-        processor.process(socket);
+        new RequestHandler(new RequestMapping()).handle(new Http11Processor(socket));
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

@@ -1,42 +1,23 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.RequestMapping;
-import org.apache.catalina.controller.Controller;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
 import java.net.Socket;
 
-public class Http11Processor implements Runnable, Processor {
-
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapping requestMapping = new RequestMapping();
+public class Http11Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
-    @Override
-    public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        process(connection);
+    public HttpRequest readRequest() throws IOException {
+        return HttpRequest.parse(connection.getInputStream());
     }
 
-    @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = HttpRequest.parse(inputStream);
-            Controller controller = requestMapping.getController(httpRequest.getRequestTarget());
-            HttpResponse response = controller.service(httpRequest);
-
-            outputStream.write(response.toHttpMessage().getBytes());
-            outputStream.flush();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    public void writeResponse(HttpResponse response) throws IOException {
+        var outputStream = connection.getOutputStream();
+        outputStream.write(response.toHttpMessage().getBytes());
+        outputStream.flush();
     }
 }

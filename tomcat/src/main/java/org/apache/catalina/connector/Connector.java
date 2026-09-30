@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class Connector implements Runnable {
 
@@ -22,17 +22,17 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private final Consumer<Http11Processor> connectionHandler;
+    private final RequestHandler requestHandler;
     private volatile boolean stopped;
 
-    public Connector(Consumer<Http11Processor> connectionHandler) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, connectionHandler);
+    public Connector(RequestHandler requestHandler) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestHandler);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads, Consumer<Http11Processor> connectionHandler) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, RequestHandler requestHandler) {
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.connectionHandler = connectionHandler;
+        this.requestHandler = requestHandler;
         this.stopped = false;
     }
 
@@ -82,7 +82,7 @@ public class Connector implements Runnable {
         var processor = new Http11Processor(connection);
         executorService.execute(() -> {
             try (connection) {
-                connectionHandler.accept(processor);
+                processor.process(requestHandler);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }

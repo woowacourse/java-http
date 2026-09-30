@@ -21,7 +21,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket();
 
         // when
-        new HttpRequestHandler(new RequestMapping()).handle(new Http11Processor(socket));
+        new Http11Processor(socket).process(new HttpRequestHandler(new RequestMapping()));
 
         // then
         var expected = String.join("\r\n",
@@ -47,7 +47,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
 
         // when
-        new HttpRequestHandler(new RequestMapping()).handle(new Http11Processor(socket));
+        new Http11Processor(socket).process(new HttpRequestHandler(new RequestMapping()));
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

@@ -1,25 +1,24 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final Consumer<Http11Processor> connectionHandler;
+    private final RequestHandler requestHandler;
 
-    public Tomcat(Consumer<Http11Processor> connectionHandler) {
-        this.connectionHandler = connectionHandler;
+    public Tomcat(RequestHandler requestHandler) {
+        this.requestHandler = requestHandler;
     }
 
     public void start() {
-        var connector = new Connector(connectionHandler);
+        var connector = new Connector(requestHandler);
         connector.start();
 
         try {

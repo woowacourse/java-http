@@ -1,13 +1,11 @@
 package com.techcourse;
 
 import com.techcourse.controller.RequestMapping;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.RequestHandler;
 
-public class HttpRequestHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
+public class HttpRequestHandler implements RequestHandler {
 
     private final RequestMapping requestMapping;
 
@@ -15,14 +13,9 @@ public class HttpRequestHandler {
         this.requestMapping = requestMapping;
     }
 
-    public void handle(Http11Processor processor) {
-        try {
-            var request = processor.readRequest();
-            var controller = requestMapping.getController(request.getRequestTarget());
-            var response = controller.service(request);
-            processor.writeResponse(response);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    @Override
+    public HttpResponse handle(HttpRequest request) throws Exception {
+        var controller = requestMapping.getController(request.getRequestTarget());
+        return controller.service(request);
     }
 }

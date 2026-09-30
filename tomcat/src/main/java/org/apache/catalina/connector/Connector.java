@@ -1,6 +1,8 @@
 package org.apache.catalina.connector;
 
 import com.techcourse.controller.ControllerResolver;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -17,18 +19,24 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 10;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private final SessionManager sessionManager = new SessionManager();
     private final ControllerResolver controllerResolver = new ControllerResolver();
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        if (maxThreads < 0) {
+            throw new IllegalArgumentException("maxThreads는 1 이상이어야 합니다.");
+        }
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -81,6 +89,7 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executorService.shutdown();
     }
 
     private int checkPort(final int port) {

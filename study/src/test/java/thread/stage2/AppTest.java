@@ -20,6 +20,11 @@ class AppTest {
      * - 스레드명(nio-8080-exec-x)으로 생성된 스레드 갯수를 파악
      * - http call count
      * - 테스트 결과값
+     * accept-count: 1 | max-connections: 1 | threads: min-spare: 2 , max: 2 -> 1, 2
+     * accept-count: 4 | max-connections: 1 | threads: min-spare: 2 , max: 2 -> 1, 2, 3, 4, 5
+     * accept-count: 1 | max-connections: 4 | threads: min-spare: 2 , max: 2 -> 2, 1, 3, 4, 5
+     * accept-count: 10 | max-connections: 10 | threads: min-spare: 2, max: 4 -> 2, 3, 1, 4, 6, 7, 5, 8, 9, 10
+     * accept-count: 10 | max-connections: 10 | threads: min-spare: 4, max: 2 -> 2, 1, 3, 4, 5, 6, 7, 8, 9, 10
      */
     @Test
     void test() throws Exception {

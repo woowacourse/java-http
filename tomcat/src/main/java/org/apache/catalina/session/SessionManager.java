@@ -18,13 +18,21 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final Session session) {
+        if (session == null) {
+            throw new IllegalArgumentException("session must not be null");
+        }
+        if (session.getId() == null) {
+            throw new IllegalArgumentException("session id must not be null");
+        }
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
-    }
+        if (id == null) {
+            throw new IllegalArgumentException("session id must not be null");
+        }
+        return SESSIONS.get(id);    }
 
     @Override
     public void remove(final String id) {

@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.controller.ControllerResolver;
 import org.slf4j.Logger;
@@ -34,17 +37,27 @@ public class Connector implements Runnable {
             final int maxThreads,
             final ControllerResolver controllerResolver
     ) {
-        this.serverSocket = createServerSocket(port, acceptCount);
+        final int checkedAcceptCount = checkAcceptCount(acceptCount);
+        this.serverSocket = createServerSocket(port, checkedAcceptCount);
         this.controllerResolver = controllerResolver;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = createExecutorService(maxThreads, checkedAcceptCount);
         this.stopped = false;
+    }
+
+    static ThreadPoolExecutor createExecutorService(final int maxThreads, final int acceptCount) {
+        return new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(acceptCount)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkedPort, acceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -80,13 +93,27 @@ public class Connector implements Runnable {
         }
         var processor = new Http11Processor(connection, controllerResolver);
 
-        executorService.execute(processor);
+        try {
+            executorService.execute(processor);
+        } catch (RejectedExecutionException e) {
+            close(connection);
+            log.warn("Request rejected because the thread pool queue is full.");
+        }
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void close(final Socket connection) {
+        try {
+            connection.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

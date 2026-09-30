@@ -105,10 +105,10 @@ class Http11ProcessorTest {
 
         // then
         String response = socket.output();
-        String sessionId = response.split("Set-Cookie: JSESSIONID=")[1].split("\r\n")[0];
-
         assertThat(response).startsWith("HTTP/1.1 302 Found\r\nLocation: /index.html\r\nContent-Length: 0");
         assertThat(response).contains("Set-Cookie: JSESSIONID=");
+
+        String sessionId = response.split("Set-Cookie: JSESSIONID=")[1].split("\r\n")[0];
         assertThat(sessionId).matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
         Session session = SessionManager.getInstance().findSession(sessionId);

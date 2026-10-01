@@ -1,5 +1,6 @@
 package thread.stage2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpResponse;
@@ -7,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("manual")
 class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);
@@ -23,6 +25,7 @@ class AppTest {
      */
     @Test
     void test() throws Exception {
+        count.set(0);
         final var NUMBER_OF_THREAD = 10;
         var threads = new Thread[NUMBER_OF_THREAD];
 

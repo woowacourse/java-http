@@ -28,5 +28,9 @@ dependencies {
 
 test {
     maxParallelForks 3
-    useJUnitPlatform()
+    useJUnitPlatform {
+        if (!project.hasProperty('manualTests')) {
+            excludeTags 'manual'
+        }
+    }
 }

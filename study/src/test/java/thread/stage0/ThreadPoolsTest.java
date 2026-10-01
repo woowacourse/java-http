@@ -31,8 +31,9 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello fixed thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        // 스레드 풀 크기가 2이고, 스레드를 3개 생성하니까
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize =  1;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
@@ -40,13 +41,15 @@ class ThreadPoolsTest {
 
     @Test
     void testNewCachedThreadPool() {
+        // 필요할 때 새 스레드를 생성하고 이전 스레드를 재사용하는 동적 크기의 자바 스레드 풀
+        //  60초 동안 작업이 없으면 풀에서 제거
         final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

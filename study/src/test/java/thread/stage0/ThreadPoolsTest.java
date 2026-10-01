@@ -1,66 +1,87 @@
 package thread.stage0;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * 스레드 풀은 무엇이고 어떻게 동작할까?
- * 테스트를 통과시키고 왜 해당 결과가 나왔는지 생각해보자.
- *
- * Thread Pools
- * https://docs.oracle.com/javase/tutorial/essential/concurrency/pools.html
- *
- * Introduction to Thread Pools in Java
- * https://www.baeldung.com/thread-pool-java-and-guava
- */
 class ThreadPoolsTest {
 
-    private static final Logger log = LoggerFactory.getLogger(ThreadPoolsTest.class);
-
     @Test
-    void testNewFixedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
-        executor.submit(logWithSleep("hello fixed thread pools"));
-        executor.submit(logWithSleep("hello fixed thread pools"));
-        executor.submit(logWithSleep("hello fixed thread pools"));
+    void testNewFixedThreadPool() throws InterruptedException {
+        final var executor =
+                (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
 
-        // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final var started = new CountDownLatch(2);
+        final var release = new CountDownLatch(1);
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        try {
+            executor.execute(waitingTask(started, release));
+            executor.execute(waitingTask(started, release));
+
+            assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+
+            executor.execute(() -> {
+            });
+
+            assertThat(executor.getPoolSize()).isEqualTo(2);
+            assertThat(executor.getActiveCount()).isEqualTo(2);
+            assertThat(executor.getQueue()).hasSize(1);
+        } finally {
+            release.countDown();
+            executor.shutdown();
+
+            assertThat(
+                    executor.awaitTermination(5, TimeUnit.SECONDS)
+            ).isTrue();
+        }
     }
 
     @Test
-    void testNewCachedThreadPool() {
-        final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-        executor.submit(logWithSleep("hello cached thread pools"));
-        executor.submit(logWithSleep("hello cached thread pools"));
-        executor.submit(logWithSleep("hello cached thread pools"));
+    void testNewCachedThreadPool() throws InterruptedException {
+        final var executor =
+                (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
-        // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final var started = new CountDownLatch(3);
+        final var release = new CountDownLatch(1);
 
-        assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
-        assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
+        try {
+            executor.execute(waitingTask(started, release));
+            executor.execute(waitingTask(started, release));
+            executor.execute(waitingTask(started, release));
+
+            assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+
+            assertThat(executor.getPoolSize()).isEqualTo(3);
+            assertThat(executor.getActiveCount()).isEqualTo(3);
+            assertThat(executor.getQueue()).isEmpty();
+        } finally {
+            release.countDown();
+            executor.shutdown();
+
+            assertThat(
+                    executor.awaitTermination(5, TimeUnit.SECONDS)
+            ).isTrue();
+        }
     }
 
-    private Runnable logWithSleep(final String message) {
+    private Runnable waitingTask(
+            final CountDownLatch started,
+            final CountDownLatch release
+    ) {
         return () -> {
+            started.countDown();
+
             try {
-                Thread.sleep(1000);
+                release.await();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(e);
             }
-            log.info(message);
         };
     }
 }

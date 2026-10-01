@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.StaticResourceController;
@@ -17,23 +19,34 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
+    private final ExecutorService executorService;
+
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT,
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS,
                 new RequestMapping(new StaticResourceController()));
     }
 
     public Connector(final int port, final int acceptCount) {
-        this(port, acceptCount,
+        this(port, acceptCount, DEFAULT_MAX_THREADS);
+    }
+
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int maxThreads
+    ) {
+        this(port, acceptCount, maxThreads,
                 new RequestMapping(new StaticResourceController()));
     }
 
     public Connector(final RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS, requestMapping);
     }
 
     public Connector(
@@ -41,8 +54,22 @@ public class Connector implements Runnable {
             final int acceptCount,
             final RequestMapping requestMapping
     ) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS, requestMapping);
+    }
+
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final int maxThreads,
+            final RequestMapping requestMapping
+    ) {
+        if (maxThreads <= 0) {
+            throw new IllegalArgumentException("maxThreads는 1 이상이어야 합니다.");
+        }
+
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = requestMapping;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -84,8 +111,10 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+
+        final var processor = new Http11Processor(connection, requestMapping);
+
+        executorService.execute(processor);
     }
 
     public void stop() {

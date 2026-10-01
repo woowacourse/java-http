@@ -43,6 +43,26 @@ class SessionConcurrencyTest {
         }
     }
 
+    @Test
+    void storesAttributesConcurrentlyInSameSession() throws Exception {
+        final Session session = new Session("shared-session");
+
+        runConcurrently(workerIndex -> {
+            for (int i = 0; i < ITERATION_COUNT; i++) {
+                final String name = "attribute-" + workerIndex + "-" + i;
+                session.setAttribute(name, i);
+            }
+        });
+
+        for (int workerIndex = 0; workerIndex < WORKER_COUNT; workerIndex++) {
+            for (int i = 0; i < ITERATION_COUNT; i++) {
+                final String name = "attribute-" + workerIndex + "-" + i;
+
+                assertThat(session.getAttribute(name)).isEqualTo(i);
+            }
+        }
+    }
+
     private void runConcurrently(final IntConsumer task) throws Exception {
         final var executor = Executors.newFixedThreadPool(WORKER_COUNT);
         final var ready = new CountDownLatch(WORKER_COUNT);

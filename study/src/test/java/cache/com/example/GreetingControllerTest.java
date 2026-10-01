@@ -6,15 +6,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.zip.GZIPInputStream;
 
 import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "server.compression.min-response-size=1B",
+                "server.tomcat.max-connections=20"
+        }
+)
 class GreetingControllerTest {
 
     private static final Logger log = LoggerFactory.getLogger(GreetingControllerTest.class);
@@ -24,6 +39,9 @@ class GreetingControllerTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @LocalServerPort
+    private int port;
 
     @Test
     void testNoCachePrivate() {
@@ -39,19 +57,25 @@ class GreetingControllerTest {
     }
 
     @Test
-    void testCompression() {
-        final var response = webTestClient
-                .get()
-                .uri("/")
-                .exchange()
-                .expectStatus().isOk()
+    void testCompression() throws Exception {
+        final var request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/"))
+                .timeout(Duration.ofSeconds(5))
+                .header(HttpHeaders.ACCEPT_ENCODING, "gzip")
+                .build();
 
-                // gzip으로 요청 보내도 어떤 방식으로 압축할지 서버에서 결정한다.
-                // 웹브라우저에서 localhost:8080으로 접근하면 응답 헤더에 "Content-Encoding: gzip"이 있다.
-                .expectHeader().valueEquals(HttpHeaders.TRANSFER_ENCODING, "chunked")
-                .expectBody(String.class).returnResult();
+        try (final var client = HttpClient.newHttpClient()) {
+            final var response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
-        log.info("response body\n{}", response.getResponseBody());
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.headers().firstValue(HttpHeaders.CONTENT_ENCODING))
+                    .contains("gzip");
+
+            try (final var gzip = new GZIPInputStream(new ByteArrayInputStream(response.body()))) {
+                final var body = new String(gzip.readAllBytes(), StandardCharsets.UTF_8);
+                assertThat(body).contains("Hello, World!");
+            }
+        }
     }
 
     @Test

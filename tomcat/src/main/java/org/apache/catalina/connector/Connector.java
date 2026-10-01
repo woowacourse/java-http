@@ -1,7 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +32,13 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executor = Executors.newFixedThreadPool(maxThreads);
+        this.executor = new ThreadPoolExecutor(
+                maxThreads,
+                maxThreads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(checkAcceptCount(acceptCount))
+        );
         this.stopped = false;
     }
 
@@ -72,7 +81,20 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executor.execute(processor);
+        try {
+            executor.execute(processor);
+        } catch (RejectedExecutionException e) {
+            log.warn("error: thread pool queue is full.");
+            closeQuietly(connection);
+        }
+    }
+
+    private void closeQuietly(final Socket connection) {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public void stop() {

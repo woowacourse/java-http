@@ -65,7 +65,7 @@ public class LoginController extends AbstractController {
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
         String sessionId = cookie.get("JSESSIONID");
 
-        Session loginSession = sessionManager.findSession(sessionId);
+        Session loginSession = sessionId == null ? null : sessionManager.findSession(sessionId);
         if (loginSession == null) {
             sessionId = UUID.randomUUID().toString();
             loginSession = new Session(sessionId);
@@ -78,7 +78,11 @@ public class LoginController extends AbstractController {
 
     private boolean isLoggedIn(HttpHeaders requestHeaders) {
         HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
-        Session session = sessionManager.findSession(cookie.get("JSESSIONID"));
+        String sessionId = cookie.get("JSESSIONID");
+        if (sessionId == null) {
+            return false;
+        }
+        Session session = sessionManager.findSession(sessionId);
         return session != null && getUser(session) != null;
     }
 

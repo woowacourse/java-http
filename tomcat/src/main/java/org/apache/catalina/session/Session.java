@@ -9,6 +9,9 @@ public class Session {
     private final Map<String, Object> values = new HashMap<>();
 
     public Session(final String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id must not be null");
+        }
         this.id = id;
     }
 

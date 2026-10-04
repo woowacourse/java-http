@@ -54,3 +54,7 @@
   - [x] HTTP 응답을 처리하는 클래스를 추가한다.
 - [x] Controller 인터페이스 추가하기
   - [x] 각 if절 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만든다.
+
+## 4단계 - 동시성 확장하기
+- [x] Executors로 Thread Pool 적용
+- [x] 동시성 컬렉션 사용하기

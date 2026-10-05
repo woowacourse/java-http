@@ -35,10 +35,10 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads, final RequestMapping requestMapping) {
-        this(createServerSocket(port, acceptCount), createExecutor(maxThreads, MAX_QUEUED_REQUESTS), requestMapping);
+        this(createExecutor(maxThreads, MAX_QUEUED_REQUESTS), createServerSocket(port, acceptCount), requestMapping);
     }
 
-    Connector(final ServerSocket serverSocket, final ExecutorService executorService, final RequestMapping requestMapping) {
+    Connector(final ExecutorService executorService, final ServerSocket serverSocket, final RequestMapping requestMapping) {
         this.serverSocket = serverSocket;
         this.executorService = executorService;
         this.requestMapping = requestMapping;

@@ -30,7 +30,7 @@ class ConnectorTest {
         final ThreadPoolExecutor executor = Connector.createExecutor(1, 1);
 
         try (ServerSocket serverSocket = new ServerSocket(0)) {
-            final Connector connector = new Connector(serverSocket, executor, requestMapping);
+            final Connector connector = new Connector(executor, serverSocket, requestMapping);
             connector.start();
 
             try (Socket first = new Socket("127.0.0.1", serverSocket.getLocalPort());

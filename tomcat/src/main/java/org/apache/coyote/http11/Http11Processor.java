@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -37,13 +38,9 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 final HttpRequest request = HttpRequest.from(inputStream);
-                final PreparedSession preparedSession = prepareSession(request);
-
-                if (preparedSession.newlyCreated()) {
-                    response.addCookie("JSESSIONID", preparedSession.session().getId());
-                }
-
+                final Session existingSession = request.getSession(false);
                 handleRequest(request, response);
+                setSessionCookie(request, response, existingSession);
 
             } catch (IllegalArgumentException e) {
                 response = new HttpResponse();
@@ -63,14 +60,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private PreparedSession prepareSession(final HttpRequest request) {
-        final Session existingSession = request.getSession(false);
-        if (existingSession != null) {
-            return new PreparedSession(existingSession, false);
+    private void setSessionCookie(final HttpRequest request, final HttpResponse response,
+                                  final Session existingSession) {
+        final Session currentSession = request.getSession(false);
+        if (currentSession != null && currentSession != existingSession) {
+            response.addCookie("JSESSIONID", currentSession.getId());
+            return;
         }
-
-        final Session newSession = request.getSession(true);
-        return new PreparedSession(newSession, true);
+        if (request.getCookie("JSESSIONID") == null) {
+            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+        }
     }
 
     private void handleRequest(final HttpRequest request,
@@ -79,6 +78,4 @@ public class Http11Processor implements Runnable, Processor {
         controller.service(request, response);
     }
 
-    private record PreparedSession(Session session, boolean newlyCreated) {
-    }
 }

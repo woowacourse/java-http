@@ -117,14 +117,16 @@ class Http11ProcessorTest {
                 "Host: localhost:8080",
                 "",
                 ""));
-        final String sessionId = extractSessionId(firstResponse);
+        final String initialCookieId = extractSessionId(firstResponse);
+        assertThat(SessionManager.getInstance().findSession(initialCookieId)).isNull();
+
+        final String requestBody = "account=gugu&password=password";
+        final String loginResponse = execute(formRequest("/login", requestBody, initialCookieId));
+        final String sessionId = extractSessionId(loginResponse);
 
         try {
-            final String requestBody = "account=gugu&password=password";
-            final String loginResponse = execute(formRequest("/login", requestBody, sessionId));
-
-            assertThat(loginResponse).isEqualTo(redirectResponse("/index.html"));
-            assertThat(loginResponse).doesNotContain("Set-Cookie");
+            assertThat(removeAndValidateSessionCookie(loginResponse)).isEqualTo(redirectResponse("/index.html"));
+            assertThat(sessionId).isNotEqualTo(initialCookieId);
 
             final String loggedInRequest = String.join("\r\n",
                     "GET /login HTTP/1.1",
@@ -153,8 +155,7 @@ class Http11ProcessorTest {
         try {
             final Session session = SessionManager.getInstance().findSession(sessionId);
             assertThat(removeAndValidateSessionCookie(response)).startsWith("HTTP/1.1 200 OK\r\n");
-            assertThat(session).isNotNull();
-            assertThat(session.getAttribute("user")).isNull();
+            assertThat(session).isNull();
         } finally {
             SessionManager.getInstance().remove(sessionId);
         }

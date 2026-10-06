@@ -3,10 +3,10 @@ package org.apache.coyote.http11;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -38,16 +38,16 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        final BufferedInputStream requestInputStream = new BufferedInputStream(inputStream);
 
-        final String requestLineValue = reader.readLine();
+        final String requestLineValue = readLine(requestInputStream);
         if (requestLineValue == null) {
             throw new IllegalArgumentException("HTTP Request Line이 없습니다.");
         }
 
         final RequestLine requestLine = new RequestLine(requestLineValue);
-        final Map<String, String> headers = readHeaders(reader);
-        final String body = readBody(reader, headers);
+        final Map<String, String> headers = readHeaders(requestInputStream);
+        final String body = readBody(requestInputStream, headers);
         final Map<String, String> parameters = new HashMap<>(
                 parseParameters(requestLine.getQueryString())
         );
@@ -59,11 +59,39 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body, parameters, cookies, session);
     }
 
-    private static Map<String, String> readHeaders(final BufferedReader reader) throws IOException {
+    private static String readLine(final InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream lineBytes = new ByteArrayOutputStream();
+
+        while (true) {
+            final int value = inputStream.read();
+
+            if (value == -1) {
+                if (lineBytes.size() == 0) {
+                    return null;
+                }
+                throw new IllegalArgumentException("HTTP 요청의 줄이 완전히 전달되지 않았습니다.");
+            }
+
+            if (value == '\r') {
+                if (inputStream.read() != '\n') {
+                    throw new IllegalArgumentException("HTTP 줄바꿈은 CRLF여야 합니다.");
+                }
+                return lineBytes.toString(StandardCharsets.UTF_8);
+            }
+
+            if (value == '\n') {
+                throw new IllegalArgumentException("HTTP 줄바꿈은 CRLF여야 합니다.");
+            }
+
+            lineBytes.write(value);
+        }
+    }
+
+    private static Map<String, String> readHeaders(final InputStream inputStream) throws IOException {
         final Map<String, String> headers = new HashMap<>();
 
         while (true) {
-            final String headerLine = reader.readLine();
+            final String headerLine = readLine(inputStream);
 
             if (headerLine == null) {
                 throw new IllegalArgumentException("HTTP Header가 완전히 전달되지 않았습니다.");
@@ -84,7 +112,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private static String readBody(final BufferedReader reader,
+    private static String readBody(final InputStream inputStream,
                                    final Map<String, String> headers) throws IOException {
         final String contentLengthHeader = headers.get("content-length");
         if (contentLengthHeader == null) {
@@ -102,16 +130,11 @@ public class HttpRequest {
             throw new IllegalArgumentException("Content-Length는 음수일 수 없습니다.");
         }
 
-        final char[] buffer = new char[contentLength];
-        int totalRead = 0;
-        while (totalRead < contentLength) {
-            final int readCount = reader.read(buffer, totalRead, contentLength - totalRead);
-            if (readCount == -1) {
-                throw new IllegalArgumentException("Request Body가 완전히 전달되지 않았습니다.");
-            }
-            totalRead += readCount;
+        final byte[] bodyBytes = inputStream.readNBytes(contentLength);
+        if (bodyBytes.length != contentLength) {
+            throw new IllegalArgumentException("Request Body가 완전히 전달되지 않았습니다.");
         }
-        return new String(buffer);
+        return new String(bodyBytes, StandardCharsets.UTF_8);
     }
 
     private static Map<String, String> parseParameters(final String body) {

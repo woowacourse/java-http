@@ -48,7 +48,7 @@ class HttpRequestTest {
                 "POST /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Content-Type: application/x-www-form-urlencoded",
-                "Content-Length: " + requestBody.length(),
+                "Content-Length: " + requestBody.getBytes(StandardCharsets.UTF_8).length,
                 "",
                 requestBody
         );

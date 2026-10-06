@@ -1,12 +1,12 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String id;
-    private final Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;
@@ -21,6 +21,10 @@ public class Session {
     }
 
     public void setAttribute(final String name, final Object value) {
+        if (value == null) {
+            removeAttribute(name);
+            return;
+        }
         attributes.put(name, value);
     }
 
